@@ -35,7 +35,12 @@ public extension ObjcClassInterface {
     }
     
     public class ProtocolReferenceList: ASTNode {
+        public var protocols: [String]
         
+        public init(protocols: [String], location: SourceRange = .invalid) {
+            self.protocols = protocols
+            super.init(location: location)
+        }
     }
     
     public class Property: ASTNode {

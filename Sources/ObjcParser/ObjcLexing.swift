@@ -17,6 +17,7 @@ extension Lexer {
     }
     
     /// `HEX_LITERAL : '0' ('x'|'X') HexDigit+ IntegerTypeSuffix? ;`
+    @inline(__always)
     public func lexHexLiteral() throws -> Substring {
         return try consumeString { lexer in
             try lexer.advance(expectingCurrent: "0")
@@ -31,6 +32,7 @@ extension Lexer {
     }
     
     /// `DECIMAL_LITERAL : ('0' | '1'..'9' '0'..'9'*) IntegerTypeSuffix? ;`
+    @inline(__always)
     public func lexDecimalLiteral() throws -> Substring {
         return try consumeString { lexer in
             if lexer.safeIsNextChar(equalTo: "0") {
@@ -47,6 +49,7 @@ extension Lexer {
     }
     
     /// `OCTAL_LITERAL : '0' ('0'..'7')+ IntegerTypeSuffix? ;`
+    @inline(__always)
     public func lexOctalLiteral() throws -> Substring {
         return try consumeString { lexer in
             try lexer.advance(expectingCurrent: "0")
@@ -64,6 +67,7 @@ extension Lexer {
     ///     :   ('0'..'9')+ ('.' ('0'..'9')*)? Exponent? FloatTypeSuffix?
     /// 	;
     /// ```
+    @inline(__always)
     public func lexFloatingPointLiteral() throws -> Substring {
         return try consumeString { lexer in
             try lexer.advance(validatingCurrent: Lexer.isDigit)
@@ -88,6 +92,7 @@ extension Lexer {
     }
     
     /// `CHARACTER_LITERAL : '\'' ( EscapeSequence | ~('\''|'\\') ) '\''`
+    @inline(__always)
     public func lexFragmentLiteral() throws -> Substring {
         return try consumeString { lexer in
             try lexer.advance(expectingCurrent: "\'")
@@ -103,6 +108,7 @@ extension Lexer {
     }
     
     /// `STRING_LITERAL : ['L'] STRING`
+    @inline(__always)
     public func lexStringLiteral() throws -> Substring {
         return try consumeString { lexer in
             let p = try lexer.peek()
@@ -115,16 +121,19 @@ extension Lexer {
     }
     
     /// `INCLUDE : '#include' .* [\r\n]`
+    @inline(__always)
     public func lexInclude() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#pragma")
+        return try lexFromTokenToEndOfLine("#pragma")
     }
     
     /// `PRAGMA : '#pragma' .* [\r\n]`
+    @inline(__always)
     public func lexPragma() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#pragma")
+        return try lexFromTokenToEndOfLine("#pragma")
     }
     
     /// `COMMENT : /* .* */`
+    @inline(__always)
     public func lexComment() throws -> Substring {
         return try consumeString { lexer in
             try lexer.expect(match: "/*")
@@ -143,40 +152,42 @@ extension Lexer {
     
     /// `LINE_COMMENT : '//' .* [\r\n]`
     public func lexLineComment() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("//")
+        return try lexFromTokenToEndOfLine("//")
     }
     
     /// `HDEFINE : '#define' .* [\r\n]`
     public func lexHDefine() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#define")
+        return try lexFromTokenToEndOfLine("#define")
     }
     
     /// `HIF : '#if' .* [\r\n]`
     public func lexHIf() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#if")
+        return try lexFromTokenToEndOfLine("#if")
     }
     
     /// `HELSE : '#else' .* [\r\n]`
     public func lexHElse() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#else")
+        return try lexFromTokenToEndOfLine("#else")
     }
     
     /// `HUNDEF : '#undef' .* [\r\n]`
     public func lexHUndef() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#undef")
+        return try lexFromTokenToEndOfLine("#undef")
     }
     
     /// `HIFNDEF : '#ifndef' .* [\r\n]`
     public func lexHIfndef() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#ifndef")
+        return try lexFromTokenToEndOfLine("#ifndef")
     }
     
     /// `HENDIF : '#endif' .* [\r\n]`
     public func lexHEndIf() throws -> Substring {
-        return try _lexFromTokenToEndOfLine("#endif")
+        return try lexFromTokenToEndOfLine("#endif")
     }
     
-    private func _lexFromTokenToEndOfLine(_ token: String) throws -> Substring {
+    @inline(__always)
+    @_versioned
+    internal func lexFromTokenToEndOfLine(_ token: String) throws -> Substring {
         return try consumeString { lexer in
             try lexer.expect(match: token)
             lexer.advance(until: { $0 == "\n" || $0 == "\r" })
@@ -195,6 +206,7 @@ extension Lexer {
     /// LETTER:
     ///   [$_a-zA-Z]
     /// ```
+    @inline(__always)
     public static func isIdentifierLetter(_ atom: Atom) -> Bool {
         return Lexer.isLetter(atom) || atom == "_" || atom == "$"
     }
@@ -205,6 +217,7 @@ extension Lexer {
     /// HexDigit:
     ///   [0-9a-fA-F]
     /// ```
+    @inline(__always)
     public static func isHexDigit(_ atom: Atom) -> Bool {
         return Lexer.isDigit(atom) || (atom >= "a" && atom <= "f") || (atom >= "A" && atom <= "F")
     }
@@ -216,6 +229,7 @@ extension Lexer {
 public extension Lexer {
     
     /// `HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;`
+    @inline(__always)
     public func fragmentHexDigit() throws {
         try advance(validatingCurrent: Lexer.isHexDigit)
     }
@@ -226,16 +240,19 @@ public extension Lexer {
     ///     :           ('u'|'U'|'l'|'L')
     ///     ;
     /// ```
+    @inline(__always)
     public func fragmentIntegerTypeSuffix() throws {
         try advance(validatingCurrent: { (atom: Atom) -> Bool in atom == "u" || atom == "U" || atom == "l" || atom == "L" })
     }
     
     /// `LETTER : '$' | 'A'..'Z' | 'a'..'z' | '_' ;`
+    @inline(__always)
     public func fragmentLetter() throws {
         try advance(validatingCurrent: Lexer.isIdentifierLetter)
     }
     
     /// `STRING : '"' ( EscapeSequence | ~('\\'|'"') )* '"' ;`
+    @inline(__always)
     public func fragmentString() throws {
         try advance(expectingCurrent: "\"")
         
@@ -256,6 +273,7 @@ public extension Lexer {
     /// fragment
     /// Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
     /// ```
+    @inline(__always)
     public func fragmentExponent() throws {
         try advance(validatingCurrent: { $0 == "e" || $0 == "E" })
         if try peek() == "+" || peek() == "-" {
@@ -269,6 +287,7 @@ public extension Lexer {
     /// fragment
     /// FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
     /// ```
+    @inline(__always)
     public func fragmentFloatTypeSuffix() throws {
         try advance(validatingCurrent: { (atom: Atom) -> Bool in atom == "f" || atom == "F" || atom == "d" || atom == "D" })
     }
@@ -287,6 +306,7 @@ public extension Lexer {
     ///     |   '\\' ('0'..'7')
     ///     ;
     /// ```
+    @inline(__always)
     public func fragmentEscapeSequence() throws {
         try advance(expectingCurrent: "\\")
         let p = try peek()
@@ -301,6 +321,7 @@ public extension Lexer {
     }
     
     /// `ANGLE_STRING : '<' .* '>'`
+    @inline(__always)
     public func fragmentAngleString() throws {
         try advance(expectingCurrent: "<")
         advance(while: { $0 != ">" })

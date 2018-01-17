@@ -22,141 +22,6 @@ public class ObjcParser {
         self.init(string: text)
     }
     
-    /// Parses an Objective-C class interface
-    ///
-    ///     classInterface = '@interface' className (':' superclassName)? protocolRefList? ivars? interfaceDeclList? '@end';
-    ///
-    public func parseClassInerfaceNode() throws {
-        // @interface Name [: SuperClass] [<ProtocolList>]
-        //
-        // @end
-        
-        let classNode: ObjcClassInterface = context.pushContext()
-        defer {
-            context.popContext()
-        }
-        
-        lexer.skipWhitespace()
-        
-        // Consume @interface
-        try parseKeyword("@interface", onMissing: "Expected @interface to start class declaration")
-        
-        // Class name
-        classNode.identifier = .valid(try parseIdentifierNode())
-        
-        lexer.skipWhitespace()
-        
-        // Super class name
-        if try lexer.peek() == ":" {
-            // Record ':'
-            try parseTokenNode(":")
-            
-            // Record superclass name
-            try parseSuperclassNameNode()
-        }
-        
-        // Consume interface declarations
-        _=lexer.performGreedyRounds { (lexer, _) -> Bool in
-            var isEnd = false
-            
-            lexer.skipWhitespace()
-            
-            try lexer.matchFirst(withEither: { lexer in
-                try self.parseKeyword("@end", onMissing: "Expected @end to end class declaration")
-                
-                isEnd = true
-            }, { _ in
-                try self.parsePropertyNode()
-            })
-            
-            return !isEnd
-        }
-    }
-    
-    func parsePropertyNode() throws {
-        let prop = ObjcClassInterface.Property(type: .placeholder, identifier: .placeholder)
-        context.pushContext(node: prop)
-        defer {
-            context.popContext()
-        }
-        
-        // @property [(<Modifiers>)] <Type> <Name>;
-        lexer.skipWhitespace()
-        
-        // @property
-        let range = startRange()
-        try parseKeyword("@property", onMissing: "Expected @property declaration")
-        lexer.skipWhitespace()
-        
-        // Modifiers
-        if lexer.safeIsNextChar(equalTo: "(") {
-            try parsePropertyModifiersListNode()
-            lexer.skipWhitespace()
-        }
-        
-        // Type
-        prop.type = try asNodeRef(try parseTypeNameNode(), onPanic: {
-            lexer.advance(until: { Lexer.isIdentifierLetter($0) || $0 == ";" || $0 == "@" })
-        })
-        
-        lexer.skipWhitespace()
-        
-        // Name
-        prop.identifier = try asNodeRef(try parseIdentifierNode(), onPanic: {
-            lexer.advance(until: { $0 == ";" || $0 == "@" })
-        })
-        
-        // ;
-        try parseTokenNode(";", onMissing: "Expected ';' to end property declaration")
-        
-        prop.location = range.makeRange()
-    }
-    
-    func parsePropertyModifiersListNode() throws {
-        func parsePropertyModifier() throws {
-            let range = startRange()
-            let name = try lexer.lexIdentifier()
-            
-            let node = ObjcClassInterface.PropertyModifier(name: String(name), location: range.makeRange())
-            context.addChildNode(node)
-        }
-        
-        let node = context.pushContext(nodeType: ObjcClassInterface.PropertyModifierList.self)
-        defer {
-            context.popContext()
-        }
-        
-        try parseTokenNode("(")
-        
-        var expectsItem = true
-        while !lexer.isEof() {
-            lexer.skipWhitespace()
-            
-            if lexer.safeIsNextChar(equalTo: ")") {
-                break
-            }
-            
-            expectsItem = false
-            
-            if lexer.safeIsNextChar(equalTo: ",") {
-                try parseTokenNode(",")
-                expectsItem = true
-                continue
-            }
-            
-            try parsePropertyModifier()
-        }
-        
-        // Closed list after comma
-        if expectsItem {
-            diagnostics.error("Expected modifier parameter after comma", location: location())
-            // Panic and end list here
-            lexer.skipWhitespace()
-        }
-        
-        try parseTokenNode(")")
-    }
-    
     func parseObjcType() throws -> TypeNameNode.ObjcType {
         // Here we simplify the grammar for types as:
         // TypeName: IDENTIFIER ('<' TypeName '>')? '*'?
@@ -224,16 +89,6 @@ public class ObjcParser {
         }
     }
     
-    func parseSuperclassNameNode() throws {
-        lexer.skipWhitespace()
-        
-        let identRange = startRange()
-        let ident = try lexer.lexIdentifier()
-        let node = ObjcClassInterface.SuperclassName(name: String(ident), location: identRange.makeRange())
-        
-        context.addChildNode(node)
-    }
-    
     func parseKeyword(_ keyword: String, onMissing message: String? = nil) throws {
         let range = startRange()
         
@@ -269,30 +124,37 @@ public class ObjcParser {
         return .location(lexer.inputIndex)
     }
     
-    private func _parseCommaSeparatedList<T>(braces openBrace: Lexer.Atom, _ closeBrace: Lexer.Atom, addTokensToContext: Bool = true, itemParser: () throws -> T) throws -> [T] {
+    internal func _parseCommaSeparatedList<T>(braces openBrace: Lexer.Atom, _ closeBrace: Lexer.Atom, addTokensToContext: Bool = true, itemParser: () throws -> T) throws -> [T] {
         try parseTokenNode(openBrace.description, addToContext: addTokensToContext)
         
         var expectsItem = true
         var items: [T] = []
         while !lexer.isEof() {
-            lexer.skipWhitespace()
-            
-            // Close brace
-            if lexer.safeIsNextChar(equalTo: closeBrace) {
-                break
-            }
-            
-            // Item
-            let item = try itemParser()
-            items.append(item)
-            
             expectsItem = false
             
-            // Comma separator
+            lexer.skipWhitespace()
+            
+            // Item
+            do {
+                let item = try itemParser()
+                items.append(item)
+            } catch {
+                lexer.advance(until: { $0 == "," || $0 == ">" })
+            }
+            
+            lexer.skipWhitespace()
+            
+            // Comma separator / close brace
             lexer.skipWhitespace()
             if lexer.safeIsNextChar(equalTo: ",") {
                 try parseTokenNode(",", addToContext: addTokensToContext)
                 expectsItem = true
+            } else if lexer.safeIsNextChar(equalTo: closeBrace) {
+                break
+            } else {
+                // Panic!
+                diagnostics.error("Expected ',' or '>' after an item", location: location())
+                lexer.skipWhitespace()
             }
         }
         
