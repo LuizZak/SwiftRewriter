@@ -167,6 +167,8 @@ public class ObjcParser {
         
         // '<' : Generic type specifier
         if lexer.withTemporaryIndex(changes: { lexer.skipWhitespace(); return lexer.safeIsNextChar(equalTo: "<") }) {
+            lexer.skipWhitespace()
+            
             if typeName == "id" {
                 let types = try _parseCommaSeparatedList(braces: "<", ">", itemParser: lexer.lexIdentifier)
                 type = .id(protocols: types.map { String($0) })
@@ -175,7 +177,11 @@ public class ObjcParser {
                 type = .generic(typeName, parameters: types)
             }
         } else {
-            type = .struct(typeName)
+            if typeName == "id" {
+                type = .id(protocols: [])
+            } else {
+                type = .struct(typeName)
+            }
         }
         
         // '*' : Pointer
