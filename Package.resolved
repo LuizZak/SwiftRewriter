@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "MiniLexer",
+        "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
+        "state": {
+          "branch": null,
+          "revision": "755657b275f61f6f2fabf718452764ee3dd0c02e",
+          "version": "0.3.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
