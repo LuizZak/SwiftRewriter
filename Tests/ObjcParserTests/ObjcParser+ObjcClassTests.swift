@@ -16,6 +16,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
         XCTAssertEqual(result.identifier.name, "MyClass")
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassKeywords() throws {
@@ -32,6 +33,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.identifier.name, "MyClass")
         XCTAssertTrue(keywords.contains { $0.name == "@interface" })
         XCTAssertTrue(keywords.contains { $0.name == "@end" })
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithProperty() throws {
@@ -51,7 +53,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
         XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
         XCTAssert(result.properties[0].childrenMatching(type: TokenNode.self).contains { $0.token == ";" })
-        XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithPropertyWithGenericType() throws {
@@ -74,7 +76,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.properties[0].type.type, .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])))
         XCTAssertEqual(result.properties[0].identifier.name, "myProperty3")
         XCTAssert(result.properties[0].childrenMatching(type: TokenNode.self).contains { $0.token == ";" })
-        XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithPropertyWithModifiers() throws {
@@ -95,12 +97,13 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.properties[0].modifierList?.modifiers[0].name, "atomic")
         XCTAssertEqual(result.properties[0].modifierList?.modifiers[1].name, "nonatomic")
         XCTAssertEqual(result.properties[0].modifierList?.modifiers[2].name, "copy")
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithPropertyWithModifiersRecovery() throws {
         let source = """
             @interface MyClass
-            @property ( atomic, nonatomic , ) BOOL myProperty1;
+            @property ( atomic, nonatomic, , ) BOOL myProperty1;
             @end
             """
         let sut = ObjcParser(string: source)
@@ -114,8 +117,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertNotNil(result.properties[0].modifierList)
         XCTAssertEqual(result.properties[0].modifierList?.modifiers[0].name, "atomic")
         XCTAssertEqual(result.properties[0].modifierList?.modifiers[1].name, "nonatomic")
-        
-        XCTAssertEqual(sut.diagnostics.errors.count, 1)
+        XCTAssertEqual(sut.diagnostics.errors.count, 2)
     }
     
     func testParseClassWithPropertyMissingNameRecovery() throws {
@@ -134,7 +136,6 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertFalse(result.properties[0].identifier.exists)
         XCTAssertNil(result.properties[0].modifierList)
         XCTAssertEqual(result.properties[0].childrenMatching(type: TokenNode.self)[0].token, ";")
-        
         XCTAssertEqual(sut.diagnostics.errors.count, 1)
     }
     
@@ -169,7 +170,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
         
         XCTAssertEqual(result.superclass?.name, "Superclass")
-        XCTAssertEqual(sut.diagnostics.errors.count, 0)
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithProtocolReferenceList() throws {
@@ -186,7 +187,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.protocolList?.protocols.count, 2)
         XCTAssertEqual(result.protocolList?.protocols[0], "MyProtocol1")
         XCTAssertEqual(result.protocolList?.protocols[1], "MyProtocol2")
-        XCTAssertEqual(sut.diagnostics.errors.count, 0)
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithSuperclassProtocolReferenceList() throws {
@@ -204,7 +205,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.protocolList?.protocols.count, 2)
         XCTAssertEqual(result.protocolList?.protocols[0], "MyProtocol1")
         XCTAssertEqual(result.protocolList?.protocols[1], "MyProtocol2")
-        XCTAssertEqual(sut.diagnostics.errors.count, 0)
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassProtocolReferenceListRecover1() throws {

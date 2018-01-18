@@ -35,10 +35,10 @@ public class ObjcParser {
             lexer.skipWhitespace()
             
             if typeName == "id" {
-                let types = try _parseCommaSeparatedList(braces: "<", ">", itemParser: lexer.lexIdentifier)
+                let types = _parseCommaSeparatedList(braces: "<", ">", itemParser: lexer.lexIdentifier)
                 type = .id(protocols: types.map { String($0) })
             } else {
-                let types = try _parseCommaSeparatedList(braces: "<", ">", itemParser: parseObjcType)
+                let types = _parseCommaSeparatedList(braces: "<", ">", itemParser: parseObjcType)
                 type = .generic(typeName, parameters: types)
             }
         } else {
@@ -124,8 +124,37 @@ public class ObjcParser {
         return .location(lexer.inputIndex)
     }
     
-    internal func _parseCommaSeparatedList<T>(braces openBrace: Lexer.Atom, _ closeBrace: Lexer.Atom, addTokensToContext: Bool = true, itemParser: () throws -> T) throws -> [T] {
-        try parseTokenNode(openBrace.description, addToContext: addTokensToContext)
+    /// Starts parsing a comman-separated list of items using the specified braces
+    /// settings and an item-parsing closure.
+    ///
+    /// The method starts and ends by reading the opening and closing braces, and
+    /// always expects to successfully parse at least one item.
+    ///
+    /// The method performs error recovery for opening/closing braces and the
+    /// comma, but it is the responsibility of the `itemParser` closure to perform
+    /// its own error recovery during parsing.
+    ///
+    /// The caller can optionally specify whether to ignore adding tokens (for
+    /// opening brace/comma/closing brance tokens) to the context when parsing is
+    /// performed.
+    ///
+    /// - Parameters:
+    ///   - openBrace: Character that represents the opening brace, e.g. '(', '['
+    /// or '<'.
+    ///   - closeBrace: Character that represents the closing brace, e.g. ')', ']'
+    /// or '>'.
+    ///   - addTokensToContext: If true, when parsing tokens they are added to
+    /// the current `context` as `TokenNode`s.
+    ///   - itemParser: Block that is called to parse items on the list. Reporting
+    /// of errors as diagnostics must be made by this closure.
+    /// - Returns: An array of items returned by `itemParser` for each successful
+    /// parse performed.
+    internal func _parseCommaSeparatedList<T>(braces openBrace: Lexer.Atom, _ closeBrace: Lexer.Atom, addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
+        do {
+            try parseTokenNode(openBrace.description, addToContext: addTokensToContext)
+        } catch {
+            diagnostics.error("Expected \(openBrace) to open list", location: location())
+        }
         
         var expectsItem = true
         var items: [T] = []
@@ -139,19 +168,24 @@ public class ObjcParser {
                 let item = try itemParser()
                 items.append(item)
             } catch {
-                lexer.advance(until: { $0 == "," || $0 == ">" })
+                lexer.advance(until: { $0 == "," || $0 == closeBrace })
             }
             
             lexer.skipWhitespace()
             
             // Comma separator / close brace
             lexer.skipWhitespace()
-            if lexer.safeIsNextChar(equalTo: ",") {
-                try parseTokenNode(",", addToContext: addTokensToContext)
-                expectsItem = true
-            } else if lexer.safeIsNextChar(equalTo: closeBrace) {
-                break
-            } else {
+            do {
+                if lexer.safeIsNextChar(equalTo: ",") {
+                    try parseTokenNode(",", addToContext: addTokensToContext)
+                    expectsItem = true
+                } else if lexer.safeIsNextChar(equalTo: closeBrace) {
+                    break
+                } else {
+                    // Should match either comma or closing brace!
+                    throw LexerError.genericParseError
+                }
+            } catch {
                 // Panic!
                 diagnostics.error("Expected ',' or '>' after an item", location: location())
                 lexer.skipWhitespace()
@@ -165,7 +199,11 @@ public class ObjcParser {
             lexer.skipWhitespace()
         }
         
-        try parseTokenNode(closeBrace.description, addToContext: addTokensToContext)
+        do {
+            try parseTokenNode(closeBrace.description, addToContext: addTokensToContext)
+        } catch {
+            diagnostics.error("Expected \(closeBrace) to close list", location: location())
+        }
         
         return items
     }

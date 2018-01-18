@@ -52,6 +52,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertEqual(result.modifierList?.modifiers[0].name, "atomic")
         XCTAssertEqual(result.modifierList?.modifiers[1].name, "nonatomic")
         XCTAssertEqual(result.modifierList?.modifiers[2].name, "copy")
+        XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithPropertyWithModifiersRecovery() throws {
@@ -67,7 +68,6 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertNotNil(result.modifierList)
         XCTAssertEqual(result.modifierList?.modifiers[0].name, "atomic")
         XCTAssertEqual(result.modifierList?.modifiers[1].name, "nonatomic")
-        
         XCTAssertEqual(sut.diagnostics.errors.count, 1)
     }
     
@@ -83,7 +83,6 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertFalse(result.identifier.exists)
         XCTAssertNil(result.modifierList)
         XCTAssertEqual(result.childrenMatching(type: TokenNode.self)[0].token, ";")
-        
         XCTAssertEqual(sut.diagnostics.errors.count, 1)
     }
     
@@ -99,7 +98,6 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertFalse(result.identifier.exists)
         XCTAssertNil(result.modifierList)
         XCTAssertEqual(result.childrenMatching(type: TokenNode.self)[0].token, ";")
-        
         XCTAssertEqual(sut.diagnostics.errors.count, 2)
     }
 }

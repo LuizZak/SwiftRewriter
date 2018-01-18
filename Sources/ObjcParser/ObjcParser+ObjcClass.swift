@@ -58,11 +58,11 @@ extension ObjcParser {
             lexer.skipWhitespace()
             
             try lexer.matchFirst(withEither: { lexer in
+                try self.parsePropertyNode()
+            }, { _ in
                 try self.parseKeyword("@end", onMissing: "Expected @end to end class declaration")
                 
                 isEnd = true
-            }, { _ in
-                try self.parsePropertyNode()
             })
             
             return !isEnd
@@ -99,8 +99,8 @@ extension ObjcParser {
         }
         
         let protocols =
-            try _parseCommaSeparatedList(braces: "<", ">",
-                                         itemParser: parseProtocolName)
+            _parseCommaSeparatedList(braces: "<", ">",
+                                     itemParser: parseProtocolName)
         
         node.protocols = protocols
     }
@@ -146,11 +146,16 @@ extension ObjcParser {
     
     func parsePropertyModifiersListNode() throws {
         func parsePropertyModifier() throws {
-            let range = startRange()
-            let name = try lexer.lexIdentifier()
-            
-            let node = ObjcClassInterface.PropertyModifier(name: String(name), location: range.makeRange())
-            context.addChildNode(node)
+            do {
+                let range = startRange()
+                let name = try lexer.lexIdentifier()
+                
+                let node = ObjcClassInterface.PropertyModifier(name: String(name), location: range.makeRange())
+                context.addChildNode(node)
+            } catch {
+                diagnostics.error("Expected a property modifier", location: location())
+                throw error
+            }
         }
         
         let node = context.pushContext(nodeType: ObjcClassInterface.PropertyModifierList.self)
@@ -158,35 +163,7 @@ extension ObjcParser {
             context.popContext()
         }
         
-        try parseTokenNode("(")
-        
-        var expectsItem = true
-        while !lexer.isEof() {
-            lexer.skipWhitespace()
-            
-            if lexer.safeIsNextChar(equalTo: ")") {
-                break
-            }
-            
-            expectsItem = false
-            
-            if lexer.safeIsNextChar(equalTo: ",") {
-                try parseTokenNode(",")
-                expectsItem = true
-                continue
-            }
-            
-            try parsePropertyModifier()
-        }
-        
-        // Closed list after comma
-        if expectsItem {
-            diagnostics.error("Expected modifier parameter after comma", location: location())
-            // Panic and end list here
-            lexer.skipWhitespace()
-        }
-        
-        try parseTokenNode(")")
+        _=_parseCommaSeparatedList(braces: "(", ")", itemParser: parsePropertyModifier)
     }
     
     func parseSuperclassNameNode() throws {
