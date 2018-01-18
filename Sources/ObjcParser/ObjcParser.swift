@@ -187,7 +187,7 @@ public class ObjcParser {
                 }
             } catch {
                 // Panic!
-                diagnostics.error("Expected ',' or '>' after an item", location: location())
+                diagnostics.error("Expected ',' or '\(closeBrace)' after an item", location: location())
                 lexer.skipWhitespace()
             }
         }
