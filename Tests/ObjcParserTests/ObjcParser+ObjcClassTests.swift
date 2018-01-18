@@ -12,9 +12,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
         XCTAssertEqual(result.identifier.name, "MyClass")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
@@ -26,9 +25,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
         let keywords = result.childrenMatching(type: Keyword.self)
         XCTAssertEqual(result.identifier.name, "MyClass")
         XCTAssertTrue(keywords.contains { $0.name == "@interface" })
@@ -45,9 +43,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
         let keywordsProp1 = result.properties[0].childrenMatching(type: Keyword.self)
         XCTAssertTrue(keywordsProp1.contains { $0.name == "@property" })
         XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
@@ -66,10 +63,9 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let sut = ObjcParser(string: source)
         
         // Act
-        try sut.parseClassInerfaceNode()
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         // Assert
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
         let keywordsProp1 = result.properties[0].childrenMatching(type: Keyword.self)
         
         XCTAssertTrue(keywordsProp1.contains { $0.name == "@property" })
@@ -87,9 +83,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
-        
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
         XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
@@ -108,9 +102,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
-        
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
         XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
@@ -128,9 +120,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
-        
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
         XCTAssertFalse(result.properties[0].identifier.exists)
@@ -147,9 +137,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
-        
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.properties[0].type.exists, false)
         XCTAssertFalse(result.properties[0].identifier.exists)
@@ -165,9 +153,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
-        
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.superclass?.name, "Superclass")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
@@ -180,9 +166,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
-        
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.protocolList?.protocols.count, 2)
         XCTAssertEqual(result.protocolList?.protocols[0], "MyProtocol1")
@@ -197,9 +181,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
-        
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.superclass?.name, "Superclass")
         XCTAssertEqual(result.protocolList?.protocols.count, 2)
@@ -215,11 +197,9 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             """
         let sut = ObjcParser(string: source)
         
-        try sut.parseClassInerfaceNode()
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
-        let result: ObjcClassInterface! = sut.context.topmostNode?.childrenMatching().first
         let protocolList = result.protocolList!
-        
         XCTAssertEqual(result.superclass?.name, "Superclass")
         XCTAssertEqual(protocolList.protocols.count, 1)
         XCTAssertEqual(protocolList.protocols[0], "MyProtocol1")
@@ -236,10 +216,13 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let sut = ObjcParser(string: source)
         
         // Act
-        try sut.parseProtocolReferenceListNode()
+        let root: GlobalContextNode =
+            try sut.withTemporaryContext {
+                try sut.parseProtocolReferenceListNode()
+            }
         
         // Assert
-        let result: ObjcClassInterface.ProtocolReferenceList! = sut.context.topmostNode?.childrenMatching().first
+        let result: ObjcClassInterface.ProtocolReferenceList! = root.childrenMatching().first
         
         XCTAssertEqual(result.protocols.count, 3)
         XCTAssertEqual(result.protocols[0], "UITableViewDataSource")
@@ -253,13 +236,32 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let sut = ObjcParser(string: source)
         
         // Act
-        try sut.parseProtocolReferenceListNode()
+        let root: GlobalContextNode =
+            try sut.withTemporaryContext {
+                try sut.parseProtocolReferenceListNode()
+            }
         
         // Assert
-        let result: ObjcClassInterface.ProtocolReferenceList! = sut.context.topmostNode?.childrenMatching().first
+        let result: ObjcClassInterface.ProtocolReferenceList! = root.childrenMatching().first
         
         XCTAssertEqual(result.protocols.count, 1)
         XCTAssertEqual(result.protocols[0], "UITableViewDataSource")
         XCTAssert(sut.diagnostics.errors.count > 0)
+    }
+    
+    private func _parseTestObjcInterfaceNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> ObjcClassInterface {
+        do {
+            let root: GlobalContextNode =
+                try parser.withTemporaryContext {
+                    try parser.parseClassInerfaceNode()
+                }
+            
+            let result: ObjcClassInterface! = root.childrenMatching().first
+            
+            return result
+        } catch {
+            recordFailure(withDescription: "Failed to parse: \(error)", inFile: #file, atLine: line, expected: false)
+            fatalError()
+        }
     }
 }

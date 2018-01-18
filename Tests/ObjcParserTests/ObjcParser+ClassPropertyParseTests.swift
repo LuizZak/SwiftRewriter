@@ -8,9 +8,8 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         let source = "@property BOOL myProperty1;"
         let sut = ObjcParser(string: source)
         
-        try sut.parsePropertyNode()
+        let result = _parseTestPropertyNode(source: source, parser: sut)
         
-        let result: ObjcClassInterface.Property! = sut.context.topmostNode?.childrenMatching().first
         let keywordsProp1 = result.childrenMatching(type: Keyword.self)
         XCTAssertTrue(keywordsProp1.contains { $0.name == "@property" })
         XCTAssertEqual(result.type.type, .struct("BOOL"))
@@ -25,12 +24,10 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         let sut = ObjcParser(string: source)
         
         // Act
-        try sut.parsePropertyNode()
+        let result = _parseTestPropertyNode(source: source, parser: sut)
         
         // Assert
-        let result: ObjcClassInterface.Property! = sut.context.topmostNode?.childrenMatching().first
         let keywordsProp1 = result.childrenMatching(type: Keyword.self)
-        
         XCTAssertTrue(keywordsProp1.contains { $0.name == "@property" })
         XCTAssertEqual(result.type.type, .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])))
         XCTAssertEqual(result.identifier.name, "myProperty3")
@@ -42,9 +39,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         let source = "@property ( atomic, nonatomic , copy ) BOOL myProperty1;"
         let sut = ObjcParser(string: source)
         
-        try sut.parsePropertyNode()
-        
-        let result: ObjcClassInterface.Property! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestPropertyNode(source: source, parser: sut)
         
         XCTAssertEqual(result.type.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier.name, "myProperty1")
@@ -59,9 +54,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         let source = "@property ( atomic, nonatomic , ) BOOL myProperty1;"
         let sut = ObjcParser(string: source)
         
-        try sut.parsePropertyNode()
-        
-        let result: ObjcClassInterface.Property! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestPropertyNode(source: source, parser: sut)
         
         XCTAssertEqual(result.type.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier.name, "myProperty1")
@@ -75,9 +68,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         let source = "@property BOOL ;"
         let sut = ObjcParser(string: source)
         
-        try sut.parsePropertyNode()
-        
-        let result: ObjcClassInterface.Property! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestPropertyNode(source: source, parser: sut)
         
         XCTAssertEqual(result.type.type, .struct("BOOL"))
         XCTAssertFalse(result.identifier.exists)
@@ -90,14 +81,28 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         let source = "@property ;"
         let sut = ObjcParser(string: source)
         
-        try sut.parsePropertyNode()
-        
-        let result: ObjcClassInterface.Property! = sut.context.topmostNode?.childrenMatching().first
+        let result = _parseTestPropertyNode(source: source, parser: sut)
         
         XCTAssertEqual(result.type.exists, false)
         XCTAssertFalse(result.identifier.exists)
         XCTAssertNil(result.modifierList)
         XCTAssertEqual(result.childrenMatching(type: TokenNode.self)[0].token, ";")
         XCTAssertEqual(sut.diagnostics.errors.count, 2)
+    }
+    
+    private func _parseTestPropertyNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> ObjcClassInterface.Property {
+        do {
+            let root: GlobalContextNode =
+                try parser.withTemporaryContext {
+                    try parser.parsePropertyNode()
+                }
+            
+            let result: ObjcClassInterface.Property! = root.childrenMatching().first
+            
+            return result
+        } catch {
+            recordFailure(withDescription: "Failed to parse: \(error)", inFile: #file, atLine: line, expected: false)
+            fatalError()
+        }
     }
 }

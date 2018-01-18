@@ -8,18 +8,56 @@ public class ObjcParser {
     
     public let diagnostics: Diagnostics
     
+    /// The root global context note after parsing.
+    public var rootNode: GlobalContextNode
+    
     public init(string: String) {
         lexer = Lexer(input: string)
         context = NodeCreationContext()
         diagnostics = Diagnostics()
-        
-        // TODO: Remove-me: this should be done at a parseGlobalNamespace() or similar
-        context.pushContext(nodeType: GlobalContextNode.self)
+        rootNode = GlobalContextNode()
     }
     
     public convenience init(filePath: String, encoding: String.Encoding = .utf8) throws {
         let text = try String(contentsOfFile: filePath, encoding: encoding)
         self.init(string: text)
+    }
+    
+    public func withTemporaryContextNode(_ node: ASTNode, do action: () throws -> ()) rethrows {
+        context.pushContext(node: node)
+        defer {
+            context.popContext()
+        }
+        
+        try action()
+    }
+    
+    public func withTemporaryContext<T: ASTNode & InitializableNode>(nodeType: T.Type = T.self, do action: () throws -> ()) rethrows -> T {
+        let node = context.pushContext(nodeType: nodeType)
+        defer {
+            context.popContext()
+        }
+        
+        try action()
+        
+        return node
+    }
+    
+    /// Parses the entire source string
+    public func parse() throws {
+        context.pushContext(node: rootNode)
+        defer {
+            context.popContext()
+        }
+        
+        try parseGlobalNamespace()
+    }
+    
+    /// Parse the global namespace.
+    /// Called by `parse` by default until the entire string is consumed.
+    public func parseGlobalNamespace() throws {
+        // TODO: Flesh out full global scope grammar here
+        try parseClassInerfaceNode()
     }
     
     func parseObjcType() throws -> TypeNameNode.ObjcType {

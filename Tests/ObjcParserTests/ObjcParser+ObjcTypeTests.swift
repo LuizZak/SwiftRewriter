@@ -43,7 +43,11 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
         
         // Act
         do {
-            let type = try sut.parseObjcType()
+            var type: TypeNameNode.ObjcType!
+            
+            _=try sut.withTemporaryContext(nodeType: GlobalContextNode.self, do: {
+                type = try sut.parseObjcType()
+            })
             
             // Assert
             if type != expectedType {

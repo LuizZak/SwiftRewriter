@@ -22,6 +22,9 @@ let package = Package(
             name: "GrammarModels",
             dependencies: []),
         .target(
+            name: "SwiftRewriter",
+            dependencies: ["GrammarModels"]),
+        .target(
             name: "ObjcParser",
             dependencies: ["GrammarModels", "MiniLexer", "TypeLexing"]),
         .testTarget(
@@ -30,5 +33,8 @@ let package = Package(
         .testTarget(
             name: "GrammarModelsTests",
             dependencies: ["GrammarModels"]),
+        .testTarget(
+            name: "SwiftRewriterTests",
+            dependencies: ["SwiftRewriter", "GrammarModels"]),
     ]
 )
