@@ -75,6 +75,8 @@ extension Lexer {
                 return
             }
             
+            lexer.advance(while: Lexer.isDigit)
+            
             if lexer.safeIsNextChar(equalTo: ".") {
                 try lexer.advance()
                 try lexer.advance(validatingCurrent: Lexer.isDigit)
@@ -107,7 +109,7 @@ extension Lexer {
         }
     }
     
-    /// `STRING_LITERAL : ['L'] STRING`
+    /// `STRING_LITERAL : ['L' | '@'] STRING`
     @inline(__always)
     public func lexStringLiteral() throws -> Substring {
         return try consumeString { lexer in
@@ -263,6 +265,8 @@ public extension Lexer {
                 try fragmentEscapeSequence()
             } else if p == "\"" {
                 break
+            } else {
+                try advance()
             }
         }
         

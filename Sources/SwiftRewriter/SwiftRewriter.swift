@@ -52,8 +52,10 @@ public class SwiftRewriter {
         outputTarget.onAfterOutput()
     }
     
+    // MARK: - ObjcClassInterface
     private func enterObjcClassInterfaceNode(_ node: ObjcClassInterface) {
         outputTarget.output(line: "class \(node.identifier.name ?? "<Unknown>") {")
+        outputTarget.increaseIdentation()
     }
     
     private func visitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
@@ -61,6 +63,8 @@ public class SwiftRewriter {
     }
     
     private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
+        outputTarget.decreaseIdentation()
         outputTarget.output(line: "}")
     }
+    // MARK: -
 }

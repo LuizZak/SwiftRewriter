@@ -6,6 +6,8 @@ public class ObjcParser {
     let lexer: Lexer
     let context: NodeCreationContext
     
+    internal var currentToken: Token = Token(type: .eof, string: "", location: .invalid)
+    
     public let diagnostics: Diagnostics
     
     /// The root global context note after parsing.
@@ -16,6 +18,8 @@ public class ObjcParser {
         context = NodeCreationContext()
         diagnostics = Diagnostics()
         rootNode = GlobalContextNode()
+        
+        readCurrentToken()
     }
     
     public convenience init(filePath: String, encoding: String.Encoding = .utf8) throws {
@@ -157,6 +161,12 @@ public class ObjcParser {
         return RangeMarker(lexer: lexer)
     }
     
+    /// Creates and returns a backtracking point which can be activated to rewind
+    /// the lexer to the point at which this method was called.
+    func backtracker() -> Backtrack {
+        return Backtrack(parser: self)
+    }
+    
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
         return .location(lexer.inputIndex)
@@ -255,12 +265,41 @@ public class ObjcParser {
             self.index = lexer.inputIndex
         }
         
+        func makeSubstring() -> Substring {
+            return lexer.inputString[rawRange()]
+        }
+        
         func makeRange() -> SourceRange {
-            return .valid(index..<lexer.inputIndex)
+            return .valid(rawRange())
         }
         
         func makeLocation() -> SourceLocation {
-            return .range(index..<lexer.inputIndex)
+            return .range(rawRange())
+        }
+        
+        private func rawRange() -> Range<Lexer.Index> {
+            return index..<lexer.inputIndex
+        }
+    }
+    
+    class Backtrack {
+        let parser: ObjcParser
+        let index: Lexer.Index
+        private var activated = false
+        
+        init(parser: ObjcParser) {
+            self.parser = parser
+            self.index = parser.lexer.inputIndex
+        }
+        
+        func backtrack() {
+            guard !activated else {
+                return
+            }
+            
+            parser.lexer.inputIndex = index
+            
+            activated = true
         }
     }
 }

@@ -28,3 +28,17 @@ public enum SourceRange {
         }
     }
 }
+
+extension SourceRange: Equatable {
+    public static func ==(lhs: SourceRange, rhs: SourceRange) -> Bool {
+        switch (lhs, rhs) {
+        case let (.valid(l), .valid(r)):
+            return l == r
+        case (.invalid, .invalid):
+            return true
+            
+        default:
+            return false
+        }
+    }
+}
