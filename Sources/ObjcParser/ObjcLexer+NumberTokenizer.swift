@@ -1,7 +1,7 @@
 import MiniLexer
 import GrammarModels
 
-extension ObjcParser {
+extension ObjcLexer {
     /// Tries to parse either a decimal, hexadecimal, octal or floating-point
     /// literal token.
     internal func readNumberToken() throws {

@@ -1,8 +1,26 @@
+//
+//  ObjcLexer.swift
+//  ObjcParser
+//
+//  Created by Luiz Silva on 22/01/2018.
+//
+
 import MiniLexer
 import GrammarModels
 
-// MARK: - Lexing extensions
-public extension ObjcParser {
+public class ObjcLexer {
+    var lexer: Lexer
+    var source: CodeSource
+    
+    /// Whether a token has been read yet by this parser
+    var _hasReadToken: Bool = false
+    var currentToken: Token = Token(type: .eof, string: "", location: .invalid)
+    
+    public init(source: CodeSource) {
+        self.source = source
+        self.lexer = Lexer(input: source.fetchSource())
+    }
+    
     /// Gets the token type for the current token
     public func tokenType() -> TokenType {
         return token().type
@@ -94,7 +112,7 @@ public extension ObjcParser {
         
         let keyword = range.makeSubstring()
         
-        if !ObjcParser.isKeyword(keyword) {
+        if !ObjcLexer.isKeyword(keyword) {
             backtrack.backtrack()
             return false
         }
@@ -145,4 +163,83 @@ public extension ObjcParser {
         "void", "@interface", "@implementation", "@property", "@end", "@protocol",
         "typedef", "struct", "enum"
     ]
+    
+    func startRange() -> RangeMarker {
+        return RangeMarker(lexer: lexer)
+    }
+    
+    /// Creates and returns a backtracking point which can be activated to rewind
+    /// the lexer to the point at which this method was called.
+    func backtracker() -> Backtrack {
+        return Backtrack(lexer: self.lexer)
+    }
+    
+    /// Current lexer's location as a `SourceLocation`.
+    func location() -> SourceLocation {
+        return .location(lexer.inputIndex)
+    }
+    
+    struct RangeMarker {
+        let lexer: Lexer
+        let index: Lexer.Index
+        
+        init(lexer: Lexer) {
+            self.lexer = lexer
+            self.index = lexer.inputIndex
+        }
+        
+        func makeSubstring() -> Substring {
+            return lexer.inputString[rawRange()]
+        }
+        
+        func makeRange() -> SourceRange {
+            return .valid(rawRange())
+        }
+        
+        func makeLocation() -> SourceLocation {
+            return .range(rawRange())
+        }
+        
+        private func rawRange() -> Range<Lexer.Index> {
+            return index..<lexer.inputIndex
+        }
+    }
+    
+    class Backtrack {
+        let lexer: Lexer
+        let index: Lexer.Index
+        private var activated = false
+        
+        init(lexer: Lexer) {
+            self.lexer = lexer
+            self.index = lexer.inputIndex
+        }
+        
+        func backtrack() {
+            guard !activated else {
+                return
+            }
+            
+            lexer.inputIndex = index
+            
+            activated = true
+        }
+    }
+}
+
+/// Protocol for sourcing code strings from
+public protocol CodeSource {
+    func fetchSource() -> String
+}
+
+public struct StringCodeSource: CodeSource {
+    public var source: String
+    
+    public init(source: String) {
+        self.source = source
+    }
+    
+    public func fetchSource() -> String {
+        return source
+    }
 }

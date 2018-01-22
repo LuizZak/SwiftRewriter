@@ -1,5 +1,5 @@
 //
-//  ObjcParser+TokenizerTests.swift
+//  ObjcLexer+TokenizerTests.swift
 //  ObjcParserTests
 //
 //  Created by Luiz Silva on 22/01/2018.
@@ -9,7 +9,7 @@ import XCTest
 import GrammarModels
 @testable import ObjcParser
 
-class ObjcParser_TokenizerTests: XCTestCase {
+class ObjcLexer_TokenizerTests: XCTestCase {
     func testTokenizeLiterals() {
         expect("123", toTokenizeAs: .decimalLiteral)
         expect("123.4", toTokenizeAs: .floatLiteral)
@@ -45,8 +45,8 @@ class ObjcParser_TokenizerTests: XCTestCase {
     }
     
     func testTokenizeSpecialChars() {
-        //expect(":", toTokenizeAs: .colon)
-        //expect(";", toTokenizeAs: .semicolon)
+        expect(":", toTokenizeAs: .colon)
+        expect(";", toTokenizeAs: .semicolon)
         expect(",", toTokenizeAs: .comma)
         expect("(", toTokenizeAs: .openParens)
         expect(")", toTokenizeAs: .closeParens)
@@ -105,9 +105,9 @@ class ObjcParser_TokenizerTests: XCTestCase {
     }
     
     private func expect(sequence string: String, toTokenizeAs expectedTypes: [TokenType], file: String = #file, line: Int = #line) {
-        let parser = ObjcParser(string: string)
+        let lexer = ObjcLexer(source: StringCodeSource(source: string))
         
-        for pair in zip(parser.allTokens(), expectedTypes) {
+        for pair in zip(lexer.allTokens(), expectedTypes) {
             
             let actual = pair.0
             let expected = pair.1
@@ -130,10 +130,10 @@ class ObjcParser_TokenizerTests: XCTestCase {
     }
     
     private func tokenizeTest(_ string: String, _ expected: Token, file: String = #file, line: Int = #line) {
-        let parser = ObjcParser(string: string)
+        let lexer = ObjcLexer(source: StringCodeSource(source: string))
         
-        if parser.token() != expected {
-            recordFailure(withDescription: "Expected token: \(expected) received token: \(parser.token())",
+        if lexer.token() != expected {
+            recordFailure(withDescription: "Expected token: \(expected) received token: \(lexer.token())",
                           inFile: file, atLine: line, expected: false)
         }
     }

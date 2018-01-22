@@ -1,7 +1,7 @@
 import MiniLexer
 import GrammarModels
 
-public extension ObjcParser {
+public extension ObjcLexer {
     internal func readOperator() throws {
         let range = startRange()
         

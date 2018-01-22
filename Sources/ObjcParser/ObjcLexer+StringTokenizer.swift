@@ -1,7 +1,7 @@
 import MiniLexer
 import GrammarModels
 
-extension ObjcParser {
+extension ObjcLexer {
     /// Parses a string literal at the current position
     internal func readStringLiteralToken() throws {
         let range = startRange()

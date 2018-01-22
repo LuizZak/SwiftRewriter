@@ -35,6 +35,6 @@ let package = Package(
             dependencies: ["GrammarModels"]),
         .testTarget(
             name: "SwiftRewriterTests",
-            dependencies: ["SwiftRewriter", "GrammarModels"]),
+            dependencies: ["SwiftRewriter", "GrammarModels", "ObjcParser"]),
     ]
 )
