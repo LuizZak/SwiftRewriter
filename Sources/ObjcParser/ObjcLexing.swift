@@ -88,7 +88,7 @@ extension Lexer {
             }
             
             try? lexer.rewindOnFailure {
-                try lexer.fragmentExponent()
+                try fragmentFloatTypeSuffix()
             }
         }
     }

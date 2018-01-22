@@ -6,6 +6,8 @@ public class ObjcParser {
     let lexer: Lexer
     let context: NodeCreationContext
     
+    /// Whether a token has been read yet by this parser
+    internal var _hasReadToken: Bool = false
     internal var currentToken: Token = Token(type: .eof, string: "", location: .invalid)
     
     public let diagnostics: Diagnostics
@@ -18,8 +20,6 @@ public class ObjcParser {
         context = NodeCreationContext()
         diagnostics = Diagnostics()
         rootNode = GlobalContextNode()
-        
-        readCurrentToken()
     }
     
     public convenience init(filePath: String, encoding: String.Encoding = .utf8) throws {
