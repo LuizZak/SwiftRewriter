@@ -29,19 +29,19 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     }
     
     func testTokenizeKeywords() {
-        expect("@interface", toTokenizeAs: .keyword)
-        expect("@implementation", toTokenizeAs: .keyword)
-        expect("@protocol", toTokenizeAs: .keyword)
-        expect("@end", toTokenizeAs: .keyword)
-        expect("if", toTokenizeAs: .keyword)
-        expect("else", toTokenizeAs: .keyword)
-        expect("while", toTokenizeAs: .keyword)
-        expect("switch", toTokenizeAs: .keyword)
-        expect("continue", toTokenizeAs: .keyword)
-        expect("break", toTokenizeAs: .keyword)
-        expect("return", toTokenizeAs: .keyword)
-        expect("typedef", toTokenizeAs: .keyword)
-        expect("struct", toTokenizeAs: .keyword)
+        expect("@interface", toTokenizeAs: .keyword(.atInterface))
+        expect("@implementation", toTokenizeAs: .keyword(.atImplementation))
+        expect("@protocol", toTokenizeAs: .keyword(.atProtocol))
+        expect("@end", toTokenizeAs: .keyword(.atEnd))
+        expect("if", toTokenizeAs: .keyword(.if))
+        expect("else", toTokenizeAs: .keyword(.else))
+        expect("while", toTokenizeAs: .keyword(.while))
+        expect("switch", toTokenizeAs: .keyword(.switch))
+        expect("continue", toTokenizeAs: .keyword(.continue))
+        expect("break", toTokenizeAs: .keyword(.break))
+        expect("return", toTokenizeAs: .keyword(.return))
+        expect("typedef", toTokenizeAs: .keyword(.typedef))
+        expect("struct", toTokenizeAs: .keyword(.struct))
     }
     
     func testTokenizeSpecialChars() {
@@ -99,7 +99,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect(sequence: source, toTokenizeAs: [
             .operator(.bitwiseShiftRight), .operator(.bitwiseShiftLeft),
             .operator(.greaterThanOrEqual), .operator(.lessThanOrEqual),
-            .identifier, .keyword, .decimalLiteral, .hexLiteral, .comma, .decimalLiteral,
+            .identifier, .keyword(.atInterface), .decimalLiteral, .hexLiteral, .comma, .decimalLiteral,
             .comma, .floatLiteral
             ])
     }

@@ -3,7 +3,7 @@ import MiniLexer
 import GrammarModels
 
 public class ObjcParser {
-    let lexer: Lexer
+    let lexer: ObjcLexer
     let context: NodeCreationContext
     
     /// Whether a token has been read yet by this parser
@@ -15,16 +15,15 @@ public class ObjcParser {
     /// The root global context note after parsing.
     public var rootNode: GlobalContextNode
     
-    public init(string: String) {
-        lexer = Lexer(input: string)
+    public convenience init(string: String) {
+        self.init(source: StringCodeSource(source: string))
+    }
+    
+    public init(source: CodeSource) {
+        lexer = ObjcLexer(source: source)
         context = NodeCreationContext()
         diagnostics = Diagnostics()
         rootNode = GlobalContextNode()
-    }
-    
-    public convenience init(filePath: String, encoding: String.Encoding = .utf8) throws {
-        let text = try String(contentsOfFile: filePath, encoding: encoding)
-        self.init(string: text)
     }
     
     public func withTemporaryContextNode(_ node: ASTNode, do action: () throws -> ()) rethrows {
@@ -70,17 +69,17 @@ public class ObjcParser {
         
         var type: TypeNameNode.ObjcType
         
-        let typeName = String(try lexer.lexIdentifier())
+        let typeName = try lexer.consume(tokenType: .identifier).string
         
         // '<' : Generic type specifier
-        if lexer.withTemporaryIndex(changes: { lexer.skipWhitespace(); return lexer.safeIsNextChar(equalTo: "<") }) {
-            lexer.skipWhitespace()
-            
+        if lexer.tokenType() == .operator(.lessThan) {
             if typeName == "id" {
-                let types = _parseCommaSeparatedList(braces: "<", ">", itemParser: lexer.lexIdentifier)
-                type = .id(protocols: types.map { String($0) })
+                let types =
+                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan), itemParser: { try lexer.consume(tokenType: .identifier) })
+                type = .id(protocols: types.map { String($0.string) })
             } else {
-                let types = _parseCommaSeparatedList(braces: "<", ">", itemParser: parseObjcType)
+                let types =
+                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan), itemParser: parseObjcType)
                 type = .generic(typeName, parameters: types)
             }
         } else {
@@ -92,9 +91,8 @@ public class ObjcParser {
         }
         
         // '*' : Pointer
-        if lexer.withTemporaryIndex(changes: { lexer.skipWhitespace(); return lexer.safeIsNextChar(equalTo: "*") }) {
-            lexer.skipWhitespace()
-            try lexer.advance()
+        if lexer.tokenType(.operator(.multiply)) {
+            lexer.skipToken()
             type = .pointer(type)
         }
         
@@ -102,8 +100,6 @@ public class ObjcParser {
     }
     
     func parseTypeNameNode(onMissing message: String = "Expected type name") throws -> TypeNameNode {
-        lexer.skipWhitespace()
-        
         let range = startRange()
         do {
             return try lexer.rewindOnFailure {
@@ -118,58 +114,52 @@ public class ObjcParser {
     }
     
     func parseIdentifierNode(onMissing message: String = "Expected identifier") throws -> Identifier {
-        lexer.skipWhitespace()
-        
         let identRange = startRange()
         do {
-            let ident = try lexer.rewindOnFailure { try lexer.lexIdentifier() }
+            let ident = try lexer.rewindOnFailure { try lexer.consume(tokenType: .identifier) }
             
-            return Identifier(name: String(ident), location: identRange.makeRange())
+            return Identifier(name: ident.string, location: identRange.makeRange())
         } catch {
             diagnostics.error(message, location: location())
             throw error
         }
     }
     
-    func parseKeyword(_ keyword: String, onMissing message: String? = nil) throws {
+    func parseKeyword(_ keyword: Keyword, onMissing message: String? = nil) throws {
         let range = startRange()
         
-        if !lexer.advanceIf(equals: keyword) {
-            throw LexerError.syntaxError(message ?? "Expected \(keyword)")
-        }
+        _=try lexer.consume(tokenType: .keyword(keyword))
         
-        let node = Keyword(name: keyword, location: range.makeRange())
+        let node = KeywordNode(keyword: keyword, location: range.makeRange())
         
         context.addChildNode(node)
     }
     
-    func parseTokenNode(_ token: String, onMissing message: String? = nil, addToContext: Bool = true) throws {
+    func parseTokenNode(_ tokenType: TokenType, onMissing message: String? = nil, addToContext: Bool = true) throws {
         let range = startRange()
         
-        if !lexer.advanceIf(equals: token) {
-            throw LexerError.syntaxError(message ?? "Expected \(token)")
-        }
+        let tok = try lexer.consume(tokenType: tokenType)
         
         if addToContext {
-            let node = TokenNode(token: token, location: range.makeRange())
+            let node = TokenNode(token: tok, location: range.makeRange())
             
             context.addChildNode(node)
         }
     }
     
-    func startRange() -> RangeMarker {
-        return RangeMarker(lexer: lexer)
+    func startRange() -> ObjcLexer.RangeMarker {
+        return lexer.startRange()
     }
     
     /// Creates and returns a backtracking point which can be activated to rewind
     /// the lexer to the point at which this method was called.
-    func backtracker() -> Backtrack {
-        return Backtrack(parser: self)
+    func backtracker() -> ObjcLexer.Backtrack {
+        return lexer.backtracker()
     }
     
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
-        return .location(lexer.inputIndex)
+        return lexer.location()
     }
     
     /// Starts parsing a comman-separated list of items using the specified braces
@@ -197,37 +187,32 @@ public class ObjcParser {
     /// of errors as diagnostics must be made by this closure.
     /// - Returns: An array of items returned by `itemParser` for each successful
     /// parse performed.
-    internal func _parseCommaSeparatedList<T>(braces openBrace: Lexer.Atom, _ closeBrace: Lexer.Atom, addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
+    internal func _parseCommaSeparatedList<T>(braces openBrace: TokenType, _ closeBrace: TokenType, addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
         do {
-            try parseTokenNode(openBrace.description, addToContext: addTokensToContext)
+            try parseTokenNode(openBrace, addToContext: addTokensToContext)
         } catch {
             diagnostics.error("Expected \(openBrace) to open list", location: location())
         }
         
         var expectsItem = true
         var items: [T] = []
-        while !lexer.isEof() {
+        while !lexer.isEof {
             expectsItem = false
-            
-            lexer.skipWhitespace()
             
             // Item
             do {
                 let item = try itemParser()
                 items.append(item)
             } catch {
-                lexer.advance(until: { $0 == "," || $0 == closeBrace })
+                lexer.advance(until: { $0.type == .comma || $0.type == closeBrace })
             }
             
-            lexer.skipWhitespace()
-            
             // Comma separator / close brace
-            lexer.skipWhitespace()
             do {
-                if lexer.safeIsNextChar(equalTo: ",") {
-                    try parseTokenNode(",", addToContext: addTokensToContext)
+                if lexer.tokenType(.comma) {
+                    try parseTokenNode(.comma, addToContext: addTokensToContext)
                     expectsItem = true
-                } else if lexer.safeIsNextChar(equalTo: closeBrace) {
+                } else if lexer.tokenType(closeBrace) {
                     break
                 } else {
                     // Should match either comma or closing brace!
@@ -235,8 +220,7 @@ public class ObjcParser {
                 }
             } catch {
                 // Panic!
-                diagnostics.error("Expected ',' or '\(closeBrace)' after an item", location: location())
-                lexer.skipWhitespace()
+                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item", location: location())
             }
         }
         
@@ -244,63 +228,15 @@ public class ObjcParser {
         if expectsItem {
             diagnostics.error("Expected item after comma", location: location())
             // Panic and end list here
-            lexer.skipWhitespace()
         }
         
         do {
-            try parseTokenNode(closeBrace.description, addToContext: addTokensToContext)
+            try parseTokenNode(closeBrace, addToContext: addTokensToContext)
         } catch {
             diagnostics.error("Expected \(closeBrace) to close list", location: location())
         }
         
         return items
-    }
-    
-    struct RangeMarker {
-        let lexer: Lexer
-        let index: Lexer.Index
-        
-        init(lexer: Lexer) {
-            self.lexer = lexer
-            self.index = lexer.inputIndex
-        }
-        
-        func makeSubstring() -> Substring {
-            return lexer.inputString[rawRange()]
-        }
-        
-        func makeRange() -> SourceRange {
-            return .valid(rawRange())
-        }
-        
-        func makeLocation() -> SourceLocation {
-            return .range(rawRange())
-        }
-        
-        private func rawRange() -> Range<Lexer.Index> {
-            return index..<lexer.inputIndex
-        }
-    }
-    
-    class Backtrack {
-        let parser: ObjcParser
-        let index: Lexer.Index
-        private var activated = false
-        
-        init(parser: ObjcParser) {
-            self.parser = parser
-            self.index = parser.lexer.inputIndex
-        }
-        
-        func backtrack() {
-            guard !activated else {
-                return
-            }
-            
-            parser.lexer.inputIndex = index
-            
-            activated = true
-        }
     }
 }
 

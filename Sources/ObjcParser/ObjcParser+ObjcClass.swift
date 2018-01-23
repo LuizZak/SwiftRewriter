@@ -19,54 +19,40 @@ extension ObjcParser {
             context.popContext()
         }
         
-        lexer.skipWhitespace()
-        
         // Consume @interface
-        try parseKeyword("@interface", onMissing: "Expected @interface to start class declaration")
+        try parseKeyword(.atInterface, onMissing: "Expected \(Keyword.atInterface) to start class declaration")
         
         // Class name
         classNode.identifier = .valid(try parseIdentifierNode())
-        lexer.skipWhitespace()
         
         // Super class name
-        if try lexer.peek() == ":" {
+        if lexer.tokenType(.colon) {
             // Record ':'
-            try parseTokenNode(":")
+            try parseTokenNode(.colon)
             
             // Record superclass name
             try parseSuperclassNameNode()
-            
-            lexer.skipWhitespace()
         }
         
         // Protocol conformance list
-        if try lexer.peek() == "<" {
+        if lexer.tokenType(.operator(.lessThan)) {
             do {
                 try parseProtocolReferenceListNode()
             } catch {
                 // Panic!
-                lexer.skipWhitespace()
             }
-            
-            lexer.skipWhitespace()
         }
         
         // Consume interface declarations
-        _=lexer.performGreedyRounds { (lexer, _) -> Bool in
-            var isEnd = false
-            
-            lexer.skipWhitespace()
-            
-            try lexer.matchFirst(withEither: { lexer in
+        while !lexer.tokenType(.keyword(.atEnd)) {
+            if lexer.tokenType(.keyword(.atProperty)) {
                 try self.parsePropertyNode()
-            }, { _ in
-                try self.parseKeyword("@end", onMissing: "Expected @end to end class declaration")
-                
-                isEnd = true
-            })
-            
-            return !isEnd
+            } else {
+                throw LexerError.syntaxError("Expected an ivar list, @property, or method(s) declaration(s) in class")
+            }
         }
+        
+        try self.parseKeyword(.atEnd, onMissing: "Expected \(Keyword.atEnd) to end class declaration")
     }
     
     /// Parses a protocol conformance list at the current location
@@ -85,7 +71,7 @@ extension ObjcParser {
     public func parseProtocolReferenceListNode() throws {
         func parseProtocolName() throws -> String {
             do {
-                return String(try lexer.lexIdentifier())
+                return try lexer.consume(tokenType: .identifier).string
             } catch {
                 diagnostics.error("Expected protocol name", location: location())
                 throw error
@@ -99,7 +85,7 @@ extension ObjcParser {
         }
         
         let protocols =
-            _parseCommaSeparatedList(braces: "<", ">",
+            _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
                                      itemParser: parseProtocolName)
         
         node.protocols = protocols
@@ -113,33 +99,24 @@ extension ObjcParser {
         }
         
         // @property [(<Modifiers>)] <Type> <Name>;
-        lexer.skipWhitespace()
         
         // @property
         let range = startRange()
-        try parseKeyword("@property", onMissing: "Expected @property declaration")
-        lexer.skipWhitespace()
+        try parseKeyword(.atProperty, onMissing: "Expected \(Keyword.atProperty) declaration")
         
         // Modifiers
-        if lexer.safeIsNextChar(equalTo: "(") {
+        if lexer.tokenType(.openParens) {
             try parsePropertyModifiersListNode()
-            lexer.skipWhitespace()
         }
         
         // Type
-        prop.type = try asNodeRef(try parseTypeNameNode(), onPanic: {
-            lexer.advance(until: { Lexer.isIdentifierLetter($0) || $0 == ";" || $0 == "@" })
-        })
-        
-        lexer.skipWhitespace()
+        prop.type = try asNodeRef(try parseTypeNameNode())
         
         // Name
-        prop.identifier = try asNodeRef(try parseIdentifierNode(), onPanic: {
-            lexer.advance(until: { $0 == ";" || $0 == "@" })
-        })
+        prop.identifier = try asNodeRef(try parseIdentifierNode())
         
         // ;
-        try parseTokenNode(";", onMissing: "Expected ';' to end property declaration")
+        try parseTokenNode(.semicolon, onMissing: "Expected \(TokenType.semicolon) to end property declaration")
         
         prop.location = range.makeRange()
     }
@@ -148,9 +125,11 @@ extension ObjcParser {
         func parsePropertyModifier() throws {
             do {
                 let range = startRange()
-                let name = try lexer.lexIdentifier()
+                let token = try lexer.consume(tokenType: .identifier)
                 
-                let node = ObjcClassInterface.PropertyModifier(name: String(name), location: range.makeRange())
+                let node =
+                    ObjcClassInterface
+                        .PropertyModifier(name: token.string, location: range.makeRange())
                 context.addChildNode(node)
             } catch {
                 diagnostics.error("Expected a property modifier", location: location())
@@ -163,15 +142,15 @@ extension ObjcParser {
             context.popContext()
         }
         
-        _=_parseCommaSeparatedList(braces: "(", ")", itemParser: parsePropertyModifier)
+        _=_parseCommaSeparatedList(braces: .openParens, .closeParens, itemParser: parsePropertyModifier)
     }
     
     func parseSuperclassNameNode() throws {
-        lexer.skipWhitespace()
-        
         let identRange = startRange()
-        let ident = try lexer.lexIdentifier()
-        let node = ObjcClassInterface.SuperclassName(name: String(ident), location: identRange.makeRange())
+        let ident =
+            try lexer.consume(tokenType: .identifier)
+        
+        let node = ObjcClassInterface.SuperclassName(name: ident.string, location: identRange.makeRange())
         
         context.addChildNode(node)
     }

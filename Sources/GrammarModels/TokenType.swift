@@ -11,7 +11,9 @@ public enum TokenType {
     case stringLiteral
     
     case identifier
-    case keyword
+    case keyword(Keyword)
+    
+    case at
     
     case colon
     case semicolon
@@ -37,10 +39,28 @@ public enum TokenType {
         }
     }
     
+    public var isKeyword: Bool {
+        switch self {
+        case .keyword:
+            return true
+        default:
+            return false
+        }
+    }
+    
     public var `operator`: Operator? {
         switch self {
         case .operator(let op):
             return op
+        default:
+            return nil
+        }
+    }
+    
+    public var keyword: Keyword? {
+        switch self {
+        case .keyword(let kw):
+            return kw
         default:
             return nil
         }
@@ -58,7 +78,7 @@ extension TokenType: Equatable {
              (.hexLiteral, .hexLiteral),
              (.stringLiteral, .stringLiteral),
              (.identifier, .identifier),
-             (.keyword, .keyword),
+             (.at, .at),
              (.comma, .comma),
              (.colon, .colon),
              (.semicolon, .semicolon),
@@ -69,10 +89,59 @@ extension TokenType: Equatable {
              (.closeParens, .closeParens),
              (.closeSquareBracket, .closeSquareBracket):
             return true
+        case let (.keyword(l), .keyword(r)):
+            return l == r
         case let (.operator(l), .operator(r)):
             return l == r
         default:
             return false
+        }
+    }
+}
+
+extension TokenType: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .eof:
+            return "<eof>"
+        case .unknown:
+            return "<unknown>"
+        case .decimalLiteral:
+            return "decimal literal"
+        case .floatLiteral:
+            return "floating-point literal"
+        case .octalLiteral:
+            return "octal literal"
+        case .hexLiteral:
+            return "hexadecimal literal"
+        case .stringLiteral:
+            return "string literal"
+        case .identifier:
+            return "identifier"
+        case .keyword:
+            return "keyword"
+        case .at:
+            return "'@'"
+        case .colon:
+            return "':'"
+        case .semicolon:
+            return "';'"
+        case .comma:
+            return "','"
+        case .openBrace:
+            return "'{'"
+        case .closeBrace:
+            return "'}'"
+        case .openParens:
+            return "'('"
+        case .closeParens:
+            return "')'"
+        case .openSquareBracket:
+            return "'['"
+        case .closeSquareBracket:
+            return "']'"
+        case .`operator`(let op):
+            return op.description
         }
     }
 }
@@ -115,4 +184,71 @@ public enum Operator: Int {
     case assign
     case equals
     case unequals
+}
+
+extension Operator: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .add:
+            return "'+'"
+        case .subtract:
+            return "'-'"
+        case .multiply:
+            return "'*'"
+        case .divide:
+            return "'/'"
+        case .addAssign:
+            return "'+='"
+        case .subtractAssign:
+            return "'-='"
+        case .multiplyAssign:
+            return "'*='"
+        case .divideAssign:
+            return "'/='"
+        case .negate:
+            return "'!'"
+        case .and:
+            return "'&&'"
+        case .or:
+            return "'||'"
+        case .bitwiseAnd:
+            return "'&'"
+        case .bitwiseOr:
+            return "'|'"
+        case .bitwiseXor:
+            return "'^'"
+        case .bitwiseNot:
+            return "'~'"
+        case .bitwiseShiftLeft:
+            return "'<<'"
+        case .bitwiseShiftRight:
+            return "'>>'"
+        case .bitwiseAndAssign:
+            return "'&='"
+        case .bitwiseOrAssign:
+            return "'|='"
+        case .bitwiseXorAssign:
+            return "'^='"
+        case .bitwiseNotAssign:
+            return "'~='"
+        case .bitwiseShiftLeftAssign:
+            return "'<<='"
+        case .bitwiseShiftRightAssign:
+            return "'>>='"
+        case .lessThan:
+            return "'<'"
+        case .lessThanOrEqual:
+            return "'<='"
+        case .greaterThan:
+            return "'>'"
+        case .greaterThanOrEqual:
+            return "'>='"
+        case .assign:
+            return "'='"
+        case .equals:
+            return "'=='"
+        case .unequals:
+            return "'!='"
+        }
+    }
 }

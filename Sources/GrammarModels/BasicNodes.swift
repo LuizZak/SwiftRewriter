@@ -13,9 +13,9 @@ public class UnknownNode: ASTNode {
 /// A node that holds an arbitrary token that has no proper semantic naming without
 /// context.
 public class TokenNode: ASTNode {
-    public var token: String
+    public var token: Token
     
-    public init(token: String, location: SourceRange = .invalid) {
+    public init(token: Token, location: SourceRange = .invalid) {
         self.token = token
         
         super.init(location: location)
@@ -46,21 +46,21 @@ public extension ASTNodeRef where Node == Identifier {
 }
 
 /// A node that represents a special keyword-type token
-public class Keyword: ASTNode {
-    public var name: String
+public class KeywordNode: ASTNode {
+    public var keyword: Keyword
     
-    public init(name: String, location: SourceRange = .invalid) {
-        self.name = name
+    public init(keyword: Keyword, location: SourceRange = .invalid) {
+        self.keyword = keyword
         
         super.init(location: location)
     }
 }
 
-public extension ASTNodeRef where Node == Keyword {
+public extension ASTNodeRef where Node == KeywordNode {
     public var name: String? {
         switch self {
         case .valid(let node):
-            return node.name
+            return node.keyword.rawValue
         case .invalid:
             return nil
         }

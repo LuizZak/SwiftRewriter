@@ -16,14 +16,34 @@ public class ObjcLexer {
     var _hasReadToken: Bool = false
     var currentToken: Token = Token(type: .eof, string: "", location: .invalid)
     
+    var isEof: Bool {
+        return lexer.isEof() && tokenType() != .eof
+    }
+    
     public init(source: CodeSource) {
         self.source = source
         self.lexer = Lexer(input: source.fetchSource())
     }
     
+    /// Attempts to consume a given token, failing with an error if the operation
+    /// fails.
+    /// After reading, the current token is advanced to the next.
+    public func consume(tokenType: TokenType) throws -> Token {
+        if self.tokenType() != tokenType {
+            throw Error.unexpectedToken(received: self.tokenType(), expected: tokenType)
+        }
+        
+        return nextToken()
+    }
+    
     /// Gets the token type for the current token
     public func tokenType() -> TokenType {
         return token().type
+    }
+    
+    /// Returns whether the token type for the current token matches a given one
+    public func tokenType(_ tok: TokenType) -> Bool {
+        return tokenType() == tok
     }
     
     /// Reads the next token from the parser, without advancing
@@ -49,8 +69,6 @@ public class ObjcLexer {
     
     /// Gets the current token, and skips to the next token on the string
     public func nextToken() -> Token {
-        lexer.skipWhitespace()
-        
         let tok = token()
         _readToken()
         return tok
@@ -65,8 +83,25 @@ public class ObjcLexer {
         _readToken()
     }
     
+    /// Advances through the tokens until a predicate returns false for a token
+    /// value.
+    /// The method stops such that the next token is the first token the closure
+    /// returned false to.
+    /// The method returns automatically when end-of-file is reached.
+    public func advance(until predicate: (Token) throws -> Bool) rethrows {
+        while !isEof {
+            if try predicate(token()) {
+                return
+            }
+            
+            skipToken()
+        }
+    }
+    
     private func _readToken() {
         _hasReadToken = true
+        
+        lexer.skipWhitespace()
         
         if lexer.isEof() {
             currentToken = Token(type: .eof, string: "", location: location())
@@ -112,13 +147,13 @@ public class ObjcLexer {
         
         let keyword = range.makeSubstring()
         
-        if !ObjcLexer.isKeyword(keyword) {
+        guard let kw = Keyword(rawValue: String(keyword)) else {
             backtrack.backtrack()
             return false
         }
         
         currentToken =
-            Token(type: .keyword, string: String(keyword), location: range.makeLocation())
+            Token(type: .keyword(kw), string: String(keyword), location: range.makeLocation())
         
         return true
     }
@@ -154,16 +189,6 @@ public class ObjcLexer {
         return true
     }
     
-    private static func isKeyword<S: StringProtocol>(_ value: S) -> Bool {
-        return keywords.contains(where: { $0 == value })
-    }
-    
-    private static let keywords: [String] = [
-        "if", "else", "for", "while", "switch", "continue", "break", "return",
-        "void", "@interface", "@implementation", "@property", "@end", "@protocol",
-        "typedef", "struct", "enum"
-    ]
-    
     func startRange() -> RangeMarker {
         return RangeMarker(lexer: lexer)
     }
@@ -177,6 +202,17 @@ public class ObjcLexer {
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
         return .location(lexer.inputIndex)
+    }
+    
+    func rewindOnFailure<T>(_ block: () throws -> T) rethrows -> T {
+        let bt = backtracker()
+        
+        do {
+            return try block()
+        } catch {
+            bt.backtrack()
+            throw error
+        }
     }
     
     struct RangeMarker {
@@ -223,6 +259,17 @@ public class ObjcLexer {
             lexer.inputIndex = index
             
             activated = true
+        }
+    }
+    
+    public enum Error: Swift.Error, CustomStringConvertible {
+        case unexpectedToken(received: TokenType, expected: TokenType)
+        
+        public var description: String {
+            switch self {
+            case let .unexpectedToken(received, expected):
+                return "Unexpected token: received \(received), but expected \(expected)"
+            }
         }
     }
 }

@@ -10,11 +10,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
         
-        let keywordsProp1 = result.childrenMatching(type: Keyword.self)
-        XCTAssertTrue(keywordsProp1.contains { $0.name == "@property" })
+        let keywordsProp1 = result.childrenMatching(type: KeywordNode.self)
+        XCTAssertTrue(keywordsProp1.contains { $0.keyword == .atProperty })
         XCTAssertEqual(result.type.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier.name, "myProperty1")
-        XCTAssert(result.childrenMatching(type: TokenNode.self).contains { $0.token == ";" })
+        XCTAssert(result.childrenMatching(type: TokenNode.self).contains { $0.token.type == .semicolon })
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
@@ -27,11 +27,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         let result = _parseTestPropertyNode(source: source, parser: sut)
         
         // Assert
-        let keywordsProp1 = result.childrenMatching(type: Keyword.self)
-        XCTAssertTrue(keywordsProp1.contains { $0.name == "@property" })
+        let keywordsProp1 = result.childrenMatching(type: KeywordNode.self)
+        XCTAssertTrue(keywordsProp1.contains { $0.keyword == .atProperty })
         XCTAssertEqual(result.type.type, .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])))
         XCTAssertEqual(result.identifier.name, "myProperty3")
-        XCTAssert(result.childrenMatching(type: TokenNode.self).contains { $0.token == ";" })
+        XCTAssert(result.childrenMatching(type: TokenNode.self).contains { $0.token.type == .semicolon })
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
@@ -73,7 +73,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertEqual(result.type.type, .struct("BOOL"))
         XCTAssertFalse(result.identifier.exists)
         XCTAssertNil(result.modifierList)
-        XCTAssertEqual(result.childrenMatching(type: TokenNode.self)[0].token, ";")
+        XCTAssertEqual(result.childrenMatching(type: TokenNode.self)[0].token.type, .semicolon)
         XCTAssertEqual(sut.diagnostics.errors.count, 1)
     }
     
@@ -86,7 +86,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertEqual(result.type.exists, false)
         XCTAssertFalse(result.identifier.exists)
         XCTAssertNil(result.modifierList)
-        XCTAssertEqual(result.childrenMatching(type: TokenNode.self)[0].token, ";")
+        XCTAssertEqual(result.childrenMatching(type: TokenNode.self)[0].token.type, .semicolon)
         XCTAssertEqual(sut.diagnostics.errors.count, 2)
     }
     
@@ -101,7 +101,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
             
             return result
         } catch {
-            recordFailure(withDescription: "Failed to parse: \(error)", inFile: #file, atLine: line, expected: false)
+            recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
             fatalError()
         }
     }
