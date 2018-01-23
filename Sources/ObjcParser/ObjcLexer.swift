@@ -134,9 +134,14 @@ public class ObjcLexer {
     private func readIdentifierToken() throws {
         let range = startRange()
         let ident = try lexer.lexIdentifier()
+        var type = TokenType.identifier
+        
+        if ident == "id" {
+            type = .id
+        }
         
         currentToken =
-            Token(type: .identifier, string: String(ident), location: range.makeLocation())
+            Token(type: type, string: String(ident), location: range.makeLocation())
     }
     
     private func attemptReadKeywordToken() throws -> Bool {

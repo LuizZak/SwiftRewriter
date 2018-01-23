@@ -143,7 +143,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertFalse(result.properties[0].identifier.exists)
         XCTAssertNil(result.properties[0].modifierList)
         XCTAssertEqual(result.properties[0].childrenMatching(type: TokenNode.self)[0].token.type, .semicolon)
-        XCTAssertEqual(sut.diagnostics.errors.count, 2)
+        XCTAssertEqual(sut.diagnostics.errors.count, 2, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithSuperclass() throws {

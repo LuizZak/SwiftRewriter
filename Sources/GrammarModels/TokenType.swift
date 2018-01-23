@@ -10,6 +10,8 @@ public enum TokenType {
     case hexLiteral
     case stringLiteral
     
+    case id
+    
     case identifier
     case keyword(Keyword)
     
@@ -78,6 +80,7 @@ extension TokenType: Equatable {
              (.hexLiteral, .hexLiteral),
              (.stringLiteral, .stringLiteral),
              (.identifier, .identifier),
+             (.id, .id),
              (.at, .at),
              (.comma, .comma),
              (.colon, .colon),
@@ -116,6 +119,8 @@ extension TokenType: CustomStringConvertible {
             return "hexadecimal literal"
         case .stringLiteral:
             return "string literal"
+        case .id:
+            return "id"
         case .identifier:
             return "identifier"
         case .keyword:

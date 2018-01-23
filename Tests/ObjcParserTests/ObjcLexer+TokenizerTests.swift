@@ -28,6 +28,10 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("_AnIdentifier_", toTokenizeAs: .identifier)
     }
     
+    func testTokenizeId() {
+        expect("id", toTokenizeAs: .id)
+    }
+    
     func testTokenizeKeywords() {
         expect("@interface", toTokenizeAs: .keyword(.atInterface))
         expect("@implementation", toTokenizeAs: .keyword(.atImplementation))

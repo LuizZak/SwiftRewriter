@@ -69,25 +69,31 @@ public class ObjcParser {
         
         var type: TypeNameNode.ObjcType
         
-        let typeName = try lexer.consume(tokenType: .identifier).string
-        
-        // '<' : Generic type specifier
-        if lexer.tokenType() == .operator(.lessThan) {
-            if typeName == "id" {
+        if lexer.tokenType(.id) {
+            lexer.skipToken()
+            
+            // '<' : Protocol list
+            if lexer.tokenType() == .operator(.lessThan) {
                 let types =
-                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan), itemParser: { try lexer.consume(tokenType: .identifier) })
+                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
+                                             itemParser: { try lexer.consume(tokenType: .identifier) })
                 type = .id(protocols: types.map { String($0.string) })
             } else {
+                type = .id(protocols: [])
+            }
+        } else if lexer.tokenType(.identifier) {
+            let typeName = try lexer.consume(tokenType: .identifier).string
+            
+            // '<' : Generic type specifier
+            if lexer.tokenType() == .operator(.lessThan) {
                 let types =
                     _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan), itemParser: parseObjcType)
                 type = .generic(typeName, parameters: types)
-            }
-        } else {
-            if typeName == "id" {
-                type = .id(protocols: [])
             } else {
                 type = .struct(typeName)
             }
+        } else {
+            throw LexerError.syntaxError("Expected type name")
         }
         
         // '*' : Pointer
@@ -227,7 +233,6 @@ public class ObjcParser {
         // Closed list after comma
         if expectsItem {
             diagnostics.error("Expected item after comma", location: location())
-            // Panic and end list here
         }
         
         do {
