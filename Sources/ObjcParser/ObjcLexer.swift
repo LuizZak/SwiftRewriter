@@ -117,7 +117,11 @@ public class ObjcLexer {
                 try readNumberToken()
             } else if Lexer.isLetter(p) || p == "_" || p == "@" {
                 if try !attemptReadKeywordToken() {
-                    try readIdentifierToken()
+                    if p == "@" {
+                        _=try attemptReadSpecialChar()
+                    } else {
+                        try readIdentifierToken()
+                    }
                 }
             } else if try !attemptReadSpecialChar() {
                 try readOperator()
@@ -141,6 +145,11 @@ public class ObjcLexer {
         
         if try lexer.peek() == "@" {
             try lexer.advance()
+            
+            if lexer.isEof() {
+                backtrack.backtrack()
+                return false
+            }
         }
         
         _=try lexer.lexIdentifier()
@@ -163,6 +172,8 @@ public class ObjcLexer {
         let type: TokenType
         
         switch try lexer.peek() {
+        case "@":
+            type = .at
         case ":":
             type = .colon
         case ";":

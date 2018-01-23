@@ -45,6 +45,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     }
     
     func testTokenizeSpecialChars() {
+        expect("@", toTokenizeAs: .at)
         expect(":", toTokenizeAs: .colon)
         expect(";", toTokenizeAs: .semicolon)
         expect(",", toTokenizeAs: .comma)
@@ -94,13 +95,14 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     }
     
     func testTokenizeSequence() {
-        let source = ">> << >= <= identifier @interface 1234 0x0f1Ab,1,2.3F"
+        let source = ">> << @@ >= <= identifier @interface @notkeyword 1234 0x0f1Ab,1,2.3F"
         
         expect(sequence: source, toTokenizeAs: [
             .operator(.bitwiseShiftRight), .operator(.bitwiseShiftLeft),
             .operator(.greaterThanOrEqual), .operator(.lessThanOrEqual),
-            .identifier, .keyword(.atInterface), .decimalLiteral, .hexLiteral, .comma, .decimalLiteral,
-            .comma, .floatLiteral
+            .at, .at, .identifier, .keyword(.atInterface), .at, .identifier,
+            .decimalLiteral, .hexLiteral, .comma, .decimalLiteral, .comma,
+            .floatLiteral
             ])
     }
     
