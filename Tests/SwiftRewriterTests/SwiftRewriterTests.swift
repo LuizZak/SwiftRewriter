@@ -63,15 +63,19 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @interface MyClass
             @property (nonnull) NSArray* nontypedArray;
+            @property (nullable) NSArray* nontypedArrayNull;
             @property NSArray<NSString*>* stringArray;
-            @property NSArray<SomeType*>* clsArray;
+            @property (nonnull) NSArray<SomeType*>* clsArray;
+            @property (nullable) NSArray<SomeType*>* clsArrayNull;
             @end
             """,
             swift: """
             class MyClass {
                 var nontypedArray: NSArray
-                var stringArray: [String]
+                var nontypedArrayNull: NSArray?
+                var stringArray: [String]!
                 var clsArray: [SomeType]
+                var clsArrayNull: [SomeType]?
             }
             """)
     }

@@ -45,7 +45,9 @@ public class TypeMapper {
                           context: .alwaysNonnull) // We do not pass context because
                                                    // it's not appliable to generic types
             
-            return "[\(inner)]"
+            let final = "[\(inner)]"
+            
+            return swiftType(name: final, withNullability: context.nullability())
         }
         
         return "<unknown generic \(name)>"
