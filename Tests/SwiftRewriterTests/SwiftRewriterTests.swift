@@ -54,6 +54,24 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteNSArray() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            @property NSArray* nontypedArray;
+            @property NSArray<NSString*>* stringArray;
+            @property NSArray<SomeType*>* clsArray;
+            @end
+            """,
+            swift: """
+            class MyClass {
+                var nontypedArray: NSArray
+                var stringArray: [String]
+                var clsArray: [SomeType]
+            }
+            """)
+    }
+    
     private func assertObjcTypeParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
         let sut = ObjcParser(string: objc)
         

@@ -30,15 +30,22 @@ public class TypeMapper {
             return scalar
         }
         
-        return ""
+        return "<unkown scalar type>"
     }
     
     private func swiftType(forIdWithProtocols protocols: [String]) -> String {
-        return ""
+        return "<unknown id<protocols>>"
     }
     
     private func swiftType(forGenericObjcType name: String, parameters: [ObjcType]) -> String {
-        return ""
+        // Array conversion
+        if name == "NSArray" && parameters.count == 1 {
+            let inner = swiftType(forObjcType: parameters[0])
+            
+            return "[\(inner)]"
+        }
+        
+        return "<unknown generic \(name)>"
     }
     
     private func swiftType(forObjcPointerType type: ObjcType) -> String {
@@ -46,6 +53,9 @@ public class TypeMapper {
             if let ptr = TypeMapper._pointerMappings[inner] {
                 return ptr
             }
+            
+            // Assume it's a class type here
+            return inner
         }
         
         return swiftType(forObjcType: type)
@@ -63,7 +73,7 @@ public class TypeMapper {
     private static let _pointerMappings: [String: String] = [
         "NSObject": "NSObject",
         "NSNumber": "NSNumber",
-        "NSArray": "Array",
+        "NSArray": "NSArray",
         "NSString": "String"
     ]
 }
