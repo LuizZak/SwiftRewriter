@@ -63,11 +63,11 @@ public class ObjcParser {
         try parseClassInerfaceNode()
     }
     
-    func parseObjcType() throws -> TypeNameNode.ObjcType {
+    func parseObjcType() throws -> ObjcType {
         // Here we simplify the grammar for types as:
         // TypeName: IDENTIFIER ('<' TypeName '>')? '*'?
         
-        var type: TypeNameNode.ObjcType
+        var type: ObjcType
         
         if lexer.tokenType(.id) {
             lexer.skipToken()

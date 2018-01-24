@@ -36,6 +36,20 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteClassWithProperty() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            @property BOOL someField;
+            @end
+            """,
+            swift: """
+            class MyClass {
+                var someField: Bool
+            }
+            """)
+    }
+    
     private func assertObjcTypeParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
         let sut = ObjcParser(string: objc)
         

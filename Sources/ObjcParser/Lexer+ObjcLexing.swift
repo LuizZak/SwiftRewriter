@@ -97,7 +97,7 @@ extension Lexer {
     @inline(__always)
     public func lexFragmentLiteral() throws -> Substring {
         return try consumeString { lexer in
-            try lexer.advance(expectingCurrent: "\'")
+            try lexer.advance(expectingCurrent: "'")
             
             if lexer.safeIsNextChar(equalTo: "\\") {
                 try lexer.fragmentEscapeSequence()
@@ -105,7 +105,7 @@ extension Lexer {
                 try lexer.advance(validatingCurrent: { $0 != "\\" })
             }
             
-            try lexer.advance(expectingCurrent: "\'")
+            try lexer.advance(expectingCurrent: "'")
         }
     }
     

@@ -37,13 +37,13 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
                                 .id(protocols: ["UIDelegate", "_MyDelegateProtocol"]))
     }
     
-    private func assertObjcTypeParse(_ source: String, _ expectedType: TypeNameNode.ObjcType, file: String = #file, line: Int = #line) throws {
+    private func assertObjcTypeParse(_ source: String, _ expectedType: ObjcType, file: String = #file, line: Int = #line) throws {
         // Arrange
         let sut = ObjcParser(string: source)
         
         // Act
         do {
-            var type: TypeNameNode.ObjcType!
+            var type: ObjcType!
             
             _=try sut.withTemporaryContext(nodeType: GlobalContextNode.self, do: {
                 type = try sut.parseObjcType()

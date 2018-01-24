@@ -18,21 +18,33 @@ public struct RewriterOutputSettings {
 }
 
 /// Protocol for output targets of `SwiftRewritter` instances.
-public protocol RewriterOutputTarget {
+public protocol RewriterOutputTarget: class {
     init(settings: RewriterOutputSettings)
     
-    mutating func output(line: String)
+    func output(line: String)
     
     /// Increases the identation of output lines from this output target
-    mutating func increaseIdentation()
+    func increaseIdentation()
     
     /// Decreases the identation of output lines from this output target
-    mutating func decreaseIdentation()
+    func decreaseIdentation()
+    
+    /// Performs a series of operations while idented, decreasing the identation
+    /// automatically after.
+    func idented(perform block: () -> ())
     
     /// Called after the entire output operation is finished on this rewriter.
     /// Used to allow post-printing operations to be performed, like string trimming
     /// or passing on the output to a different object etc.
-    mutating func onAfterOutput()
+    func onAfterOutput()
+}
+
+public extension RewriterOutputTarget {
+    func idented(perform block: () -> ()) {
+        increaseIdentation()
+        block()
+        decreaseIdentation()
+    }
 }
 
 /// Outputs to a string buffer
