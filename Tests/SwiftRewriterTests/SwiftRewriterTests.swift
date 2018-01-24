@@ -44,6 +44,7 @@ class SwiftRewriterTests: XCTestCase {
             @property NSInteger someOtherField;
             @property (nonnull) NSString* aRatherStringlyField;
             @property (nullable) NSString* specifiedNull;
+            @property NSString *_Nonnull nonNullWithQualifier;
             @property NSString* nonSpecifiedNull;
             @end
             """,
@@ -53,6 +54,7 @@ class SwiftRewriterTests: XCTestCase {
                 var someOtherField: Int
                 var aRatherStringlyField: String
                 var specifiedNull: String?
+                var nonNullWithQualifier: String
                 var nonSpecifiedNull: String!
             }
             """)

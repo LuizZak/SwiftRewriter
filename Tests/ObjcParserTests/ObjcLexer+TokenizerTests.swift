@@ -32,6 +32,13 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("id", toTokenizeAs: .id)
     }
     
+    func testTokenizeTypeQualifier() {
+        expect("const", toTokenizeAs: .typeQualifier)
+        expect("volatile", toTokenizeAs: .typeQualifier)
+        expect("_Nonnull", toTokenizeAs: .typeQualifier)
+        expect("_Nullable", toTokenizeAs: .typeQualifier)
+    }
+    
     func testTokenizeKeywords() {
         expect("@interface", toTokenizeAs: .keyword(.atInterface))
         expect("@implementation", toTokenizeAs: .keyword(.atImplementation))

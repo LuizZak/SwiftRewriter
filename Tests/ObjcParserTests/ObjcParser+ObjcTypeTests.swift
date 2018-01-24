@@ -10,6 +10,11 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
         try assertObjcTypeParse("_MyStruct", .struct("_MyStruct"))
     }
     
+    func testParsePointerSpecifiers() throws {
+        try assertObjcTypeParse("NSArray<NSString*>* _Nonnull",
+                                .qualified(.pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])), qualifiers: ["_Nonnull"]))
+    }
+    
     func testParseGenericObjcType() throws {
         try assertObjcTypeParse("NSArray<NSString*>*",
                                 .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])))
@@ -51,7 +56,7 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
             
             // Assert
             if type != expectedType {
-                recordFailure(withDescription: "Failed: Expected to parse type \(source) as \(expectedType), but received \(type)", inFile: file, atLine: line, expected: false)
+                recordFailure(withDescription: "Failed: Expected to parse type '\(source)' as '\(expectedType)', but received '\(type)'", inFile: file, atLine: line, expected: false)
             }
             
             if sut.diagnostics.errors.count != 0 {

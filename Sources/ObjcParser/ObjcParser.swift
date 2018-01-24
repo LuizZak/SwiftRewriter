@@ -102,6 +102,17 @@ public class ObjcParser {
             type = .pointer(type)
         }
         
+        // Type qualifier
+        var qualifiers: [String] = []
+        while lexer.tokenType(.typeQualifier) {
+            let qual = lexer.nextToken().string
+            qualifiers.append(qual)
+        }
+        
+        if qualifiers.count > 0 {
+            type = .qualified(type, qualifiers: qualifiers)
+        }
+        
         return type
     }
     

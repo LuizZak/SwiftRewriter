@@ -21,6 +21,9 @@ public class TypeMapper {
             
         case .pointer(let type):
             return swiftType(forObjcPointerType: type, context: context)
+            
+        case let .qualified(type, qualifiers):
+            return swiftType(forObjcType: type, withQualifiers: qualifiers, context: context)
         }
     }
     
@@ -42,8 +45,9 @@ public class TypeMapper {
         if name == "NSArray" && parameters.count == 1 {
             let inner =
                 swiftType(forObjcType: parameters[0],
-                          context: .alwaysNonnull) // We do not pass context because
-                                                   // it's not appliable to generic types
+                          // We pass a non-null context because it's not appliable
+                          // to generic types in Objective-C (they always map to non-null).
+                          context: context.asAlwaysNonNull())
             
             return "[\(inner)]"
         }
@@ -81,6 +85,14 @@ public class TypeMapper {
         }
     }
     
+    private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String], context: TypeMappingContext) -> String {
+        let locQualifiers = context.withQualifiers(qualifiers)
+        
+        let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
+        
+        return swiftType(name: final, withNullability: locQualifiers.nullability())
+    }
+    
     private static let _scalarMappings: [String: String] = [
         "BOOL": "Bool",
         "NSInteger": "Int",
@@ -100,50 +112,74 @@ public class TypeMapper {
     /// Contexts used during type mapping.
     public struct TypeMappingContext {
         /// Gets an empty type mapping context
-        public static let empty = TypeMappingContext(modifiers: nil, alwaysNonnull: false)
+        public static let empty = TypeMappingContext(modifiers: nil, qualifiers: [], alwaysNonnull: false)
         
         /// Gets a type mapping context that always maps to a non-null type
-        public static let alwaysNonnull = TypeMappingContext(modifiers: nil, alwaysNonnull: true)
+        public static let alwaysNonnull = TypeMappingContext(modifiers: nil, qualifiers: [], alwaysNonnull: true)
         
         /// Modifiers fetched from a @property declaraion
         public var modifiers: ObjcClassInterface.PropertyModifierList?
+        
+        public var qualifiers: [String]
         
         public var alwaysNonnull: Bool
         
         public init(modifiers: ObjcClassInterface.PropertyModifierList?) {
             self.modifiers = modifiers
+            self.qualifiers = []
             self.alwaysNonnull = false
         }
         
-        public init(modifiers: ObjcClassInterface.PropertyModifierList?, alwaysNonnull: Bool) {
+        public init(modifiers: ObjcClassInterface.PropertyModifierList?, qualifiers: [String], alwaysNonnull: Bool) {
             self.modifiers = modifiers
+            self.qualifiers = qualifiers
             self.alwaysNonnull = alwaysNonnull
         }
         
-        /// Returns whether a modified with a given name can be found within this
+        public func asAlwaysNonNull() -> TypeMappingContext {
+            return TypeMappingContext(modifiers: modifiers, qualifiers: qualifiers, alwaysNonnull: true)
+        }
+        
+        public func withQualifiers(_ qualifiers: [String]) -> TypeMappingContext {
+            return TypeMappingContext(modifiers: modifiers, qualifiers: qualifiers, alwaysNonnull: alwaysNonnull)
+        }
+        
+        /// Returns whether a modifier with a given name can be found within this
         /// type mapping context
         public func hasPropertyModifier(named name: String) -> Bool {
             guard let mods = modifiers?.modifiers else {
                 return false
             }
             
-            return mods.first { $0.name == name } != nil
+            return mods.contains { $0.name == name }
         }
         
-        /// Returns whether any of the @property modifiers is a `nonnull` modifier
+        /// Returns whether a type qualifier with a given name can be found within
+        /// this type mapping context
+        public func hasQualifierModifier(named name: String) -> Bool {
+            return qualifiers.contains(name)
+        }
+        
+        /// Returns whether any of the @property modifiers is a `nonnull` modifier,
+        /// or it the type pointer within has a `_Nonnull` specifier.
         public func hasNonnullModifier() -> Bool {
             return hasPropertyModifier(named: "nonnull")
+                || hasQualifierModifier(named: "_Nonnull")
         }
         
-        /// Returns whether any of the @property modifiers is a `nullable` modifier
+        /// Returns whether any of the @property modifiers is a `nullable` modifier,
+        /// or it the type pointer within has a `_Nullable` specifier.
         public func hasNullableModifier() -> Bool {
             return hasPropertyModifier(named: "nullable")
+                || hasQualifierModifier(named: "_Nullable")
         }
         
         /// Returns whether any of the @property modifiers is a `null_unspecified`
         /// modifier
+        /// or it the type pointer within has a `_Null_unspecified` specifier.
         public func hasUnspecifiedNullabilityModifier() -> Bool {
             return hasPropertyModifier(named: "null_unspecified")
+                || hasQualifierModifier(named: "_Null_unspecified")
         }
         
         /// Gets the nullability for the current type context

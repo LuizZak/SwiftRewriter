@@ -116,7 +116,7 @@ public class ObjcLexer {
             } else if Lexer.isDigit(p) {
                 try readNumberToken()
             } else if Lexer.isLetter(p) || p == "_" || p == "@" {
-                if try !attemptReadKeywordToken() {
+                if try !attemptReadKeywordToken() && !attemptReadQualifierToken() {
                     if p == "@" {
                         _=try attemptReadSpecialChar()
                     } else {
@@ -142,6 +142,21 @@ public class ObjcLexer {
         
         currentToken =
             Token(type: type, string: String(ident), location: range.makeLocation())
+    }
+    
+    private func attemptReadQualifierToken() -> Bool {
+        let range = startRange()
+        
+        do {
+            _=try lexer.lexTypeQualifier()
+            currentToken =
+                Token(type: .typeQualifier, string: String(range.makeSubstring()),
+                      location: range.makeLocation())
+            
+            return true
+        } catch {
+            return false
+        }
     }
     
     private func attemptReadKeywordToken() throws -> Bool {

@@ -13,6 +13,7 @@ public enum TokenType {
     case id
     
     case identifier
+    case typeQualifier
     case keyword(Keyword)
     
     case at
@@ -80,6 +81,7 @@ extension TokenType: Equatable {
              (.hexLiteral, .hexLiteral),
              (.stringLiteral, .stringLiteral),
              (.identifier, .identifier),
+             (.typeQualifier, .typeQualifier),
              (.id, .id),
              (.at, .at),
              (.comma, .comma),
@@ -123,6 +125,8 @@ extension TokenType: CustomStringConvertible {
             return "id"
         case .identifier:
             return "identifier"
+        case .typeQualifier:
+            return "type qualifier"
         case .keyword:
             return "keyword"
         case .at:

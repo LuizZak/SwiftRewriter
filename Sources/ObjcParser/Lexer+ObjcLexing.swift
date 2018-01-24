@@ -4,6 +4,25 @@ extension Lexer {
     /// Lexes an identifier token with the following grammar:
     ///
     /// ```
+    /// type_qualifier:
+    ///         'const' | 'volatile' | '_Nonnull' | '_Nullable';
+    /// ```
+    @inline(__always)
+    public func lexTypeQualifier() throws -> Substring {
+        return try consumeString { lexer in
+            if !lexer.advanceIf(equals: "const") &&
+                !lexer.advanceIf(equals: "volatile") &&
+                !lexer.advanceIf(equals: "_Nonnull") &&
+                !lexer.advanceIf(equals: "_Nullable")
+            {
+                throw LexerError.syntaxError("Expected type qualifier")
+            }
+        }
+    }
+    
+    /// Lexes an identifier token with the following grammar:
+    ///
+    /// ```
     /// ident:
     ///   LETTER (LETTER | 0-9)*
     /// ```
@@ -202,6 +221,16 @@ extension Lexer {
         }
     }
     
+    /// Returns whether a given string represents a type qualifier.
+    ///
+    /// ```
+    /// type_qualifier:
+    ///         'const' | 'volatile' | '_Nonnull' | '_Nullable';
+    /// ```
+    public static func isTypeQualifier(_ string: String) -> Bool {
+        return _typeQualifiers.contains(string)
+    }
+    
     /// Returns true if the character is an identifier letter character.
     ///
     /// ```
@@ -223,6 +252,10 @@ extension Lexer {
     public static func isHexDigit(_ atom: Atom) -> Bool {
         return Lexer.isDigit(atom) || (atom >= "a" && atom <= "f") || (atom >= "A" && atom <= "F")
     }
+    
+    private static let _typeQualifiers = [
+        "const", "volatile", "_Nonnull", "_Nullable"
+    ]
 }
 
 // MARK: Fragment-style lexing
