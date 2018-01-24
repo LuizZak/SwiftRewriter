@@ -41,11 +41,15 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @interface MyClass
             @property BOOL someField;
+            @property NSInteger someOtherField;
+            @property NSString* aRatherStringlyField;
             @end
             """,
             swift: """
             class MyClass {
                 var someField: Bool
+                var someOtherField: Int
+                var aRatherStringlyField: String
             }
             """)
     }

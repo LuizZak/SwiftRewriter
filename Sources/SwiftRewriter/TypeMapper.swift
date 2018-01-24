@@ -25,8 +25,9 @@ public class TypeMapper {
     }
     
     private func swiftType(forObjcStructType structType: String) -> String {
-        if structType == "BOOL" {
-            return "Bool"
+        // Check scalars first
+        if let scalar = TypeMapper._scalarMappings[structType] {
+            return scalar
         }
         
         return ""
@@ -41,6 +42,28 @@ public class TypeMapper {
     }
     
     private func swiftType(forObjcPointerType type: ObjcType) -> String {
+        if case .struct(let inner) = type {
+            if let ptr = TypeMapper._pointerMappings[inner] {
+                return ptr
+            }
+        }
+        
         return swiftType(forObjcType: type)
     }
+    
+    private static let _scalarMappings: [String: String] = [
+        "BOOL": "Bool",
+        "NSInteger": "Int",
+        "NSUInteger": "UInt",
+        "CGFloat": "CGFloat"
+    ]
+    
+    /// For mapping pointer-reference structs (could be Objc-C classes) into
+    /// known Swift types
+    private static let _pointerMappings: [String: String] = [
+        "NSObject": "NSObject",
+        "NSNumber": "NSNumber",
+        "NSArray": "Array",
+        "NSString": "String"
+    ]
 }
