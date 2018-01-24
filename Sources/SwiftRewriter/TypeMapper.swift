@@ -45,17 +45,16 @@ public class TypeMapper {
                           context: .alwaysNonnull) // We do not pass context because
                                                    // it's not appliable to generic types
             
-            let final = "[\(inner)]"
-            
-            return swiftType(name: final, withNullability: context.nullability())
+            return "[\(inner)]"
         }
         
         return "<unknown generic \(name)>"
     }
     
     private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> String {
+        let final: String
+        
         if case .struct(let inner) = type {
-            let final: String
             if let ptr = TypeMapper._pointerMappings[inner] {
                 final = ptr
             } else {
@@ -66,7 +65,9 @@ public class TypeMapper {
             return swiftType(name: final, withNullability: context.nullability())
         }
         
-        return swiftType(forObjcType: type, context: context)
+        final = swiftType(forObjcType: type, context: context)
+        
+        return swiftType(name: final, withNullability: context.nullability())
     }
     
     private func swiftType(name: String, withNullability nullability: TypeNullability) -> String {
