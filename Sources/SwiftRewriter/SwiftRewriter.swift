@@ -83,7 +83,9 @@ public class SwiftRewriter {
     private func outputClassProperty(_ prop: ClassConstruct.Property) {
         let type = prop.source!.type.type!
         
-        let typeName = typeMapper.swiftType(forObjcType: type)
+        let ctx = TypeMapper.TypeMappingContext(modifiers: prop.source?.modifierList)
+        
+        let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
         var decl: String = "var "
         decl += "\(prop.name): \(typeName)"

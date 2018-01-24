@@ -8,23 +8,23 @@ public class TypeMapper {
         self.context = context
     }
     
-    public func swiftType(forObjcType type: ObjcType) -> String {
+    public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext = .empty) -> String {
         switch type {
         case .struct(let str):
-            return swiftType(forObjcStructType: str)
+            return swiftType(forObjcStructType: str, context: context)
             
         case .id(let protocols):
-            return swiftType(forIdWithProtocols: protocols)
+            return swiftType(forIdWithProtocols: protocols, context: context)
             
         case let .generic(name, parameters):
-            return swiftType(forGenericObjcType: name, parameters: parameters)
+            return swiftType(forGenericObjcType: name, parameters: parameters, context: context)
             
         case .pointer(let type):
-            return swiftType(forObjcPointerType: type)
+            return swiftType(forObjcPointerType: type, context: context)
         }
     }
     
-    private func swiftType(forObjcStructType structType: String) -> String {
+    private func swiftType(forObjcStructType structType: String, context: TypeMappingContext) -> String {
         // Check scalars first
         if let scalar = TypeMapper._scalarMappings[structType] {
             return scalar
@@ -33,14 +33,17 @@ public class TypeMapper {
         return "<unkown scalar type>"
     }
     
-    private func swiftType(forIdWithProtocols protocols: [String]) -> String {
+    private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> String {
         return "<unknown id<protocols>>"
     }
     
-    private func swiftType(forGenericObjcType name: String, parameters: [ObjcType]) -> String {
+    private func swiftType(forGenericObjcType name: String, parameters: [ObjcType], context: TypeMappingContext) -> String {
         // Array conversion
         if name == "NSArray" && parameters.count == 1 {
-            let inner = swiftType(forObjcType: parameters[0])
+            let inner =
+                swiftType(forObjcType: parameters[0],
+                          context: .alwaysNonnull) // We do not pass context because
+                                                   // it's not appliable to generic types
             
             return "[\(inner)]"
         }
@@ -48,17 +51,31 @@ public class TypeMapper {
         return "<unknown generic \(name)>"
     }
     
-    private func swiftType(forObjcPointerType type: ObjcType) -> String {
+    private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> String {
         if case .struct(let inner) = type {
+            let final: String
             if let ptr = TypeMapper._pointerMappings[inner] {
-                return ptr
+                final = ptr
+            } else {
+                // Assume it's a class type here
+                final = inner
             }
             
-            // Assume it's a class type here
-            return inner
+            return swiftType(name: final, withNullability: context.nullability())
         }
         
-        return swiftType(forObjcType: type)
+        return swiftType(forObjcType: type, context: context)
+    }
+    
+    private func swiftType(name: String, withNullability nullability: TypeNullability) -> String {
+        switch nullability {
+        case .nonnull:
+            return name
+        case .nullable:
+            return name + "?"
+        case .nullResettable, .unspecified:
+            return name + "!"
+        }
     }
     
     private static let _scalarMappings: [String: String] = [
@@ -76,4 +93,78 @@ public class TypeMapper {
         "NSArray": "NSArray",
         "NSString": "String"
     ]
+    
+    /// Contexts used during type mapping.
+    public struct TypeMappingContext {
+        /// Gets an empty type mapping context
+        public static let empty = TypeMappingContext(modifiers: nil, alwaysNonnull: false)
+        
+        /// Gets a type mapping context that always maps to a non-null type
+        public static let alwaysNonnull = TypeMappingContext(modifiers: nil, alwaysNonnull: true)
+        
+        /// Modifiers fetched from a @property declaraion
+        public var modifiers: ObjcClassInterface.PropertyModifierList?
+        
+        public var alwaysNonnull: Bool
+        
+        public init(modifiers: ObjcClassInterface.PropertyModifierList?) {
+            self.modifiers = modifiers
+            self.alwaysNonnull = false
+        }
+        
+        public init(modifiers: ObjcClassInterface.PropertyModifierList?, alwaysNonnull: Bool) {
+            self.modifiers = modifiers
+            self.alwaysNonnull = alwaysNonnull
+        }
+        
+        /// Returns whether a modified with a given name can be found within this
+        /// type mapping context
+        public func hasPropertyModifier(named name: String) -> Bool {
+            guard let mods = modifiers?.modifiers else {
+                return false
+            }
+            
+            return mods.first { $0.name == name } != nil
+        }
+        
+        /// Returns whether any of the @property modifiers is a `nonnull` modifier
+        public func hasNonnullModifier() -> Bool {
+            return hasPropertyModifier(named: "nonnull")
+        }
+        
+        /// Returns whether any of the @property modifiers is a `nullable` modifier
+        public func hasNullableModifier() -> Bool {
+            return hasPropertyModifier(named: "nullable")
+        }
+        
+        /// Returns whether any of the @property modifiers is a `null_unspecified`
+        /// modifier
+        public func hasUnspecifiedNullabilityModifier() -> Bool {
+            return hasPropertyModifier(named: "null_unspecified")
+        }
+        
+        /// Gets the nullability for the current type context
+        public func nullability() -> TypeNullability {
+            if alwaysNonnull {
+                return .nonnull
+            }
+            
+            if hasNonnullModifier() {
+                return .nonnull
+            }
+            if hasNullableModifier() {
+                return .nullable
+            }
+            
+            return .unspecified
+        }
+    }
+}
+
+/// One of the possible nullability specifiers that can be found in Objective-C
+public enum TypeNullability {
+    case nonnull
+    case nullable
+    case unspecified
+    case nullResettable // Only applicable to Obj-c @properties
 }

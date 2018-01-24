@@ -42,7 +42,9 @@ class SwiftRewriterTests: XCTestCase {
             @interface MyClass
             @property BOOL someField;
             @property NSInteger someOtherField;
-            @property NSString* aRatherStringlyField;
+            @property (nonnull) NSString* aRatherStringlyField;
+            @property (nullable) NSString* specifiedNull;
+            @property NSString* nonSpecifiedNull;
             @end
             """,
             swift: """
@@ -50,6 +52,8 @@ class SwiftRewriterTests: XCTestCase {
                 var someField: Bool
                 var someOtherField: Int
                 var aRatherStringlyField: String
+                var specifiedNull: String?
+                var nonSpecifiedNull: String!
             }
             """)
     }
@@ -58,7 +62,7 @@ class SwiftRewriterTests: XCTestCase {
         try assertObjcTypeParse(
             objc: """
             @interface MyClass
-            @property NSArray* nontypedArray;
+            @property (nonnull) NSArray* nontypedArray;
             @property NSArray<NSString*>* stringArray;
             @property NSArray<SomeType*>* clsArray;
             @end
