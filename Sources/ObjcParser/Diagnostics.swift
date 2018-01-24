@@ -51,7 +51,11 @@ public enum DiagnosticMessage {
     
     public var location: SourceLocation {
         switch self {
-        case .error(_, let loc), .warning(_, let loc), .note(_, let loc):
+        case .error(_, let loc):
+            return loc
+        case .warning(_, let loc):
+            return loc
+        case .note(_, let loc):
             return loc
         }
     }

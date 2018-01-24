@@ -206,17 +206,22 @@ public class ObjcLexer {
     }
     
     func startRange() -> RangeMarker {
-        return RangeMarker(lexer: lexer)
+        return _RangeMarker(objcLexer: self)
     }
     
     /// Creates and returns a backtracking point which can be activated to rewind
     /// the lexer to the point at which this method was called.
     func backtracker() -> Backtrack {
-        return Backtrack(lexer: self.lexer)
+        return _Backtrack(lexer: self.lexer)
     }
     
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
+        return SourceLocation(range: locationAsRange(), source: source)
+    }
+    
+    /// Current lexer's location as a `SourceRange.location` enum case
+    func locationAsRange() -> SourceRange {
         return .location(lexer.inputIndex)
     }
     
@@ -231,33 +236,33 @@ public class ObjcLexer {
         }
     }
     
-    struct RangeMarker {
-        let lexer: Lexer
+    private struct _RangeMarker: RangeMarker {
+        let objcLexer: ObjcLexer
         let index: Lexer.Index
         
-        init(lexer: Lexer) {
-            self.lexer = lexer
-            self.index = lexer.inputIndex
+        init(objcLexer: ObjcLexer) {
+            self.objcLexer = objcLexer
+            self.index = objcLexer.lexer.inputIndex
         }
         
         func makeSubstring() -> Substring {
-            return lexer.inputString[rawRange()]
+            return objcLexer.lexer.inputString[rawRange()]
         }
         
         func makeRange() -> SourceRange {
-            return .valid(rawRange())
-        }
-        
-        func makeLocation() -> SourceLocation {
             return .range(rawRange())
         }
         
+        func makeLocation() -> SourceLocation {
+            return SourceLocation(range: makeRange(), source: objcLexer.source)
+        }
+        
         private func rawRange() -> Range<Lexer.Index> {
-            return index..<lexer.inputIndex
+            return index..<objcLexer.lexer.inputIndex
         }
     }
     
-    class Backtrack {
+    class _Backtrack: Backtrack {
         let lexer: Lexer
         let index: Lexer.Index
         private var activated = false
@@ -290,8 +295,20 @@ public class ObjcLexer {
     }
 }
 
+public protocol RangeMarker {
+    func makeSubstring() -> Substring
+    
+    func makeRange() -> SourceRange
+    
+    func makeLocation() -> SourceLocation
+}
+
+public protocol Backtrack: class {
+    func backtrack()
+}
+
 /// Protocol for sourcing code strings from
-public protocol CodeSource {
+public protocol CodeSource: Source {
     func fetchSource() -> String
 }
 
@@ -304,5 +321,13 @@ public struct StringCodeSource: CodeSource {
     
     public func fetchSource() -> String {
         return source
+    }
+    
+    public func isEqual(to other: Source) -> Bool {
+        guard let strSource = other as? StringCodeSource else {
+            return false
+        }
+        
+        return source == strSource.source
     }
 }

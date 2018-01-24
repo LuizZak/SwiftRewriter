@@ -2,8 +2,3 @@
 public class EnumGenerationIntention: TypeGenerationIntention {
     
 }
-
-/// An intention to generate a property for an enum
-public class EnumPropertyGenerationIntention: PropertyGenerationIntention {
-    
-}

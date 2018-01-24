@@ -82,7 +82,10 @@ open class ASTNode: ASTNodeValue {
     public func updateSourceRange() {
         let range = children.reduce(SourceRange.invalid, { $0.union(with: $1.location) })
         
-        if case .valid = range {
+        switch range {
+        case .invalid:
+            break
+        default:
             self.location = range
         }
     }
