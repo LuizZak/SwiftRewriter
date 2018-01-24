@@ -118,7 +118,7 @@ extension ObjcParser {
         // ;
         try parseTokenNode(.semicolon, onMissing: "Expected \(TokenType.semicolon) to end property declaration")
         
-        prop.location = range.makeRange()
+        prop.location = range.makeLocation()
     }
     
     func parsePropertyModifiersListNode() throws {
@@ -129,7 +129,7 @@ extension ObjcParser {
                 
                 let node =
                     ObjcClassInterface
-                        .PropertyModifier(name: token.string, location: range.makeRange())
+                        .PropertyModifier(name: token.string, location: range.makeLocation())
                 context.addChildNode(node)
             } catch {
                 diagnostics.error("Expected a property modifier", location: location())
@@ -150,7 +150,7 @@ extension ObjcParser {
         let ident =
             try lexer.consume(tokenType: .identifier)
         
-        let node = ObjcClassInterface.SuperclassName(name: ident.string, location: identRange.makeRange())
+        let node = ObjcClassInterface.SuperclassName(name: ident.string, location: identRange.makeLocation())
         
         context.addChildNode(node)
     }

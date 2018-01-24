@@ -313,8 +313,6 @@ public class ObjcLexer {
 public protocol RangeMarker {
     func makeSubstring() -> Substring
     
-    func makeRange() -> SourceRange
-    
     func makeLocation() -> SourceLocation
 }
 

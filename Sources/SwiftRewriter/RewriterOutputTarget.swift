@@ -53,6 +53,9 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     private var settings: RewriterOutputSettings
     private(set) public var buffer: String = ""
     
+    /// Called everytime the buffer changes due to an output request
+    public var onChangeBuffer: ((String) -> Void)?
+    
     required public init(settings: RewriterOutputSettings = .defaults) {
         self.settings = settings
     }
@@ -61,6 +64,8 @@ public final class StringRewriterOutput: RewriterOutputTarget {
         buffer += identString()
         buffer += line
         buffer += "\n"
+        
+        onChangeBuffer?(buffer)
     }
     
     public func increaseIdentation() {
@@ -73,6 +78,8 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     
     public func onAfterOutput() {
         buffer = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        onChangeBuffer?(buffer)
     }
     
     private func identString() -> String {

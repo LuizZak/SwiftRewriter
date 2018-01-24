@@ -1,4 +1,6 @@
-/// A protocol for a source for source code
+/// A protocol for a source for source code.
+/// It is used to group up units of compilation to aid in checking of access control
+/// across compilation unit/file boundaries.
 public protocol Source {
     func isEqual(to other: Source) -> Bool
 }

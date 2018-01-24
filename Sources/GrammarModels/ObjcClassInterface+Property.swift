@@ -30,7 +30,7 @@ public extension ObjcClassInterface {
     public class PropertyModifier: ASTNode {
         public var name: String
         
-        public init(name: String, location: SourceRange = .invalid) {
+        public init(name: String, location: SourceLocation = .invalid) {
             self.name = name
             super.init(location: location)
         }

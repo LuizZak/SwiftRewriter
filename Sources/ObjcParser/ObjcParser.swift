@@ -122,7 +122,7 @@ public class ObjcParser {
             return try lexer.rewindOnFailure {
                 let type = try parseObjcType()
                 
-                return TypeNameNode(type: type, location: range.makeRange())
+                return TypeNameNode(type: type, location: range.makeLocation())
             }
         } catch {
             diagnostics.error(message, location: location())
@@ -135,7 +135,7 @@ public class ObjcParser {
         do {
             let ident = try lexer.rewindOnFailure { try lexer.consume(tokenType: .identifier) }
             
-            return Identifier(name: ident.string, location: identRange.makeRange())
+            return Identifier(name: ident.string, location: identRange.makeLocation())
         } catch {
             diagnostics.error(message, location: location())
             throw error
@@ -147,7 +147,7 @@ public class ObjcParser {
         
         _=try lexer.consume(tokenType: .keyword(keyword))
         
-        let node = KeywordNode(keyword: keyword, location: range.makeRange())
+        let node = KeywordNode(keyword: keyword, location: range.makeLocation())
         
         context.addChildNode(node)
     }
@@ -158,7 +158,7 @@ public class ObjcParser {
         let tok = try lexer.consume(tokenType: tokenType)
         
         if addToContext {
-            let node = TokenNode(token: tok, location: range.makeRange())
+            let node = TokenNode(token: tok, location: range.makeLocation())
             
             context.addChildNode(node)
         }

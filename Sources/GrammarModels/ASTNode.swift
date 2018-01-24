@@ -1,7 +1,7 @@
 /// A protocol wrapping node types
 public protocol ASTNodeValue {
     /// Location for this node
-    var location: SourceRange { get }
+    var location: SourceLocation { get }
     
     /// Trivia leading up to this node
     var leadingTrivia: Trivia? { get }
@@ -16,7 +16,7 @@ public protocol ASTNodeValue {
 /// Base node type
 open class ASTNode: ASTNodeValue {
     /// Location for this node
-    public var location: SourceRange
+    public var location: SourceLocation
     
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
@@ -39,7 +39,7 @@ open class ASTNode: ASTNodeValue {
     
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
-    public init(location: SourceRange = .invalid, existsInSource: Bool = true) {
+    public init(location: SourceLocation = .invalid, existsInSource: Bool = true) {
         self.location = location
         self.existsInSource = existsInSource
     }
@@ -80,13 +80,13 @@ open class ASTNode: ASTNodeValue {
     /// children's ranges combined.
     /// Does nothing if resulting range is .invalid.
     public func updateSourceRange() {
-        let range = children.reduce(SourceRange.invalid, { $0.union(with: $1.location) })
+        let range = children.reduce(SourceRange.invalid, { $0.union(with: $1.location.range) })
         
         switch range {
         case .invalid:
             break
         default:
-            self.location = range
+            self.location.range = range
         }
     }
 }
@@ -136,7 +136,7 @@ public enum ASTNodeRef<Node: ASTNodeValue>: ASTNodeValue {
         }
     }
     
-    public var location: SourceRange {
+    public var location: SourceLocation {
         switch self {
         case .valid(let node):
             return node.location

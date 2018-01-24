@@ -3,16 +3,18 @@ import GrammarModels
 /// Allows re-writing Objective-C constructs into Swift equivalents.
 public class SwiftRewriter {
     
-    private var outputTarget: RewriterOutputTarget
+    private var outputTarget: WriterOutput
     private let globalNode: GlobalContextNode
     private let context: TypeContext
     private let typeMapper: TypeMapper
+    private let intentionCollection: IntentionCollection
     
-    public init(outputTarget: RewriterOutputTarget, globalNode: GlobalContextNode) {
+    public init(outputTarget: WriterOutput, globalNode: GlobalContextNode) {
         self.outputTarget = outputTarget
         self.globalNode = globalNode
         self.context = TypeContext()
         self.typeMapper = TypeMapper(context: context)
+        self.intentionCollection = IntentionCollection()
     }
     
     public func add(classInterface interface: ObjcClassInterface) {
@@ -62,42 +64,19 @@ public class SwiftRewriter {
     }
     
     private func outputDefinitions() {
-        // Output class definitions in the order they where collected
-        for cls in context.classes {
-            outputClass(cls)
-        }
-        
-        outputTarget.onAfterOutput()
-    }
-    
-    private func outputClass(_ cls: ClassConstruct) {
-        outputTarget.output(line: "class \(cls.name) {")
-        outputTarget.idented {
-            for prop in cls.properties {
-                outputClassProperty(prop)
-            }
-        }
-        outputTarget.output(line: "}")
-    }
-    
-    private func outputClassProperty(_ prop: ClassConstruct.Property) {
-        let type = prop.source!.type.type!
-        
-        let ctx = TypeMapper.TypeMappingContext(modifiers: prop.source?.modifierList)
-        
-        let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
-        
-        var decl: String = "var "
-        decl += "\(prop.name): \(typeName)"
-        
-        outputTarget.output(line: decl)
+        let writer = SwiftWriter(intentions: intentionCollection, output: outputTarget)
+        writer.execute()
     }
     
     // MARK: - ObjcClassInterface
     private func enterObjcClassInterfaceNode(_ node: ObjcClassInterface) {
         if let name = node.identifier.name {
-            let cls = context.defineClass(named: name)
-            context.pushContext(cls)
+            let intent =
+                ClassGenerationIntention(typeName: name, source: node)
+            
+            intentionCollection.addIntention(intent)
+            
+            context.pushContext(intent)
         }
     }
     
@@ -111,12 +90,15 @@ public class SwiftRewriter {
     // MARK: -
     
     private func visitObjcClassInterfacePropertyNode(_ node: ObjcClassInterface.Property) {
-        guard let ctx = context.context(ofType: ClassConstruct.self) else {
+        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
             return
         }
         
-        ctx.addProperty(named: node.identifier.name ?? "",
-                        type: node.type.type?.description ?? "",
-                        source: node)
+        let prop =
+            PropertyGenerationIntention(name: node.identifier.name ?? "",
+                                        type: node.type.type ?? .struct(""),
+                                        source: node)
+        
+        ctx.addProperty(prop)
     }
 }

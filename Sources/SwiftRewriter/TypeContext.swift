@@ -1,19 +1,6 @@
 /// Represents a local context for constructing types with.
 public class TypeContext {
-    var classes: [ClassConstruct] = []
     var contexts: [Context] = []
-    
-    public func getClass(named name: String) -> ClassConstruct? {
-        return classes.first { $0.name == name }
-    }
-    
-    @discardableResult
-    public func defineClass(named name: String) -> ClassConstruct {
-        let cls = ClassConstruct(name: name)
-        classes.append(cls)
-        
-        return cls
-    }
     
     public func pushContext(_ context: Context) {
         contexts.append(context)

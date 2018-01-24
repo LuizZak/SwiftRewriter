@@ -28,7 +28,7 @@ public extension ObjcClassInterface {
         /// Type identifier
         public var name: String
         
-        public init(name: String, location: SourceRange = .invalid) {
+        public init(name: String, location: SourceLocation = .invalid) {
             self.name = name
             super.init(location: location)
         }
@@ -37,7 +37,7 @@ public extension ObjcClassInterface {
     public class ProtocolReferenceList: ASTNode {
         public var protocols: [String]
         
-        public init(protocols: [String], location: SourceRange = .invalid) {
+        public init(protocols: [String], location: SourceLocation = .invalid) {
             self.protocols = protocols
             super.init(location: location)
         }

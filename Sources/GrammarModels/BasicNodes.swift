@@ -15,7 +15,7 @@ public class UnknownNode: ASTNode {
 public class TokenNode: ASTNode {
     public var token: Token
     
-    public init(token: Token, location: SourceRange = .invalid) {
+    public init(token: Token, location: SourceLocation = .invalid) {
         self.token = token
         
         super.init(location: location)
@@ -27,7 +27,7 @@ public class Identifier: ASTNode {
     /// String identifier
     public var name: String
     
-    public init(name: String, location: SourceRange = .invalid) {
+    public init(name: String, location: SourceLocation = .invalid) {
         self.name = name
         
         super.init(location: location)
@@ -49,7 +49,7 @@ public extension ASTNodeRef where Node == Identifier {
 public class KeywordNode: ASTNode {
     public var keyword: Keyword
     
-    public init(keyword: Keyword, location: SourceRange = .invalid) {
+    public init(keyword: Keyword, location: SourceLocation = .invalid) {
         self.keyword = keyword
         
         super.init(location: location)

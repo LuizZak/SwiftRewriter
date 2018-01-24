@@ -13,7 +13,7 @@ class SwiftRewriterTests: XCTestCase {
             """
         let cls = ObjcClassInterface()
         cls.identifier = .valid(Identifier(name: "MyClass"))
-        let output = StringRewriterOutput()
+        let output = TestWriterOutput()
         let rewriter = SwiftRewriter(outputTarget: output, globalNode: GlobalContextNode())
         rewriter.add(classInterface: cls)
         
@@ -90,7 +90,7 @@ class SwiftRewriterTests: XCTestCase {
             
             let globalNode = sut.rootNode
             
-            let output = StringRewriterOutput()
+            let output = TestWriterOutput()
             let rewriter = SwiftRewriter(outputTarget: output, globalNode: globalNode)
             
             try rewriter.rewrite()
@@ -105,5 +105,27 @@ class SwiftRewriterTests: XCTestCase {
         } catch {
             recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
         }
+    }
+}
+
+class TestWriterOutput: WriterOutput, FileOutput {
+    var buffer: String = ""
+    
+    func createFile(path: String) -> FileOutput {
+        return self
+    }
+    
+    func close() {
+        
+    }
+    
+    func outputTarget() -> RewriterOutputTarget {
+        let target = StringRewriterOutput()
+        
+        target.onChangeBuffer = { value in
+            self.buffer = value
+        }
+        
+        return target
     }
 }
