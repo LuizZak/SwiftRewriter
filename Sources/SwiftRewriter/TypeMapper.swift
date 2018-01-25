@@ -39,7 +39,7 @@ public class TypeMapper {
             return scalar
         }
         
-        return "<unkown scalar type>"
+        return structType
     }
     
     private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> String {
@@ -128,7 +128,8 @@ public class TypeMapper {
         "BOOL": "Bool",
         "NSInteger": "Int",
         "NSUInteger": "UInt",
-        "CGFloat": "CGFloat"
+        "CGFloat": "CGFloat",
+        "instancetype": "AnyObject"
     ]
     
     /// For mapping pointer-reference structs (could be Objc-C classes) into

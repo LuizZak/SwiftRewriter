@@ -92,6 +92,20 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         XCTAssertEqual(sign.parameters[1].name, "b")
     }
     
+    func testSelectorWithCollapsing() {
+        let sign = genSignature("""
+            - (void)doSomethingWithColor:(CGColor)color;
+            """)
+        
+        XCTAssertEqual(sign.name, "doSomething")
+        XCTAssertEqual(sign.returnType, .void)
+        XCTAssertEqual(sign.parameters.count, 1)
+        
+        XCTAssertEqual(sign.parameters[0].label, "with")
+        XCTAssertEqual(sign.parameters[0].type, .struct("CGColor"))
+        XCTAssertEqual(sign.parameters[0].name, "color")
+    }
+    
     private func genSignature(_ objc: String) -> MethodGenerationIntention.Signature {
         let node = parseMethodSign(objc)
         let gen = createSwiftMethodSignatureGen()

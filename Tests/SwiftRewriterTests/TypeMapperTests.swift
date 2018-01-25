@@ -9,6 +9,8 @@ class TypeMapperTests: XCTestCase {
         
         expect(.struct("BOOL"), toConvertTo: "Bool")
         
+        expect(.struct("CGColor"), toConvertTo: "CGColor")
+        
         expect(.pointer(.struct("NSString")),
                toConvertTo: "String")
         
@@ -32,6 +34,9 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "NSArray")
         expect(.pointer(.struct("NSArray")),
                toConvertTo: "NSArray")
+        
+        expect(.struct("instancetype"),
+               toConvertTo: "AnyObject")
     }
     
     private func expect(_ type: ObjcType, withNull nullability: TypeNullability? = .nonnull, toConvertTo expected: String, file: String = #file, line: Int = #line) {

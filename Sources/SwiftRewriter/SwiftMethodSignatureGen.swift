@@ -72,6 +72,24 @@ public class SwiftMethodSignatureGen {
             
             target.parameters.append(param)
         }
+        
+        // Do a little Clang-like-magic here: If the method selector is in the
+        // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
+        // noun is followed by a parameter that has the same name, we collapse
+        // such selector in Swift as `lorem(with:)`.
+        if let firstSelName = keywords[0].selector?.name, firstSelName.contains("With") {
+            let split = firstSelName.components(separatedBy: "With")
+            if split.count != 2 || split.contains(where: { $0.count < 2 }) {
+                return
+            }
+            if split[1].lowercased() != keywords[0].identifier?.name {
+                return
+            }
+            
+            // All good! Collapse the identifier into a more 'swifty' construct
+            target.name = split[0]
+            target.parameters[0].label = "with"
+        }
     }
     
     private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability {
