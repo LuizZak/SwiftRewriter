@@ -2,6 +2,10 @@
 public class TypeContext {
     var contexts: [Context] = []
     
+    public init() {
+        
+    }
+    
     public func pushContext(_ context: Context) {
         contexts.append(context)
     }

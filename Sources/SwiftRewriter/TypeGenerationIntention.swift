@@ -80,7 +80,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     }
     
     public struct Parameter {
-        public var selector: String
+        public var label: String
         public var name: String
         public var type: ObjcType
     }
@@ -92,4 +92,16 @@ public enum Scope {
     case `fileprivate`
     case `internal`
     case `public`
+}
+
+extension MethodGenerationIntention.Signature: Equatable {
+    public static func ==(lhs: MethodGenerationIntention.Signature, rhs: MethodGenerationIntention.Signature) -> Bool {
+        return lhs.name == rhs.name && lhs.parameters == rhs.parameters && lhs.returnType == rhs.returnType
+    }
+}
+
+extension MethodGenerationIntention.Parameter: Equatable {
+    public static func ==(lhs: MethodGenerationIntention.Parameter, rhs: MethodGenerationIntention.Parameter) -> Bool {
+        return lhs.name == rhs.name && lhs.label == rhs.label && lhs.type == rhs.type
+    }
 }
