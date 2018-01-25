@@ -92,6 +92,32 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         XCTAssertEqual(sign.parameters[1].name, "b")
     }
     
+    func testAbcdSelectorlessTypelessSignature() {
+        let sign = genSignature("""
+            - (void):a:b:c:d;
+            """)
+        
+        XCTAssertEqual(sign.name, "__")
+        XCTAssertEqual(sign.returnType, .void)
+        XCTAssertEqual(sign.parameters.count, 4)
+        
+        XCTAssertEqual(sign.parameters[0].label, "a")
+        XCTAssertEqual(sign.parameters[0].type, .id(protocols: []))
+        XCTAssertEqual(sign.parameters[0].name, "a")
+        
+        XCTAssertEqual(sign.parameters[1].label, "_")
+        XCTAssertEqual(sign.parameters[1].type, .id(protocols: []))
+        XCTAssertEqual(sign.parameters[1].name, "b")
+        
+        XCTAssertEqual(sign.parameters[2].label, "_")
+        XCTAssertEqual(sign.parameters[2].type, .id(protocols: []))
+        XCTAssertEqual(sign.parameters[2].name, "c")
+        
+        XCTAssertEqual(sign.parameters[3].label, "_")
+        XCTAssertEqual(sign.parameters[3].type, .id(protocols: []))
+        XCTAssertEqual(sign.parameters[3].name, "d")
+    }
+    
     func testAbcdReturnlessSelectorlessTypelessSignature() {
         let sign = genSignature("""
             - :a:b:c:d;
