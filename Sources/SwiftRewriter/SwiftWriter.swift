@@ -41,7 +41,15 @@ public class SwiftWriter {
             }
             
             for method in cls.methods {
-                outputMethod(method, target: target)
+                // Init methods are treated differently
+                // TODO: Create a separate GenerationIntention entirely for init
+                // methods and detect them during SwiftRewriter's parsing instead
+                // of postponing to here.
+                if method.signature.name == "init" {
+                    outputInitMethod(method, target: target)
+                } else {
+                    outputMethod(method, target: target)
+                }
             }
         }
         target.output(line: "}")
@@ -70,15 +78,61 @@ public class SwiftWriter {
         target.output(line: decl)
     }
     
+    private func outputInitMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+        var decl = "init"
+        
+        decl += generateParameters(for: method.signature)
+        
+        decl += " {"
+        
+        target.output(line: decl)
+        
+        target.idented {
+            // TODO: Output method body here.
+            outputMethodBody(method, target: target)
+        }
+        
+        target.output(line: "}")
+    }
+    
     private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
         var decl: String = "func "
         
         let sign = method.signature
         
         decl += sign.name
-        decl += "("
         
-        for (i, param) in sign.parameters.enumerated() {
+        decl += generateParameters(for: method.signature)
+        
+        switch sign.returnType {
+        case .void: // `-> Void` can be omitted for void functions.
+            break
+        default:
+            decl += " -> "
+            decl += typeMapper.swiftType(forObjcType: sign.returnType,
+                                         context: .init(explicitNullability: sign.returnTypeNullability))
+        }
+        
+        decl += " {"
+        
+        target.output(line: decl)
+        
+        target.idented {
+            // TODO: Output method body here.
+            outputMethodBody(method, target: target)
+        }
+        
+        target.output(line: "}")
+    }
+    
+    private func outputMethodBody(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+        
+    }
+    
+    private func generateParameters(for signature: MethodGenerationIntention.Signature) -> String {
+        var decl = "("
+        
+        for (i, param) in signature.parameters.enumerated() {
             if i > 0 {
                 decl += ", "
             }
@@ -97,23 +151,6 @@ public class SwiftWriter {
         
         decl += ")"
         
-        switch sign.returnType {
-        case .void: // `-> Void` can be omitted for void functions.
-            break
-        default:
-            decl += " -> "
-            decl += typeMapper.swiftType(forObjcType: sign.returnType,
-                                         context: .init(explicitNullability: sign.returnTypeNullability))
-        }
-        
-        decl += " {"
-        
-        target.output(line: decl)
-        
-        target.idented {
-            // TODO: Output method body here.
-        }
-        
-        target.output(line: "}")
+        return decl
     }
 }

@@ -111,6 +111,24 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteInitMethods() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            - (instancetype)init;
+            - (instancetype)initWithNumber:(nonnull NSNumber*)number;
+            @end
+            """,
+            swift: """
+            class MyClass {
+                init() {
+                }
+                init(with number: NSNumber) {
+                }
+            }
+            """)
+    }
+    
     private func assertObjcTypeParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
         let output = TestWriterOutput()
         let input = TestSingleInputProvider(code: objc)
