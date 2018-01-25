@@ -5,6 +5,10 @@ import GrammarModels
 public class Diagnostics {
     private(set) public var diagnostics: [DiagnosticMessage] = []
     
+    public init() {
+        
+    }
+    
     public var errors: [DiagnosticMessage] {
         return diagnostics.filter { if case .error = $0 { return true }; return false }
     }

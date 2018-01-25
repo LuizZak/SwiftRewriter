@@ -10,7 +10,7 @@ public class ObjcParser {
     internal var _hasReadToken: Bool = false
     internal var currentToken: Token = Token(type: .eof, string: "", location: .invalid)
     
-    public let diagnostics: Diagnostics
+    public var diagnostics: Diagnostics
     
     /// The root global context note after parsing.
     public var rootNode: GlobalContextNode

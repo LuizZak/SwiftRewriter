@@ -26,7 +26,7 @@ let package = Package(
             dependencies: []),
         .target(
             name: "SwiftRewriter",
-            dependencies: ["GrammarModels"]),
+            dependencies: ["GrammarModels", "ObjcParser"]),
         .target(
             name: "ObjcParser",
             dependencies: ["GrammarModels", "MiniLexer", "TypeLexing"]),

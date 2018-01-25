@@ -5,25 +5,6 @@ import GrammarModels
 
 class SwiftRewriterTests: XCTestCase {
     
-    func testRewriteClassInterface() throws {
-        // Arrange
-        let expected = """
-            class MyClass {
-            }
-            """
-        let cls = ObjcClassInterface()
-        cls.identifier = .valid(Identifier(name: "MyClass"))
-        let output = TestWriterOutput()
-        let rewriter = SwiftRewriter(outputTarget: output, globalNode: GlobalContextNode())
-        rewriter.add(classInterface: cls)
-        
-        // Act
-        try rewriter.rewrite()
-        
-        // Assert
-        XCTAssertEqual(output.buffer, expected)
-    }
-    
     func testRewriteEmptyClass() throws {
         try assertObjcTypeParse(
             objc: """
@@ -83,17 +64,13 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     private func assertObjcTypeParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
-        let sut = ObjcParser(string: objc)
+        let output = TestWriterOutput()
+        let input = TestSingleInputProvider(code: objc)
+        
+        let sut = SwiftRewriter(input: input, output: output)
         
         do {
-            try sut.parse()
-            
-            let globalNode = sut.rootNode
-            
-            let output = TestWriterOutput()
-            let rewriter = SwiftRewriter(outputTarget: output, globalNode: globalNode)
-            
-            try rewriter.rewrite()
+            try sut.rewrite()
             
             if output.buffer != expectedSwift {
                 recordFailure(withDescription: "Failed: Expected to translate Objective-C \(objc) as \(expectedSwift), but translate as \(output.buffer)", inFile: file, atLine: line, expected: false)
@@ -105,6 +82,34 @@ class SwiftRewriterTests: XCTestCase {
         } catch {
             recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
         }
+    }
+}
+
+class TestSingleInputProvider: InputSourcesProvider, InputSource, CodeSource {
+    var code: String
+    
+    init(code: String) {
+        self.code = code
+    }
+    
+    func sources() -> [InputSource] {
+        return [self]
+    }
+    
+    func loadSource() throws -> CodeSource {
+        return self
+    }
+    
+    func fetchSource() -> String {
+        return code
+    }
+    
+    func isEqual(to other: Source) -> Bool {
+        guard let other = other as? TestSingleInputProvider else {
+            return false
+        }
+        
+        return self === other
     }
 }
 

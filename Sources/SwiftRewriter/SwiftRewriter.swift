@@ -1,33 +1,51 @@
 import GrammarModels
+import ObjcParser
 
 /// Allows re-writing Objective-C constructs into Swift equivalents.
 public class SwiftRewriter {
     
     private var outputTarget: WriterOutput
-    private let globalNode: GlobalContextNode
     private let context: TypeContext
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
+    private let sourcesProvider: InputSourcesProvider
     
-    public init(outputTarget: WriterOutput, globalNode: GlobalContextNode) {
-        self.outputTarget = outputTarget
-        self.globalNode = globalNode
+    /// A diagnostics instance that collects all diagnostic errors during input
+    /// source processing.
+    public let diagnostics: Diagnostics
+    
+    public init(input: InputSourcesProvider, output: WriterOutput) {
+        self.diagnostics = Diagnostics()
+        self.sourcesProvider = input
+        self.outputTarget = output
         self.context = TypeContext()
         self.typeMapper = TypeMapper(context: context)
         self.intentionCollection = IntentionCollection()
     }
     
-    public func add(classInterface interface: ObjcClassInterface) {
-        globalNode.addChild(interface)
-    }
-    
     public func rewrite() throws {
-        try collectDefinitions()
+        try loadInputSources()
         outputDefinitions()
     }
     
-    public func collectDefinitions() throws {
-        let node = globalNode
+    private func loadInputSources() throws {
+        // Load input sources
+        let sources = sourcesProvider.sources()
+        
+        for src in sources {
+            try loadObjcSource(from: src)
+        }
+    }
+    
+    private func loadObjcSource(from source: InputSource) throws {
+        let src = try source.loadSource()
+        
+        let parser = ObjcParser(source: src)
+        parser.diagnostics = diagnostics
+        
+        try parser.parse()
+        
+        let node = parser.rootNode
         let visitor = AnonymousASTVisitor()
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
