@@ -50,7 +50,7 @@ public class SwiftMethodSignatureGen {
         }
         
         // First selector is always the method's name
-        target.name = keywords[0].selector?.name ?? "_"
+        target.name = keywords[0].selector?.name ?? "__"
         
         for (i, kw) in keywords.enumerated() {
             var label = kw.selector?.name ?? "_"

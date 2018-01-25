@@ -56,6 +56,10 @@ public class TypeMapper {
     }
     
     private func swiftType(forGenericObjcType name: String, parameters: [ObjcType], context: TypeMappingContext) -> String {
+        if parameters.count == 0 {
+            return "\(name)"
+        }
+        
         // Array conversion
         if name == "NSArray" && parameters.count == 1 {
             let inner =
@@ -67,7 +71,13 @@ public class TypeMapper {
             return "[\(inner)]"
         }
         
-        return "<unknown generic \(name)>"
+        let types =
+            parameters.map {
+                swiftType(forObjcType: $0,
+                          context: context.asAlwaysNonNull())
+            }
+        
+        return "\(name)<\(types.joined(separator: ", "))>"
     }
     
     private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> String {

@@ -105,7 +105,7 @@ class SwiftRewriterTests: XCTestCase {
                 }
                 func someNullArray() -> NSArray? {
                 }
-                func _(a: AnyObject!) {
+                func __(a: AnyObject!) {
                 }
             }
             """)

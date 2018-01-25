@@ -74,6 +74,24 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         XCTAssertEqual(sign.parameters[1].name, "b")
     }
     
+    func testSelectorLessArguments() {
+        let sign = genSignature("""
+            - (void):(NSInteger)a :(NSString*)b;
+            """)
+        
+        XCTAssertEqual(sign.name, "__")
+        XCTAssertEqual(sign.returnType, .void)
+        XCTAssertEqual(sign.parameters.count, 2)
+        
+        XCTAssertEqual(sign.parameters[0].label, "a")
+        XCTAssertEqual(sign.parameters[0].type, .struct("NSInteger"))
+        XCTAssertEqual(sign.parameters[0].name, "a")
+        
+        XCTAssertEqual(sign.parameters[1].label, "_")
+        XCTAssertEqual(sign.parameters[1].type, .pointer(.struct("NSString")))
+        XCTAssertEqual(sign.parameters[1].name, "b")
+    }
+    
     private func genSignature(_ objc: String) -> MethodGenerationIntention.Signature {
         let node = parseMethodSign(objc)
         let gen = createSwiftMethodSignatureGen()
