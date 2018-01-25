@@ -5,7 +5,7 @@ extension Lexer {
     ///
     /// ```
     /// type_qualifier:
-    ///         'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong';
+    ///         'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong' | '__kindof';
     /// ```
     @inline(__always)
     public func lexTypeQualifier() throws -> Substring {
@@ -16,7 +16,8 @@ extension Lexer {
                 !lexer.advanceIf(equals: "_Nonnull") &&
                 !lexer.advanceIf(equals: "_Nullable") &&
                 !lexer.advanceIf(equals: "__weak") &&
-                !lexer.advanceIf(equals: "__strong")
+                !lexer.advanceIf(equals: "__strong") &&
+                !lexer.advanceIf(equals: "__kindof")
             {
                 throw LexerError.syntaxError("Expected type qualifier")
             }
@@ -228,7 +229,7 @@ extension Lexer {
     ///
     /// ```
     /// type_qualifier:
-    ///         'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong';
+    ///         'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong' | '__kindof';
     /// ```
     public static func isTypeQualifier(_ string: String) -> Bool {
         return _typeQualifiers.contains(string)
@@ -257,7 +258,7 @@ extension Lexer {
     }
     
     private static let _typeQualifiers = [
-        "static", "const", "volatile", "_Nonnull", "_Nullable", "__weak", "__strong"
+        "static", "const", "volatile", "_Nonnull", "_Nullable", "__weak", "__strong", "__kindof"
     ]
 }
 

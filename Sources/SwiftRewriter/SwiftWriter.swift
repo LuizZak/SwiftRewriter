@@ -60,10 +60,32 @@ public class SwiftWriter {
         
         decl += sign.name
         decl += "("
+        
+        for (i, param) in sign.parameters.enumerated() {
+            if i > 0 {
+                decl += ", "
+            }
+            
+            if param.label != param.name {
+                decl += param.label
+                decl += " "
+            }
+            
+            decl += "\(param.name): "
+            
+            decl +=
+                typeMapper.swiftType(forObjcType: param.type,
+                                     context: .init(explicitNullability: param.nullability))
+        }
+        
         decl += ")"
         
-        if case .void = sign.returnType {
-            
+        switch sign.returnType {
+        case .void: // `-> Void` can be omitted for void functions.
+            break
+        default:
+            decl += " -> "
+            decl += typeMapper.swiftType(forObjcType: sign.returnType)
         }
         
         decl += " {"

@@ -18,6 +18,7 @@ public class SwiftMethodSignatureGen {
             MethodGenerationIntention
                 .Signature(name: "_",
                            returnType: ObjcType.id(protocols: []),
+                           returnTypeNullability: .unspecified,
                            parameters: [])
         
         if let sel = objcMethod.methodSelector.selector {
@@ -31,6 +32,11 @@ public class SwiftMethodSignatureGen {
         
         if let type = objcMethod.returnType.type.type {
             sign.returnType = type
+        }
+        
+        /// Nullability specifiers (from e.g. `... arg:(nullable NSString*)paramName ...`
+        if let nullSpecs = objcMethod.returnType.nodeValue?.nullabilitySpecifiers {
+            sign.returnTypeNullability = nullabilityFrom(specifiers: nullSpecs)
         }
         
         return sign
@@ -49,6 +55,7 @@ public class SwiftMethodSignatureGen {
         for (i, kw) in keywords.enumerated() {
             var label = kw.selector?.name ?? "_"
             let identifier = kw.identifier?.name ?? "_\(i)"
+            var nullability = TypeNullability.unspecified
             let type = kw.type?.type.type ?? ObjcType.id(protocols: [])
             
             // The first label name is always equal to its keyword's identifier.
@@ -57,9 +64,28 @@ public class SwiftMethodSignatureGen {
                 label = identifier
             }
             
-            let param = Parameter(label: label, name: identifier, type: type)
+            if let nullSpecs = kw.type?.nullabilitySpecifiers {
+                nullability = nullabilityFrom(specifiers: nullSpecs)
+            }
+            
+            let param = Parameter(label: label, name: identifier, nullability: nullability, type: type)
             
             target.parameters.append(param)
+        }
+    }
+    
+    private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability {
+        guard let last = specifiers.last else {
+            return .unspecified
+        }
+        
+        switch last.name {
+        case "nonnull":
+            return .nonnull
+        case "nullable":
+            return .nullable
+        default:
+            return .unspecified
         }
     }
 }

@@ -63,8 +63,13 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         return signature.parameters
     }
     
-    public init(name: String, returnType: ObjcType, parameters: [Parameter], scope: Scope = .internal, source: ASTNode? = nil) {
-        self.signature = Signature(name: name, returnType: returnType, parameters: parameters)
+    public init(name: String, returnType: ObjcType,
+                returnTypeNullabilitySpecifier: TypeNullability,
+                parameters: [Parameter], scope: Scope = .internal, source: ASTNode? = nil) {
+        self.signature =
+            Signature(name: name, returnType: returnType,
+                      returnTypeNullability: returnTypeNullabilitySpecifier,
+                      parameters: parameters)
         super.init(scope: scope, source: source)
     }
     
@@ -76,12 +81,14 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     public struct Signature {
         public var name: String
         public var returnType: ObjcType
+        public var returnTypeNullability: TypeNullability
         public var parameters: [Parameter]
     }
     
     public struct Parameter {
         public var label: String
         public var name: String
+        public var nullability: TypeNullability
         public var type: ObjcType
     }
 }
@@ -102,6 +109,6 @@ extension MethodGenerationIntention.Signature: Equatable {
 
 extension MethodGenerationIntention.Parameter: Equatable {
     public static func ==(lhs: MethodGenerationIntention.Parameter, rhs: MethodGenerationIntention.Parameter) -> Bool {
-        return lhs.name == rhs.name && lhs.label == rhs.label && lhs.type == rhs.type
+        return lhs.name == rhs.name && lhs.label == rhs.label && lhs.nullability == rhs.nullability && lhs.type == rhs.type
     }
 }

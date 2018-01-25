@@ -45,6 +45,13 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
                                     qualifiers: ["_Nonnull"])
                                     )
                                 )
+        
+        try assertObjcTypeParse("__kindof __weak NSArray*",
+                                .specified(specifiers: ["__kindof", "__weak"],
+                                           .pointer(.struct("NSArray")
+                                        )
+                                    )
+                                )
     }
     
     func testParseGenericObjcType() throws {

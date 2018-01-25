@@ -80,12 +80,19 @@ public class KeywordDeclarator: ASTNode {
 }
 
 public class MethodType: ASTNode {
+    public var nullabilitySpecifiers: [NullabilitySpecifier] {
+        return childrenMatching()
+    }
     public var type: ASTNodeRef<TypeNameNode>
     
     public init(type: ASTNodeRef<TypeNameNode>) {
         self.type = type
         super.init()
     }
+}
+
+public class NullabilitySpecifier: Identifier {
+    
 }
 
 // MARK: - ASTNodeRef extensions

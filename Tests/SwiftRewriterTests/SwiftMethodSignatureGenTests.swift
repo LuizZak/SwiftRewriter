@@ -14,6 +14,16 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         XCTAssertEqual(sign.parameters.count, 0)
     }
     
+    func testReturnType() throws {
+        let sign = genSignature("""
+            - (NSString*)abc;
+            """)
+        
+        XCTAssertEqual(sign.name, "abc")
+        XCTAssertEqual(sign.returnType, .pointer(.struct("NSString")))
+        XCTAssertEqual(sign.parameters.count, 0)
+    }
+    
     func testSimpleSingleArgument() throws {
         let sign = genSignature("""
             - (void)setInteger:(NSInteger)int;

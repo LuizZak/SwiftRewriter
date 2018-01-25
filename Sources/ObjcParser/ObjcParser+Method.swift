@@ -131,7 +131,10 @@ public extension ObjcParser {
     ///
     /// ```
     /// method_type:
-    ///    '(' objcType ')'
+    ///    '(' nullability_specifier* objcType ')'
+    ///
+    /// nullability_specifier:
+    ///    'nullable' | 'nonnull' | 'null_unspecified'
     /// ```
     func parseMethodType() throws {
         let methodType = MethodType(type: .placeholder)
@@ -142,8 +145,44 @@ public extension ObjcParser {
         
         try parseTokenNode(.openParens)
         
+        // nullability_specifier*
+        outer: while lexer.tokenType(.identifier) {
+            switch lexer.token().string {
+            case "nullable", "nonnull", "null_unspecified":
+                try parseNullabilitySpecifier()
+            default:
+                break outer
+            }
+        }
+        
         methodType.type = .valid(try parseTypeNameNode())
         
+        if !lexer.tokenType(.closeParens) {
+            diagnostics.error("Expected \(TokenType.closeParens) after signature method", location: location())
+        }
+        
         try parseTokenNode(.closeParens)
+    }
+    
+    /// ```
+    /// nullability_specifier:
+    ///    'nullable' | 'nonnull' | 'null_unspecified'
+    /// ```
+    private func parseNullabilitySpecifier() throws {
+        let identRange = startRange()
+        do {
+            let ident = try lexer.rewindOnFailure {
+                try lexer.consume(tokenType: .identifier)
+            }
+            
+            let node =
+                NullabilitySpecifier(name: ident.string,
+                                     location: identRange.makeLocation())
+            
+            context.addChildNode(node)
+        } catch {
+            diagnostics.error("Expected nullabiliy specifier", location: location())
+            throw error
+        }
     }
 }

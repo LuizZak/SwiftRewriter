@@ -131,15 +131,27 @@ public class TypeMapper {
         
         /// Modifiers fetched from a @property declaraion
         public var modifiers: PropertyModifierList?
+        /// Nullability specifiers from a method definition's type decl
+        public var nullabilitySpecifiers: [NullabilitySpecifier] = []
         
-        public var qualifiers: [String]
+        /// Objc type qualifiers from a type name.
+        /// See `ObjcType` for more information.
+        public var qualifiers: [String] = []
         
-        public var alwaysNonnull: Bool
+        /// If `true`, all requests for nullability from this context object will
+        /// result in `TypeNullability.nonnull` being returned.
+        /// Used when traversing nested Objc generic types, which do not support
+        /// nullability annotations.
+        public var alwaysNonnull: Bool = false
+        
+        /// If non-nil, this explicit nullability specifier is used for all requests
+        /// for nullability.
+        ///
+        /// Is overriden by `alwaysNonnull`.
+        public var explicitNullability: TypeNullability?
         
         public init(modifiers: PropertyModifierList?) {
             self.modifiers = modifiers
-            self.qualifiers = []
-            self.alwaysNonnull = false
         }
         
         public init(modifiers: PropertyModifierList?, qualifiers: [String], alwaysNonnull: Bool) {
@@ -148,12 +160,25 @@ public class TypeMapper {
             self.alwaysNonnull = alwaysNonnull
         }
         
+        public init(explicitNullability: TypeNullability) {
+            self.explicitNullability = explicitNullability
+        }
+        
+        public init(nullabilitySpecs: [NullabilitySpecifier], alwaysNonnull: Bool = false) {
+            self.nullabilitySpecifiers = nullabilitySpecs
+            self.alwaysNonnull = alwaysNonnull
+        }
+        
         public func asAlwaysNonNull() -> TypeMappingContext {
-            return TypeMappingContext(modifiers: modifiers, qualifiers: qualifiers, alwaysNonnull: true)
+            var copy = self
+            copy.alwaysNonnull = true
+            return copy
         }
         
         public func withQualifiers(_ qualifiers: [String]) -> TypeMappingContext {
-            return TypeMappingContext(modifiers: modifiers, qualifiers: qualifiers, alwaysNonnull: alwaysNonnull)
+            var copy = self
+            copy.qualifiers = qualifiers
+            return copy
         }
         
         /// Returns whether a modifier with a given name can be found within this
@@ -172,10 +197,17 @@ public class TypeMapper {
             return qualifiers.contains(name)
         }
         
+        /// Returns whether a type-signature nullability specifier with a given
+        /// name can be found within this type mapping context
+        public func hasMethodNullabilitySpecifier(named name: String) -> Bool {
+            return nullabilitySpecifiers.contains { $0.name == name }
+        }
+        
         /// Returns whether any of the @property modifiers is a `nonnull` modifier,
         /// or it the type pointer within has a `_Nonnull` specifier.
         public func hasNonnullModifier() -> Bool {
             return hasPropertyModifier(named: "nonnull")
+                || hasMethodNullabilitySpecifier(named: "nonnull")
                 || hasQualifierModifier(named: "_Nonnull")
         }
         
@@ -183,6 +215,7 @@ public class TypeMapper {
         /// or it the type pointer within has a `_Nullable` specifier.
         public func hasNullableModifier() -> Bool {
             return hasPropertyModifier(named: "nullable")
+                || hasMethodNullabilitySpecifier(named: "nullable")
                 || hasQualifierModifier(named: "_Nullable")
         }
         
@@ -191,6 +224,7 @@ public class TypeMapper {
         /// or it the type pointer within has a `_Null_unspecified` specifier.
         public func hasUnspecifiedNullabilityModifier() -> Bool {
             return hasPropertyModifier(named: "null_unspecified")
+                || hasMethodNullabilitySpecifier(named: "null_unspecified")
                 || hasQualifierModifier(named: "_Null_unspecified")
         }
         
@@ -198,6 +232,10 @@ public class TypeMapper {
         public func nullability() -> TypeNullability {
             if alwaysNonnull {
                 return .nonnull
+            }
+            
+            if let explicit = explicitNullability {
+                return explicit
             }
             
             if hasNonnullModifier() {
