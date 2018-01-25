@@ -31,44 +31,7 @@ public enum TokenType {
     case openSquareBracket
     case closeSquareBracket
     
-    case `operator`(Operator)
-    
-    public var isOperator: Bool {
-        switch self {
-        case .operator:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    public var isKeyword: Bool {
-        switch self {
-        case .keyword:
-            return true
-        default:
-            return false
-        }
-    }
-    
-    public var `operator`: Operator? {
-        switch self {
-        case .operator(let op):
-            return op
-        default:
-            return nil
-        }
-    }
-    
-    public var keyword: Keyword? {
-        switch self {
-        case .keyword(let kw):
-            return kw
-        default:
-            return nil
-        }
-    }
-}
+    case `operator`(Operator)}
 
 extension TokenType: Equatable {
     public static func ==(lhs: TokenType, rhs: TokenType) -> Bool {
