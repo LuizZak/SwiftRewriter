@@ -8,6 +8,9 @@ public protocol InputSourcesProvider {
 
 /// Represents an input source for Obj-c file
 public protocol InputSource {
+    /// Requests a unique name for this source name.
+    func sourceName() -> String
+    
     /// Asks the receiver to return its target's contents.
     func loadSource() throws -> CodeSource
 }

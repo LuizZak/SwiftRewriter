@@ -38,6 +38,14 @@ public class SwiftRewriter {
     }
     
     private func loadObjcSource(from source: InputSource) throws {
+        // Generate intention for this source
+        let fileIntent = FileGenerationIntention(fileName: source.sourceName())
+        intentionCollection.addIntention(fileIntent)
+        context.pushContext(fileIntent)
+        defer {
+            context.popContext()
+        }
+        
         let src = try source.loadSource()
         
         let parser = ObjcParser(source: src)
@@ -90,14 +98,20 @@ public class SwiftRewriter {
     
     // MARK: - ObjcClassInterface
     private func enterObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        if let name = node.identifier.name {
-            let intent =
-                ClassGenerationIntention(typeName: name, source: node)
-            
-            intentionCollection.addIntention(intent)
-            
-            context.pushContext(intent)
+        guard let name = node.identifier.name else {
+            return
         }
+        
+        let intent =
+            ClassGenerationIntention(typeName: name, source: node)
+        
+        intentionCollection.addIntention(intent)
+        
+        context
+            .context(ofType: FileGenerationIntention.self)?
+            .addType(intent)
+        
+        context.pushContext(intent)
     }
     
     private func visitObjcClassInterfaceNode(_ node: ObjcClassInterface) {

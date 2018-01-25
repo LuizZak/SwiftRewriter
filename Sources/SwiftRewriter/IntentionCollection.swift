@@ -3,6 +3,10 @@
 public class IntentionCollection {
     private var _intentions: [Intention] = []
     
+    public func intentionFor(fileNamed name: String) -> FileGenerationIntention? {
+        return intentions().first { $0.fileName == name }
+    }
+    
     public func intentionFor(classNamed name: String) -> ClassGenerationIntention? {
         return intentions().first { $0.typeName == name }
     }

@@ -10,6 +10,9 @@ public protocol Intention: Context {
 
 /// An intention to create a .swift file
 public class FileGenerationIntention: Intention {
+    /// The intended output file name
+    public var fileName: String
+    
     /// Gets the types to create on this file.
     private(set) var typeIntentions: [TypeGenerationIntention] = []
     
@@ -17,6 +20,18 @@ public class FileGenerationIntention: Intention {
     private(set) var globalFunctionIntentions: [FunctionGenerationIntention] = []
     
     public var source: ASTNode?
+    
+    public init(fileName: String) {
+        self.fileName = fileName
+    }
+    
+    public func addType(_ intention: TypeGenerationIntention) {
+        typeIntentions.append(intention)
+    }
+    
+    public func addGlobalFunction(_ intention: FunctionGenerationIntention) {
+        globalFunctionIntentions.append(intention)
+    }
 }
 
 /// An intention to generate a function. Can represent either a global function,

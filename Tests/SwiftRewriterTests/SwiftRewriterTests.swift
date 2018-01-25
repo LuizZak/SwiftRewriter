@@ -132,6 +132,10 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
         return [self]
     }
     
+    func sourceName() -> String {
+        return "\(type(of: self))"
+    }
+    
     func loadSource() throws -> CodeSource {
         return StringCodeSource(source: code)
     }

@@ -13,8 +13,16 @@ public class SwiftWriter {
     }
     
     public func execute() {
-        let out = output.createFile(path: "").outputTarget()
-        let classes = intentions.intentions(ofType: ClassGenerationIntention.self)
+        let fileIntents = intentions.intentions(ofType: FileGenerationIntention.self)
+        
+        for file in fileIntents {
+            outputFile(file)
+        }
+    }
+    
+    private func outputFile(_ file: FileGenerationIntention) {
+        let out = output.createFile(path: file.fileName).outputTarget()
+        let classes = file.typeIntentions.flatMap { $0 as? ClassGenerationIntention }
         
         for cls in classes {
             outputClass(cls, target: out)
