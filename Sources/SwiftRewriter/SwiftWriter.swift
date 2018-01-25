@@ -85,7 +85,8 @@ public class SwiftWriter {
             break
         default:
             decl += " -> "
-            decl += typeMapper.swiftType(forObjcType: sign.returnType)
+            decl += typeMapper.swiftType(forObjcType: sign.returnType,
+                                         context: .init(explicitNullability: sign.returnTypeNullability))
         }
         
         decl += " {"

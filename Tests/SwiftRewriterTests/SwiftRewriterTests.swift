@@ -84,6 +84,7 @@ class SwiftRewriterTests: XCTestCase {
             @interface MyClass
             - (void)myMethod;
             - (NSInteger)myOtherMethod:(NSInteger)abc aString:(nonnull NSString*)str;
+            - (nullable NSArray*)someNullArray;
             @end
             """,
             swift: """
@@ -91,6 +92,8 @@ class SwiftRewriterTests: XCTestCase {
                 func myMethod() {
                 }
                 func myOtherMethod(abc: Int, aString str: String) -> Int {
+                }
+                func someNullArray() -> NSArray? {
                 }
             }
             """)
