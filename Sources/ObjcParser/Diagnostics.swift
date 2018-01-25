@@ -41,15 +41,19 @@ public class Diagnostics {
 }
 
 /// A single diagnostic message
-public enum DiagnosticMessage {
+public enum DiagnosticMessage: CustomStringConvertible {
     case note(message: String, location: SourceLocation)
     case warning(message: String, location: SourceLocation)
     case error(message: String, location: SourceLocation)
     
-    public var message: String {
+    public var description: String {
         switch self {
-        case .error(let message, _), .warning(let message, _), .note(let message, _):
-            return message
+        case let .warning(message, loc):
+            return "\(message) at \(loc)"
+        case let .note(message, loc):
+            return "\(message) at \(loc)"
+        case let .error(message, loc):
+            return "\(message) at \(loc)"
         }
     }
     

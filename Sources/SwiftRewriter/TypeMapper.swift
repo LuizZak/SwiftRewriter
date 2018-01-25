@@ -10,6 +10,9 @@ public class TypeMapper {
     
     public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext = .empty) -> String {
         switch type {
+        case .void:
+            return "Void"
+            
         case .struct(let str):
             return swiftType(forObjcStructType: str, context: context)
             
@@ -21,6 +24,9 @@ public class TypeMapper {
             
         case .pointer(let type):
             return swiftType(forObjcPointerType: type, context: context)
+            
+        case let .specified(spec, type):
+            return swiftType(forObjcType: type, withSpecifiers: spec, context: context)
             
         case let .qualified(type, qualifiers):
             return swiftType(forObjcType: type, withQualifiers: qualifiers, context: context)
@@ -85,6 +91,12 @@ public class TypeMapper {
         }
     }
     
+    private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String], context: TypeMappingContext) -> String {
+        let final = swiftType(forObjcType: type, context: context)
+        
+        return swiftType(name: final, withNullability: context.nullability())
+    }
+    
     private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String], context: TypeMappingContext) -> String {
         let locQualifiers = context.withQualifiers(qualifiers)
         
@@ -118,19 +130,19 @@ public class TypeMapper {
         public static let alwaysNonnull = TypeMappingContext(modifiers: nil, qualifiers: [], alwaysNonnull: true)
         
         /// Modifiers fetched from a @property declaraion
-        public var modifiers: ObjcClassInterface.PropertyModifierList?
+        public var modifiers: PropertyModifierList?
         
         public var qualifiers: [String]
         
         public var alwaysNonnull: Bool
         
-        public init(modifiers: ObjcClassInterface.PropertyModifierList?) {
+        public init(modifiers: PropertyModifierList?) {
             self.modifiers = modifiers
             self.qualifiers = []
             self.alwaysNonnull = false
         }
         
-        public init(modifiers: ObjcClassInterface.PropertyModifierList?, qualifiers: [String], alwaysNonnull: Bool) {
+        public init(modifiers: PropertyModifierList?, qualifiers: [String], alwaysNonnull: Bool) {
             self.modifiers = modifiers
             self.qualifiers = qualifiers
             self.alwaysNonnull = alwaysNonnull

@@ -8,7 +8,7 @@ public class ObjcClassInterface: ASTNode, InitializableNode {
 
 // MARK: - Accessor properties
 public extension ObjcClassInterface {
-    public var properties: [Property] {
+    public var properties: [PropertyDefinition] {
         return childrenMatching()
     }
     

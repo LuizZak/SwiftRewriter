@@ -27,6 +27,14 @@ public class SwiftWriter {
             for prop in cls.properties {
                 outputProperty(prop, target: target)
             }
+            
+            if cls.properties.count > 0 && cls.methods.count > 0 {
+                target.output(line: "")
+            }
+            
+            for method in cls.methods {
+                outputMethod(method, target: target)
+            }
         }
         target.output(line: "}")
         target.onAfterOutput()
@@ -43,5 +51,29 @@ public class SwiftWriter {
         decl += "\(prop.name): \(typeName)"
         
         target.output(line: decl)
+    }
+    
+    private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+        var decl: String = "func "
+        
+        let sign = method.signature
+        
+        decl += sign.name
+        decl += "("
+        decl += ")"
+        
+        if case .void = sign.returnType {
+            
+        }
+        
+        decl += " {"
+        
+        target.output(line: decl)
+        
+        target.idented {
+            // TODO: Output method body here.
+        }
+        
+        target.output(line: "}")
     }
 }

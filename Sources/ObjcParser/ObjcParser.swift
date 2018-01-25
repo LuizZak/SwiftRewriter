@@ -65,9 +65,15 @@ public class ObjcParser {
     
     func parseObjcType() throws -> ObjcType {
         // Here we simplify the grammar for types as:
-        // TypeName: IDENTIFIER ('<' TypeName '>')? '*'?
+        // TypeName: specifiers* IDENTIFIER ('<' TypeName '>')? '*'? qualifiers*
         
         var type: ObjcType
+        
+        var specifiers: [String] = []
+        while lexer.tokenType(.typeQualifier) {
+            let spec = lexer.nextToken().string
+            specifiers.append(spec)
+        }
         
         if lexer.tokenType(.id) {
             lexer.skipToken()
@@ -92,6 +98,9 @@ public class ObjcParser {
             } else {
                 type = .struct(typeName)
             }
+        } else if lexer.tokenType(.keyword(.void)) {
+            lexer.skipToken()
+            type = .void
         } else {
             throw LexerError.syntaxError("Expected type name")
         }
@@ -111,6 +120,9 @@ public class ObjcParser {
         
         if qualifiers.count > 0 {
             type = .qualified(type, qualifiers: qualifiers)
+        }
+        if specifiers.count > 0 {
+            type = .specified(specifiers: specifiers, type)
         }
         
         return type

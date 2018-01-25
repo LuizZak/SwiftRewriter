@@ -4,15 +4,47 @@ import GrammarModels
 
 class ObjcParser_ObjcTypeTests: XCTestCase {
     
+    func testParseVoidType() throws {
+        try assertObjcTypeParse("void", .void)
+        try assertObjcTypeParse("void*", .pointer(.void))
+    }
+    
     func testParseStructType() throws {
         try assertObjcTypeParse("NSInteger", .struct("NSInteger"))
         try assertObjcTypeParse("BOOL", .struct("BOOL"))
         try assertObjcTypeParse("_MyStruct", .struct("_MyStruct"))
     }
     
-    func testParsePointerSpecifiers() throws {
+    func testParsePointerQualifiers() throws {
         try assertObjcTypeParse("NSArray<NSString*>* _Nonnull",
                                 .qualified(.pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])), qualifiers: ["_Nonnull"]))
+    }
+    
+    func testParseTypeSpecifiers() throws {
+        try assertObjcTypeParse("const __weak NSArray<NSString*>* _Nonnull",
+                                .specified(specifiers: ["const", "__weak"],
+                                .qualified(
+                                    .pointer(
+                                        .generic("NSArray",
+                                                 parameters: [.pointer(.struct("NSString"))])),
+                                    qualifiers: ["_Nonnull"])
+                                    )
+                                )
+        
+        try assertObjcTypeParse("static __weak NSArray<const NSString*>* _Nonnull",
+                                .specified(specifiers: ["static", "__weak"],
+                                .qualified(
+                                    .pointer(
+                                        .generic("NSArray",
+                                                 parameters: [
+                                                    .specified(specifiers: ["const"],
+                                                               .pointer(.struct("NSString")))
+                                                    ]
+                                                )
+                                            ),
+                                    qualifiers: ["_Nonnull"])
+                                    )
+                                )
     }
     
     func testParseGenericObjcType() throws {

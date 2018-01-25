@@ -1,19 +1,22 @@
 import MiniLexer
 
 extension Lexer {
-    /// Lexes an identifier token with the following grammar:
+    /// Lexes a token with the following grammar:
     ///
     /// ```
     /// type_qualifier:
-    ///         'const' | 'volatile' | '_Nonnull' | '_Nullable';
+    ///         'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong';
     /// ```
     @inline(__always)
     public func lexTypeQualifier() throws -> Substring {
         return try consumeString { lexer in
-            if !lexer.advanceIf(equals: "const") &&
+            if !lexer.advanceIf(equals: "static") &&
+                !lexer.advanceIf(equals: "const") &&
                 !lexer.advanceIf(equals: "volatile") &&
                 !lexer.advanceIf(equals: "_Nonnull") &&
-                !lexer.advanceIf(equals: "_Nullable")
+                !lexer.advanceIf(equals: "_Nullable") &&
+                !lexer.advanceIf(equals: "__weak") &&
+                !lexer.advanceIf(equals: "__strong")
             {
                 throw LexerError.syntaxError("Expected type qualifier")
             }
@@ -225,7 +228,7 @@ extension Lexer {
     ///
     /// ```
     /// type_qualifier:
-    ///         'const' | 'volatile' | '_Nonnull' | '_Nullable';
+    ///         'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong';
     /// ```
     public static func isTypeQualifier(_ string: String) -> Bool {
         return _typeQualifiers.contains(string)
@@ -254,7 +257,7 @@ extension Lexer {
     }
     
     private static let _typeQualifiers = [
-        "const", "volatile", "_Nonnull", "_Nullable"
+        "static", "const", "volatile", "_Nonnull", "_Nullable", "__weak", "__strong"
     ]
 }
 

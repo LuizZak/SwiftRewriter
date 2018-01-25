@@ -31,8 +31,8 @@ public class MemberGenerationIntention: Intention {
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention {
-    public var typedSource: ObjcClassInterface.Property? {
-        return source as? ObjcClassInterface.Property
+    public var typedSource: PropertyDefinition? {
+        return source as? PropertyDefinition
     }
     
     public var name: String
@@ -47,7 +47,43 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
 
 /// An intention to generate a static/instance function for a type.
 public class MethodGenerationIntention: MemberGenerationIntention {
+    public var typedSource: MethodDefinition? {
+        return source as? MethodDefinition
+    }
     
+    public var signature: Signature
+    
+    public var name: String {
+        return signature.name
+    }
+    public var returnType: ObjcType {
+        return signature.returnType
+    }
+    public var parameters: [Parameter] {
+        return signature.parameters
+    }
+    
+    public init(name: String, returnType: ObjcType, parameters: [Parameter], scope: Scope = .internal, source: ASTNode? = nil) {
+        self.signature = Signature(name: name, returnType: returnType, parameters: parameters)
+        super.init(scope: scope, source: source)
+    }
+    
+    public init(signature: Signature, scope: Scope = .internal, source: ASTNode? = nil) {
+        self.signature = signature
+        super.init(scope: scope, source: source)
+    }
+    
+    public struct Signature {
+        public var name: String
+        public var returnType: ObjcType
+        public var parameters: [Parameter]
+    }
+    
+    public struct Parameter {
+        public var selector: String
+        public var name: String
+        public var type: ObjcType
+    }
 }
 
 /// Scope for a member

@@ -9,6 +9,9 @@ public enum ObjcType: CustomStringConvertible {
     /// May be any type that is not an `id`.
     case `struct`(String)
     
+    /// A special `void` type that indicates an empty value.
+    case void
+    
     /// A composed pointer, like `NSObject*` or `int*`.
     /// May be an objc class or a struct-type pointer.
     indirect case pointer(ObjcType)
@@ -20,10 +23,16 @@ public enum ObjcType: CustomStringConvertible {
     /// which is a pointer to a struct NSObject with _Nonnull qualifier.
     indirect case qualified(ObjcType, qualifiers: [String])
     
+    /// An Objc type that has associated specifiers, such as `__weak NSObject*`,
+    /// which is a __weak pointer to a struct NSObject.
+    indirect case specified(specifiers: [String], ObjcType)
+    
     /// Gets the plain string definition for this type.
     /// Always maps to valid objc type
     public var description: String {
         switch self {
+        case .void:
+            return "void"
         case .struct(let s):
             return s
         case let .generic(cl, parameters):
@@ -41,6 +50,8 @@ public enum ObjcType: CustomStringConvertible {
             return "\(type.description)*"
         case let .qualified(type, qualifiers):
             return "\(type.description) \(qualifiers.joined(separator: " "))"
+        case let .specified(specifiers, type):
+            return "\(specifiers.joined(separator: " ")) \(type.description)"
         }
     }
     
@@ -54,6 +65,8 @@ public enum ObjcType: CustomStringConvertible {
             return .generic(type, parameters: parameters.map { $0.normalized })
         case let .qualified(type, qualifiers) where qualifiers.isEmpty:
             return type.normalized
+        case let .specified(specifiers, type) where specifiers.isEmpty:
+            return type.normalized
         default:
             return self
         }
@@ -63,6 +76,8 @@ public enum ObjcType: CustomStringConvertible {
 extension ObjcType: Equatable {
     public static func ==(lhs: ObjcType, rhs: ObjcType) -> Bool {
         switch (lhs, rhs) {
+        case (.void, .void):
+            return true
         case let (.struct(l), .struct(r)):
             return l == r
         case let (.id(lhsProtocols), .id(rhsProtocols)):
@@ -73,6 +88,8 @@ extension ObjcType: Equatable {
             return lhsPointer == rhsPointer
         case let (.qualified(lhsType, lhsQualifiers), .qualified(rhsType, rhsQualifiers)):
             return lhsType == rhsType && lhsQualifiers == rhsQualifiers
+        case let (.specified(lhsSpecifiers, lhsType), .specified(rhsSpecifiers, rhsType)):
+            return lhsType == rhsType && lhsSpecifiers == rhsSpecifiers
         default:
             return false
         }

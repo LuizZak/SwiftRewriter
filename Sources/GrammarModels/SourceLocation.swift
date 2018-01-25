@@ -17,3 +17,16 @@ extension SourceLocation: Equatable {
         return lhs.range == rhs.range && lhs.source.isEqual(to: rhs.source)
     }
 }
+
+extension SourceLocation: CustomStringConvertible {
+    public var description: String {
+        guard let start = range.start else {
+            return "line \(0) column \(0)"
+        }
+        
+        let line = source.lineNumber(at: start)
+        let col = source.columnNumber(at: start)
+        
+        return "line \(line) column \(col)"
+    }
+}

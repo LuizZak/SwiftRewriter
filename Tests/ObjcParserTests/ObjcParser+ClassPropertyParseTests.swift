@@ -4,7 +4,7 @@ import GrammarModels
 
 class ObjcParser_ClassPropertyParseTests: XCTestCase {
     
-    func testParseClassWithProperty() throws {
+    func testParseSimpleProperty() throws {
         let source = "@property BOOL myProperty1;"
         let sut = ObjcParser(string: source)
         
@@ -18,7 +18,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
-    func testParseClassWithPropertyWithGenericType() throws {
+    func testParsePropertyWithGenericType() throws {
         // Arrange
         let source = "@property NSArray<NSString*>* myProperty3;"
         let sut = ObjcParser(string: source)
@@ -35,7 +35,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
-    func testParseClassWithPropertyWithModifiers() throws {
+    func testParsePropertyWithModifiers() throws {
         let source = "@property ( atomic, nonatomic , copy ) BOOL myProperty1;"
         let sut = ObjcParser(string: source)
         
@@ -50,7 +50,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
-    func testParseClassWithPropertyWithModifiersRecovery() throws {
+    func testParsePropertyWithModifiersRecovery() throws {
         let source = "@property ( atomic, nonatomic , ) BOOL myProperty1;"
         let sut = ObjcParser(string: source)
         
@@ -64,7 +64,7 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertEqual(sut.diagnostics.errors.count, 1)
     }
     
-    func testParseClassWithPropertyMissingNameRecovery() throws {
+    func testParsePropertyMissingNameRecovery() throws {
         let source = "@property BOOL ;"
         let sut = ObjcParser(string: source)
         
@@ -90,14 +90,14 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertEqual(sut.diagnostics.errors.count, 2)
     }
     
-    private func _parseTestPropertyNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> ObjcClassInterface.Property {
+    private func _parseTestPropertyNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> PropertyDefinition {
         do {
             let root: GlobalContextNode =
                 try parser.withTemporaryContext {
                     try parser.parsePropertyNode()
                 }
             
-            let result: ObjcClassInterface.Property! = root.childrenMatching().first
+            let result: PropertyDefinition! = root.childrenMatching().first
             
             return result
         } catch {

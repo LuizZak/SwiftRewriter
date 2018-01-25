@@ -33,10 +33,13 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     }
     
     func testTokenizeTypeQualifier() {
+        expect("static", toTokenizeAs: .typeQualifier)
         expect("const", toTokenizeAs: .typeQualifier)
         expect("volatile", toTokenizeAs: .typeQualifier)
         expect("_Nonnull", toTokenizeAs: .typeQualifier)
         expect("_Nullable", toTokenizeAs: .typeQualifier)
+        expect("__weak", toTokenizeAs: .typeQualifier)
+        expect("__strong", toTokenizeAs: .typeQualifier)
     }
     
     func testTokenizeKeywords() {

@@ -112,6 +112,8 @@ public enum ASTNodeRef<Node: ASTNodeValue>: ASTNodeValue {
     case valid(Node)
     case invalid(InvalidNode)
     
+    /// An invalid node that can be used during parsing to postpone creation of
+    /// actual parsed nodes.
     public static var placeholder: ASTNodeRef<Node> {
         return .invalid(InvalidNode(location: .invalid))
     }

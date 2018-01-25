@@ -127,8 +127,8 @@ extension TokenType: CustomStringConvertible {
             return "identifier"
         case .typeQualifier:
             return "type qualifier"
-        case .keyword:
-            return "keyword"
+        case .keyword(let kw):
+            return "'\(kw)'"
         case .at:
             return "'@'"
         case .colon:

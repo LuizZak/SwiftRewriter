@@ -63,6 +63,21 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteMethod() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            - (void)myMethod;
+            @end
+            """,
+            swift: """
+            class MyClass {
+                func myMethod() {
+                }
+            }
+            """)
+    }
+    
     private func assertObjcTypeParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
         let output = TestWriterOutput()
         let input = TestSingleInputProvider(code: objc)
@@ -85,7 +100,7 @@ class SwiftRewriterTests: XCTestCase {
     }
 }
 
-class TestSingleInputProvider: InputSourcesProvider, InputSource, CodeSource {
+class TestSingleInputProvider: InputSourcesProvider, InputSource {
     var code: String
     
     init(code: String) {
@@ -97,19 +112,7 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource, CodeSource {
     }
     
     func loadSource() throws -> CodeSource {
-        return self
-    }
-    
-    func fetchSource() -> String {
-        return code
-    }
-    
-    func isEqual(to other: Source) -> Bool {
-        guard let other = other as? TestSingleInputProvider else {
-            return false
-        }
-        
-        return self === other
+        return StringCodeSource(source: code)
     }
 }
 

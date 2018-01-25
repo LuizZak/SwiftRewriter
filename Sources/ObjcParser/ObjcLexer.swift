@@ -116,7 +116,8 @@ public class ObjcLexer {
             } else if Lexer.isDigit(p) {
                 try readNumberToken()
             } else if Lexer.isLetter(p) || p == "_" || p == "@" {
-                if try !attemptReadKeywordToken() && !attemptReadQualifierToken() {
+                if try !attemptReadKeywordToken() && !attemptReadQualifierToken() 
+                {
                     if p == "@" {
                         _=try attemptReadSpecialChar()
                     } else {
@@ -172,7 +173,7 @@ public class ObjcLexer {
             }
         }
         
-        _=try lexer.lexIdentifier()
+        _=try lexer.rewindOnFailure { try lexer.lexIdentifier() }
         
         let keyword = range.makeSubstring()
         
@@ -227,7 +228,7 @@ public class ObjcLexer {
     /// Creates and returns a backtracking point which can be activated to rewind
     /// the lexer to the point at which this method was called.
     func backtracker() -> Backtrack {
-        return _Backtrack(lexer: self.lexer)
+        return _Backtrack(lexer: self)
     }
     
     /// Current lexer's location as a `SourceLocation`.
@@ -237,7 +238,7 @@ public class ObjcLexer {
     
     /// Current lexer's location as a `SourceRange.location` enum case
     func locationAsRange() -> SourceRange {
-        return .location(lexer.inputIndex)
+        return currentToken.location.range
     }
     
     func rewindOnFailure<T>(_ block: () throws -> T) rethrows -> T {
@@ -278,13 +279,17 @@ public class ObjcLexer {
     }
     
     class _Backtrack: Backtrack {
-        let lexer: Lexer
+        let lexer: ObjcLexer
         let index: Lexer.Index
+        let token: Token
+        let hasReadToken: Bool
         private var activated = false
         
-        init(lexer: Lexer) {
+        init(lexer: ObjcLexer) {
             self.lexer = lexer
-            self.index = lexer.inputIndex
+            self.hasReadToken = lexer._hasReadToken
+            self.index = lexer.lexer.inputIndex
+            self.token = lexer.currentToken
         }
         
         func backtrack() {
@@ -292,7 +297,9 @@ public class ObjcLexer {
                 return
             }
             
-            lexer.inputIndex = index
+            lexer._hasReadToken = hasReadToken
+            lexer.lexer.inputIndex = index
+            lexer.currentToken = token
             
             activated = true
         }
@@ -323,24 +330,4 @@ public protocol Backtrack: class {
 /// Protocol for sourcing code strings from
 public protocol CodeSource: Source {
     func fetchSource() -> String
-}
-
-public struct StringCodeSource: CodeSource {
-    public var source: String
-    
-    public init(source: String) {
-        self.source = source
-    }
-    
-    public func fetchSource() -> String {
-        return source
-    }
-    
-    public func isEqual(to other: Source) -> Bool {
-        guard let strSource = other as? StringCodeSource else {
-            return false
-        }
-        
-        return source == strSource.source
-    }
 }

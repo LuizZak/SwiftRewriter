@@ -4,6 +4,34 @@ public enum SourceRange {
     case range(Range<String.Index>)
     case invalid
     
+    /// Gets a value that represents the start of this source range.
+    /// For `location` cases, this is the same as the associated value, for `range`
+    /// cases, this is `range.lowerBound`, and for `invalid` nodes this is nil.
+    public var start: String.Index? {
+        switch self {
+        case .location(let l):
+            return l
+        case .range(let r):
+            return r.lowerBound
+        case .invalid:
+            return nil
+        }
+    }
+    
+    /// Gets a value that represents the end of this source range.
+    /// For `location` cases, this is the same as the associated value, for `range`
+    /// cases, this is `range.upperBound`, and for `invalid` nodes this is nil.
+    public var end: String.Index? {
+        switch self {
+        case .location(let l):
+            return l
+        case .range(let r):
+            return r.lowerBound
+        case .invalid:
+            return nil
+        }
+    }
+    
     public func union(with node: SourceRange) -> SourceRange {
         switch (self, node) {
         case (.invalid, .invalid):

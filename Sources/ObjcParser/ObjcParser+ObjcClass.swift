@@ -47,8 +47,11 @@ extension ObjcParser {
         while !lexer.tokenType(.keyword(.atEnd)) {
             if lexer.tokenType(.keyword(.atProperty)) {
                 try self.parsePropertyNode()
+            } else if lexer.tokenType(.operator(.add)) || lexer.tokenType(.operator(.subtract)) {
+                try self.parseMethodDeclaration()
             } else {
-                throw LexerError.syntaxError("Expected an ivar list, @property, or method(s) declaration(s) in class")
+                diagnostics.error("Expected an ivar list, @property, or method(s) declaration(s) in class", location: location())
+                lexer.advance(until: { $0.type == .keyword(.atEnd) })
             }
         }
         
@@ -89,60 +92,6 @@ extension ObjcParser {
                                      itemParser: parseProtocolName)
         
         node.protocols = protocols
-    }
-    
-    func parsePropertyNode() throws {
-        let prop = ObjcClassInterface.Property(type: .placeholder, identifier: .placeholder)
-        context.pushContext(node: prop)
-        defer {
-            context.popContext()
-        }
-        
-        // @property [(<Modifiers>)] <Type> <Name>;
-        
-        // @property
-        let range = startRange()
-        try parseKeyword(.atProperty, onMissing: "Expected \(Keyword.atProperty) declaration")
-        
-        // Modifiers
-        if lexer.tokenType(.openParens) {
-            try parsePropertyModifiersListNode()
-        }
-        
-        // Type
-        prop.type = try asNodeRef(try parseTypeNameNode())
-        
-        // Name
-        prop.identifier = try asNodeRef(try parseIdentifierNode())
-        
-        // ;
-        try parseTokenNode(.semicolon, onMissing: "Expected \(TokenType.semicolon) to end property declaration")
-        
-        prop.location = range.makeLocation()
-    }
-    
-    func parsePropertyModifiersListNode() throws {
-        func parsePropertyModifier() throws {
-            do {
-                let range = startRange()
-                let token = try lexer.consume(tokenType: .identifier)
-                
-                let node =
-                    ObjcClassInterface
-                        .PropertyModifier(name: token.string, location: range.makeLocation())
-                context.addChildNode(node)
-            } catch {
-                diagnostics.error("Expected a property modifier", location: location())
-                throw error
-            }
-        }
-        
-        let node = context.pushContext(nodeType: ObjcClassInterface.PropertyModifierList.self)
-        defer {
-            context.popContext()
-        }
-        
-        _=_parseCommaSeparatedList(braces: .openParens, .closeParens, itemParser: parsePropertyModifier)
     }
     
     func parseSuperclassNameNode() throws {

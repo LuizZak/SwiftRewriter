@@ -62,8 +62,10 @@ public class SwiftRewriter {
             switch node {
             case let n as ObjcClassInterface:
                 self.visitObjcClassInterfaceNode(n)
-            case let n as ObjcClassInterface.Property:
+            case let n as PropertyDefinition:
                 self.visitObjcClassInterfacePropertyNode(n)
+            case let n as MethodDefinition:
+                self.visitObjcClassInterfaceMethodNode(n)
             default:
                 return
             }
@@ -107,7 +109,7 @@ public class SwiftRewriter {
     }
     // MARK: -
     
-    private func visitObjcClassInterfacePropertyNode(_ node: ObjcClassInterface.Property) {
+    private func visitObjcClassInterfacePropertyNode(_ node: PropertyDefinition) {
         guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
             return
         }
@@ -118,5 +120,21 @@ public class SwiftRewriter {
                                         source: node)
         
         ctx.addProperty(prop)
+    }
+    
+    private func visitObjcClassInterfaceMethodNode(_ node: MethodDefinition) {
+        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+            return
+        }
+        
+        let signGen =
+            SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+        
+        let sign = signGen.generateDefinitionSignature(from: node)
+        
+        let method =
+            MethodGenerationIntention(signature: sign, source: node)
+        
+        ctx.addMethod(method)
     }
 }
