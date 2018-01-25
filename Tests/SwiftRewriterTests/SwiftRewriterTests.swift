@@ -17,7 +17,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteClassWithProperty() throws {
+    func testRewriteClassProperties() throws {
         try assertObjcTypeParse(
             objc: """
             @interface MyClass
@@ -27,6 +27,9 @@ class SwiftRewriterTests: XCTestCase {
             @property (nullable) NSString* specifiedNull;
             @property NSString *_Nonnull nonNullWithQualifier;
             @property NSString* nonSpecifiedNull;
+            @property id idType;
+            @property (weak) id<MyDelegate, MyDataSource> delegate;
+            @property (assign, nonnull) MyClass* assignProp;
             @end
             """,
             swift: """
@@ -37,6 +40,9 @@ class SwiftRewriterTests: XCTestCase {
                 var specifiedNull: String?
                 var nonNullWithQualifier: String
                 var nonSpecifiedNull: String!
+                var idType: AnyObject!
+                weak var delegate: AnyObject<MyDelegate, MyDataSource>?
+                unowned(unsafe) var assignProp: MyClass
             }
             """)
     }
@@ -86,6 +92,7 @@ class SwiftRewriterTests: XCTestCase {
             - (NSInteger)myOtherMethod:(NSInteger)abc aString:(nonnull NSString*)str;
             - (NSInteger)myAnonParamMethod:(NSInteger)abc :(nonnull NSString*)str;
             - (nullable NSArray*)someNullArray;
+            - (void):a;
             @end
             """,
             swift: """
@@ -97,6 +104,8 @@ class SwiftRewriterTests: XCTestCase {
                 func myAnonParamMethod(abc: Int, _ str: String) -> Int {
                 }
                 func someNullArray() -> NSArray? {
+                }
+                func _(a: AnyObject!) {
                 }
             }
             """)

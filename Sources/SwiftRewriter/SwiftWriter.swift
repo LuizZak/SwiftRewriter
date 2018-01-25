@@ -51,11 +51,20 @@ public class SwiftWriter {
     private func outputProperty(_ prop: PropertyGenerationIntention, target: RewriterOutputTarget) {
         let type = prop.type
         
-        let ctx = TypeMapper.TypeMappingContext(modifiers: prop.typedSource?.modifierList)
+        var decl: String = "var "
         
+        /// Detect `weak` and `unowned` vars
+        if let modifiers = prop.typedSource?.modifierList?.modifiers.map({ $0.name }) {
+            if modifiers.contains("weak") {
+                decl = "weak var "
+            } else if modifiers.contains("unsafe_unretained") || modifiers.contains("assign") {
+                decl = "unowned(unsafe) var "
+            }
+        }
+        
+        let ctx = TypeMapper.TypeMappingContext(modifiers: prop.typedSource?.modifierList)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
-        var decl: String = "var "
         decl += "\(prop.name): \(typeName)"
         
         target.output(line: decl)

@@ -43,7 +43,16 @@ public class TypeMapper {
     }
     
     private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> String {
-        return "<unknown id<protocols>>"
+        let type: String
+        
+        if protocols.count == 0 {
+            type = "AnyObject"
+        } else {
+            type = "AnyObject<\(protocols.joined(separator: ", "))>"
+        }
+        
+        let final = swiftType(name: type, withNullability: context.nullability())
+        return final
     }
     
     private func swiftType(forGenericObjcType name: String, parameters: [ObjcType], context: TypeMappingContext) -> String {
@@ -236,6 +245,11 @@ public class TypeMapper {
             
             if let explicit = explicitNullability {
                 return explicit
+            }
+            
+            // Weak assumes nullable
+            if hasPropertyModifier(named: "weak") {
+                return .nullable
             }
             
             if hasNonnullModifier() {
