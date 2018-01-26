@@ -3,7 +3,7 @@ import MiniLexer
 
 public extension ObjcParser {
     
-    /// Parses an Objective-c class/instance method declaration
+    /// Parses an Objective-C class/instance method declaration
     ///
     /// ```
     /// method_declaration:
@@ -48,7 +48,7 @@ public extension ObjcParser {
     ///
     /// ```
     /// method_selector:
-    ///    selector |(keyword_declarator+ (parameter_list)? )
+    ///    selector | ( keyword_declarator+ (parameter_list)? )
     ///
     /// selector:
     ///    IDENTIFIER | 'retain';
