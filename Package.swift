@@ -13,10 +13,14 @@ let package = Package(
         .library(
             name: "ObjcParser",
             targets: ["ObjcParser"]),
+        .executable(
+            name: "SwiftRewriter",
+            targets: ["SwiftRewriter"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.5.1"),
+        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -30,6 +34,9 @@ let package = Package(
         .target(
             name: "ObjcParser",
             dependencies: ["GrammarModels", "MiniLexer", "TypeLexing"]),
+        .target(
+            name: "SwiftRewriter",
+            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility"]),
         .testTarget(
             name: "ObjcParserTests",
             dependencies: ["GrammarModels", "ObjcParser"]),
