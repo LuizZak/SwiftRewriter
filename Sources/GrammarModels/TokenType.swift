@@ -31,7 +31,8 @@ public enum TokenType {
     case openSquareBracket
     case closeSquareBracket
     
-    case `operator`(Operator)}
+    case `operator`(Operator)
+}
 
 extension TokenType: Equatable {
     public static func ==(lhs: TokenType, rhs: TokenType) -> Bool {
