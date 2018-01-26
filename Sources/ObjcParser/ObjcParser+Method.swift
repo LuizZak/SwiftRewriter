@@ -7,7 +7,7 @@ public extension ObjcParser {
     ///
     /// ```
     /// method_declaration:
-    ///    ('+' | '-') method_definition ';'
+    ///    ('+' | '-') method_definition (';' | method_body)
     ///
     /// method_definition:
     ///    method_type? method_selector
@@ -39,8 +39,34 @@ public extension ObjcParser {
         
         if lexer.tokenType(.semicolon) {
             try parseTokenNode(.semicolon)
+        } else if lexer.tokenType(.openBrace) {
+            // TODO: Actually parse statements here
+            let range = startRange()
+            
+            var depth = 0
+            while !lexer.isEof {
+                lexer.skipToken()
+                
+                if lexer.tokenType(.openBrace) {
+                    depth += 1
+                } else if lexer.tokenType(.closeBrace) {
+                    if depth == 0 {
+                        break
+                    }
+                    
+                    depth -= 0
+                }
+            }
+            
+            if depth != 0 {
+                diagnostics.error("Expected \(TokenType.closeBrace) to finish method definition", location: location())
+            } else {
+                lexer.skipToken()
+            }
+            
+            method.body = range.makeString()
         } else {
-            diagnostics.error("Expected \(TokenType.semicolon) after method declaration", location: location())
+            diagnostics.error("Expected \(TokenType.semicolon) or method body after method declaration", location: location())
         }
     }
     
@@ -66,25 +92,18 @@ public extension ObjcParser {
             lexer.skipToken()
             
             let kind: Int
-            if lexer.tokenType(.semicolon) {
+            if lexer.tokenType(.colon) {
                 kind = 0
-            } else if lexer.tokenType(.colon) {
-                kind = 1
             } else {
-                kind = 2
-                
-                diagnostics.error(
-                    "Expected \(TokenType.colon) or \(TokenType.semicolon) after method declaration",
-                    location: location())
+                kind = 1
             }
-            
             bk.backtrack()
             
             if kind == 0 {
+                try parseKeywordDeclaratorList()
+            } else {
                 let node = try parseIdentifierNode()
                 context.addChildNode(node)
-            } else if kind == 1 {
-                try parseKeywordDeclaratorList()
             }
         } else {
             try parseKeywordDeclaratorList()

@@ -1,3 +1,4 @@
+/// A syntax node for an Objective-C class interface (`@interface`) declaration.
 public class ObjcClassInterface: ASTNode, InitializableNode {
     public var identifier: ASTNodeRef<Identifier> = .invalid(InvalidNode())
     
@@ -6,7 +7,6 @@ public class ObjcClassInterface: ASTNode, InitializableNode {
     }
 }
 
-// MARK: - Accessor properties
 public extension ObjcClassInterface {
     public var properties: [PropertyDefinition] {
         return childrenMatching()
@@ -25,12 +25,31 @@ public extension ObjcClassInterface {
     }
 }
 
+public class SuperclassName: Identifier {
+    
+}
+
+public class IVarsList: ASTNode, InitializableNode {
+    public var ivarDeclarations: [IVarDeclaration] {
+        return childrenMatching()
+    }
+    
+    public required init() {
+        super.init()
+    }
+}
+
+public class IVarDeclaration: ASTNode, InitializableNode {
+    public var identifier: ASTNodeRef<Identifier> = .placeholder
+    public var type: ASTNodeRef<TypeNameNode> = .placeholder
+    
+    public required init() {
+        super.init()
+    }
+}
+
 // MARK: - Subnodes
 public extension ObjcClassInterface {
-    
-    public class SuperclassName: Identifier {
-        
-    }
     
     public class ProtocolReferenceList: ASTNode {
         public var protocols: [ProtocolName] {
@@ -44,24 +63,5 @@ public extension ObjcClassInterface {
     
     public class ProtocolName: Identifier {
         
-    }
-    
-    public class IVarsList: ASTNode, InitializableNode {
-        public var ivarDeclarations: [IVarDeclaration] {
-            return childrenMatching()
-        }
-        
-        public required init() {
-            super.init()
-        }
-    }
-    
-    public class IVarDeclaration: ASTNode, InitializableNode {
-        public var identifier: ASTNodeRef<Identifier> = .placeholder
-        public var type: ASTNodeRef<TypeNameNode> = .placeholder
-        
-        public required init() {
-            super.init()
-        }
     }
 }

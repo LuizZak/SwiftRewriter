@@ -81,10 +81,10 @@ public class SwiftRewriter {
             case let n as ObjcClassInterface.ProtocolReferenceList:
                 self.visitObjcClassProtocolReferenceListNode(n)
                 
-            case let n as ObjcClassInterface.SuperclassName:
+            case let n as SuperclassName:
                 self.visitObjcClassSuperclassName(n)
                 
-            case let n as ObjcClassInterface.IVarDeclaration:
+            case let n as IVarDeclaration:
                 self.visitObjcClassIVarDeclarationNode(n)
             default:
                 return
@@ -164,7 +164,7 @@ public class SwiftRewriter {
         ctx.addMethod(method)
     }
     
-    private func visitObjcClassSuperclassName(_ node: ObjcClassInterface.SuperclassName) {
+    private func visitObjcClassSuperclassName(_ node: SuperclassName) {
         guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
             return
         }
@@ -184,7 +184,7 @@ public class SwiftRewriter {
         }
     }
     
-    private func visitObjcClassIVarDeclarationNode(_ node: ObjcClassInterface.IVarDeclaration) {
+    private func visitObjcClassIVarDeclarationNode(_ node: IVarDeclaration) {
         guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
             return
         }

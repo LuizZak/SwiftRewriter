@@ -2,7 +2,6 @@ import MiniLexer
 import GrammarModels
 
 extension ObjcParser {
-    
     /// Parses an Objective-C class interface
     ///
     /// ```
@@ -57,6 +56,7 @@ extension ObjcParser {
             } else {
                 diagnostics.error("Expected an ivar list, @property, or method(s) declaration(s) in class", location: location())
                 lexer.advance(until: { $0.type == .keyword(.atEnd) })
+                break
             }
         }
         
@@ -81,7 +81,7 @@ extension ObjcParser {
     ///     ;
     /// ```
     public func parseIVarsList() throws {
-        let node = context.pushContext(nodeType: ObjcClassInterface.IVarsList.self)
+        let node = context.pushContext(nodeType: IVarsList.self)
         defer {
             context.popContext()
         }
@@ -106,7 +106,7 @@ extension ObjcParser {
     }
     
     public func parseIVarDeclaration() throws {
-        let node = context.pushContext(nodeType: ObjcClassInterface.IVarDeclaration.self)
+        let node = context.pushContext(nodeType: IVarDeclaration.self)
         defer {
             context.popContext()
         }
@@ -167,7 +167,7 @@ extension ObjcParser {
             let identRange = startRange()
             let ident = try lexer.consume(tokenType: .identifier)
             
-            let node = ObjcClassInterface.SuperclassName(name: ident.string, location: identRange.makeLocation())
+            let node = SuperclassName(name: ident.string, location: identRange.makeLocation())
             
             context.addChildNode(node)
         } catch {

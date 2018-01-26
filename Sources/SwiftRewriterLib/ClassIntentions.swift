@@ -36,8 +36,8 @@ public class ProtocolInheritanceIntention: FromSourceIntention {
 
 /// An intention to create an instance variable (Objective-C's 'ivar').
 public class InstanceVariableGenerationIntention: MemberGenerationIntention {
-    public var typedSource: ObjcClassInterface.IVarDeclaration? {
-        return source as? ObjcClassInterface.IVarDeclaration
+    public var typedSource: IVarDeclaration? {
+        return source as? IVarDeclaration
     }
     
     public var name: String

@@ -1,6 +1,7 @@
 public class MethodDefinition: ASTNode {
     public var returnType: ASTNodeRef<MethodType>
     public var methodSelector: ASTNodeRef<MethodSelector>
+    public var body: String? // TODO: This should be a CompoundStatement node or similar later on.
     
     public init(returnType: ASTNodeRef<MethodType>,
                 methodSelector: ASTNodeRef<MethodSelector>) {
