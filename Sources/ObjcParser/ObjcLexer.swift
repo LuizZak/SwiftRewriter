@@ -24,7 +24,7 @@ public class ObjcLexer {
     /// and `currentToken` remains the `TokenType.eof` token kind for the remainder
     /// of the lexer's lifetime.
     public var isEof: Bool {
-        return lexer.isEof() && tokenType() != .eof
+        return lexer.isEof() || tokenType() == .eof
     }
     
     public init(source: CodeSource) {
@@ -67,7 +67,7 @@ public class ObjcLexer {
     public func allTokens() -> [Token] {
         var toks: [Token] = []
         
-        while !lexer.isEof() && tokenType() != .eof && tokenType() != .unknown {
+        while !isEof && tokenType() != .unknown {
             toks.append(nextToken())
         }
         
@@ -111,7 +111,10 @@ public class ObjcLexer {
         lexer.skipWhitespace()
         
         if lexer.isEof() {
-            currentToken = Token(type: .eof, string: "", location: location())
+            if currentToken.type != .eof {
+                currentToken = Token(type: .eof, string: "", location: location())
+            }
+            
             return
         }
         
