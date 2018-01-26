@@ -9,8 +9,10 @@ public protocol Source {
     func columnNumber(at index: String.Index) -> Int
 }
 
-/// Represents an invalid source, which is neither a file nor a stirng source.
+/// Represents an invalid source, which is neither a file nor a string source.
+/// Used to represent an invalid original source location for a node.
 public struct InvalidSource: Source {
+    /// Gets the default invalid source instance singleton.
     public static let invalid = InvalidSource()
     
     private init() {

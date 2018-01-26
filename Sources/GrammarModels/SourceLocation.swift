@@ -1,14 +1,21 @@
 /// Indicates a location in a source file, either as a single location or as a
 /// range
 public struct SourceLocation {
-    public static let invalid = SourceLocation(range: .invalid, source: InvalidSource.invalid)
+    /// Gets the default invalid source location construct.
+    ///
+    /// It always has a `SourceRange.invalid` range and a source pointing to an
+    /// `InvalidSource` instance.
+    public static let invalid = SourceLocation(source: InvalidSource.invalid, range: .invalid)
     
-    public var range: SourceRange
+    /// The original source this location references.
     public var source: Source
     
-    public init(range: SourceRange, source: Source) {
-        self.range = range
+    /// Range within the original source this location points to.
+    public var range: SourceRange
+    
+    public init(source: Source, range: SourceRange) {
         self.source = source
+        self.range = range
     }
 }
 

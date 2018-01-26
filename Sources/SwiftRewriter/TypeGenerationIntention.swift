@@ -3,14 +3,14 @@ import GrammarModels
 /// An intention to generate a class, struct or enumeration in swift.
 public class TypeGenerationIntention: Intention {
     public var typeName: String
-    public var scope: Scope
+    public var scope: AccessLevel
     
     public var properties: [PropertyGenerationIntention] = []
     public var methods: [MethodGenerationIntention] = []
     
     public var source: ASTNode?
     
-    public init(typeName: String, scope: Scope = .internal, source: ASTNode? = nil) {
+    public init(typeName: String, scope: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
         self.scope = scope
         self.source = source
@@ -20,10 +20,10 @@ public class TypeGenerationIntention: Intention {
 /// An intention to generate a property or method on a type
 public class MemberGenerationIntention: Intention {
     public var source: ASTNode?
-    public var scope: Scope
+    public var accessLevel: AccessLevel
     
-    public init(scope: Scope, source: ASTNode?) {
-        self.scope = scope
+    public init(scope: AccessLevel, source: ASTNode?) {
+        self.accessLevel = scope
         self.source = source
     }
 }
@@ -38,7 +38,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
     public var name: String
     public var type: ObjcType
     
-    public init(name: String, type: ObjcType, scope: Scope = .internal, source: ASTNode? = nil) {
+    public init(name: String, type: ObjcType, scope: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
         self.type = type
         super.init(scope: scope, source: source)
@@ -65,7 +65,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     
     public init(name: String, returnType: ObjcType,
                 returnTypeNullabilitySpecifier: TypeNullability,
-                parameters: [Parameter], scope: Scope = .internal, source: ASTNode? = nil) {
+                parameters: [Parameter], scope: AccessLevel = .internal, source: ASTNode? = nil) {
         self.signature =
             Signature(name: name, returnType: returnType,
                       returnTypeNullability: returnTypeNullabilitySpecifier,
@@ -73,7 +73,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         super.init(scope: scope, source: source)
     }
     
-    public init(signature: Signature, scope: Scope = .internal, source: ASTNode? = nil) {
+    public init(signature: Signature, scope: AccessLevel = .internal, source: ASTNode? = nil) {
         self.signature = signature
         super.init(scope: scope, source: source)
     }
@@ -93,8 +93,8 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     }
 }
 
-/// Scope for a member
-public enum Scope {
+/// Access level visibility for a member or type
+public enum AccessLevel {
     case `private`
     case `fileprivate`
     case `internal`

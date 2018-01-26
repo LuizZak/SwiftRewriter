@@ -14,9 +14,16 @@ public class ObjcLexer {
     
     /// Whether a token has been read yet by this parser
     var _hasReadToken: Bool = false
-    var currentToken: Token = Token(type: .eof, string: "", location: .invalid)
+    internal(set) public var currentToken = Token(type: .eof, string: "",
+                                                  location: .invalid)
     
-    var isEof: Bool {
+    /// Gets a value specifying whether the current token is pointing to the end
+    /// of the valid source string.
+    ///
+    /// When `isEof` is `true`, no further token reading operations can be made,
+    /// and `currentToken` remains the `TokenType.eof` token kind for the remainder
+    /// of the lexer's lifetime.
+    public var isEof: Bool {
         return lexer.isEof() && tokenType() != .eof
     }
     
@@ -233,7 +240,7 @@ public class ObjcLexer {
     
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
-        return SourceLocation(range: locationAsRange(), source: source)
+        return SourceLocation(source: source, range: locationAsRange())
     }
     
     /// Current lexer's location as a `SourceRange.location` enum case
@@ -270,7 +277,7 @@ public class ObjcLexer {
         }
         
         func makeLocation() -> SourceLocation {
-            return SourceLocation(range: makeRange(), source: objcLexer.source)
+            return SourceLocation(source: objcLexer.source, range: makeRange())
         }
         
         private func rawRange() -> Range<Lexer.Index> {
