@@ -68,6 +68,8 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect(")", toTokenizeAs: .closeParens)
         expect("[", toTokenizeAs: .openSquareBracket)
         expect("]", toTokenizeAs: .closeSquareBracket)
+        expect("{", toTokenizeAs: .openBrace)
+        expect("}", toTokenizeAs: .closeBrace)
     }
     
     func testTokenizeOperators() {

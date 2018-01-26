@@ -32,6 +32,16 @@ public class ObjcLexer {
         self.lexer = Lexer(input: source.fetchSource())
     }
     
+    /// Current lexer's location as a `SourceLocation`.
+    func location() -> SourceLocation {
+        return SourceLocation(source: source, range: locationAsRange())
+    }
+    
+    /// Current lexer's location as a `SourceRange.location` enum case
+    func locationAsRange() -> SourceRange {
+        return currentToken.location.range
+    }
+    
     /// Attempts to consume a given token, failing with an error if the operation
     /// fails.
     /// After reading, the current token is advanced to the next.
@@ -219,6 +229,10 @@ public class ObjcLexer {
             type = .openSquareBracket
         case "]":
             type = .closeSquareBracket
+        case "{":
+            type = .openBrace
+        case "}":
+            type = .closeBrace
         default:
             return false
         }
@@ -239,16 +253,6 @@ public class ObjcLexer {
     /// the lexer to the point at which this method was called.
     func backtracker() -> Backtrack {
         return _Backtrack(lexer: self)
-    }
-    
-    /// Current lexer's location as a `SourceLocation`.
-    func location() -> SourceLocation {
-        return SourceLocation(source: source, range: locationAsRange())
-    }
-    
-    /// Current lexer's location as a `SourceRange.location` enum case
-    func locationAsRange() -> SourceRange {
-        return currentToken.location.range
     }
     
     func rewindOnFailure<T>(_ block: () throws -> T) rethrows -> T {

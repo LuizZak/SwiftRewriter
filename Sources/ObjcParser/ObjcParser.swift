@@ -26,6 +26,21 @@ public class ObjcParser {
         rootNode = GlobalContextNode()
     }
     
+    func startRange() -> RangeMarker {
+        return lexer.startRange()
+    }
+    
+    /// Creates and returns a backtracking point which can be activated to rewind
+    /// the lexer to the point at which this method was called.
+    func backtracker() -> Backtrack {
+        return lexer.backtracker()
+    }
+    
+    /// Current lexer's location as a `SourceLocation`.
+    func location() -> SourceLocation {
+        return lexer.location()
+    }
+    
     public func withTemporaryContextNode(_ node: ASTNode, do action: () throws -> ()) rethrows {
         context.pushContext(node: node)
         defer {
@@ -174,21 +189,6 @@ public class ObjcParser {
             
             context.addChildNode(node)
         }
-    }
-    
-    func startRange() -> RangeMarker {
-        return lexer.startRange()
-    }
-    
-    /// Creates and returns a backtracking point which can be activated to rewind
-    /// the lexer to the point at which this method was called.
-    func backtracker() -> Backtrack {
-        return lexer.backtracker()
-    }
-    
-    /// Current lexer's location as a `SourceLocation`.
-    func location() -> SourceLocation {
-        return lexer.location()
     }
     
     /// Starts parsing a comman-separated list of items using the specified braces

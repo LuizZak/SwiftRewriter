@@ -43,6 +43,11 @@ extension ObjcParser {
             }
         }
         
+        // ivar list
+        if lexer.tokenType(.openBrace) {
+            try parseIVarsList()
+        }
+        
         // Consume interface declarations
         while !lexer.tokenType(.keyword(.atEnd)) {
             if lexer.tokenType(.keyword(.atProperty)) {
@@ -56,6 +61,39 @@ extension ObjcParser {
         }
         
         try self.parseKeyword(.atEnd, onMissing: "Expected \(Keyword.atEnd) to end class declaration")
+    }
+    
+    /// Parses an ivar section from an interface or implementation's header section
+    ///
+    /// ```
+    /// instance_variables
+    ///     :   '{' struct_declaration* '}'
+    ///     |   '{' visibility_specification struct_declaration+ '}'
+    ///     |   '{' struct_declaration+ instance_variables '}'
+    ///     |   '{' visibility_specification struct_declaration+ instance_variables '}'
+    ///     ;
+    ///
+    /// visibility_specification
+    ///     :   '@private'
+    ///     |   '@protected'
+    ///     |   '@package'
+    ///     |   '@public'
+    ///     ;
+    /// ```
+    public func parseIVarsList() throws {
+        let node = context.pushContext(nodeType: ObjcClassInterface.IVarsList.self)
+        defer {
+            context.popContext()
+        }
+        
+        try parseTokenNode(.openBrace)
+        
+        // TODO: Parse ivars list here
+        while !lexer.isEof && !lexer.tokenType(.closeBrace) {
+            lexer.skipToken()
+        }
+        
+        try parseTokenNode(.closeBrace)
     }
     
     /// Parses a protocol conformance list at the current location

@@ -19,6 +19,10 @@ public extension ObjcClassInterface {
     public var protocolList: ProtocolReferenceList? {
         return childrenMatching().first
     }
+    
+    public var ivarsList: IVarsList? {
+        return childrenMatching().first
+    }
 }
 
 // MARK: - Subnodes
@@ -40,5 +44,11 @@ public extension ObjcClassInterface {
     
     public class ProtocolName: Identifier {
         
+    }
+    
+    public class IVarsList: ASTNode, InitializableNode {
+        public required init() {
+            super.init()
+        }
     }
 }

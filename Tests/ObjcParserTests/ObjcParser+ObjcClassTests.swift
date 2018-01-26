@@ -4,7 +4,6 @@ import GrammarModels
 
 class ObjcParser_ObjcClassTests: XCTestCase {
     
-    
     func testParseClass() throws {
         let source = """
             @interface MyClass
@@ -15,6 +14,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.identifier.name, "MyClass")
+        XCTAssertNil(result.ivarsList)
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
@@ -31,6 +31,22 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.identifier.name, "MyClass")
         XCTAssertTrue(keywords.contains { $0.keyword == .atInterface })
         XCTAssertTrue(keywords.contains { $0.keyword == .atEnd })
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
+    func testParseClassWithEmptyIVars() throws {
+        let source = """
+            @interface MyClass
+            {
+            }
+            @end
+            """
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
+        
+        XCTAssertEqual(result.identifier.name, "MyClass")
+        XCTAssertNotNil(result.ivarsList)
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
