@@ -8,11 +8,47 @@ class SwiftRewriterTests: XCTestCase {
     func testRewriteEmptyClass() throws {
         try assertObjcTypeParse(
             objc: """
+            @interface MyClass: NSObject
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+            }
+            """)
+    }
+    
+    func testRewriteInfersNSObjectSuperclass() throws {
+        try assertObjcTypeParse(
+            objc: """
             @interface MyClass
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
+            }
+            """)
+    }
+    
+    func testRewriteInheritance() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass : UIView
+            @end
+            """,
+            swift: """
+            class MyClass: UIView {
+            }
+            """)
+    }
+    
+    func testRewriteProtocolSpecification() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass : UIView <UITableViewDelegate>
+            @end
+            """,
+            swift: """
+            class MyClass: UIView, UITableViewDelegate {
             }
             """)
     }
@@ -33,7 +69,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 var someField: Bool
                 var someOtherField: Int
                 var aRatherStringlyField: String
@@ -59,7 +95,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 var nontypedArray: NSArray
                 var nontypedArrayNull: NSArray?
                 var stringArray: [String]!
@@ -77,7 +113,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 func myMethod() {
                 }
             }
@@ -93,10 +129,11 @@ class SwiftRewriterTests: XCTestCase {
             - (NSInteger)myAnonParamMethod:(NSInteger)abc :(nonnull NSString*)str;
             - (nullable NSArray*)someNullArray;
             - (void):a;
+            - :a;
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 func myMethod() {
                 }
                 func myOtherMethod(abc: Int, aString str: String) -> Int {
@@ -106,6 +143,8 @@ class SwiftRewriterTests: XCTestCase {
                 func someNullArray() -> NSArray? {
                 }
                 func __(a: AnyObject!) {
+                }
+                func __(a: AnyObject!) -> AnyObject! {
                 }
             }
             """)
@@ -120,10 +159,32 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 init() {
                 }
                 init(with number: NSNumber) {
+                }
+            }
+            """)
+    }
+    
+    func testRewriteInterfaceWithImplementation() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            - (void)myMethod;
+            @end
+            
+            @implementation MyClass
+            - (void)myMethod {
+                // Function body here
+            }
+            @end
+            """,
+            swift: """
+            class MyClass {
+                func myMethod() {
+                    // Function body here
                 }
             }
             """)

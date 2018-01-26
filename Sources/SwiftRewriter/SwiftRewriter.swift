@@ -68,12 +68,21 @@ public class SwiftRewriter {
         
         visitor.visitClosure = { node in
             switch node {
+            // Objective-C @interface class declarations
             case let n as ObjcClassInterface:
                 self.visitObjcClassInterfaceNode(n)
+            
             case let n as PropertyDefinition:
                 self.visitObjcClassInterfacePropertyNode(n)
+            
             case let n as MethodDefinition:
                 self.visitObjcClassInterfaceMethodNode(n)
+                
+            case let n as ObjcClassInterface.ProtocolReferenceList:
+                self.visitObjcClassProtocolReferenceListNode(n)
+                
+            case let n as ObjcClassInterface.SuperclassName:
+                self.visitObjcClassSuperclassName(n)
             default:
                 return
             }
@@ -150,5 +159,25 @@ public class SwiftRewriter {
             MethodGenerationIntention(signature: sign, source: node)
         
         ctx.addMethod(method)
+    }
+    
+    private func visitObjcClassSuperclassName(_ node: ObjcClassInterface.SuperclassName) {
+        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+            return
+        }
+        
+        ctx.superclassName = node.name
+    }
+    
+    private func visitObjcClassProtocolReferenceListNode(_ node: ObjcClassInterface.ProtocolReferenceList) {
+        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+            return
+        }
+        
+        for protNode in node.protocols {
+            let intent = ProtocolInheritanceIntention(protocolName: protNode.name, source: protNode)
+            
+            ctx.addProtocol(intent)
+        }
     }
 }

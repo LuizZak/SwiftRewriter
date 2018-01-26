@@ -169,8 +169,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         XCTAssertEqual(result.protocolList?.protocols.count, 2)
-        XCTAssertEqual(result.protocolList?.protocols[0], "MyProtocol1")
-        XCTAssertEqual(result.protocolList?.protocols[1], "MyProtocol2")
+        XCTAssertEqual(result.protocolList?.protocols[0].name, "MyProtocol1")
+        XCTAssertEqual(result.protocolList?.protocols[1].name, "MyProtocol2")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
@@ -185,8 +185,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         XCTAssertEqual(result.superclass?.name, "Superclass")
         XCTAssertEqual(result.protocolList?.protocols.count, 2)
-        XCTAssertEqual(result.protocolList?.protocols[0], "MyProtocol1")
-        XCTAssertEqual(result.protocolList?.protocols[1], "MyProtocol2")
+        XCTAssertEqual(result.protocolList?.protocols[0].name, "MyProtocol1")
+        XCTAssertEqual(result.protocolList?.protocols[1].name, "MyProtocol2")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
@@ -202,7 +202,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let protocolList = result.protocolList!
         XCTAssertEqual(result.superclass?.name, "Superclass")
         XCTAssertEqual(protocolList.protocols.count, 1)
-        XCTAssertEqual(protocolList.protocols[0], "MyProtocol1")
+        XCTAssertEqual(protocolList.protocols[0].name, "MyProtocol1")
         XCTAssert(result.childrenMatching(type: KeywordNode.self).contains { $0.keyword == .atInterface })
         XCTAssert(protocolList.childrenMatching(type: TokenNode.self).contains { $0.token.type == .operator(.lessThan) })
         XCTAssert(protocolList.childrenMatching(type: TokenNode.self).contains { $0.token.type == .operator(.greaterThan) })
@@ -225,9 +225,9 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let result: ObjcClassInterface.ProtocolReferenceList! = root.childrenMatching().first
         
         XCTAssertEqual(result.protocols.count, 3)
-        XCTAssertEqual(result.protocols[0], "UITableViewDataSource")
-        XCTAssertEqual(result.protocols[1], "UITableViewDelegate")
-        XCTAssertEqual(result.protocols[2], "_MyProtocol1_")
+        XCTAssertEqual(result.protocols[0].name, "UITableViewDataSource")
+        XCTAssertEqual(result.protocols[1].name, "UITableViewDelegate")
+        XCTAssertEqual(result.protocols[2].name, "_MyProtocol1_")
     }
     
     func testParseProtocolReferenceListRecovery() throws {
@@ -245,7 +245,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let result: ObjcClassInterface.ProtocolReferenceList! = root.childrenMatching().first
         
         XCTAssertEqual(result.protocols.count, 1)
-        XCTAssertEqual(result.protocols[0], "UITableViewDataSource")
+        XCTAssertEqual(result.protocols[0].name, "UITableViewDataSource")
         XCTAssert(sut.diagnostics.errors.count > 0)
     }
     

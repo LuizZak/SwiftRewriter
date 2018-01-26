@@ -1,24 +1,8 @@
 import GrammarModels
 
-/// An intention to generate a class, struct or enumeration in swift.
-public class TypeGenerationIntention: Intention {
-    public var typeName: String
-    public var scope: AccessLevel
-    
-    public var properties: [PropertyGenerationIntention] = []
-    public var methods: [MethodGenerationIntention] = []
-    
-    public var source: ASTNode?
-    
-    public init(typeName: String, scope: AccessLevel = .internal, source: ASTNode? = nil) {
-        self.typeName = typeName
-        self.scope = scope
-        self.source = source
-    }
-}
-
-/// An intention to generate a property or method on a type
-public class MemberGenerationIntention: Intention {
+/// An intention that comes from the reading of a source code file, instead of
+/// being synthesized
+public class FromSourceIntention: Intention {
     public var source: ASTNode?
     public var accessLevel: AccessLevel
     
@@ -26,6 +10,27 @@ public class MemberGenerationIntention: Intention {
         self.accessLevel = scope
         self.source = source
     }
+}
+
+/// An intention to generate a class, struct or enumeration in swift.
+public class TypeGenerationIntention: FromSourceIntention {
+    public var typeName: String
+    
+    public var superclassName: String? = "NSObject"
+    public var protocols: [ProtocolInheritanceIntention] = []
+    public var properties: [PropertyGenerationIntention] = []
+    public var methods: [MethodGenerationIntention] = []
+    
+    public init(typeName: String, scope: AccessLevel = .internal, source: ASTNode? = nil) {
+        self.typeName = typeName
+        
+        super.init(scope: scope, source: source)
+    }
+}
+
+/// An intention to generate a property or method on a type
+public class MemberGenerationIntention: FromSourceIntention {
+    
 }
 
 /// An intention to generate a property, either static/instance, computed/stored

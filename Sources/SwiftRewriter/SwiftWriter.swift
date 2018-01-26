@@ -30,7 +30,22 @@ public class SwiftWriter {
     }
     
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
-        target.output(line: "class \(cls.typeName) {")
+        var classDecl: String = "class \(cls.typeName)"
+        
+        // Figure out inheritance clauses
+        var inheritances: [String] = []
+        if let sup = cls.superclassName {
+            inheritances.append(sup)
+        }
+        inheritances.append(contentsOf: cls.protocols.map { p in p.protocolName })
+        
+        if inheritances.count > 0 {
+            classDecl += ": \(inheritances.joined(separator: ", "))"
+        }
+        
+        // Start outputting class now
+        
+        target.output(line: "\(classDecl) {")
         target.idented {
             for prop in cls.properties {
                 outputProperty(prop, target: target)

@@ -24,22 +24,21 @@ public extension ObjcClassInterface {
 // MARK: - Subnodes
 public extension ObjcClassInterface {
     
-    public class SuperclassName: ASTNode {
-        /// Type identifier
-        public var name: String
+    public class SuperclassName: Identifier {
         
-        public init(name: String, location: SourceLocation = .invalid) {
-            self.name = name
+    }
+    
+    public class ProtocolReferenceList: ASTNode {
+        public var protocols: [ProtocolName] {
+            return childrenMatching()
+        }
+        
+        public init(location: SourceLocation = .invalid) {
             super.init(location: location)
         }
     }
     
-    public class ProtocolReferenceList: ASTNode {
-        public var protocols: [String]
+    public class ProtocolName: Identifier {
         
-        public init(protocols: [String], location: SourceLocation = .invalid) {
-            self.protocols = protocols
-            super.init(location: location)
-        }
     }
 }

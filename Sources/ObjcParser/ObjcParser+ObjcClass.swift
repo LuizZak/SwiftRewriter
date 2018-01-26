@@ -72,26 +72,27 @@ extension ObjcParser {
     ///    identifier
     /// ```
     public func parseProtocolReferenceListNode() throws {
-        func parseProtocolName() throws -> String {
+        func parseProtocolName() throws {
             do {
-                return try lexer.consume(tokenType: .identifier).string
+                let identRange = startRange()
+                let ident = try lexer.consume(tokenType: .identifier).string
+                let node = ObjcClassInterface.ProtocolName(name: ident, location: identRange.makeLocation())
+                
+                context.addChildNode(node)
             } catch {
                 diagnostics.error("Expected protocol name", location: location())
                 throw error
             }
         }
         
-        let node = ObjcClassInterface.ProtocolReferenceList(protocols: [])
+        let node = ObjcClassInterface.ProtocolReferenceList()
         context.pushContext(node: node)
         defer {
             context.popContext()
         }
         
-        let protocols =
-            _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                     itemParser: parseProtocolName)
-        
-        node.protocols = protocols
+        _=_parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
+                                   itemParser: parseProtocolName)
     }
     
     func parseSuperclassNameNode() throws {
