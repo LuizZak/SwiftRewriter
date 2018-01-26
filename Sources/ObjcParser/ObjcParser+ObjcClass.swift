@@ -31,7 +31,7 @@ extension ObjcParser {
             try parseTokenNode(.colon)
             
             // Record superclass name
-            try parseSuperclassNameNode()
+            parseSuperclassNameNode()
         }
         
         // Protocol conformance list
@@ -162,13 +162,16 @@ extension ObjcParser {
                                    itemParser: parseProtocolName)
     }
     
-    func parseSuperclassNameNode() throws {
-        let identRange = startRange()
-        let ident =
-            try lexer.consume(tokenType: .identifier)
-        
-        let node = ObjcClassInterface.SuperclassName(name: ident.string, location: identRange.makeLocation())
-        
-        context.addChildNode(node)
+    func parseSuperclassNameNode() {
+        do {
+            let identRange = startRange()
+            let ident = try lexer.consume(tokenType: .identifier)
+            
+            let node = ObjcClassInterface.SuperclassName(name: ident.string, location: identRange.makeLocation())
+            
+            context.addChildNode(node)
+        } catch {
+            diagnostics.error("Expected superclass name after ':'", location: location())
+        }
     }
 }

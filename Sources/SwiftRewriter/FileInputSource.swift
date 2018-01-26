@@ -4,14 +4,16 @@ import GrammarModels
 import ObjcParser
 
 public class FileInputProvider: InputSourcesProvider {
-    var file: String
+    var files: [String]
     
-    public init(file: String) {
-        self.file = file
+    public init(files: [String]) {
+        self.files = files
     }
     
     public func sources() -> [InputSource] {
-        return [FileInputSource(file: file)]
+        return files.map {
+            FileInputSource(file: $0)
+        }
     }
 }
 

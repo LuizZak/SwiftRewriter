@@ -47,7 +47,7 @@ public class ObjcLexer {
     /// After reading, the current token is advanced to the next.
     public func consume(tokenType: TokenType) throws -> Token {
         if self.tokenType() != tokenType {
-            throw Error.unexpectedToken(received: self.tokenType(), expected: tokenType)
+            throw Error.unexpectedToken(received: self.tokenType(), expected: tokenType, at: location())
         }
         
         return nextToken()
@@ -66,7 +66,6 @@ public class ObjcLexer {
     /// Reads the next token from the parser, without advancing
     public func token() -> Token {
         if !_hasReadToken {
-            lexer.skipWhitespace()
             _readToken()
         }
         
@@ -119,6 +118,7 @@ public class ObjcLexer {
         _hasReadToken = true
         
         lexer.skipWhitespace()
+        skipComments()
         
         if lexer.isEof() {
             if currentToken.type != .eof {
@@ -131,7 +131,9 @@ public class ObjcLexer {
         do {
             let p = try! lexer.peek()
             
-            if isStringLiteralToken() {
+            if attemptReadPreprocessorDirective() {
+               // Done!
+            } else if isStringLiteralToken() {
                 try readStringLiteralToken()
             } else if Lexer.isDigit(p) {
                 try readNumberToken()
@@ -150,6 +152,54 @@ public class ObjcLexer {
         } catch {
             currentToken = Token(type: .eof, string: "", location: .invalid)
         }
+    }
+    
+    private func skipComments() {
+        while lexer.advanceIf(equals: "//") {
+            lexer.advance(until: { $0 == "\n" })
+            if !lexer.safeAdvance() {
+                return
+            }
+        }
+        
+        while lexer.advanceIf(equals: "/*") {
+            if !lexer.safeAdvance() {
+                return
+            }
+            
+            if lexer.advanceIf(equals: "*/") {
+                break
+            }
+        }
+        
+        lexer.skipWhitespace()
+    }
+    
+    /// Parses a pre-processor directive token.
+    /// Pre-processor tokens start with a '#' and end at the end of the line it's
+    /// at.
+    ///
+    /// ```
+    /// preprocessor_directive:
+    ///    '#' ~[\n]* '\n'
+    /// ```
+    private func attemptReadPreprocessorDirective() -> Bool {
+        // TODO: Have preprocessors only work if they are the first non-comment
+        // token on a line.
+        guard lexer.safeIsNextChar(equalTo: "#") else {
+            return false
+        }
+        
+        let range = startRange()
+        let type = TokenType.preprocessorDirective
+        
+        lexer.advance(until: { $0 == "\n" })
+        _=lexer.safeAdvance()
+        
+        currentToken =
+            Token(type: type, string: range.makeString(), location: range.makeLocation())
+        
+        return true
     }
     
     private func readIdentifierToken() throws {
@@ -171,7 +221,7 @@ public class ObjcLexer {
         do {
             _=try lexer.lexTypeQualifier()
             currentToken =
-                Token(type: .typeQualifier, string: String(range.makeSubstring()),
+                Token(type: .typeQualifier, string: range.makeString(),
                       location: range.makeLocation())
             
             return true
@@ -240,7 +290,7 @@ public class ObjcLexer {
         try lexer.advance()
         
         currentToken =
-            Token(type: type, string: String(range.makeSubstring()), location: range.makeLocation())
+            Token(type: type, string: range.makeString(), location: range.makeLocation())
         
         return true
     }
@@ -320,12 +370,12 @@ public class ObjcLexer {
     }
     
     public enum Error: Swift.Error, CustomStringConvertible {
-        case unexpectedToken(received: TokenType, expected: TokenType)
+        case unexpectedToken(received: TokenType, expected: TokenType, at: SourceLocation)
         
         public var description: String {
             switch self {
-            case let .unexpectedToken(received, expected):
-                return "Unexpected token: received \(received), but expected \(expected)"
+            case let .unexpectedToken(received, expected, location):
+                return "Unexpected token at \(location.description): received \(received), but expected \(expected)"
             }
         }
     }
@@ -333,8 +383,15 @@ public class ObjcLexer {
 
 public protocol RangeMarker {
     func makeSubstring() -> Substring
+    func makeString() -> String
     
     func makeLocation() -> SourceLocation
+}
+
+public extension RangeMarker {
+    public func makeString() -> String {
+        return String(makeSubstring())
+    }
 }
 
 public protocol Backtrack: class {

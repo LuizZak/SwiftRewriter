@@ -4,6 +4,11 @@ public enum TokenType {
     case eof
     case unknown
     
+    case singleLineComment
+    case multiLineComment
+    
+    case preprocessorDirective
+    
     case decimalLiteral
     case floatLiteral
     case octalLiteral
@@ -39,6 +44,9 @@ extension TokenType: Equatable {
         switch (lhs, rhs) {
         case (.eof, .eof),
              (.unknown, .unknown),
+             (.singleLineComment, .singleLineComment),
+             (.multiLineComment, .multiLineComment),
+             (.preprocessorDirective, .preprocessorDirective),
              (.decimalLiteral, .decimalLiteral),
              (.floatLiteral, .floatLiteral),
              (.octalLiteral, .octalLiteral),
@@ -75,6 +83,12 @@ extension TokenType: CustomStringConvertible {
             return "<eof>"
         case .unknown:
             return "<unknown>"
+        case .singleLineComment:
+            return "single line comment"
+        case .multiLineComment:
+            return "milti-line comment"
+        case .preprocessorDirective:
+            return "preprocessor directive"
         case .decimalLiteral:
             return "decimal literal"
         case .floatLiteral:

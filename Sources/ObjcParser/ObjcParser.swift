@@ -73,9 +73,34 @@ public class ObjcParser {
     
     /// Parse the global namespace.
     /// Called by `parse` by default until the entire string is consumed.
+    ///
+    /// ```
+    /// external_declaration:
+    ///   COMMENT | LINE_COMMENT | preprocessor_declaration
+    ///   | function_definition
+    ///   | declaration
+    ///   | class_interface
+    ///   | class_implementation
+    ///   | category_interface
+    ///   | category_implementation
+    ///   | protocol_declaration
+    ///   | protocol_declaration_list
+    ///   | class_declaration_list;
+    /// ```
     public func parseGlobalNamespace() throws {
         // TODO: Flesh out full global scope grammar here
-        try parseClassInerfaceNode()
+        
+        while !lexer.isEof {
+            if lexer.tokenType(.keyword(.atInterface)) {
+                try parseClassInerfaceNode()
+            } else if lexer.tokenType(.preprocessorDirective) {
+                // TODO: Parse preprocessor directives
+                lexer.skipToken()
+            } else {
+                diagnostics.error("Expected a definition in file before <eof>", location: location())
+                return
+            }
+        }
     }
     
     func parseObjcType() throws -> ObjcType {

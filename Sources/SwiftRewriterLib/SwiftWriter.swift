@@ -22,13 +22,16 @@ public class SwiftWriter {
         }
     }
     
-    private func outputFile(_ file: FileGenerationIntention) {
-        let out = output.createFile(path: file.fileName).outputTarget()
-        let classes = file.typeIntentions.flatMap { $0 as? ClassGenerationIntention }
+    private func outputFile(_ fileIntent: FileGenerationIntention) {
+        let file = output.createFile(path: fileIntent.fileName)
+        let out = file.outputTarget()
+        let classes = fileIntent.typeIntentions.flatMap { $0 as? ClassGenerationIntention }
         
         for cls in classes {
             outputClass(cls, target: out)
         }
+        
+        file.close()
     }
     
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {

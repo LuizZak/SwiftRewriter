@@ -117,15 +117,40 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("!=", toTokenizeAs: .operator(.unequals))
     }
     
+    func testTokenizePreprocessorDirective() {
+        expect("#include \"MyFile.h\"", toTokenizeAs: .preprocessorDirective)
+        expect("#pragma my pragma", toTokenizeAs: .preprocessorDirective)
+        expect("#import <MyFile.h>", toTokenizeAs: .preprocessorDirective)
+        expect("#error an error pragma", toTokenizeAs: .preprocessorDirective)
+        expect("#warning a warning pragma", toTokenizeAs: .preprocessorDirective)
+    }
+    
+    func testSkipComments() {
+        expect(sequence: "abc // test\n123", toTokenizeAs: [.identifier, .decimalLiteral])
+        expect(sequence: """
+            123
+            /* test
+             comment */
+            abc
+            """, toTokenizeAs: [.decimalLiteral, .identifier])
+    }
+    
     func testTokenizeSequence() {
-        let source = ">> << @@ >= <= identifier @interface @notkeyword 1234 0x0f1Ab,1,2.3F"
+        let source = """
+            >> << @@ >= <= identifier @interface @notkeyword 1234 0x0f1Ab,1,2.3F
+            // A comment
+            //
+            
+            #preprocessor line same preproc
+            adef
+            """
         
         expect(sequence: source, toTokenizeAs: [
             .operator(.bitwiseShiftRight), .operator(.bitwiseShiftLeft),
             .operator(.greaterThanOrEqual), .operator(.lessThanOrEqual),
             .at, .at, .identifier, .keyword(.atInterface), .at, .identifier,
             .decimalLiteral, .hexLiteral, .comma, .decimalLiteral, .comma,
-            .floatLiteral
+            .floatLiteral, .preprocessorDirective, .identifier
             ])
     }
     

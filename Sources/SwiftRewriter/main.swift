@@ -1,24 +1,38 @@
 import SwiftRewriterLib
 import Utility
+import Foundation
+
+let arguments = Array(ProcessInfo.processInfo.arguments.dropFirst())
 
 let parser =
-    ArgumentParser(usage: "<file>",
+    ArgumentParser(usage: "<files>",
                    overview: "Automates part of convering Objective-C source code into Swift")
 
-let fileArg: PositionalArgument<String> =
-    parser.add(positional: "<file>", kind: String.self, usage: "Objective-C file to convert")
+let filesArg: PositionalArgument<[String]> =
+    parser.add(positional: "<files>", kind: [String].self, usage: "Objective-C file(s) to convert")
 
 do {
-    let result = try parser.parse()
+    let result = try parser.parse(arguments)
     
-    if let file = result.get(fileArg) {
-        let input = FileInputProvider(file: file)
+    if let files = result.get(filesArg) {
+        let input = FileInputProvider(files: files)
         let output = StdoutWriterOutput()
         
         let converter = SwiftRewriter(input: input, output: output)
         try converter.rewrite()
+        
+        // Print diagnostics
+        for diag in converter.diagnostics.diagnostics {
+            switch diag {
+            case .note:
+                print("Note: \(diag)")
+            case .warning:
+                print("Warning: \(diag)")
+            case .error:
+                print("Error: \(diag)")
+            }
+        }
     }
 } catch {
     print("Error: \(error)")
-    _=readLine()
 }
