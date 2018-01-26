@@ -1,4 +1,4 @@
-public class PropertyDefinition: ASTNode {
+public class PropertyDefinition: ASTNode, InitializableNode {
     /// Type identifier
     public var type: ASTNodeRef<TypeNameNode>
     
@@ -12,6 +12,12 @@ public class PropertyDefinition: ASTNode {
     public init(type: ASTNodeRef<TypeNameNode>, identifier: ASTNodeRef<Identifier>) {
         self.type = type
         self.identifier = identifier
+        super.init()
+    }
+    
+    public required init() {
+        self.type = .placeholder
+        self.identifier = .placeholder
         super.init()
     }
 }

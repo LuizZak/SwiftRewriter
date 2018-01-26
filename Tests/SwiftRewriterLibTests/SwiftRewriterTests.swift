@@ -105,6 +105,24 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteInstanceVariables() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            {
+                NSString *_myString;
+                __weak id _delegate;
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                private var _myString: String!
+                private weak var _delegate: AnyObject?
+            }
+            """)
+    }
+    
     func testRewriteEmptyMethod() throws {
         try assertObjcTypeParse(
             objc: """

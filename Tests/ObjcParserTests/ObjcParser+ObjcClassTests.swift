@@ -50,6 +50,55 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
+    func testParseClassWithIVars() throws {
+        let source = """
+            @interface MyClass
+            {
+                NSString *_myString;
+                __weak id _delegate;
+            }
+            @end
+            """
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
+        
+        XCTAssertEqual(result.identifier.name, "MyClass")
+        XCTAssertNotNil(result.ivarsList)
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].type.type, .pointer(.struct("NSString")))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].identifier.name, "_myString")
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].type.type, ObjcType.specified(specifiers: ["__weak"], .id(protocols: [])))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].identifier.name, "_delegate")
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
+    // TODO: Make this pass by implementing @private/@protected/@package/@public
+    func testParseClassWithIVarsPublic() throws {
+        let source = """
+            @interface MyClass
+            {
+            @private
+            @protected
+            @package
+            @public
+                NSString *_myString;
+                __weak id _delegate;
+            }
+            @end
+            """
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
+        
+        XCTAssertEqual(result.identifier.name, "MyClass")
+        XCTAssertNotNil(result.ivarsList)
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].type.type, .pointer(.struct("NSString")))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].identifier.name, "_myString")
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].type.type, ObjcType.specified(specifiers: ["__weak"], .id(protocols: [])))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].identifier.name, "_delegate")
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
     func testParseClassWithProperty() throws {
         let source = """
             @interface MyClass

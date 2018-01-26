@@ -83,6 +83,9 @@ public class SwiftRewriter {
                 
             case let n as ObjcClassInterface.SuperclassName:
                 self.visitObjcClassSuperclassName(n)
+                
+            case let n as ObjcClassInterface.IVarDeclaration:
+                self.visitObjcClassIVarDeclarationNode(n)
             default:
                 return
             }
@@ -179,5 +182,18 @@ public class SwiftRewriter {
             
             ctx.addProtocol(intent)
         }
+    }
+    
+    private func visitObjcClassIVarDeclarationNode(_ node: ObjcClassInterface.IVarDeclaration) {
+        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+            return
+        }
+        
+        let ivar =
+            InstanceVariableGenerationIntention(name: node.identifier.name ?? "",
+                                      type: node.type.type ?? .struct(""),
+                                      source: node)
+        
+        ctx.addInstanceVariable(ivar)
     }
 }

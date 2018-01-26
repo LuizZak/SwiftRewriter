@@ -92,7 +92,7 @@ extension TokenType: CustomStringConvertible {
         case .typeQualifier:
             return "type qualifier"
         case .keyword(let kw):
-            return "'\(kw)'"
+            return "'\(kw.rawValue)'"
         case .at:
             return "'@'"
         case .colon:

@@ -18,6 +18,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     
     public var superclassName: String? = "NSObject"
     public var protocols: [ProtocolInheritanceIntention] = []
+    public var instanceVariables: [InstanceVariableGenerationIntention] = []
     public var properties: [PropertyGenerationIntention] = []
     public var methods: [MethodGenerationIntention] = []
     
@@ -99,7 +100,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
 }
 
 /// Access level visibility for a member or type
-public enum AccessLevel {
+public enum AccessLevel: String {
     case `private`
     case `fileprivate`
     case `internal`

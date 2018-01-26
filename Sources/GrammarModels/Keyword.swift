@@ -8,13 +8,19 @@ public enum Keyword: String {
     case `continue`
     case `break`
     case `return`
-    case `void`
-    case `atInterface` = "@interface"
-    case `atImplementation` = "@implementation"
-    case `atProperty` = "@property"
-    case `atEnd` = "@end"
-    case `atProtocol` = "@protocol"
-    case `typedef`
+    case void
+    case atInterface = "@interface"
+    case atImplementation = "@implementation"
+    case atProperty = "@property"
+    case atEnd = "@end"
+    case atProtocol = "@protocol"
+    case typedef
     case `struct`
     case `enum`
+    case atPrivate = "@private"
+    case atPublic = "@public"
+    case atProtected = "@protected"
+    case atPackage = "@package"
+    case atOptional = "@optional"
+    case atRequired = "@required"
 }

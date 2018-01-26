@@ -88,12 +88,41 @@ extension ObjcParser {
         
         try parseTokenNode(.openBrace)
         
-        // TODO: Parse ivars list here
         while !lexer.isEof && !lexer.tokenType(.closeBrace) {
-            lexer.skipToken()
+            if lexer.tokenType(.keyword(.atPrivate)) {
+                try parseKeyword(.atPrivate)
+            } else if lexer.tokenType(.keyword(.atPublic)) {
+                try parseKeyword(.atPublic)
+            } else if lexer.tokenType(.keyword(.atProtected)) {
+                try parseKeyword(.atProtected)
+            } else if lexer.tokenType(.keyword(.atPackage)) {
+                try parseKeyword(.atPackage)
+            } else {
+                try parseIVarDeclaration()
+            }
         }
         
         try parseTokenNode(.closeBrace)
+    }
+    
+    public func parseIVarDeclaration() throws {
+        let node = context.pushContext(nodeType: ObjcClassInterface.IVarDeclaration.self)
+        defer {
+            context.popContext()
+        }
+        
+        let range = startRange()
+        
+        // Type
+        node.type = try asNodeRef(try parseTypeNameNode())
+        
+        // Name
+        node.identifier = try asNodeRef(try parseIdentifierNode())
+        
+        // ;
+        try parseTokenNode(.semicolon, onMissing: "Expected \(TokenType.semicolon) to end property declaration")
+        
+        node.location = range.makeLocation()
     }
     
     /// Parses a protocol conformance list at the current location

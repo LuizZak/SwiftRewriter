@@ -44,6 +44,10 @@ public class NodeCreationContext {
     /// Pops the current top-most node
     /// - precondition: `topmostNode != nil`
     public func popContext() {
-        _nodeStack.removeLast()
+        if let top = _nodeStack.popLast() {
+            if top.location == .invalid {
+                top.updateSourceRange()
+            }
+        }
     }
 }

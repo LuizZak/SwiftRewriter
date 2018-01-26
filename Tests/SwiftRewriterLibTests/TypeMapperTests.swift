@@ -21,7 +21,7 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "AnyObject")
         
         expect(.id(protocols: ["UITableViewDelegate"]),
-               withNull: .nullable,
+               withExplicitNullability: .nullable,
                toConvertTo: "AnyObject<UITableViewDelegate>?")
         
         expect(.pointer(.generic("NSArray", parameters: [.struct("NSInteger")])),
@@ -37,9 +37,13 @@ class TypeMapperTests: XCTestCase {
         
         expect(.struct("instancetype"),
                toConvertTo: "AnyObject")
+        
+        expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
+               withExplicitNullability: nil,
+               toConvertTo: "AnyObject!")
     }
     
-    private func expect(_ type: ObjcType, withNull nullability: TypeNullability? = .nonnull, toConvertTo expected: String, file: String = #file, line: Int = #line) {
+    private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull, toConvertTo expected: String, file: String = #file, line: Int = #line) {
         let converted = typeMapperConvert(type, nullability: nullability)
         
         if converted != expected {

@@ -47,6 +47,19 @@ public extension ObjcClassInterface {
     }
     
     public class IVarsList: ASTNode, InitializableNode {
+        public var ivarDeclarations: [IVarDeclaration] {
+            return childrenMatching()
+        }
+        
+        public required init() {
+            super.init()
+        }
+    }
+    
+    public class IVarDeclaration: ASTNode, InitializableNode {
+        public var identifier: ASTNodeRef<Identifier> = .placeholder
+        public var type: ASTNodeRef<TypeNameNode> = .placeholder
+        
         public required init() {
             super.init()
         }

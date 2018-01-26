@@ -52,6 +52,12 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
                                         )
                                     )
                                 )
+        
+        try assertObjcTypeParse("__weak id",
+                                .specified(specifiers: ["__weak"],
+                                       .id(protocols: [])
+                                    )
+                                )
     }
     
     func testParseGenericObjcType() throws {

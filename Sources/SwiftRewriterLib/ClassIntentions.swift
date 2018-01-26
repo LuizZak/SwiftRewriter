@@ -10,6 +10,10 @@ public class ClassGenerationIntention: TypeGenerationIntention {
         self.protocols.append(intention)
     }
     
+    public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
+        self.instanceVariables.append(intention)
+    }
+    
     public func addProperty(_ intention: PropertyGenerationIntention) {
         self.properties.append(intention)
     }
@@ -26,6 +30,22 @@ public class ProtocolInheritanceIntention: FromSourceIntention {
     public init(protocolName: String, scope: AccessLevel = .internal, source: ASTNode? = nil) {
         self.protocolName = protocolName
         
+        super.init(scope: scope, source: source)
+    }
+}
+
+/// An intention to create an instance variable (Objective-C's 'ivar').
+public class InstanceVariableGenerationIntention: MemberGenerationIntention {
+    public var typedSource: ObjcClassInterface.IVarDeclaration? {
+        return source as? ObjcClassInterface.IVarDeclaration
+    }
+    
+    public var name: String
+    public var type: ObjcType
+    
+    public init(name: String, type: ObjcType, scope: AccessLevel = .private, source: ASTNode? = nil) {
+        self.name = name
+        self.type = type
         super.init(scope: scope, source: source)
     }
 }
