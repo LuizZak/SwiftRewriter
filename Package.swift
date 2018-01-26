@@ -8,8 +8,8 @@ let package = Package(
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
-            name: "SwiftRewriter",
-            targets: ["SwiftRewriter"]),
+            name: "SwiftRewriterLib",
+            targets: ["SwiftRewriterLib"]),
         .library(
             name: "ObjcParser",
             targets: ["ObjcParser"]),
@@ -25,7 +25,7 @@ let package = Package(
             name: "GrammarModels",
             dependencies: []),
         .target(
-            name: "SwiftRewriter",
+            name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "ObjcParser"]),
         .target(
             name: "ObjcParser",
@@ -37,7 +37,7 @@ let package = Package(
             name: "GrammarModelsTests",
             dependencies: ["GrammarModels"]),
         .testTarget(
-            name: "SwiftRewriterTests",
-            dependencies: ["SwiftRewriter", "GrammarModels", "ObjcParser"]),
+            name: "SwiftRewriterLibTests",
+            dependencies: ["SwiftRewriterLib", "GrammarModels", "ObjcParser"]),
     ]
 )
