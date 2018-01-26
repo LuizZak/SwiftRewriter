@@ -158,6 +158,6 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     private func fullRange(_ str: String) -> SourceLocation {
         let range: SourceRange = .range(str.startIndex..<str.endIndex)
         
-        return SourceLocation(range: range, source: StringCodeSource(source: str))
+        return SourceLocation(source: StringCodeSource(source: str), range: range)
     }
 }
