@@ -98,6 +98,30 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
+    func testParseClassPropertyImplementation() throws {
+        let source = """
+            @implementation MyClass
+            @synthesize abc;
+            @dynamic def, ghi=jlm;
+            @end
+            """
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestObjcImplementationNode(source: source, parser: sut)
+        
+        let properties = result.childrenMatching(type: PropertyImplementation.self)
+        XCTAssertEqual(properties.count, 2)
+        XCTAssertEqual(properties[0].kind, .synthesize)
+        XCTAssertEqual(properties[0].list.items?[0].propertyName.name, "abc")
+        XCTAssertNil(properties[0].list.items?[0].ivarName)
+        XCTAssertEqual(properties[1].kind, .dynamic)
+        XCTAssertEqual(properties[1].list.items?[0].propertyName.name, "def")
+        XCTAssertNil(properties[1].list.items?[0].ivarName)
+        XCTAssertEqual(properties[1].list.items?[1].propertyName.name, "ghi")
+        XCTAssertEqual(properties[1].list.items?[1].ivarName?.name, "jlm")
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
     func testParseClassWithProperty() throws {
         let source = """
             @interface MyClass

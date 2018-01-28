@@ -206,6 +206,21 @@ public class ObjcParser {
         context.addChildNode(node)
     }
     
+    func parseAnyKeyword(onMissing message: String = "Expected keyword") throws {
+        let range = startRange()
+        
+        let tok = lexer.nextToken().type
+        
+        guard case TokenType.keyword(let keyword) = tok else {
+            diagnostics.error(message, location: location())
+            throw LexerError.syntaxError(message)
+        }
+        
+        let node = KeywordNode(keyword: keyword, location: range.makeLocation())
+        
+        context.addChildNode(node)
+    }
+    
     func parseTokenNode(_ tokenType: TokenType, onMissing message: String? = nil, addToContext: Bool = true) throws {
         let range = startRange()
         
@@ -218,7 +233,7 @@ public class ObjcParser {
         }
     }
     
-    func parseAnyTokenNode(onMissing message: String? = nil, addToContext: Bool = true) {
+    func parseAnyTokenNode(addToContext: Bool = true) {
         let range = startRange()
         
         let tok = lexer.nextToken()

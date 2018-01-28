@@ -17,7 +17,7 @@ public class FileGenerationIntention: Intention {
     private(set) var typeIntentions: [TypeGenerationIntention] = []
     
     /// Gets the global functions to create on this file.
-    private(set) var globalFunctionIntentions: [FunctionGenerationIntention] = []
+    private(set) var globalFunctionIntentions: [GlobalFunctionGenerationIntention] = []
     
     public var source: ASTNode?
     
@@ -37,13 +37,12 @@ public class FileGenerationIntention: Intention {
         }
     }
     
-    public func addGlobalFunction(_ intention: FunctionGenerationIntention) {
+    public func addGlobalFunction(_ intention: GlobalFunctionGenerationIntention) {
         globalFunctionIntentions.append(intention)
     }
 }
 
-/// An intention to generate a function. Can represent either a global function,
-/// or a static/instance method of a type.
-public class FunctionGenerationIntention: Intention {
-    public var source: ASTNode?
+/// An intention to generate a global function.
+public class GlobalFunctionGenerationIntention: FromSourceIntention {
+    
 }

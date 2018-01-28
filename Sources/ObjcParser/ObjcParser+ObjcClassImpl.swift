@@ -18,19 +18,6 @@ extension ObjcParser {
     ///       | property_implementation
     ///       )+
     ///     ;
-    ///
-    /// property_implementation
-    ///     : '@synthesize' property_synthesize_list ';'
-    ///     | '@dynamic' property_synthesize_list ';'
-    ///     ;
-    ///
-    /// property_synthesize_list
-    ///     : property_synthesize_item (',' property_synthesize_item)*
-    ///     ;
-    ///
-    /// property_synthesize_item
-    ///     : IDENTIFIER | IDENTIFIER '=' IDENTIFIER
-    ///     ;
     /// ```
     public func parseClassImplementation() throws {
         // TODO: Support property_implementation/property_synthesize_list/property_synthesize_item parsing.
@@ -67,7 +54,9 @@ extension ObjcParser {
         // Consume implementation definitions
         while !lexer.tokenType(.keyword(.atEnd)) {
             if lexer.tokenType(.operator(.add)) || lexer.tokenType(.operator(.subtract)) {
-                try self.parseMethodDeclaration()
+                try parseMethodDeclaration()
+            } else if lexer.tokenType(.keyword(.atDynamic)) || lexer.tokenType(.keyword(.atSynthesize)) {
+                try parsePropertyImplementation()
             } else {
                 diagnostics.error("Expected an ivar list, @synthesize/@dynamic, or method(s) definitions(s) in class", location: location())
                 lexer.advance(until: { $0.type == .keyword(.atEnd) })
@@ -76,5 +65,97 @@ extension ObjcParser {
         }
         
         try self.parseKeyword(.atEnd, onMissing: "Expected \(Keyword.atEnd) to end class definition")
+    }
+    
+    /// Parses a property implementation node
+    ///
+    /// ```
+    /// property_implementation
+    ///     : '@synthesize' property_synthesize_list ';'
+    ///     | '@dynamic' property_synthesize_list ';'
+    ///     ;
+    /// ```
+    public func parsePropertyImplementation() throws {
+        context.pushContext(nodeType: PropertyImplementation.self)
+        defer {
+            context.popContext()
+        }
+        
+        if !lexer.tokenType(.keyword(.atDynamic)) && !lexer.tokenType(.keyword(.atSynthesize)) {
+            throw LexerError.syntaxError("Expected \(Keyword.atSynthesize) or \(Keyword.atDynamic) to start a property implementation declaration.")
+        }
+        
+        try parseAnyKeyword()
+        
+        try parsePropertySynthesizeList()
+    }
+    
+    /// Parses a property synthesize list.
+    ///
+    /// ```
+    /// property_synthesize_list
+    ///     : property_synthesize_item (',' property_synthesize_item)*
+    ///     ;
+    /// ```
+    public func parsePropertySynthesizeList() throws {
+        context.pushContext(nodeType: PropertySynthesizeList.self)
+        defer {
+            context.popContext()
+        }
+        
+        var afterComma: Bool
+        repeat {
+            afterComma = false
+            
+            do {
+                try parsePropertySynthesizeItem()
+            } catch {
+                lexer.advance(untilTokenType: .semicolon)
+                break
+            }
+            
+            if lexer.tokenType(.comma) {
+                parseAnyTokenNode()
+                afterComma = true
+            }
+        } while !lexer.tokenType(.semicolon)
+        
+        if afterComma {
+            diagnostics.error("Expected property synthesize item after \(TokenType.comma)", location: location())
+        }
+        
+        if lexer.tokenType(.semicolon) {
+           parseAnyTokenNode()
+        } else {
+            diagnostics.error("Expected \(TokenType.semicolon) after synthesize list", location: location())
+        }
+    }
+    
+    /// Parses a property synthesize item.
+    ///
+    /// ```
+    /// property_synthesize_item
+    ///     : IDENTIFIER | IDENTIFIER '=' IDENTIFIER
+    ///     ;
+    /// ```
+    public func parsePropertySynthesizeItem() throws {
+        let ident = try parseIdentifierNode(onMissing: "Expected property name to synthesize.")
+        
+        let item = PropertySynthesizeItem(propertyName: ident)
+        context.pushContext(node: item)
+        defer {
+            context.popContext()
+        }
+        
+        // '=' IDENTIFIER
+        guard lexer.tokenType(.operator(.assign)) else {
+            return
+        }
+        
+        parseAnyTokenNode()
+        
+        if let ident = try? parseIdentifierNode(onMissing: "Expected property name to synthesize.") {
+            item.ivarName = ident
+        }
     }
 }
