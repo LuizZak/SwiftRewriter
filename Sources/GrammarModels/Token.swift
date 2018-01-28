@@ -1,5 +1,5 @@
 /// A token that the lexer has read
-public struct Token {
+public struct Token: Equatable {
     /// Gets a value specifying whether this Token represents an end-of-file token.
     public var isEndOfFile: Bool {
         return type == .eof
@@ -13,12 +13,6 @@ public struct Token {
         self.type = type
         self.string = string
         self.location = location
-    }
-}
-
-extension Token: Equatable {
-    public static func ==(lhs: Token, rhs: Token) -> Bool {
-        return lhs.type == rhs.type && lhs.location == rhs.location && lhs.string == rhs.string
     }
 }
 

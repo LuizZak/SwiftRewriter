@@ -73,7 +73,7 @@ open class ASTNode: ASTNodeValue {
     
     /// Gets children of this node of a given type
     public func childrenMatching<T: ASTNode>(type: T.Type = T.self) -> [T] {
-        return children.flatMap { $0 as? T }
+        return children.compactMap { $0 as? T }
     }
     
     /// Updates the source range by making it the union of all of this node's

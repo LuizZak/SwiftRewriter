@@ -25,7 +25,7 @@ public class SwiftWriter {
     private func outputFile(_ fileIntent: FileGenerationIntention) {
         let file = output.createFile(path: fileIntent.filePath)
         let out = file.outputTarget()
-        let classes = fileIntent.typeIntentions.flatMap { $0 as? ClassGenerationIntention }
+        let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         
         for cls in classes {
             outputClass(cls, target: out)

@@ -1,5 +1,5 @@
 /// The type for a Token read by the lexer
-public enum TokenType {
+public enum TokenType: Equatable {
     /// End-of-file token
     case eof
     case unknown
@@ -37,43 +37,6 @@ public enum TokenType {
     case closeSquareBracket
     
     case `operator`(Operator)
-}
-
-extension TokenType: Equatable {
-    public static func ==(lhs: TokenType, rhs: TokenType) -> Bool {
-        switch (lhs, rhs) {
-        case (.eof, .eof),
-             (.unknown, .unknown),
-             (.singleLineComment, .singleLineComment),
-             (.multiLineComment, .multiLineComment),
-             (.preprocessorDirective, .preprocessorDirective),
-             (.decimalLiteral, .decimalLiteral),
-             (.floatLiteral, .floatLiteral),
-             (.octalLiteral, .octalLiteral),
-             (.hexLiteral, .hexLiteral),
-             (.stringLiteral, .stringLiteral),
-             (.identifier, .identifier),
-             (.typeQualifier, .typeQualifier),
-             (.id, .id),
-             (.at, .at),
-             (.comma, .comma),
-             (.colon, .colon),
-             (.semicolon, .semicolon),
-             (.openBrace, .openBrace),
-             (.openParens, .openParens),
-             (.openSquareBracket, .openSquareBracket),
-             (.closeBrace, .closeBrace),
-             (.closeParens, .closeParens),
-             (.closeSquareBracket, .closeSquareBracket):
-            return true
-        case let (.keyword(l), .keyword(r)):
-            return l == r
-        case let (.operator(l), .operator(r)):
-            return l == r
-        default:
-            return false
-        }
-    }
 }
 
 extension TokenType: CustomStringConvertible {

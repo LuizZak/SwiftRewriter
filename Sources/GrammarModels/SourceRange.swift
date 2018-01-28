@@ -1,5 +1,5 @@
 /// Range in source code a node spans
-public enum SourceRange {
+public enum SourceRange: Equatable {
     case location(String.Index)
     case range(Range<String.Index>)
     case invalid
@@ -75,22 +75,6 @@ public enum SourceRange {
             return string[range]
         case .location, .invalid:
             return nil
-        }
-    }
-}
-
-extension SourceRange: Equatable {
-    public static func ==(lhs: SourceRange, rhs: SourceRange) -> Bool {
-        switch (lhs, rhs) {
-        case let (.range(l), .range(r)):
-            return l == r
-        case let (.location(l), .location(r)):
-            return l == r
-        case (.invalid, .invalid):
-            return true
-            
-        default:
-            return false
         }
     }
 }

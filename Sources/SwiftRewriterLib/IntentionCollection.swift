@@ -24,7 +24,7 @@ public class IntentionCollection {
     }
     
     public func intentions<T>(ofType type: T.Type = T.self) -> [T] {
-        return _intentions.flatMap { $0 as? T }
+        return _intentions.compactMap { $0 as? T }
     }
     
     public func removeIntention<T>(where predicate: (T) -> Bool) {

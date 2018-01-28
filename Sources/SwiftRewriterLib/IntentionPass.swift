@@ -12,6 +12,9 @@ public class FileGroupingIntentionPass: IntentionPass {
         let intentions =
             intentionCollection.intentions(ofType: FileGenerationIntention.self)
         
+        var headers: [FileGenerationIntention] = []
+        var implementations: [FileGenerationIntention] = []
+        
         var pairs: [Pair] = []
         
         for intent in intentions {
@@ -20,14 +23,14 @@ public class FileGroupingIntentionPass: IntentionPass {
             
             if fileName.hasSuffix(".m") {
                 
-            } else fileName.hasSuffix(".h") {
+            } else if fileName.hasSuffix(".h") {
                 
             }
         }
     }
     
     private struct Pair {
-        var header: FileGenerationIntention?
-        var implementation: FileGenerationIntention?
+        var header: FileGenerationIntention
+        var implementation: FileGenerationIntention
     }
 }

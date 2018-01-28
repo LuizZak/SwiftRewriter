@@ -5,9 +5,9 @@
         "package": "MiniLexer",
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
-          "branch": null,
-          "revision": "8f25f797c6bf38d8feab5b9ad5bd32e73eac4d3e",
-          "version": "0.5.1"
+          "branch": "swift4.1-experiments",
+          "revision": "5a15a3d8ebebaa17c4da4fcd32abccfcbd8717f8",
+          "version": null
         }
       },
       {

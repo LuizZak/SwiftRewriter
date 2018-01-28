@@ -1,7 +1,7 @@
 /// Specifies an objetive-c type for a property or local.
-/// For objc class pointers, they are always specified as
-/// `.pointerType(.structType("NSSomeClass"))`, like `.pointerType(.structType("NSObject"))`
-public enum ObjcType: CustomStringConvertible {
+/// For objc class pointers, they are always specified as pointers to structs,
+/// like `.pointerType(.structType("NSObject"))`
+public enum ObjcType: Equatable, CustomStringConvertible {
     /// Objective-c's `id` type, with optional protocol array specifiers
     case id(protocols: [String])
     
@@ -24,7 +24,7 @@ public enum ObjcType: CustomStringConvertible {
     indirect case qualified(ObjcType, qualifiers: [String])
     
     /// An Objc type that has associated specifiers, such as `__weak NSObject*`,
-    /// which is a __weak pointer to a struct NSObject.
+    /// which is a __weak-tagged type of a pointer to a struct NSObject.
     indirect case specified(specifiers: [String], ObjcType)
     
     /// Gets the plain string definition for this type.
@@ -73,29 +73,6 @@ public enum ObjcType: CustomStringConvertible {
             return type.normalized
         default:
             return self
-        }
-    }
-}
-
-extension ObjcType: Equatable {
-    public static func ==(lhs: ObjcType, rhs: ObjcType) -> Bool {
-        switch (lhs, rhs) {
-        case (.void, .void):
-            return true
-        case let (.struct(l), .struct(r)):
-            return l == r
-        case let (.id(lhsProtocols), .id(rhsProtocols)):
-            return lhsProtocols == rhsProtocols
-        case let (.generic(lhsClassName, lhsParameters), .generic(rhsClassName, rhsParameters)):
-            return lhsClassName == rhsClassName && lhsParameters == rhsParameters
-        case let (.pointer(lhsPointer), .pointer(rhsPointer)):
-            return lhsPointer == rhsPointer
-        case let (.qualified(lhsType, lhsQualifiers), .qualified(rhsType, rhsQualifiers)):
-            return lhsType == rhsType && lhsQualifiers == rhsQualifiers
-        case let (.specified(lhsSpecifiers, lhsType), .specified(rhsSpecifiers, rhsType)):
-            return lhsType == rhsType && lhsSpecifiers == rhsSpecifiers
-        default:
-            return false
         }
     }
 }
