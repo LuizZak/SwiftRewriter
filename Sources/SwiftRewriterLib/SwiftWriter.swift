@@ -27,11 +27,39 @@ public class SwiftWriter {
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         
+        for varDef in fileIntent.globalVariableIntentions {
+            outputVariableDeclaration(varDef, target: out)
+        }
+        
         for cls in classes {
             outputClass(cls, target: out)
         }
         
+        out.onAfterOutput()
+        
         file.close()
+    }
+    
+    private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention, target: RewriterOutputTarget) {
+        let name = varDecl.name
+        let type = varDecl.type
+        let initVal = varDecl.initialValueExpr
+        
+        var decl = "var "
+        decl = _prependAccessModifier(in: decl, accessLevel: varDecl.accessLevel)
+        
+        decl += name
+        
+        let ctx = TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: varDecl.type) ?? .unspecified)
+        let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
+        
+        decl += ": \(typeName)"
+        
+        if let initVal = initVal {
+            decl += " = \(initVal)"
+        }
+        
+        target.output(line: decl)
     }
     
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
@@ -75,8 +103,8 @@ public class SwiftWriter {
                 }
             }
         }
+        
         target.output(line: "}")
-        target.onAfterOutput()
     }
     
     // TODO: See if we can reuse the PropertyGenerationIntention
@@ -248,7 +276,12 @@ public class SwiftWriter {
     
     private func _typeNullability(inType type: ObjcType) -> TypeNullability? {
         switch type {
-        case .specified(let specifiers, _):
+        case .specified(let specifiers, let type):
+            // Struct types are never null.
+            if case .struct = type {
+                return .nonnull
+            }
+            
             if specifiers.last == "__weak" {
                 return .nullable
             } else if specifiers.last == "__unsafe_unretained" {

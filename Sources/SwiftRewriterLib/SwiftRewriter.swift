@@ -98,6 +98,9 @@ public class SwiftRewriter {
                 
             case let n as IVarDeclaration:
                 self.visitObjcClassIVarDeclarationNode(n)
+                
+            case let n as VariableDeclaration:
+                self.visitVariableDeclarationNode(n)
             default:
                 return
             }
@@ -146,6 +149,22 @@ public class SwiftRewriter {
                 break
             }
         }
+    }
+    
+    private func visitVariableDeclarationNode(_ node: VariableDeclaration) {
+        guard let ctx = context.context(ofType: FileGenerationIntention.self) else {
+            return
+        }
+        
+        guard let name = node.identifier, let type = node.type else {
+            return
+        }
+        
+        let intent =
+            GlobalVariableGenerationIntention(name: name.name, type: type.type,
+                                              source: node)
+        
+        ctx.addGlobalVariable(intent)
     }
     
     // MARK: - ObjcClassInterface

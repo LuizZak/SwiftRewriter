@@ -26,6 +26,8 @@ public enum TokenType: Equatable {
     case colon
     case semicolon
     case comma
+    case period
+    case ellipsis
     
     case openBrace
     case closeBrace
@@ -78,6 +80,10 @@ extension TokenType: CustomStringConvertible {
             return "';'"
         case .comma:
             return "','"
+        case .ellipsis:
+            return "'...'"
+        case .period:
+            return "'.'"
         case .openBrace:
             return "'{'"
         case .closeBrace:

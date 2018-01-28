@@ -40,40 +40,52 @@ public extension ObjcParser {
         if lexer.tokenType(.semicolon) {
             try parseTokenNode(.semicolon)
         } else if lexer.tokenType(.openBrace) {
-            lexer.autoSkipComments = false
-            
-            try parseTokenNode(.openBrace)
-            
-            // TODO: Actually parse statements here
-            let range = startRange()
-            
-            var depth = 0
-            while !lexer.isEof {
-                if lexer.tokenType(.openBrace) {
-                    depth += 1
-                } else if lexer.tokenType(.closeBrace) {
-                    if depth == 0 {
-                        break
-                    }
-                    
-                    depth -= 0
-                }
-                
-                parseAnyTokenNode()
-            }
-            
-            method.body = range.makeString()
-            
-            lexer.autoSkipComments = true
-            
-            if depth != 0 {
-                diagnostics.error("Expected \(TokenType.closeBrace) to finish method definition", location: location())
-            } else {
-                try parseTokenNode(.closeBrace)
-            }
+            method.body = try parseFunctionBody()
         } else {
             diagnostics.error("Expected \(TokenType.semicolon) or method body after method declaration", location: location())
         }
+    }
+    
+    /// Parses a function body
+    ///
+    /// ```
+    /// function_body:
+    ///     statements
+    /// ```
+    func parseFunctionBody() throws -> String {
+        lexer.autoSkipComments = false
+        
+        try parseTokenNode(.openBrace)
+        
+        // TODO: Actually parse statements here
+        let range = startRange()
+        
+        var depth = 0
+        while !lexer.isEof {
+            if lexer.tokenType(.openBrace) {
+                depth += 1
+            } else if lexer.tokenType(.closeBrace) {
+                if depth == 0 {
+                    break
+                }
+                
+                depth -= 0
+            }
+            
+            parseAnyTokenNode()
+        }
+        
+        let body = range.makeString()
+        
+        lexer.autoSkipComments = true
+        
+        if depth != 0 {
+            diagnostics.error("Expected \(TokenType.closeBrace) to finish method definition", location: location())
+        } else {
+            try parseTokenNode(.closeBrace)
+        }
+        
+        return body
     }
     
     /// Parses an Objective-c method selector definition

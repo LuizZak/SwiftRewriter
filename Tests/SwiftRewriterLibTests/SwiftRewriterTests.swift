@@ -259,6 +259,16 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteGlobalVariableDeclaration() throws {
+        try assertObjcTypeParse(
+            objc: """
+            const NSInteger myGlobal;
+            """,
+            swift: """
+            var myGlobal: Int
+            """)
+    }
+    
     private func assertObjcTypeParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
         let output = TestWriterOutput()
         let input = TestSingleInputProvider(code: objc)

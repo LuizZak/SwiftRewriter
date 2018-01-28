@@ -19,6 +19,9 @@ public class FileGenerationIntention: Intention {
     /// Gets the global functions to create on this file.
     private(set) var globalFunctionIntentions: [GlobalFunctionGenerationIntention] = []
     
+    /// Gets the global variables to create on this file.
+    private(set) var globalVariableIntentions: [GlobalVariableGenerationIntention] = []
+    
     public var source: ASTNode?
     
     public init(filePath: String) {
@@ -40,9 +43,26 @@ public class FileGenerationIntention: Intention {
     public func addGlobalFunction(_ intention: GlobalFunctionGenerationIntention) {
         globalFunctionIntentions.append(intention)
     }
+    
+    public func addGlobalVariable(_ intention: GlobalVariableGenerationIntention) {
+        globalVariableIntentions.append(intention)
+    }
 }
 
 /// An intention to generate a global function.
 public class GlobalFunctionGenerationIntention: FromSourceIntention {
     
+}
+
+/// An intention to generate a global variable.
+public class GlobalVariableGenerationIntention: FromSourceIntention {
+    public var name: String
+    public var type: ObjcType
+    public var initialValueExpr: String?
+    
+    public init(name: String, type: ObjcType, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+        self.name = name
+        self.type = type
+        super.init(accessLevel: accessLevel, source: source)
+    }
 }

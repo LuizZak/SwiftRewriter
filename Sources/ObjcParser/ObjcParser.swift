@@ -96,11 +96,14 @@ public class ObjcParser {
             } else if lexer.tokenType(.keyword(.atImplementation)) {
                 try parseClassImplementation()
             } else if lexer.tokenType(.preprocessorDirective) {
-                // TODO: Parse preprocessor directives
-                lexer.skipToken()
+                parseAnyTokenNode()
             } else {
-                diagnostics.error("Expected a definition in file before <eof>", location: location())
-                return
+                do {
+                    try parseGlobalDeclaration()
+                } catch {
+                    diagnostics.error("Expected a definition in file before <eof>", location: location())
+                    return
+                }
             }
         }
     }
