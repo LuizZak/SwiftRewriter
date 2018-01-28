@@ -138,6 +138,21 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteEmptyClassMethod() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            + (void)myMethod;
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                static func myMethod() {
+                }
+            }
+            """)
+    }
+    
     func testRewriteMethodSignatures() throws {
         try assertObjcTypeParse(
             objc: """

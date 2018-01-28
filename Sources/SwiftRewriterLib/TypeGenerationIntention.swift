@@ -107,6 +107,12 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         return source as? MethodDefinition
     }
     
+    public var isClassMethod: Bool {
+        return
+            source?.firstChild(ofType: TokenNode.self)?.token.type
+                == .operator(.add)
+    }
+    
     public var signature: Signature
     
     // TODO: Type this properly as a MethodBodyIntention or similar.

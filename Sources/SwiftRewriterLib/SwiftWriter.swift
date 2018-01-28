@@ -171,7 +171,13 @@ public class SwiftWriter {
     }
     
     private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
-        var decl = _prependAccessModifier(in: "func ", accessLevel: method.accessLevel)
+        var decl = "func "
+        
+        if method.isClassMethod {
+            decl = "static " + decl
+        }
+        
+        decl = _prependAccessModifier(in: decl, accessLevel: method.accessLevel)
         
         let sign = method.signature
         

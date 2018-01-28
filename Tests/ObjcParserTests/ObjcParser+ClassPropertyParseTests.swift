@@ -63,7 +63,6 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
-    
     func testParsePropertyWithSetterModifier() throws {
         let source = "@property (setter=setIsEnabled:) BOOL enabled;"
         let sut = ObjcParser(string: source)
