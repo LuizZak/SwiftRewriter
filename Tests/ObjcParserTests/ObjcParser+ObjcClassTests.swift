@@ -72,7 +72,6 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
-    // TODO: Make this pass by implementing @private/@protected/@package/@public
     func testParseClassWithIVarsPublic() throws {
         let source = """
             @interface MyClass

@@ -11,10 +11,10 @@ public class ClassGenerationIntention: TypeGenerationIntention {
 public class ProtocolInheritanceIntention: FromSourceIntention {
     public var protocolName: String
     
-    public init(protocolName: String, scope: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(protocolName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.protocolName = protocolName
         
-        super.init(scope: scope, source: source)
+        super.init(accessLevel: accessLevel, source: source)
     }
 }
 
@@ -27,9 +27,9 @@ public class InstanceVariableGenerationIntention: MemberGenerationIntention {
     public var name: String
     public var type: ObjcType
     
-    public init(name: String, type: ObjcType, scope: AccessLevel = .private, source: ASTNode? = nil) {
+    public init(name: String, type: ObjcType, accessLevel: AccessLevel = .private, source: ASTNode? = nil) {
         self.name = name
         self.type = type
-        super.init(scope: scope, source: source)
+        super.init(accessLevel: accessLevel, source: source)
     }
 }

@@ -6,8 +6,8 @@ public class FromSourceIntention: Intention {
     public var source: ASTNode?
     public var accessLevel: AccessLevel
     
-    public init(scope: AccessLevel, source: ASTNode?) {
-        self.accessLevel = scope
+    public init(accessLevel: AccessLevel, source: ASTNode?) {
+        self.accessLevel = accessLevel
         self.source = source
     }
 }
@@ -22,10 +22,10 @@ public class TypeGenerationIntention: FromSourceIntention {
     public var properties: [PropertyGenerationIntention] = []
     public var methods: [MethodGenerationIntention] = []
     
-    public init(typeName: String, scope: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
         
-        super.init(scope: scope, source: source)
+        super.init(accessLevel: accessLevel, source: source)
     }
     
     public func addProtocol(_ intention: ProtocolInheritanceIntention) {
@@ -84,10 +84,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
     public var name: String
     public var type: ObjcType
     
-    public init(name: String, type: ObjcType, scope: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String, type: ObjcType, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
         self.type = type
-        super.init(scope: scope, source: source)
+        super.init(accessLevel: accessLevel, source: source)
     }
 }
 
@@ -114,17 +114,19 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     
     public init(name: String, returnType: ObjcType,
                 returnTypeNullabilitySpecifier: TypeNullability,
-                parameters: [Parameter], scope: AccessLevel = .internal, source: ASTNode? = nil) {
+                parameters: [Parameter], accessLevel: AccessLevel = .internal,
+                source: ASTNode? = nil) {
         self.signature =
             Signature(name: name, returnType: returnType,
                       returnTypeNullability: returnTypeNullabilitySpecifier,
                       parameters: parameters)
-        super.init(scope: scope, source: source)
+        super.init(accessLevel: accessLevel, source: source)
     }
     
-    public init(signature: Signature, scope: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(signature: Signature, accessLevel: AccessLevel = .internal,
+                source: ASTNode? = nil) {
         self.signature = signature
-        super.init(scope: scope, source: source)
+        super.init(accessLevel: accessLevel, source: source)
     }
     
     public struct Signature: Equatable {

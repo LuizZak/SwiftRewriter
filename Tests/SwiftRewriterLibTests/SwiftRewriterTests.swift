@@ -186,6 +186,26 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteIVarsWithAccessControls() throws {
+        try assertObjcTypeParse(objc: """
+            @interface MyClass
+            {
+                NSString *_myString;
+            @package
+                __weak id _delegate;
+            @public
+                NSInteger _myInt;
+            }
+            @end
+            """, swift: """
+            class MyClass: NSObject {
+                private var _myString: String!
+                weak var _delegate: AnyObject?
+                public var _myInt: Int
+            }
+            """)
+    }
+    
     func testRewriteInterfaceWithImplementation() throws {
         try assertObjcTypeParse(
             objc: """

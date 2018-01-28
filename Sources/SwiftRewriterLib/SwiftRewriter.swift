@@ -64,6 +64,8 @@ public class SwiftRewriter {
                 self.enterObjcClassInterfaceNode(n)
             case let n as ObjcClassImplementation:
                 self.enterObjcClassImplementationNode(n)
+            case let n as IVarsList:
+                self.enterObjcClassIVarsListNode(n)
             default:
                 return
             }
@@ -78,6 +80,9 @@ public class SwiftRewriter {
             // Objective-C @implementation class definition
             case let n as ObjcClassImplementation:
                 self.visitObjcClassImplementationNode(n)
+                
+            case let n as KeywordNode:
+                self.visitKeywordNode(n)
             
             case let n as PropertyDefinition:
                 self.visitObjcClassInterfacePropertyNode(n)
@@ -104,6 +109,8 @@ public class SwiftRewriter {
                 self.exitObjcClassInterfaceNode(n)
             case let n as ObjcClassImplementation:
                 self.exitObjcClassImplementationNode(n)
+            case let n as IVarsList:
+                self.exitObjcClassIVarsListNode(n)
             default:
                 return
             }
@@ -121,6 +128,24 @@ public class SwiftRewriter {
     private func outputDefinitions() {
         let writer = SwiftWriter(intentions: intentionCollection, output: outputTarget)
         writer.execute()
+    }
+    
+    private func visitKeywordNode(_ node: KeywordNode) {
+        // Handle IVars list flagging
+        if let ctx = context.context(ofType: IVarListContext.self) {
+            switch node.keyword {
+            case .atPrivate:
+                ctx.accessLevel = .private
+            case .atPublic:
+                ctx.accessLevel = .public
+            case .atPackage:
+                ctx.accessLevel = .internal
+            case .atProtected:
+                ctx.accessLevel = .internal
+            default:
+                break
+            }
+        }
     }
     
     // MARK: - ObjcClassInterface
@@ -146,7 +171,7 @@ public class SwiftRewriter {
     }
     
     private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        context.popContext()
+        context.popContext() // ClassGenerationIntention
     }
     // MARK: -
     
@@ -173,7 +198,7 @@ public class SwiftRewriter {
     }
     
     private func exitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
-        context.popContext()
+        context.popContext() // ClassGenerationIntention
     }
     // MARK: -
     
@@ -228,16 +253,41 @@ public class SwiftRewriter {
         }
     }
     
+    // MARK: - IVar Section
+    private func enterObjcClassIVarsListNode(_ node: IVarsList) {
+        let ctx = IVarListContext(accessLevel: .private)
+        context.pushContext(ctx)
+    }
+    
     private func visitObjcClassIVarDeclarationNode(_ node: IVarDeclaration) {
-        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+        guard let classCtx = context.context(ofType: ClassGenerationIntention.self) else {
             return
         }
+        let ivarCtx =
+            context.context(ofType: IVarListContext.self)
+        
+        let access = ivarCtx?.accessLevel ?? .private
         
         let ivar =
-            InstanceVariableGenerationIntention(name: node.identifier.name ?? "",
-                                      type: node.type.type ?? .struct(""),
-                                      source: node)
+            InstanceVariableGenerationIntention(
+                name: node.identifier.name ?? "",
+                type: node.type.type ?? .struct(""),
+                accessLevel: access,
+                source: node)
         
-        ctx.addInstanceVariable(ivar)
+        classCtx.addInstanceVariable(ivar)
+    }
+    
+    private func exitObjcClassIVarsListNode(_ node: IVarsList) {
+        context.popContext() // InstanceVarContext
+    }
+    // MARK: -
+    
+    private class IVarListContext: Context {
+        var accessLevel: AccessLevel
+        
+        init(accessLevel: AccessLevel = .private) {
+            self.accessLevel = accessLevel
+        }
     }
 }
