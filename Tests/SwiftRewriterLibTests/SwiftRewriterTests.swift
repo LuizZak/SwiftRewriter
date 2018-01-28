@@ -200,7 +200,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 func myMethod() {
                     // Function body here
                 }
@@ -242,7 +242,7 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
     }
     
     func sourceName() -> String {
-        return "\(type(of: self))"
+        return "\(type(of: self)).m"
     }
     
     func loadSource() throws -> CodeSource {

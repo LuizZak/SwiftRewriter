@@ -26,7 +26,7 @@ public enum SourceRange: Equatable {
         case .location(let l):
             return l
         case .range(let r):
-            return r.lowerBound
+            return r.upperBound
         case .invalid:
             return nil
         }

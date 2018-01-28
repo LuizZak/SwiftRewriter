@@ -49,7 +49,7 @@ extension TokenType: CustomStringConvertible {
         case .singleLineComment:
             return "single line comment"
         case .multiLineComment:
-            return "milti-line comment"
+            return "multi-line comment"
         case .preprocessorDirective:
             return "preprocessor directive"
         case .decimalLiteral:

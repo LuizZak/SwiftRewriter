@@ -3,6 +3,10 @@ import XCTest
 import GrammarModels
 
 class ObjcParserTests: XCTestCase {
+    static var allTests = [
+        ("testInit", testInit),
+    ]
+    
     func testInit() {
         _=ObjcParser(string: "abc")
     }
@@ -28,10 +32,6 @@ class ObjcParserTests: XCTestCase {
             """
         _=parserTest(source)
     }
-    
-    static var allTests = [
-        ("testInit", testInit),
-    ]
     
     private func parserTest(_ source: String) -> GlobalContextNode {
         let sut = ObjcParser(string: source)

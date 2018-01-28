@@ -162,7 +162,6 @@ public class SwiftWriter {
         target.output(line: decl)
         
         target.idented {
-            // TODO: Output method body here.
             outputMethodBody(method, target: target)
         }
         
@@ -170,7 +169,10 @@ public class SwiftWriter {
     }
     
     private func outputMethodBody(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
-        
+        // TODO: Convert and output Swift method body here.
+        if let body = method.body {
+            target.output(line: body.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
     }
     
     private func generateParameters(for signature: MethodGenerationIntention.Signature) -> String {

@@ -10,6 +10,14 @@ import GrammarModels
 @testable import ObjcParser
 
 class ObjcLexer_TokenizerTests: XCTestCase {
+    var autoSkipComments = true
+    
+    override func setUp() {
+        super.setUp()
+        
+        autoSkipComments = true
+    }
+    
     func testTokenizeLiterals() {
         expect("123", toTokenizeAs: .decimalLiteral)
         expect("123.4", toTokenizeAs: .floatLiteral)
@@ -135,6 +143,18 @@ class ObjcLexer_TokenizerTests: XCTestCase {
             """, toTokenizeAs: [.decimalLiteral, .identifier])
     }
     
+    func testConsumeComments() {
+        autoSkipComments = false
+        
+        expect(sequence: "abc // test\n123", toTokenizeAs: [.identifier, .singleLineComment, .decimalLiteral])
+        expect(sequence: """
+            123
+            /* test
+             comment */
+            abc
+            """, toTokenizeAs: [.decimalLiteral, .multiLineComment, .identifier])
+    }
+    
     func testTokenizeSequence() {
         let source = """
             >> << @@ >= <= identifier @interface @notkeyword 1234 0x0f1Ab,1,2.3F
@@ -155,7 +175,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     }
     
     private func expect(sequence string: String, toTokenizeAs expectedTypes: [TokenType], file: String = #file, line: Int = #line) {
-        let lexer = ObjcLexer(source: StringCodeSource(source: string))
+        let lexer = makeLexer(string)
         
         for pair in zip(lexer.allTokens(), expectedTypes) {
             
@@ -180,12 +200,19 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     }
     
     private func tokenizeTest(_ string: String, _ expected: Token, file: String = #file, line: Int = #line) {
-        let lexer = ObjcLexer(source: StringCodeSource(source: string))
+        let lexer = makeLexer(string)
         
         if lexer.token() != expected {
             recordFailure(withDescription: "Expected token: \(expected) received token: \(lexer.token())",
                           inFile: file, atLine: line, expected: false)
         }
+    }
+    
+    private func makeLexer(_ string: String) -> ObjcLexer {
+        let lexer = ObjcLexer(source: StringCodeSource(source: string))
+        lexer.autoSkipComments = autoSkipComments
+        
+        return lexer
     }
     
     private func fullRange(_ str: String) -> SourceLocation {

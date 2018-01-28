@@ -25,6 +25,7 @@ public class SwiftRewriter {
     
     public func rewrite() throws {
         try loadInputSources()
+        performIntentionPasses()
         outputDefinitions()
     }
     
@@ -61,6 +62,8 @@ public class SwiftRewriter {
             switch node {
             case let n as ObjcClassInterface:
                 self.enterObjcClassInterfaceNode(n)
+            case let n as ObjcClassImplementation:
+                self.enterObjcClassImplementationNode(n)
             default:
                 return
             }
@@ -71,12 +74,16 @@ public class SwiftRewriter {
             // Objective-C @interface class declarations
             case let n as ObjcClassInterface:
                 self.visitObjcClassInterfaceNode(n)
+                
+            // Objective-C @implementation class definition
+            case let n as ObjcClassImplementation:
+                self.visitObjcClassImplementationNode(n)
             
             case let n as PropertyDefinition:
                 self.visitObjcClassInterfacePropertyNode(n)
             
             case let n as MethodDefinition:
-                self.visitObjcClassInterfaceMethodNode(n)
+                self.visitObjcClassMethodNode(n)
                 
             case let n as ObjcClassInterface.ProtocolReferenceList:
                 self.visitObjcClassProtocolReferenceListNode(n)
@@ -95,12 +102,20 @@ public class SwiftRewriter {
             switch node {
             case let n as ObjcClassInterface:
                 self.exitObjcClassInterfaceNode(n)
+            case let n as ObjcClassImplementation:
+                self.exitObjcClassImplementationNode(n)
             default:
                 return
             }
         }
         
         traverser.traverse()
+    }
+    
+    private func performIntentionPasses() {
+        for pass in IntentionPasses.passes {
+            pass.apply(on: intentionCollection)
+        }
     }
     
     private func outputDefinitions() {
@@ -135,6 +150,33 @@ public class SwiftRewriter {
     }
     // MARK: -
     
+    // MARK: - ObjcClassImplementation
+    private func enterObjcClassImplementationNode(_ node: ObjcClassImplementation) {
+        guard let name = node.identifier.name else {
+            return
+        }
+        
+        let intent =
+            ClassGenerationIntention(typeName: name, source: node)
+        
+        intentionCollection.addIntention(intent)
+        
+        context
+            .context(ofType: FileGenerationIntention.self)?
+            .addType(intent)
+        
+        context.pushContext(intent)
+    }
+    
+    private func visitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
+        
+    }
+    
+    private func exitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
+        context.popContext()
+    }
+    // MARK: -
+    
     private func visitObjcClassInterfacePropertyNode(_ node: PropertyDefinition) {
         guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
             return
@@ -148,7 +190,7 @@ public class SwiftRewriter {
         ctx.addProperty(prop)
     }
     
-    private func visitObjcClassInterfaceMethodNode(_ node: MethodDefinition) {
+    private func visitObjcClassMethodNode(_ node: MethodDefinition) {
         guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
             return
         }
@@ -160,6 +202,8 @@ public class SwiftRewriter {
         
         let method =
             MethodGenerationIntention(signature: sign, source: node)
+        
+        method.body = node.body
         
         ctx.addMethod(method)
     }

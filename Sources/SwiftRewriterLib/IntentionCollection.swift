@@ -31,6 +31,15 @@ public class IntentionCollection {
         for (i, item) in _intentions.enumerated() {
             if let it = item as? T, predicate(it) {
                 _intentions.remove(at: i)
+                return
+            }
+        }
+    }
+    
+    public func removeIntentions<T>(where predicate: (T) -> Bool) {
+        for (i, item) in _intentions.enumerated().reversed() {
+            if let it = item as? T, predicate(it) {
+                _intentions.remove(at: i)
             }
         }
     }

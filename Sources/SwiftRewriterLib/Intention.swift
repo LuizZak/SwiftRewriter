@@ -29,6 +29,14 @@ public class FileGenerationIntention: Intention {
         typeIntentions.append(intention)
     }
     
+    public func removeTypes(where predicate: (TypeGenerationIntention) -> Bool) {
+        for (i, type) in typeIntentions.enumerated().reversed() {
+            if predicate(type) {
+                typeIntentions.remove(at: i)
+            }
+        }
+    }
+    
     public func addGlobalFunction(_ intention: FunctionGenerationIntention) {
         globalFunctionIntentions.append(intention)
     }

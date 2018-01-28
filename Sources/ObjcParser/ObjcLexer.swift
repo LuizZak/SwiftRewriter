@@ -17,6 +17,10 @@ public class ObjcLexer {
     internal(set) public var currentToken = Token(type: .eof, string: "",
                                                   location: .invalid)
     
+    /// Whether to automatically skip over single/multi-comment tokens.
+    /// Defaults to true.
+    public var autoSkipComments: Bool = true
+    
     /// Gets a value specifying whether the current token is pointing to the end
     /// of the valid source string.
     ///
@@ -86,6 +90,7 @@ public class ObjcLexer {
     /// Gets the current token, and skips to the next token on the string
     public func nextToken() -> Token {
         let tok = token()
+        skipToken()
         _readToken()
         return tok
     }
@@ -96,7 +101,10 @@ public class ObjcLexer {
             return
         }
         
-        _readToken()
+        if let index = token().location.range.end {
+            lexer.inputIndex = index
+            _readToken()
+        }
     }
     
     /// Advances through the tokens until a predicate returns false for a token
@@ -115,10 +123,18 @@ public class ObjcLexer {
     }
     
     private func _readToken() {
+        let index = lexer.inputIndex
+        defer {
+            lexer.inputIndex = index
+        }
+        
         _hasReadToken = true
         
         lexer.skipWhitespace()
-        skipComments()
+        
+        if autoSkipComments {
+            skipComments()
+        }
         
         if lexer.isEof() {
             if currentToken.type != .eof {
@@ -131,7 +147,9 @@ public class ObjcLexer {
         do {
             let p = try! lexer.peek()
             
-            if attemptReadPreprocessorDirective() {
+            if !autoSkipComments && attemptReadCommentToken() {
+                // Done!
+            } else if attemptReadPreprocessorDirective() {
                // Done!
             } else if isStringLiteralToken() {
                 try readStringLiteralToken()
@@ -163,16 +181,52 @@ public class ObjcLexer {
         }
         
         while lexer.advanceIf(equals: "/*") {
-            if !lexer.safeAdvance() {
-                return
-            }
-            
-            if lexer.advanceIf(equals: "*/") {
-                break
+            while !lexer.isEof() {
+                if !lexer.safeAdvance() {
+                    return
+                }
+                
+                if lexer.advanceIf(equals: "*/") {
+                    break
+                }
             }
         }
         
         lexer.skipWhitespace()
+    }
+    
+    private func attemptReadCommentToken() -> Bool {
+        let range = startRange()
+        let tokenType: TokenType
+        
+        if lexer.advanceIf(equals: "//") {
+            lexer.advance(until: { $0 == "\n" })
+            _=lexer.safeAdvance()
+            
+            tokenType = .singleLineComment
+        } else if lexer.advanceIf(equals: "/*") {
+            let bk = backtracker()
+            
+            while !lexer.isEof() {
+                if !lexer.safeAdvance() {
+                    bk.backtrack()
+                    return false
+                }
+                
+                if lexer.advanceIf(equals: "*/") {
+                    break
+                }
+            }
+            
+            tokenType = .multiLineComment
+        } else {
+            return false
+        }
+        
+        currentToken =
+            Token(type: tokenType, string: range.makeString(), location: range.makeLocation())
+        
+        return true
     }
     
     /// Parses a pre-processor directive token.
@@ -322,7 +376,7 @@ public class ObjcLexer {
         
         init(objcLexer: ObjcLexer) {
             self.objcLexer = objcLexer
-            self.index = objcLexer.lexer.inputIndex
+            self.index = _RangeMarker.lexerIndex(in: objcLexer)
         }
         
         func makeSubstring() -> Substring {
@@ -330,6 +384,10 @@ public class ObjcLexer {
         }
         
         func makeRange() -> SourceRange {
+            if index == _RangeMarker.lexerIndex(in: objcLexer) {
+                return .location(index)
+            }
+            
             return .range(rawRange())
         }
         
@@ -338,7 +396,11 @@ public class ObjcLexer {
         }
         
         private func rawRange() -> Range<Lexer.Index> {
-            return index..<objcLexer.lexer.inputIndex
+            return index..<_RangeMarker.lexerIndex(in: objcLexer)
+        }
+        
+        private static func lexerIndex(in lexer: ObjcLexer) -> Lexer.Index {
+            return lexer.lexer.inputIndex
         }
     }
     

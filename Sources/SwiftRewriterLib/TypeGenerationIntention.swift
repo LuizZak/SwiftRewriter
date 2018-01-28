@@ -27,6 +27,46 @@ public class TypeGenerationIntention: FromSourceIntention {
         
         super.init(scope: scope, source: source)
     }
+    
+    public func addProtocol(_ intention: ProtocolInheritanceIntention) {
+        self.protocols.append(intention)
+    }
+    
+    public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
+        self.instanceVariables.append(intention)
+    }
+    
+    public func addProperty(_ intention: PropertyGenerationIntention) {
+        self.properties.append(intention)
+    }
+    
+    public func addMethod(_ intention: MethodGenerationIntention) {
+        self.methods.append(intention)
+    }
+    
+    public func hasProtocol(named name: String) -> Bool {
+        return protocols.contains(where: { $0.protocolName == name })
+    }
+    
+    public func hasInstanceVariable(named name: String) -> Bool {
+        return instanceVariables.contains(where: { $0.name == name })
+    }
+    
+    public func hasProperty(named name: String) -> Bool {
+        return properties.contains(where: { $0.name == name })
+    }
+    
+    public func hasMethod(named name: String) -> Bool {
+        return methods.contains(where: { $0.name == name })
+    }
+    
+    public func hasMethod(withSignature signature: MethodGenerationIntention.Signature) -> Bool {
+        return methods.contains(where: { $0.signature == signature })
+    }
+    
+    public func method(withSignature signature: MethodGenerationIntention.Signature) -> MethodGenerationIntention? {
+        return methods.first(where: { $0.signature == signature })
+    }
 }
 
 /// An intention to generate a property or method on a type
@@ -59,6 +99,9 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     
     public var signature: Signature
     
+    // TODO: Type this properly as a MethodBodyIntention or similar.
+    public var body: String?
+    
     public var name: String {
         return signature.name
     }
@@ -84,14 +127,14 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         super.init(scope: scope, source: source)
     }
     
-    public struct Signature {
+    public struct Signature: Equatable {
         public var name: String
         public var returnType: ObjcType
         public var returnTypeNullability: TypeNullability
         public var parameters: [Parameter]
     }
     
-    public struct Parameter {
+    public struct Parameter: Equatable {
         public var label: String
         public var name: String
         public var nullability: TypeNullability
@@ -105,16 +148,4 @@ public enum AccessLevel: String {
     case `fileprivate`
     case `internal`
     case `public`
-}
-
-extension MethodGenerationIntention.Signature: Equatable {
-    public static func ==(lhs: MethodGenerationIntention.Signature, rhs: MethodGenerationIntention.Signature) -> Bool {
-        return lhs.name == rhs.name && lhs.parameters == rhs.parameters && lhs.returnType == rhs.returnType
-    }
-}
-
-extension MethodGenerationIntention.Parameter: Equatable {
-    public static func ==(lhs: MethodGenerationIntention.Parameter, rhs: MethodGenerationIntention.Parameter) -> Bool {
-        return lhs.name == rhs.name && lhs.label == rhs.label && lhs.nullability == rhs.nullability && lhs.type == rhs.type
-    }
 }
