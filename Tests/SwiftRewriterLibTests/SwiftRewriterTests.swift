@@ -96,6 +96,7 @@ class SwiftRewriterTests: XCTestCase {
             @property NSArray<NSString*>* stringArray;
             @property (nonnull) NSArray<SomeType*>* clsArray;
             @property (nullable) NSArray<SomeType*>* clsArrayNull;
+            @property (nonnull) NSArray<SomeType<SomeDelegate>*> *delegateableArray;
             @end
             """,
             swift: """
@@ -105,6 +106,7 @@ class SwiftRewriterTests: XCTestCase {
                 var stringArray: [String]!
                 var clsArray: [SomeType]
                 var clsArrayNull: [SomeType]?
+                var delegateableArray: [SomeType & SomeDelegate]
             }
             """)
     }
