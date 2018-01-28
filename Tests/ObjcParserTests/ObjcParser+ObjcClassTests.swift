@@ -364,9 +364,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
                     try parser.parseClassInerfaceNode()
                 }
             
-            let result: ObjcClassInterface! = root.childrenMatching().first
-            
-            return result
+            let node: ObjcClassInterface? = root.firstChild()
+            return node!
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
             fatalError()
@@ -380,9 +379,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
                     try parser.parseClassImplementation()
             }
             
-            let result: ObjcClassImplementation! = root.childrenMatching().first
-            
-            return result
+            let node: ObjcClassImplementation? = root.firstChild()
+            return node!
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
             fatalError()

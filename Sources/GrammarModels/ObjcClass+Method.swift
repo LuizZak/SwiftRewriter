@@ -68,7 +68,7 @@ public class MethodSelector: ASTNode {
 public class KeywordDeclarator: ASTNode {
     public var selector: Identifier?
     public var type: MethodType? {
-        return childrenMatching().first
+        return firstChild()
     }
     public var identifier: Identifier?
     

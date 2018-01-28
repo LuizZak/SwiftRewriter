@@ -23,4 +23,6 @@ public enum Keyword: String {
     case atPackage = "@package"
     case atOptional = "@optional"
     case atRequired = "@required"
+    case atSynthesize = "@synthesize"
+    case atDynamic = "@dynamic"
 }

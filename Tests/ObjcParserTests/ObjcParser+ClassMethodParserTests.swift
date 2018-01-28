@@ -113,9 +113,8 @@ class ObjcParser_ClassMethodParseTests: XCTestCase {
                     try parser.parseMethodDeclaration()
             }
             
-            let result: MethodDefinition! = root.childrenMatching().first
-            
-            return result
+            let node: MethodDefinition? = root.firstChild()
+            return node!
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
             fatalError()

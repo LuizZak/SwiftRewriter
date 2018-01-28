@@ -76,6 +76,26 @@ open class ASTNode: ASTNodeValue {
         return children.compactMap { $0 as? T }
     }
     
+    /// Gets the first child of this `ASTNode` that passes a given predicate.
+    public func firstChild<T: ASTNode>(where predicate: (T) -> Bool) -> T? {
+        for child in children {
+            guard let cast = child as? T else {
+                continue
+            }
+            
+            if predicate(cast) {
+                return cast
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Gets the first child of this `ASTNode` that is derived from a given type.
+    public func firstChild<T: ASTNode>(ofType type: T.Type = T.self) -> T? {
+        return firstChild { _ in true }
+    }
+    
     /// Updates the source range by making it the union of all of this node's
     /// children's ranges combined.
     /// Does nothing if resulting range is .invalid.

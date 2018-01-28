@@ -10,14 +10,49 @@ public class ObjcClassImplementation: ASTNode, InitializableNode {
 
 public extension ObjcClassImplementation {
     public var superclass: SuperclassName? {
-        return childrenMatching().first
+        return firstChild()
     }
     
     public var ivarsList: IVarsList? {
-        return childrenMatching().first
+        return firstChild()
     }
     
     public var methods: [MethodDefinition] {
         return childrenMatching()
     }
+}
+
+/// Node for a @synthesize/@dynamic declaration in a class implementation.
+public class PropertyImplementation: ASTNode {
+    
+    /// Returns the kind of this property implementation node.
+    /// Defaults to `@synthesize`, if it's missing the required keyword nodes.
+    public var kind: PropertyImplementationKind {
+        let kws = childrenMatching(type: KeywordNode.self)
+        
+        if kws.contains(where: { $0.keyword == Keyword.atDynamic }) {
+            return .dynamic
+        } else {
+            return .synthesize
+        }
+    }
+    
+    public var list: ASTNodeRef<PropertySynthesizeList> = .placeholder
+}
+
+/// List of synthesizes in a @synthesize/@dynamic property implementation.
+public class PropertySynthesizeList: ASTNode {
+    public var items: [PropertySynthesizeItem] {
+        return childrenMatching(type: PropertySynthesizeItem.self)
+    }
+}
+
+/// Single item of a @synthesize/@dynamic property implementation list.
+public class PropertySynthesizeItem: ASTNode {
+    
+}
+
+public enum PropertyImplementationKind {
+    case synthesize
+    case dynamic
 }

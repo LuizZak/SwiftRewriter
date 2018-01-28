@@ -13,15 +13,15 @@ public extension ObjcClassInterface {
     }
     
     public var superclass: SuperclassName? {
-        return childrenMatching().first
+        return firstChild()
     }
     
     public var protocolList: ProtocolReferenceList? {
-        return childrenMatching().first
+        return firstChild()
     }
     
     public var ivarsList: IVarsList? {
-        return childrenMatching().first
+        return firstChild()
     }
     
     public var methods: [MethodDefinition] {

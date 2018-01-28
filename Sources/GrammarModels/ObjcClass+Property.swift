@@ -3,7 +3,7 @@ public class PropertyDefinition: ASTNode, InitializableNode {
     public var type: ASTNodeRef<TypeNameNode>
     
     public var modifierList: PropertyModifierList? {
-        return childrenMatching().first
+        return firstChild()
     }
     
     /// Identifier for this property
