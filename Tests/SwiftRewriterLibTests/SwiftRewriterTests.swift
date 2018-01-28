@@ -59,13 +59,15 @@ class SwiftRewriterTests: XCTestCase {
             @interface MyClass
             @property BOOL someField;
             @property NSInteger someOtherField;
-            @property (nonnull) NSString* aRatherStringlyField;
-            @property (nullable) NSString* specifiedNull;
+            @property (nonnull) NSString *aRatherStringlyField;
+            @property (nullable) NSString *specifiedNull;
             @property NSString *_Nonnull nonNullWithQualifier;
-            @property NSString* nonSpecifiedNull;
+            @property NSString *nonSpecifiedNull;
             @property id idType;
             @property (weak) id<MyDelegate, MyDataSource> delegate;
-            @property (assign, nonnull) MyClass* assignProp;
+            @property (nonnull) UITableView<UITableViewDataSource> *tableWithDataSource;
+            @property (weak) UIView<UIDelegate> *weakViewWithDelegate;
+            @property (assign, nonnull) MyClass *assignProp;
             @end
             """,
             swift: """
@@ -78,6 +80,8 @@ class SwiftRewriterTests: XCTestCase {
                 var nonSpecifiedNull: String!
                 var idType: AnyObject!
                 weak var delegate: AnyObject<MyDelegate, MyDataSource>?
+                var tableWithDataSource: UITableView & UITableViewDataSource
+                weak var weakViewWithDelegate: (UIView & UIDelegate)?
                 unowned(unsafe) var assignProp: MyClass
             }
             """)

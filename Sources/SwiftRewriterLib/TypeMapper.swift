@@ -51,7 +51,7 @@ public class TypeMapper {
             type = "AnyObject<\(protocols.joined(separator: ", "))>"
         }
         
-        let final = swiftType(name: type, withNullability: context.nullability())
+        let final = swiftType(name: type, withNullability: context.nullability(), parens: false)
         return final
     }
     
@@ -77,7 +77,13 @@ public class TypeMapper {
                           context: context.asAlwaysNonNull())
             }
         
-        return "\(name)<\(types.joined(separator: ", "))>"
+        if isPointerOnly(types: parameters) {
+            // Generic type
+            return "\(name)<\(types.joined(separator: ", "))>"
+        } else {
+            // Concrete class + protocol conformance list
+            return ([name] + types).joined(separator: " & ")
+        }
     }
     
     private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> String {
@@ -91,21 +97,30 @@ public class TypeMapper {
                 final = inner
             }
             
-            return swiftType(name: final, withNullability: context.nullability())
+            return swiftType(name: final, withNullability: context.nullability(), parens: false)
         }
         
         final = swiftType(forObjcType: type, context: context)
         
-        return swiftType(name: final, withNullability: context.nullability())
+        return swiftType(name: final, withNullability: context.nullability(),
+                         parens: shouldParenthesize(type: type))
     }
     
-    private func swiftType(name: String, withNullability nullability: TypeNullability) -> String {
+    private func swiftType(name: String, withNullability nullability: TypeNullability, parens: Bool) -> String {
         switch nullability {
         case .nonnull:
             return name
         case .nullable:
+            if parens {
+                return "(" + name + ")?"
+            }
+            
             return name + "?"
         case .nullResettable, .unspecified:
+            if parens {
+                return "(" + name + ")!"
+            }
+            
             return name + "!"
         }
     }
@@ -113,7 +128,8 @@ public class TypeMapper {
     private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String], context: TypeMappingContext) -> String {
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
-        return swiftType(name: final, withNullability: context.nullability())
+        return swiftType(name: final, withNullability: context.nullability(),
+                         parens: shouldParenthesize(type: type))
     }
     
     private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String], context: TypeMappingContext) -> String {
@@ -121,7 +137,36 @@ public class TypeMapper {
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
-        return swiftType(name: final, withNullability: locQualifiers.nullability())
+        return
+            swiftType(name: final, withNullability: locQualifiers.nullability(),
+                      parens: shouldParenthesize(type: type))
+    }
+    
+    private func shouldParenthesize(type: ObjcType) -> Bool {
+        switch type {
+        case .generic(_, let params):
+            return !isPointerOnly(types: params)
+        case .pointer(let inner):
+            return shouldParenthesize(type: inner)
+        default:
+            return false
+        }
+    }
+    
+    private func isPointerOnly(types: [ObjcType]) -> Bool {
+        if types.count == 0 {
+            return false
+        }
+        
+        for type in types {
+            if case .pointer = type {
+                continue
+            }
+            
+            return false
+        }
+        
+        return true
     }
     
     private static let _scalarMappings: [String: String] = [

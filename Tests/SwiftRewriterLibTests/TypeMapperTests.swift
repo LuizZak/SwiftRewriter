@@ -43,6 +43,14 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "AnyObject!")
     }
     
+    func testConcreteTypesWithProtocol() {
+        expect(.pointer(.generic("UIView", parameters: [.struct("UIDelegate")])),
+               toConvertTo: "UIView & UIDelegate")
+        expect(.pointer(.generic("UIView", parameters: [.struct("UIDelegate")])),
+               withExplicitNullability: .nullable,
+               toConvertTo: "(UIView & UIDelegate)?")
+    }
+    
     private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull, toConvertTo expected: String, file: String = #file, line: Int = #line) {
         let converted = typeMapperConvert(type, nullability: nullability)
         
