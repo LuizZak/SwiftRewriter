@@ -39,7 +39,7 @@ public class SwiftRewriter {
     
     private func loadObjcSource(from source: InputSource) throws {
         // Generate intention for this source
-        let fileIntent = FileGenerationIntention(fileName: source.sourceName())
+        let fileIntent = FileGenerationIntention(filePath: source.sourceName())
         intentionCollection.addIntention(fileIntent)
         context.pushContext(fileIntent)
         defer {

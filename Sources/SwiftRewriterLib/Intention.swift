@@ -10,8 +10,8 @@ public protocol Intention: Context {
 
 /// An intention to create a .swift file
 public class FileGenerationIntention: Intention {
-    /// The intended output file name
-    public var fileName: String
+    /// The intended output file path
+    public var filePath: String
     
     /// Gets the types to create on this file.
     private(set) var typeIntentions: [TypeGenerationIntention] = []
@@ -21,8 +21,8 @@ public class FileGenerationIntention: Intention {
     
     public var source: ASTNode?
     
-    public init(fileName: String) {
-        self.fileName = fileName
+    public init(filePath: String) {
+        self.filePath = filePath
     }
     
     public func addType(_ intention: TypeGenerationIntention) {

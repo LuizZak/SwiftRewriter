@@ -4,7 +4,7 @@ public class IntentionCollection {
     private var _intentions: [Intention] = []
     
     public func intentionFor(fileNamed name: String) -> FileGenerationIntention? {
-        return intentions().first { $0.fileName == name }
+        return intentions().first { $0.filePath == name }
     }
     
     public func intentionFor(classNamed name: String) -> ClassGenerationIntention? {
@@ -25,5 +25,13 @@ public class IntentionCollection {
     
     public func intentions<T>(ofType type: T.Type = T.self) -> [T] {
         return _intentions.flatMap { $0 as? T }
+    }
+    
+    public func removeIntention<T>(where predicate: (T) -> Bool) {
+        for (i, item) in _intentions.enumerated() {
+            if let it = item as? T, predicate(it) {
+                _intentions.remove(at: i)
+            }
+        }
     }
 }

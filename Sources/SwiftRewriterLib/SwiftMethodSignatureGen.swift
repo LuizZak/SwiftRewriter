@@ -16,7 +16,7 @@ public class SwiftMethodSignatureGen {
     public func generateDefinitionSignature(from objcMethod: MethodDefinition) -> MethodGenerationIntention.Signature {
         var sign =
             MethodGenerationIntention
-                .Signature(name: "_",
+                .Signature(name: "__",
                            returnType: ObjcType.id(protocols: []),
                            returnTypeNullability: .unspecified,
                            parameters: [])

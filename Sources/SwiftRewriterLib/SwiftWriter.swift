@@ -23,7 +23,7 @@ public class SwiftWriter {
     }
     
     private func outputFile(_ fileIntent: FileGenerationIntention) {
-        let file = output.createFile(path: fileIntent.fileName)
+        let file = output.createFile(path: fileIntent.filePath)
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.flatMap { $0 as? ClassGenerationIntention }
         
