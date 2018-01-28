@@ -44,9 +44,36 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertEqual(result.type.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier.name, "myProperty1")
         XCTAssertNotNil(result.modifierList)
-        XCTAssertEqual(result.modifierList?.modifiers[0].name, "atomic")
-        XCTAssertEqual(result.modifierList?.modifiers[1].name, "nonatomic")
-        XCTAssertEqual(result.modifierList?.modifiers[2].name, "copy")
+        XCTAssertEqual(result.modifierList?.keywordModifiers[0], "atomic")
+        XCTAssertEqual(result.modifierList?.keywordModifiers[1], "nonatomic")
+        XCTAssertEqual(result.modifierList?.keywordModifiers[2], "copy")
+        XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
+    }
+    
+    func testParsePropertyWithGetterModifier() throws {
+        let source = "@property (getter=isEnabled) BOOL enabled;"
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestPropertyNode(source: source, parser: sut)
+        
+        XCTAssertEqual(result.type.type, .struct("BOOL"))
+        XCTAssertEqual(result.identifier.name, "enabled")
+        XCTAssertNotNil(result.modifierList)
+        XCTAssertEqual(result.modifierList?.getterModifiers[0], "isEnabled")
+        XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
+    }
+    
+    
+    func testParsePropertyWithSetterModifier() throws {
+        let source = "@property (setter=setIsEnabled:) BOOL enabled;"
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestPropertyNode(source: source, parser: sut)
+        
+        XCTAssertEqual(result.type.type, .struct("BOOL"))
+        XCTAssertEqual(result.identifier.name, "enabled")
+        XCTAssertNotNil(result.modifierList)
+        XCTAssertEqual(result.modifierList?.setterModifiers[0], "setIsEnabled")
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
@@ -59,8 +86,8 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         XCTAssertEqual(result.type.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier.name, "myProperty1")
         XCTAssertNotNil(result.modifierList)
-        XCTAssertEqual(result.modifierList?.modifiers[0].name, "atomic")
-        XCTAssertEqual(result.modifierList?.modifiers[1].name, "nonatomic")
+        XCTAssertEqual(result.modifierList?.keywordModifiers[0], "atomic")
+        XCTAssertEqual(result.modifierList?.keywordModifiers[1], "nonatomic")
         XCTAssertEqual(sut.diagnostics.errors.count, 1)
     }
     

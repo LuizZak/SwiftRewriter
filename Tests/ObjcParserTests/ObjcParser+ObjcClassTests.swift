@@ -176,9 +176,9 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
         XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
         XCTAssertNotNil(result.properties[0].modifierList)
-        XCTAssertEqual(result.properties[0].modifierList?.modifiers[0].name, "atomic")
-        XCTAssertEqual(result.properties[0].modifierList?.modifiers[1].name, "nonatomic")
-        XCTAssertEqual(result.properties[0].modifierList?.modifiers[2].name, "copy")
+        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[0], "atomic")
+        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[1], "nonatomic")
+        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[2], "copy")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
@@ -195,8 +195,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
         XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
         XCTAssertNotNil(result.properties[0].modifierList)
-        XCTAssertEqual(result.properties[0].modifierList?.modifiers[0].name, "atomic")
-        XCTAssertEqual(result.properties[0].modifierList?.modifiers[1].name, "nonatomic")
+        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[0], "atomic")
+        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[1], "nonatomic")
         XCTAssertEqual(sut.diagnostics.errors.count, 2)
     }
     

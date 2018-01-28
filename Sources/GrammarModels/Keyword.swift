@@ -17,6 +17,8 @@ public enum Keyword: String {
     case typedef
     case `struct`
     case `enum`
+    case getter
+    case setter
     case atPrivate = "@private"
     case atPublic = "@public"
     case atProtected = "@protected"

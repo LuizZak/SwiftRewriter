@@ -101,7 +101,7 @@ public class SwiftWriter {
         var decl = "var "
         
         /// Detect `weak` and `unowned` vars
-        if let modifiers = prop.propertySource?.modifierList?.modifiers.map({ $0.name }) {
+        if let modifiers = prop.propertySource?.modifierList?.keywordModifiers {
             if modifiers.contains("weak") {
                 decl = "weak \(decl)"
             } else if modifiers.contains("unsafe_unretained") || modifiers.contains("assign") {

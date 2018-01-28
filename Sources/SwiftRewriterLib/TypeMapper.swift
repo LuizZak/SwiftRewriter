@@ -204,11 +204,11 @@ public class TypeMapper {
         /// Returns whether a modifier with a given name can be found within this
         /// type mapping context
         public func hasPropertyModifier(named name: String) -> Bool {
-            guard let mods = modifiers?.modifiers else {
+            guard let mods = modifiers?.keywordModifiers else {
                 return false
             }
             
-            return mods.contains { $0.name == name }
+            return mods.contains(name)
         }
         
         /// Returns whether a type qualifier with a given name can be found within

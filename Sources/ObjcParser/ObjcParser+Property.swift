@@ -36,10 +36,39 @@ public extension ObjcParser {
         func parsePropertyModifier() throws {
             do {
                 let range = startRange()
-                let token = try lexer.consume(tokenType: .identifier)
+                let node: PropertyModifier
                 
-                let node =
-                    PropertyModifier(name: token.string, location: range.makeLocation())
+                if lexer.tokenType(.keyword(.getter)) {
+                    // 'getter' '=' IDENT
+                    try parseAnyKeyword()
+                    
+                    // '='
+                    try parseTokenNode(.operator(.assign))
+                    
+                    // IDENT
+                    let id = try parseIdentifierNode()
+                    
+                    node = PropertyModifier(getter: id.name, location: range.makeLocation())
+                } else if lexer.tokenType(.keyword(.setter)) {
+                    // 'setter' '=' IDENT ':'
+                    try parseAnyKeyword()
+                    
+                    // '='
+                    try parseTokenNode(.operator(.assign))
+                    
+                    // IDENT
+                    let id = try parseIdentifierNode()
+                    
+                    // ':'
+                    try parseTokenNode(.colon, onMissing: "Expected a setter selector")
+                    
+                    node = PropertyModifier(setter: id.name, location: range.makeLocation())
+                } else {
+                    let token = try lexer.consume(tokenType: .identifier)
+                    
+                    node = PropertyModifier(name: token.string, location: range.makeLocation())
+                }
+                
                 context.addChildNode(node)
             } catch {
                 diagnostics.error("Expected a property modifier", location: location())
