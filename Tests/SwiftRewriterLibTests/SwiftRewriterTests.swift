@@ -173,12 +173,15 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @interface MyClass
             - (instancetype)init;
+            - (instancetype)initWithThing:(id)thing;
             - (instancetype)initWithNumber:(nonnull NSNumber*)number;
             @end
             """,
             swift: """
             class MyClass: NSObject {
                 init() {
+                }
+                init(with thing: AnyObject!) {
                 }
                 init(with number: NSNumber) {
                 }
@@ -210,10 +213,14 @@ class SwiftRewriterTests: XCTestCase {
         try assertObjcTypeParse(
             objc: """
             @interface MyClass
+            - (instancetype)initWithThing:(id)thing;
             - (void)myMethod;
             @end
             
             @implementation MyClass
+            - (instancetype)initWithThing:(id)thing {
+                // Init here
+            }
             - (void)myMethod {
                 // Function body here
             }
@@ -221,6 +228,9 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                init(with thing: AnyObject!) {
+                    // Init here
+                }
                 func myMethod() {
                     // Function body here
                 }

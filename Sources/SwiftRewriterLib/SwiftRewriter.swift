@@ -131,7 +131,7 @@ public class SwiftRewriter {
     }
     
     private func visitKeywordNode(_ node: KeywordNode) {
-        // Handle IVars list flagging
+        // ivar list accessibility specification
         if let ctx = context.context(ofType: IVarListContext.self) {
             switch node.keyword {
             case .atPrivate:
@@ -173,7 +173,6 @@ public class SwiftRewriter {
     private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
         context.popContext() // ClassGenerationIntention
     }
-    // MARK: -
     
     // MARK: - ObjcClassImplementation
     private func enterObjcClassImplementationNode(_ node: ObjcClassImplementation) {

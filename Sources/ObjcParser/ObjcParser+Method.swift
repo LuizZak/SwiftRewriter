@@ -42,7 +42,7 @@ public extension ObjcParser {
         } else if lexer.tokenType(.openBrace) {
             lexer.autoSkipComments = false
             
-            lexer.skipToken()
+            try parseTokenNode(.openBrace)
             
             // TODO: Actually parse statements here
             let range = startRange()
@@ -59,7 +59,7 @@ public extension ObjcParser {
                     depth -= 0
                 }
                 
-                lexer.skipToken()
+                parseAnyTokenNode()
             }
             
             method.body = range.makeString()
@@ -69,7 +69,7 @@ public extension ObjcParser {
             if depth != 0 {
                 diagnostics.error("Expected \(TokenType.closeBrace) to finish method definition", location: location())
             } else {
-                lexer.skipToken()
+                try parseTokenNode(.closeBrace)
             }
         } else {
             diagnostics.error("Expected \(TokenType.semicolon) or method body after method declaration", location: location())
@@ -118,7 +118,7 @@ public extension ObjcParser {
 
     func parseKeywordDeclaratorList() throws {
         do {
-            while !lexer.tokenType(.semicolon) {
+            while !lexer.tokenType(.semicolon) && !lexer.tokenType(.openBrace) {
                 try parseKeywordDeclarator()
             }
         } catch {

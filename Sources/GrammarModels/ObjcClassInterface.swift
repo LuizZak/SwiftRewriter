@@ -23,6 +23,10 @@ public extension ObjcClassInterface {
     public var ivarsList: IVarsList? {
         return childrenMatching().first
     }
+    
+    public var methods: [MethodDefinition] {
+        return childrenMatching()
+    }
 }
 
 public class SuperclassName: Identifier {

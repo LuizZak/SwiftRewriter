@@ -7,3 +7,17 @@ public class ObjcClassImplementation: ASTNode, InitializableNode {
         
     }
 }
+
+public extension ObjcClassImplementation {
+    public var superclass: SuperclassName? {
+        return childrenMatching().first
+    }
+    
+    public var ivarsList: IVarsList? {
+        return childrenMatching().first
+    }
+    
+    public var methods: [MethodDefinition] {
+        return childrenMatching()
+    }
+}

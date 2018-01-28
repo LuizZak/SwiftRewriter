@@ -218,6 +218,18 @@ public class ObjcParser {
         }
     }
     
+    func parseAnyTokenNode(onMissing message: String? = nil, addToContext: Bool = true) {
+        let range = startRange()
+        
+        let tok = lexer.nextToken()
+        
+        if addToContext {
+            let node = TokenNode(token: tok, location: range.makeLocation())
+            
+            context.addChildNode(node)
+        }
+    }
+    
     /// Starts parsing a comman-separated list of items using the specified braces
     /// settings and an item-parsing closure.
     ///

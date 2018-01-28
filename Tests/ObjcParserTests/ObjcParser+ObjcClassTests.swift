@@ -274,6 +274,50 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssert(sut.diagnostics.errors.count > 0)
     }
     
+    func testParseClassWithInit() throws {
+        let source = """
+            @interface MyClass
+            - (instancetype)initWithThing:(id)thing;
+            @end
+            """
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
+        
+        let method = result.methods[0]
+        let selector = method.methodSelector.selector
+        
+        XCTAssertNil(method.body)
+        XCTAssertEqual(selector?.keywordDeclarations?.count, 1)
+        XCTAssertEqual(selector?.keywordDeclarations?[0].selector?.name, "initWithThing")
+        XCTAssertEqual(selector?.keywordDeclarations?[0].identifier?.name, "thing")
+        XCTAssert(method.childrenMatching(type: TokenNode.self).contains { $0.token.type == .semicolon })
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
+    func testParseClassImplementationWithInit() throws {
+        let source = """
+            @implementation MyClass
+            - (instancetype)initWithThing:(id)thing {
+            }
+            @end
+            """
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestObjcImplementationNode(source: source, parser: sut)
+        
+        let method = result.methods[0]
+        let selector = method.methodSelector.selector
+        
+        XCTAssertNotNil(method.body)
+        XCTAssertEqual(selector?.keywordDeclarations?.count, 1)
+        XCTAssertEqual(selector?.keywordDeclarations?[0].selector?.name, "initWithThing")
+        XCTAssertEqual(selector?.keywordDeclarations?[0].identifier?.name, "thing")
+        XCTAssert(method.childrenMatching(type: TokenNode.self).contains { $0.token.type == .openBrace })
+        XCTAssert(method.childrenMatching(type: TokenNode.self).contains { $0.token.type == .closeBrace })
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
     func testParseProtocolReferenceList() throws {
         // Arrange
         let source = "<UITableViewDataSource, UITableViewDelegate, _MyProtocol1_>"
@@ -321,6 +365,22 @@ class ObjcParser_ObjcClassTests: XCTestCase {
                 }
             
             let result: ObjcClassInterface! = root.childrenMatching().first
+            
+            return result
+        } catch {
+            recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
+            fatalError()
+        }
+    }
+    
+    private func _parseTestObjcImplementationNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> ObjcClassImplementation {
+        do {
+            let root: GlobalContextNode =
+                try parser.withTemporaryContext {
+                    try parser.parseClassImplementation()
+            }
+            
+            let result: ObjcClassImplementation! = root.childrenMatching().first
             
             return result
         } catch {
