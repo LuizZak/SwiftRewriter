@@ -77,17 +77,27 @@ public class MemberGenerationIntention: FromSourceIntention {
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention {
-    public var typedSource: PropertyDefinition? {
+    public var propertySource: PropertyDefinition? {
         return source as? PropertyDefinition
+    }
+    public var synthesizeSource: PropertySynthesizeItem? {
+        return source as? PropertySynthesizeItem
     }
     
     public var name: String
     public var type: ObjcType
+    public var mode: Mode = .asField
     
     public init(name: String, type: ObjcType, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
         self.type = type
         super.init(accessLevel: accessLevel, source: source)
+    }
+    
+    public enum Mode {
+        case asField
+        case computed(MethodBody)
+        case property(get: MethodBody, set: MethodBody)
     }
 }
 

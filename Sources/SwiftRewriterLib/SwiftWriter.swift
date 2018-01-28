@@ -101,7 +101,7 @@ public class SwiftWriter {
         var decl = "var "
         
         /// Detect `weak` and `unowned` vars
-        if let modifiers = prop.typedSource?.modifierList?.modifiers.map({ $0.name }) {
+        if let modifiers = prop.propertySource?.modifierList?.modifiers.map({ $0.name }) {
             if modifiers.contains("weak") {
                 decl = "weak \(decl)"
             } else if modifiers.contains("unsafe_unretained") || modifiers.contains("assign") {
@@ -111,12 +111,45 @@ public class SwiftWriter {
         
         decl = _prependAccessModifier(in: decl, accessLevel: prop.accessLevel)
         
-        let ctx = TypeMapper.TypeMappingContext(modifiers: prop.typedSource?.modifierList)
+        let ctx = TypeMapper.TypeMappingContext(modifiers: prop.propertySource?.modifierList)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
         decl += "\(prop.name): \(typeName)"
         
-        target.output(line: decl)
+        switch prop.mode {
+        case .asField:
+            target.output(line: decl)
+            break
+        case .computed(let body):
+            decl += " {"
+            
+            target.output(line: decl)
+            
+            target.idented {
+                outputMethodBody(body, target: target)
+            }
+            
+            target.output(line: "}")
+        case let .property(getter, setter):
+            decl += " {"
+            
+            target.output(line: decl)
+            
+            target.idented {
+                target.output(line: "get {")
+                target.idented {
+                    outputMethodBody(getter, target: target)
+                }
+                target.output(line: "}")
+                target.output(line: "set {")
+                target.idented {
+                    outputMethodBody(setter, target: target)
+                }
+                target.output(line: "}")
+            }
+            
+            target.output(line: "}")
+        }
     }
     
     private func outputInitMethod(_ initMethod: MethodGenerationIntention, target: RewriterOutputTarget) {
@@ -129,8 +162,9 @@ public class SwiftWriter {
         target.output(line: decl)
         
         target.idented {
-            // TODO: Output method body here.
-            outputMethodBody(initMethod, target: target)
+            if let body = initMethod.body {
+                outputMethodBody(body, target: target)
+            }
         }
         
         target.output(line: "}")
@@ -138,9 +172,6 @@ public class SwiftWriter {
     
     private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
         var decl = _prependAccessModifier(in: "func ", accessLevel: method.accessLevel)
-        if method.accessLevel != .internal {
-            
-        }
         
         let sign = method.signature
         
@@ -162,17 +193,17 @@ public class SwiftWriter {
         target.output(line: decl)
         
         target.idented {
-            outputMethodBody(method, target: target)
+            if let body = method.body {
+                outputMethodBody(body, target: target)
+            }
         }
         
         target.output(line: "}")
     }
     
-    private func outputMethodBody(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+    private func outputMethodBody(_ body: MethodBody, target: RewriterOutputTarget) {
         // TODO: Convert and output Swift method body here.
-        if let body = method.body {
-            target.output(line: body.trimmingCharacters(in: .whitespacesAndNewlines))
-        }
+        target.output(line: body.trimmingCharacters(in: .whitespacesAndNewlines))
     }
     
     private func generateParameters(for signature: MethodGenerationIntention.Signature) -> String {
