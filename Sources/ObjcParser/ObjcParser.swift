@@ -91,6 +91,15 @@ public class ObjcParser {
         // TODO: Flesh out full global scope grammar here
         
         while !lexer.isEof {
+            // Hack-ish: Parse NS_ASSUME_NONNULL_BEGIN/END macros
+            if lexer.tokenType(.identifier) {
+                if lexer.token().string == "NS_ASSUME_NONNULL_BEGIN" ||
+                    lexer.token().string == "NS_ASSUME_NONNULL_END" {
+                    context.addChildNode(try parseIdentifierNode())
+                    continue
+                }
+            }
+            
             if lexer.tokenType(.keyword(.atInterface)) {
                 if isClassCategory() {
                     try parseClassCategoryNode()

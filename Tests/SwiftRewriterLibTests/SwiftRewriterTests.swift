@@ -5,6 +5,14 @@ import GrammarModels
 
 class SwiftRewriterTests: XCTestCase {
     
+    func testParseNonnullMacros() throws {
+        try assertObjcTypeParse(objc: """
+            NS_ASSUME_NONNULL_BEGIN
+            NS_ASSUME_NONNULL_END
+            """, swift: """
+            """)
+    }
+    
     func testRewriteEmptyClass() throws {
         try assertObjcTypeParse(
             objc: """
