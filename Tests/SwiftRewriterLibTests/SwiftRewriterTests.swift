@@ -6,7 +6,7 @@ import GrammarModels
 class SwiftRewriterTests: XCTestCase {
     
     func testParseNonnullMacros() throws {
-        try assertObjcTypeParse(objc: """
+        try assertObjcParse(objc: """
             NS_ASSUME_NONNULL_BEGIN
             NS_ASSUME_NONNULL_END
             """, swift: """
@@ -14,7 +14,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteEmptyClass() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass: NSObject
             @end
@@ -26,7 +26,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteInfersNSObjectSuperclass() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             @end
@@ -38,7 +38,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteInheritance() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass : UIView
             @end
@@ -50,7 +50,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteProtocolSpecification() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass : UIView <UITableViewDelegate>
             @end
@@ -62,7 +62,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteClassProperties() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             @property BOOL someField;
@@ -96,7 +96,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteNSArray() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             @property (nonnull) NSArray* nontypedArray;
@@ -120,7 +120,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteInstanceVariables() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             {
@@ -138,7 +138,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteEmptyMethod() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             - (void)myMethod;
@@ -153,7 +153,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteEmptyClassMethod() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             + (void)myMethod;
@@ -168,7 +168,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteMethodSignatures() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             - (void)myMethod;
@@ -198,7 +198,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteInitMethods() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)init;
@@ -219,7 +219,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteIVarsWithAccessControls() throws {
-        try assertObjcTypeParse(objc: """
+        try assertObjcParse(objc: """
             @interface MyClass
             {
                 NSString *_myString;
@@ -239,7 +239,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteInterfaceWithImplementation() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)initWithThing:(id)thing;
@@ -268,7 +268,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteInterfaceWithCategoryWithImplementation() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)initWithThing:(id)thing;
@@ -310,7 +310,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testWhenRewritingMethodsSignaturesWithNullabilityOverrideSignaturesWithout() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)initWithThing:(nonnull id)thing;
@@ -339,7 +339,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteGlobalVariableDeclaration() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             const NSInteger myGlobal;
             NSInteger myOtherGlobal;
@@ -351,7 +351,7 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     func testRewriteGlobalVariableDeclarationWithInitialValue() throws {
-        try assertObjcTypeParse(
+        try assertObjcParse(
             objc: """
             const CGFloat kMyConstantValue = 45;
             NSString *_Nonnull kMyNotConstantValue;
@@ -362,7 +362,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    private func assertObjcTypeParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
+    private func assertObjcParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
         let output = TestWriterOutput()
         let input = TestSingleInputProvider(code: objc)
         
@@ -384,7 +384,7 @@ class SwiftRewriterTests: XCTestCase {
     }
 }
 
-class TestSingleInputProvider: InputSourcesProvider, InputSource {
+private class TestSingleInputProvider: InputSourcesProvider, InputSource {
     var code: String
     
     init(code: String) {
@@ -404,7 +404,7 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
     }
 }
 
-class TestWriterOutput: WriterOutput, FileOutput {
+private class TestWriterOutput: WriterOutput, FileOutput {
     var buffer: String = ""
     
     func createFile(path: String) -> FileOutput {

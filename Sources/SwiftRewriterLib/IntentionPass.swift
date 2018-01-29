@@ -77,12 +77,24 @@ public class FileGroupingIntentionPass: IntentionPass {
             mergeDefinitions(from: header, into: implementation)
         }
         
-        /*
-        // Remove all header intentions (implementation intentions override them)
+        // Remove all header intentions that have a matching implementation
+        // (implementation intentions override them)
         intentionCollection.removeIntentions { (intent: FileGenerationIntention) -> Bool in
-            return intent.filePath.hasSuffix(".h")
+            if !intent.filePath.hasSuffix(".h") {
+                return false
+            }
+            
+            let headerFile =
+                (intent.filePath as NSString).deletingPathExtension
+            
+            if implementations.contains(where: { impl -> Bool in
+                (impl.filePath as NSString).deletingPathExtension == headerFile
+            }) {
+                return true
+            }
+            
+            return false
         }
-        */
     }
     
     private func mergeDefinitions(from header: FileGenerationIntention,
