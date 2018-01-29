@@ -6,6 +6,13 @@ public class FromSourceIntention: Intention {
     public var source: ASTNode?
     public var accessLevel: AccessLevel
     
+    // NOTE: This is a hack- shouldn't be recorded on the intention but passed to
+    // it in a more abstract way.
+    // For now we leave as it makes things work!
+    /// Whether this intention was collected between NS_ASSUME_NONNULL_BEGIN/END
+    /// macros.
+    public var inNonnullContext: Bool = false
+    
     public init(accessLevel: AccessLevel, source: ASTNode?) {
         self.accessLevel = accessLevel
         self.source = source
@@ -143,7 +150,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     public struct Signature: Equatable {
         public var name: String
         public var returnType: ObjcType
-        public var returnTypeNullability: TypeNullability
+        public var returnTypeNullability: TypeNullability?
         public var parameters: [Parameter]
         
         public static func match(lhs: Signature, rhs: Signature, ignoreNullability: Bool = false) -> Bool {
@@ -171,7 +178,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     public struct Parameter: Equatable {
         public var label: String
         public var name: String
-        public var nullability: TypeNullability
+        public var nullability: TypeNullability?
         public var type: ObjcType
         
         public static func match(lhs: Parameter, rhs: Parameter, ignoreNullability: Bool = false) -> Bool {

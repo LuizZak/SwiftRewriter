@@ -362,6 +362,30 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriterUsesNonnullMacrosForNullabilityInferring() throws {
+        try assertObjcParse(
+            objc: """
+            NS_ASSUME_NONNULL_BEGIN
+            @interface MyClass1
+            - (id)aMethod:(NSString*)param;
+            @end
+            NS_ASSUME_NONNULL_END
+            @interface MyClass2
+            - (id)aMethod:(NSString*)param;
+            @end
+            """,
+            swift: """
+            class MyClass1: NSObject {
+                func aMethod(param: String) -> AnyObject {
+                }
+            }
+            class MyClass2: NSObject {
+                func aMethod(param: String!) -> AnyObject! {
+                }
+            }
+            """)
+    }
+    
     private func assertObjcParse(objc: String, swift expectedSwift: String, file: String = #file, line: Int = #line) throws {
         let output = TestWriterOutput()
         let input = TestSingleInputProvider(code: objc)

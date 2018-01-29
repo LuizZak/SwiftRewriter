@@ -199,6 +199,10 @@ public class TypeMapper {
         /// Nullability specifiers from a method definition's type decl
         public var nullabilitySpecifiers: [NullabilitySpecifier] = []
         
+        /// If true, always infers `nonnull` for otherwise unspecified nullability
+        /// cases.
+        public var inNonnullContext: Bool = false
+        
         /// Objc type qualifiers from a type name.
         /// See `ObjcType` for more information.
         public var qualifiers: [String] = []
@@ -215,23 +219,24 @@ public class TypeMapper {
         /// Is overriden by `alwaysNonnull`.
         public var explicitNullability: TypeNullability?
         
-        public init(modifiers: PropertyModifierList?) {
-            self.modifiers = modifiers
-        }
-        
-        public init(modifiers: PropertyModifierList?, qualifiers: [String], alwaysNonnull: Bool) {
+        public init(modifiers: PropertyModifierList?, qualifiers: [String] = [],
+                    alwaysNonnull: Bool = false, inNonnull: Bool = false) {
             self.modifiers = modifiers
             self.qualifiers = qualifiers
             self.alwaysNonnull = alwaysNonnull
+            self.inNonnullContext = inNonnull
         }
         
-        public init(explicitNullability: TypeNullability?) {
+        public init(explicitNullability: TypeNullability?, inNonnull: Bool = false) {
             self.explicitNullability = explicitNullability
+            self.inNonnullContext = inNonnull
         }
         
-        public init(nullabilitySpecs: [NullabilitySpecifier], alwaysNonnull: Bool = false) {
+        public init(nullabilitySpecs: [NullabilitySpecifier], alwaysNonnull: Bool = false,
+                    inNonnull: Bool = false) {
             self.nullabilitySpecifiers = nullabilitySpecs
             self.alwaysNonnull = alwaysNonnull
+            self.inNonnullContext = inNonnull
         }
         
         public func asAlwaysNonNull() -> TypeMappingContext {
@@ -313,6 +318,10 @@ public class TypeMapper {
             }
             if hasNullableModifier() {
                 return .nullable
+            }
+            
+            if inNonnullContext {
+                return .nonnull
             }
             
             return .unspecified

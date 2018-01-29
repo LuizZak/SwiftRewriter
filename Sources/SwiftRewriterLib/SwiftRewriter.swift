@@ -10,6 +10,9 @@ public class SwiftRewriter {
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
     
+    /// Whether we're in between NS_ASSUME_NONNULL_BEGIN/END macros
+    private var _isInNonnullContext = false
+    
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
     public let diagnostics: Diagnostics
@@ -113,6 +116,14 @@ public class SwiftRewriter {
                 
             case let n as VariableDeclaration:
                 self.visitVariableDeclarationNode(n)
+                
+            case let n as Identifier
+                where n.name == "NS_ASSUME_NONNULL_BEGIN":
+                self._isInNonnullContext = true
+                
+            case let n as Identifier
+                where n.name == "NS_ASSUME_NONNULL_END":
+                self._isInNonnullContext = false
             default:
                 return
             }
@@ -179,6 +190,8 @@ public class SwiftRewriter {
         let intent =
             GlobalVariableGenerationIntention(name: name.name, type: type.type,
                                               source: node)
+        
+        intent.inNonnullContext = _isInNonnullContext
         
         if let expr = node.initialExpression?.expression {
             intent.initialValueExpr = expr.expression
@@ -300,6 +313,8 @@ public class SwiftRewriter {
                                         type: node.type.type ?? .struct(""),
                                         source: node)
         
+        prop.inNonnullContext = _isInNonnullContext
+        
         ctx.addProperty(prop)
     }
     
@@ -315,6 +330,8 @@ public class SwiftRewriter {
         
         let method =
             MethodGenerationIntention(signature: sign, source: node)
+        
+        method.inNonnullContext = _isInNonnullContext
         
         method.body = node.body
         
@@ -362,6 +379,8 @@ public class SwiftRewriter {
                 type: node.type.type ?? .struct(""),
                 accessLevel: access,
                 source: node)
+        
+        ivar.inNonnullContext = _isInNonnullContext
         
         classCtx.addInstanceVariable(ivar)
     }

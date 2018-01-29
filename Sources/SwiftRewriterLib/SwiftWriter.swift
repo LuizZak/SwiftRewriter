@@ -51,7 +51,9 @@ public class SwiftWriter {
         
         decl += name
         
-        let ctx = TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: type))
+        let ctx =
+            TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: type),
+                                          inNonnull: varDecl.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
         decl += ": \(typeName)"
@@ -117,7 +119,9 @@ public class SwiftWriter {
         
         decl = _prependAccessModifier(in: decl, accessLevel: ivar.accessLevel)
         
-        let ctx = TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: ivar.type) ?? .unspecified)
+        let ctx =
+            TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: ivar.type) ?? .unspecified,
+                                          inNonnull: ivar.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
         decl += "\(ivar.name): \(typeName)"
@@ -141,7 +145,9 @@ public class SwiftWriter {
         
         decl = _prependAccessModifier(in: decl, accessLevel: prop.accessLevel)
         
-        let ctx = TypeMapper.TypeMappingContext(modifiers: prop.propertySource?.modifierList)
+        let ctx =
+            TypeMapper.TypeMappingContext(modifiers: prop.propertySource?.modifierList,
+                                          inNonnull: prop.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
         decl += "\(prop.name): \(typeName)"
@@ -185,7 +191,8 @@ public class SwiftWriter {
     private func outputInitMethod(_ initMethod: MethodGenerationIntention, target: RewriterOutputTarget) {
         var decl = _prependAccessModifier(in: "init", accessLevel: initMethod.accessLevel)
         
-        decl += generateParameters(for: initMethod.signature)
+        decl += generateParameters(for: initMethod.signature,
+                                   inNonnullContext: initMethod.inNonnullContext)
         
         decl += " {"
         
@@ -213,7 +220,8 @@ public class SwiftWriter {
         
         decl += sign.name
         
-        decl += generateParameters(for: method.signature)
+        decl += generateParameters(for: method.signature,
+                                   inNonnullContext: method.inNonnullContext)
         
         switch sign.returnType {
         case .void: // `-> Void` can be omitted for void functions.
@@ -221,7 +229,8 @@ public class SwiftWriter {
         default:
             decl += " -> "
             decl += typeMapper.swiftType(forObjcType: sign.returnType,
-                                         context: .init(explicitNullability: sign.returnTypeNullability))
+                                         context: .init(explicitNullability: sign.returnTypeNullability,
+                                                        inNonnull: method.inNonnullContext))
         }
         
         decl += " {"
@@ -242,7 +251,8 @@ public class SwiftWriter {
         target.output(line: body.trimmingCharacters(in: .whitespacesAndNewlines))
     }
     
-    private func generateParameters(for signature: MethodGenerationIntention.Signature) -> String {
+    private func generateParameters(for signature: MethodGenerationIntention.Signature,
+                                    inNonnullContext: Bool = false) -> String {
         var decl = "("
         
         for (i, param) in signature.parameters.enumerated() {
@@ -259,7 +269,8 @@ public class SwiftWriter {
             
             decl +=
                 typeMapper.swiftType(forObjcType: param.type,
-                                     context: .init(explicitNullability: param.nullability))
+                                     context: .init(explicitNullability: param.nullability,
+                                                    inNonnull: inNonnullContext))
         }
         
         decl += ")"

@@ -18,7 +18,7 @@ public class SwiftMethodSignatureGen {
             MethodGenerationIntention
                 .Signature(name: "__",
                            returnType: ObjcType.id(protocols: []),
-                           returnTypeNullability: .unspecified,
+                           returnTypeNullability: nil,
                            parameters: [])
         
         if let sel = objcMethod.methodSelector.selector {
@@ -55,7 +55,7 @@ public class SwiftMethodSignatureGen {
         for (i, kw) in keywords.enumerated() {
             var label = kw.selector?.name ?? "_"
             let identifier = kw.identifier?.name ?? "_\(i)"
-            var nullability = TypeNullability.unspecified
+            var nullability: TypeNullability? = nil
             let type = kw.type?.type.type ?? ObjcType.id(protocols: [])
             
             // The first label name is always equal to its keyword's identifier.
@@ -92,9 +92,9 @@ public class SwiftMethodSignatureGen {
         }
     }
     
-    private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability {
+    private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability? {
         guard let last = specifiers.last else {
-            return .unspecified
+            return nil
         }
         
         switch last.name {
@@ -102,8 +102,10 @@ public class SwiftMethodSignatureGen {
             return .nonnull
         case "nullable":
             return .nullable
-        default:
+        case "null_unspecified":
             return .unspecified
+        default:
+            return nil
         }
     }
 }
