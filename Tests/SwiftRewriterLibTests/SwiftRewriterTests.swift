@@ -301,10 +301,12 @@ class SwiftRewriterTests: XCTestCase {
     func testRewriteGlobalVariableDeclarationWithInitialValue() throws {
         try assertObjcTypeParse(
             objc: """
-            const CGFloat kMyValue = 45;
+            const CGFloat kMyConstantValue = 45;
+            NSString *_Nonnull kMyNotConstantValue;
             """,
             swift: """
-            var kMyValue: CGFloat = 45
+            let kMyConstantValue: CGFloat = 45
+            var kMyNotConstantValue: String
             """)
     }
     

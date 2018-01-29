@@ -44,13 +44,14 @@ public class SwiftWriter {
         let name = varDecl.name
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr
+        let varOrLet = _varOrLet(fromType: type)
         
-        var decl = "var "
+        var decl = varOrLet + " "
         decl = _prependAccessModifier(in: decl, accessLevel: varDecl.accessLevel)
         
         decl += name
         
-        let ctx = TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: varDecl.type) ?? .unspecified)
+        let ctx = TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: type))
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
         decl += ": \(typeName)"
@@ -110,8 +111,9 @@ public class SwiftWriter {
     // TODO: See if we can reuse the PropertyGenerationIntention
     private func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
         let type = ivar.type
+        let varOrLet = _varOrLet(fromType: type)
         
-        var decl = _prependOwnership(in: "var ", for: ivar.type)
+        var decl = _prependOwnership(in: varOrLet + " ", for: ivar.type)
         
         decl = _prependAccessModifier(in: decl, accessLevel: ivar.accessLevel)
         
@@ -272,6 +274,19 @@ public class SwiftWriter {
         }
         
         return "\(pref) \(decl)"
+    }
+    
+    private func _varOrLet(fromType type: ObjcType) -> String {
+        switch type {
+        case .specified(let specifiers, _):
+            if specifiers.contains("const") {
+                return "let"
+            }
+        default:
+            break
+        }
+        
+        return "var"
     }
     
     private func _typeNullability(inType type: ObjcType) -> TypeNullability? {

@@ -225,7 +225,7 @@ public class TypeMapper {
             self.alwaysNonnull = alwaysNonnull
         }
         
-        public init(explicitNullability: TypeNullability) {
+        public init(explicitNullability: TypeNullability?) {
             self.explicitNullability = explicitNullability
         }
         
