@@ -69,6 +69,37 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
+    func testProcessAssumeNonnullAcrossFiles() throws {
+        assertThat()
+            .file(name: "objc.h",
+                  """
+            NS_ASSUME_NONNULL_BEGIN
+            @interface MyClass
+            @property NSString *property;
+            - (id)myMethod:(NSString*)parameter;
+            @end
+            NS_ASSUME_NONNULL_END
+            """)
+            .file(name: "objc.m",
+                  """
+            @implementation MyClass
+            - (id)myMethod:(NSString*)parameter {
+            }
+            @end
+            """)
+            .translatesToSwift(
+                """
+            class MyClass: NSObject {
+                var property: String
+                
+                func myMethod(parameter: String) -> AnyObject {
+                    
+                }
+            }
+            // End of file objc.m
+            """)
+    }
+    
     private func assertThat() -> TestBuilder {
         return TestBuilder(test: self)
     }
