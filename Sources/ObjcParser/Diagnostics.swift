@@ -5,10 +5,6 @@ import GrammarModels
 public class Diagnostics {
     private(set) public var diagnostics: [DiagnosticMessage] = []
     
-    public init() {
-        
-    }
-    
     public var errors: [DiagnosticMessage] {
         return diagnostics.filter { if case .error = $0 { return true }; return false }
     }
@@ -17,8 +13,28 @@ public class Diagnostics {
         return diagnostics.filter { if case .warning = $0 { return true }; return false }
     }
     
-    public var note: [DiagnosticMessage] {
+    public var notes: [DiagnosticMessage] {
         return diagnostics.filter { if case .note = $0 { return true }; return false }
+    }
+    
+    public init() {
+        
+    }
+    
+    public func printDiagnostics<Target>(to output: inout Target, includeNotes: Bool = false) where Target: TextOutputStream {
+        for error in errors {
+            print("Error: " + error.description, to: &output)
+        }
+        
+        for warning in warnings {
+            print("Warnings: " + warning.description, to: &output)
+        }
+        
+        if includeNotes {
+            for note in notes {
+                print("Note: " + note.description, to: &output)
+            }
+        }
     }
     
     public func error(_ message: String, location: SourceLocation) {

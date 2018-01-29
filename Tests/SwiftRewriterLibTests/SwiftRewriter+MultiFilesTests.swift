@@ -4,15 +4,36 @@ import ObjcParser
 import GrammarModels
 
 class SwiftRewriter_MultiFilesTests: XCTestCase {
+    func testEmittingErrors() throws {
+        assertThat()
+            .file(name: "objc.h",
+            """
+            @interface MyClass
+            - (void)myMethod
+            @end
+            """)
+            .translatesToSwift(
+            """
+            class MyClass: NSObject {
+                func myMethod() {
+                }
+            }
+            // End of file objc.h
+            """, expectsErrors: true)
+            .assertErrorStreamIs("""
+            Error: Expected ';' or method body after method declaration at line 3 column 1
+            """)
+    }
+    
     func testEmittingHeaderWhenMissingImplementation() throws {
-        assertObjcParse()
+        assertThat()
             .file(name: "objc.h",
             """
             @interface MyClass
             - (void)myMethod;
             @end
             """)
-            .swift(
+            .translatesToSwift(
             """
             class MyClass: NSObject {
                 func myMethod() {
@@ -23,7 +44,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
     }
     
     func testAvoidEmittingHeaderWhenImplementationExists() throws {
-        assertObjcParse()
+        assertThat()
             .file(name: "objc.h",
             """
             @interface MyClass
@@ -37,7 +58,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             }
             @end
             """)
-            .swift(
+            .translatesToSwift(
             """
             class MyClass: NSObject {
                 func myMethod() {
@@ -48,7 +69,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
-    private func assertObjcParse() -> TestBuilder {
+    private func assertThat() -> TestBuilder {
         return TestBuilder(test: self)
     }
 }
@@ -56,6 +77,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
 private class TestBuilder {
     var test: XCTestCase
     var files: [(name: String, souce: String)] = []
+    var errors: String = ""
     
     init(test: XCTestCase) {
         self.test = test
@@ -67,7 +89,8 @@ private class TestBuilder {
     }
     
     /// Assertion execution point
-    func swift(_ expectedSwift: String, file: String = #file, line: Int = #line) {
+    @discardableResult
+    func translatesToSwift(_ expectedSwift: String, expectsErrors: Bool = false, file: String = #file, line: Int = #line) -> TestBuilder {
         let inputs = files.map(TestInputSource.init)
         
         let output = TestWriterOutput()
@@ -82,11 +105,23 @@ private class TestBuilder {
                 test.recordFailure(withDescription: "Failed: Expected to translate Objective-C inputs as \(expectedSwift), but translate as \(output.buffer)", inFile: file, atLine: line, expected: false)
             }
             
-            if sut.diagnostics.errors.count != 0 {
+            if !expectsErrors && sut.diagnostics.errors.count != 0 {
                 test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(sut.diagnostics.errors.description)", inFile: file, atLine: line, expected: false)
             }
+            
+            var errorsOutput = ""
+            sut.diagnostics.printDiagnostics(to: &errorsOutput)
+            errors = errorsOutput.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
             test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
+        }
+        
+        return self
+    }
+    
+    func assertErrorStreamIs(_ expected: String, file: String = #file, line: Int = #line) {
+        if errors != expected {
+            test.recordFailure(withDescription: "Mismatched errors stream. Expected \(expected) but found \(errors)", inFile: file, atLine: line, expected: false)
         }
     }
 }
