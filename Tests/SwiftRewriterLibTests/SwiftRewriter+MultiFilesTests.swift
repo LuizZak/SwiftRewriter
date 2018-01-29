@@ -6,12 +6,14 @@ import GrammarModels
 class SwiftRewriter_MultiFilesTests: XCTestCase {
     func testEmittingHeaderWhenMissingImplementation() throws {
         assertObjcParse()
-            .header("""
+            .file(name: "objc.h",
+            """
             @interface MyClass
             - (void)myMethod;
             @end
             """)
-            .swift("""
+            .swift(
+            """
             class MyClass: NSObject {
                 func myMethod() {
                 }
@@ -22,18 +24,21 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
     
     func testAvoidEmittingHeaderWhenImplementationExists() throws {
         assertObjcParse()
-            .header("""
+            .file(name: "objc.h",
+            """
             @interface MyClass
             - (void)myMethod;
             @end
             """)
-            .implementation("""
+            .file(name: "objc.m",
+            """
             @implementation MyClass
             - (void)myMethod {
             }
             @end
             """)
-            .swift("""
+            .swift(
+            """
             class MyClass: NSObject {
                 func myMethod() {
                     
@@ -59,14 +64,6 @@ private class TestBuilder {
     func file(name: String, _ contents: String) -> TestBuilder {
         files.append((name, contents))
         return self
-    }
-    
-    func header(name: String = "objc", _ contents: String) -> TestBuilder {
-        return file(name: name + ".h", contents)
-    }
-    
-    func implementation(name: String = "objc", _ contents: String) -> TestBuilder {
-        return file(name: name + ".m", contents)
     }
     
     /// Assertion execution point
