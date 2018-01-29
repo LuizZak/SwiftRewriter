@@ -14,6 +14,7 @@ public enum Keyword: String {
     case atProperty = "@property"
     case atEnd = "@end"
     case atProtocol = "@protocol"
+    case atClass = "@class"
     case typedef
     case `struct`
     case `enum`

@@ -62,6 +62,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("@package", toTokenizeAs: .keyword(.atPackage))
         expect("@optional", toTokenizeAs: .keyword(.atOptional))
         expect("@required", toTokenizeAs: .keyword(.atRequired))
+        expect("@class", toTokenizeAs: .keyword(.atClass))
         expect("if", toTokenizeAs: .keyword(.if))
         expect("else", toTokenizeAs: .keyword(.else))
         expect("while", toTokenizeAs: .keyword(.while))

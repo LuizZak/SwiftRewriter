@@ -100,24 +100,63 @@ public class ObjcParser {
                 }
             }
             
+            // @class - forward class declaration
+            if lexer.tokenType(.keyword(.atClass)) {
+                try parseForwardClassDeclaration()
+                continue
+            }
+            
+            // @interface
             if lexer.tokenType(.keyword(.atInterface)) {
                 if isClassCategory() {
                     try parseClassCategoryNode()
                 } else {
                     try parseClassInerfaceNode()
                 }
-            } else if lexer.tokenType(.keyword(.atImplementation)) {
-                try parseClassImplementation()
-            } else if lexer.tokenType(.preprocessorDirective) {
-                parseAnyTokenNode()
-            } else {
-                do {
-                    try parseGlobalDeclaration()
-                } catch {
-                    diagnostics.error("Expected a definition in file before <eof>", location: location())
-                    return
-                }
+                continue
             }
+            
+            // @implementation
+            if lexer.tokenType(.keyword(.atImplementation)) {
+                try parseClassImplementation()
+                continue
+            }
+            
+            // Preprocessor
+            if lexer.tokenType(.preprocessorDirective) {
+                parseAnyTokenNode()
+                continue
+            }
+            
+            do {
+                try parseGlobalDeclaration()
+            } catch {
+                diagnostics.error("Expected a definition in file before <eof>", location: location())
+                return
+            }
+        }
+    }
+    
+    /// Parses a forward class declaration from Objective-C.
+    ///
+    /// ```
+    /// forwardClassDeclaration:
+    ///     '@class' IDENTIFIER ';'
+    ///
+    /// ```
+    func parseForwardClassDeclaration() throws {
+        _=try lexer.consume(tokenType: .keyword(.atClass))
+        do {
+            _=try parseIdentifierNode(onMissing: "Expected class name to forward declare after @class")
+        } catch {
+            
+        }
+        
+        do {
+            try lexer.consume(tokenType: .semicolon)
+        } catch {
+            diagnostics.error("Expected semicolon after @class declaration.",
+                              location: location())
         }
     }
     

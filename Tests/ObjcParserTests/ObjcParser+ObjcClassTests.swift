@@ -4,6 +4,17 @@ import GrammarModels
 
 class ObjcParser_ObjcClassTests: XCTestCase {
     
+    func testParseForwardClassDeclaration() throws {
+        let source = """
+            @class MyClass;
+            """
+        let sut = ObjcParser(string: source)
+        
+        try sut.parse()
+        
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
     func testParseClass() throws {
         let source = """
             @interface MyClass
