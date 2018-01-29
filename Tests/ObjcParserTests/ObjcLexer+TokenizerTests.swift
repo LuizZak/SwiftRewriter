@@ -41,6 +41,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
     }
     
     func testTokenizeTypeQualifier() {
+        expect("extern", toTokenizeAs: .typeQualifier)
         expect("static", toTokenizeAs: .typeQualifier)
         expect("const", toTokenizeAs: .typeQualifier)
         expect("volatile", toTokenizeAs: .typeQualifier)

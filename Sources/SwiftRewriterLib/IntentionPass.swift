@@ -175,7 +175,7 @@ public class FileGroupingIntentionPass: IntentionPass {
             }
             
             let p2 = method2.signature.parameters[i]
-            if (p2.nullability == nil || p2.nullability == .unspecified) && p1.nullability != nil {
+            if p1.nullability != nil && (p2.nullability == nil || p2.nullability == .unspecified) {
                 method2.signature.parameters[i].nullability = p1.nullability
             }
         }

@@ -50,15 +50,28 @@ extension ObjcParser {
         
         // Consume interface declarations
         while !lexer.tokenType(.keyword(.atEnd)) {
+            // @property declaration
             if lexer.tokenType(.keyword(.atProperty)) {
                 try self.parsePropertyNode()
-            } else if lexer.tokenType(.operator(.add)) || lexer.tokenType(.operator(.subtract)) {
-                try self.parseMethodDeclaration()
-            } else {
-                diagnostics.error("Expected an ivar list, @property, or method(s) declaration(s) in class", location: location())
-                lexer.advance(until: { $0.type == .keyword(.atEnd) })
-                break
+                continue
             }
+            
+            // Method declaration
+            if lexer.tokenType(.operator(.add)) || lexer.tokenType(.operator(.subtract)) {
+                try self.parseMethodDeclaration()
+                continue
+            }
+            
+            // Preprocessor directives
+            if lexer.tokenType(.preprocessorDirective) {
+                // TODO: Preprocessor directive parsing should occur at top-level.
+                parseAnyTokenNode()
+                continue
+            }
+            
+            diagnostics.error("Expected an ivar list, @property, or method(s) declaration(s) in class", location: location())
+            lexer.advance(until: { $0.type == .keyword(.atEnd) })
+            break
         }
         
         try self.parseKeyword(.atEnd, onMissing: "Expected \(Keyword.atEnd) to end class declaration")

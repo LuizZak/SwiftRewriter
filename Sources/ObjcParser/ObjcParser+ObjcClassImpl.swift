@@ -53,18 +53,28 @@ extension ObjcParser {
         
         // Consume implementation definitions
         while !lexer.tokenType(.keyword(.atEnd)) {
+            // Method
             if lexer.tokenType(.operator(.add)) || lexer.tokenType(.operator(.subtract)) {
                 try parseMethodDeclaration()
-            } else if lexer.tokenType(.keyword(.atDynamic)) || lexer.tokenType(.keyword(.atSynthesize)) {
+                continue
+            }
+            
+            // @synthesize/@dynamic property implementation
+            if lexer.tokenType(.keyword(.atDynamic)) || lexer.tokenType(.keyword(.atSynthesize)) {
                 try parsePropertyImplementation()
-            } else if lexer.tokenType(.preprocessorDirective) {
+                continue
+            }
+            
+            // Preprocessor directives
+            if lexer.tokenType(.preprocessorDirective) {
                 // TODO: Preprocessor directive parsing should occur at top-level.
                 parseAnyTokenNode()
-            } else {
-                diagnostics.error("Expected an ivar list, @synthesize/@dynamic, or method(s) definitions(s) in class", location: location())
-                lexer.advance(until: { $0.type == .keyword(.atEnd) })
-                break
+                continue
             }
+            
+            diagnostics.error("Expected an ivar list, @synthesize/@dynamic, or method(s) definitions(s) in class", location: location())
+            lexer.advance(until: { $0.type == .keyword(.atEnd) })
+            break
         }
         
         try self.parseKeyword(.atEnd, onMissing: "Expected \(Keyword.atEnd) to end class definition")
