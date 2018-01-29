@@ -2,6 +2,17 @@ import GrammarModels
 
 /// An intention to generate a Swift class type
 public class ClassGenerationIntention: TypeGenerationIntention {
+    public var superclassName: String? = "NSObject"
+    public var instanceVariables: [InstanceVariableGenerationIntention] = []
+    
+    public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
+        self.instanceVariables.append(intention)
+    }
+    
+    public func hasInstanceVariable(named name: String) -> Bool {
+        return instanceVariables.contains(where: { $0.name == name })
+    }
+    
     public func setSuperclassIntention(_ superclassName: String) {
         self.superclassName = superclassName
     }

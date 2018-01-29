@@ -33,7 +33,7 @@ public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
                 return
                     file.typeIntentions.contains {
                         $0.typeName == type.typeName && $0.source is ObjcClassImplementation
-                }
+                    }
             })
         }
     }
@@ -119,10 +119,13 @@ public class FileGroupingIntentionPass: IntentionPass {
             }
         }
         
-        // Instance vars
-        for ivar in first.instanceVariables {
-            if !second.hasInstanceVariable(named: ivar.name) {
-                second.addInstanceVariable(ivar)
+        if let firstCls = first as? ClassGenerationIntention,
+            let secondCls = second as? ClassGenerationIntention {
+            // Instance vars
+            for ivar in firstCls.instanceVariables {
+                if !secondCls.hasInstanceVariable(named: ivar.name) {
+                    secondCls.addInstanceVariable(ivar)
+                }
             }
         }
         

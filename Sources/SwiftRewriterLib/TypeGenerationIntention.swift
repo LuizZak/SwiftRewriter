@@ -16,9 +16,7 @@ public class FromSourceIntention: Intention {
 public class TypeGenerationIntention: FromSourceIntention {
     public var typeName: String
     
-    public var superclassName: String? = "NSObject"
     public var protocols: [ProtocolInheritanceIntention] = []
-    public var instanceVariables: [InstanceVariableGenerationIntention] = []
     public var properties: [PropertyGenerationIntention] = []
     public var methods: [MethodGenerationIntention] = []
     
@@ -32,10 +30,6 @@ public class TypeGenerationIntention: FromSourceIntention {
         self.protocols.append(intention)
     }
     
-    public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
-        self.instanceVariables.append(intention)
-    }
-    
     public func addProperty(_ intention: PropertyGenerationIntention) {
         self.properties.append(intention)
     }
@@ -46,10 +40,6 @@ public class TypeGenerationIntention: FromSourceIntention {
     
     public func hasProtocol(named name: String) -> Bool {
         return protocols.contains(where: { $0.protocolName == name })
-    }
-    
-    public func hasInstanceVariable(named name: String) -> Bool {
-        return instanceVariables.contains(where: { $0.name == name })
     }
     
     public func hasProperty(named name: String) -> Bool {

@@ -66,6 +66,8 @@ public class SwiftRewriter {
                 self.enterObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.enterObjcClassImplementationNode(n)
+            case let n as ProtocolDeclaration:
+                self.enterProtocolDeclarationNode(n)
             case let n as IVarsList:
                 self.enterObjcClassIVarsListNode(n)
             default:
@@ -86,6 +88,10 @@ public class SwiftRewriter {
             // Objective-C @implementation class implementation
             case let n as ObjcClassImplementation:
                 self.visitObjcClassImplementationNode(n)
+                
+            // Objective-C @protocol declaration
+            case let n as ProtocolDeclaration:
+                self.visitProtocolDeclarationNode(n)
                 
             case let n as KeywordNode:
                 self.visitKeywordNode(n)
@@ -120,6 +126,8 @@ public class SwiftRewriter {
                 self.exitObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.exitObjcClassImplementationNode(n)
+            case let n as ProtocolDeclaration:
+                self.exitProtocolDeclarationNode(n)
             case let n as IVarsList:
                 self.exitObjcClassIVarsListNode(n)
             default:
@@ -205,7 +213,7 @@ public class SwiftRewriter {
         context.popContext() // ClassGenerationIntention
     }
     
-    // MARK: - ObjcClassInterface
+    // MARK: - ObjcClassCategory
     private func enterObjcClassCategoryNode(_ node: ObjcClassCategory) {
         guard let name = node.identifier.name else {
             return
@@ -256,10 +264,34 @@ public class SwiftRewriter {
     private func exitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
         context.popContext() // ClassGenerationIntention
     }
-    // MARK: -
     
+    // MARK: - ProtocolDeclaration
+    private func enterProtocolDeclarationNode(_ node: ProtocolDeclaration) {
+        guard let name = node.identifier.name else {
+            return
+        }
+        
+        let intent =
+            ProtocolGenerationIntention(typeName: name, source: node)
+        
+        intentionCollection.addIntention(intent)
+        
+        context
+            .context(ofType: FileGenerationIntention.self)?
+            .addProtocol(intent)
+        
+        context.pushContext(intent)
+    }
+    
+    private func visitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
+        
+    }
+    
+    private func exitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
+        context.popContext() // ProtocolGenerationIntention
+    }
     private func visitObjcClassInterfacePropertyNode(_ node: PropertyDefinition) {
-        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+        guard let ctx = context.context(ofType: TypeGenerationIntention.self) else {
             return
         }
         
@@ -272,7 +304,7 @@ public class SwiftRewriter {
     }
     
     private func visitObjcClassMethodNode(_ node: MethodDefinition) {
-        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+        guard let ctx = context.context(ofType: TypeGenerationIntention.self) else {
             return
         }
         
@@ -298,7 +330,7 @@ public class SwiftRewriter {
     }
     
     private func visitObjcClassProtocolReferenceListNode(_ node: ProtocolReferenceList) {
-        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+        guard let ctx = context.context(ofType: TypeGenerationIntention.self) else {
             return
         }
         

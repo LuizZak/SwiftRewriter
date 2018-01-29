@@ -16,6 +16,9 @@ public class FileGenerationIntention: Intention {
     /// Gets the types to create on this file.
     private(set) var typeIntentions: [TypeGenerationIntention] = []
     
+    /// Gets the protocols to create on this file.
+    private(set) var protocolIntentions: [ProtocolGenerationIntention] = []
+    
     /// Gets the global functions to create on this file.
     private(set) var globalFunctionIntentions: [GlobalFunctionGenerationIntention] = []
     
@@ -38,6 +41,10 @@ public class FileGenerationIntention: Intention {
                 typeIntentions.remove(at: i)
             }
         }
+    }
+    
+    public func addProtocol(_ intention: ProtocolGenerationIntention) {
+        protocolIntentions.append(intention)
     }
     
     public func addGlobalFunction(_ intention: GlobalFunctionGenerationIntention) {
