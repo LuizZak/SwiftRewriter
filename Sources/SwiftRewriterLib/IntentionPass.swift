@@ -77,10 +77,12 @@ public class FileGroupingIntentionPass: IntentionPass {
             mergeDefinitions(from: header, into: implementation)
         }
         
+        /*
         // Remove all header intentions (implementation intentions override them)
         intentionCollection.removeIntentions { (intent: FileGenerationIntention) -> Bool in
             return intent.filePath.hasSuffix(".h")
         }
+        */
     }
     
     private func mergeDefinitions(from header: FileGenerationIntention,
