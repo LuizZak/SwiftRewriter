@@ -326,7 +326,9 @@ public class SwiftRewriter {
         let signGen =
             SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
         
-        let sign = signGen.generateDefinitionSignature(from: node)
+        let sign =
+            signGen.generateDefinitionSignature(from: node,
+                                                inNonnullContext: _isInNonnullContext)
         
         let method =
             MethodGenerationIntention(signature: sign, source: node)

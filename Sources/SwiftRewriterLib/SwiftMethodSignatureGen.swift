@@ -13,7 +13,7 @@ public class SwiftMethodSignatureGen {
     
     /// Generates a function definition from an objective-c signature to use as
     /// a class-type function definition.
-    public func generateDefinitionSignature(from objcMethod: MethodDefinition) -> MethodGenerationIntention.Signature {
+    public func generateDefinitionSignature(from objcMethod: MethodDefinition, inNonnullContext: Bool) -> MethodGenerationIntention.Signature {
         var sign =
             MethodGenerationIntention
                 .Signature(name: "__",
@@ -26,7 +26,7 @@ public class SwiftMethodSignatureGen {
             case .selector(let s):
                 sign.name = s.name
             case .keywords(let kw):
-                processKeywords(kw, &sign)
+                processKeywords(kw, &sign, inNonnullContext: inNonnullContext)
             }
         }
         
@@ -36,13 +36,17 @@ public class SwiftMethodSignatureGen {
         
         /// Nullability specifiers (from e.g. `... arg:(nullable NSString*)paramName ...`
         if let nullSpecs = objcMethod.returnType.nodeValue?.nullabilitySpecifiers {
-            sign.returnTypeNullability = nullabilityFrom(specifiers: nullSpecs)
+            sign.returnTypeNullability =
+                nullabilityFrom(specifiers: nullSpecs,
+                                inNonnullContext: inNonnullContext)
         }
         
         return sign
     }
     
-    private func processKeywords(_ keywords: [KeywordDeclarator], _ target: inout MethodGenerationIntention.Signature) {
+    private func processKeywords(_ keywords: [KeywordDeclarator],
+                                 _ target: inout MethodGenerationIntention.Signature,
+                                 inNonnullContext: Bool) {
         typealias Parameter = MethodGenerationIntention.Parameter // To shorten up type names within the method
         
         guard keywords.count > 0 else {
@@ -65,7 +69,9 @@ public class SwiftMethodSignatureGen {
             }
             
             if let nullSpecs = kw.type?.nullabilitySpecifiers {
-                nullability = nullabilityFrom(specifiers: nullSpecs)
+                nullability =
+                    nullabilityFrom(specifiers: nullSpecs,
+                                    inNonnullContext: inNonnullContext)
             }
             
             let param = Parameter(label: label, name: identifier, nullability: nullability, type: type)
@@ -92,9 +98,9 @@ public class SwiftMethodSignatureGen {
         }
     }
     
-    private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability? {
+    private func nullabilityFrom(specifiers: [NullabilitySpecifier], inNonnullContext: Bool) -> TypeNullability? {
         guard let last = specifiers.last else {
-            return nil
+            return inNonnullContext ? .nonnull : nil
         }
         
         switch last.name {
@@ -105,7 +111,7 @@ public class SwiftMethodSignatureGen {
         case "null_unspecified":
             return .unspecified
         default:
-            return nil
+            return inNonnullContext ? .nonnull : nil
         }
     }
 }

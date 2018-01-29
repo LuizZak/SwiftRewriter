@@ -176,7 +176,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         let node = parseMethodSign(objc)
         let gen = createSwiftMethodSignatureGen()
         
-        return gen.generateDefinitionSignature(from: node)
+        return gen.generateDefinitionSignature(from: node, inNonnullContext: false)
     }
     
     private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {

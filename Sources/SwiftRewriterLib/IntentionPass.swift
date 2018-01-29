@@ -164,7 +164,7 @@ public class FileGroupingIntentionPass: IntentionPass {
     
     private func mergeMethod(_ method1: MethodGenerationIntention, into method2: MethodGenerationIntention) {
         if method1.signature.returnTypeNullability != nil &&
-            method2.signature.returnTypeNullability == nil {
+            (method2.signature.returnTypeNullability == nil || method2.signature.returnTypeNullability == .unspecified) {
             method2.signature.returnTypeNullability =
                 method1.signature.returnTypeNullability
         }
@@ -175,7 +175,7 @@ public class FileGroupingIntentionPass: IntentionPass {
             }
             
             let p2 = method2.signature.parameters[i]
-            if p2.nullability == nil && p1.nullability != nil {
+            if (p2.nullability == nil || p2.nullability == .unspecified) && p1.nullability != nil {
                 method2.signature.parameters[i].nullability = p1.nullability
             }
         }
