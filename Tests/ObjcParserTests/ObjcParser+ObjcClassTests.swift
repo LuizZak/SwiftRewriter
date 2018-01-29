@@ -342,6 +342,21 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
+    func testParseCategory() throws {
+        let source = """
+            @interface MyClass ()
+            - (void)someMethod;
+            @end
+            """
+        let sut = ObjcParser(string: source)
+        
+        let result = _parseTestObjcCategoryNode(source: source, parser: sut)
+        
+        XCTAssertEqual(result.identifier.name, "MyClass")
+        XCTAssertNil(result.ivarsList)
+        XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
+    }
+    
     func testParseProtocolReferenceList() throws {
         // Arrange
         let source = "<UITableViewDataSource, UITableViewDelegate, _MyProtocol1_>"
@@ -354,7 +369,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             }
         
         // Assert
-        let result: ObjcClassInterface.ProtocolReferenceList! = root.childrenMatching().first
+        let result: ProtocolReferenceList! = root.childrenMatching().first
         
         XCTAssertEqual(result.protocols.count, 3)
         XCTAssertEqual(result.protocols[0].name, "UITableViewDataSource")
@@ -374,7 +389,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             }
         
         // Assert
-        let result: ObjcClassInterface.ProtocolReferenceList! = root.childrenMatching().first
+        let result: ProtocolReferenceList! = root.childrenMatching().first
         
         XCTAssertEqual(result.protocols.count, 1)
         XCTAssertEqual(result.protocols[0].name, "UITableViewDataSource")
@@ -404,6 +419,21 @@ class ObjcParser_ObjcClassTests: XCTestCase {
             }
             
             let node: ObjcClassImplementation? = root.firstChild()
+            return node!
+        } catch {
+            recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
+            fatalError()
+        }
+    }
+    
+    private func _parseTestObjcCategoryNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> ObjcClassCategory {
+        do {
+            let root: GlobalContextNode =
+                try parser.withTemporaryContext {
+                    try parser.parseClassCategoryNode()
+            }
+            
+            let node: ObjcClassCategory? = root.firstChild()
             return node!
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)

@@ -90,7 +90,7 @@ public class SwiftRewriter {
             case let n as MethodDefinition:
                 self.visitObjcClassMethodNode(n)
                 
-            case let n as ObjcClassInterface.ProtocolReferenceList:
+            case let n as ProtocolReferenceList:
                 self.visitObjcClassProtocolReferenceListNode(n)
                 
             case let n as SuperclassName:
@@ -263,7 +263,7 @@ public class SwiftRewriter {
         ctx.superclassName = node.name
     }
     
-    private func visitObjcClassProtocolReferenceListNode(_ node: ObjcClassInterface.ProtocolReferenceList) {
+    private func visitObjcClassProtocolReferenceListNode(_ node: ProtocolReferenceList) {
         guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
             return
         }

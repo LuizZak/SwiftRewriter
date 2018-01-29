@@ -292,9 +292,11 @@ class SwiftRewriterTests: XCTestCase {
         try assertObjcTypeParse(
             objc: """
             const NSInteger myGlobal;
+            NSInteger myOtherGlobal;
             """,
             swift: """
-            var myGlobal: Int
+            let myGlobal: Int
+            var myOtherGlobal: Int
             """)
     }
     

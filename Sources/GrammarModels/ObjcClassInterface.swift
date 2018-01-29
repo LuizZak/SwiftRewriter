@@ -1,6 +1,7 @@
 /// A syntax node for an Objective-C class interface (`@interface`) declaration.
 public class ObjcClassInterface: ASTNode, InitializableNode {
     public var identifier: ASTNodeRef<Identifier> = .invalid(InvalidNode())
+    public var categoryName: Identifier?
     
     public required init() {
         
@@ -53,19 +54,16 @@ public class IVarDeclaration: ASTNode, InitializableNode {
 }
 
 // MARK: - Subnodes
-public extension ObjcClassInterface {
-    
-    public class ProtocolReferenceList: ASTNode {
-        public var protocols: [ProtocolName] {
-            return childrenMatching()
-        }
-        
-        public init(location: SourceLocation = .invalid) {
-            super.init(location: location)
-        }
+public class ProtocolReferenceList: ASTNode {
+    public var protocols: [ProtocolName] {
+        return childrenMatching()
     }
     
-    public class ProtocolName: Identifier {
-        
+    public init(location: SourceLocation = .invalid) {
+        super.init(location: location)
     }
+}
+
+public class ProtocolName: Identifier {
+    
 }

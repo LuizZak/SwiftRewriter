@@ -2,6 +2,7 @@ import MiniLexer
 import GrammarModels
 
 extension ObjcParser {
+    
     /// Parses an Objective-C class interface
     ///
     /// ```
@@ -143,7 +144,7 @@ extension ObjcParser {
             do {
                 let identRange = startRange()
                 let ident = try lexer.consume(tokenType: .identifier).string
-                let node = ObjcClassInterface.ProtocolName(name: ident, location: identRange.makeLocation())
+                let node = ProtocolName(name: ident, location: identRange.makeLocation())
                 
                 context.addChildNode(node)
             } catch {
@@ -152,7 +153,7 @@ extension ObjcParser {
             }
         }
         
-        let node = ObjcClassInterface.ProtocolReferenceList()
+        let node = ProtocolReferenceList()
         context.pushContext(node: node)
         defer {
             context.popContext()
