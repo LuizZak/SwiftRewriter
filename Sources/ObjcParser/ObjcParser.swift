@@ -116,6 +116,12 @@ public class ObjcParser {
                 continue
             }
             
+            // @protocol
+            if lexer.tokenType(.keyword(.atProtocol)) {
+                try parseProtocol()
+                continue
+            }
+            
             // @implementation
             if lexer.tokenType(.keyword(.atImplementation)) {
                 try parseClassImplementation()
@@ -145,6 +151,8 @@ public class ObjcParser {
     ///
     /// ```
     func parseForwardClassDeclaration() throws {
+        // TODO: This should actually support multiple class names, separated by comma!
+        
         _=try lexer.consume(tokenType: .keyword(.atClass))
         do {
             _=try parseIdentifierNode(onMissing: "Expected class name to forward declare after @class")
@@ -153,7 +161,7 @@ public class ObjcParser {
         }
         
         do {
-            try lexer.consume(tokenType: .semicolon)
+            _=try lexer.consume(tokenType: .semicolon)
         } catch {
             diagnostics.error("Expected semicolon after @class declaration.",
                               location: location())

@@ -376,7 +376,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         // Act
         let root: GlobalContextNode =
             try sut.withTemporaryContext {
-                try sut.parseProtocolReferenceListNode()
+                try sut.parseProtocolReferenceList()
             }
         
         // Assert
@@ -396,7 +396,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         // Act
         let root: GlobalContextNode =
             try sut.withTemporaryContext {
-                try sut.parseProtocolReferenceListNode()
+                try sut.parseProtocolReferenceList()
             }
         
         // Assert

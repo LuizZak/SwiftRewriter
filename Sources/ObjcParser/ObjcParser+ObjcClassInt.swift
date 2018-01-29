@@ -31,13 +31,13 @@ extension ObjcParser {
             try parseTokenNode(.colon)
             
             // Record superclass name
-            parseSuperclassNameNode()
+            parseSuperclassName()
         }
         
         // Protocol conformance list
         if lexer.tokenType(.operator(.lessThan)) {
             do {
-                try parseProtocolReferenceListNode()
+                try parseProtocolReferenceList()
             } catch {
                 // Panic!
             }
@@ -139,7 +139,7 @@ extension ObjcParser {
     /// protocol_name:
     ///    identifier
     /// ```
-    public func parseProtocolReferenceListNode() throws {
+    public func parseProtocolReferenceList() throws {
         func parseProtocolName() throws {
             do {
                 let identRange = startRange()
@@ -163,7 +163,7 @@ extension ObjcParser {
                                    itemParser: parseProtocolName)
     }
     
-    func parseSuperclassNameNode() {
+    func parseSuperclassName() {
         do {
             let identRange = startRange()
             let ident = try lexer.consume(tokenType: .identifier)

@@ -43,7 +43,7 @@ extension ObjcParser {
             try parseTokenNode(.colon)
             
             // Record superclass name
-            parseSuperclassNameNode()
+            parseSuperclassName()
         }
         
         // ivar list

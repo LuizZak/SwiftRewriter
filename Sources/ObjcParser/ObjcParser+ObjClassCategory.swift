@@ -74,7 +74,7 @@ public extension ObjcParser {
         // Protocol conformance list
         if lexer.tokenType(.operator(.lessThan)) {
             do {
-                try parseProtocolReferenceListNode()
+                try parseProtocolReferenceList()
             } catch {
                 // Panic!
             }
