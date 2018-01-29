@@ -188,6 +188,11 @@ public class ObjcLexer {
     }
     
     private func skipComments() {
+        while attemptReadCommentToken() {
+            lexer.skipWhitespace()
+        }
+        
+        /*
         while lexer.advanceIf(equals: "//") {
             lexer.advance(until: { $0 == "\n" })
             if !lexer.safeAdvance() {
@@ -208,6 +213,7 @@ public class ObjcLexer {
         }
         
         lexer.skipWhitespace()
+        */
     }
     
     private func attemptReadCommentToken() -> Bool {

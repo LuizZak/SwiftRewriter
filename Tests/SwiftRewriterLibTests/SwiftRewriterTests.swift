@@ -268,6 +268,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
 
             @interface MyClass () <MyDelegate>
+            {
+                /// Coments that are meant to be ignored.
+                /// None of these should affect parsing
+                NSInteger anIVar;
+            }
             - (void)methodFromCategory;
             @end
             
@@ -282,6 +287,8 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject, MyDelegate {
+                private var anIVar: Int
+                
                 init(with thing: AnyObject!) {
                     // Init here
                 }
