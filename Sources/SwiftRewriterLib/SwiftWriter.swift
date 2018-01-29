@@ -56,7 +56,7 @@ public class SwiftWriter {
         decl += ": \(typeName)"
         
         if let initVal = initVal {
-            decl += " = \(initVal)"
+            decl += " = \(initVal.trimmingCharacters(in: .whitespaces))"
         }
         
         target.output(line: decl)

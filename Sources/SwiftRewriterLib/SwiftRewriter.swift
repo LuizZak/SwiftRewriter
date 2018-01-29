@@ -164,6 +164,10 @@ public class SwiftRewriter {
             GlobalVariableGenerationIntention(name: name.name, type: type.type,
                                               source: node)
         
+        if let expr = node.initialExpression?.expression {
+            intent.initialValueExpr = expr.expression
+        }
+        
         ctx.addGlobalVariable(intent)
     }
     
