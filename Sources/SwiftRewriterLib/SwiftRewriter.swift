@@ -10,9 +10,6 @@ public class SwiftRewriter {
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
     
-    /// Whether we're in between NS_ASSUME_NONNULL_BEGIN/END macros
-    private var _isInNonnullContext = false
-    
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
     public let diagnostics: Diagnostics
@@ -46,6 +43,7 @@ public class SwiftRewriter {
         let fileIntent = FileGenerationIntention(filePath: source.sourceName())
         intentionCollection.addIntention(fileIntent)
         context.pushContext(fileIntent)
+        context.pushContext(AssumeNonnullContext(isNonnullOn: false))
         defer {
             context.popContext()
         }
@@ -119,11 +117,11 @@ public class SwiftRewriter {
                 
             case let n as Identifier
                 where n.name == "NS_ASSUME_NONNULL_BEGIN":
-                self._isInNonnullContext = true
+                self.context.context(ofType: AssumeNonnullContext.self)?.isNonnullOn = true
                 
             case let n as Identifier
                 where n.name == "NS_ASSUME_NONNULL_END":
-                self._isInNonnullContext = false
+                self.context.context(ofType: AssumeNonnullContext.self)?.isNonnullOn = false
             default:
                 return
             }
@@ -191,7 +189,7 @@ public class SwiftRewriter {
             GlobalVariableGenerationIntention(name: name.name, type: type.type,
                                               source: node)
         
-        intent.inNonnullContext = _isInNonnullContext
+        intent.inNonnullContext = context.isAssumeNonnullOn
         
         if let expr = node.initialExpression?.expression {
             intent.initialValueExpr = expr.expression
@@ -313,7 +311,7 @@ public class SwiftRewriter {
                                         type: node.type.type ?? .struct(""),
                                         source: node)
         
-        prop.inNonnullContext = _isInNonnullContext
+        prop.inNonnullContext = context.isAssumeNonnullOn
         
         ctx.addProperty(prop)
     }
@@ -327,13 +325,12 @@ public class SwiftRewriter {
             SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
         
         let sign =
-            signGen.generateDefinitionSignature(from: node,
-                                                inNonnullContext: _isInNonnullContext)
+            signGen.generateDefinitionSignature(from: node)
         
         let method =
             MethodGenerationIntention(signature: sign, source: node)
         
-        method.inNonnullContext = _isInNonnullContext
+        method.inNonnullContext = context.isAssumeNonnullOn
         
         method.body = node.body
         
@@ -382,7 +379,7 @@ public class SwiftRewriter {
                 accessLevel: access,
                 source: node)
         
-        ivar.inNonnullContext = _isInNonnullContext
+        ivar.inNonnullContext = context.isAssumeNonnullOn
         
         classCtx.addInstanceVariable(ivar)
     }

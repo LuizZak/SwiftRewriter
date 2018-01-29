@@ -27,3 +27,22 @@ public class TypeContext {
 public protocol Context {
     
 }
+
+/// Context pushed when the the parser is in between NS_ASSUME_NONNULL_BEGIN/END
+/// macros.
+public class AssumeNonnullContext: Context {
+    /// Whether assume nonnull is on.
+    public var isNonnullOn: Bool
+    
+    public init(isNonnullOn: Bool = false) {
+        self.isNonnullOn = isNonnullOn
+    }
+}
+
+// MARK: - AssumeNonnullContext-specific TypeContext extension
+public extension TypeContext {
+    /// Returns a value specifying whether assume nonnull is on for pointer types.
+    public var isAssumeNonnullOn: Bool {
+        return context(ofType: AssumeNonnullContext.self)?.isNonnullOn ?? false
+    }
+}

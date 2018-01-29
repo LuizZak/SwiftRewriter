@@ -229,7 +229,8 @@ class SwiftRewriterTests: XCTestCase {
                 NSInteger _myInt;
             }
             @end
-            """, swift: """
+            """,
+            swift: """
             class MyClass: NSObject {
                 private var _myString: String!
                 weak var _delegate: AnyObject?
