@@ -259,6 +259,35 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testWhenRewritingMethodsSignaturesWithNullabilityOverrideSignaturesWithout() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            - (instancetype)initWithThing:(nonnull id)thing;
+            - (void)myMethod;
+            @end
+            
+            @implementation MyClass
+            - (instancetype)initWithThing:(id)thing {
+                // Init here
+            }
+            - (void)myMethod {
+                // Function body here
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                init(with thing: AnyObject) {
+                    // Init here
+                }
+                func myMethod() {
+                    // Function body here
+                }
+            }
+            """)
+    }
+    
     func testRewriteGlobalVariableDeclaration() throws {
         try assertObjcTypeParse(
             objc: """

@@ -53,31 +53,32 @@ public extension ObjcParser {
     ///     statements
     /// ```
     func parseFunctionBody() throws -> String {
-        lexer.autoSkipComments = false
-        
         try parseTokenNode(.openBrace)
         
         // TODO: Actually parse statements here
         let range = startRange()
         
+        let innerLexer = lexer.lexer
+        
         var depth = 0
-        while !lexer.isEof {
-            if lexer.tokenType(.openBrace) {
+        while !innerLexer.isEof() {
+            if innerLexer.safeIsNextChar(equalTo: "{") {
                 depth += 1
-            } else if lexer.tokenType(.closeBrace) {
+            } else if innerLexer.safeIsNextChar(equalTo: "}") {
                 if depth == 0 {
                     break
                 }
                 
-                depth -= 0
+                depth -= 1
             }
             
-            parseAnyTokenNode()
+            _=innerLexer.safeAdvance()
         }
         
         let body = range.makeString()
         
-        lexer.autoSkipComments = true
+        // Force-read new token on ObjcLexer
+        lexer._readToken()
         
         if depth != 0 {
             diagnostics.error("Expected \(TokenType.closeBrace) to finish method definition", location: location())

@@ -91,7 +91,6 @@ public class ObjcLexer {
     public func nextToken() -> Token {
         let tok = token()
         skipToken()
-        _readToken()
         return tok
     }
     
@@ -138,7 +137,7 @@ public class ObjcLexer {
         }
     }
     
-    private func _readToken() {
+    internal func _readToken() {
         let index = lexer.inputIndex
         defer {
             lexer.inputIndex = index
@@ -331,6 +330,7 @@ public class ObjcLexer {
     private func attemptReadSpecialChar() throws -> Bool {
         let range = startRange()
         let type: TokenType
+        var length = 1
         
         switch try lexer.peek() {
         case "@":
@@ -353,11 +353,18 @@ public class ObjcLexer {
             type = .openBrace
         case "}":
             type = .closeBrace
+        case ".":
+            if lexer.checkNext(matches: "...") {
+                type = .ellipsis
+                length = 3
+            } else {
+                type = .period
+            }
         default:
             return false
         }
         
-        try lexer.advance()
+        try lexer.advanceLength(length)
         
         currentToken =
             Token(type: type, string: range.makeString(), location: range.makeLocation())

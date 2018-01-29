@@ -57,6 +57,9 @@ extension ObjcParser {
                 try parseMethodDeclaration()
             } else if lexer.tokenType(.keyword(.atDynamic)) || lexer.tokenType(.keyword(.atSynthesize)) {
                 try parsePropertyImplementation()
+            } else if lexer.tokenType(.preprocessorDirective) {
+                // TODO: Preprocessor directive parsing should occur at top-level.
+                parseAnyTokenNode()
             } else {
                 diagnostics.error("Expected an ivar list, @synthesize/@dynamic, or method(s) definitions(s) in class", location: location())
                 lexer.advance(until: { $0.type == .keyword(.atEnd) })

@@ -61,11 +61,16 @@ public class TypeGenerationIntention: FromSourceIntention {
     }
     
     public func hasMethod(withSignature signature: MethodGenerationIntention.Signature) -> Bool {
-        return methods.contains(where: { $0.signature == signature })
+        return method(withSignature: signature) != nil
     }
     
     public func method(withSignature signature: MethodGenerationIntention.Signature) -> MethodGenerationIntention? {
-        return methods.first(where: { $0.signature == signature })
+        return methods.first(where: {
+            return
+                MethodGenerationIntention
+                    .Signature
+                    .match(lhs: signature, rhs: $0.signature, ignoreNullability: true)
+        })
     }
 }
 
@@ -150,6 +155,27 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         public var returnType: ObjcType
         public var returnTypeNullability: TypeNullability
         public var parameters: [Parameter]
+        
+        public static func match(lhs: Signature, rhs: Signature, ignoreNullability: Bool = false) -> Bool {
+            if lhs.parameters.count != rhs.parameters.count {
+                return false
+            }
+            
+            if lhs.name != rhs.name && lhs.returnType.normalized != lhs.returnType.normalized {
+                return false
+            }
+            if !ignoreNullability && lhs.returnTypeNullability != rhs.returnTypeNullability {
+                return false
+            }
+            
+            for (p1, p2) in zip(lhs.parameters, rhs.parameters) {
+                if !Parameter.match(lhs: p1, rhs: p2, ignoreNullability: ignoreNullability) {
+                    return false
+                }
+            }
+            
+            return true
+        }
     }
     
     public struct Parameter: Equatable {
@@ -157,6 +183,17 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         public var name: String
         public var nullability: TypeNullability
         public var type: ObjcType
+        
+        public static func match(lhs: Parameter, rhs: Parameter, ignoreNullability: Bool = false) -> Bool {
+            if lhs.label != rhs.label && lhs.type.normalized != lhs.type.normalized {
+                return false
+            }
+            if !ignoreNullability && lhs.nullability != rhs.nullability {
+                return false
+            }
+            
+            return true
+        }
     }
 }
 
