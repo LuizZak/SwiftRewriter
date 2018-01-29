@@ -259,6 +259,41 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteInterfaceWithCategoryWithImplementation() throws {
+        try assertObjcTypeParse(
+            objc: """
+            @interface MyClass
+            - (instancetype)initWithThing:(id)thing;
+            - (void)myMethod;
+            @end
+
+            @interface MyClass () <MyDelegate>
+            - (void)methodFromCategory;
+            @end
+            
+            @implementation MyClass
+            - (instancetype)initWithThing:(id)thing {
+                // Init here
+            }
+            - (void)myMethod {
+                // Function body here
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject, MyDelegate {
+                init(with thing: AnyObject!) {
+                    // Init here
+                }
+                func myMethod() {
+                    // Function body here
+                }
+                func methodFromCategory() {
+                }
+            }
+            """)
+    }
+    
     func testWhenRewritingMethodsSignaturesWithNullabilityOverrideSignaturesWithout() throws {
         try assertObjcTypeParse(
             objc: """

@@ -26,7 +26,7 @@ public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
             // Remove from file implementation any class generation intent that came
             // from an @interface
             file.removeTypes(where: { type in
-                if !(type.source is ObjcClassInterface) {
+                if !(type.source is ObjcClassInterface || type.source is ObjcClassCategory) {
                     return false
                 }
                 
@@ -89,8 +89,8 @@ public class FileGroupingIntentionPass: IntentionPass {
         
         let groupedTypes = Dictionary(grouping: total, by: { $0.typeName })
         
-        for (_, types) in groupedTypes where types.count == 2 {
-            mergeTypes(from: types[0], into: types[1])
+        for (_, types) in groupedTypes where types.count >= 2 {
+            mergeAllTypeDefinitions(in: types)
         }
     }
     
@@ -98,8 +98,16 @@ public class FileGroupingIntentionPass: IntentionPass {
         let groupedTypes = Dictionary(grouping: implementation.typeIntentions,
                                       by: { $0.typeName })
         
-        for (_, types) in groupedTypes where types.count == 2 {
-            mergeTypes(from: types[0], into: types[1])
+        for (_, types) in groupedTypes where types.count >= 2 {
+            mergeAllTypeDefinitions(in: types)
+        }
+    }
+    
+    private func mergeAllTypeDefinitions(in types: [TypeGenerationIntention]) {
+        let target = types.reversed().first { $0.source is ObjcClassImplementation } ?? types.last!
+        
+        for type in types.dropLast() {
+            mergeTypes(from: type, into: target)
         }
     }
     

@@ -161,7 +161,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
                 return false
             }
             
-            if lhs.name != rhs.name && lhs.returnType.normalized != lhs.returnType.normalized {
+            if lhs.name != rhs.name || lhs.returnType.normalized != lhs.returnType.normalized {
                 return false
             }
             if !ignoreNullability && lhs.returnTypeNullability != rhs.returnTypeNullability {
@@ -185,7 +185,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         public var type: ObjcType
         
         public static func match(lhs: Parameter, rhs: Parameter, ignoreNullability: Bool = false) -> Bool {
-            if lhs.label != rhs.label && lhs.type.normalized != lhs.type.normalized {
+            if lhs.label != rhs.label || lhs.type.normalized != lhs.type.normalized {
                 return false
             }
             if !ignoreNullability && lhs.nullability != rhs.nullability {

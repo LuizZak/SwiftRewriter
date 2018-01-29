@@ -92,12 +92,10 @@ public class ObjcParser {
         
         while !lexer.isEof {
             if lexer.tokenType(.keyword(.atInterface)) {
-                do {
-                    try lexer.rewindOnFailure {
-                        try parseClassInerfaceNode()
-                    }
-                } catch {
+                if isClassCategory() {
                     try parseClassCategoryNode()
+                } else {
+                    try parseClassInerfaceNode()
                 }
             } else if lexer.tokenType(.keyword(.atImplementation)) {
                 try parseClassImplementation()

@@ -62,6 +62,8 @@ public class SwiftRewriter {
             switch node {
             case let n as ObjcClassInterface:
                 self.enterObjcClassInterfaceNode(n)
+            case let n as ObjcClassCategory:
+                self.enterObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.enterObjcClassImplementationNode(n)
             case let n as IVarsList:
@@ -77,7 +79,11 @@ public class SwiftRewriter {
             case let n as ObjcClassInterface:
                 self.visitObjcClassInterfaceNode(n)
                 
-            // Objective-C @implementation class definition
+            // Objective-C class category
+            case let n as ObjcClassCategory:
+                self.visitObjcClassCategoryNode(n)
+                
+            // Objective-C @implementation class implementation
             case let n as ObjcClassImplementation:
                 self.visitObjcClassImplementationNode(n)
                 
@@ -110,6 +116,8 @@ public class SwiftRewriter {
             switch node {
             case let n as ObjcClassInterface:
                 self.exitObjcClassInterfaceNode(n)
+            case let n as ObjcClassCategory:
+                self.exitObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.exitObjcClassImplementationNode(n)
             case let n as IVarsList:
@@ -194,6 +202,32 @@ public class SwiftRewriter {
     }
     
     private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
+        context.popContext() // ClassGenerationIntention
+    }
+    
+    // MARK: - ObjcClassInterface
+    private func enterObjcClassCategoryNode(_ node: ObjcClassCategory) {
+        guard let name = node.identifier.name else {
+            return
+        }
+        
+        let intent =
+            ClassGenerationIntention(typeName: name, source: node)
+        
+        intentionCollection.addIntention(intent)
+        
+        context
+            .context(ofType: FileGenerationIntention.self)?
+            .addType(intent)
+        
+        context.pushContext(intent)
+    }
+    
+    private func visitObjcClassCategoryNode(_ node: ObjcClassCategory) {
+        
+    }
+    
+    private func exitObjcClassCategoryNode(_ node: ObjcClassCategory) {
         context.popContext() // ClassGenerationIntention
     }
     

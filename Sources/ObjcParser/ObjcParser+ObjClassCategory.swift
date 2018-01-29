@@ -1,7 +1,38 @@
 import GrammarModels
 
 public extension ObjcParser {
-    // Parses an Objective-C class category
+    /// Returns true iff the current tokens indicate the start of a class category
+    /// declaration.
+    internal func isClassCategory() -> Bool {
+        let bk = lexer.backtracker()
+        defer {
+            bk.backtrack()
+        }
+        
+        // '@interface'
+        if lexer.nextToken().type != .keyword(.atInterface) {
+            return false
+        }
+        
+        // className
+        if lexer.nextToken().type != .identifier {
+            return false
+        }
+        
+        // '(' categoryName? ')'
+        if lexer.nextToken().type != .openParens {
+            return false
+        }
+        
+        let tok = lexer.nextToken()
+        if tok.type != .identifier && tok.type != .closeParens {
+            return false
+        }
+        
+        return true
+    }
+    
+    /// Parses an Objective-C class category
     ///
     /// ```
     /// classInterface:
