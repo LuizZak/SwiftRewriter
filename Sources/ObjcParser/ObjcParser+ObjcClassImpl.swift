@@ -19,7 +19,7 @@ extension ObjcParser {
     ///       )+
     ///     ;
     /// ```
-    public func parseClassImplementation() throws {
+    func parseClassImplementation() throws {
         // TODO: Support property_implementation/property_synthesize_list/property_synthesize_item parsing.
         
         // @implementation Name [: SuperClass]
@@ -88,7 +88,7 @@ extension ObjcParser {
     ///     | '@dynamic' property_synthesize_list ';'
     ///     ;
     /// ```
-    public func parsePropertyImplementation() throws {
+    func parsePropertyImplementation() throws {
         context.pushContext(nodeType: PropertyImplementation.self)
         defer {
             context.popContext()
@@ -110,7 +110,7 @@ extension ObjcParser {
     ///     : property_synthesize_item (',' property_synthesize_item)*
     ///     ;
     /// ```
-    public func parsePropertySynthesizeList() throws {
+    func parsePropertySynthesizeList() throws {
         context.pushContext(nodeType: PropertySynthesizeList.self)
         defer {
             context.popContext()
@@ -151,7 +151,7 @@ extension ObjcParser {
     ///     : IDENTIFIER | IDENTIFIER '=' IDENTIFIER
     ///     ;
     /// ```
-    public func parsePropertySynthesizeItem() throws {
+    func parsePropertySynthesizeItem() throws {
         let ident = try parseIdentifierNode(onMissing: "Expected property name to synthesize.")
         
         let item = PropertySynthesizeItem(propertyName: ident)

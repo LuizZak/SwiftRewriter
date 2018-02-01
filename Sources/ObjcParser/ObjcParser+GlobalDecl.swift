@@ -7,7 +7,7 @@ public extension ObjcParser {
     /// ```
     /// global_declaration: declaration;
     /// ```
-    public func parseGlobalDeclaration() throws {
+    func parseGlobalDeclaration() throws {
         try parseDeclaration()
     }
     
@@ -19,7 +19,7 @@ public extension ObjcParser {
     ///     | variable_declaration
     ///     ;
     /// ```
-    public func parseDeclaration() throws {
+    func parseDeclaration() throws {
         do {
             // Attempt to parse a function definition, fallback to a variable definition
             // if not possible.
@@ -38,7 +38,7 @@ public extension ObjcParser {
     /// ```
     /// variable_declaration : objc_type IDENTIFIER initial_expr? ';' ;
     /// ```
-    public func parseVariableDeclaration() throws {
+    func parseVariableDeclaration() throws {
         context.pushContext(nodeType: VariableDeclaration.self)
         defer {
             context.popContext()
@@ -79,7 +79,7 @@ public extension ObjcParser {
     ///     | string_literal
     ///     ;
     /// ```
-    public func parseInitialExpression() throws {
+    func parseInitialExpression() throws {
         context.pushContext(nodeType: InitialExpression.self)
         defer {
             context.popContext()
@@ -114,7 +114,7 @@ public extension ObjcParser {
     ///
     /// function_parameters : '(' parameter_list? ')' ;
     /// ```
-    public func parseFunctionDeclaration() throws {
+    func parseFunctionDeclaration() throws {
         let node = context.pushContext(nodeType: FunctionDefinition.self)
         defer {
             context.popContext()
@@ -146,7 +146,7 @@ public extension ObjcParser {
     /// ```
     /// parameter_list : function_parameter (',' function_parameter)*  (',' '...')? ;
     /// ```
-    public func parseFunctionParameterList() throws {
+    func parseFunctionParameterList() throws {
         context.pushContext(nodeType: ParameterList.self)
         defer {
             context.popContext()
@@ -191,7 +191,7 @@ public extension ObjcParser {
     /// ```
     /// function_parameter : objc_type IDENTIFIER ;
     /// ```
-    public func parseFunctionParameter() throws {
+    func parseFunctionParameter() throws {
         context.pushContext(nodeType: FunctionParameter.self)
         defer {
             context.popContext()

@@ -187,15 +187,21 @@ class SwiftMethodSignatureGenTests: XCTestCase {
     }
     
     private func parseMethodSign(_ source: String, file: String = #file, line: Int = #line) -> MethodDefinition {
-        let parser = ObjcParser(string: source)
+        let finalSrc = """
+            @interface myClass
+            \(source)
+            @end
+            """
+        
+        let parser = ObjcParser(string: finalSrc)
         
         do {
-            let root: GlobalContextNode =
-                try parser.withTemporaryContext {
-                    try parser.parseMethodDeclaration()
-            }
+            try parser.parse()
             
-            let node: MethodDefinition? = root.firstChild()
+            let node =
+                parser.rootNode
+                    .firstChild(ofType: ObjcClassInterface.self)?
+                    .firstChild(ofType: MethodDefinition.self)
             return node!
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)

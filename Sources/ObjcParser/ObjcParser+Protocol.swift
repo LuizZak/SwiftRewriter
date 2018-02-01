@@ -9,7 +9,7 @@ public extension ObjcParser {
     ///     ( methodDefinition | propertyDefinition )*
     //      '@end'
     /// ```
-    public func parseProtocol() throws {
+    func parseProtocol() throws {
         let node = context.pushContext(nodeType: ProtocolDeclaration.self)
         defer {
             context.popContext()

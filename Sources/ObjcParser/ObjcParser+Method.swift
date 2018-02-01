@@ -206,7 +206,7 @@ public extension ObjcParser {
     /// nullability_specifier:
     ///    'nullable' | 'nonnull' | 'null_unspecified'
     /// ```
-    private func parseNullabilitySpecifier() throws {
+    func parseNullabilitySpecifier() throws {
         let identRange = startRange()
         do {
             let ident = try lexer.rewindOnFailure {

@@ -1,6 +1,9 @@
 import Foundation
 import MiniLexer
 import GrammarModels
+import class Antlr4.ANTLRInputStream
+import class Antlr4.CommonTokenStream
+import ObjcParserAntlr
 
 public class ObjcParser {
     let lexer: ObjcLexer
@@ -41,7 +44,7 @@ public class ObjcParser {
         return lexer.location()
     }
     
-    public func withTemporaryContextNode(_ node: ASTNode, do action: () throws -> ()) rethrows {
+    func withTemporaryContextNode(_ node: ASTNode, do action: () throws -> ()) rethrows {
         context.pushContext(node: node)
         defer {
             context.popContext()
@@ -50,7 +53,7 @@ public class ObjcParser {
         try action()
     }
     
-    public func withTemporaryContext<T: ASTNode & InitializableNode>(nodeType: T.Type = T.self, do action: () throws -> ()) rethrows -> T {
+    func withTemporaryContext<T: ASTNode & InitializableNode>(nodeType: T.Type = T.self, do action: () throws -> ()) rethrows -> T {
         let node = context.pushContext(nodeType: nodeType)
         defer {
             context.popContext()
@@ -87,7 +90,7 @@ public class ObjcParser {
     ///   | protocol_declaration_list
     ///   | class_declaration_list;
     /// ```
-    public func parseGlobalNamespace() throws {
+    func parseGlobalNamespace() throws {
         // TODO: Flesh out full global scope grammar here
         
         while !lexer.isEof {

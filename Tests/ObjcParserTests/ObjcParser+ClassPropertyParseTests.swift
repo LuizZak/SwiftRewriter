@@ -5,7 +5,11 @@ import GrammarModels
 class ObjcParser_ClassPropertyParseTests: XCTestCase {
     
     func testParseSimpleProperty() throws {
-        let source = "@property BOOL myProperty1;"
+        let source = """
+            @interface MyClass
+            @property BOOL myProperty1;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
@@ -20,7 +24,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     
     func testParsePropertyWithGenericType() throws {
         // Arrange
-        let source = "@property NSArray<NSString*>* myProperty3;"
+        let source = """
+            @interface MyClass
+            @property NSArray<NSString*>* myProperty3;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         // Act
@@ -36,7 +44,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     }
     
     func testParsePropertyWithModifiers() throws {
-        let source = "@property ( atomic, nonatomic , copy ) BOOL myProperty1;"
+        let source = """
+            @interface MyClass
+            @property ( atomic, nonatomic , copy ) BOOL myProperty1;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
@@ -51,7 +63,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     }
     
     func testParsePropertyWithGetterModifier() throws {
-        let source = "@property (getter=isEnabled) BOOL enabled;"
+        let source = """
+            @interface MyClass
+            @property (getter=isEnabled) BOOL enabled;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
@@ -64,7 +80,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     }
     
     func testParsePropertyWithSetterModifier() throws {
-        let source = "@property (setter=setIsEnabled:) BOOL enabled;"
+        let source = """
+            @interface MyClass
+            @property (setter=setIsEnabled:) BOOL enabled;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
@@ -77,7 +97,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     }
     
     func testParsePropertyWithModifiersRecovery() throws {
-        let source = "@property ( atomic, nonatomic , ) BOOL myProperty1;"
+        let source = """
+            @interface MyClass
+            @property ( atomic, nonatomic , ) BOOL myProperty1;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
@@ -91,7 +115,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     }
     
     func testParsePropertyMissingNameRecovery() throws {
-        let source = "@property BOOL ;"
+        let source = """
+            @interface MyClass
+            @property BOOL ;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
@@ -104,7 +132,11 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     }
     
     func testParsePropertyMissingTypeAndNameRecovery() throws {
-        let source = "@property ;"
+        let source = """
+            @interface MyClass
+            @property ;
+            @end
+            """
         let sut = ObjcParser(string: source)
         
         let result = _parseTestPropertyNode(source: source, parser: sut)
@@ -118,14 +150,13 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
     
     private func _parseTestPropertyNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> PropertyDefinition {
         do {
-            let root: GlobalContextNode =
-                try parser.withTemporaryContext {
-                    try parser.parsePropertyNode()
-                }
+            try parser.parse()
             
-            let result: PropertyDefinition! = root.childrenMatching().first
-            
-            return result
+            let node =
+                parser.rootNode
+                    .firstChild(ofType: ObjcClassInterface.self)?
+                    .firstChild(ofType: PropertyDefinition.self)
+            return node!
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
             fatalError()

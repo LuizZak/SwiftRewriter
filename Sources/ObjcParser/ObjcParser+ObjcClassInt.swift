@@ -9,7 +9,7 @@ extension ObjcParser {
     /// classInterface:
     ///    '@interface' className (':' superclassName)? protocolRefList? ivars? interfaceDeclList? '@end';
     /// ```
-    public func parseClassInerfaceNode() throws {
+    func parseClassInerfaceNode() throws {
         // @interface Name [: SuperClass] [<ProtocolList>]
         //
         // @end
@@ -94,7 +94,7 @@ extension ObjcParser {
     ///     |   '@public'
     ///     ;
     /// ```
-    public func parseIVarsList() throws {
+    func parseIVarsList() throws {
         let node = context.pushContext(nodeType: IVarsList.self)
         defer {
             context.popContext()
@@ -119,7 +119,7 @@ extension ObjcParser {
         try parseTokenNode(.closeBrace)
     }
     
-    public func parseIVarDeclaration() throws {
+    func parseIVarDeclaration() throws {
         let node = context.pushContext(nodeType: IVarDeclaration.self)
         defer {
             context.popContext()
@@ -152,7 +152,7 @@ extension ObjcParser {
     /// protocol_name:
     ///    identifier
     /// ```
-    public func parseProtocolReferenceList() throws {
+    func parseProtocolReferenceList() throws {
         func parseProtocolName() throws {
             do {
                 let identRange = startRange()

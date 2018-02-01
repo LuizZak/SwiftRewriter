@@ -47,8 +47,6 @@ public class SwiftMethodSignatureGen {
                                  _ target: inout MethodGenerationIntention.Signature) {
         typealias Parameter = MethodGenerationIntention.Parameter // To shorten up type names within the method
         
-        let inNonnullContext = context.isAssumeNonnullOn
-        
         guard keywords.count > 0 else {
             return
         }

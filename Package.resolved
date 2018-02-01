@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "Antlr4",
+        "repositoryURL": "https://cs-luiz-silva@bitbucket.org/cs-luiz-silva/antlr4-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "acf396441ba76cb0a10911afcf1efe337d790543",
+          "version": "4.0.0"
+        }
+      },
+      {
         "package": "MiniLexer",
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {

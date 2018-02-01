@@ -3,7 +3,7 @@ import GrammarModels
 public extension ObjcParser {
     /// Returns true iff the current tokens indicate the start of a class category
     /// declaration.
-    internal func isClassCategory() -> Bool {
+    func isClassCategory() -> Bool {
         let bk = lexer.backtracker()
         defer {
             bk.backtrack()
@@ -41,7 +41,7 @@ public extension ObjcParser {
     /// categoryName:
     ///     identifier
     /// ```
-    public func parseClassCategoryNode() throws {
+    func parseClassCategoryNode() throws {
         // @interface Name [: SuperClass] [<ProtocolList>]
         //
         // @end
