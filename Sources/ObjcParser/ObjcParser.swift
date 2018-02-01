@@ -3,10 +3,12 @@ import MiniLexer
 import GrammarModels
 import class Antlr4.ANTLRInputStream
 import class Antlr4.CommonTokenStream
+import class Antlr4.ParseTreeWalker
 import ObjcParserAntlr
 
 public class ObjcParser {
     let lexer: ObjcLexer
+    let source: CodeSource
     let context: NodeCreationContext
     
     /// Whether a token has been read yet by this parser
@@ -23,6 +25,7 @@ public class ObjcParser {
     }
     
     public init(source: CodeSource) {
+        self.source = source
         lexer = ObjcLexer(source: source)
         context = NodeCreationContext()
         diagnostics = Diagnostics()
@@ -66,6 +69,22 @@ public class ObjcParser {
     
     /// Parses the entire source string
     public func parse() throws {
+        // Make a pass with ANTLR before traversing the parse tree and collecting
+        // known constructs
+        let src = source.fetchSource()
+        
+        let input = ANTLRInputStream(src)
+        let lexer = ObjectiveCLexer(input)
+        let tokens = CommonTokenStream(lexer)
+        
+        let parser = try ObjectiveCParser(tokens)
+        let root = try parser.translationUnit()
+        
+        let listener = ObjcParserListener()
+        
+        let walker = ParseTreeWalker()
+        try walker.walk(listener, root)
+        
         context.pushContext(node: rootNode)
         defer {
             context.popContext()

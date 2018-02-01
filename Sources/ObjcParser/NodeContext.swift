@@ -7,6 +7,8 @@ public class NodeCreationContext {
         return _nodeStack.last
     }
     
+    public var autoUpdatesSourceRange = true
+    
     private var _nodeStack: [ASTNode] = []
     
     /// Pushes a new node context
@@ -43,11 +45,18 @@ public class NodeCreationContext {
     
     /// Pops the current top-most node
     /// - precondition: `topmostNode != nil`
-    public func popContext() {
-        if let top = _nodeStack.popLast() {
+    @discardableResult
+    public func popContext() -> ASTNode? {
+        guard let top = _nodeStack.popLast() else {
+            return nil
+        }
+        
+        if autoUpdatesSourceRange {
             if top.location == .invalid {
                 top.updateSourceRange()
             }
         }
+        
+        return top
     }
 }
