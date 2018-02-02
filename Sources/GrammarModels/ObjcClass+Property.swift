@@ -1,23 +1,19 @@
 public class PropertyDefinition: ASTNode, InitializableNode {
     /// Type identifier
-    public var type: ASTNodeRef<TypeNameNode>
+    public var type: TypeNameNode? {
+        return firstChild()
+    }
     
     public var modifierList: PropertyModifierList? {
         return firstChild()
     }
     
     /// Identifier for this property
-    public var identifier: ASTNodeRef<Identifier>
-    
-    public init(type: ASTNodeRef<TypeNameNode>, identifier: ASTNodeRef<Identifier>) {
-        self.type = type
-        self.identifier = identifier
-        super.init()
+    public var identifier: Identifier? {
+        return firstChild()
     }
     
     public required init() {
-        self.type = .placeholder
-        self.identifier = .placeholder
         super.init()
     }
 }

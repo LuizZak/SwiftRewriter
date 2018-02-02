@@ -71,6 +71,17 @@ open class ASTNode: ASTNodeValue {
         }
     }
     
+    /// Gets a child of a given type at a given index
+    public func child<T: ASTNode>(ofType type: T.Type = T.self, atIndex index: Int) -> T? {
+        let ch = childrenMatching(type: type)
+        
+        if index < 0 || index >= ch.count {
+            return nil
+        }
+        
+        return ch[index]
+    }
+    
     /// Gets children of this node of a given type
     public func childrenMatching<T: ASTNode>(type: T.Type = T.self) -> [T] {
         return children.compactMap { $0 as? T }

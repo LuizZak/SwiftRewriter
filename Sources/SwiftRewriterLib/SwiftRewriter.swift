@@ -78,30 +78,14 @@ public class SwiftRewriter {
         
         visitor.visitClosure = { node in
             switch node {
-            // Objective-C @interface class declarations
-            case let n as ObjcClassInterface:
-                self.visitObjcClassInterfaceNode(n)
-                
-            // Objective-C class category
-            case let n as ObjcClassCategory:
-                self.visitObjcClassCategoryNode(n)
-                
-            // Objective-C @implementation class implementation
-            case let n as ObjcClassImplementation:
-                self.visitObjcClassImplementationNode(n)
-                
-            // Objective-C @protocol declaration
-            case let n as ProtocolDeclaration:
-                self.visitProtocolDeclarationNode(n)
-                
             case let n as KeywordNode:
                 self.visitKeywordNode(n)
             
-            case let n as PropertyDefinition:
-                self.visitObjcClassInterfacePropertyNode(n)
-            
             case let n as MethodDefinition:
                 self.visitObjcClassMethodNode(n)
+            
+            case let n as PropertyDefinition:
+                self.visitPropertyDefinitionNode(n)
                 
             case let n as ProtocolReferenceList:
                 self.visitObjcClassProtocolReferenceListNode(n)
@@ -117,11 +101,11 @@ public class SwiftRewriter {
                 
             case let n as Identifier
                 where n.name == "NS_ASSUME_NONNULL_BEGIN":
-                self.context.context(ofType: AssumeNonnullContext.self)?.isNonnullOn = true
+                self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn = true
                 
             case let n as Identifier
                 where n.name == "NS_ASSUME_NONNULL_END":
-                self.context.context(ofType: AssumeNonnullContext.self)?.isNonnullOn = false
+                self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn = false
             default:
                 return
             }
@@ -160,7 +144,7 @@ public class SwiftRewriter {
     
     private func visitKeywordNode(_ node: KeywordNode) {
         // ivar list accessibility specification
-        if let ctx = context.context(ofType: IVarListContext.self) {
+        if let ctx = context.findContext(ofType: IVarListContext.self) {
             switch node.keyword {
             case .atPrivate:
                 ctx.accessLevel = .private
@@ -177,7 +161,7 @@ public class SwiftRewriter {
     }
     
     private func visitVariableDeclarationNode(_ node: VariableDeclaration) {
-        guard let ctx = context.context(ofType: FileGenerationIntention.self) else {
+        guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
             return
         }
         
@@ -210,18 +194,16 @@ public class SwiftRewriter {
         intentionCollection.addIntention(intent)
         
         context
-            .context(ofType: FileGenerationIntention.self)?
+            .findContext(ofType: FileGenerationIntention.self)?
             .addType(intent)
         
         context.pushContext(intent)
     }
     
-    private func visitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        
-    }
-    
     private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        context.popContext() // ClassGenerationIntention
+        if node.identifier.name != nil {
+            context.popContext() // ClassGenerationIntention
+        }
     }
     
     // MARK: - ObjcClassCategory
@@ -236,18 +218,16 @@ public class SwiftRewriter {
         intentionCollection.addIntention(intent)
         
         context
-            .context(ofType: FileGenerationIntention.self)?
+            .findContext(ofType: FileGenerationIntention.self)?
             .addType(intent)
         
         context.pushContext(intent)
     }
     
-    private func visitObjcClassCategoryNode(_ node: ObjcClassCategory) {
-        
-    }
-    
     private func exitObjcClassCategoryNode(_ node: ObjcClassCategory) {
-        context.popContext() // ClassGenerationIntention
+        if node.identifier.name != nil {
+            context.popContext() // ClassGenerationIntention
+        }
     }
     
     // MARK: - ObjcClassImplementation
@@ -262,14 +242,10 @@ public class SwiftRewriter {
         intentionCollection.addIntention(intent)
         
         context
-            .context(ofType: FileGenerationIntention.self)?
+            .findContext(ofType: FileGenerationIntention.self)?
             .addType(intent)
         
         context.pushContext(intent)
-    }
-    
-    private func visitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
-        
     }
     
     private func exitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
@@ -288,27 +264,25 @@ public class SwiftRewriter {
         intentionCollection.addIntention(intent)
         
         context
-            .context(ofType: FileGenerationIntention.self)?
+            .findContext(ofType: FileGenerationIntention.self)?
             .addProtocol(intent)
         
         context.pushContext(intent)
     }
     
-    private func visitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
-        
-    }
-    
     private func exitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
-        context.popContext() // ProtocolGenerationIntention
+        if node.identifier.name != nil {
+            context.popContext() // ProtocolGenerationIntention
+        }
     }
-    private func visitObjcClassInterfacePropertyNode(_ node: PropertyDefinition) {
-        guard let ctx = context.context(ofType: TypeGenerationIntention.self) else {
+    private func visitPropertyDefinitionNode(_ node: PropertyDefinition) {
+        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
         }
         
         let prop =
-            PropertyGenerationIntention(name: node.identifier.name ?? "",
-                                        type: node.type.type ?? .struct(""),
+            PropertyGenerationIntention(name: node.identifier?.name ?? "",
+                                        type: node.type?.type ?? .struct(""),
                                         source: node)
         
         prop.inNonnullContext = context.isAssumeNonnullOn
@@ -317,7 +291,7 @@ public class SwiftRewriter {
     }
     
     private func visitObjcClassMethodNode(_ node: MethodDefinition) {
-        guard let ctx = context.context(ofType: TypeGenerationIntention.self) else {
+        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
         }
         
@@ -338,7 +312,7 @@ public class SwiftRewriter {
     }
     
     private func visitObjcClassSuperclassName(_ node: SuperclassName) {
-        guard let ctx = context.context(ofType: ClassGenerationIntention.self) else {
+        guard let ctx = context.findContext(ofType: ClassGenerationIntention.self) else {
             return
         }
         
@@ -346,7 +320,7 @@ public class SwiftRewriter {
     }
     
     private func visitObjcClassProtocolReferenceListNode(_ node: ProtocolReferenceList) {
-        guard let ctx = context.context(ofType: TypeGenerationIntention.self) else {
+        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
         }
         
@@ -364,18 +338,18 @@ public class SwiftRewriter {
     }
     
     private func visitObjcClassIVarDeclarationNode(_ node: IVarDeclaration) {
-        guard let classCtx = context.context(ofType: ClassGenerationIntention.self) else {
+        guard let classCtx = context.findContext(ofType: ClassGenerationIntention.self) else {
             return
         }
         let ivarCtx =
-            context.context(ofType: IVarListContext.self)
+            context.findContext(ofType: IVarListContext.self)
         
         let access = ivarCtx?.accessLevel ?? .private
         
         let ivar =
             InstanceVariableGenerationIntention(
-                name: node.identifier.name ?? "",
-                type: node.type.type ?? .struct(""),
+                name: node.identifier?.name ?? "",
+                type: node.type?.type ?? .struct(""),
                 accessLevel: access,
                 source: node)
         

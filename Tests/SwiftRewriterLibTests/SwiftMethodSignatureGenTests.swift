@@ -26,16 +26,16 @@ class SwiftMethodSignatureGenTests: XCTestCase {
     
     func testSimpleSingleArgument() throws {
         let sign = genSignature("""
-            - (void)setInteger:(NSInteger)int;
+            - (void)setInteger:(NSInteger)inty;
             """)
         
         XCTAssertEqual(sign.name, "setInteger")
         XCTAssertEqual(sign.returnType, .void)
         XCTAssertEqual(sign.parameters.count, 1)
         
-        XCTAssertEqual(sign.parameters[0].label, "int")
+        XCTAssertEqual(sign.parameters[0].label, "inty")
         XCTAssertEqual(sign.parameters[0].type, .struct("NSInteger"))
-        XCTAssertEqual(sign.parameters[0].name, "int")
+        XCTAssertEqual(sign.parameters[0].name, "inty")
     }
     
     func testSimpleMultiArguments() throws {

@@ -4,26 +4,6 @@ import ObjcParser
 import GrammarModels
 
 class SwiftRewriter_MultiFilesTests: XCTestCase {
-    func testEmittingErrors() throws {
-        assertThat()
-            .file(name: "objc.h",
-            """
-            @interface MyClass
-            - (void)myMethod
-            @end
-            """)
-            .translatesToSwift(
-            """
-            class MyClass: NSObject {
-                func myMethod() {
-                }
-            }
-            // End of file objc.h
-            """, expectsErrors: true)
-            .assertErrorStreamIs("""
-            Error: Expected ';' or method body after method declaration at line 3 column 1
-            """)
-    }
     
     func testEmittingHeaderWhenMissingImplementation() throws {
         assertThat()
@@ -72,7 +52,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
     func testProcessAssumeNonnullAcrossFiles() throws {
         assertThat()
             .file(name: "objc.h",
-                  """
+            """
             NS_ASSUME_NONNULL_BEGIN
             @interface MyClass
             @property NSString *property;
@@ -81,14 +61,14 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             NS_ASSUME_NONNULL_END
             """)
             .file(name: "objc.m",
-                  """
+            """
             @implementation MyClass
             - (id)myMethod:(NSString*)parameter {
             }
             @end
             """)
             .translatesToSwift(
-                """
+            """
             class MyClass: NSObject {
                 var property: String
                 

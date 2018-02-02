@@ -45,8 +45,12 @@ public class IVarsList: ASTNode, InitializableNode {
 }
 
 public class IVarDeclaration: ASTNode, InitializableNode {
-    public var identifier: ASTNodeRef<Identifier> = .placeholder
-    public var type: ASTNodeRef<TypeNameNode> = .placeholder
+    public var type: TypeNameNode? {
+        return firstChild()
+    }
+    public var identifier: Identifier? {
+        return firstChild()
+    }
     
     public required init() {
         super.init()
@@ -54,13 +58,13 @@ public class IVarDeclaration: ASTNode, InitializableNode {
 }
 
 // MARK: - Subnodes
-public class ProtocolReferenceList: ASTNode {
+public class ProtocolReferenceList: ASTNode, InitializableNode {
     public var protocols: [ProtocolName] {
         return childrenMatching()
     }
     
-    public init(location: SourceLocation = .invalid) {
-        super.init(location: location)
+    public required init() {
+        super.init()
     }
 }
 

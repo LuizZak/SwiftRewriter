@@ -14,8 +14,15 @@ public class TypeContext {
     ///
     /// Searches from top-to-bottom, so the last context `T` that was pushed is
     /// returned first.
-    public func context<T: Context>(ofType type: T.Type = T.self) -> T? {
+    public func findContext<T: Context>(ofType type: T.Type = T.self) -> T? {
         return contexts.reversed().first { $0 is T } as? T
+    }
+    
+    /// Returns the topmost context on the contexts stack casted to a specific type.
+    ///
+    /// If the topmost context is not T, nil is returned instead.
+    public func currentContext<T: Context>(as type: T.Type = T.self) -> T? {
+        return contexts.last as? T
     }
     
     public func popContext() {
@@ -43,6 +50,6 @@ public class AssumeNonnullContext: Context {
 public extension TypeContext {
     /// Returns a value specifying whether assume nonnull is on for pointer types.
     public var isAssumeNonnullOn: Bool {
-        return context(ofType: AssumeNonnullContext.self)?.isNonnullOn ?? false
+        return findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn ?? false
     }
 }

@@ -3,7 +3,7 @@ import GrammarModels
 public extension ObjcParser {
     
     func parsePropertyNode() throws {
-        let prop = PropertyDefinition(type: .placeholder, identifier: .placeholder)
+        let prop = PropertyDefinition()
         context.pushContext(node: prop)
         defer {
             context.popContext()
@@ -21,10 +21,10 @@ public extension ObjcParser {
         }
         
         // Type
-        prop.type = try asNodeRef(try parseTypeNameNode())
+        context.addChildNode(try parseTypeNameNode())
         
         // Name
-        prop.identifier = try asNodeRef(try parseIdentifierNode())
+        context.addChildNode(try parseIdentifierNode())
         
         // ;
         try parseTokenNode(.semicolon, onMissing: "Expected \(TokenType.semicolon) to end property declaration")

@@ -1,38 +1,25 @@
 public typealias MethodBody = String // TODO: Create the node that contains the method body.
 
-public class MethodDefinition: ASTNode {
-    public var returnType: ASTNodeRef<MethodType>
-    public var methodSelector: ASTNodeRef<MethodSelector>
+public class MethodDefinition: ASTNode, InitializableNode {
+    public var returnType: MethodType? {
+        return firstChild()
+    }
+    public var methodSelector: MethodSelector? {
+        return firstChild()
+    }
     public var body: MethodBody?
     
-    public init(returnType: ASTNodeRef<MethodType>,
-                methodSelector: ASTNodeRef<MethodSelector>) {
-        self.returnType = returnType
-        self.methodSelector = methodSelector
+    public required init() {
         super.init()
     }
     
     public override func addChild(_ node: ASTNode) {
         super.addChild(node)
-        
-        if let retNode = node as? MethodType {
-            if case .valid = returnType {
-                fatalError("Attempted to add more than one method_type node to a method definition node.")
-            }
-            
-            returnType = .valid(retNode)
-        } else if let selNode = node as? MethodSelector {
-            if case .valid = methodSelector {
-                fatalError("Attempted to add more than one method_selector node to a method definition node.")
-            }
-            
-            methodSelector = .valid(selNode)
-        }
     }
 }
 
-public class MethodSelector: ASTNode {
-    var selector: SelectorKind {
+public class MethodSelector: ASTNode, InitializableNode {
+    public var selector: SelectorKind {
         let sel = childrenMatching(type: Identifier.self)
         let kw = childrenMatching(type: KeywordDeclarator.self)
         
@@ -41,6 +28,10 @@ public class MethodSelector: ASTNode {
         } else {
             return .keywords(kw)
         }
+    }
+    
+    public required init() {
+        super.init()
     }
     
     public enum SelectorKind {
@@ -67,56 +58,40 @@ public class MethodSelector: ASTNode {
     }
 }
 
-public class KeywordDeclarator: ASTNode {
-    public var selector: Identifier?
+public class KeywordDeclarator: ASTNode, InitializableNode {
+    public var selector: Identifier? {
+        let children = childrenMatching(type: Identifier.self)
+        if children.count == 1 {
+            return nil
+        }
+        
+        return children.first
+    }
     public var type: MethodType? {
         return firstChild()
     }
-    public var identifier: Identifier?
+    public var identifier: Identifier? {
+        return childrenMatching(type: Identifier.self).last
+    }
     
-    public init(selector: Identifier?, identifier: Identifier?) {
-        self.selector = selector
-        self.identifier = identifier
-        
+    public required init() {
         super.init()
     }
 }
 
-public class MethodType: ASTNode {
+public class MethodType: ASTNode, InitializableNode {
     public var nullabilitySpecifiers: [NullabilitySpecifier] {
         return childrenMatching()
     }
-    public var type: ASTNodeRef<TypeNameNode>
+    public var type: TypeNameNode? {
+        return firstChild()
+    }
     
-    public init(type: ASTNodeRef<TypeNameNode>) {
-        self.type = type
+    public required init() {
         super.init()
     }
 }
 
 public class NullabilitySpecifier: Identifier {
     
-}
-
-// MARK: - ASTNodeRef extensions
-public extension ASTNodeRef where Node == MethodType {
-    public var type: ASTNodeRef<TypeNameNode> {
-        switch self {
-        case .valid(let node):
-            return node.type
-        case .invalid:
-            return .placeholder
-        }
-    }
-}
-
-public extension ASTNodeRef where Node == MethodSelector {
-    public var selector: MethodSelector.SelectorKind? {
-        switch self {
-        case .valid(let node):
-            return node.selector
-        default:
-            return nil
-        }
-    }
 }

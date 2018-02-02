@@ -13,7 +13,7 @@ public extension ObjcParser {
     ///    method_type? method_selector
     /// ```
     func parseMethodDeclaration() throws {
-        let method = MethodDefinition(returnType: .placeholder, methodSelector: .placeholder)
+        let method = MethodDefinition()
         context.pushContext(node: method)
         defer {
             context.popContext()
@@ -146,14 +146,14 @@ public extension ObjcParser {
     ///    selector? ':' method_type* IDENTIFIER;
     /// ```
     func parseKeywordDeclarator() throws {
-        let node = KeywordDeclarator(selector: nil, identifier: nil)
+        let node = KeywordDeclarator()
         context.pushContext(node: node)
         defer {
             context.popContext()
         }
         
         if lexer.tokenType(.identifier) {
-            node.selector = try parseIdentifierNode()
+            node.addChild(try parseIdentifierNode())
         }
         
         try parseTokenNode(.colon)
@@ -162,7 +162,7 @@ public extension ObjcParser {
             try parseMethodType()
         }
         
-        node.identifier = try parseIdentifierNode()
+        node.addChild(try parseIdentifierNode())
     }
     
     /// Parses an Objective-C method type
@@ -175,8 +175,7 @@ public extension ObjcParser {
     ///    'nullable' | 'nonnull' | 'null_unspecified'
     /// ```
     func parseMethodType() throws {
-        let methodType = MethodType(type: .placeholder)
-        context.pushContext(node: methodType)
+        let methodType = context.pushContext(nodeType: MethodType.self)
         defer {
             context.popContext()
         }
@@ -193,7 +192,8 @@ public extension ObjcParser {
             }
         }
         
-        methodType.type = .valid(try parseTypeNameNode())
+        let node = try parseTypeNameNode()
+        context.addChildNode(node)
         
         if !lexer.tokenType(.closeParens) {
             diagnostics.error("Expected \(TokenType.closeParens) after signature method", location: location())

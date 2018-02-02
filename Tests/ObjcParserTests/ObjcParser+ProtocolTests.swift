@@ -28,7 +28,7 @@ class ObjcParser_ProtocolTests: XCTestCase {
         let prot = _parseTestProtocolNode(source: source, parser: sut)
         
         XCTAssertEqual(prot.identifier.name, "MyProtocol")
-        XCTAssertEqual(prot.methods[0].methodSelector.selector?.identifier?.name, "aMethod")
+        XCTAssertEqual(prot.methods[0].methodSelector?.selector.identifier?.name, "aMethod")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     

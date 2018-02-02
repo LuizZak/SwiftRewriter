@@ -85,12 +85,16 @@ public class ObjcParser {
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
         
+        rootNode = listener.rootNode
+        
+        /*
         context.pushContext(node: rootNode)
         defer {
             context.popContext()
         }
         
         try parseGlobalNamespace()
+        */
     }
     
     /// Parse the global namespace.
@@ -209,6 +213,7 @@ public class ObjcParser {
             if lexer.tokenType() == .operator(.lessThan) {
                 let types =
                     _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
+                                             addTokensToContext: false,
                                              itemParser: { try lexer.consume(tokenType: .identifier) })
                 type = .id(protocols: types.map { String($0.string) })
             } else {
@@ -220,7 +225,9 @@ public class ObjcParser {
             // '<' : Generic type specifier
             if lexer.tokenType() == .operator(.lessThan) {
                 let types =
-                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan), itemParser: parseObjcType)
+                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
+                                             addTokensToContext: false,
+                                             itemParser: parseObjcType)
                 type = .generic(typeName, parameters: types)
             } else {
                 type = .struct(typeName)

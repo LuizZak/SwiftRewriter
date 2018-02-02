@@ -21,7 +21,7 @@ public class SwiftMethodSignatureGen {
                            returnTypeNullability: nil,
                            parameters: [])
         
-        if let sel = objcMethod.methodSelector.selector {
+        if let sel = objcMethod.methodSelector?.selector {
             switch sel {
             case .selector(let s):
                 sign.name = s.name
@@ -30,12 +30,12 @@ public class SwiftMethodSignatureGen {
             }
         }
         
-        if let type = objcMethod.returnType.type.type {
+        if let type = objcMethod.returnType?.type?.type {
             sign.returnType = type
         }
         
         /// Nullability specifiers (from e.g. `... arg:(nullable NSString*)paramName ...`
-        if let nullSpecs = objcMethod.returnType.nodeValue?.nullabilitySpecifiers {
+        if let nullSpecs = objcMethod.returnType?.nullabilitySpecifiers {
             sign.returnTypeNullability =
                 nullabilityFrom(specifiers: nullSpecs)
         }
@@ -58,7 +58,7 @@ public class SwiftMethodSignatureGen {
             var label = kw.selector?.name ?? "_"
             let identifier = kw.identifier?.name ?? "_\(i)"
             var nullability: TypeNullability? = nil
-            let type = kw.type?.type.type ?? ObjcType.id(protocols: [])
+            let type = kw.type?.type?.type ?? ObjcType.id(protocols: [])
             
             // The first label name is always equal to its keyword's identifier.
             // This is because the first label is actually used as the method's name.

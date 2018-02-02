@@ -128,10 +128,10 @@ extension ObjcParser {
         let range = startRange()
         
         // Type
-        node.type = try asNodeRef(try parseTypeNameNode())
+        context.addChildNode(try parseTypeNameNode())
         
         // Name
-        node.identifier = try asNodeRef(try parseIdentifierNode())
+        context.addChildNode(try parseIdentifierNode())
         
         // ;
         try parseTokenNode(.semicolon, onMissing: "Expected \(TokenType.semicolon) to end property declaration")

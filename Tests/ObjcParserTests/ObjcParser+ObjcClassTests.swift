@@ -146,8 +146,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         let keywordsProp1 = result.properties[0].childrenMatching(type: KeywordNode.self)
         XCTAssertTrue(keywordsProp1.contains { $0.keyword == .atProperty })
-        XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
-        XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
+        XCTAssertEqual(result.properties[0].type?.type, .struct("BOOL"))
+        XCTAssertEqual(result.properties[0].identifier?.name, "myProperty1")
         XCTAssert(result.properties[0].childrenMatching(type: TokenNode.self).contains { $0.token.type == .semicolon })
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
@@ -168,8 +168,8 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let keywordsProp1 = result.properties[0].childrenMatching(type: KeywordNode.self)
         
         XCTAssertTrue(keywordsProp1.contains { $0.keyword == .atProperty })
-        XCTAssertEqual(result.properties[0].type.type, .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])))
-        XCTAssertEqual(result.properties[0].identifier.name, "myProperty3")
+        XCTAssertEqual(result.properties[0].type?.type, .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])))
+        XCTAssertEqual(result.properties[0].identifier?.name, "myProperty3")
         XCTAssert(result.properties[0].childrenMatching(type: TokenNode.self).contains { $0.token.type == .semicolon })
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
@@ -184,65 +184,13 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
-        XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
-        XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
+        XCTAssertEqual(result.properties[0].type?.type, .struct("BOOL"))
+        XCTAssertEqual(result.properties[0].identifier?.name, "myProperty1")
         XCTAssertNotNil(result.properties[0].modifierList)
         XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[0], "atomic")
         XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[1], "nonatomic")
         XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[2], "copy")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
-    }
-    
-    func testParseClassWithPropertyWithModifiersRecovery() throws {
-        let source = """
-            @interface MyClass
-            @property ( atomic, nonatomic, , ) BOOL myProperty1;
-            @end
-            """
-        let sut = ObjcParser(string: source)
-        
-        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
-        
-        XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
-        XCTAssertEqual(result.properties[0].identifier.name, "myProperty1")
-        XCTAssertNotNil(result.properties[0].modifierList)
-        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[0], "atomic")
-        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[1], "nonatomic")
-        XCTAssertEqual(sut.diagnostics.errors.count, 2)
-    }
-    
-    func testParseClassWithPropertyMissingNameRecovery() throws {
-        let source = """
-            @interface MyClass
-            @property BOOL ;
-            @end
-            """
-        let sut = ObjcParser(string: source)
-        
-        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
-        
-        XCTAssertEqual(result.properties[0].type.type, .struct("BOOL"))
-        XCTAssertFalse(result.properties[0].identifier.exists)
-        XCTAssertNil(result.properties[0].modifierList)
-        XCTAssertEqual(result.properties[0].childrenMatching(type: TokenNode.self)[0].token.type, .semicolon)
-        XCTAssertEqual(sut.diagnostics.errors.count, 1)
-    }
-    
-    func testParseClassWithPropertyMissingTypeAndNameRecovery() throws {
-        let source = """
-            @interface MyClass
-            @property ;
-            @end
-            """
-        let sut = ObjcParser(string: source)
-        
-        let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
-        
-        XCTAssertEqual(result.properties[0].type.exists, false)
-        XCTAssertFalse(result.properties[0].identifier.exists)
-        XCTAssertNil(result.properties[0].modifierList)
-        XCTAssertEqual(result.properties[0].childrenMatching(type: TokenNode.self)[0].token.type, .semicolon)
-        XCTAssertEqual(sut.diagnostics.errors.count, 2, sut.diagnostics.errors.description)
     }
     
     func testParseClassWithSuperclass() throws {
@@ -320,7 +268,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let result = _parseTestObjcInterfaceNode(source: source, parser: sut)
         
         let method = result.methods[0]
-        let selector = method.methodSelector.selector
+        let selector = method.methodSelector?.selector
         
         XCTAssertNil(method.body)
         XCTAssertEqual(selector?.keywordDeclarations?.count, 1)
@@ -342,7 +290,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let result = _parseTestObjcImplementationNode(source: source, parser: sut)
         
         let method = result.methods[0]
-        let selector = method.methodSelector.selector
+        let selector = method.methodSelector?.selector
         
         XCTAssertNotNil(method.body)
         XCTAssertEqual(selector?.keywordDeclarations?.count, 1)
