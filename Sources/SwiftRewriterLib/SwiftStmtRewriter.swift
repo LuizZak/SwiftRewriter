@@ -26,8 +26,22 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     var target: RewriterOutputTarget
     var onFirstStatement = true
     
+    var onExitListeners: [ExitRuleListener] = []
+    
     init(target: RewriterOutputTarget) {
         self.target = target
+    }
+    
+    func onExitRule(_ rule: ParserRuleContext, do block: @escaping () -> Void) {
+        onExitListeners.append(ExitRuleListener(rule: rule, onExit: block))
+    }
+    
+    override func exitEveryRule(_ ctx: ParserRuleContext) {
+        // Trigger exit listeners, removing them whenever they are successfully
+        // triggered.
+        onExitListeners = onExitListeners.filter { listener in
+            return !listener.exitEveryRule(ctx)
+        }
     }
     
     override func enterStatement(_ ctx: ObjectiveCParser.StatementContext) {
@@ -76,6 +90,32 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         target.outputInline(")")
     }
     
+    override func enterPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) {
+        if let lp = ctx.LP(), let expression = ctx.expression(), let rp = ctx.RP() {
+            target.outputInline("(")
+            onExitRule(expression) {
+                self.target.outputInline(")")
+            }
+        }
+    }
+    
+    override func enterExpression(_ ctx: ObjectiveCParser.ExpressionContext) {
+        // When entering/exiting an expression, check if it's a compounded binary expression
+        binaryExp: if let parentExpression = ctx.parent as? ObjectiveCParser.ExpressionContext {
+            guard let op = parentExpression.op?.getText() else {
+                break binaryExp
+            }
+            // Binary expr
+            // Print operator after expression, with spaces in between
+            if parentExpression.expression().count == 2 && ctx.indexOnParent() == 0 {
+                onExitRule(ctx) {
+                    self.target.outputInline(" ")
+                    self.target.outputInline(op + " ")
+                }
+            }
+        }
+    }
+    
     // MARK: Primitives
     override func enterIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) {
         target.outputInline(ctx.getText())
@@ -83,6 +123,25 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     
     override func enterConstant(_ ctx: ObjectiveCParser.ConstantContext) {
         target.outputInline(ctx.getText())
+    }
+}
+
+private class ExitRuleListener {
+    let rule: ParserRuleContext
+    let onExit: () -> Void
+    
+    init(rule: ParserRuleContext, onExit: @escaping () -> Void) {
+        self.rule = rule
+        self.onExit = onExit
+    }
+    
+    func exitEveryRule(_ ctx: ParserRuleContext) -> Bool {
+        if ctx === rule {
+            onExit()
+            return true
+        }
+        
+        return false
     }
 }
 
