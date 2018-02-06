@@ -76,10 +76,10 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         XCTAssertEqual(result.identifier.name, "MyClass")
         XCTAssertNotNil(result.ivarsList)
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].type.type, .pointer(.struct("NSString")))
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].identifier.name, "_myString")
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].type.type, ObjcType.specified(specifiers: ["__weak"], .id(protocols: [])))
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].identifier.name, "_delegate")
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].type?.type, .pointer(.struct("NSString")))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].identifier?.name, "_myString")
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].type?.type, ObjcType.specified(specifiers: ["__weak"], .id(protocols: [])))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].identifier?.name, "_delegate")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     
@@ -102,10 +102,10 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         XCTAssertEqual(result.identifier.name, "MyClass")
         XCTAssertNotNil(result.ivarsList)
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].type.type, .pointer(.struct("NSString")))
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].identifier.name, "_myString")
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].type.type, ObjcType.specified(specifiers: ["__weak"], .id(protocols: [])))
-        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].identifier.name, "_delegate")
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].type?.type, .pointer(.struct("NSString")))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[0].identifier?.name, "_myString")
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].type?.type, ObjcType.specified(specifiers: ["__weak"], .id(protocols: [])))
+        XCTAssertEqual(result.ivarsList?.ivarDeclarations[1].identifier?.name, "_delegate")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     

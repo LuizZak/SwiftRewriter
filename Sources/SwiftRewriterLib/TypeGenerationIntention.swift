@@ -110,9 +110,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     }
     
     public var isClassMethod: Bool {
-        return
-            source?.firstChild(ofType: TokenNode.self)?.token.type
-                == .operator(.add)
+        return typedSource?.isClassMethod ?? false
     }
     
     public var signature: Signature

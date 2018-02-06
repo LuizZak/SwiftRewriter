@@ -113,7 +113,12 @@ private class TestBuilder {
             try sut.rewrite()
             
             if output.buffer != expectedSwift {
-                test.recordFailure(withDescription: "Failed: Expected to translate Objective-C inputs as \(expectedSwift), but translate as \(output.buffer)", inFile: file, atLine: line, expected: false)
+                test.recordFailure(withDescription: """
+                    Failed: Expected to translate Objective-C inputs as:
+                    \(expectedSwift)
+                    but translated as:
+                    \(output.buffer)
+                    """, inFile: file, atLine: line, expected: false)
             }
             
             if !expectsErrors && sut.diagnostics.errors.count != 0 {

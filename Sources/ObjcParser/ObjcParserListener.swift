@@ -65,9 +65,11 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     private func configureMappers() {
         mapper.addRuleMap(rule: ObjectiveCParser.TranslationUnitContext.self, node: rootNode)
         mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategory.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.PropertyDeclarationContext.self, nodeType: PropertyDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.PropertyAttributesListContext.self, nodeType: PropertyModifierList.self)
+//        mapper.addRuleMap(rule: ObjectiveCParser.PropertyDeclarationContext.self, nodeType: PropertyDefinition.self)
+//        mapper.addRuleMap(rule: ObjectiveCParser.PropertyAttributesListContext.self, nodeType: PropertyModifierList.self)
         mapper.addRuleMap(rule: ObjectiveCParser.KeywordDeclaratorContext.self, nodeType: KeywordDeclarator.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodSelectorContext.self, nodeType: MethodSelector.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodTypeContext.self, nodeType: MethodType.self)
@@ -100,6 +102,18 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
     }
     
+    // MARK: - Class Category
+    override func enterCategoryInterface(_ ctx: ObjectiveCParser.CategoryInterfaceContext) {
+        guard let classNode = context.currentContextNode(as: ObjcClassCategory.self) else {
+            return
+        }
+        
+        // Class name
+        if let ident = ctx.className?.getText() {
+            classNode.identifier = .valid(Identifier(name: ident))
+        }
+    }
+    
     override func enterProtocolName(_ ctx: ObjectiveCParser.ProtocolNameContext) {
         guard let node = context.currentContextNode(as: ProtocolReferenceList.self) else {
             return
@@ -110,20 +124,37 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
     }
     
-    // MARK: - Instance Variables
-    override func enterAccessModifier(_ ctx: ObjectiveCParser.AccessModifierContext) {
-        if ctx.PRIVATE() != nil {
-            context.addChildNode(KeywordNode(keyword: .atPrivate))
-        } else if ctx.PACKAGE() != nil {
-            context.addChildNode(KeywordNode(keyword: .atPackage))
-        } else if ctx.PROTECTED() != nil {
-            context.addChildNode(KeywordNode(keyword: .atProtected))
-        } else if ctx.PUBLIC() != nil {
-            context.addChildNode(KeywordNode(keyword: .atPublic))
+    // MARK: - Class Implementation
+    override func enterClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) {
+        guard let classNode = context.currentContextNode(as: ObjcClassImplementation.self) else {
+            return
+        }
+        
+        // Class name
+        if let ident = ctx.className?.identifier()?.getText() {
+            classNode.identifier = .valid(Identifier(name: ident))
+        }
+        
+        // Super class name
+        if let sup = ctx.superclassName?.getText() {
+            context.addChildNode(SuperclassName(name: sup))
         }
     }
     
+    // MARK: - Instance Variables
     override func enterVisibilitySection(_ ctx: ObjectiveCParser.VisibilitySectionContext) {
+        if let accessModifier = ctx.accessModifier() {
+            if accessModifier.PRIVATE() != nil {
+                context.addChildNode(KeywordNode(keyword: .atPrivate))
+            } else if accessModifier.PACKAGE() != nil {
+                context.addChildNode(KeywordNode(keyword: .atPackage))
+            } else if accessModifier.PROTECTED() != nil {
+                context.addChildNode(KeywordNode(keyword: .atProtected))
+            } else if accessModifier.PUBLIC() != nil {
+                context.addChildNode(KeywordNode(keyword: .atPublic))
+            }
+        }
+        
         let declarations = ctx.fieldDeclaration()
         
         for decl in declarations {
@@ -151,43 +182,15 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Property Declaration
     override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
-        if let ident =
-            ctx.fieldDeclaration()?
-                .fieldDeclaratorList()?
-                .fieldDeclarator(0)?
-                .declarator()?
-                .directDeclarator()?
-                .identifier() {
-            
-            context.addChildNode(Identifier(name: ident.getText()))
-        }
+        let listener = PropertyListener()
+        let walker = ParseTreeWalker()
+        try? walker.walk(listener, ctx)
         
-        if let fieldDeclaration = ctx.fieldDeclaration() {
-            if let type = ObjcParserListener.parseObjcType(inDeclaration: fieldDeclaration) {
-                let typeNode = TypeNameNode(type: type)
-                context.addChildNode(typeNode)
-            }
-        }
+        context.pushContext(node: listener.property)
     }
     
-    override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
-        let modifier: PropertyModifier.Modifier
-        
-        if let ident = ctx.identifier()?.getText() {
-            if ctx.GETTER() != nil {
-                modifier = .getter(ident)
-            } else if ctx.SETTER() != nil {
-                modifier = .setter(ident)
-            } else {
-                modifier = .keyword(ident)
-            }
-        } else {
-            modifier = .keyword(ctx.getText())
-        }
-        
-        let node = PropertyModifier(modifier: modifier)
-        
-        context.addChildNode(node)
+    override func exitPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
+        context.popContext()
     }
     
     override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
@@ -240,9 +243,65 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     // MARK: - Method Declaration
+    override func enterMethodDeclaration(_ ctx: ObjectiveCParser.MethodDeclarationContext) {
+        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
+            return
+        }
+        
+        node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDeclarationContext
+    }
+    
     override func enterMethodSelector(_ ctx: ObjectiveCParser.MethodSelectorContext) {
         if let selIdentifier = ctx.selector()?.identifier() {
             context.addChildNode(Identifier(name: selIdentifier.getText()))
+        }
+    }
+    
+    private class PropertyListener: ObjectiveCParserBaseListener {
+        var property = PropertyDefinition()
+        
+        override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
+            if let ident =
+                ctx.fieldDeclaration()?
+                    .fieldDeclaratorList()?
+                    .fieldDeclarator(0)?
+                    .declarator()?
+                    .directDeclarator()?
+                    .identifier() {
+                
+                property.addChild(Identifier(name: ident.getText()))
+            }
+            
+            if let fieldDeclaration = ctx.fieldDeclaration() {
+                if let type = ObjcParserListener.parseObjcType(inDeclaration: fieldDeclaration) {
+                    let typeNode = TypeNameNode(type: type)
+                    property.addChild(typeNode)
+                }
+            }
+        }
+        
+        override func enterPropertyAttributesList(_ ctx: ObjectiveCParser.PropertyAttributesListContext) {
+            property.addChild(PropertyModifierList())
+        }
+        
+        override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
+            let modifier: PropertyModifier.Modifier
+            
+            if let ident = ctx.identifier()?.getText() {
+                if ctx.GETTER() != nil {
+                    modifier = .getter(ident)
+                } else if ctx.SETTER() != nil {
+                    modifier = .setter(ident)
+                } else {
+                    modifier = .keyword(ident)
+                }
+            } else {
+                modifier = .keyword(ctx.getText())
+            }
+            
+            let node = PropertyModifier(modifier: modifier)
+            
+            property.modifierList?.addChild(node)
         }
     }
 }

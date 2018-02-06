@@ -419,7 +419,18 @@ class SwiftRewriterTests: XCTestCase {
             try sut.rewrite()
             
             if output.buffer != expectedSwift {
-                recordFailure(withDescription: "Failed: Expected to translate Objective-C \(objc) as \(expectedSwift), but translate as \(output.buffer)", inFile: file, atLine: line, expected: false)
+                recordFailure(withDescription: """
+                    Failed: Expected to translate Objective-C
+                    \(objc)
+                    
+                    as
+                    
+                    \(expectedSwift)
+                    
+                    but translate as
+                    
+                    \(output.buffer)
+                    """, inFile: file, atLine: line, expected: false)
             }
             
             if sut.diagnostics.errors.count != 0 {

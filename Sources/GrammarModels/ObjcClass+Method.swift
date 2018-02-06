@@ -9,6 +9,8 @@ public class MethodDefinition: ASTNode, InitializableNode {
     }
     public var body: MethodBody?
     
+    public var isClassMethod: Bool = false
+    
     public required init() {
         super.init()
     }
