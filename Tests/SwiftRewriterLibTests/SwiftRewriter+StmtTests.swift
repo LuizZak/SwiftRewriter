@@ -32,4 +32,20 @@ class SwiftRewriter_StmtTests: XCTestCase {
             }
             """)
     }
+    
+    func testTranslateBinaryExpression() throws {
+        try assertObjcParse(objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                10 + 26;
+            }
+            @end
+            """, swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    10 + 26;
+                }
+            }
+            """)
+    }
 }

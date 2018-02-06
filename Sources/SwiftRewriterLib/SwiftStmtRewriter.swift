@@ -52,27 +52,10 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         guard let messageSelector = ctx.parent as? ObjectiveCParser.MessageSelectorContext else {
             return
         }
-        guard let index = messageSelector.index(of: ctx) else {
-            return
-        }
         
         // Second argument on, print comma before printing argument
-        if index > 0 {
+        if ctx.indexOnParent() > 0 {
             target.outputInline(", ")
-        }
-    }
-    
-    override func exitKeywordArgument(_ ctx: ObjectiveCParser.KeywordArgumentContext) {
-        guard let messageSelector = ctx.parent as? ObjectiveCParser.MessageSelectorContext else {
-            return
-        }
-        guard let index = messageSelector.index(of: ctx) else {
-            return
-        }
-        
-        // First argument, print an opening parens
-        if index == 0 {
-            //target.outputInline("(")
         }
     }
     
@@ -93,12 +76,21 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         target.outputInline(")")
     }
     
+    // MARK: Primitives
     override func enterIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) {
+        target.outputInline(ctx.getText())
+    }
+    
+    override func enterConstant(_ ctx: ObjectiveCParser.ConstantContext) {
         target.outputInline(ctx.getText())
     }
 }
 
 private extension Tree {
+    func indexOnParent() -> Int {
+        return getParent()?.index(of: self) ?? -1
+    }
+    
     func index(of child: Tree) -> Int? {
         for i in 0..<getChildCount() {
             if getChild(i) === child {
