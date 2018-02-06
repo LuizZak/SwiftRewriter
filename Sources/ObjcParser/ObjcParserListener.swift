@@ -109,7 +109,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let ident = ctx.className?.getText() {
+        if let ident = ctx.categoryName?.identifier()?.getText() {
             classNode.identifier = .valid(Identifier(name: ident))
         }
     }
