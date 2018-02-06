@@ -4,57 +4,74 @@ class SwiftRewriter_StmtTests: XCTestCase {
     func testTranslateSingleSelectorMessage() throws {
         try assertSingleStatement(
             objc: "[self thing];",
-            swift: "self.thing()")
+            swift: "self.thing()"
+        )
     }
     
     func testTranslateTwoSelectorMessage() throws {
         try assertSingleStatement(
             objc: "[self thing:a b:c];",
-            swift: "self.thing(a, b: c)")
+            swift: "self.thing(a, b: c)"
+        )
     }
     
     func testTranslateBinaryExpression() throws {
         try assertSingleStatement(
             objc: "10 + 26;",
-            swift: "10 + 26")
+            swift: "10 + 26"
+        )
     }
     
     func testTranslateParenthesizedExpression() throws {
         try assertSingleStatement(
             objc: "((10 + 26) * (15 + 15));",
-            swift: "((10 + 26) * (15 + 15))")
+            swift: "((10 + 26) * (15 + 15))"
+        )
     }
     
     func testTernaryExpression() throws {
         try assertSingleStatement(
             objc: "aValue ? 123 : 456;",
-            swift: "aValue ? 123 : 456")
+            swift: "aValue ? 123 : 456"
+        )
         
         try assertSingleStatement(
             objc: "aNullableValue ?: anotherValue;",
-            swift: "aNullableValue ?? anotherValue")
+            swift: "aNullableValue ?? anotherValue"
+        )
     }
     
     func testMemberAccess() throws {
         try assertSingleStatement(
             objc: "self.member.subMember;",
-            swift: "self.member.subMember")
+            swift: "self.member.subMember"
+        )
     }
     
     func testStringLiteral() throws {
         try assertSingleStatement(
             objc: "@\"literal abc\";",
-            swift: "\"literal abc\"")
+            swift: "\"literal abc\""
+        )
         
         try assertSingleStatement(
             objc: "@\"literal \\n abc\";",
-            swift: "\"literal \\n abc\"")
+            swift: "\"literal \\n abc\""
+        )
     }
     
     func testFloatLiteral() throws {
         try assertSingleStatement(
             objc: "123.456e+99f;",
-            swift: "123.456e+99")
+            swift: "123.456e+99"
+        )
+    }
+    
+    func testFreeFunctionCall() throws {
+        try assertSingleStatement(
+            objc: "aFunction(123, 456)",
+            swift: "aFunction(123, 456)"
+        )
     }
     
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {

@@ -105,6 +105,23 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterPostfixExpr(_ ctx: ObjectiveCParser.PostfixExprContext) {
+        if let lp = ctx.LP(), let argumentExpressionList = ctx.argumentExpressionList(), let rp = ctx.RP(0) {
+            target.outputInline(lp.getText())
+            
+            onExitRule(argumentExpressionList) {
+                self.target.outputInline(rp.getText())
+            }
+        }
+    }
+    
+    override func enterArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) {
+        // Insert comma between parameters
+        if ctx.indexOnParent() > 0 {
+            target.outputInline(", ")
+        }
+    }
+    
     override func enterExpression(_ ctx: ObjectiveCParser.ExpressionContext) {
         // When entering/exiting an expression, check if it's a compounded binary expression
         binaryExp: if let parentExpression = ctx.parent as? ObjectiveCParser.ExpressionContext {
