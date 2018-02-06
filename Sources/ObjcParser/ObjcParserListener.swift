@@ -8,13 +8,13 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     private let mapper: GenericParseTreeContextMapper
     private let source: String
     
-    init(source: String) {
-        self.source = source
+    init(sourceString: String, source: Source) {
+        self.source = sourceString
         
         context = NodeCreationContext()
         context.autoUpdatesSourceRange = false
         rootNode = GlobalContextNode()
-        mapper = GenericParseTreeContextMapper()
+        mapper = GenericParseTreeContextMapper(source: source)
         
         super.init()
         
@@ -79,11 +79,23 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
-        mapper.matchEnter(ruleType: type(of: ctx), context: context)
+        mapper.matchEnter(rule: ctx, context: context)
     }
     
     override func exitEveryRule(_ ctx: ParserRuleContext) {
-        mapper.matchExit(ruleType: type(of: ctx), context: context)
+        mapper.matchExit(rule: ctx, context: context)
+    }
+    
+    // MARK: - Global Context
+    override func enterTranslationUnit(_ ctx: ObjectiveCParser.TranslationUnitContext) {
+        // Collect global variables
+        let globalVariableListener = GlobalVariableListener()
+        let walker = ParseTreeWalker()
+        try? walker.walk(globalVariableListener, ctx)
+        
+        for global in globalVariableListener.variables {
+            context.addChildNode(global)
+        }
     }
     
     // MARK: - Class Interface
@@ -298,6 +310,43 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
 }
 
+private class GlobalVariableListener: ObjectiveCParserBaseListener {
+    var variables: [VariableDeclaration] = []
+    
+    override func enterTranslationUnit(_ ctx: ObjectiveCParser.TranslationUnitContext) {
+        let topLevelDeclarations = ctx.topLevelDeclaration()
+        
+        for topLevelDeclaration in topLevelDeclarations {
+            guard let declaration = topLevelDeclaration.declaration() else { continue }
+            guard let varDeclaration = declaration.varDeclaration() else { continue }
+            guard let initDeclarator = varDeclaration.initDeclaratorList()?.initDeclarator(0) else { continue }
+            guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }
+            
+            // Get a type string to convert into a proper type
+            guard let declarationSpecifiers = varDeclaration.declarationSpecifiers() else { continue }
+            let pointer = initDeclarator.declarator()?.pointer()
+            
+            let typeString = "\(declarationSpecifiers.getText()) \(pointer?.getText() ?? "")"
+            
+            guard let type = ObjcParserListener.parseObjcType(typeString) else { continue }
+            
+            let varDecl = VariableDeclaration()
+            varDecl.addChild(Identifier(name: identifier.getText()))
+            varDecl.addChild(TypeNameNode(type: type))
+            
+            if let initializer = initDeclarator.initializer() {
+                let constantExpression = ConstantExpression(expression: initializer.getText())
+                let initialExpression = InitialExpression()
+                initialExpression.addChild(constantExpression)
+                
+                varDecl.addChild(initialExpression)
+            }
+            
+            variables.append(varDecl)
+        }
+    }
+}
+
 private class PropertyListener: ObjectiveCParserBaseListener {
     var property = PropertyDefinition()
     
@@ -352,6 +401,12 @@ private class GenericParseTreeContextMapper {
     private var pairs: [Pair] = []
     private var exceptions: [ParserRuleContext.Type] = []
     
+    private var source: Source
+    
+    init(source: Source) {
+        self.source = source
+    }
+    
     func addRuleMap<T: ParserRuleContext, U: NodeType>(rule: T.Type, nodeType: U.Type) {
         assert(match(ruleType: rule) == nil, "Duplicated mapping rule for parser rule context \(rule)")
         
@@ -372,7 +427,8 @@ private class GenericParseTreeContextMapper {
         exceptions.removeLast()
     }
     
-    func matchEnter(ruleType: ParserRuleContext.Type, context: NodeCreationContext) {
+    func matchEnter(rule: ParserRuleContext, context: NodeCreationContext) {
+        let ruleType = type(of: rule)
         guard let nodeType = match(ruleType: ruleType) else {
             return
         }
@@ -380,13 +436,24 @@ private class GenericParseTreeContextMapper {
         switch nodeType {
         case .type(_, let nodeType):
             let node = nodeType.init()
+            
+            let startIndex = rule.start?.getStartIndex() ?? 0
+            let endIndex = rule.stop?.getStopIndex() ?? 0
+            
+            let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
+            let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
+            
+            node.location =
+                .init(source: source, range: .range(sourceStartIndex..<sourceEndIndex))
+            
             context.pushContext(node: node)
         case .instance(_, let node):
             context.pushContext(node: node)
         }
     }
     
-    func matchExit(ruleType: ParserRuleContext.Type, context: NodeCreationContext) {
+    func matchExit(rule: ParserRuleContext, context: NodeCreationContext) {
+        let ruleType = type(of: rule)
         guard let pair = match(ruleType: ruleType) else {
             return
         }

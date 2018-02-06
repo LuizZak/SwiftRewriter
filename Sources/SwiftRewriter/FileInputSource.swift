@@ -48,6 +48,10 @@ public class FileCodeSource: CodeSource {
         return fileContents
     }
     
+    public func stringIndex(forCharOffset offset: Int) -> String.Index {
+        return fileContents.index(fileContents.startIndex, offsetBy: offset)
+    }
+    
     public func isEqual(to other: Source) -> Bool {
         guard let other = other as? FileCodeSource else {
             return false

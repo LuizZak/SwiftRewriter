@@ -4,6 +4,8 @@
 public protocol Source {
     func isEqual(to other: Source) -> Bool
     
+    func stringIndex(forCharOffset offset: Int) -> String.Index
+    
     /// Gets the line number at a given source location
     func lineNumber(at index: String.Index) -> Int
     func columnNumber(at index: String.Index) -> Int
@@ -17,6 +19,10 @@ public struct InvalidSource: Source {
     
     private init() {
         
+    }
+    
+    public func stringIndex(forCharOffset offset: Int) -> String.Index {
+        return "".startIndex
     }
     
     public func isEqual(to other: Source) -> Bool {

@@ -69,6 +69,19 @@ public class ObjcParser {
     
     /// Parses the entire source string
     public func parse() throws {
+        try parseMainChannel()
+        try parseDirectivesChannel()
+        /*
+        context.pushContext(node: rootNode)
+        defer {
+            context.popContext()
+        }
+        
+        try parseGlobalNamespace()
+        */
+    }
+    
+    private func parseMainChannel() throws {
         // Make a pass with ANTLR before traversing the parse tree and collecting
         // known constructs
         let src = source.fetchSource()
@@ -80,21 +93,35 @@ public class ObjcParser {
         let parser = try ObjectiveCParser(tokens)
         let root = try parser.translationUnit()
         
-        let listener = ObjcParserListener(source: src)
+        let listener = ObjcParserListener(sourceString: src, source: source)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
         
         rootNode = listener.rootNode
+    }
+    
+    private func parseDirectivesChannel() throws {
+        let src = source.fetchSource()
         
-        /*
-        context.pushContext(node: rootNode)
-        defer {
-            context.popContext()
+        let input = ANTLRInputStream(src)
+        let lexer = ObjectiveCLexer(input)
+        lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
+        let tokens = CommonTokenStream(lexer)
+        
+        let allTokens = tokens.getTokens()
+        
+        for tok in allTokens {
+            let tokType = tok.getType()
+            guard tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN || tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END else {
+                continue
+            }
+            
+            let stringStartIndex = source.stringIndex(forCharOffset: tok.getStartIndex())
+            let stringEndIndex = source.stringIndex(forCharOffset: tok.getStopIndex())
+            
+            
         }
-        
-        try parseGlobalNamespace()
-        */
     }
     
     /// Parse the global namespace.

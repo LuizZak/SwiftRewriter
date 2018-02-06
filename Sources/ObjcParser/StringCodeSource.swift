@@ -11,6 +11,10 @@ public struct StringCodeSource: CodeSource {
         return source
     }
     
+    public func stringIndex(forCharOffset offset: Int) -> String.Index {
+        return source.index(source.startIndex, offsetBy: offset)
+    }
+    
     public func isEqual(to other: Source) -> Bool {
         guard let strSource = other as? StringCodeSource else {
             return false
