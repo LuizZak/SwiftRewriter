@@ -427,7 +427,7 @@ class SwiftRewriterTests: XCTestCase {
                     
                     \(expectedSwift)
                     
-                    but translate as
+                    but translated as
                     
                     \(output.buffer)
                     """, inFile: file, atLine: line, expected: false)

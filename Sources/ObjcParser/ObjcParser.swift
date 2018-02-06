@@ -80,7 +80,7 @@ public class ObjcParser {
         let parser = try ObjectiveCParser(tokens)
         let root = try parser.translationUnit()
         
-        let listener = ObjcParserListener()
+        let listener = ObjcParserListener(source: src)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)

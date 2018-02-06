@@ -6,8 +6,11 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     let context: NodeCreationContext
     let rootNode: GlobalContextNode
     private let mapper: GenericParseTreeContextMapper
+    private let source: String
     
-    override init() {
+    init(source: String) {
+        self.source = source
+        
         context = NodeCreationContext()
         context.autoUpdatesSourceRange = false
         rootNode = GlobalContextNode()
@@ -19,14 +22,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     // Helper for mapping Objective-C types from raw strings into a structured types
-    private static func parseObjcType(_ source: String) -> ObjcType? {
+    fileprivate static func parseObjcType(_ source: String) -> ObjcType? {
         let parser = ObjcParser(source: StringCodeSource(source: source))
         return try? parser.parseObjcType()
     }
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
-    private static func parseObjcType(inDeclaration decl: ObjectiveCParser.FieldDeclarationContext) -> ObjcType? {
+    fileprivate static func parseObjcType(inDeclaration decl: ObjectiveCParser.FieldDeclarationContext) -> ObjcType? {
         guard let specQualifier = decl.specifierQualifierList() else {
             return nil
         }
@@ -68,12 +71,10 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
         mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategory.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
-//        mapper.addRuleMap(rule: ObjectiveCParser.PropertyDeclarationContext.self, nodeType: PropertyDefinition.self)
-//        mapper.addRuleMap(rule: ObjectiveCParser.PropertyAttributesListContext.self, nodeType: PropertyModifierList.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.MethodDefinitionContext.self, nodeType: MethodDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.KeywordDeclaratorContext.self, nodeType: KeywordDeclarator.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodSelectorContext.self, nodeType: MethodSelector.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodTypeContext.self, nodeType: MethodType.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.ProtocolListContext.self, nodeType: ProtocolReferenceList.self)
         mapper.addRuleMap(rule: ObjectiveCParser.InstanceVariablesContext.self, nodeType: IVarsList.self)
     }
     
@@ -100,6 +101,22 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         if let sup = ctx.superclassName?.getText() {
             context.addChildNode(SuperclassName(name: sup))
         }
+        
+        // Protocol list
+        if let protocolList = ctx.protocolList() {
+            let protocolListNode = ProtocolReferenceList()
+            
+            for prot in protocolList.protocolName() {
+                guard let protName = prot.identifier()?.getText() else {
+                    continue
+                }
+                
+                let protNameNode = ProtocolName(name: protName)
+                protocolListNode.addChild(protNameNode)
+            }
+            
+            context.addChildNode(protocolListNode)
+        }
     }
     
     // MARK: - Class Category
@@ -112,15 +129,21 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         if let ident = ctx.categoryName?.identifier()?.getText() {
             classNode.identifier = .valid(Identifier(name: ident))
         }
-    }
-    
-    override func enterProtocolName(_ ctx: ObjectiveCParser.ProtocolNameContext) {
-        guard let node = context.currentContextNode(as: ProtocolReferenceList.self) else {
-            return
-        }
         
-        if let ident = ctx.identifier()?.getText() {
-            node.addChild(ProtocolName(name: ident))
+        // Protocol list
+        if let protocolList = ctx.protocolList() {
+            let protocolListNode = ProtocolReferenceList()
+            
+            for prot in protocolList.protocolName() {
+                guard let protName = prot.identifier()?.getText() else {
+                    continue
+                }
+                
+                let protNameNode = ProtocolName(name: protName)
+                protocolListNode.addChild(protNameNode)
+            }
+            
+            context.addChildNode(protocolListNode)
         }
     }
     
@@ -251,58 +274,75 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDeclarationContext
     }
     
+    override func enterMethodDefinition(_ ctx: ObjectiveCParser.MethodDefinitionContext) {
+        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
+            return
+        }
+        
+        node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDefinitionContext
+        
+        guard let startIndex = ctx.compoundStatement()?.start?.getStartIndex(),
+            let endIndex = ctx.compoundStatement()?.stop?.getStopIndex() else {
+            return
+        }
+        
+        let start = source.index(source.startIndex, offsetBy: startIndex + 1)
+        let end = source.index(source.startIndex, offsetBy: endIndex)
+        node.body = String(source[start..<end])
+    }
+    
     override func enterMethodSelector(_ ctx: ObjectiveCParser.MethodSelectorContext) {
         if let selIdentifier = ctx.selector()?.identifier() {
             context.addChildNode(Identifier(name: selIdentifier.getText()))
         }
     }
+}
+
+private class PropertyListener: ObjectiveCParserBaseListener {
+    var property = PropertyDefinition()
     
-    private class PropertyListener: ObjectiveCParserBaseListener {
-        var property = PropertyDefinition()
-        
-        override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
-            if let ident =
-                ctx.fieldDeclaration()?
-                    .fieldDeclaratorList()?
-                    .fieldDeclarator(0)?
-                    .declarator()?
-                    .directDeclarator()?
-                    .identifier() {
-                
-                property.addChild(Identifier(name: ident.getText()))
-            }
+    override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
+        if let ident =
+            ctx.fieldDeclaration()?
+                .fieldDeclaratorList()?
+                .fieldDeclarator(0)?
+                .declarator()?
+                .directDeclarator()?
+                .identifier() {
             
-            if let fieldDeclaration = ctx.fieldDeclaration() {
-                if let type = ObjcParserListener.parseObjcType(inDeclaration: fieldDeclaration) {
-                    let typeNode = TypeNameNode(type: type)
-                    property.addChild(typeNode)
-                }
-            }
+            property.addChild(Identifier(name: ident.getText()))
         }
         
-        override func enterPropertyAttributesList(_ ctx: ObjectiveCParser.PropertyAttributesListContext) {
-            property.addChild(PropertyModifierList())
+        if let fieldDeclaration = ctx.fieldDeclaration() {
+            if let type = ObjcParserListener.parseObjcType(inDeclaration: fieldDeclaration) {
+                let typeNode = TypeNameNode(type: type)
+                property.addChild(typeNode)
+            }
         }
+    }
+    
+    override func enterPropertyAttributesList(_ ctx: ObjectiveCParser.PropertyAttributesListContext) {
+        property.addChild(PropertyModifierList())
+    }
+    
+    override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
+        let modifier: PropertyModifier.Modifier
         
-        override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
-            let modifier: PropertyModifier.Modifier
-            
-            if let ident = ctx.identifier()?.getText() {
-                if ctx.GETTER() != nil {
-                    modifier = .getter(ident)
-                } else if ctx.SETTER() != nil {
-                    modifier = .setter(ident)
-                } else {
-                    modifier = .keyword(ident)
-                }
+        if let ident = ctx.identifier()?.getText() {
+            if ctx.GETTER() != nil {
+                modifier = .getter(ident)
+            } else if ctx.SETTER() != nil {
+                modifier = .setter(ident)
             } else {
-                modifier = .keyword(ctx.getText())
+                modifier = .keyword(ident)
             }
-            
-            let node = PropertyModifier(modifier: modifier)
-            
-            property.modifierList?.addChild(node)
+        } else {
+            modifier = .keyword(ctx.getText())
         }
+        
+        let node = PropertyModifier(modifier: modifier)
+        
+        property.modifierList?.addChild(node)
     }
 }
 
