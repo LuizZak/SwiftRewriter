@@ -246,9 +246,14 @@ public class SwiftWriter {
         target.output(line: "}")
     }
     
-    private func outputMethodBody(_ body: MethodBody, target: RewriterOutputTarget) {
+    private func outputMethodBody(_ body: MethodBodyIntention, target: RewriterOutputTarget) {
         // TODO: Convert and output Swift method body here.
-        target.output(line: body.trimmingCharacters(in: .whitespacesAndNewlines))
+        guard let stmt = body.typedSource?.statements else {
+            return
+        }
+        
+        let rewriter = SwiftStmtRewriter()
+        rewriter.rewrite(stmt, into: target)
     }
     
     private func generateParameters(for signature: MethodGenerationIntention.Signature,

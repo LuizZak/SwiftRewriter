@@ -40,7 +40,7 @@ public extension ObjcParser {
         if lexer.tokenType(.semicolon) {
             try parseTokenNode(.semicolon)
         } else if lexer.tokenType(.openBrace) {
-            method.body = try parseFunctionBody()
+            //method.body = try parseFunctionBody()
         } else {
             diagnostics.error("Expected \(TokenType.semicolon) or method body after method declaration", location: location())
         }

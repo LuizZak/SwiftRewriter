@@ -98,8 +98,16 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
     
     public enum Mode {
         case asField
-        case computed(MethodBody)
-        case property(get: MethodBody, set: MethodBody)
+        case computed(MethodBodyIntention)
+        case property(get: MethodBodyIntention, set: MethodBodyIntention)
+    }
+}
+
+/// An intention to generate a body of Swift code from an equivalent Objective-C
+/// source.
+public class MethodBodyIntention: FromSourceIntention {
+    public var typedSource: MethodBody? {
+        return source as? MethodBody
     }
 }
 
@@ -116,7 +124,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     public var signature: Signature
     
     // TODO: Type this properly as a MethodBodyIntention or similar.
-    public var body: String?
+    public var body: MethodBodyIntention?
     
     public var name: String {
         return signature.name

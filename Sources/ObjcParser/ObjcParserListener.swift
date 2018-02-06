@@ -339,6 +339,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDefinitionContext
         
+        /*
         guard let startIndex = ctx.compoundStatement()?.start?.getStartIndex(),
             let endIndex = ctx.compoundStatement()?.stop?.getStopIndex() else {
             return
@@ -346,7 +347,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         let start = sourceString.index(sourceString.startIndex, offsetBy: startIndex + 1)
         let end = sourceString.index(sourceString.startIndex, offsetBy: endIndex)
-        node.body = String(sourceString[start..<end])
+        */
+        
+        let methodBody = MethodBody()
+        
+        methodBody.sourceRuleContext = ctx
+        methodBody.statements = ctx.compoundStatement()
+        
+        node.body = methodBody
     }
     
     override func enterMethodSelector(_ ctx: ObjectiveCParser.MethodSelectorContext) {

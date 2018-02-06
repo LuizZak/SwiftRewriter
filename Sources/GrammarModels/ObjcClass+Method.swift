@@ -1,4 +1,8 @@
-public typealias MethodBody = String // TODO: Create the node that contains the method body.
+import ObjcParserAntlr
+
+public class MethodBody: ASTNode {
+    public var statements: ObjectiveCParser.CompoundStatementContext?
+}
 
 public class MethodDefinition: ASTNode, InitializableNode {
     public var returnType: MethodType? {

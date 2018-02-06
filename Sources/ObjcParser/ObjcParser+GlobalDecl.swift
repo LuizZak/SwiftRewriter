@@ -132,7 +132,7 @@ public extension ObjcParser {
         try parseTokenNode(.closeParens)
         
         if lexer.tokenType(.openBrace) {
-            node.methodBody = try parseFunctionBody()
+            //node.methodBody = try parseFunctionBody()
         } else if lexer.tokenType(.semicolon) {
             parseAnyTokenNode()
         } else {

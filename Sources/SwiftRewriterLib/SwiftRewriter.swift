@@ -329,7 +329,9 @@ public class SwiftRewriter {
         
         method.inNonnullContext = isNodeInNonnullContext(node)
         
-        method.body = node.body
+        let methodBodyIntention = MethodBodyIntention(accessLevel: .public, source: node.body)
+        
+        method.body = methodBodyIntention
         
         ctx.addMethod(method)
     }
