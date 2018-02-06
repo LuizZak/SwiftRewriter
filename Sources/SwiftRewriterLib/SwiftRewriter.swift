@@ -11,6 +11,9 @@ public class SwiftRewriter {
     private let sourcesProvider: InputSourcesProvider
     private var nonnullTokenRanges: [(start: Int, end: Int)] = []
     
+    /// To keep token sources alive long enough.
+    private var parsers: [ObjcParser] = []
+    
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
     public let diagnostics: Diagnostics
@@ -25,6 +28,8 @@ public class SwiftRewriter {
     }
     
     public func rewrite() throws {
+        parsers.removeAll()
+        
         try loadInputSources()
         performIntentionPasses()
         outputDefinitions()
@@ -52,6 +57,7 @@ public class SwiftRewriter {
         let src = try source.loadSource()
         
         let parser = ObjcParser(source: src)
+        parsers.append(parser)
         parser.diagnostics = diagnostics
         
         try parser.parse()

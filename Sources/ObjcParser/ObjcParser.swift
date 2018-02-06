@@ -10,6 +10,7 @@ public class ObjcParser {
     let lexer: ObjcLexer
     let source: CodeSource
     let context: NodeCreationContext
+    let tokens: CommonTokenStream
     
     /// Whether a token has been read yet by this parser
     internal var _hasReadToken: Bool = false
@@ -38,6 +39,10 @@ public class ObjcParser {
         context = NodeCreationContext()
         diagnostics = Diagnostics()
         rootNode = GlobalContextNode()
+        
+        let input = ANTLRInputStream(source.fetchSource())
+        let lxr = ObjectiveCLexer(input)
+        tokens = CommonTokenStream(lxr)
     }
     
     func startRange() -> RangeMarker {
@@ -85,10 +90,6 @@ public class ObjcParser {
         // Make a pass with ANTLR before traversing the parse tree and collecting
         // known constructs
         let src = source.fetchSource()
-        
-        let input = ANTLRInputStream(src)
-        let lexer = ObjectiveCLexer(input)
-        let tokens = CommonTokenStream(lexer)
         
         let parser = try ObjectiveCParser(tokens)
         let root = try parser.translationUnit()

@@ -21,7 +21,18 @@ public struct RewriterOutputSettings {
 public protocol RewriterOutputTarget: class {
     init(settings: RewriterOutputSettings)
     
+    /// Outputs the given string and outputs a line feed at the end, with padding
+    /// for identation at the begginning.
     func output(line: String)
+    
+    /// Outputs a given string inline without adding a line feed at the end.
+    func outputInline(_ content: String)
+    
+    /// Outputs a line feed character at the current position
+    func outputLineFeed()
+    
+    /// Outputs the current identation spacing at the current location.
+    func outputIdentation()
     
     /// Increases the identation of output lines from this output target
     func increaseIdentation()
@@ -51,6 +62,7 @@ public extension RewriterOutputTarget {
 public final class StringRewriterOutput: RewriterOutputTarget {
     private var identDepth: Int = 0
     private var settings: RewriterOutputSettings
+    private var ignoreCallChange = false
     private(set) public var buffer: String = ""
     
     /// Called everytime the buffer changes due to an output request
@@ -61,11 +73,30 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     }
     
     public func output(line: String) {
-        buffer += identString()
-        buffer += line
-        buffer += "\n"
+        ignoreCallChange = true
         
-        onChangeBuffer?(buffer)
+        outputIdentation()
+        buffer += line
+        outputLineFeed()
+        
+        ignoreCallChange = false
+        
+        callChangeCallback()
+    }
+    
+    public func outputIdentation() {
+        buffer += identString()
+        callChangeCallback()
+    }
+    
+    public func outputLineFeed() {
+        buffer += "\n"
+        callChangeCallback()
+    }
+    
+    public func outputInline(_ content: String) {
+        buffer += content
+        callChangeCallback()
     }
     
     public func increaseIdentation() {
@@ -78,6 +109,14 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     
     public func onAfterOutput() {
         buffer = buffer.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        callChangeCallback()
+    }
+    
+    private func callChangeCallback() {
+        if ignoreCallChange {
+            return
+        }
         
         onChangeBuffer?(buffer)
     }

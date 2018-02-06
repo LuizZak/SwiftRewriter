@@ -9,7 +9,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             }
             @end
             """, swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 func myMethod() {
                     self.thing()
                 }
