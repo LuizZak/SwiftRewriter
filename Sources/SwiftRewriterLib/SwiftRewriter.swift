@@ -9,6 +9,7 @@ public class SwiftRewriter {
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
+    private var nonnullTokenRanges: [(start: Int, end: Int)] = []
     
     /// A diagnostics instance that collects all diagnostic errors during input
     /// source processing.
@@ -55,11 +56,16 @@ public class SwiftRewriter {
         
         try parser.parse()
         
+        nonnullTokenRanges = parser.nonnullMacroRegionsTokenRange
+        
         let node = parser.rootNode
         let visitor = AnonymousASTVisitor()
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
         visitor.onEnterClosure = { node in
+            self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn =
+                self.isNodeInNonnullContext(node)
+            
             switch node {
             case let n as ObjcClassInterface:
                 self.enterObjcClassInterfaceNode(n)
@@ -142,6 +148,23 @@ public class SwiftRewriter {
         writer.execute()
     }
     
+    private func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+        guard let ruleContext = node.sourceRuleContext else {
+            return false
+        }
+        guard let startToken = ruleContext.getStart(), let stopToken = ruleContext.getStop() else {
+            return false
+        }
+        
+        for n in nonnullTokenRanges {
+            if n.start <= startToken.getTokenIndex() && n.end >= stopToken.getTokenIndex() {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
     private func visitKeywordNode(_ node: KeywordNode) {
         // ivar list accessibility specification
         if let ctx = context.findContext(ofType: IVarListContext.self) {
@@ -173,7 +196,7 @@ public class SwiftRewriter {
             GlobalVariableGenerationIntention(name: name.name, type: type.type,
                                               source: node)
         
-        intent.inNonnullContext = context.isAssumeNonnullOn
+        intent.inNonnullContext = isNodeInNonnullContext(node)
         
         if let expr = node.initialExpression?.expression {
             intent.initialValueExpr = expr.expression
@@ -285,7 +308,7 @@ public class SwiftRewriter {
                                         type: node.type?.type ?? .struct(""),
                                         source: node)
         
-        prop.inNonnullContext = context.isAssumeNonnullOn
+        prop.inNonnullContext = isNodeInNonnullContext(node)
         
         ctx.addProperty(prop)
     }
@@ -304,7 +327,7 @@ public class SwiftRewriter {
         let method =
             MethodGenerationIntention(signature: sign, source: node)
         
-        method.inNonnullContext = context.isAssumeNonnullOn
+        method.inNonnullContext = isNodeInNonnullContext(node)
         
         method.body = node.body
         
@@ -353,7 +376,7 @@ public class SwiftRewriter {
                 accessLevel: access,
                 source: node)
         
-        ivar.inNonnullContext = context.isAssumeNonnullOn
+        ivar.inNonnullContext = isNodeInNonnullContext(node)
         
         classCtx.addInstanceVariable(ivar)
     }

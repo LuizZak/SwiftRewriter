@@ -33,6 +33,45 @@ class ObjcParserTests: XCTestCase {
         _=parserTest(source)
     }
     
+    func testParserMaintainsOriginalRuleContext() {
+        let source = """
+            #import "abc.h"
+            NS_ASSUME_NONNULL_BEGIN
+            
+            @interface MyClass : Superclass <Prot1, Prot2>
+            {
+                NSInteger myInt;
+            }
+            @property (nonatomic, getter=isValue) BOOL value;
+            - (void)myMethod:(NSString*)param1;
+            @end
+            
+            @interface MyClass (MyCategory)
+            + (void)classMethod:(NSArray<NSObject*>*)anyArray;
+            @end
+
+            @implementation MyClass
+            - (void)myMethod:(NSString*)param1 {
+            }
+            + (void)classMethod:(NSArray<NSObject*>*)anyArray {
+            }
+            @end
+            """
+        
+        let node = parserTest(source)
+        
+        let visitor = AnonymousASTVisitor(visit: { node in
+            if node is InvalidNode {
+                return
+            }
+            
+            XCTAssertNotNil(node.sourceRuleContext, "\(node)")
+        })
+        
+        let traverser = ASTTraverser(node: node, visitor: visitor)
+        traverser.traverse()
+    }
+    
     private func parserTest(_ source: String) -> GlobalContextNode {
         let sut = ObjcParser(string: source)
         

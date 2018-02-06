@@ -6,10 +6,12 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     let context: NodeCreationContext
     let rootNode: GlobalContextNode
     private let mapper: GenericParseTreeContextMapper
-    private let source: String
+    private let sourceString: String
+    private let source: Source
     
     init(sourceString: String, source: Source) {
-        self.source = sourceString
+        self.sourceString = sourceString
+        self.source = source
         
         context = NodeCreationContext()
         context.autoUpdatesSourceRange = false
@@ -60,6 +62,17 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         return type
     }
     
+    private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
+        guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
+            return .invalid
+        }
+        
+        let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
+        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
+        
+        return SourceLocation(source: source, range: .range(sourceStartIndex..<sourceEndIndex))
+    }
+    
     /// Configures mappers in `self.mapper` so they are automatically pushed and
     /// popped whenever the rules are entered and exited during visit.
     ///
@@ -105,25 +118,31 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let ident = ctx.className?.identifier()?.getText() {
-            classNode.identifier = .valid(Identifier(name: ident))
+        if let identifier = ctx.className?.identifier() {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            classNode.identifier = .valid(identifierNode)
         }
         
         // Super class name
         if let sup = ctx.superclassName?.getText() {
-            context.addChildNode(SuperclassName(name: sup))
+            let supName = SuperclassName(name: sup)
+            supName.sourceRuleContext = ctx.superclassName
+            context.addChildNode(supName)
         }
         
         // Protocol list
         if let protocolList = ctx.protocolList() {
             let protocolListNode = ProtocolReferenceList()
+            protocolListNode.sourceRuleContext = protocolList
             
             for prot in protocolList.protocolName() {
-                guard let protName = prot.identifier()?.getText() else {
+                guard let identifier = prot.identifier() else {
                     continue
                 }
                 
-                let protNameNode = ProtocolName(name: protName)
+                let protNameNode = ProtocolName(name: identifier.getText())
+                protNameNode.sourceRuleContext = identifier
                 protocolListNode.addChild(protNameNode)
             }
             
@@ -138,20 +157,24 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let ident = ctx.categoryName?.identifier()?.getText() {
-            classNode.identifier = .valid(Identifier(name: ident))
+        if let identifier = ctx.categoryName?.identifier() {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            classNode.identifier = .valid(identifierNode)
         }
         
         // Protocol list
         if let protocolList = ctx.protocolList() {
             let protocolListNode = ProtocolReferenceList()
+            protocolListNode.sourceRuleContext = protocolList
             
             for prot in protocolList.protocolName() {
-                guard let protName = prot.identifier()?.getText() else {
+                guard let identifier = prot.identifier() else {
                     continue
                 }
                 
-                let protNameNode = ProtocolName(name: protName)
+                let protNameNode = ProtocolName(name: identifier.getText())
+                protNameNode.sourceRuleContext = identifier
                 protocolListNode.addChild(protNameNode)
             }
             
@@ -166,27 +189,38 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let ident = ctx.className?.identifier()?.getText() {
-            classNode.identifier = .valid(Identifier(name: ident))
+        if let identifier = ctx.className?.identifier() {
+            let identNode = Identifier(name: identifier.getText())
+            identNode.sourceRuleContext = identifier
+            classNode.identifier = .valid(identNode)
         }
         
         // Super class name
         if let sup = ctx.superclassName?.getText() {
-            context.addChildNode(SuperclassName(name: sup))
+            let supName = SuperclassName(name: sup)
+            supName.sourceRuleContext = ctx.superclassName
+            context.addChildNode(supName)
         }
     }
     
     // MARK: - Instance Variables
     override func enterVisibilitySection(_ ctx: ObjectiveCParser.VisibilitySectionContext) {
         if let accessModifier = ctx.accessModifier() {
+            var accessNode: KeywordNode?
+            
             if accessModifier.PRIVATE() != nil {
-                context.addChildNode(KeywordNode(keyword: .atPrivate))
+                accessNode = KeywordNode(keyword: .atPrivate)
             } else if accessModifier.PACKAGE() != nil {
-                context.addChildNode(KeywordNode(keyword: .atPackage))
+                accessNode = KeywordNode(keyword: .atPackage)
             } else if accessModifier.PROTECTED() != nil {
-                context.addChildNode(KeywordNode(keyword: .atProtected))
+                accessNode = KeywordNode(keyword: .atProtected)
             } else if accessModifier.PUBLIC() != nil {
-                context.addChildNode(KeywordNode(keyword: .atPublic))
+                accessNode = KeywordNode(keyword: .atPublic)
+            }
+            
+            if let accessNode = accessNode {
+                accessNode.sourceRuleContext = accessModifier
+                context.addChildNode(accessNode)
             }
         }
         
@@ -196,20 +230,24 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             guard let declarator = decl.fieldDeclaratorList()?.fieldDeclarator(0)?.declarator() else {
                 continue
             }
-            guard let identString = declarator.directDeclarator()?.identifier()?.getText() else {
+            guard let identifier = declarator.directDeclarator()?.identifier() else {
                 continue
             }
-            
             guard let type = ObjcParserListener.parseObjcType(inDeclaration: decl) else {
                 continue
             }
             
+            let identString = identifier.getText()
+            
             let typeNode = TypeNameNode(type: type)
+            typeNode.sourceRuleContext = decl
             let ident = Identifier(name: identString)
+            ident.sourceRuleContext = identifier
             
             let ivar = IVarDeclaration()
             ivar.addChild(typeNode)
             ivar.addChild(ident)
+            ivar.sourceRuleContext = declarator
             
             context.addChildNode(ivar)
         }
@@ -240,6 +278,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         let node = TypeNameNode(type: type)
+        node.sourceRuleContext = ctx
         context.addChildNode(node)
     }
     
@@ -253,6 +292,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     override func enterNullabilitySpecifier(_ ctx: ObjectiveCParser.NullabilitySpecifierContext) {
         let spec = NullabilitySpecifier(name: ctx.getText())
+        spec.sourceRuleContext = ctx
         context.addChildNode(spec)
     }
     
@@ -262,12 +302,18 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         let selectorIdent =
-            (ctx.selector()?.identifier()).map {
-                Identifier(name: $0.getText())
-        }
+            (ctx.selector()?.identifier()).map { ctx -> Identifier in
+                let node = Identifier(name: ctx.getText())
+                node.sourceRuleContext = ctx
+                return node
+            }
         
         let ident =
-            ctx.identifier().map { Identifier(name: $0.getText()) }
+            ctx.identifier().map { ctx -> Identifier in
+                let node = Identifier(name: ctx.getText())
+                node.sourceRuleContext = ctx
+                return node
+            }
         
         if let ident = selectorIdent {
             node.addChild(ident)
@@ -298,14 +344,16 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
-        let start = source.index(source.startIndex, offsetBy: startIndex + 1)
-        let end = source.index(source.startIndex, offsetBy: endIndex)
-        node.body = String(source[start..<end])
+        let start = sourceString.index(sourceString.startIndex, offsetBy: startIndex + 1)
+        let end = sourceString.index(sourceString.startIndex, offsetBy: endIndex)
+        node.body = String(sourceString[start..<end])
     }
     
     override func enterMethodSelector(_ ctx: ObjectiveCParser.MethodSelectorContext) {
         if let selIdentifier = ctx.selector()?.identifier() {
-            context.addChildNode(Identifier(name: selIdentifier.getText()))
+            let node = Identifier(name: selIdentifier.getText())
+            node.sourceRuleContext = ctx
+            context.addChildNode(node)
         }
     }
 }
@@ -331,12 +379,15 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
             guard let type = ObjcParserListener.parseObjcType(typeString) else { continue }
             
             let varDecl = VariableDeclaration()
+            varDecl.sourceRuleContext = topLevelDeclaration
             varDecl.addChild(Identifier(name: identifier.getText()))
             varDecl.addChild(TypeNameNode(type: type))
             
             if let initializer = initDeclarator.initializer() {
                 let constantExpression = ConstantExpression(expression: initializer.getText())
+                constantExpression.sourceRuleContext = initializer
                 let initialExpression = InitialExpression()
+                initialExpression.sourceRuleContext = initializer
                 initialExpression.addChild(constantExpression)
                 
                 varDecl.addChild(initialExpression)
@@ -351,6 +402,8 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     var property = PropertyDefinition()
     
     override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
+        property.sourceRuleContext = ctx
+        
         if let ident =
             ctx.fieldDeclaration()?
                 .fieldDeclaratorList()?
@@ -359,19 +412,25 @@ private class PropertyListener: ObjectiveCParserBaseListener {
                 .directDeclarator()?
                 .identifier() {
             
-            property.addChild(Identifier(name: ident.getText()))
+            let node = Identifier(name: ident.getText())
+            node.sourceRuleContext = ctx
+            
+            property.addChild(node)
         }
         
         if let fieldDeclaration = ctx.fieldDeclaration() {
             if let type = ObjcParserListener.parseObjcType(inDeclaration: fieldDeclaration) {
                 let typeNode = TypeNameNode(type: type)
+                typeNode.sourceRuleContext = ctx
                 property.addChild(typeNode)
             }
         }
     }
     
     override func enterPropertyAttributesList(_ ctx: ObjectiveCParser.PropertyAttributesListContext) {
-        property.addChild(PropertyModifierList())
+        let node = PropertyModifierList()
+        node.sourceRuleContext = ctx
+        property.addChild(node)
     }
     
     override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
@@ -390,6 +449,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         }
         
         let node = PropertyModifier(modifier: modifier)
+        node.sourceRuleContext = ctx
         
         property.modifierList?.addChild(node)
     }
@@ -446,8 +506,10 @@ private class GenericParseTreeContextMapper {
             node.location =
                 .init(source: source, range: .range(sourceStartIndex..<sourceEndIndex))
             
+            node.sourceRuleContext = rule
             context.pushContext(node: node)
         case .instance(_, let node):
+            node.sourceRuleContext = rule
             context.pushContext(node: node)
         }
     }

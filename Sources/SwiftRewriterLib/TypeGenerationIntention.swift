@@ -2,7 +2,7 @@ import GrammarModels
 
 /// An intention that comes from the reading of a source code file, instead of
 /// being synthesized
-public class FromSourceIntention: Intention {
+public class FromSourceIntention: NonNullScopedIntention {
     public var source: ASTNode?
     public var accessLevel: AccessLevel
     

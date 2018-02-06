@@ -20,6 +20,14 @@ public class ObjcParser {
     /// The root global context note after parsing.
     public var rootNode: GlobalContextNode
     
+    // NOTE: This is mostly a hack to work around issues related to using primarily
+    // ANTLR for parsing. This should be done in a smoother way later on, if possible.
+    ///
+    /// When NS_ASSUME_NONNULL_BEGIN/END pairs are present on the source code, this
+    /// array keeps the index of the BEGIN/END token pairs so that later on the
+    /// rewriter can leverage this information to infer nonnull contexts.
+    public var nonnullMacroRegionsTokenRange: [(start: Int, end: Int)] = []
+    
     public convenience init(string: String) {
         self.init(source: StringCodeSource(source: string))
     }
@@ -71,14 +79,6 @@ public class ObjcParser {
     public func parse() throws {
         try parseMainChannel()
         try parseDirectivesChannel()
-        /*
-        context.pushContext(node: rootNode)
-        defer {
-            context.popContext()
-        }
-        
-        try parseGlobalNamespace()
-        */
     }
     
     private func parseMainChannel() throws {
@@ -102,25 +102,31 @@ public class ObjcParser {
     }
     
     private func parseDirectivesChannel() throws {
+        nonnullMacroRegionsTokenRange = []
+        
         let src = source.fetchSource()
         
         let input = ANTLRInputStream(src)
         let lexer = ObjectiveCLexer(input)
-        lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
+        lexer.setChannel(ObjectiveCLexer.IGNORED_MACROS)
         let tokens = CommonTokenStream(lexer)
+        try tokens.fill()
         
         let allTokens = tokens.getTokens()
         
+        var lastBegin: Int?
+        
         for tok in allTokens {
             let tokType = tok.getType()
-            guard tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN || tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END else {
-                continue
+            if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN {
+                lastBegin = tok.getTokenIndex()
+            } else if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END {
+                
+                if let lastBeginIndex = lastBegin {
+                    nonnullMacroRegionsTokenRange.append((start: lastBeginIndex, end: tok.getTokenIndex()))
+                    lastBegin = nil
+                }
             }
-            
-            let stringStartIndex = source.stringIndex(forCharOffset: tok.getStartIndex())
-            let stringEndIndex = source.stringIndex(forCharOffset: tok.getStopIndex())
-            
-            
         }
     }
     

@@ -1,3 +1,7 @@
+import Foundation
+import Antlr4
+import ObjcParserAntlr
+
 /// A protocol wrapping node types
 public protocol ASTNodeValue {
     /// Location for this node
@@ -20,6 +24,10 @@ open class ASTNode: ASTNodeValue {
     
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
+    
+    /// If this node was parsed from an Antlr rule, this value is set to the original
+    /// parser rule that originated this node.
+    public var sourceRuleContext: ParserRuleContext?
     
     /// Parent node for this node
     public weak var parent: ASTNode?
@@ -57,6 +65,21 @@ open class ASTNode: ASTNodeValue {
         
         node.parent = self
         children.append(node)
+    }
+    
+    /// Inserts a node as a child of this node.
+    /// - precondition: `node` has no previous parent node (`node.parent == nil`).
+    public func insertChild(_ node: ASTNode, at index: Int) {
+        guard node.parent == nil else {
+            if node.parent === self {
+                fatalError("Node is already a child of \(self)")
+            } else {
+                fatalError("Node already has a parent \(node.parent!)")
+            }
+        }
+        
+        node.parent = self
+        children.insert(node, at: index)
     }
     
     /// Removes a node as a child of this node

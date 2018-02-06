@@ -12,6 +12,10 @@ class SourceTests: XCTestCase {
     
     func testInvalidSourceIsNotEquatableToOtherSources() {
         struct TestSource: Source {
+            func stringIndex(forCharOffset offset: Int) -> String.Index {
+                return "".startIndex
+            }
+            
             func isEqual(to other: Source) -> Bool {
                 return other is TestSource
             }
