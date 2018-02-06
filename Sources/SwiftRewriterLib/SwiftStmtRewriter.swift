@@ -97,6 +97,19 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterUnaryOperator(_ ctx: ObjectiveCParser.UnaryOperatorContext) {
+        target.outputInline(ctx.getText())
+    }
+    
+    override func enterUnaryExpression(_ ctx: ObjectiveCParser.UnaryExpressionContext) {
+        if let inc = ctx.INC() {
+            target.outputInline(inc.getText())
+        }
+        if let dec = ctx.DEC() {
+            target.outputInline(dec.getText())
+        }
+    }
+    
     override func enterPostfixExpression(_ ctx: ObjectiveCParser.PostfixExpressionContext) {
         if let postfixExpression = ctx.postfixExpression(), ctx.DOT() != nil || ctx.STRUCTACCESS() != nil {
             onExitRule(postfixExpression) {
@@ -106,12 +119,29 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
     
     override func enterPostfixExpr(_ ctx: ObjectiveCParser.PostfixExprContext) {
+        // Function call
         if let lp = ctx.LP(), let argumentExpressionList = ctx.argumentExpressionList(), let rp = ctx.RP(0) {
             target.outputInline(lp.getText())
             
             onExitRule(argumentExpressionList) {
                 self.target.outputInline(rp.getText())
             }
+        }
+        
+        // Subscript
+        if let lb = ctx.LBRACK(), let expression = ctx.expression(), let rb = ctx.RBRACK() {
+            target.outputInline(lb.getText())
+            onExitRule(expression) {
+                self.target.outputInline(rb.getText())
+            }
+        }
+        
+        // Increment/decrement
+        if let inc = ctx.INC() {
+            target.outputInline(inc.getText())
+        }
+        if let dec = ctx.DEC() {
+            target.outputInline(dec.getText())
         }
     }
     

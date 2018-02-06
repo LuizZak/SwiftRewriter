@@ -69,8 +69,69 @@ class SwiftRewriter_StmtTests: XCTestCase {
     
     func testFreeFunctionCall() throws {
         try assertSingleStatement(
-            objc: "aFunction(123, 456)",
+            objc: "aFunction(123, 456);",
             swift: "aFunction(123, 456)"
+        )
+    }
+    
+    func testSubscription() throws {
+        try assertSingleStatement(
+            objc: "aSubscriptable[1];",
+            swift: "aSubscriptable[1]"
+        )
+        try assertSingleStatement(
+            objc: "aDictionary[@\"key\"];",
+            swift: "aDictionary[\"key\"]"
+        )
+    }
+    
+    func testPrefixAndPostfixIncrementAndDecrement() throws {
+        try assertSingleStatement(
+            objc: "value++;",
+            swift: "value++"
+        )
+        try assertSingleStatement(
+            objc: "value--;",
+            swift: "value--"
+        )
+        try assertSingleStatement(
+            objc: "++value;",
+            swift: "++value"
+        )
+        try assertSingleStatement(
+            objc: "--value;",
+            swift: "--value"
+        )
+    }
+    
+    func testUnaryOperator() throws {
+        try assertSingleStatement(
+            objc: "-value;",
+            swift: "-value"
+        )
+        try assertSingleStatement(
+            objc: "+value;",
+            swift: "+value"
+        )
+        try assertSingleStatement(
+            objc: "!value;",
+            swift: "!value"
+        )
+        try assertSingleStatement(
+            objc: "!value;",
+            swift: "!value"
+        )
+        try assertSingleStatement(
+            objc: "~value;",
+            swift: "~value"
+        )
+        try assertSingleStatement(
+            objc: "&value;",
+            swift: "&value"
+        )
+        try assertSingleStatement(
+            objc: "*value;",
+            swift: "*value"
         )
     }
     
