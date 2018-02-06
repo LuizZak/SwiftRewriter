@@ -97,6 +97,14 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterPostfixExpression(_ ctx: ObjectiveCParser.PostfixExpressionContext) {
+        if let postfixExpression = ctx.postfixExpression(), ctx.DOT() != nil || ctx.STRUCTACCESS() != nil {
+            onExitRule(postfixExpression) {
+                self.target.outputInline(".")
+            }
+        }
+    }
+    
     override func enterExpression(_ ctx: ObjectiveCParser.ExpressionContext) {
         // When entering/exiting an expression, check if it's a compounded binary expression
         binaryExp: if let parentExpression = ctx.parent as? ObjectiveCParser.ExpressionContext {

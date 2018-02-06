@@ -35,6 +35,12 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: "aNullableValue ?? anotherValue")
     }
     
+    func testMemberAccess() throws {
+        try assertSingleStatement(
+            objc: "self.member.subMember;",
+            swift: "self.member.subMember")
+    }
+    
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass
