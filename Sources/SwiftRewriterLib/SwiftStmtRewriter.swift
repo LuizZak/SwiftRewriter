@@ -48,6 +48,20 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         target.outputInline(".")
     }
     
+    override func enterKeywordArgument(_ ctx: ObjectiveCParser.KeywordArgumentContext) {
+        guard let messageSelector = ctx.parent as? ObjectiveCParser.MessageSelectorContext else {
+            return
+        }
+        guard let index = messageSelector.index(of: ctx) else {
+            return
+        }
+        
+        // Second argument on, print comma before printing argument
+        if index > 0 {
+            target.outputInline(", ")
+        }
+    }
+    
     override func exitKeywordArgument(_ ctx: ObjectiveCParser.KeywordArgumentContext) {
         guard let messageSelector = ctx.parent as? ObjectiveCParser.MessageSelectorContext else {
             return
@@ -58,12 +72,21 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         
         // First argument, print an opening parens
         if index == 0 {
-            target.outputInline("(")
+            //target.outputInline("(")
         }
     }
     
     override func exitSelector(_ ctx: ObjectiveCParser.SelectorContext) {
-        target.outputInline("(")
+        if ctx.parent is ObjectiveCParser.MessageSelectorContext {
+            target.outputInline("(")
+        }
+        if let messageSelector = ctx.parent?.parent as? ObjectiveCParser.MessageSelectorContext {
+            if messageSelector.index(of: ctx.parent!) == 0 {
+                target.outputInline("(")
+            } else {
+                target.outputInline(": ")
+            }
+        }
     }
     
     override func exitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) {
@@ -75,8 +98,8 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
 }
 
-private extension ParserRuleContext {
-    func index(of child: ParserRuleContext) -> Int? {
+private extension Tree {
+    func index(of child: Tree) -> Int? {
         for i in 0..<getChildCount() {
             if getChild(i) === child {
                 return i
