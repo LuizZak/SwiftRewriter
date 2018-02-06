@@ -146,7 +146,26 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
     
     override func enterConstant(_ ctx: ObjectiveCParser.ConstantContext) {
-        target.outputInline(ctx.getText())
+        if let float = ctx.FLOATING_POINT_LITERAL() {
+            var floatText = float.getText()
+            if floatText.hasSuffix("f") || floatText.hasSuffix("F") || floatText.hasSuffix("D") || floatText.hasSuffix("d") {
+                floatText = String(floatText.dropLast())
+            }
+            
+            target.outputInline(floatText)
+        } else {
+            target.outputInline(ctx.getText())
+        }
+    }
+    
+    override func exitStringLiteral(_ ctx: ObjectiveCParser.StringLiteralContext) {
+        let value = ctx.STRING_VALUE().map {
+            // TODO: Support conversion of hexadecimal and octal digits properly.
+            // Octal literals need to be converted before being proper to use.
+            $0.getText()
+        }.joined()
+        
+        target.outputInline("\"\(value)\"")
     }
 }
 

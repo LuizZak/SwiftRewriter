@@ -41,6 +41,22 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: "self.member.subMember")
     }
     
+    func testStringLiteral() throws {
+        try assertSingleStatement(
+            objc: "@\"literal abc\";",
+            swift: "\"literal abc\"")
+        
+        try assertSingleStatement(
+            objc: "@\"literal \\n abc\";",
+            swift: "\"literal \\n abc\"")
+    }
+    
+    func testFloatLiteral() throws {
+        try assertSingleStatement(
+            objc: "123.456e+99f;",
+            swift: "123.456e+99")
+    }
+    
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass
