@@ -282,6 +282,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         let source = """
             @implementation MyClass
             - (instancetype)initWithThing:(id)thing {
+                [self thing];
             }
             @end
             """

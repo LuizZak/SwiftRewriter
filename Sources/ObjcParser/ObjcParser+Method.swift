@@ -40,7 +40,7 @@ public extension ObjcParser {
         if lexer.tokenType(.semicolon) {
             try parseTokenNode(.semicolon)
         } else if lexer.tokenType(.openBrace) {
-            //method.body = try parseFunctionBody()
+            method.body = try parseFunctionBody()
         } else {
             diagnostics.error("Expected \(TokenType.semicolon) or method body after method declaration", location: location())
         }
@@ -52,11 +52,11 @@ public extension ObjcParser {
     /// function_body:
     ///     statements
     /// ```
-    func parseFunctionBody() throws -> String {
+    func parseFunctionBody() throws -> MethodBody {
         try parseTokenNode(.openBrace)
         
         // TODO: Actually parse statements here
-        let range = startRange()
+        //let range = startRange()
         
         let innerLexer = lexer.lexer
         
@@ -75,7 +75,7 @@ public extension ObjcParser {
             _=innerLexer.safeAdvance()
         }
         
-        let body = range.makeString()
+        //let body = range.makeString()
         
         // Force-read new token on ObjcLexer
         lexer._readToken()
@@ -86,7 +86,7 @@ public extension ObjcParser {
             try parseTokenNode(.closeBrace)
         }
         
-        return body
+        return MethodBody(location: .invalid, existsInSource: true)
     }
     
     /// Parses an Objective-c method selector definition

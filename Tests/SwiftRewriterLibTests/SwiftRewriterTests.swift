@@ -249,20 +249,20 @@ class SwiftRewriterTests: XCTestCase {
             
             @implementation MyClass
             - (instancetype)initWithThing:(id)thing {
-                // Init here
+                [self thing];
             }
             - (void)myMethod {
-                // Function body here
+                [self thing];
             }
             @end
             """,
             swift: """
             class MyClass: NSObject {
                 init(with thing: AnyObject!) {
-                    // Init here
+                    self.thing()
                 }
                 func myMethod() {
-                    // Function body here
+                    self.thing()
                 }
             }
             """)
@@ -287,10 +287,10 @@ class SwiftRewriterTests: XCTestCase {
             
             @implementation MyClass
             - (instancetype)initWithThing:(id)thing {
-                // Init here
+                [self thing];
             }
             - (void)myMethod {
-                // Function body here
+                [self thing];
             }
             @end
             """,
@@ -299,10 +299,10 @@ class SwiftRewriterTests: XCTestCase {
                 private var anIVar: Int
                 
                 init(with thing: AnyObject!) {
-                    // Init here
+                    self.thing()
                 }
                 func myMethod() {
-                    // Function body here
+                    self.thing()
                 }
                 func methodFromCategory() {
                 }
@@ -320,20 +320,20 @@ class SwiftRewriterTests: XCTestCase {
             
             @implementation MyClass
             - (instancetype)initWithThing:(id)thing {
-                // Init here
+                [self thing];
             }
             - (void)myMethod {
-                // Function body here
+                [self thing];
             }
             @end
             """,
             swift: """
             class MyClass: NSObject {
                 init(with thing: AnyObject) {
-                    // Init here
+                    self.thing()
                 }
                 func myMethod() {
-                    // Function body here
+                    self.thing()
                 }
             }
             """)
@@ -403,7 +403,6 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func aMethod(param: String) -> AnyObject {
-                    
                 }
             }
             """)
