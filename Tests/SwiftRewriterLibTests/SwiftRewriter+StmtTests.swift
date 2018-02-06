@@ -25,6 +25,16 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: "((10 + 26) * (15 + 15))")
     }
     
+    func testTernaryExpression() throws {
+        try assertSingleStatement(
+            objc: "aValue ? 123 : 456;",
+            swift: "aValue ? 123 : 456")
+        
+        try assertSingleStatement(
+            objc: "aNullableValue ?: anotherValue;",
+            swift: "aNullableValue ?? anotherValue")
+    }
+    
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass

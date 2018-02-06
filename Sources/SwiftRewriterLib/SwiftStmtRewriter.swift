@@ -32,6 +32,8 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         self.target = target
     }
     
+    /// Adds a listener for a context rule that performs a given statements block
+    /// when the given parser rule is exited.
     func onExitRule(_ rule: ParserRuleContext, do block: @escaping () -> Void) {
         onExitListeners.append(ExitRuleListener(rule: rule, onExit: block))
     }
@@ -63,10 +65,6 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
     
     override func enterKeywordArgument(_ ctx: ObjectiveCParser.KeywordArgumentContext) {
-        guard let messageSelector = ctx.parent as? ObjectiveCParser.MessageSelectorContext else {
-            return
-        }
-        
         // Second argument on, print comma before printing argument
         if ctx.indexOnParent() > 0 {
             target.outputInline(", ")
@@ -92,9 +90,9 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     
     override func enterPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) {
         if let lp = ctx.LP(), let expression = ctx.expression(), let rp = ctx.RP() {
-            target.outputInline("(")
+            target.outputInline(lp.getText())
             onExitRule(expression) {
-                self.target.outputInline(")")
+                self.target.outputInline(rp.getText())
             }
         }
     }
@@ -111,6 +109,24 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
                 onExitRule(ctx) {
                     self.target.outputInline(" ")
                     self.target.outputInline(op + " ")
+                }
+            }
+        }
+        
+        // Ternary expressions
+        if ctx.QUESTION() != nil, let expression = ctx.expression(0), ctx.falseExpression != nil {
+            // True ternary expression
+            if let trueExpression = ctx.trueExpression {
+                onExitRule(expression) {
+                    self.target.outputInline(" ? ")
+                }
+                onExitRule(trueExpression) {
+                    self.target.outputInline(" : ")
+                }
+            } else {
+                // '?:' is a null-coallesce style operator (equivalent to '??' in Swift)
+                onExitRule(expression) {
+                    self.target.outputInline(" ?? ")
                 }
             }
         }
