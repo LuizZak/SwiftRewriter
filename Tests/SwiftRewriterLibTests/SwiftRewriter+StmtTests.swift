@@ -148,6 +148,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: "NSInteger a = 5, b, c = 6;",
             swift: "var a: Int = 5, b: Int, c: Int = 6"
         )
+        try assertSingleStatement(
+            objc: "CGFloat x = [self offsetForDate:cell.startDate];",
+            swift: "var x: CGFloat = self.offsetForDate(cell.startDate)"
+        )
     }
     
     func testAssignmentOperation() throws {

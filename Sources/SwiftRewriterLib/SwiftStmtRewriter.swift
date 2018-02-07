@@ -340,7 +340,10 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     // MARK: Primitives
     override func enterIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) {
         // Ignore on declarations, which are handled separetely.
-        if ctx.isDesendentOf(treeType: ObjectiveCParser.DeclarationContext.self) {
+        if ctx.isDesendentOf(treeType: ObjectiveCParser.DeclarationSpecifiersContext.self) {
+            return
+        }
+        if ctx.isDesendentOf(treeType: ObjectiveCParser.DeclaratorContext.self) {
             return
         }
         
