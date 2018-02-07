@@ -26,6 +26,7 @@ fileprivate class BaseRewriter<T> where T: ParserRuleContext {
 fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     var target: RewriterOutputTarget
     var onFirstStatement = true
+    var compoundDepth = 0
     
     var onExitListeners: [ExitRuleListener] = []
     
@@ -57,6 +58,10 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
     
     override func enterStatement(_ ctx: ObjectiveCParser.StatementContext) {
+        if ctx.compoundStatement() != nil {
+            return
+        }
+        
         if !onFirstStatement {
             target.outputLineFeed()
         }
@@ -65,12 +70,32 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         onFirstStatement = true
     }
     
+    override func enterCompoundStatement(_ ctx: ObjectiveCParser.CompoundStatementContext) {
+        if compoundDepth > 0 {
+            target.outputInline(" {")
+            target.outputLineFeed()
+        }
+        
+        compoundDepth += 1
+    }
+    override func exitCompoundStatement(_ ctx: ObjectiveCParser.CompoundStatementContext) {
+        compoundDepth -= 1
+        
+        if compoundDepth > 0 {
+            //target.outputLineFeed()
+            target.outputIdentation()
+            target.outputInline("}")
+        }
+    }
+    
     override func exitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) {
         target.outputLineFeed()
     }
     
     override func exitStatement(_ ctx: ObjectiveCParser.StatementContext) {
-        target.outputLineFeed()
+        if ctx.compoundStatement() == nil {
+            target.outputLineFeed()
+        }
     }
     
     override func enterVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) {
@@ -158,8 +183,8 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         if ctx.parent is ObjectiveCParser.MessageSelectorContext {
             target.outputInline("(")
         }
-        if let messageSelector = ctx.parent?.parent as? ObjectiveCParser.MessageSelectorContext {
-            if messageSelector.index(of: ctx.parent!) == 0 {
+        if let messageSelector = ctx.parent?.parent as? ObjectiveCParser.MessageSelectorContext, let parent = ctx.parent {
+            if messageSelector.index(of: parent) == 0 {
                 target.outputInline("(")
             } else {
                 target.outputInline(": ")
@@ -273,6 +298,27 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         if let assignmentOperator = ctx.assignmentOperator(), let unaryExpression = ctx.unaryExpression() {
             onExitRule(unaryExpression) {
                 self.target.outputInline(" \(assignmentOperator.getText()) ")
+            }
+        }
+    }
+    
+    // MARK: Statements
+    override func enterSelectionStatement(_ ctx: ObjectiveCParser.SelectionStatementContext) {
+        if ctx.IF() != nil && ctx.ELSE() == nil {
+            target.outputInline("if(")
+            if let exp = ctx.expression() {
+                onExitRule(exp) {
+                    self.target.outputInline(")")
+                }
+            }
+        }
+    }
+    
+    override func enterJumpStatement(_ ctx: ObjectiveCParser.JumpStatementContext) {
+        if let ret = ctx.RETURN() {
+            target.outputInline(ret.getText())
+            if ctx.expression() != nil {
+                target.outputInline(" ")
             }
         }
     }

@@ -168,6 +168,35 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testIfStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                if(true) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    if(true) {
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testReturnStatement() throws {
+        try assertSingleStatement(
+            objc: "return;", swift: "return"
+        )
+        try assertSingleStatement(
+            objc: "return 10;", swift: "return 10"
+        )
+    }
+    
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass
