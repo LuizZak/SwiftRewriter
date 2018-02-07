@@ -1,6 +1,5 @@
 // Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/ObjectiveCLexer.g4 by ANTLR 4.7
 import Antlr4
-import Foundation
 
 open class ObjectiveCLexer: Lexer {
 	internal static var _decisionToDFA: [DFA] = {

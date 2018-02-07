@@ -44,15 +44,15 @@ public class SwiftWriter {
         let name = varDecl.name
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr
-        let varOrLet = _varOrLet(fromType: type)
+        let varOrLet = SwiftWriter._varOrLet(fromType: type)
         
         var decl = varOrLet + " "
-        decl = _prependAccessModifier(in: decl, accessLevel: varDecl.accessLevel)
+        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: varDecl.accessLevel)
         
         decl += name
         
         let ctx =
-            TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: type),
+            TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: type),
                                           inNonnull: varDecl.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
@@ -113,14 +113,14 @@ public class SwiftWriter {
     // TODO: See if we can reuse the PropertyGenerationIntention
     private func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
         let type = ivar.type
-        let varOrLet = _varOrLet(fromType: type)
+        let varOrLet = SwiftWriter._varOrLet(fromType: type)
         
         var decl = _prependOwnership(in: varOrLet + " ", for: ivar.type)
         
-        decl = _prependAccessModifier(in: decl, accessLevel: ivar.accessLevel)
+        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: ivar.accessLevel)
         
         let ctx =
-            TypeMapper.TypeMappingContext(explicitNullability: _typeNullability(inType: ivar.type) ?? .unspecified,
+            TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: ivar.type) ?? .unspecified,
                                           inNonnull: ivar.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
@@ -143,7 +143,7 @@ public class SwiftWriter {
             }
         }
         
-        decl = _prependAccessModifier(in: decl, accessLevel: prop.accessLevel)
+        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: prop.accessLevel)
         
         let ctx =
             TypeMapper.TypeMappingContext(modifiers: prop.propertySource?.modifierList,
@@ -189,7 +189,7 @@ public class SwiftWriter {
     }
     
     private func outputInitMethod(_ initMethod: MethodGenerationIntention, target: RewriterOutputTarget) {
-        var decl = _prependAccessModifier(in: "init", accessLevel: initMethod.accessLevel)
+        var decl = SwiftWriter._prependAccessModifier(in: "init", accessLevel: initMethod.accessLevel)
         
         decl += generateParameters(for: initMethod.signature,
                                    inNonnullContext: initMethod.inNonnullContext)
@@ -214,7 +214,7 @@ public class SwiftWriter {
             decl = "static " + decl
         }
         
-        decl = _prependAccessModifier(in: decl, accessLevel: method.accessLevel)
+        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: method.accessLevel)
         
         let sign = method.signature
         
@@ -284,7 +284,7 @@ public class SwiftWriter {
     }
     
     private func _prependOwnership(in decl: String, for type: ObjcType) -> String {
-        let pref = _ownershipPrefix(inType: type)
+        let pref = SwiftWriter._ownershipPrefix(inType: type)
         if pref.isEmpty {
             return decl
         }
@@ -292,7 +292,7 @@ public class SwiftWriter {
         return "\(pref) \(decl)"
     }
     
-    private func _varOrLet(fromType type: ObjcType) -> String {
+    public static func _varOrLet(fromType type: ObjcType) -> String {
         switch type {
         case .specified(let specifiers, _):
             if specifiers.contains("const") {
@@ -305,7 +305,7 @@ public class SwiftWriter {
         return "var"
     }
     
-    private func _typeNullability(inType type: ObjcType) -> TypeNullability? {
+    public static func _typeNullability(inType type: ObjcType) -> TypeNullability? {
         switch type {
         case .specified(let specifiers, let type):
             // Struct types are never null.
@@ -325,7 +325,7 @@ public class SwiftWriter {
         }
     }
     
-    private func _ownershipPrefix(inType type: ObjcType) -> String {
+    public static func _ownershipPrefix(inType type: ObjcType) -> String {
         switch type {
         case .specified(let specifiers, _):
             if specifiers.last == "__weak" {
@@ -340,7 +340,7 @@ public class SwiftWriter {
         }
     }
     
-    private func _prependAccessModifier(in decl: String, accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
+    public static func _prependAccessModifier(in decl: String, accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
         // In Swift, omitting the access level specifier infers 'internal', so we
         // allow the user to decide whether to omit the keyword here
         if omitInternal && accessLevel == .internal {
@@ -350,7 +350,7 @@ public class SwiftWriter {
         return "\(_accessModifierFor(accessLevel: accessLevel)) \(decl)"
     }
     
-    private func _accessModifierFor(accessLevel: AccessLevel) -> String {
+    public static func _accessModifierFor(accessLevel: AccessLevel) -> String {
         return accessLevel.rawValue
     }
 }

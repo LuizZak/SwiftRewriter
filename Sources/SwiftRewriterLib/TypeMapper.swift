@@ -128,8 +128,13 @@ public class TypeMapper {
     private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String], context: TypeMappingContext) -> String {
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
-        return swiftType(name: final, withNullability: context.nullability(),
-                         parens: shouldParenthesize(type: type))
+        switch type {
+        case .struct, .void:
+            return final
+        default:
+            return swiftType(name: final, withNullability: context.nullability(),
+                             parens: shouldParenthesize(type: type))
+        }
     }
     
     private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String], context: TypeMappingContext) -> String {

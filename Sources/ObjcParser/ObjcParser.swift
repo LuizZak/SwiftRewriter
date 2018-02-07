@@ -131,6 +131,74 @@ public class ObjcParser {
         }
     }
     
+    public func parseObjcType() throws -> ObjcType {
+        // Here we simplify the grammar for types as:
+        // TypeName: specifiers* IDENTIFIER ('<' TypeName '>')? '*'? qualifiers*
+        
+        var type: ObjcType
+        
+        var specifiers: [String] = []
+        while lexer.tokenType(.typeQualifier) {
+            let spec = lexer.nextToken().string
+            specifiers.append(spec)
+        }
+        
+        if lexer.tokenType(.id) {
+            lexer.skipToken()
+            
+            // '<' : Protocol list
+            if lexer.tokenType() == .operator(.lessThan) {
+                let types =
+                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
+                                             addTokensToContext: false,
+                                             itemParser: { try lexer.consume(tokenType: .identifier) })
+                type = .id(protocols: types.map { String($0.string) })
+            } else {
+                type = .id(protocols: [])
+            }
+        } else if lexer.tokenType(.identifier) {
+            let typeName = try lexer.consume(tokenType: .identifier).string
+            
+            // '<' : Generic type specifier
+            if lexer.tokenType() == .operator(.lessThan) {
+                let types =
+                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
+                                             addTokensToContext: false,
+                                             itemParser: parseObjcType)
+                type = .generic(typeName, parameters: types)
+            } else {
+                type = .struct(typeName)
+            }
+        } else if lexer.tokenType(.keyword(.void)) {
+            lexer.skipToken()
+            type = .void
+        } else {
+            throw LexerError.syntaxError("Expected type name")
+        }
+        
+        // '*' : Pointer
+        if lexer.tokenType(.operator(.multiply)) {
+            lexer.skipToken()
+            type = .pointer(type)
+        }
+        
+        // Type qualifier
+        var qualifiers: [String] = []
+        while lexer.tokenType(.typeQualifier) {
+            let qual = lexer.nextToken().string
+            qualifiers.append(qual)
+        }
+        
+        if qualifiers.count > 0 {
+            type = .qualified(type, qualifiers: qualifiers)
+        }
+        if specifiers.count > 0 {
+            type = .specified(specifiers: specifiers, type)
+        }
+        
+        return type
+    }
+    
     /// Parse the global namespace.
     /// Called by `parse` by default until the entire string is consumed.
     ///
@@ -226,74 +294,6 @@ public class ObjcParser {
             diagnostics.error("Expected semicolon after @class declaration.",
                               location: location())
         }
-    }
-    
-    func parseObjcType() throws -> ObjcType {
-        // Here we simplify the grammar for types as:
-        // TypeName: specifiers* IDENTIFIER ('<' TypeName '>')? '*'? qualifiers*
-        
-        var type: ObjcType
-        
-        var specifiers: [String] = []
-        while lexer.tokenType(.typeQualifier) {
-            let spec = lexer.nextToken().string
-            specifiers.append(spec)
-        }
-        
-        if lexer.tokenType(.id) {
-            lexer.skipToken()
-            
-            // '<' : Protocol list
-            if lexer.tokenType() == .operator(.lessThan) {
-                let types =
-                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             addTokensToContext: false,
-                                             itemParser: { try lexer.consume(tokenType: .identifier) })
-                type = .id(protocols: types.map { String($0.string) })
-            } else {
-                type = .id(protocols: [])
-            }
-        } else if lexer.tokenType(.identifier) {
-            let typeName = try lexer.consume(tokenType: .identifier).string
-            
-            // '<' : Generic type specifier
-            if lexer.tokenType() == .operator(.lessThan) {
-                let types =
-                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             addTokensToContext: false,
-                                             itemParser: parseObjcType)
-                type = .generic(typeName, parameters: types)
-            } else {
-                type = .struct(typeName)
-            }
-        } else if lexer.tokenType(.keyword(.void)) {
-            lexer.skipToken()
-            type = .void
-        } else {
-            throw LexerError.syntaxError("Expected type name")
-        }
-        
-        // '*' : Pointer
-        if lexer.tokenType(.operator(.multiply)) {
-            lexer.skipToken()
-            type = .pointer(type)
-        }
-        
-        // Type qualifier
-        var qualifiers: [String] = []
-        while lexer.tokenType(.typeQualifier) {
-            let qual = lexer.nextToken().string
-            qualifiers.append(qual)
-        }
-        
-        if qualifiers.count > 0 {
-            type = .qualified(type, qualifiers: qualifiers)
-        }
-        if specifiers.count > 0 {
-            type = .specified(specifiers: specifiers, type)
-        }
-        
-        return type
     }
     
     func parseTypeNameNode(onMissing message: String = "Expected type name") throws -> TypeNameNode {

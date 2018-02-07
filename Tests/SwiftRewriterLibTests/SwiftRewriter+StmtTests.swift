@@ -135,6 +135,17 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testVarDeclaration() throws {
+        try assertSingleStatement(
+            objc: "NSInteger myInt = 5;",
+            swift: "var myInt: Int = 5"
+        )
+        try assertSingleStatement(
+            objc: "const NSInteger myInt = 5;",
+            swift: "let myInt: Int = 5"
+        )
+    }
+    
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass

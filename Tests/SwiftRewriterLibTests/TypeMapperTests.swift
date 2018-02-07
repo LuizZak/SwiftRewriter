@@ -5,6 +5,13 @@ import GrammarModels
 
 class TypeMapperTests: XCTestCase {
     func testMapSimpleTypes() {
+        expect(.specified(specifiers: ["const"], .struct("NSInteger")),
+               toConvertTo: "Int")
+        
+        expect(.specified(specifiers: ["const"], .struct("NSInteger")),
+               withExplicitNullability: nil,
+               toConvertTo: "Int")
+        
         expect(.struct("NSInteger"), toConvertTo: "Int")
         
         expect(.struct("BOOL"), toConvertTo: "Bool")

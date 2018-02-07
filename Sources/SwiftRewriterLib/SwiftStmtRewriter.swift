@@ -1,5 +1,6 @@
 import Antlr4
 import ObjcParserAntlr
+import ObjcParser
 
 /// Main frontend class for performing Swift-conversion of Objective-C statements.
 class SwiftStmtRewriter {
@@ -46,6 +47,15 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) {
+        if !onFirstStatement {
+            target.outputLineFeed()
+        }
+        target.outputIdentation()
+        
+        onFirstStatement = true
+    }
+    
     override func enterStatement(_ ctx: ObjectiveCParser.StatementContext) {
         if !onFirstStatement {
             target.outputLineFeed()
@@ -55,8 +65,70 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         onFirstStatement = true
     }
     
+    override func exitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) {
+        target.outputLineFeed()
+    }
+    
     override func exitStatement(_ ctx: ObjectiveCParser.StatementContext) {
         target.outputLineFeed()
+    }
+    
+    override func enterVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) {
+        guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else {
+            return
+        }
+        
+        let extractor = VarDeclarationTypeExtracter()
+        extractor.declaratorIndex = 0
+        guard let typeString = ctx.accept(extractor) else {
+            return
+        }
+        let parser = ObjcParser(string: typeString)
+        guard let type = try? parser.parseObjcType() else {
+            return
+        }
+        
+        let typeContext = TypeContext()
+        let typeMapper = TypeMapper(context: typeContext)
+        
+        let varOrLet = SwiftWriter._varOrLet(fromType: type)
+        let arc = SwiftWriter._ownershipPrefix(inType: type)
+        
+        if !arc.isEmpty {
+            target.outputInline("\(arc) ")
+        }
+        
+        target.outputInline("\(varOrLet) ")
+        
+        for (i, initDeclarator) in initDeclarators.enumerated() {
+            guard let ident = initDeclarator.declarator()?.directDeclarator()?.identifier() else {
+                continue
+            }
+            
+            extractor.declaratorIndex = i
+            guard let typeString = ctx.accept(extractor) else {
+                continue
+            }
+            
+            let parser = ObjcParser(string: typeString)
+            guard let type = try? parser.parseObjcType() else {
+                continue
+            }
+            
+            let swiftTypeString = typeMapper.swiftType(forObjcType: type)
+            target.outputInline("\(ident.getText()): \(swiftTypeString)")
+            
+            if let initializer = initDeclarator.initializer() {
+                self.target.outputInline(" = ")
+                
+                // Add comma between initializers
+                if i < initDeclarators.count - 1 {
+                    onExitRule(initializer) {
+                        self.target.outputInline(", ")
+                    }
+                }
+            }
+        }
     }
     
     override func exitReceiver(_ ctx: ObjectiveCParser.ReceiverContext) {
@@ -189,6 +261,11 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     
     // MARK: Primitives
     override func enterIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) {
+        // Ignore on declarations, which are handled separetely.
+        if ctx.isDesendentOf(treeType: ObjectiveCParser.DeclarationContext.self) {
+            return
+        }
+        
         target.outputInline(ctx.getText())
     }
     
@@ -216,6 +293,26 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
 }
 
+private class VarDeclarationTypeExtracter: ObjectiveCParserBaseVisitor<String> {
+    var declaratorIndex: Int = 0
+    
+    override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> String? {
+        guard let initDeclarator = ctx.initDeclaratorList()?.initDeclarator(declaratorIndex) else { return nil }
+        
+        // Get a type string to convert into a proper type
+        guard let declarationSpecifiers = ctx.declarationSpecifiers() else { return nil }
+        let pointer = initDeclarator.declarator()?.pointer()
+        
+        let specifiersString = declarationSpecifiers.children?.map {
+            $0.getText()
+        }.joined(separator: " ") ?? ""
+        
+        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
+        
+        return typeString
+    }
+}
+
 private class ExitRuleListener {
     let rule: ParserRuleContext
     let onExit: () -> Void
@@ -236,6 +333,14 @@ private class ExitRuleListener {
 }
 
 private extension Tree {
+    func isDesendentOf<T>(treeType: T.Type) -> Bool {
+        guard let parent = getParent() else {
+            return false
+        }
+        
+        return parent is T || parent.isDesendentOf(treeType: T.self)
+    }
+    
     func indexOnParent() -> Int {
         return getParent()?.index(of: self) ?? -1
     }

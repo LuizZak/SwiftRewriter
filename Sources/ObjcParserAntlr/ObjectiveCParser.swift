@@ -268,7 +268,7 @@ open class ObjectiveCParser: Parser {
 		}
 		return tokenNames
 	}()
-    
+	
 	open func getTokenNames() -> [String?]? {
 		return tokenNames
 	}
@@ -313,6 +313,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitTranslationUnit(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTranslationUnit(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTranslationUnit(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -406,6 +417,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitTopLevelDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTopLevelDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTopLevelDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -514,6 +536,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitImportDeclaration(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitImportDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitImportDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func importDeclaration() throws -> ImportDeclarationContext {
@@ -572,6 +605,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitClassInterface(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassInterface(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassInterface(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -723,6 +767,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitCategoryInterface(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitCategoryInterface(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCategoryInterface(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func categoryInterface() throws -> CategoryInterfaceContext {
@@ -861,6 +916,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitClassImplementation(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassImplementation(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassImplementation(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func classImplementation() throws -> ClassImplementationContext {
@@ -972,6 +1038,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitCategoryImplementation(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitCategoryImplementation(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCategoryImplementation(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func categoryImplementation() throws -> CategoryImplementationContext {
@@ -1059,6 +1136,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitGenericTypeSpecifier(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitGenericTypeSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitGenericTypeSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func genericTypeSpecifier() throws -> GenericTypeSpecifierContext {
@@ -1127,6 +1215,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitProtocolDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -1218,6 +1317,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitProtocolDeclarationSection(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolDeclarationSection(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolDeclarationSection(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -1357,7 +1467,7 @@ open class ObjectiveCParser: Parser {
 
 		 				break
 		 			default:
-		 				throw ANTLRException.recognition(e: NoViableAltException(self))
+		 				throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
 		 			setState(415); 
 		 			try _errHandler.sync(self)
@@ -1366,7 +1476,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -1392,6 +1502,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitProtocolDeclarationList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolDeclarationList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolDeclarationList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -1438,6 +1559,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitClassDeclarationList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassDeclarationList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassDeclarationList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -1505,6 +1637,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitProtocolList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func protocolList() throws -> ProtocolListContext {
@@ -1570,6 +1713,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitPropertyDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -1654,6 +1808,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitPropertyAttributesList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyAttributesList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyAttributesList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func propertyAttributesList() throws -> PropertyAttributesListContext {
@@ -1725,6 +1890,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitPropertyAttribute(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyAttribute(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyAttribute(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -1866,6 +2042,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitProtocolName(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolName(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolName(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func protocolName() throws -> ProtocolNameContext {
@@ -1963,7 +2150,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -1992,6 +2179,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitInstanceVariables(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInstanceVariables(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInstanceVariables(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2063,6 +2261,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitVisibilitySection(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitVisibilitySection(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitVisibilitySection(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2182,7 +2391,7 @@ open class ObjectiveCParser: Parser {
 
 		 				break
 		 			default:
-		 				throw ANTLRException.recognition(e: NoViableAltException(self))
+		 				throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
 		 			setState(516); 
 		 			try _errHandler.sync(self)
@@ -2191,7 +2400,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -2218,6 +2427,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAccessModifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAccessModifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAccessModifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2301,6 +2521,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitInterfaceDeclarationList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInterfaceDeclarationList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInterfaceDeclarationList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func interfaceDeclarationList() throws -> InterfaceDeclarationListContext {
@@ -2351,7 +2582,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(529); 
 		 		try _errHandler.sync(self)
@@ -2382,6 +2613,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitClassMethodDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassMethodDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassMethodDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2423,6 +2665,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitInstanceMethodDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInstanceMethodDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInstanceMethodDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2470,6 +2723,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitMethodDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2574,6 +2838,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitImplementationDefinitionList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitImplementationDefinitionList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitImplementationDefinitionList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func implementationDefinitionList() throws -> ImplementationDefinitionListContext {
@@ -2663,6 +2938,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitClassMethodDefinition(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitClassMethodDefinition(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitClassMethodDefinition(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func classMethodDefinition() throws -> ClassMethodDefinitionContext {
@@ -2702,6 +2988,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitInstanceMethodDefinition(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInstanceMethodDefinition(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInstanceMethodDefinition(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2752,6 +3049,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitMethodDefinition(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodDefinition(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodDefinition(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -2848,6 +3156,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitMethodSelector(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodSelector(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodSelector(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func methodSelector() throws -> MethodSelectorContext {
@@ -2882,7 +3201,7 @@ open class ObjectiveCParser: Parser {
 
 		 				break
 		 			default:
-		 				throw ANTLRException.recognition(e: NoViableAltException(self))
+		 				throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
 		 			setState(577); 
 		 			try _errHandler.sync(self)
@@ -2943,6 +3262,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitKeywordDeclarator(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitKeywordDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitKeywordDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3033,6 +3363,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitSelector(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelector(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelector(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func selector() throws -> SelectorContext {
@@ -3105,7 +3446,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -3133,6 +3474,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitMethodType(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitMethodType(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMethodType(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3178,6 +3530,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitPropertyImplementation(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertyImplementation(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertyImplementation(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func propertyImplementation() throws -> PropertyImplementationContext {
@@ -3212,7 +3575,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -3241,6 +3604,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitPropertySynthesizeList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertySynthesizeList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertySynthesizeList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3302,6 +3676,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitPropertySynthesizeItem(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPropertySynthesizeItem(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPropertySynthesizeItem(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3371,6 +3756,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitBlockType(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitBlockType(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBlockType(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3478,6 +3874,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitGenericsSpecifier(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitGenericsSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitGenericsSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func genericsSpecifier() throws -> GenericsSpecifierContext {
@@ -3564,6 +3971,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitTypeSpecifierWithPrefixes(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeSpecifierWithPrefixes(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeSpecifierWithPrefixes(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func typeSpecifierWithPrefixes() throws -> TypeSpecifierWithPrefixesContext {
@@ -3619,6 +4037,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitDictionaryExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDictionaryExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDictionaryExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3722,6 +4151,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitDictionaryPair(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDictionaryPair(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDictionaryPair(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func dictionaryPair() throws -> DictionaryPairContext {
@@ -3763,6 +4203,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitArrayExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitArrayExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArrayExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3852,6 +4303,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitBoxExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitBoxExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBoxExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -3955,7 +4417,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 
 		 		break
@@ -3990,6 +4452,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitBlockParameters(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitBlockParameters(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBlockParameters(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4088,6 +4561,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitTypeVariableDeclaratorOrName(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeVariableDeclaratorOrName(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeVariableDeclaratorOrName(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func typeVariableDeclaratorOrName() throws -> TypeVariableDeclaratorOrNameContext {
@@ -4147,6 +4631,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitBlockExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitBlockExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitBlockExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4233,6 +4728,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitMessageExpression(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitMessageExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMessageExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func messageExpression() throws -> MessageExpressionContext {
@@ -4279,6 +4785,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitReceiver(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitReceiver(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitReceiver(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4337,6 +4854,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitMessageSelector(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitMessageSelector(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMessageSelector(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4417,6 +4945,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitKeywordArgument(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitKeywordArgument(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitKeywordArgument(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4505,6 +5044,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitKeywordArgumentType(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitKeywordArgumentType(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitKeywordArgumentType(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func keywordArgumentType() throws -> KeywordArgumentTypeContext {
@@ -4574,6 +5124,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitSelectorExpression(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelectorExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelectorExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func selectorExpression() throws -> SelectorExpressionContext {
@@ -4620,6 +5181,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitSelectorName(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelectorName(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelectorName(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4718,6 +5290,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitProtocolExpression(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func protocolExpression() throws -> ProtocolExpressionContext {
@@ -4763,6 +5346,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitEncodeExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitEncodeExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEncodeExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4813,6 +5407,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitTypeVariableDeclarator(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeVariableDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeVariableDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func typeVariableDeclarator() throws -> TypeVariableDeclaratorContext {
@@ -4857,6 +5462,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitThrowStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitThrowStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitThrowStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -4928,6 +5544,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitTryBlock(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTryBlock(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTryBlock(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5016,6 +5643,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitCatchStatement(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitCatchStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCatchStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func catchStatement() throws -> CatchStatementContext {
@@ -5068,6 +5706,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitSynchronizedStatement(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSynchronizedStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSynchronizedStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func synchronizedStatement() throws -> SynchronizedStatementContext {
@@ -5115,6 +5764,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitAutoreleaseStatement(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAutoreleaseStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAutoreleaseStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func autoreleaseStatement() throws -> AutoreleaseStatementContext {
@@ -5154,6 +5814,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitFunctionDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5198,6 +5869,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitFunctionDefinition(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionDefinition(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionDefinition(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5250,6 +5932,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitFunctionSignature(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionSignature(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionSignature(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5344,6 +6037,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitAttribute(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttribute(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttribute(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func attribute() throws -> AttributeContext {
@@ -5395,6 +6099,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAttributeName(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeName(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeName(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5468,7 +6183,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -5496,6 +6211,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAttributeParameters(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameters(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameters(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5567,6 +6293,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitAttributeParameterList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameterList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameterList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func attributeParameterList() throws -> AttributeParameterListContext {
@@ -5632,6 +6369,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAttributeParameter(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameter(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameter(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5705,6 +6453,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAttributeParameterAssignment(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeParameterAssignment(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeParameterAssignment(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5801,7 +6560,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 
 		}
@@ -5837,6 +6596,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5912,6 +6682,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitFunctionCallExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionCallExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionCallExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -5993,6 +6774,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitEnumDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -6086,6 +6878,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitVarDeclaration(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitVarDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitVarDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func varDeclaration() throws -> VarDeclarationContext {
@@ -6147,6 +6950,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitTypedefDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypedefDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypedefDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -6224,6 +7038,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitTypeDeclaratorList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeDeclaratorList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeDeclaratorList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func typeDeclaratorList() throws -> TypeDeclaratorListContext {
@@ -6283,6 +7108,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitTypeDeclarator(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -6383,6 +7219,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitDeclarationSpecifiers(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclarationSpecifiers(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclarationSpecifiers(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func declarationSpecifiers() throws -> DeclarationSpecifiersContext {
@@ -6448,7 +7295,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(975); 
 		 		try _errHandler.sync(self)
@@ -6490,6 +7337,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAttributeSpecifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAttributeSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAttributeSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -6563,6 +7421,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitInitDeclaratorList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitDeclaratorList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitDeclaratorList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func initDeclaratorList() throws -> InitDeclaratorListContext {
@@ -6624,6 +7493,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitInitDeclarator(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func initDeclarator() throws -> InitDeclaratorContext {
@@ -6683,6 +7563,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitStructOrUnionSpecifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitStructOrUnionSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStructOrUnionSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -6802,6 +7693,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitFieldDeclaration(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFieldDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFieldDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func fieldDeclaration() throws -> FieldDeclarationContext {
@@ -6899,6 +7801,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitSpecifierQualifierList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSpecifierQualifierList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSpecifierQualifierList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func specifierQualifierList() throws -> SpecifierQualifierListContext {
@@ -6954,7 +7867,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1034); 
 		 		try _errHandler.sync(self)
@@ -6991,6 +7904,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitIbOutletQualifier(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitIbOutletQualifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitIbOutletQualifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func ibOutletQualifier() throws -> IbOutletQualifierContext {
@@ -7023,7 +7947,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -7050,6 +7974,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitArcBehaviourSpecifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitArcBehaviourSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArcBehaviourSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -7107,6 +8042,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitNullabilitySpecifier(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitNullabilitySpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitNullabilitySpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func nullabilitySpecifier() throws -> NullabilitySpecifierContext {
@@ -7160,6 +8106,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitStorageClassSpecifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitStorageClassSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStorageClassSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -7220,6 +8177,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitTypePrefix(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypePrefix(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypePrefix(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func typePrefix() throws -> TypePrefixContext {
@@ -7278,6 +8246,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitTypeQualifier(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeQualifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeQualifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func typeQualifier() throws -> TypeQualifierContext {
@@ -7322,7 +8301,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -7345,6 +8324,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitProtocolQualifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitProtocolQualifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitProtocolQualifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -7414,6 +8404,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitTypeSpecifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -7553,6 +8554,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitTypeofExpression(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeofExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeofExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func typeofExpression() throws -> TypeofExpressionContext {
@@ -7601,6 +8613,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitFieldDeclaratorList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFieldDeclaratorList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFieldDeclaratorList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -7662,6 +8685,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitFieldDeclarator(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFieldDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFieldDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -7748,6 +8782,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitEnumSpecifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -7878,7 +8923,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 
 		 		break
@@ -7917,7 +8962,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -7946,6 +8991,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitEnumeratorList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumeratorList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumeratorList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8021,6 +9077,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitEnumerator(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumerator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumerator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func enumerator() throws -> EnumeratorContext {
@@ -8074,6 +9141,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitEnumeratorIdentifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitEnumeratorIdentifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitEnumeratorIdentifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8148,7 +9226,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -8191,6 +9269,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitDirectDeclarator(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDirectDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDirectDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8273,7 +9362,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1163)
 		 		try _errHandler.sync(self)
@@ -8363,6 +9452,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitDeclaratorSuffix(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclaratorSuffix(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclaratorSuffix(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func declaratorSuffix() throws -> DeclaratorSuffixContext {
@@ -8429,6 +9529,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitParameterList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitParameterList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitParameterList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func parameterList() throws -> ParameterListContext {
@@ -8485,6 +9596,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitPointer(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPointer(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPointer(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8552,6 +9674,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitMacro(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitMacro(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitMacro(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8627,6 +9760,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitArrayInitializer(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitArrayInitializer(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArrayInitializer(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8709,6 +9853,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitStructInitializer(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitStructInitializer(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStructInitializer(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8803,6 +9958,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitInitializerList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitializerList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitializerList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func initializerList() throws -> InitializerListContext {
@@ -8877,6 +10043,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitTypeName(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitTypeName(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitTypeName(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -8963,6 +10140,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAbstractDeclarator(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAbstractDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAbstractDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9089,7 +10277,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -9120,6 +10308,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitAbstractDeclaratorSuffix(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAbstractDeclaratorSuffix(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAbstractDeclaratorSuffix(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9197,7 +10396,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -9226,6 +10425,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitParameterDeclarationList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitParameterDeclarationList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitParameterDeclarationList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9287,6 +10497,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitParameterDeclaration(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitParameterDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitParameterDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func parameterDeclaration() throws -> ParameterDeclarationContext {
@@ -9342,6 +10563,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitDeclarator(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDeclarator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDeclarator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9422,6 +10654,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9633,6 +10876,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitLabeledStatement(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitLabeledStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitLabeledStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func labeledStatement() throws -> LabeledStatementContext {
@@ -9677,6 +10931,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitRangeExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitRangeExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitRangeExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9741,6 +11006,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitCompoundStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitCompoundStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCompoundStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9839,6 +11115,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitSelectionStatement(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSelectionStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSelectionStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func selectionStatement() throws -> SelectionStatementContext {
@@ -9893,7 +11180,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -9924,6 +11211,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitSwitchStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -9974,6 +11272,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitSwitchBlock(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchBlock(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchBlock(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10041,6 +11350,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitSwitchSection(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchSection(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchSection(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10124,6 +11444,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitSwitchLabel(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitSwitchLabel(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitSwitchLabel(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10221,7 +11552,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1418)
 		 		try match(ObjectiveCParser.Tokens.COLON.rawValue)
@@ -10237,7 +11568,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -10272,6 +11603,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitIterationStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitIterationStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitIterationStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10343,6 +11685,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitWhileStatement(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitWhileStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitWhileStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func whileStatement() throws -> WhileStatementContext {
@@ -10393,6 +11746,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitDoStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitDoStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitDoStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10455,6 +11819,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitForStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitForStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitForStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10585,6 +11960,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitForLoopInitializer(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitForLoopInitializer(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitForLoopInitializer(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func forLoopInitializer() throws -> ForLoopInitializerContext {
@@ -10645,6 +12031,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitForInStatement(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitForInStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitForInStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10728,6 +12125,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitJumpStatement(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitJumpStatement(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitJumpStatement(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func jumpStatement() throws -> JumpStatementContext {
@@ -10780,7 +12188,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -10809,6 +12217,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitExpressions(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitExpressions(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitExpressions(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -10908,6 +12327,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitExpression(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 
 	public final  func expression( ) throws -> ExpressionContext   {
@@ -10969,7 +12399,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1502)
 						if (!(precpred(_ctx, 12))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 12)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 12)"))
 						}
 						setState(1503)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -10997,7 +12427,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1505)
 						if (!(precpred(_ctx, 11))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 11)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 11)"))
 						}
 						setState(1506)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -11022,7 +12452,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1508)
 						if (!(precpred(_ctx, 10))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 10)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 10)"))
 						}
 						setState(1513)
 						try _errHandler.sync(self)
@@ -11043,7 +12473,7 @@ open class ObjectiveCParser: Parser {
 
 							break
 						default:
-							throw ANTLRException.recognition(e: NoViableAltException(self))
+							throw try ANTLRException.recognition(e: NoViableAltException(self))
 						}
 						setState(1515)
 						try expression(11)
@@ -11054,7 +12484,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1516)
 						if (!(precpred(_ctx, 9))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 9)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 9)"))
 						}
 						setState(1517)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -11082,7 +12512,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1519)
 						if (!(precpred(_ctx, 8))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 8)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 8)"))
 						}
 						setState(1520)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -11107,7 +12537,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1522)
 						if (!(precpred(_ctx, 7))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 7)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 7)"))
 						}
 						setState(1523)
 						try {
@@ -11124,7 +12554,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1525)
 						if (!(precpred(_ctx, 6))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 6)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 6)"))
 						}
 						setState(1526)
 						try {
@@ -11141,7 +12571,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1528)
 						if (!(precpred(_ctx, 5))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 5)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 5)"))
 						}
 						setState(1529)
 						try {
@@ -11158,7 +12588,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1531)
 						if (!(precpred(_ctx, 4))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 4)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 4)"))
 						}
 						setState(1532)
 						try {
@@ -11175,7 +12605,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1534)
 						if (!(precpred(_ctx, 3))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 3)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 3)"))
 						}
 						setState(1535)
 						try {
@@ -11192,7 +12622,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1537)
 						if (!(precpred(_ctx, 2))) {
-						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 2)"))
+						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 2)"))
 						}
 						setState(1538)
 						try match(ObjectiveCParser.Tokens.QUESTION.rawValue)
@@ -11266,6 +12696,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitAssignmentOperator(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitAssignmentOperator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitAssignmentOperator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func assignmentOperator() throws -> AssignmentOperatorContext {
@@ -11329,6 +12770,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitCastExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitCastExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitCastExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -11409,6 +12861,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitInitializer(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitInitializer(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitInitializer(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func initializer() throws -> InitializerContext {
@@ -11468,6 +12931,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitConstantExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitConstantExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitConstantExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -11554,7 +13028,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -11598,6 +13072,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitUnaryExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitUnaryExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitUnaryExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -11698,6 +13183,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitUnaryOperator(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitUnaryOperator(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitUnaryOperator(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func unaryOperator() throws -> UnaryOperatorContext {
@@ -11767,6 +13263,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitPostfixExpression(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPostfixExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPostfixExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 
 	public final  func postfixExpression( ) throws -> PostfixExpressionContext   {
@@ -11818,7 +13325,7 @@ open class ObjectiveCParser: Parser {
 					try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_postfixExpression)
 					setState(1597)
 					if (!(precpred(_ctx, 1))) {
-					    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 1)"))
+					    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 1)"))
 					}
 					setState(1598)
 					_la = try _input.LA(1)
@@ -11901,6 +13408,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitPostfixExpr(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPostfixExpr(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPostfixExpr(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -12071,6 +13589,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitArgumentExpressionList(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitArgumentExpressionList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArgumentExpressionList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func argumentExpressionList() throws -> ArgumentExpressionListContext {
@@ -12130,6 +13659,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitArgumentExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitArgumentExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitArgumentExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -12217,6 +13757,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitPrimaryExpression(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitPrimaryExpression(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitPrimaryExpression(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -12342,6 +13893,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitConstant(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitConstant(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitConstant(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
@@ -12518,6 +14080,17 @@ open class ObjectiveCParser: Parser {
 			 	(listener as! ObjectiveCParserListener).exitStringLiteral(self)
 			}
 		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitStringLiteral(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStringLiteral(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
 	}
 	@discardableResult
 	open func stringLiteral() throws -> StringLiteralContext {
@@ -12571,7 +14144,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1690); 
 		 		try _errHandler.sync(self)
@@ -12646,6 +14219,17 @@ open class ObjectiveCParser: Parser {
 		open func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCParserListener {
 			 	(listener as! ObjectiveCParserListener).exitIdentifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitIdentifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitIdentifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
 			}
 		}
 	}
