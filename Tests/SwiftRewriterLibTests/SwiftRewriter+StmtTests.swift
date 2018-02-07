@@ -188,6 +188,46 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testWhileStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                while(true) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    while(true) {
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testForStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                for(int i = 0; i < 10; i++) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    for i in 0..<10 {
+                    }
+                }
+            }
+            """)
+    }
+    
     func testReturnStatement() throws {
         try assertSingleStatement(
             objc: "return;", swift: "return"

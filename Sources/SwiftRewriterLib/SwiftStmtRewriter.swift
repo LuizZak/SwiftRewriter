@@ -74,6 +74,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         if compoundDepth > 0 {
             target.outputInline(" {")
             target.outputLineFeed()
+            target.increaseIdentation()
         }
         
         compoundDepth += 1
@@ -82,7 +83,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         compoundDepth -= 1
         
         if compoundDepth > 0 {
-            //target.outputLineFeed()
+            target.decreaseIdentation()
             target.outputIdentation()
             target.outputInline("}")
         }
@@ -312,6 +313,19 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
                 }
             }
         }
+    }
+    
+    override func enterWhileStatement(_ ctx: ObjectiveCParser.WhileStatementContext) {
+        target.outputInline("while(")
+        if let exp = ctx.expression() {
+            onExitRule(exp) {
+                self.target.outputInline(")")
+            }
+        }
+    }
+    
+    override func enterForStatement(_ ctx: ObjectiveCParser.ForStatementContext) {
+        target.outputInline("for(")
     }
     
     override func enterJumpStatement(_ ctx: ObjectiveCParser.JumpStatementContext) {
