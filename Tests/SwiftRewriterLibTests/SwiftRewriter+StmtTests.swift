@@ -69,6 +69,14 @@ class SwiftRewriter_StmtTests: XCTestCase {
     
     func testFreeFunctionCall() throws {
         try assertSingleStatement(
+            objc: "aFunction();",
+            swift: "aFunction()"
+        )
+        try assertSingleStatement(
+            objc: "aFunction(123);",
+            swift: "aFunction(123)"
+        )
+        try assertSingleStatement(
             objc: "aFunction(123, 456);",
             swift: "aFunction(123, 456)"
         )
@@ -178,7 +186,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @implementation MyClass
             - (void)myMethod {
                 if(true) {
+                    stmt();
                 }
+                if(true)
+                    stmt();
             }
             @end
             """,
@@ -186,6 +197,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 func myMethod() {
                     if(true) {
+                        stmt()
+                    }
+                    if(true) {
+                        stmt()
                     }
                 }
             }
@@ -198,7 +213,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @implementation MyClass
             - (void)myMethod {
                 while(true) {
+                    stmt();
                 }
+                while(true)
+                    stmt();
             }
             @end
             """,
@@ -206,6 +224,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 func myMethod() {
                     while(true) {
+                        stmt()
+                    }
+                    while(true) {
+                        stmt()
                     }
                 }
             }

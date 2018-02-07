@@ -43,8 +43,12 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     override func exitEveryRule(_ ctx: ParserRuleContext) {
         // Trigger exit listeners, removing them whenever they are successfully
         // triggered.
+        for listener in onExitListeners {
+            listener.exitEveryRule(ctx)
+        }
+        
         onExitListeners = onExitListeners.filter { listener in
-            return !listener.exitEveryRule(ctx)
+            return !listener.executed
         }
     }
     
@@ -229,10 +233,14 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     
     override func enterPostfixExpr(_ ctx: ObjectiveCParser.PostfixExprContext) {
         // Function call
-        if let lp = ctx.LP(), let argumentExpressionList = ctx.argumentExpressionList(), let rp = ctx.RP(0) {
+        if let lp = ctx.LP(), let rp = ctx.RP(0) {
             target.outputInline(lp.getText())
             
-            onExitRule(argumentExpressionList) {
+            if let argumentExpressionList = ctx.argumentExpressionList() {
+                onExitRule(argumentExpressionList) {
+                    self.target.outputInline(rp.getText())
+                }
+            } else {
                 self.target.outputInline(rp.getText())
             }
         }
@@ -307,9 +315,15 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     override func enterSelectionStatement(_ ctx: ObjectiveCParser.SelectionStatementContext) {
         if ctx.IF() != nil && ctx.ELSE() == nil {
             target.outputInline("if(")
-            if let exp = ctx.expression() {
-                onExitRule(exp) {
-                    self.target.outputInline(")")
+            guard let exp = ctx.expression() else {
+                return
+            }
+            
+            onExitRule(exp) {
+                self.target.outputInline(")")
+                
+                if let stmt = ctx.statement(0) {
+                    self.ensureBraces(around: stmt)
                 }
             }
         }
@@ -320,6 +334,10 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         if let exp = ctx.expression() {
             onExitRule(exp) {
                 self.target.outputInline(")")
+                
+                if let stmt = ctx.statement() {
+                    self.ensureBraces(around: stmt)
+                }
             }
         }
     }
@@ -374,6 +392,30 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
 }
 
+extension StmtRewriterListener {
+    /// If a given statement is not a compound statement, ensure it prints proper
+    /// braces during printing.
+    ///
+    /// Swift required that all statements after if, for, while, do, and switch
+    /// to feature braces.
+    ///
+    /// If `stmt` is a compound statement already, this method does nothing.
+    func ensureBraces(around stmt: ObjectiveCParser.StatementContext) {
+        if stmt.compoundStatement() != nil {
+            return
+        }
+        
+        target.outputInline(" {")
+        target.outputLineFeed()
+        target.increaseIdentation()
+        onExitRule(stmt) {
+            self.target.decreaseIdentation()
+            self.target.outputIdentation()
+            self.target.outputInline("}")
+        }
+    }
+}
+
 private class VarDeclarationTypeExtracter: ObjectiveCParserBaseVisitor<String> {
     var declaratorIndex: Int = 0
     
@@ -392,24 +434,40 @@ private class VarDeclarationTypeExtracter: ObjectiveCParserBaseVisitor<String> {
         
         return typeString
     }
+    
+    override func visitForLoopInitializer(_ ctx: ObjectiveCParser.ForLoopInitializerContext) -> String? {
+        guard let initDeclarator = ctx.initDeclaratorList()?.initDeclarator(declaratorIndex) else { return nil }
+        
+        // Get a type string to convert into a proper type
+        guard let declarationSpecifiers = ctx.declarationSpecifiers() else { return nil }
+        let pointer = initDeclarator.declarator()?.pointer()
+        
+        let specifiersString = declarationSpecifiers.children?.map {
+            $0.getText()
+            }.joined(separator: " ") ?? ""
+        
+        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
+        
+        return typeString
+    }
 }
 
 private class ExitRuleListener {
     let rule: ParserRuleContext
     let onExit: () -> Void
     
+    var executed: Bool = false
+    
     init(rule: ParserRuleContext, onExit: @escaping () -> Void) {
         self.rule = rule
         self.onExit = onExit
     }
     
-    func exitEveryRule(_ ctx: ParserRuleContext) -> Bool {
+    func exitEveryRule(_ ctx: ParserRuleContext) {
         if ctx === rule {
             onExit()
-            return true
+            executed = true
         }
-        
-        return false
     }
 }
 
