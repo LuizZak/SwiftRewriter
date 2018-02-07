@@ -150,6 +150,24 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testAssignmentOperation() throws {
+        try assertSingleStatement(
+            objc: "a = 5;", swift: "a = 5"
+        )
+        try assertSingleStatement(
+            objc: "a += 5;", swift: "a += 5"
+        )
+        try assertSingleStatement(
+            objc: "a -= 5;", swift: "a -= 5"
+        )
+        try assertSingleStatement(
+            objc: "a /= 5;", swift: "a /= 5"
+        )
+        try assertSingleStatement(
+            objc: "a *= 5;", swift: "a *= 5"
+        )
+    }
+    
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass

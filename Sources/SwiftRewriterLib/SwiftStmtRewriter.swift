@@ -268,6 +268,13 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
                 }
             }
         }
+        
+        // Assignment expression
+        if let assignmentOperator = ctx.assignmentOperator(), let unaryExpression = ctx.unaryExpression() {
+            onExitRule(unaryExpression) {
+                self.target.outputInline(" \(assignmentOperator.getText()) ")
+            }
+        }
     }
     
     // MARK: Primitives
