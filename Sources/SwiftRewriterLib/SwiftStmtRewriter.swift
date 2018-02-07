@@ -116,14 +116,25 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             }
             
             let swiftTypeString = typeMapper.swiftType(forObjcType: type)
-            target.outputInline("\(ident.getText()): \(swiftTypeString)")
             
             if let initializer = initDeclarator.initializer() {
-                self.target.outputInline(" = ")
+                onExitRule(ident) {
+                    self.target.outputInline("\(ident.getText()): \(swiftTypeString)")
+                    self.target.outputInline(" = ")
+                }
                 
-                // Add comma between initializers
-                if i < initDeclarators.count - 1 {
-                    onExitRule(initializer) {
+                onExitRule(initializer) {
+                    // Add comma between initializers
+                    if i < initDeclarators.count - 1 {
+                        self.target.outputInline(", ")
+                    }
+                }
+            } else {
+                onExitRule(ident) {
+                    self.target.outputInline("\(ident.getText()): \(swiftTypeString)")
+                    
+                    // Add comma between initializers
+                    if i < initDeclarators.count - 1 {
                         self.target.outputInline(", ")
                     }
                 }

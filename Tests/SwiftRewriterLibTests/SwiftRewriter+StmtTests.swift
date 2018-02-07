@@ -144,6 +144,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: "const NSInteger myInt = 5;",
             swift: "let myInt: Int = 5"
         )
+        try assertSingleStatement(
+            objc: "NSInteger a = 5, b, c = 6;",
+            swift: "var a: Int = 5, b: Int, c: Int = 6"
+        )
     }
     
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
