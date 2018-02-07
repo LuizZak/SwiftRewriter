@@ -90,6 +90,9 @@ public class SwiftRewriter {
         
         visitor.visitClosure = { node in
             switch node {
+            case let n as TypedefNode:
+                self.visitTypedefNode(n)
+                
             case let n as KeywordNode:
                 self.visitKeywordNode(n)
             
@@ -169,6 +172,23 @@ public class SwiftRewriter {
         }
         
         return false
+    }
+    
+    private func visitTypedefNode(_ node: TypedefNode) {
+        guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
+            return
+        }
+        guard let type = node.type else {
+            return
+        }
+        guard let name = node.identifier?.name else {
+            return
+        }
+        
+        let intent = TypealiasIntention(fromType: type.type, named: name)
+        intent.inNonnullContext = isNodeInNonnullContext(node)
+        
+        ctx.addTypealias(intent)
     }
     
     private func visitKeywordNode(_ node: KeywordNode) {

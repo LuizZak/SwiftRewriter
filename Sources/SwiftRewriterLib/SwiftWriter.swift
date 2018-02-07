@@ -27,6 +27,10 @@ public class SwiftWriter {
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         
+        for typeali in fileIntent.typealiasIntentions {
+            outputTypealias(typeali, target: out)
+        }
+        
         for varDef in fileIntent.globalVariableIntentions {
             outputVariableDeclaration(varDef, target: out)
         }
@@ -38,6 +42,15 @@ public class SwiftWriter {
         out.onAfterOutput()
         
         file.close()
+    }
+    
+    private func outputTypealias(_ typeali: TypealiasIntention, target: RewriterOutputTarget) {
+        let ctx =
+            TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: typeali.fromType),
+                                          inNonnull: typeali.inNonnullContext)
+        let typeName = typeMapper.swiftType(forObjcType: typeali.fromType, context: ctx)
+        
+        target.output(line: "typealias \(typeali.named) = \(typeName)")
     }
     
     private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention, target: RewriterOutputTarget) {

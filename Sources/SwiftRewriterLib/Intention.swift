@@ -16,6 +16,9 @@ public class FileGenerationIntention: Intention {
     /// Gets the types to create on this file.
     private(set) var typeIntentions: [TypeGenerationIntention] = []
     
+    /// Gets the typealias intentions to create on this file.
+    private(set) var typealiasIntentions: [TypealiasIntention] = []
+    
     /// Gets the protocols to create on this file.
     private(set) var protocolIntentions: [ProtocolGenerationIntention] = []
     
@@ -33,6 +36,10 @@ public class FileGenerationIntention: Intention {
     
     public func addType(_ intention: TypeGenerationIntention) {
         typeIntentions.append(intention)
+    }
+    
+    public func addTypealias(_ intention: TypealiasIntention) {
+        typealiasIntentions.append(intention)
     }
     
     public func removeTypes(where predicate: (TypeGenerationIntention) -> Bool) {

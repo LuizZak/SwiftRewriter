@@ -444,7 +444,7 @@ private class VarDeclarationTypeExtracter: ObjectiveCParserBaseVisitor<String> {
         
         let specifiersString = declarationSpecifiers.children?.map {
             $0.getText()
-            }.joined(separator: " ") ?? ""
+        }.joined(separator: " ") ?? ""
         
         let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
         

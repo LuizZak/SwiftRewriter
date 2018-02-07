@@ -62,6 +62,95 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         return type
     }
     
+    fileprivate static func parseObjcType(inDeclarationSpecifiers declarationSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext,
+                                          typeDeclarator: ObjectiveCParser.TypeDeclaratorContext) -> ObjcType? {
+        let pointer = typeDeclarator.pointer()
+        
+        let specifiersString = declarationSpecifiers.children?.map {
+            $0.getText()
+        }.joined(separator: " ") ?? ""
+        
+        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
+        
+        guard var type = ObjcParserListener.parseObjcType(typeString) else {
+            return nil
+        }
+        
+        // Block type
+        if let blockIdentifier = typeDeclarator.directDeclarator()?.identifier(),
+            let blockParameters = typeDeclarator.directDeclarator()?.blockParameters() {
+            let typeVariableDeclaratorOrNames = blockParameters.typeVariableDeclaratorOrName()
+            
+            var blockParameterTypes: [ObjcType] = []
+            
+            for typeVariableDeclaratorOrName in typeVariableDeclaratorOrNames {
+                let paramType: ObjcType
+                if let typeName = typeVariableDeclaratorOrName.typeName(),
+                    let type = ObjcParserListener.parseObjcType(typeName.getText()) {
+                    paramType = type
+                } else {
+                    continue
+                }
+                
+                blockParameterTypes.append(paramType)
+            }
+            
+            type = .blockType(name: blockIdentifier.getText(),
+                              returnType: type,
+                              parameters: blockParameterTypes)
+        }
+        
+        return type
+    }
+    
+    private static func parseObjcType(fromTypeVariableDeclaratorOrTypeName typeContext: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
+        if let typeName = typeContext.typeName() {
+            return parseObjcType(fromTypeName: typeName)
+        }
+        
+        guard let typeVarDeclarator = typeContext.typeVariableDeclarator() else {
+            return nil
+        }
+        guard let declarationSpecifiers = typeVarDeclarator.declarationSpecifiers() else {
+            return nil
+        }
+        guard let typeDeclarator = typeVarDeclarator.declarator() else {
+            return nil
+        }
+        
+        let pointer = typeDeclarator.pointer()
+        
+        let specifiersString = declarationSpecifiers.children?.map {
+            $0.getText()
+            }.joined(separator: " ") ?? ""
+        
+        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
+        
+        guard let type = ObjcParserListener.parseObjcType(typeString) else {
+            return nil
+        }
+        
+        return type
+    }
+    
+    private static func parseObjcType(fromTypeName typeName: ObjectiveCParser.TypeNameContext) -> ObjcType? {
+        guard let specifierQualifierList = typeName.specifierQualifierList() else {
+            return nil
+        }
+        let specifierList =
+            (specifierQualifierList
+                .children?
+                .map { $0.getText() }
+                .joined(separator: " ")
+                ) ?? ""
+        
+        guard let type = ObjcParserListener.parseObjcType(specifierList) else {
+            return nil
+        }
+        
+        return type
+    }
+    
     private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
         guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
             return .invalid
@@ -89,6 +178,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.MethodSelectorContext.self, nodeType: MethodSelector.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodTypeContext.self, nodeType: MethodType.self)
         mapper.addRuleMap(rule: ObjectiveCParser.InstanceVariablesContext.self, nodeType: IVarsList.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.TypedefDeclarationContext.self, nodeType: TypedefNode.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.BlockParametersContext.self, nodeType: BlockParametersNode.self)
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -339,16 +430,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDefinitionContext
         
-        /*
-        guard let startIndex = ctx.compoundStatement()?.start?.getStartIndex(),
-            let endIndex = ctx.compoundStatement()?.stop?.getStopIndex() else {
-            return
-        }
-        
-        let start = sourceString.index(sourceString.startIndex, offsetBy: startIndex + 1)
-        let end = sourceString.index(sourceString.startIndex, offsetBy: endIndex)
-        */
-        
         let methodBody = MethodBody()
         
         methodBody.sourceRuleContext = ctx
@@ -362,6 +443,78 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             let node = Identifier(name: selIdentifier.getText())
             node.sourceRuleContext = ctx
             context.addChildNode(node)
+        }
+    }
+    
+    override func enterTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
+        guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
+            return
+        }
+        
+        guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
+            return
+        }
+        
+        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
+            guard let directDeclarator = typeDeclarator.directDeclarator() else {
+                continue
+            }
+            guard let identifier = directDeclarator.identifier() else {
+                continue
+            }
+            
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            typedefNode.addChild(identifierNode)
+        }
+    }
+    
+    override func exitTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
+        guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
+            return
+        }
+        
+        guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
+            return
+        }
+        guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
+            return
+        }
+        
+        // Detect block types
+        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
+            guard let directDeclarator = typeDeclarator.directDeclarator() else {
+                continue
+            }
+            guard let identifier = directDeclarator.identifier() else {
+                continue
+            }
+            
+            guard let type = ObjcParserListener.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+                                                              typeDeclarator: typeDeclarator) else
+            {
+                continue
+            }
+            
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            typedefNode.addChild(identifierNode)
+            
+            let typeNameNode = TypeNameNode(type: type)
+            typeNameNode.sourceRuleContext = typeDeclarator
+            typedefNode.addChild(typeNameNode)
+        }
+    }
+    
+    override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
+        for typeVariableDeclaratorOrName in ctx.typeVariableDeclaratorOrName() {
+            guard let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
+                continue
+            }
+            
+            let typeNameNode = TypeNameNode(type: type)
+            typeNameNode.sourceRuleContext = typeVariableDeclaratorOrName
+            context.addChildNode(typeNameNode)
         }
     }
 }

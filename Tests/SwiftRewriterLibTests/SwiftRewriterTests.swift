@@ -363,6 +363,16 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteBlockTypeDef() throws {
+        try assertObjcParse(
+            objc: """
+            typedef void(^errorBlock)();
+            """,
+            swift: """
+            typealias errorBlock = () -> Void
+            """)
+    }
+    
     func testRewriterUsesNonnullMacrosForNullabilityInferring() throws {
         try assertObjcParse(
             objc: """
