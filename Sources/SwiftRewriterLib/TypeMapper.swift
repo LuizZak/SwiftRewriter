@@ -129,13 +129,15 @@ public class TypeMapper {
     }
     
     private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String], context: TypeMappingContext) -> String {
+        let locSpecifiers = context.withSpecifiers(specifiers)
+        
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
         switch type {
         case .struct, .void:
             return final
         default:
-            return swiftType(name: final, withNullability: context.nullability(),
+            return swiftType(name: final, withNullability: locSpecifiers.nullability(),
                              parens: shouldParenthesize(type: type))
         }
     }
@@ -229,6 +231,10 @@ public class TypeMapper {
         /// cases.
         public var inNonnullContext: Bool = false
         
+        /// Objc type specifiers from a type name.
+        /// See `ObjcType` for more information.
+        public var specifiers: [String] = []
+        
         /// Objc type qualifiers from a type name.
         /// See `ObjcType` for more information.
         public var qualifiers: [String] = []
@@ -245,9 +251,11 @@ public class TypeMapper {
         /// Is overriden by `alwaysNonnull`.
         public var explicitNullability: TypeNullability?
         
-        public init(modifiers: PropertyModifierList?, qualifiers: [String] = [],
-                    alwaysNonnull: Bool = false, inNonnull: Bool = false) {
+        public init(modifiers: PropertyModifierList?, specifiers: [String] = [],
+                    qualifiers: [String] = [], alwaysNonnull: Bool = false,
+                    inNonnull: Bool = false) {
             self.modifiers = modifiers
+            self.specifiers = specifiers
             self.qualifiers = qualifiers
             self.alwaysNonnull = alwaysNonnull
             self.inNonnullContext = inNonnull
@@ -268,6 +276,12 @@ public class TypeMapper {
         public func asAlwaysNonNull() -> TypeMappingContext {
             var copy = self
             copy.alwaysNonnull = true
+            return copy
+        }
+        
+        public func withSpecifiers(_ specifiers: [String]) -> TypeMappingContext {
+            var copy = self
+            copy.specifiers = specifiers
             return copy
         }
         
@@ -293,6 +307,12 @@ public class TypeMapper {
             return qualifiers.contains(name)
         }
         
+        /// Returns whether a type specifier with a given name can be found within
+        /// this type mapping context
+        public func hasSpecifierModifier(named name: String) -> Bool {
+            return specifiers.contains(name)
+        }
+        
         /// Returns whether a type-signature nullability specifier with a given
         /// name can be found within this type mapping context
         public func hasMethodNullabilitySpecifier(named name: String) -> Bool {
@@ -305,6 +325,7 @@ public class TypeMapper {
             return hasPropertyModifier(named: "nonnull")
                 || hasMethodNullabilitySpecifier(named: "nonnull")
                 || hasQualifierModifier(named: "_Nonnull")
+                || hasSpecifierModifier(named: "nonnull")
         }
         
         /// Returns whether any of the @property modifiers is a `nullable` modifier,
@@ -313,6 +334,7 @@ public class TypeMapper {
             return hasPropertyModifier(named: "nullable")
                 || hasMethodNullabilitySpecifier(named: "nullable")
                 || hasQualifierModifier(named: "_Nullable")
+                || hasSpecifierModifier(named: "nullable")
         }
         
         /// Returns whether any of the @property modifiers is a `null_unspecified`
@@ -322,6 +344,7 @@ public class TypeMapper {
             return hasPropertyModifier(named: "null_unspecified")
                 || hasMethodNullabilitySpecifier(named: "null_unspecified")
                 || hasQualifierModifier(named: "_Null_unspecified")
+                || hasSpecifierModifier(named: "null_unspecified")
         }
         
         /// Gets the nullability for the current type context

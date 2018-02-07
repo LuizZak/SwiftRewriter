@@ -133,7 +133,56 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         return type
     }
     
+    private static func parseObjcType(fromTypeSpecifier typeSpecifier: ObjectiveCParser.TypeSpecifierContext) -> ObjcType? {
+        // TODO: Support typeofExpression
+        if typeSpecifier.typeofExpression() != nil {
+            return nil
+        }
+        // TODO: Support enumSpecifier
+        if typeSpecifier.enumSpecifier() != nil {
+            return nil
+        }
+        // TODO: Support structOrUnionSpecifier
+        if typeSpecifier.structOrUnionSpecifier() != nil {
+            return nil
+        }
+        
+        if let genericTypeSpecifier = typeSpecifier.genericTypeSpecifier() {
+            return ObjcParserListener.parseObjcType(genericTypeSpecifier.getText())
+        }
+        
+        return ObjcParserListener.parseObjcType(typeSpecifier.getText())
+    }
+    
+    private static func parseObjcType(fromBlockType blockType: ObjectiveCParser.BlockTypeContext) -> ObjcType? {
+        guard let returnTypeSpecifier = blockType.typeSpecifier(0) else {
+            return nil
+        }
+        guard let returnType = parseObjcType(fromTypeSpecifier: returnTypeSpecifier) else {
+            return nil
+        }
+        
+        var parameterTypes: [ObjcType] = []
+        
+        if let blockParameters = blockType.blockParameters() {
+            for param in blockParameters.typeVariableDeclaratorOrName() {
+                guard let paramType = parseObjcType(fromTypeVariableDeclaratorOrTypeName: param) else {
+                    continue
+                }
+                
+                parameterTypes.append(paramType)
+            }
+        }
+        
+        return ObjcType.blockType(name: "", returnType: returnType, parameters: parameterTypes)
+    }
+    
     private static func parseObjcType(fromTypeName typeName: ObjectiveCParser.TypeNameContext) -> ObjcType? {
+        // Block type
+        if let blockType = typeName.blockType() {
+            return parseObjcType(fromBlockType: blockType)
+        }
+        
         guard let specifierQualifierList = typeName.specifierQualifierList() else {
             return nil
         }
@@ -144,7 +193,9 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 .joined(separator: " ")
                 ) ?? ""
         
-        guard let type = ObjcParserListener.parseObjcType(specifierList) else {
+        let abstractDeclarator = typeName.abstractDeclarator()?.getText() ?? ""
+        
+        guard let type = ObjcParserListener.parseObjcType("\(specifierList) \(abstractDeclarator)") else {
             return nil
         }
         
@@ -358,13 +409,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
-        guard let typeSpec = ctx.specifierQualifierList()?.typeSpecifier(0)?.getText() else {
-            return
-        }
-        
-        let abstract = ctx.abstractDeclarator()?.getText() ?? ""
-        
-        guard let type = ObjcParserListener.parseObjcType(typeSpec + abstract) else {
+        guard let type = ObjcParserListener.parseObjcType(fromTypeName: ctx) else {
             return
         }
         

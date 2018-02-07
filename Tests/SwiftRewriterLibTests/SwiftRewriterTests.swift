@@ -373,6 +373,24 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteBlockParameters() throws {
+        try assertObjcParse(
+            objc: """
+            @interface AClass
+            - (void)aBlocky:(void(^)())blocky;
+            - (void)aBlockyWithString:(void(^)(nonnull NSString*))blocky;
+            @end
+            """,
+            swift: """
+            class AClass: NSObject {
+                func aBlocky(blocky: () -> Void) {
+                }
+                func aBlockyWithString(blocky: (String) -> Void) {
+                }
+            }
+            """)
+    }
+    
     func testRewriterUsesNonnullMacrosForNullabilityInferring() throws {
         try assertObjcParse(
             objc: """

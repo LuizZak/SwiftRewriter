@@ -92,7 +92,7 @@ class ObjcParser_ClassMethodParseTests: XCTestCase {
         
         XCTAssertEqual(keyword?.selector?.name, "abc")
         XCTAssertEqual(keyword?.type?.nullabilitySpecifiers[0].name, "nullable")
-        XCTAssertEqual(keyword?.type?.type?.type, .pointer(.struct("NSString")))
+        XCTAssertEqual(keyword?.type?.type?.type, .specified(specifiers: ["nullable"], .pointer(.struct("NSString"))))
         XCTAssertEqual(keyword?.identifier?.name, "a")
 //        XCTAssert(result.childrenMatching(type: TokenNode.self).contains { $0.token.type == .semicolon })
     }

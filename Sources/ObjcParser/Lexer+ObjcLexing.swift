@@ -5,7 +5,7 @@ extension Lexer {
     ///
     /// ```
     /// type_qualifier:
-    ///         'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong' | '__kindof';
+    ///         'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | 'nonnull' | 'nullable' | 'null_unspecified' | 'null_resettable' | '__weak' | '__strong' | '__kindof';
     /// ```
     @inline(__always)
     public func lexTypeQualifier() throws -> Substring {
@@ -16,6 +16,10 @@ extension Lexer {
                 !lexer.advanceIf(equals: "volatile") &&
                 !lexer.advanceIf(equals: "_Nonnull") &&
                 !lexer.advanceIf(equals: "_Nullable") &&
+                !lexer.advanceIf(equals: "nonnull") &&
+                !lexer.advanceIf(equals: "nullable") &&
+                !lexer.advanceIf(equals: "null_unspecified") &&
+                !lexer.advanceIf(equals: "null_resettable") &&
                 !lexer.advanceIf(equals: "__weak") &&
                 !lexer.advanceIf(equals: "__strong") &&
                 !lexer.advanceIf(equals: "__kindof")
@@ -259,7 +263,7 @@ extension Lexer {
     }
     
     private static let _typeQualifiers = [
-        "extern", "static", "const", "volatile", "_Nonnull", "_Nullable", "__weak", "__strong", "__kindof"
+        "extern", "static", "const", "volatile", "_Nonnull", "_Nullable", "nonnull", "nullable", "null_unspecified", "null_resettable", "__weak", "__strong", "__kindof"
     ]
 }
 
