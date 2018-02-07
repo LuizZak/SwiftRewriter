@@ -30,6 +30,9 @@ public class TypeMapper {
             
         case let .qualified(type, qualifiers):
             return swiftType(forObjcType: type, withQualifiers: qualifiers, context: context)
+            
+        case let .blockType(_, returnType, parameters):
+            return swiftBlockType(forReturnType: returnType, parameters: parameters, context: context)
         }
     }
     
@@ -145,6 +148,24 @@ public class TypeMapper {
         return
             swiftType(name: final, withNullability: locQualifiers.nullability(),
                       parens: shouldParenthesize(type: type))
+    }
+    
+    private func swiftBlockType(forReturnType returnType: ObjcType, parameters: [ObjcType], context: TypeMappingContext) -> String {
+        // Parameters
+        var buffer = "("
+        
+        buffer +=
+            parameters.map {
+                swiftType(forObjcType: $0, context: context)
+            }.joined(separator: ", ")
+        
+        buffer += ")"
+        
+        // Return type
+        buffer += " -> "
+        buffer += swiftType(forObjcType: returnType, context: context)
+        
+        return buffer
     }
     
     private func shouldParenthesize(type: ObjcType) -> Bool {

@@ -58,6 +58,20 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "(UIView & UIDelegate)?")
     }
     
+    func testBlockTypes() {
+        expect(.blockType(name: "block", returnType: .void, parameters: []),
+               toConvertTo: "() -> Void")
+        
+        expect(.blockType(name: "block", returnType: .struct("NSInteger"), parameters: []),
+               toConvertTo: "() -> Int")
+        
+        expect(.blockType(name: "block", returnType: .struct("NSInteger"), parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSString"))]),
+               toConvertTo: "(String, String) -> Int")
+        expect(.blockType(name: "block", returnType: .struct("NSInteger"), parameters: [.qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"]), .pointer(.struct("NSString"))]),
+               withExplicitNullability: nil,
+               toConvertTo: "(String?, String!) -> Int")
+    }
+    
     private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull, toConvertTo expected: String, file: String = #file, line: Int = #line) {
         let converted = typeMapperConvert(type, nullability: nullability)
         

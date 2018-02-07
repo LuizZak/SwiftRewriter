@@ -27,6 +27,10 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     /// which is a __weak-tagged type of a pointer to a struct NSObject.
     indirect case specified(specifiers: [String], ObjcType)
     
+    /// An objective-C block type.
+    /// Block types may specify names, or not (in case of block literals).
+    indirect case blockType(name: String, returnType: ObjcType, parameters: [ObjcType])
+    
     /// Gets the plain string definition for this type.
     /// Always maps to valid objc type
     public var description: String {
@@ -56,6 +60,8 @@ public enum ObjcType: Equatable, CustomStringConvertible {
             return "\(type.description) \(qualifiers.joined(separator: " "))"
         case let .specified(specifiers, type):
             return "\(specifiers.joined(separator: " ")) \(type.description)"
+        case let .blockType(name, returnType, parameters):
+            return "\(returnType)(^\(name))(\(parameters.map { $0.description }.joined(separator: ", ")))"
         }
     }
     
@@ -71,6 +77,9 @@ public enum ObjcType: Equatable, CustomStringConvertible {
             return type.normalized
         case let .specified(specifiers, type) where specifiers.isEmpty:
             return type.normalized
+        case let .blockType(name, returnType, parameters):
+            return .blockType(name: name, returnType: returnType.normalized,
+                              parameters: parameters.map { $0.normalized })
         default:
             return self
         }
