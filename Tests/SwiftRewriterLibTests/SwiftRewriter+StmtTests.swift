@@ -393,6 +393,15 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testContinueBreakStatements() throws {
+        try assertSingleStatement(
+            objc: "continue;", swift: "continue"
+        )
+        try assertSingleStatement(
+            objc: "break;", swift: "break"
+        )
+    }
+    
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass

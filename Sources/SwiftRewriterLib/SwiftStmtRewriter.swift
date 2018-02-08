@@ -409,6 +409,12 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
                 target.outputInline(" ")
             }
         }
+        else if let cnt = ctx.CONTINUE() {
+            target.outputInline(cnt.getText())
+        }
+        else if let brk = ctx.BREAK() {
+            target.outputInline(brk.getText())
+        }
     }
     
     // MARK: Primitives
