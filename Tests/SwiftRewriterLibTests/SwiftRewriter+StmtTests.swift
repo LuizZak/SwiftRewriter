@@ -207,6 +207,62 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testElseStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                if(true) {
+                    stmt1();
+                } else {
+                    stmt2();
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    if(true) {
+                        stmt1()
+                    } else {
+                        stmt2()
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testIfElseStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                if(true) {
+                    stmt1();
+                } else if(true) {
+                    stmt2();
+                } else {
+                    stmt3();
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    if(true) {
+                        stmt1()
+                    } else if(true) {
+                        stmt2()
+                    } else {
+                        stmt3()
+                    }
+                }
+            }
+            """)
+    }
+    
     func testWhileStatement() throws {
         try assertObjcParse(
             objc: """

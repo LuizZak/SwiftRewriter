@@ -146,65 +146,65 @@ extension Operator: CustomStringConvertible {
     public var description: String {
         switch self {
         case .add:
-            return "'+'"
+            return "+"
         case .subtract:
-            return "'-'"
+            return "-"
         case .multiply:
-            return "'*'"
+            return "*"
         case .divide:
-            return "'/'"
+            return "/"
         case .addAssign:
-            return "'+='"
+            return "+="
         case .subtractAssign:
-            return "'-='"
+            return "-="
         case .multiplyAssign:
-            return "'*='"
+            return "*="
         case .divideAssign:
-            return "'/='"
+            return "/="
         case .negate:
-            return "'!'"
+            return "!"
         case .and:
-            return "'&&'"
+            return "&&"
         case .or:
-            return "'||'"
+            return "||"
         case .bitwiseAnd:
-            return "'&'"
+            return "&"
         case .bitwiseOr:
-            return "'|'"
+            return "|"
         case .bitwiseXor:
-            return "'^'"
+            return "^"
         case .bitwiseNot:
-            return "'~'"
+            return "~"
         case .bitwiseShiftLeft:
-            return "'<<'"
+            return "<<"
         case .bitwiseShiftRight:
-            return "'>>'"
+            return ">>"
         case .bitwiseAndAssign:
-            return "'&='"
+            return "&="
         case .bitwiseOrAssign:
-            return "'|='"
+            return "|="
         case .bitwiseXorAssign:
-            return "'^='"
+            return "^="
         case .bitwiseNotAssign:
-            return "'~='"
+            return "~="
         case .bitwiseShiftLeftAssign:
-            return "'<<='"
+            return "<<="
         case .bitwiseShiftRightAssign:
-            return "'>>='"
+            return ">>="
         case .lessThan:
-            return "'<'"
+            return "<"
         case .lessThanOrEqual:
-            return "'<='"
+            return "<="
         case .greaterThan:
-            return "'>'"
+            return ">"
         case .greaterThanOrEqual:
-            return "'>='"
+            return ">="
         case .assign:
-            return "'='"
+            return "="
         case .equals:
-            return "'=='"
+            return "=="
         case .unequals:
-            return "'!='"
+            return "!="
         }
     }
 }

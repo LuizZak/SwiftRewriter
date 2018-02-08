@@ -1,10 +1,12 @@
 import Antlr4
+import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
 
 /// Main frontend class for performing Swift-conversion of Objective-C statements.
 class SwiftStmtRewriter {
     public func rewrite(_ compound: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
+        
         let listener = StmtRewriterListener(target: target)
         let walker = ParseTreeWalker()
         try? walker.walk(listener, compound)
@@ -66,6 +68,14 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             return
         }
         
+        onExitRule(ctx) {
+            self.target.outputLineFeed()
+        }
+        
+        if let parentSelection = ctx.parent as? ObjectiveCParser.SelectionStatementContext, parentSelection.ELSE() != nil, ctx.selectionStatement()?.IF() != nil {
+            return
+        }
+        
         if !onFirstStatement {
             target.outputLineFeed()
         }
@@ -98,9 +108,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     }
     
     override func exitStatement(_ ctx: ObjectiveCParser.StatementContext) {
-        if ctx.compoundStatement() == nil {
-            target.outputLineFeed()
-        }
+        
     }
     
     override func enterVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) {
@@ -313,7 +321,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     
     // MARK: Statements
     override func enterSelectionStatement(_ ctx: ObjectiveCParser.SelectionStatementContext) {
-        if ctx.IF() != nil && ctx.ELSE() == nil {
+        if ctx.IF() != nil {
             target.outputInline("if(")
             guard let exp = ctx.expression() else {
                 return
@@ -322,8 +330,18 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             onExitRule(exp) {
                 self.target.outputInline(")")
                 
-                if let stmt = ctx.statement(0) {
+                if let stmt = ctx.ifBody {
                     self.ensureBraces(around: stmt)
+                }
+            }
+            
+            if ctx.ELSE() != nil, let stmt = ctx.ifBody {
+                onExitRule(stmt) {
+                    self.target.outputInline(" else")
+                    
+                    if ctx.elseBody?.selectionStatement()?.IF() != nil {
+                        self.target.outputInline(" ")
+                    }
                 }
             }
         }
