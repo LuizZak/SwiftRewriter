@@ -17,8 +17,33 @@ class SwiftExprASTReaderTests: XCTestCase {
         assert(objcExpr: "0123", readsAs: .constant(.octal(0o123)))
         assert(objcExpr: "0x123", readsAs: .constant(.hexadecimal(0x123)))
         assert(objcExpr: "\"abc\"", readsAs: .constant(.string("abc")))
+    }
+    
+    func testFunctionCall() {
         assert(objcExpr: "print()", readsAs: .postfix(.identifier("print"), .functionCall(arguments: [])))
-        assert(objcExpr: "print(123, 456)", readsAs: .postfix(.identifier("print"), .functionCall(arguments: [.unlabeled(.constant(.int(123))), .unlabeled(.constant(.int(456)))])))
+        assert(objcExpr: "a.method()", readsAs: .postfix(.postfix(.identifier("a"), .member("method")), .functionCall(arguments: [])))
+        assert(objcExpr: "print(123, 456)", readsAs: .postfix(.identifier("print"), .functionCall(arguments: [.unlabeled(.constant(123)),
+                                                                                                              .unlabeled(.constant(456))])))
+    }
+    
+    func testSubscript() {
+        assert(objcExpr: "aSubscript[1]", readsAs: .postfix(.identifier("aSubscript"), .subscript(.constant(1))))
+    }
+    
+    func testMemberAccess() {
+        assert(objcExpr: "aSubscript.def", readsAs: .postfix(.identifier("aSubscript"), .member("def")))
+    }
+    
+    func testSelectorMessage() {
+        assert(objcExpr: "[a selector]", readsAs: .postfix(.postfix(.identifier("a"), .member("selector")), .functionCall(arguments: [])))
+        
+        assert(objcExpr: "[a selector:1, 2, 3]",
+               readsAs: .postfix(.postfix(.identifier("a"), .member("selector")),
+                                 .functionCall(arguments: [.unlabeled(.constant(1)), .unlabeled(.constant(2)), .unlabeled(.constant(3))])))
+        
+        assert(objcExpr: "[a selector:1 c:2, 3]",
+               readsAs: .postfix(.postfix(.identifier("a"), .member("selector")),
+                                 .functionCall(arguments: [.unlabeled(.constant(1)), .labeled("c", .constant(2)), .unlabeled(.constant(3))])))
     }
     
     func assert(objcExpr: String, readsAs expected: Expression, file: String = #file, line: Int = #line) {

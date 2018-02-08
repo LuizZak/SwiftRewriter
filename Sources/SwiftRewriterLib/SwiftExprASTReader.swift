@@ -1,5 +1,6 @@
 import GrammarModels
 import ObjcParserAntlr
+import ObjcParser
 import Antlr4
 
 /// A visitor that reads simple Objective-C expressions and emits as Expression
@@ -30,36 +31,108 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitPostfixExpression(_ ctx: ObjectiveCParser.PostfixExpressionContext) -> Expression? {
+        var result: Expression
+        
         if let primary = ctx.primaryExpression() {
             guard let prim = primary.accept(self) else {
                 return nil
             }
             
-            var result = prim
-            
-            for post in ctx.postfixExpr() {
-                // Function call
-                if post.LP() != nil {
-                    var arguments: [FunctionArgument] = []
-                    
-                    if let args = post.argumentExpressionList() {
-                        let funcArgVisitor = FunctionArgumentVisitor()
-                        
-                        for arg in args.argumentExpression() {
-                            if let funcArg = arg.accept(funcArgVisitor) {
-                                arguments.append(funcArg)
-                            }
-                        }
-                    }
-                    
-                    result = .postfix(result, .functionCall(arguments: arguments))
-                }
+            result = prim
+        } else if let postfixExpression = ctx.postfixExpression() {
+            guard let postfix = postfixExpression.accept(self) else {
+                return nil
+            }
+            guard let identifier = ctx.identifier() else {
+                return nil
             }
             
-            return result
+            result = .postfix(postfix, .member(identifier.getText()))
+        } else {
+            return nil
         }
         
-        return nil
+        for post in ctx.postfixExpr() {
+            // Function call
+            if post.LP() != nil {
+                var arguments: [FunctionArgument] = []
+                
+                if let args = post.argumentExpressionList() {
+                    let funcArgVisitor = FunctionArgumentVisitor()
+                    
+                    for arg in args.argumentExpression() {
+                        if let funcArg = arg.accept(funcArgVisitor) {
+                            arguments.append(funcArg)
+                        }
+                    }
+                }
+                
+                result = .postfix(result, .functionCall(arguments: arguments))
+            } else if post.LBRACK() != nil, let expression = post.expression() {
+                guard let expr = expression.accept(self) else {
+                    continue
+                }
+                
+                // Subscription
+                result = .postfix(result, .subscript(expr))
+            }
+        }
+        
+        return result
+    }
+    
+    public override func visitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) -> Expression? {
+        guard let receiverExpression = ctx.receiver()?.expression() else {
+            return nil
+        }
+        guard let receiver = receiverExpression.accept(self) else {
+            return nil
+        }
+        
+        if let identifier = ctx.messageSelector()?.selector()?.identifier()?.getText() {
+            return Expression.postfix(Expression.postfix(receiver, .member(identifier)), .functionCall(arguments: []))
+        }
+        guard let keywordArguments = ctx.messageSelector()?.keywordArgument() else {
+            return nil
+        }
+        
+        var name: String = ""
+        
+        var arguments: [FunctionArgument] = []
+        for (i, keyword) in keywordArguments.enumerated() {
+            let selectorText = keyword.selector()?.getText() ?? ""
+            
+            if i == 0 {
+                // First keyword is always the method's name, Swift doesn't support
+                // 'nameless' methods!
+                if keyword.selector() == nil {
+                    return nil
+                }
+                
+                name = selectorText
+            }
+            
+            for keywordArgumentType in keyword.keywordArgumentType() {
+                guard let expressions = keywordArgumentType.expressions() else {
+                    return nil
+                }
+                
+                for (j, expression) in expressions.expression().enumerated() {
+                    guard let exp = expression.accept(self) else {
+                        return nil
+                    }
+                    
+                    // Every argument after the first one is unlabeled
+                    if j == 0 && i > 0 {
+                        arguments.append(.labeled(selectorText, exp))
+                    } else {
+                        arguments.append(.unlabeled(exp))
+                    }
+                }
+            }
+        }
+        
+        return Expression.postfix(.postfix(receiver, .member(name)), .functionCall(arguments: arguments))
     }
     
     public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
@@ -79,6 +152,9 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         if let ident = ctx.identifier() {
             return .identifier(ident.getText())
+        }
+        if let messageExpression = ctx.messageExpression() {
+            return messageExpression.accept(self)
         }
         
         return nil

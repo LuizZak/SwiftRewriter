@@ -67,6 +67,8 @@ public enum Constant: Equatable {
     case `nil`
 }
 
+// MARK: - String Conversion
+
 extension Expression: CustomStringConvertible {
     public var description: String {
         switch self {
@@ -131,5 +133,30 @@ extension Constant: CustomStringConvertible {
         case .nil:
             return "nil"
         }
+    }
+}
+
+// MARK: - Literal initialiation
+extension Constant: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self = .int(value)
+    }
+}
+
+extension Constant: ExpressibleByFloatLiteral {
+    public init(floatLiteral value: Float) {
+        self = .float(value)
+    }
+}
+
+extension Constant: ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: Bool) {
+        self = .boolean(value)
+    }
+}
+
+extension Constant: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .string(value)
     }
 }

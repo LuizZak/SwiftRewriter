@@ -348,6 +348,27 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterArrayExpression(_ ctx: ObjectiveCParser.ArrayExpressionContext) {
+        guard let expressions = ctx.expressions()?.expression() else {
+            target.outputInline("[]")
+            return
+        }
+        
+        target.outputInline("[")
+        
+        for exp in expressions.dropLast() {
+            onExitRule(exp) {
+                self.target.outputInline(", ")
+            }
+        }
+        
+        if let last = expressions.last {
+            onExitRule(last) {
+                self.target.outputInline("]")
+            }
+        }
+    }
+    
     // MARK: Statements
     override func enterSelectionStatement(_ ctx: ObjectiveCParser.SelectionStatementContext) {
         if ctx.IF() != nil {
