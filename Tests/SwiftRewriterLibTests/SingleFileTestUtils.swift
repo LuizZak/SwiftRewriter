@@ -58,15 +58,15 @@ public extension XCTestCase {
             if output.buffer != expectedSwift {
                 recordFailure(withDescription: """
                     Failed: Expected to translate Objective-C
-                    \(objc)
+                    \(formatCodeForDisplay(objc))
                     
                     as
                     
-                    \(expectedSwift)
+                    \(formatCodeForDisplay(expectedSwift))
                     
                     but translated as
                     
-                    \(output.buffer)
+                    \(formatCodeForDisplay(output.buffer))
                     """, inFile: file, atLine: line, expected: false)
             }
             
@@ -76,5 +76,9 @@ public extension XCTestCase {
         } catch {
             recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
         }
+    }
+    
+    private func formatCodeForDisplay(_ str: String) -> String {
+        return str
     }
 }

@@ -68,8 +68,10 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             return
         }
         
-        onExitRule(ctx) {
-            self.target.outputLineFeed()
+        if ctx.parent is ObjectiveCParser.CompoundStatementContext {
+            onExitRule(ctx) {
+                self.target.outputLineFeed()
+            }
         }
         
         if let parentSelection = ctx.parent as? ObjectiveCParser.SelectionStatementContext, parentSelection.ELSE() != nil, ctx.selectionStatement()?.IF() != nil {
@@ -77,7 +79,9 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
         
         if !onFirstStatement {
-            target.outputLineFeed()
+            if ctx.parent is ObjectiveCParser.CompoundStatementContext {
+                target.outputLineFeed()
+            }
         }
         target.outputIdentation()
         
@@ -86,7 +90,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     
     override func enterCompoundStatement(_ ctx: ObjectiveCParser.CompoundStatementContext) {
         if compoundDepth > 0 {
-            target.outputInline(" {")
+            target.outputInline("{")
             target.outputLineFeed()
             target.increaseIdentation()
         }
@@ -328,7 +332,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             }
             
             onExitRule(exp) {
-                self.target.outputInline(")")
+                self.target.outputInline(") ")
                 
                 if let stmt = ctx.ifBody {
                     self.ensureBraces(around: stmt)
@@ -337,11 +341,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             
             if ctx.ELSE() != nil, let stmt = ctx.ifBody {
                 onExitRule(stmt) {
-                    self.target.outputInline(" else")
-                    
-                    if ctx.elseBody?.selectionStatement()?.IF() != nil {
-                        self.target.outputInline(" ")
-                    }
+                    self.target.outputInline(" else ")
                 }
             }
         }
@@ -351,7 +351,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         target.outputInline("while(")
         if let exp = ctx.expression() {
             onExitRule(exp) {
-                self.target.outputInline(")")
+                self.target.outputInline(") ")
                 
                 if let stmt = ctx.statement() {
                     self.ensureBraces(around: stmt)
@@ -423,10 +423,15 @@ extension StmtRewriterListener {
             return
         }
         
-        target.outputInline(" {")
+        if let parentSelection = stmt.parent as? ObjectiveCParser.SelectionStatementContext, parentSelection.ELSE() != nil, stmt.selectionStatement()?.IF() != nil {
+            return
+        }
+        
+        target.outputInline("{")
         target.outputLineFeed()
         target.increaseIdentation()
         onExitRule(stmt) {
+            self.target.outputLineFeed()
             self.target.decreaseIdentation()
             self.target.outputIdentation()
             self.target.outputInline("}")
