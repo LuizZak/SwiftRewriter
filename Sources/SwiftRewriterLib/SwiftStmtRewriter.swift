@@ -348,6 +348,22 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) {
+        guard let castExpression = ctx.castExpression() else {
+            return
+        }
+        guard let typeName = ctx.typeName() else {
+            return
+        }
+        guard let typeString = StmtRewriterListener.typeStringFromTypeContext(typeName, nullability: .nonnull) else {
+            return
+        }
+        
+        onExitRule(castExpression) {
+            self.target.outputInline(" as? \(typeString)")
+        }
+    }
+    
     override func enterArrayExpression(_ ctx: ObjectiveCParser.ArrayExpressionContext) {
         guard let expressions = ctx.expressions()?.expression() else {
             target.outputInline("[]")
@@ -490,6 +506,9 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         if ctx.isDesendentOf(treeType: ObjectiveCParser.DeclaratorContext.self) {
             return
         }
+        if ctx.isDesendentOf(treeType: ObjectiveCParser.TypeNameContext.self) {
+            return
+        }
         
         target.outputInline(ctx.getText())
     }
@@ -515,6 +534,52 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }.joined()
         
         target.outputInline("\"\(value)\"")
+    }
+    
+    static func typeFromContext(_ context: ParserRuleContext) -> ObjcType? {
+        let typeExtractor = VarDeclarationTypeExtractor()
+        guard let typeString = context.accept(typeExtractor) else {
+            return nil
+        }
+        
+        let parser = ObjcParser(string: typeString)
+        guard let type = try? parser.parseObjcType() else {
+            return nil
+        }
+        
+        return type
+    }
+    
+    static func typeStringFromTypeContext(_ context: ParserRuleContext, nullability: TypeNullability? = nil) -> String? {
+        guard let type = typeFromContext(context) else {
+            return nil
+        }
+        
+        let typeContext = TypeContext()
+        let typeMapper = TypeMapper(context: typeContext)
+        let typeString = typeMapper.swiftType(forObjcType: type, context: TypeMapper.TypeMappingContext(explicitNullability: nullability))
+        
+        return typeString
+    }
+    
+    static func declarationFromTypeContext(_ context: ParserRuleContext, nullability: TypeNullability? = nil) -> String? {
+        guard let type = typeFromContext(context) else {
+            return nil
+        }
+        guard let typeString = typeStringFromTypeContext(context, nullability: nullability) else {
+            return nil
+        }
+        
+        let varOrLet = SwiftWriter._varOrLet(fromType: type)
+        let arc = SwiftWriter._ownershipPrefix(inType: type)
+        
+        let base = "\(varOrLet): \(typeString)"
+        
+        if arc.isEmpty {
+            return base
+        }
+        
+        return "\(arc) \(base)"
     }
 }
 
@@ -617,6 +682,97 @@ class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
         
         return typeString
+    }
+    
+    override func visitTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext) -> String? {
+        // TODO: Support typeofExpression
+        if ctx.typeofExpression() != nil {
+            return nil
+        }
+        // TODO: Support enumSpecifier
+        if ctx.enumSpecifier() != nil {
+            return nil
+        }
+        // TODO: Support structOrUnionSpecifier
+        if ctx.structOrUnionSpecifier() != nil {
+            return nil
+        }
+        
+        if let genericTypeSpecifier = ctx.genericTypeSpecifier() {
+            return genericTypeSpecifier.getText()
+        }
+        
+        return ctx.getText()
+    }
+    
+    override func visitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
+        if let typeName = ctx.typeName() {
+            return typeName.accept(self)
+        }
+        
+        guard let typeVarDeclarator = ctx.typeVariableDeclarator() else {
+            return nil
+        }
+        guard let declarationSpecifiers = typeVarDeclarator.declarationSpecifiers() else {
+            return nil
+        }
+        guard let typeDeclarator = typeVarDeclarator.declarator() else {
+            return nil
+        }
+        
+        let pointer = typeDeclarator.pointer()
+        
+        let specifiersString = declarationSpecifiers.children?.map {
+            $0.getText()
+        }.joined(separator: " ") ?? ""
+        
+        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
+        
+        return typeString
+    }
+    
+    override func visitBlockType(_ ctx: ObjectiveCParser.BlockTypeContext) -> String? {
+        guard let returnTypeSpecifier = ctx.typeSpecifier(0) else {
+            return nil
+        }
+        guard let returnType = returnTypeSpecifier.accept(self) else {
+            return nil
+        }
+        
+        var parameterTypes: [String] = []
+        
+        if let blockParameters = ctx.blockParameters() {
+            for param in blockParameters.typeVariableDeclaratorOrName() {
+                guard let paramType = param.accept(self) else {
+                    continue
+                }
+                
+                parameterTypes.append(paramType)
+            }
+        }
+        
+        return "(\(parameterTypes.joined(separator: ", "))) -> \(returnType)"
+    }
+    
+    override func visitTypeName(_ ctx: ObjectiveCParser.TypeNameContext) -> String? {
+        // Block type
+        if let blockType = ctx.blockType() {
+            return blockType.accept(self)
+        }
+        
+        guard let specifierQualifierList = ctx.specifierQualifierList() else {
+            return nil
+        }
+        let specifierList =
+            (specifierQualifierList
+                .children?
+                .map { $0.getText() }
+                .joined(separator: " ")
+                ) ?? ""
+        
+        let abstractDeclarator = ctx.abstractDeclarator()?.getText() ?? ""
+        
+        return "\(specifierList) \(abstractDeclarator)"
     }
 }
 

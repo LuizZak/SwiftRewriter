@@ -190,6 +190,22 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testEmitTypeCast() throws {
+        try assertSingleStatement(
+            objc: "((NSInteger)aThing);",
+            swift: "(aThing as? Int)"
+        )
+        
+        try assertSingleStatement(
+            objc: "(NSDictionary*)aThing;",
+            swift: "aThing as? NSDictionary"
+        )
+        try assertSingleStatement(
+            objc: "(MyObject*)aThing;",
+            swift: "aThing as? MyObject"
+        )
+    }
+    
     func testVarDeclarationOmitsTypeOnLocalWithInitialValue() throws {
         try assertObjcParse(
             objc: """
