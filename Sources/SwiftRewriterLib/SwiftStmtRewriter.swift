@@ -369,6 +369,41 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterDictionaryExpression(_ ctx: ObjectiveCParser.DictionaryExpressionContext) {
+        let pairs = ctx.dictionaryPair()
+        if pairs.isEmpty {
+            target.outputInline("[:]")
+            return
+        }
+        
+        target.outputInline("[")
+        
+        for (i, pair) in pairs.enumerated() {
+            guard let key = pair.castExpression() else {
+                continue
+            }
+            guard let value = pair.expression() else{
+                continue
+            }
+            
+            onExitRule(key) {
+                self.target.outputInline(": ")
+            }
+            
+            if i < pairs.count - 1 {
+                onExitRule(value) {
+                    self.target.outputInline(", ")
+                }
+            }
+        }
+        
+        if let last = pairs.last {
+            onExitRule(last) {
+                self.target.outputInline("]")
+            }
+        }
+    }
+    
     // MARK: Statements
     override func enterSelectionStatement(_ ctx: ObjectiveCParser.SelectionStatementContext) {
         if ctx.IF() != nil {

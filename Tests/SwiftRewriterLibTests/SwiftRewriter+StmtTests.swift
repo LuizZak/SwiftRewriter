@@ -178,6 +178,18 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testDictionaryLiterals() throws {
+        try assertSingleStatement(
+            objc: "@{};",
+            swift: "[:]"
+        )
+        
+        try assertSingleStatement(
+            objc: "@{@\"a\": @\"b\", @\"c\": @\"d\"};",
+            swift: "[\"a\": \"b\", \"c\": \"d\"]"
+        )
+    }
+    
     func testVarDeclarationOmitsTypeOnLocalWithInitialValue() throws {
         try assertObjcParse(
             objc: """
