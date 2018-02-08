@@ -2,7 +2,7 @@ import GrammarModels
 
 /// Encapsulates a compound statement, that is, a series of statements enclosed
 /// within braces.
-public struct CompoundStatement {
+public struct CompoundStatement: Equatable {
     public var statements: [Statement] = []
     
     public init(statements: [Statement]) {
@@ -17,7 +17,7 @@ extension CompoundStatement: ExpressibleByArrayLiteral {
 }
 
 /// A top-level statement
-public indirect enum Statement {
+public indirect enum Statement: Equatable {
     case semicolon
     case compound(CompoundStatement)
     case `if`(Expression, body: CompoundStatement, `else`: CompoundStatement?)
@@ -31,7 +31,7 @@ public indirect enum Statement {
 }
 
 /// An expression
-public indirect enum Expression {
+public indirect enum Expression: Equatable {
     case assignment(lhs: Expression, op: Operator, rhs: Expression)
     case binary(lhs: Expression, op: Operator, rhs: Expression)
     case unary(op: Operator, Expression)
@@ -43,26 +43,28 @@ public indirect enum Expression {
 }
 
 /// A postfix expression type
-public indirect enum Postfix {
+public indirect enum Postfix: Equatable {
     case member(String)
     case `subscript`(Expression)
     case functionCall(arguments: [FunctionArgument])
 }
 
 /// A function argument kind
-public enum FunctionArgument {
+public enum FunctionArgument: Equatable {
     case labeled(String, Expression)
     case unlabeled(Expression)
 }
 
 /// One of the recognized constant values
-public enum Constant {
+public enum Constant: Equatable {
     case float(Float)
     case boolean(Bool)
     case int(Int)
+    case binary(Int)
     case octal(Int)
     case hexadecimal(Int)
     case string(String)
+    case `nil`
 }
 
 extension Expression: CustomStringConvertible {
@@ -118,12 +120,16 @@ extension Constant: CustomStringConvertible {
             return bool.description
         case .int(let int):
             return int.description
+        case .binary(let int):
+            return "0b" + String(int, radix: 2)
         case .octal(let int):
             return "0o" + String(int, radix: 8)
         case .hexadecimal(let int):
             return "0x" + String(int, radix: 16, uppercase: false)
         case .string(let str):
             return "\"\(str)\""
+        case .nil:
+            return "nil"
         }
     }
 }
