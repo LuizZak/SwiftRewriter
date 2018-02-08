@@ -573,33 +573,36 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
         for topLevelDeclaration in topLevelDeclarations {
             guard let declaration = topLevelDeclaration.declaration() else { continue }
             guard let varDeclaration = declaration.varDeclaration() else { continue }
-            guard let initDeclarator = varDeclaration.initDeclaratorList()?.initDeclarator(0) else { continue }
-            guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }
+            guard let initDeclarators = varDeclaration.initDeclaratorList()?.initDeclarator() else { continue }
             
-            // Get a type string to convert into a proper type
-            guard let declarationSpecifiers = varDeclaration.declarationSpecifiers() else { continue }
-            let pointer = initDeclarator.declarator()?.pointer()
-            
-            let typeString = "\(declarationSpecifiers.getText()) \(pointer?.getText() ?? "")"
-            
-            guard let type = ObjcParserListener.parseObjcType(typeString) else { continue }
-            
-            let varDecl = VariableDeclaration()
-            varDecl.sourceRuleContext = topLevelDeclaration
-            varDecl.addChild(Identifier(name: identifier.getText()))
-            varDecl.addChild(TypeNameNode(type: type))
-            
-            if let initializer = initDeclarator.initializer() {
-                let constantExpression = ConstantExpression(expression: initializer.getText())
-                constantExpression.sourceRuleContext = initializer
-                let initialExpression = InitialExpression()
-                initialExpression.sourceRuleContext = initializer
-                initialExpression.addChild(constantExpression)
+            for initDeclarator in initDeclarators {
+                guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }
                 
-                varDecl.addChild(initialExpression)
+                // Get a type string to convert into a proper type
+                guard let declarationSpecifiers = varDeclaration.declarationSpecifiers() else { continue }
+                let pointer = initDeclarator.declarator()?.pointer()
+                
+                let typeString = "\(declarationSpecifiers.getText()) \(pointer?.getText() ?? "")"
+                
+                guard let type = ObjcParserListener.parseObjcType(typeString) else { continue }
+                
+                let varDecl = VariableDeclaration()
+                varDecl.sourceRuleContext = topLevelDeclaration
+                varDecl.addChild(Identifier(name: identifier.getText()))
+                varDecl.addChild(TypeNameNode(type: type))
+                
+                if let initializer = initDeclarator.initializer() {
+                    let constantExpression = ConstantExpression(expression: initializer.getText())
+                    constantExpression.sourceRuleContext = initializer
+                    let initialExpression = InitialExpression()
+                    initialExpression.sourceRuleContext = initializer
+                    initialExpression.addChild(constantExpression)
+                    
+                    varDecl.addChild(initialExpression)
+                }
+                
+                variables.append(varDecl)
             }
-            
-            variables.append(varDecl)
         }
     }
 }

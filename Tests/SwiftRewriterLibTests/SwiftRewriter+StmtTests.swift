@@ -144,22 +144,54 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testVarDeclaration() throws {
-        try assertSingleStatement(
+        try assertObjcParse(
             objc: "NSInteger myInt = 5;",
             swift: "var myInt: Int = 5"
         )
-        try assertSingleStatement(
+        try assertObjcParse(
             objc: "const NSInteger myInt = 5;",
             swift: "let myInt: Int = 5"
         )
-        try assertSingleStatement(
+        try assertObjcParse(
             objc: "NSInteger a = 5, b, c = 6;",
-            swift: "var a: Int = 5, b: Int, c: Int = 6"
+            swift: """
+                var a: Int = 5
+                var b: Int
+                var c: Int = 6
+                """
         )
         try assertSingleStatement(
             objc: "CGFloat x = [self offsetForDate:cell.startDate];",
-            swift: "var x: CGFloat = self.offsetForDate(cell.startDate)"
+            swift: "var x = self.offsetForDate(cell.startDate)"
         )
+    }
+    
+    func testVarDeclarationOmitsTypeOnLocalWithInitialValue() throws {
+        try assertObjcParse(
+            objc: """
+            NSInteger myInt;
+            NSInteger myInt2 = 5;
+            @implementation MyClass
+            - (void)myMethod {
+                NSInteger local = 5;
+                const NSInteger constLocal = 5;
+                NSInteger local2;
+                NSInteger localS1 = 5, localS2;
+            }
+            @end
+            """,
+            swift: """
+            var myInt: Int
+            var myInt2: Int = 5
+            class MyClass: NSObject {
+                func myMethod() {
+                    var local = 5
+                    let constLocal = 5
+                    var local2: Int
+                    var localS1 = 5, localS2: Int
+                }
+            }
+            """)
     }
     
     func testAssignmentOperation() throws {

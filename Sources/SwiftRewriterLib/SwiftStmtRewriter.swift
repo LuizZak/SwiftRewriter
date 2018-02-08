@@ -177,8 +177,16 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             let swiftTypeString = typeMapper.swiftType(forObjcType: type)
             
             if let initializer = initDeclarator.initializer() {
+                let omitType =
+                    ctx.isDesendentOf(treeType: ObjectiveCParser.CompoundStatementContext.self)
+                
                 onExitRule(ident) {
-                    self.target.outputInline("\(ident.getText()): \(swiftTypeString)")
+                    self.target.outputInline("\(ident.getText())")
+                    
+                    if !omitType {
+                        self.target.outputInline(": \(swiftTypeString)")
+                    }
+                    
                     self.target.outputInline(" = ")
                 }
                 
@@ -486,7 +494,7 @@ extension StmtRewriterListener {
     }
 }
 
-private class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<String> {
+class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<String> {
     override func visitTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext) -> String? {
         return ctx.directDeclarator()?.accept(self)
     }
@@ -504,7 +512,7 @@ private class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor
     }
 }
 
-private class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
+class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     var declaratorIndex: Int = 0
     
     override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> String? {
