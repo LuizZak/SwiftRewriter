@@ -364,6 +364,26 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testForInStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                for(NSObject *obj in anArray) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    for obj in anArray {
+                    }
+                }
+            }
+            """)
+    }
+    
     func testReturnStatement() throws {
         try assertSingleStatement(
             objc: "return;", swift: "return"

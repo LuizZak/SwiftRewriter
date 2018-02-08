@@ -137,7 +137,7 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             return
         }
         
-        let extractor = VarDeclarationTypeExtracter()
+        let extractor = VarDeclarationTypeExtractor()
         extractor.declaratorIndex = 0
         guard let typeString = ctx.accept(extractor) else {
             return
@@ -384,6 +384,24 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
         target.outputInline("for(")
     }
     
+    override func enterForInStatement(_ ctx: ObjectiveCParser.ForInStatementContext) {
+        guard let typeVariable = ctx.typeVariableDeclarator() else {
+            return
+        }
+        let extractor = VarDeclarationIdentifierNameExtractor()
+        guard let name = typeVariable.accept(extractor) else {
+            return
+        }
+        
+        target.outputInline("for \(name) in ")
+        
+        if let expression = ctx.expression() {
+            onExitRule(expression) {
+                self.target.outputInline(" ")
+            }
+        }
+    }
+    
     override func enterJumpStatement(_ ctx: ObjectiveCParser.JumpStatementContext) {
         if let ret = ctx.RETURN() {
             target.outputInline(ret.getText())
@@ -462,7 +480,25 @@ extension StmtRewriterListener {
     }
 }
 
-private class VarDeclarationTypeExtracter: ObjectiveCParserBaseVisitor<String> {
+private class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<String> {
+    override func visitTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext) -> String? {
+        return ctx.directDeclarator()?.accept(self)
+    }
+    override func visitTypeVariableDeclarator(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> String? {
+        return ctx.declarator()?.accept(self)
+    }
+    override func visitDeclarator(_ ctx: ObjectiveCParser.DeclaratorContext) -> String? {
+        return ctx.directDeclarator()?.accept(self)
+    }
+    override func visitDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext) -> String? {
+        return ctx.identifier()?.accept(self)
+    }
+    override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> String? {
+        return ctx.getText()
+    }
+}
+
+private class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     var declaratorIndex: Int = 0
     
     override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> String? {
@@ -487,6 +523,22 @@ private class VarDeclarationTypeExtracter: ObjectiveCParserBaseVisitor<String> {
         // Get a type string to convert into a proper type
         guard let declarationSpecifiers = ctx.declarationSpecifiers() else { return nil }
         let pointer = initDeclarator.declarator()?.pointer()
+        
+        let specifiersString = declarationSpecifiers.children?.map {
+            $0.getText()
+        }.joined(separator: " ") ?? ""
+        
+        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
+        
+        return typeString
+    }
+    
+    override func visitTypeVariableDeclarator(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> String? {
+        guard let declarator = ctx.declarator() else { return nil }
+        
+        // Get a type string to convert into a proper type
+        guard let declarationSpecifiers = ctx.declarationSpecifiers() else { return nil }
+        let pointer = declarator.pointer()
         
         let specifiersString = declarationSpecifiers.children?.map {
             $0.getText()
