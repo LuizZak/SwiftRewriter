@@ -30,23 +30,40 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
     var onFirstStatement = true
     var compoundDepth = 0
     
-    var onExitListeners: [ExitRuleListener] = []
+    var onEnterListeners: [OnRuleListener] = []
+    var onExitListeners: [OnRuleListener] = []
     
     init(target: RewriterOutputTarget) {
         self.target = target
     }
     
-    /// Adds a listener for a context rule that performs a given statements block
-    /// when the given parser rule is exited.
+    /// Adds an enter rule listener for a context rule that performs a given
+    /// statements block when the given parser rule is entered.
+    func onEnterRule(_ rule: ParserRuleContext, do block: @escaping () -> Void) {
+        onEnterListeners.append(OnRuleListener(rule: rule, onRule: block))
+    }
+    
+    /// Adds an exit rule listener for a context rule that performs a given
+    /// statements block when the given parser rule is exited.
     func onExitRule(_ rule: ParserRuleContext, do block: @escaping () -> Void) {
-        onExitListeners.append(ExitRuleListener(rule: rule, onExit: block))
+        onExitListeners.append(OnRuleListener(rule: rule, onRule: block))
+    }
+    
+    override func enterEveryRule(_ ctx: ParserRuleContext) {
+        // Trigger enter listeners
+        for listener in onEnterListeners {
+            listener.checkRule(ctx)
+        }
+        
+        onEnterListeners = onEnterListeners.filter { listener in
+            return !listener.executed
+        }
     }
     
     override func exitEveryRule(_ ctx: ParserRuleContext) {
-        // Trigger exit listeners, removing them whenever they are successfully
-        // triggered.
-        for listener in onExitListeners {
-            listener.exitEveryRule(ctx)
+        // Trigger exit listeners
+        for listener in onExitListeners.reversed() {
+            listener.checkRule(ctx)
         }
         
         onExitListeners = onExitListeners.filter { listener in
@@ -333,16 +350,19 @@ fileprivate class StmtRewriterListener: ObjectiveCParserBaseListener {
             
             onExitRule(exp) {
                 self.target.outputInline(") ")
-                
-                if let stmt = ctx.ifBody {
-                    self.ensureBraces(around: stmt)
-                }
             }
             
             if ctx.ELSE() != nil, let stmt = ctx.ifBody {
                 onExitRule(stmt) {
                     self.target.outputInline(" else ")
                 }
+            }
+            
+            if let stmt = ctx.ifBody {
+                self.ensureBraces(around: stmt)
+            }
+            if let elseStmt = ctx.elseBody {
+                self.ensureBraces(around: elseStmt)
             }
         }
     }
@@ -414,10 +434,11 @@ extension StmtRewriterListener {
     /// If a given statement is not a compound statement, ensure it prints proper
     /// braces during printing.
     ///
-    /// Swift required that all statements after if, for, while, do, and switch
+    /// Swift requires that all statements after if, for, while, do, and switch
     /// to feature braces.
     ///
-    /// If `stmt` is a compound statement already, this method does nothing.
+    /// If `stmt` is a case where braces are not needed, like for an already
+    /// compound statement or for an `else-if` scenario, this method does nothing.
     func ensureBraces(around stmt: ObjectiveCParser.StatementContext) {
         if stmt.compoundStatement() != nil {
             return
@@ -427,14 +448,16 @@ extension StmtRewriterListener {
             return
         }
         
-        target.outputInline("{")
-        target.outputLineFeed()
-        target.increaseIdentation()
-        onExitRule(stmt) {
+        onEnterRule(stmt) {
+            self.target.outputInline("{")
             self.target.outputLineFeed()
-            self.target.decreaseIdentation()
-            self.target.outputIdentation()
-            self.target.outputInline("}")
+            self.target.increaseIdentation()
+            self.onExitRule(stmt) {
+                self.target.outputLineFeed()
+                self.target.decreaseIdentation()
+                self.target.outputIdentation()
+                self.target.outputInline("}")
+            }
         }
     }
 }
@@ -475,20 +498,20 @@ private class VarDeclarationTypeExtracter: ObjectiveCParserBaseVisitor<String> {
     }
 }
 
-private class ExitRuleListener {
+private class OnRuleListener {
     let rule: ParserRuleContext
-    let onExit: () -> Void
+    let onRule: () -> Void
     
     var executed: Bool = false
     
-    init(rule: ParserRuleContext, onExit: @escaping () -> Void) {
+    init(rule: ParserRuleContext, onRule: @escaping () -> Void) {
         self.rule = rule
-        self.onExit = onExit
+        self.onRule = onRule
     }
     
-    func exitEveryRule(_ ctx: ParserRuleContext) {
+    func checkRule(_ ctx: ParserRuleContext) {
         if ctx === rule {
-            onExit()
+            onRule()
             executed = true
         }
     }

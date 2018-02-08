@@ -263,6 +263,60 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testBracelessIfElseStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                if(true)
+                    stmt1();
+                else if(true)
+                    stmt2();
+                else
+                    stmt3();
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    if(true) {
+                        stmt1()
+                    } else if(true) {
+                        stmt2()
+                    } else {
+                        stmt3()
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testBracelessIfWithinIf() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                if(true) {
+                    if(true)
+                        print(10);
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    if(true) {
+                        if(true) {
+                            print(10)
+                        }
+                    }
+                }
+            }
+            """)
+    }
+    
     func testWhileStatement() throws {
         try assertObjcParse(
             objc: """
