@@ -46,6 +46,43 @@ public extension ParseTreeContextable {
     }
 }
 
+public protocol DeclarationParserRule: Tree {
+    
+}
+
+public extension Contextable where Base: DeclarationParserRule {
+    public var scope: ContainmentScope {
+        return .global
+    }
+}
+
+
+public extension Tree {
+    /// Returns true `iff` self is a descendent of any depth from a given `Tree`
+    /// type.
+    public func isDesendentOf<T>(treeType: T.Type) -> Bool {
+        guard let parent = getParent() else {
+            return false
+        }
+        
+        return parent is T || parent.isDesendentOf(treeType: T.self)
+    }
+    
+    public func indexOnParent() -> Int {
+        return getParent()?.index(of: self) ?? -1
+    }
+    
+    public func index(of child: Tree) -> Int? {
+        for i in 0..<getChildCount() {
+            if getChild(i) === child {
+                return i
+            }
+        }
+        
+        return nil
+    }
+}
+
 /// Describes the contained scope of a declaration
 public enum ContainmentScope {
     case global

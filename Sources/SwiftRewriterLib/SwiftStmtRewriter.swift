@@ -651,27 +651,3 @@ private class OnRuleListener {
         }
     }
 }
-
-private extension Tree {
-    func isDesendentOf<T>(treeType: T.Type) -> Bool {
-        guard let parent = getParent() else {
-            return false
-        }
-        
-        return parent is T || parent.isDesendentOf(treeType: T.self)
-    }
-    
-    func indexOnParent() -> Int {
-        return getParent()?.index(of: self) ?? -1
-    }
-    
-    func index(of child: Tree) -> Int? {
-        for i in 0..<getChildCount() {
-            if getChild(i) === child {
-                return i
-            }
-        }
-        
-        return nil
-    }
-}
