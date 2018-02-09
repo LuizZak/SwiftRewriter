@@ -26,13 +26,25 @@ public class SwiftWriter {
         let file = output.createFile(path: fileIntent.filePath)
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+        var addSeparator = false
         
         for typeali in fileIntent.typealiasIntentions {
             outputTypealias(typeali, target: out)
+            addSeparator = true
+        }
+        
+        if addSeparator {
+            out.output(line: "")
         }
         
         for varDef in fileIntent.globalVariableIntentions {
             outputVariableDeclaration(varDef, target: out)
+            addSeparator = true
+        }
+        
+        if addSeparator {
+            out.output(line: "")
+            addSeparator = false
         }
         
         for cls in classes {

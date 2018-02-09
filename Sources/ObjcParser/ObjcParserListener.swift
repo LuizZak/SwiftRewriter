@@ -104,27 +104,10 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     private static func parseObjcType(fromTypeVariableDeclaratorOrTypeName typeContext: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
-        if let typeName = typeContext.typeName() {
-            return parseObjcType(fromTypeName: typeName)
-        }
-        
-        guard let typeVarDeclarator = typeContext.typeVariableDeclarator() else {
+        let visitor = VarDeclarationTypeExtractor()
+        guard let typeString = typeContext.accept(visitor) else {
             return nil
         }
-        guard let declarationSpecifiers = typeVarDeclarator.declarationSpecifiers() else {
-            return nil
-        }
-        guard let typeDeclarator = typeVarDeclarator.declarator() else {
-            return nil
-        }
-        
-        let pointer = typeDeclarator.pointer()
-        
-        let specifiersString = declarationSpecifiers.children?.map {
-            $0.getText()
-            }.joined(separator: " ") ?? ""
-        
-        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
         
         guard let type = ObjcParserListener.parseObjcType(typeString) else {
             return nil
@@ -134,24 +117,15 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     private static func parseObjcType(fromTypeSpecifier typeSpecifier: ObjectiveCParser.TypeSpecifierContext) -> ObjcType? {
-        // TODO: Support typeofExpression
-        if typeSpecifier.typeofExpression() != nil {
+        let visitor = VarDeclarationTypeExtractor()
+        guard let typeString = typeSpecifier.accept(visitor) else {
             return nil
         }
-        // TODO: Support enumSpecifier
-        if typeSpecifier.enumSpecifier() != nil {
-            return nil
-        }
-        // TODO: Support structOrUnionSpecifier
-        if typeSpecifier.structOrUnionSpecifier() != nil {
+        guard let type = ObjcParserListener.parseObjcType(typeString) else {
             return nil
         }
         
-        if let genericTypeSpecifier = typeSpecifier.genericTypeSpecifier() {
-            return ObjcParserListener.parseObjcType(genericTypeSpecifier.getText())
-        }
-        
-        return ObjcParserListener.parseObjcType(typeSpecifier.getText())
+        return type
     }
     
     private static func parseObjcType(fromBlockType blockType: ObjectiveCParser.BlockTypeContext) -> ObjcType? {
@@ -183,19 +157,11 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return parseObjcType(fromBlockType: blockType)
         }
         
-        guard let specifierQualifierList = typeName.specifierQualifierList() else {
+        let visitor = VarDeclarationTypeExtractor()
+        guard let typeString = visitor.visitTypeName(typeName) else {
             return nil
         }
-        let specifierList =
-            (specifierQualifierList
-                .children?
-                .map { $0.getText() }
-                .joined(separator: " ")
-                ) ?? ""
-        
-        let abstractDeclarator = typeName.abstractDeclarator()?.getText() ?? ""
-        
-        guard let type = ObjcParserListener.parseObjcType("\(specifierList) \(abstractDeclarator)") else {
+        guard let type = ObjcParserListener.parseObjcType(typeString) else {
             return nil
         }
         
@@ -567,19 +533,46 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
 private class GlobalVariableListener: ObjectiveCParserBaseListener {
     var variables: [VariableDeclaration] = []
     
+    // Pick global variable declarations on top level
     override func enterTranslationUnit(_ ctx: ObjectiveCParser.TranslationUnitContext) {
         let topLevelDeclarations = ctx.topLevelDeclaration()
+        let visitor = GlobalVariableVisitor()
         
         for topLevelDeclaration in topLevelDeclarations {
             guard let declaration = topLevelDeclaration.declaration() else { continue }
             guard let varDeclaration = declaration.varDeclaration() else { continue }
-            guard let initDeclarators = varDeclaration.initDeclaratorList()?.initDeclarator() else { continue }
+            
+            if let vars = varDeclaration.accept(visitor) {
+                variables.append(contentsOf: vars)
+            }
+        }
+    }
+    
+    // Pick global variable declarations that are beneat the top-level, like inside
+    // class @interface/@implementations etc.
+    override func enterVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) {
+        if ctx.parent is ObjectiveCParser.DeclarationContext && ctx.parent?.parent is ObjectiveCParser.TopLevelDeclarationContext {
+            return
+        }
+        
+        let visitor = GlobalVariableVisitor()
+        
+        if let vars = ctx.accept(visitor) {
+            variables.append(contentsOf: vars)
+        }
+    }
+    
+    private class GlobalVariableVisitor: ObjectiveCParserBaseVisitor<[VariableDeclaration]> {
+        override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> [VariableDeclaration]? {
+            var variables: [VariableDeclaration] = []
+            
+            guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else { return nil }
             
             for initDeclarator in initDeclarators {
                 guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }
                 
                 // Get a type string to convert into a proper type
-                guard let declarationSpecifiers = varDeclaration.declarationSpecifiers() else { continue }
+                guard let declarationSpecifiers = ctx.declarationSpecifiers() else { continue }
                 let pointer = initDeclarator.declarator()?.pointer()
                 
                 let typeString = "\(declarationSpecifiers.getText()) \(pointer?.getText() ?? "")"
@@ -587,7 +580,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 guard let type = ObjcParserListener.parseObjcType(typeString) else { continue }
                 
                 let varDecl = VariableDeclaration()
-                varDecl.sourceRuleContext = topLevelDeclaration
+                varDecl.sourceRuleContext = ctx
                 varDecl.addChild(Identifier(name: identifier.getText()))
                 varDecl.addChild(TypeNameNode(type: type))
                 
@@ -603,6 +596,8 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 
                 variables.append(varDecl)
             }
+            
+            return variables
         }
     }
 }

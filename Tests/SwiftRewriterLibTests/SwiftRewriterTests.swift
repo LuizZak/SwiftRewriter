@@ -435,4 +435,22 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteStaticConstantValuesInClass() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass
+            static NSString *const _Nonnull kMethodKey = @"method";
+            static NSString *_Nonnull kCodeOperatorKey = @"codigo_operador";
+            @end
+            """,
+            swift: """
+            let kMethodKey = "method"
+            let kCodeOperatorKey = "codigo_operador"
+            
+            class MyClass: NSObject {
+                
+            }
+            """)
+    }
 }

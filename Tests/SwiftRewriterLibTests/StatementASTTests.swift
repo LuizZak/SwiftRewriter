@@ -13,8 +13,8 @@ class StatementASTTests: XCTestCase {
     
     func testDescriptionExpressions() {
        XCTAssertEqual(
-        Expression.postfix(.identifier("abc"), .subscript(.constant(.int(1)))).description,
-        "abc[1]")
+            Expression.postfix(.identifier("abc"), .subscript(.constant(.int(1)))).description,
+            "abc[1]")
         XCTAssertEqual(
             Expression.postfix(.identifier("abc"), .functionCall(arguments: [.labeled("label", .constant(.int(1))), .unlabeled(.constant(.boolean(true)))])).description,
             "abc(label: 1, true)")
