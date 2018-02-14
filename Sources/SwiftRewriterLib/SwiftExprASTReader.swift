@@ -229,7 +229,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                         ctx.messageExpression(),
                         ctx.arrayExpression(),
                         ctx.dictionaryExpression(),
-                        ctx.boxExpression()
+                        ctx.boxExpression(),
+                        ctx.selectorExpression()
         )
     }
     
@@ -329,6 +330,14 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         
         return .constant(.rawConstant(ctx.getText()))
+    }
+    
+    public override func visitSelectorExpression(_ ctx: ObjectiveCParser.SelectorExpressionContext) -> Expression? {
+        guard let selectorName = ctx.selectorName()?.getText() else {
+            return nil
+        }
+        
+        return .constant(.string(selectorName))
     }
     
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> Expression? {

@@ -452,4 +452,26 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteSelectorExpression() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                if([self respondsToSelector:@selector(abc:)]) {
+                    thing();
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    if self.respondsToSelector("abc:") {
+                        thing()
+                    }
+                }
+            }
+            """)
+    }
 }
