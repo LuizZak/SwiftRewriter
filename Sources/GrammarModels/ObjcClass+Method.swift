@@ -1,6 +1,6 @@
 import ObjcParserAntlr
 
-public class Expression: ASTNode {
+public class ExpressionNode: ASTNode {
     public var expression: ObjectiveCParser.ExpressionContext?
 }
 

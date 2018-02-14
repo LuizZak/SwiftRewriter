@@ -31,7 +31,7 @@ public class InitialExpression: ASTNode, InitializableNode {
 /// Represents a constant expression used as the initial value to global variables
 /// parsed from a source file.
 public class ConstantExpression: ASTNode, InitializableNode {
-    public var expression: Expression? {
+    public var expression: ExpressionNode? {
         return firstChild()
     }
     

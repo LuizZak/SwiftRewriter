@@ -41,10 +41,22 @@ public indirect enum Expression: Equatable {
     case parens(Expression)
     case identifier(String)
     case cast(Expression, type: ObjcType)
+    
+    /// `true` if this expression node requires parenthesis for unary, prefix, and
+    /// postfix operations.
+    public var requiresParens: Bool {
+        switch self {
+        case .cast:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 /// A postfix expression type
 public indirect enum Postfix: Equatable {
+    case optionalAccess
     case member(String)
     case `subscript`(Expression)
     case functionCall(arguments: [FunctionArgument])
@@ -77,8 +89,16 @@ extension Expression: CustomStringConvertible {
              let .binary(lhs, op, rhs):
             return "\(lhs.description) \(op) \(rhs.description)"
         case let .unary(op, exp), let .prefix(op, exp):
+            if exp.requiresParens {
+                return "\(op)(\(exp))"
+            }
+            
             return "\(op)\(exp)"
         case let .postfix(exp, op):
+            if exp.requiresParens {
+                return "(\(exp))\(op)"
+            }
+            
             return "\(exp)\(op)"
         case .constant(let cst):
             return cst.description
@@ -97,6 +117,8 @@ extension Expression: CustomStringConvertible {
 extension Postfix: CustomStringConvertible {
     public var description: String {
         switch self {
+        case .optionalAccess:
+            return "?"
         case .member(let mbm):
             return "." + mbm
         case .subscript(let subs):

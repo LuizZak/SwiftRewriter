@@ -23,6 +23,22 @@ class StatementASTTests: XCTestCase {
             "1 + 4")
     }
     
+    func testDescriptionCasts() {
+        XCTAssertEqual(
+            Expression.cast(.identifier("abc"), type: .pointer(.struct("NSString"))).description,
+            "abc as? String")
+        XCTAssertEqual(
+            Expression.postfix(.cast(.identifier("abc"), type: .pointer(.struct("NSString"))), .member("count")).description,
+            "(abc as? String).count")
+    }
+    
+    func testDescriptionOptionalAccess() {
+        XCTAssertEqual(
+            Expression.postfix(.postfix(.cast(.identifier("abc"), type: .pointer(.struct("NSString"))), .optionalAccess),
+                               .member("count")).description,
+            "(abc as? String)?.count")
+    }
+    
     func testDescriptionCostants() {
         XCTAssertEqual(Expression.constant(.int(1)).description, "1")
         XCTAssertEqual(Expression.constant(.float(132.4)).description, "132.4")
