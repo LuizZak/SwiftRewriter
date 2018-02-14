@@ -39,6 +39,12 @@ class StatementASTTests: XCTestCase {
             "(abc as? String)?.count")
     }
     
+    func testDescriptionNullCoallesce() {
+        XCTAssertEqual(
+            Expression.binary(lhs: .identifier("abc"), op: .nullCoallesce, rhs: .identifier("def")).description,
+            "abc ?? def")
+    }
+    
     func testDescriptionCostants() {
         XCTAssertEqual(Expression.constant(.int(1)).description, "1")
         XCTAssertEqual(Expression.constant(.float(132.4)).description, "132.4")

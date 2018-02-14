@@ -32,10 +32,10 @@ public indirect enum Statement: Equatable {
 
 /// An expression
 public indirect enum Expression: Equatable {
-    case assignment(lhs: Expression, op: Operator, rhs: Expression)
-    case binary(lhs: Expression, op: Operator, rhs: Expression)
-    case unary(op: Operator, Expression)
-    case prefix(op: Operator, Expression)
+    case assignment(lhs: Expression, op: SwiftOperator, rhs: Expression)
+    case binary(lhs: Expression, op: SwiftOperator, rhs: Expression)
+    case unary(op: SwiftOperator, Expression)
+    case prefix(op: SwiftOperator, Expression)
     case postfix(Expression, Postfix)
     case constant(Constant)
     case parens(Expression)
@@ -78,6 +78,48 @@ public enum Constant: Equatable {
     case hexadecimal(Int)
     case string(String)
     case `nil`
+}
+
+/// Describes an operator across one or two operands
+public enum SwiftOperator: Int {
+    case add
+    case subtract
+    case multiply
+    case divide
+    
+    case addAssign
+    case subtractAssign
+    case multiplyAssign
+    case divideAssign
+    
+    case negate
+    case and
+    case or
+    
+    case bitwiseAnd
+    case bitwiseOr
+    case bitwiseXor
+    case bitwiseNot
+    case bitwiseShiftLeft
+    case bitwiseShiftRight
+    
+    case bitwiseAndAssign
+    case bitwiseOrAssign
+    case bitwiseXorAssign
+    case bitwiseNotAssign
+    case bitwiseShiftLeftAssign
+    case bitwiseShiftRightAssign
+    
+    case lessThan
+    case lessThanOrEqual
+    case greaterThan
+    case greaterThanOrEqual
+    
+    case assign
+    case equals
+    case unequals
+    
+    case nullCoallesce
 }
 
 // MARK: - String Conversion
@@ -163,6 +205,75 @@ extension Constant: CustomStringConvertible {
     }
 }
 
+extension SwiftOperator: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .add:
+            return "+"
+        case .subtract:
+            return "-"
+        case .multiply:
+            return "*"
+        case .divide:
+            return "/"
+        case .addAssign:
+            return "+="
+        case .subtractAssign:
+            return "-="
+        case .multiplyAssign:
+            return "*="
+        case .divideAssign:
+            return "/="
+        case .negate:
+            return "!"
+        case .and:
+            return "&&"
+        case .or:
+            return "||"
+        case .bitwiseAnd:
+            return "&"
+        case .bitwiseOr:
+            return "|"
+        case .bitwiseXor:
+            return "^"
+        case .bitwiseNot:
+            return "~"
+        case .bitwiseShiftLeft:
+            return "<<"
+        case .bitwiseShiftRight:
+            return ">>"
+        case .bitwiseAndAssign:
+            return "&="
+        case .bitwiseOrAssign:
+            return "|="
+        case .bitwiseXorAssign:
+            return "^="
+        case .bitwiseNotAssign:
+            return "~="
+        case .bitwiseShiftLeftAssign:
+            return "<<="
+        case .bitwiseShiftRightAssign:
+            return ">>="
+        case .lessThan:
+            return "<"
+        case .lessThanOrEqual:
+            return "<="
+        case .greaterThan:
+            return ">"
+        case .greaterThanOrEqual:
+            return ">="
+        case .assign:
+            return "="
+        case .equals:
+            return "=="
+        case .unequals:
+            return "!="
+        case .nullCoallesce:
+            return "??"
+        }
+    }
+}
+
 // MARK: - Literal initialiation
 extension Constant: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
@@ -185,5 +296,44 @@ extension Constant: ExpressibleByBooleanLiteral {
 extension Constant: ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = .string(value)
+    }
+}
+
+// MARK: - Operator definitions
+public extension Expression {
+    public static func +(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .add, rhs: rhs)
+    }
+    
+    public static func -(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .subtract, rhs: rhs)
+    }
+    
+    public static func *(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .multiply, rhs: rhs)
+    }
+    
+    public static func /(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .divide, rhs: rhs)
+    }
+    
+    public static prefix func !(lhs: Expression) -> Expression {
+        return .unary(op: .negate, lhs)
+    }
+    
+    public static func &&(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .and, rhs: rhs)
+    }
+    
+    public static func ||(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .or, rhs: rhs)
+    }
+    
+    public static func |(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .bitwiseOr, rhs: rhs)
+    }
+    
+    public static func &(lhs: Expression, rhs: Expression) -> Expression {
+        return .binary(lhs: lhs, op: .bitwiseAnd, rhs: rhs)
     }
 }
