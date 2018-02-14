@@ -40,6 +40,7 @@ public indirect enum Expression: Equatable {
     case constant(Constant)
     case parens(Expression)
     case identifier(String)
+    case cast(Expression, type: ObjcType)
 }
 
 /// A postfix expression type
@@ -85,6 +86,10 @@ extension Expression: CustomStringConvertible {
             return "(" + exp.description + ")"
         case .identifier(let id):
             return id
+        case .cast(let exp, let type):
+            let cvt = TypeMapper(context: TypeContext())
+            
+            return "\(exp) as? \(cvt.swiftType(forObjcType: type, context: .alwaysNonnull))"
         }
     }
 }

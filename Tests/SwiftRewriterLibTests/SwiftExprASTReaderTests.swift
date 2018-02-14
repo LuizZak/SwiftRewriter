@@ -46,6 +46,11 @@ class SwiftExprASTReaderTests: XCTestCase {
                                  .functionCall(arguments: [.unlabeled(.constant(1)), .labeled("c", .constant(2)), .unlabeled(.constant(3))])))
     }
     
+    func testCastExpression() {
+        assert(objcExpr: "(NSString*)abc",
+               readsAs: .cast(.identifier("abc"), type: .pointer(.struct("NSString"))))
+    }
+    
     func assert(objcExpr: String, readsAs expected: Expression, file: String = #file, line: Int = #line) {
         let input = ANTLRInputStream(objcExpr)
         let lxr = ObjectiveCLexer(input)

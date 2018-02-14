@@ -18,6 +18,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         if let unary = ctx.unaryExpression() {
             return unary.accept(self)
         }
+        if let typeName = ctx.typeName(), let typeNameString = VarDeclarationTypeExtractor.extract(from: typeName),
+            let cast = ctx.castExpression()?.accept(self), let type = try? ObjcParser(string: typeNameString).parseObjcType() {
+            return Expression.cast(cast, type: type)
+        }
         
         return nil
     }
