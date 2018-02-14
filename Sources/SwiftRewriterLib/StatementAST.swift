@@ -19,10 +19,9 @@ extension CompoundStatement: ExpressibleByArrayLiteral {
 /// A top-level statement
 public indirect enum Statement: Equatable {
     case semicolon
-    case compound(CompoundStatement)
-    case `if`(Expression, body: CompoundStatement, `else`: CompoundStatement?)
-    case `else`(Expression, body: CompoundStatement)
-    case `while`(Expression, body: CompoundStatement)
+    case compound([Statement])
+    case `if`(Expression, body: Statement, `else`: Statement?)
+    case `while`(Expression, body: Statement)
     case `return`(Expression?)
     case `break`
     case `continue`
