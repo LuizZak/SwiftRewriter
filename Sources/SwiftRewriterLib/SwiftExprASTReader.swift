@@ -20,7 +20,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             guard let assignOp = ctx.assignmentOperator() else {
                 return nil
             }
-            guard let op = SwiftExprASTReader.swiftOperator(from: assignOp.getText()) else {
+            guard let op = swiftOperator(from: assignOp.getText()) else {
                 return nil
             }
             
@@ -153,7 +153,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             }
         }
         
-        return Expression.postfix(.postfix(receiver, .member(name)), .functionCall(arguments: arguments))
+        return .postfix(.postfix(receiver, .member(name)), .functionCall(arguments: arguments))
     }
     
     public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
@@ -192,16 +192,37 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitConstant(_ ctx: ObjectiveCParser.ConstantContext) -> Expression? {
-        if let int = ctx.DECIMAL_LITERAL(), let intV = Int(int.getText()) {
+        func dropIntSuffixes(from string: String) -> String {
+            var string = string
+            while string.hasSuffix("u") || string.hasSuffix("U") ||
+                string.hasSuffix("l") || string.hasSuffix("L") {
+                string = String(string.dropLast())
+            }
+            
+            return string
+        }
+        
+        func dropFloatSuffixes(from string: String) -> String {
+            var string = string
+            
+            while string.hasSuffix("f") || string.hasSuffix("F") ||
+                string.hasSuffix("d") || string.hasSuffix("D") {
+                string = String(string.dropLast())
+            }
+            
+            return string
+        }
+        
+        if let int = ctx.DECIMAL_LITERAL(), let intV = Int(dropIntSuffixes(from: int.getText())) {
             return .constant(.int(intV))
         }
-        if let oct = ctx.OCTAL_LITERAL(), let int = Int(oct.getText(), radix: 8) {
+        if let oct = ctx.OCTAL_LITERAL(), let int = Int(dropIntSuffixes(from: oct.getText()), radix: 8) {
             return .constant(.octal(int))
         }
-        if let binary = ctx.BINARY_LITERAL(), let int = Int(binary.getText().dropFirst(2), radix: 2) {
+        if let binary = ctx.BINARY_LITERAL(), let int = Int(dropIntSuffixes(from: binary.getText()).dropFirst(2), radix: 2) {
             return .constant(.binary(int))
         }
-        if let hex = ctx.HEX_LITERAL(), let int = Int(hex.getText().dropFirst(2), radix: 16) {
+        if let hex = ctx.HEX_LITERAL(), let int = Int(dropIntSuffixes(from: hex.getText()).dropFirst(2), radix: 16) {
             return .constant(.hexadecimal(int))
         }
         if ctx.YES() != nil || ctx.TRUE() != nil {
@@ -213,15 +234,11 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         if ctx.NULL() != nil || ctx.NIL() != nil {
             return .constant(.nil)
         }
-        if let float = ctx.FLOATING_POINT_LITERAL(), let value = Float(float.getText()) {
+        if let float = ctx.FLOATING_POINT_LITERAL()?.getText(), let value = Float(dropFloatSuffixes(from: float)) {
             return .constant(.float(value))
         }
         
         return nil
-    }
-    
-    private static func swiftOperator(from string: String) -> SwiftOperator? {
-        return SwiftOperator(rawValue: string)
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {
@@ -238,4 +255,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return nil
         }
     }
+}
+
+private func swiftOperator(from string: String) -> SwiftOperator? {
+    return SwiftOperator(rawValue: string)
 }

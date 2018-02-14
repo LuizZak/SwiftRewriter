@@ -9,7 +9,12 @@ class SwiftExprASTReaderTests: XCTestCase {
     
     func testConstants() {
         assert(objcExpr: "1", readsAs: .constant(.int(1)))
+        assert(objcExpr: "1ulL", readsAs: .constant(.int(1)))
         assert(objcExpr: "1.0e2", readsAs: .constant(.float(1e2)))
+        assert(objcExpr: "1f", readsAs: .constant(.float(1)))
+        assert(objcExpr: "1F", readsAs: .constant(.float(1)))
+        assert(objcExpr: "1d", readsAs: .constant(.float(1)))
+        assert(objcExpr: "1D", readsAs: .constant(.float(1)))
         assert(objcExpr: "true", readsAs: .constant(.boolean(true)))
         assert(objcExpr: "YES", readsAs: .constant(.boolean(true)))
         assert(objcExpr: "false", readsAs: .constant(.boolean(false)))
@@ -51,7 +56,7 @@ class SwiftExprASTReaderTests: XCTestCase {
                readsAs: .cast(.identifier("abc"), type: .pointer(.struct("NSString"))))
     }
     
-    func testAssignment() {
+    func testAssignmentWithMethodCall() {
         let exp =
             Expression.postfix(
                 .postfix(
@@ -75,6 +80,17 @@ class SwiftExprASTReaderTests: XCTestCase {
                 [[UIView alloc] initWithFrame:CGRectMake(0, kCPDefaultTimelineRowHeight, self.ganttWidth, self.ganttHeight)];
             """,
             readsAs: .assignment(lhs: .identifier("_cellContainerView"), op: .assign, rhs: exp))
+    }
+    
+    func testPostfixStructAccessWithAssignment() {
+        let exp =
+            Expression
+                .assignment(lhs: .postfix(.identifier("self"), .member("_ganttEndDate")),
+                            op: .assign,
+                            rhs: .identifier("ganttEndDate"))
+        
+        assert(objcExpr: "self->_ganttEndDate = ganttEndDate",
+               readsAs: exp)
     }
     
     func assert(objcExpr: String, readsAs expected: Expression, file: String = #file, line: Int = #line) {
