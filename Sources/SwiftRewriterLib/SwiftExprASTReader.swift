@@ -10,6 +10,23 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         if let cast = ctx.castExpression() {
             return cast.accept(self)
         }
+        if let assignmentExpression = ctx.assignmentExpression {
+            guard let unaryExpr = ctx.unaryExpression()?.accept(self) else {
+                return nil
+            }
+            guard let assignExpr = assignmentExpression.accept(self) else {
+                return nil
+            }
+            guard let assignOp = ctx.assignmentOperator() else {
+                return nil
+            }
+            guard let op = SwiftExprASTReader.swiftOperator(from: assignOp.getText()) else {
+                return nil
+            }
+            
+            return
+                Expression.assignment(lhs: unaryExpr, op: op, rhs: assignExpr)
+        }
         
         return nil
     }
@@ -201,6 +218,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         
         return nil
+    }
+    
+    private static func swiftOperator(from string: String) -> SwiftOperator? {
+        return SwiftOperator(rawValue: string)
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {

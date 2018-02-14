@@ -81,45 +81,45 @@ public enum Constant: Equatable {
 }
 
 /// Describes an operator across one or two operands
-public enum SwiftOperator: Int {
-    case add
-    case subtract
-    case multiply
-    case divide
+public enum SwiftOperator: String {
+    case add = "+"
+    case subtract = "-"
+    case multiply = "*"
+    case divide = "/"
     
-    case addAssign
-    case subtractAssign
-    case multiplyAssign
-    case divideAssign
+    case addAssign = "+="
+    case subtractAssign = "-="
+    case multiplyAssign = "*="
+    case divideAssign = "/="
     
-    case negate
-    case and
-    case or
+    case negate = "!"
+    case and = "&&"
+    case or = "||"
     
-    case bitwiseAnd
-    case bitwiseOr
-    case bitwiseXor
-    case bitwiseNot
-    case bitwiseShiftLeft
-    case bitwiseShiftRight
+    case bitwiseAnd = "&"
+    case bitwiseOr = "|"
+    case bitwiseXor = "^"
+    case bitwiseNot = "~"
+    case bitwiseShiftLeft = "<<"
+    case bitwiseShiftRight = ">>"
     
-    case bitwiseAndAssign
-    case bitwiseOrAssign
-    case bitwiseXorAssign
-    case bitwiseNotAssign
-    case bitwiseShiftLeftAssign
-    case bitwiseShiftRightAssign
+    case bitwiseAndAssign = "&="
+    case bitwiseOrAssign = "|="
+    case bitwiseXorAssign = "^="
+    case bitwiseNotAssign = "~="
+    case bitwiseShiftLeftAssign = "<<="
+    case bitwiseShiftRightAssign = ">>="
     
-    case lessThan
-    case lessThanOrEqual
-    case greaterThan
-    case greaterThanOrEqual
+    case lessThan = "<"
+    case lessThanOrEqual = "<="
+    case greaterThan = ">"
+    case greaterThanOrEqual = ">="
     
-    case assign
-    case equals
-    case unequals
+    case assign = "="
+    case equals = "=="
+    case unequals = "!="
     
-    case nullCoallesce
+    case nullCoallesce = "??"
 }
 
 // MARK: - String Conversion
@@ -207,70 +207,7 @@ extension Constant: CustomStringConvertible {
 
 extension SwiftOperator: CustomStringConvertible {
     public var description: String {
-        switch self {
-        case .add:
-            return "+"
-        case .subtract:
-            return "-"
-        case .multiply:
-            return "*"
-        case .divide:
-            return "/"
-        case .addAssign:
-            return "+="
-        case .subtractAssign:
-            return "-="
-        case .multiplyAssign:
-            return "*="
-        case .divideAssign:
-            return "/="
-        case .negate:
-            return "!"
-        case .and:
-            return "&&"
-        case .or:
-            return "||"
-        case .bitwiseAnd:
-            return "&"
-        case .bitwiseOr:
-            return "|"
-        case .bitwiseXor:
-            return "^"
-        case .bitwiseNot:
-            return "~"
-        case .bitwiseShiftLeft:
-            return "<<"
-        case .bitwiseShiftRight:
-            return ">>"
-        case .bitwiseAndAssign:
-            return "&="
-        case .bitwiseOrAssign:
-            return "|="
-        case .bitwiseXorAssign:
-            return "^="
-        case .bitwiseNotAssign:
-            return "~="
-        case .bitwiseShiftLeftAssign:
-            return "<<="
-        case .bitwiseShiftRightAssign:
-            return ">>="
-        case .lessThan:
-            return "<"
-        case .lessThanOrEqual:
-            return "<="
-        case .greaterThan:
-            return ">"
-        case .greaterThanOrEqual:
-            return ">="
-        case .assign:
-            return "="
-        case .equals:
-            return "=="
-        case .unequals:
-            return "!="
-        case .nullCoallesce:
-            return "??"
-        }
+        return rawValue
     }
 }
 

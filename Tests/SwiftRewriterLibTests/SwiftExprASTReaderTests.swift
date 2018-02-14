@@ -51,6 +51,32 @@ class SwiftExprASTReaderTests: XCTestCase {
                readsAs: .cast(.identifier("abc"), type: .pointer(.struct("NSString"))))
     }
     
+    func testAssignment() {
+        let exp =
+            Expression.postfix(
+                .postfix(
+                    .postfix(
+                        .postfix(.identifier("UIView"), .member("alloc")),
+                        .functionCall(arguments: [])), .member("initWithFrame")), .functionCall(arguments:
+                            [
+                            .unlabeled(
+                                .postfix(.identifier("CGRectMake"),
+                                         .functionCall(arguments:
+                                            [
+                                            .unlabeled(.constant(0)),
+                                            .unlabeled(.identifier("kCPDefaultTimelineRowHeight")),
+                                            .unlabeled(.postfix(.identifier("self"), .member("ganttWidth"))),
+                                            .unlabeled(.postfix(.identifier("self"), .member("ganttHeight")))
+                                            ])))
+                            ]))
+        
+        assert(objcExpr: """
+            _cellContainerView =
+                [[UIView alloc] initWithFrame:CGRectMake(0, kCPDefaultTimelineRowHeight, self.ganttWidth, self.ganttHeight)];
+            """,
+            readsAs: .assignment(lhs: .identifier("_cellContainerView"), op: .assign, rhs: exp))
+    }
+    
     func assert(objcExpr: String, readsAs expected: Expression, file: String = #file, line: Int = #line) {
         let input = ANTLRInputStream(objcExpr)
         let lxr = ObjectiveCLexer(input)
