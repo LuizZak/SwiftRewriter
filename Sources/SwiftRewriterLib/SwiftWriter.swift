@@ -187,31 +187,25 @@ public class SwiftWriter {
             target.output(line: decl)
             break
         case .computed(let body):
-            decl += " {"
-            
-            target.output(line: decl)
+            target.outputInline(decl)
             
             target.idented {
                 outputMethodBody(body, target: target)
             }
-            
-            target.output(line: "}")
         case let .property(getter, setter):
             decl += " {"
             
-            target.output(line: decl)
+            target.outputInline(decl)
             
             target.idented {
-                target.output(line: "get {")
+                target.outputInline("get ")
                 target.idented {
                     outputMethodBody(getter, target: target)
                 }
-                target.output(line: "}")
-                target.output(line: "set {")
+                target.outputInline("set ")
                 target.idented {
                     outputMethodBody(setter, target: target)
                 }
-                target.output(line: "}")
             }
             
             target.output(line: "}")
@@ -224,17 +218,12 @@ public class SwiftWriter {
         decl += generateParameters(for: initMethod.signature,
                                    inNonnullContext: initMethod.inNonnullContext)
         
-        decl += " {"
+        target.outputIdentation()
+        target.outputInline(decl)
         
-        target.output(line: decl)
-        
-        target.idented {
-            if let body = initMethod.body {
-                outputMethodBody(body, target: target)
-            }
+        if let body = initMethod.body {
+            outputMethodBody(body, target: target)
         }
-        
-        target.output(line: "}")
     }
     
     private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
@@ -263,17 +252,12 @@ public class SwiftWriter {
                                                         inNonnull: method.inNonnullContext))
         }
         
-        decl += " {"
+        target.outputIdentation()
+        target.outputInline(decl)
         
-        target.output(line: decl)
-        
-        target.idented {
-            if let body = method.body {
-                outputMethodBody(body, target: target)
-            }
+        if let body = method.body {
+            outputMethodBody(body, target: target)
         }
-        
-        target.output(line: "}")
     }
     
     private func outputMethodBody(_ body: MethodBodyIntention, target: RewriterOutputTarget) {

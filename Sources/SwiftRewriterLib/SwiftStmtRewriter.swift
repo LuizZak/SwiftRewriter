@@ -7,15 +7,344 @@ import ObjcParser
 /// and expressions.
 class SwiftStmtRewriter {
     public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
-        let listener = StmtRewriterListener(target: target)
-        let walker = ParseTreeWalker()
-        try? walker.walk(listener, compoundStatement)
+//        let listener = StmtRewriterListener(target: target)
+//        let walker = ParseTreeWalker()
+//        try? walker.walk(listener, compoundStatement)
+        
+        let parser = SwiftStatementASTReader()
+        guard let result = compoundStatement.accept(parser) else {
+            target.output(line: "// Failed to parse method.")
+            return
+        }
+        
+        let rewriter = StatementRewriter(target: target)
+        rewriter.visitStatement(result)
     }
     
     public func rewrite(expression: ObjectiveCParser.ExpressionContext, into target: RewriterOutputTarget) {
-        let listener = StmtRewriterListener(target: target)
-        let walker = ParseTreeWalker()
-        try? walker.walk(listener, expression)
+//        let listener = StmtRewriterListener(target: target)
+//        let walker = ParseTreeWalker()
+//        try? walker.walk(listener, expression)
+        
+        let parser = SwiftExprASTReader()
+        guard let result = expression.accept(parser) else {
+            target.output(line: "// Failed to parse method.")
+            return
+        }
+        
+        let rewriter = ExpressionRewriter(target: target)
+        rewriter.visitExpression(result)
+    }
+}
+
+fileprivate class ExpressionRewriter {
+    var target: RewriterOutputTarget
+    
+    init(target: RewriterOutputTarget) {
+        self.target = target
+    }
+    
+    fileprivate func visitExpression(_ expression: Expression, parens: Bool = false) {
+        if parens {
+            target.outputInline("(")
+        }
+        
+        switch expression {
+        case let .assignment(lhs, op, rhs):
+            visitAssignment(lhs: lhs, op: op, rhs: rhs)
+        case let .binary(lhs, op, rhs):
+            visitBinary(lhs: lhs, op: op, rhs: rhs)
+        case let .unary(op, expr):
+            visitUnary(op: op, expr)
+        case let .prefix(op, expr):
+            visitPrefix(op: op, expr)
+        case let .postfix(expr, post):
+            visitPostfix(expr, op: post)
+        case .constant(let constant):
+            visitConstant(constant)
+        case let .parens(expr):
+            visitParens(expr)
+        case .identifier(let ident):
+            visitIdentifier(ident)
+        case let .cast(expr, type):
+            visitCast(expr, type: type)
+        case .arrayLiteral(let expressions):
+            visitArray(expressions)
+        case .dictionaryLiteral(let pairs):
+            visitDictionary(pairs)
+        case let .ternary(exp, ifTrue, ifFalse):
+            visitTernary(exp, ifTrue, ifFalse)
+        }
+        
+        if parens {
+            target.outputInline(")")
+        }
+    }
+    
+    private func visitAssignment(lhs: Expression, op: SwiftOperator, rhs: Expression) {
+        visitExpression(lhs)
+        
+        if op.requiresSpacing {
+            target.outputInline(" \(op.description) ")
+        } else {
+            target.outputInline("\(op.description)")
+        }
+        
+        visitExpression(rhs)
+    }
+    
+    private func visitBinary(lhs: Expression, op: SwiftOperator, rhs: Expression) {
+        visitExpression(lhs)
+        
+        if op.requiresSpacing {
+            target.outputInline(" \(op.description) ")
+        } else {
+            target.outputInline("\(op.description)")
+        }
+        
+        visitExpression(rhs)
+    }
+    
+    private func visitUnary(op: SwiftOperator, _ exp: Expression) {
+        target.outputInline(op.description)
+        visitExpression(exp, parens: exp.requiresParens)
+    }
+    
+    private func visitPrefix(op: SwiftOperator, _ exp: Expression) {
+        target.outputInline(op.description)
+        visitExpression(exp, parens: exp.requiresParens)
+    }
+    
+    private func visitPostfix(_ exp: Expression, op: Postfix) {
+        visitExpression(exp, parens: exp.requiresParens)
+        
+        switch op {
+        case .member(let member):
+            target.outputInline(".")
+            target.outputInline(member)
+        
+        case .optionalAccess:
+            target.outputInline("?")
+        
+        case .subscript(let exp):
+            target.outputInline("[")
+            visitExpression(exp)
+            target.outputInline("]")
+            
+        case .functionCall(let arguments):
+            target.outputInline("(")
+            
+            commaSeparated(arguments) { arg in
+                switch arg {
+                case let .labeled(lbl, expr):
+                    target.outputInline(lbl)
+                    target.outputInline(": ")
+                    visitExpression(expr)
+                case let .unlabeled(expr):
+                    visitExpression(expr)
+                }
+            }
+            
+            target.outputInline(")")
+        }
+    }
+    
+    private func visitConstant(_ constant: Constant) {
+        target.outputInline(constant.description)
+    }
+    
+    private func visitParens(_ exp: Expression) {
+        target.outputInline("(")
+        visitExpression(exp)
+        target.outputInline(")")
+    }
+    
+    private func visitIdentifier(_ identifier: String) {
+        target.outputInline(identifier)
+    }
+    
+    private func visitCast(_ exp: Expression, type: ObjcType) {
+        visitExpression(exp)
+        
+        let context = TypeContext()
+        let typeMapper = TypeMapper(context: context)
+        let typeName = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
+        
+        target.outputInline(" as? \(typeName)")
+    }
+    
+    private func visitArray(_ array: [Expression]) {
+        target.outputInline("[")
+        
+        commaSeparated(array) { exp in
+            visitExpression(exp)
+        }
+        
+        target.outputInline("]")
+    }
+    
+    private func visitDictionary(_ dictionary: [ExpressionDictionaryPair]) {
+        target.outputInline("[")
+        
+        commaSeparated(dictionary) { value in
+            visitExpression(value.key)
+            target.outputInline(": ")
+            visitExpression(value.value)
+        }
+        
+        target.outputInline("]")
+    }
+    
+    private func visitTernary(_ exp: Expression, _ ifTrue: Expression, _ ifFalse: Expression) {
+        visitExpression(exp)
+        target.outputInline(" ? ")
+        visitExpression(ifTrue)
+        target.outputInline(" : ")
+        visitExpression(ifFalse)
+    }
+    
+    private func commaSeparated<T>(_ values: [T], do block: (T) -> ()) {
+        for (i, value) in values.enumerated() {
+            if i > 0 {
+                target.outputInline(", ")
+            }
+            
+            block(value)
+        }
+    }
+}
+
+fileprivate class StatementRewriter {
+    var target: RewriterOutputTarget
+    
+    init(target: RewriterOutputTarget) {
+        self.target = target
+    }
+    
+    fileprivate func visitStatement(_ statement: Statement) {
+        switch statement {
+        case .semicolon:
+            target.output(line: ";")
+        case let .compound(body):
+            visitCompound(body)
+        case let .if(exp, body, elseBody):
+            visitIf(exp, body, elseBody: elseBody)
+        case let .while(exp, body):
+            visitWhile(exp, body)
+        case let .for(pattern, exp, body):
+            visitForIn(pattern, exp, body)
+        case let .defer(body):
+            visitCompound(body)
+        case let .return(expr):
+            visitReturn(expr)
+        case .break:
+            visitBreak()
+        case .continue:
+            visitContinue()
+        case let .expressions(exp):
+            visitExpressions(exp)
+        case let .variableDeclaration(identifier, type, initialization):
+            visitVariableDeclaration(identifier, type, initialValue: initialization)
+        }
+    }
+    
+    private func visitCompound(_ compound: CompoundStatement) {
+        target.outputInline(" {")
+        target.outputLineFeed()
+        target.increaseIdentation()
+        
+        compound.statements.forEach(visitStatement)
+        
+        target.decreaseIdentation()
+        target.output(line: "}")
+    }
+    
+    private func visitIf(_ exp: Expression, _ body: CompoundStatement, elseBody: CompoundStatement?) {
+        target.outputInline("if ")
+        emitExpr(exp)
+        target.outputLineFeed()
+        
+        visitCompound(body)
+    }
+    
+    private func visitWhile(_ exp: Expression, _ body: CompoundStatement) {
+        target.outputInline("while ")
+        emitExpr(exp)
+        target.outputLineFeed()
+        
+        visitCompound(body)
+    }
+    
+    private func visitForIn(_ pattern: Pattern, _ exp: Expression, _ body: CompoundStatement) {
+        target.outputInline("for ")
+        target.outputInline(pattern.simplified.description)
+        target.outputInline(" in ")
+        emitExpr(exp)
+        target.outputLineFeed()
+        
+        visitCompound(body)
+    }
+    
+    private func visitDefer(_ body: CompoundStatement) {
+        target.outputInline("defer ")
+        visitCompound(body)
+    }
+    
+    private func visitReturn(_ exp: Expression?) {
+        if let exp = exp {
+            target.outputIdentation()
+            target.outputInline("return ")
+            emitExpr(exp)
+        } else {
+            target.output(line: "return")
+        }
+    }
+    
+    private func visitContinue() {
+        target.output(line: "continue")
+    }
+    
+    private func visitBreak() {
+        target.output(line: "break")
+    }
+    
+    private func visitExpressions(_ expr: [Expression]) {
+        for exp in expr {
+            target.outputIdentation()
+            emitExpr(exp)
+            target.outputLineFeed()
+        }
+    }
+    
+    private func visitVariableDeclaration(_ ident: String, _ type: ObjcType, initialValue: Expression?) {
+        let owner = SwiftWriter._ownershipPrefix(inType: type)
+        let varOrLet = SwiftWriter._varOrLet(fromType: type)
+        let null = SwiftWriter._typeNullability(inType: type)
+        
+        let mapper = TypeMapper(context: TypeContext())
+        
+        let typeString =
+            mapper.swiftType(forObjcType: type,
+                             context: .init(explicitNullability: null))
+        
+        var output = ""
+        if !owner.isEmpty {
+            output += owner
+            output += " "
+        }
+        output += "\(varOrLet) "
+        output += ident
+        output += ": \(typeString)"
+        
+        if let initial = initialValue {
+            output += " = "
+            emitExpr(initial)
+        }
+    }
+    
+    private func emitExpr(_ expr: Expression) {
+        let rewriter = ExpressionRewriter(target: target)
+        rewriter.visitExpression(expr)
     }
 }
 

@@ -24,6 +24,16 @@ class SwiftExprASTReaderTests: XCTestCase {
         assert(objcExpr: "\"abc\"", readsAs: .constant(.string("abc")))
     }
     
+    func testParensExpression() {
+        assert(objcExpr: "(1 + 2)",
+               readsAs: .parens(.binary(lhs: .constant(1), op: .add, rhs: .constant(2))))
+    }
+    
+    func testTernaryExpression() {
+        assert(objcExpr: "value ? ifTrue : ifFalse",
+               readsAs: .ternary(.identifier("value"), true: .identifier("ifTrue"), false: .identifier("ifFalse")))
+    }
+    
     func testFunctionCall() {
         assert(objcExpr: "print()", readsAs: .postfix(.identifier("print"), .functionCall(arguments: [])))
         assert(objcExpr: "a.method()", readsAs: .postfix(.postfix(.identifier("a"), .member("method")), .functionCall(arguments: [])))

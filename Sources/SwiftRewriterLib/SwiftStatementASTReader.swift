@@ -4,6 +4,26 @@ import ObjcParser
 import Antlr4
 
 public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
+    public override func visitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) -> Statement? {
+        if let varDecl = ctx.varDeclaration()?.accept(self) {
+            return varDecl
+        }
+        
+        return nil
+    }
+    
+    public override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> Statement? {
+        guard let stmts = ctx.accept(VarDeclarationExtractor()) else {
+            return nil
+        }
+        
+        if stmts.count == 1 {
+            return stmts[0]
+        }
+        
+        return .compound(CompoundStatement(statements: stmts))
+    }
+    
     public override func visitStatement(_ ctx: ObjectiveCParser.StatementContext) -> Statement? {
         if let sel = ctx.selectionStatement()?.accept(self) {
             return sel
@@ -161,8 +181,17 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         override func visitCompoundStatement(_ ctx: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement? {
             let reader = SwiftStatementASTReader()
             
-            return CompoundStatement(statements: ctx.statement().compactMap { stmt in
-                return reader.visitStatement(stmt)
+            let rules: [ParserRuleContext] =
+                ctx.declaration().map { $0 } + ctx.statement().map { $0 }
+            
+            return CompoundStatement(statements: rules.compactMap { stmt in
+                if let stmt = stmt as? ObjectiveCParser.StatementContext {
+                    return reader.visitStatement(stmt)
+                }
+                if let declaration = stmt as? ObjectiveCParser.DeclarationContext {
+                    return reader.visitDeclaration(declaration)
+                }
+                return nil
             })
         }
     }

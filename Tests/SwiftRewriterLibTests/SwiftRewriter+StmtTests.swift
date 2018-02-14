@@ -96,19 +96,19 @@ class SwiftRewriter_StmtTests: XCTestCase {
     func testPrefixAndPostfixIncrementAndDecrement() throws {
         try assertSingleStatement(
             objc: "value++;",
-            swift: "value++"
+            swift: "value += 1"
         )
         try assertSingleStatement(
             objc: "value--;",
-            swift: "value--"
+            swift: "value -= 1"
         )
         try assertSingleStatement(
             objc: "++value;",
-            swift: "++value"
+            swift: "value += 1"
         )
         try assertSingleStatement(
             objc: "--value;",
-            swift: "--value"
+            swift: "value -= 1"
         )
     }
     

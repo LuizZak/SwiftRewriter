@@ -71,6 +71,7 @@ public indirect enum Expression: Equatable {
     case cast(Expression, type: ObjcType)
     case arrayLiteral([Expression])
     case dictionaryLiteral([ExpressionDictionaryPair])
+    case ternary(Expression, `true`: Expression, `false`: Expression)
     
     /// `true` if this expression node requires parenthesis for unary, prefix, and
     /// postfix operations.
@@ -117,6 +118,7 @@ public enum Constant: Equatable {
     case octal(Int)
     case hexadecimal(Int)
     case string(String)
+    case rawConstant(String)
     case `nil`
 }
 
@@ -184,6 +186,17 @@ extension ExpressionDictionaryPair: CustomStringConvertible {
     }
 }
 
+extension Pattern: CustomStringConvertible {
+    public var description: String {
+        switch self.simplified {
+        case .tuple(let tups):
+            return "(" + tups.map({ $0.description }).joined(separator: ", ") + ")"
+        case .identifier(let ident):
+            return ident
+        }
+    }
+}
+
 extension Expression: CustomStringConvertible {
     public var description: String {
         switch self {
@@ -230,6 +243,12 @@ extension Expression: CustomStringConvertible {
             }
             
             return "[" + pairs.map { $0.description }.joined(separator: ", ") + "]"
+            
+        case let .ternary(exp, ifTrue, ifFalse):
+            return
+                exp.description + " ? " +
+                    ifTrue.description + " : " +
+                    ifFalse.description
         }
     }
 }
@@ -277,6 +296,8 @@ extension Constant: CustomStringConvertible {
             return "0x" + String(int, radix: 16, uppercase: false)
         case .string(let str):
             return "\"\(str)\""
+        case .rawConstant(let str):
+            return str
         case .nil:
             return "nil"
         }

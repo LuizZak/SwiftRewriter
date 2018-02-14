@@ -119,6 +119,13 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
     }
     
+    func testDeclaration() {
+        assert(objcExpr: "CGFloat value = 1;",
+               readsAs: .variableDeclaration(identifier: "value",
+                                             type: .struct("CGFloat"),
+                                             initialization: .constant(1)))
+    }
+    
     func assert(objcExpr: String, readsAs expected: Statement, file: String = #file, line: Int = #line) {
         let input = ANTLRInputStream(objcExpr)
         let lxr = ObjectiveCLexer(input)
