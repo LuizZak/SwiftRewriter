@@ -194,7 +194,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             let rules: [ParserRuleContext] =
                 ctx.declaration().map { $0 } + ctx.statement().map { $0 }
             
-            return CompoundStatement(statements: rules.compactMap { stmt in
+            return CompoundStatement(statements: rules.compactMap { stmt -> Statement? in
                 if let stmt = stmt as? ObjectiveCParser.StatementContext {
                     return reader.visitStatement(stmt)
                 }
@@ -202,6 +202,13 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                     return reader.visitDeclaration(declaration)
                 }
                 return nil
+            }.flatMap { stmt -> [Statement] in
+                // Free compound blocks cannot be declared in Swift
+                if case .compound(let inner) = stmt {
+                    return inner.statements
+                }
+                
+                return [stmt]
             })
         }
     }

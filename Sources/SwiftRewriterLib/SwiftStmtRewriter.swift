@@ -311,7 +311,7 @@ fileprivate class StatementRewriter {
     
     private func visitDefer(_ body: CompoundStatement) {
         target.outputIdentation()
-        target.outputInline("defer ")
+        target.outputInline("defer")
         visitCompound(body)
     }
     
