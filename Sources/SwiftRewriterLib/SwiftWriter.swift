@@ -88,7 +88,7 @@ public class SwiftWriter {
         if let expression = initVal?.typedSource?.expression?.expression?.expression {
             let exprTarget = StringRewriterOutput()
             
-            let rewriter = SwiftStmtRewriter()
+            let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
             rewriter.rewrite(expression: expression, into: exprTarget)
             
             decl += " = \(exprTarget.buffer.trimmingCharacters(in: .whitespaces))"
@@ -271,7 +271,7 @@ public class SwiftWriter {
             return
         }
         
-        let rewriter = SwiftStmtRewriter()
+        let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
         rewriter.rewrite(compoundStatement: stmt, into: target)
     }
     

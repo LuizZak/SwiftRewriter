@@ -8,6 +8,10 @@ import ObjcParser
 class SwiftStmtRewriter {
     var expressionPasses: [ExpressionPass] = []
     
+    public init(expressionPasses: [ExpressionPass]) {
+        self.expressionPasses = expressionPasses
+    }
+    
     public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
 //        let listener = StmtRewriterListener(target: target)
 //        let walker = ParseTreeWalker()
