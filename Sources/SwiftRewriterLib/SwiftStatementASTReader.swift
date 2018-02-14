@@ -25,20 +25,22 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     }
     
     public override func visitStatement(_ ctx: ObjectiveCParser.StatementContext) -> Statement? {
-        if let sel = ctx.selectionStatement()?.accept(self) {
-            return sel
-        }
         if let cpd = ctx.compoundStatement(), let compound = cpd.accept(CompoundStatementVisitor()) {
             return .compound(compound)
         }
-        if let iterationStatement = ctx.iterationStatement() {
-            return iterationStatement.accept(self)
-        }
-        if let expressions = ctx.expressions() {
-            return expressions.accept(self)
+        
+        let stmt: Statement?
+        if let sel = ctx.selectionStatement()?.accept(self) {
+            stmt = sel
+        } else if let iterationStatement = ctx.iterationStatement() {
+            stmt = iterationStatement.accept(self)
+        } else if let expressions = ctx.expressions() {
+            stmt = expressions.accept(self)
+        } else {
+            stmt = nil
         }
         
-        return nil
+        return stmt
     }
     
     public override func visitExpressions(_ ctx: ObjectiveCParser.ExpressionsContext) -> Statement? {

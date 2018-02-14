@@ -184,6 +184,11 @@ fileprivate class ExpressionRewriter {
     }
     
     private func visitDictionary(_ dictionary: [ExpressionDictionaryPair]) {
+        if dictionary.count == 0 {
+            target.outputInline("[:]")
+            return
+        }
+        
         target.outputInline("[")
         
         commaSeparated(dictionary) { value in
@@ -248,7 +253,7 @@ fileprivate class StatementRewriter {
         }
     }
     
-    private func visitCompound(_ compound: CompoundStatement) {
+    private func visitCompound(_ compound: CompoundStatement, lineFeedAfter: Bool = true) {
         target.outputInline(" {")
         target.outputLineFeed()
         target.increaseIdentation()
@@ -256,31 +261,50 @@ fileprivate class StatementRewriter {
         compound.statements.forEach(visitStatement)
         
         target.decreaseIdentation()
-        target.output(line: "}")
+        if lineFeedAfter {
+            target.output(line: "}")
+        } else {
+            target.outputIdentation()
+            target.outputInline("}")
+        }
     }
     
-    private func visitIf(_ exp: Expression, _ body: CompoundStatement, elseBody: CompoundStatement?) {
+    private func visitIf(_ exp: Expression, _ body: CompoundStatement, elseBody: CompoundStatement?, _ withIdent: Bool = true) {
+        if withIdent {
+            target.outputIdentation()
+        }
         target.outputInline("if ")
         emitExpr(exp)
-        target.outputLineFeed()
         
-        visitCompound(body)
+        visitCompound(body, lineFeedAfter: elseBody == nil)
+        
+        if let elseBody = elseBody {
+            target.outputInline(" else")
+            
+            if elseBody.statements.count == 1,
+                case let .if(exp, body, elseBody) = elseBody.statements[0] {
+                target.outputInline(" ")
+                visitIf(exp, body, elseBody: elseBody, false)
+            } else {
+                visitCompound(elseBody)
+            }
+        }
     }
     
     private func visitWhile(_ exp: Expression, _ body: CompoundStatement) {
+        target.outputIdentation()
         target.outputInline("while ")
         emitExpr(exp)
-        target.outputLineFeed()
         
         visitCompound(body)
     }
     
     private func visitForIn(_ pattern: Pattern, _ exp: Expression, _ body: CompoundStatement) {
+        target.outputIdentation()
         target.outputInline("for ")
         target.outputInline(pattern.simplified.description)
         target.outputInline(" in ")
         emitExpr(exp)
-        target.outputLineFeed()
         
         visitCompound(body)
     }
@@ -336,10 +360,16 @@ fileprivate class StatementRewriter {
         output += ident
         output += ": \(typeString)"
         
+        target.outputIdentation()
+        target.outputInline(output)
+        
         if let initial = initialValue {
-            output += " = "
+            target.outputInline(" = ")
+            
             emitExpr(initial)
         }
+        
+        target.outputLineFeed()
     }
     
     private func emitExpr(_ expr: Expression) {

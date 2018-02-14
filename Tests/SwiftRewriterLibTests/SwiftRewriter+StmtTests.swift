@@ -162,7 +162,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
         try assertSingleStatement(
             objc: "CGFloat x = [self offsetForDate:cell.startDate];",
-            swift: "var x = self.offsetForDate(cell.startDate)"
+            swift: "var x: CGFloat = self.offsetForDate(cell.startDate)"
         )
     }
     
@@ -269,10 +269,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    if(true) {
+                    if true {
                         stmt()
                     }
-                    if(true) {
+                    if true {
                         stmt()
                     }
                 }
@@ -296,7 +296,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    if(true) {
+                    if true {
                         stmt1()
                     } else {
                         stmt2()
@@ -324,9 +324,9 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    if(true) {
+                    if true {
                         stmt1()
-                    } else if(true) {
+                    } else if true {
                         stmt2()
                     } else {
                         stmt3()
@@ -353,9 +353,9 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    if(true) {
+                    if true {
                         stmt1()
-                    } else if(true) {
+                    } else if true {
                         stmt2()
                     } else {
                         stmt3()
@@ -380,8 +380,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    if(true) {
-                        if(true) {
+                    if true {
+                        if true {
                             print(10)
                         }
                     }
@@ -406,10 +406,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    while(true) {
+                    while true {
                         stmt()
                     }
-                    while(true) {
+                    while true {
                         stmt()
                     }
                 }
