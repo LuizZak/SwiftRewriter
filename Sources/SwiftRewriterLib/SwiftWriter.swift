@@ -83,8 +83,13 @@ public class SwiftWriter {
         
         decl += ": \(typeName)"
         
-        if let initVal = initVal {
-            decl += " = \(initVal.trimmingCharacters(in: .whitespaces))"
+        if let expression = initVal?.typedSource?.expression?.expression?.expression {
+            let exprTarget = StringRewriterOutput()
+            
+            let rewriter = SwiftStmtRewriter()
+            rewriter.rewrite(expression: expression, into: exprTarget)
+            
+            decl += " = \(exprTarget.buffer.trimmingCharacters(in: .whitespaces))"
         }
         
         target.output(line: decl)
@@ -278,7 +283,7 @@ public class SwiftWriter {
         }
         
         let rewriter = SwiftStmtRewriter()
-        rewriter.rewrite(stmt, into: target)
+        rewriter.rewrite(compoundStatement: stmt, into: target)
     }
     
     private func generateParameters(for signature: MethodGenerationIntention.Signature,

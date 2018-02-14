@@ -123,7 +123,6 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     
     public var signature: Signature
     
-    // TODO: Type this properly as a MethodBodyIntention or similar.
     public var body: MethodBodyIntention?
     
     public var name: String {

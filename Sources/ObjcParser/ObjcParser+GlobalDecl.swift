@@ -87,18 +87,13 @@ public extension ObjcParser {
         
         try parseTokenNode(.operator(.assign))
         
-        let range = startRange()
-        
         if lexer.tokenType(.decimalLiteral) || lexer.tokenType(.stringLiteral) ||
             lexer.tokenType(.octalLiteral) || lexer.tokenType(.floatLiteral) ||
             lexer.tokenType(.hexLiteral) {
             
             parseAnyTokenNode()
             
-            let node =
-                ConstantExpression(expression: range.makeString(), location: range.makeLocation(),
-                                   existsInSource: true)
-            
+            let node = ConstantExpression()
             context.addChildNode(node)
         } else {
             diagnostics.error("Expected initial expression after \(Operator.assign)",

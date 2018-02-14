@@ -445,11 +445,10 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            let kMethodKey = "method"
-            let kCodeOperatorKey = "codigo_operador"
+            let kMethodKey: String = "method"
+            let kCodeOperatorKey: String = "codigo_operador"
             
             class MyClass: NSObject {
-                
             }
             """)
     }

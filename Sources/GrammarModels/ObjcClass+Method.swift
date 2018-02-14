@@ -1,5 +1,9 @@
 import ObjcParserAntlr
 
+public class Expression: ASTNode {
+    public var expression: ObjectiveCParser.ExpressionContext?
+}
+
 public class MethodBody: ASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
 }

@@ -30,12 +30,12 @@ public class InitialExpression: ASTNode, InitializableNode {
 
 /// Represents a constant expression used as the initial value to global variables
 /// parsed from a source file.
-public class ConstantExpression: ASTNode {
-    public var expression: String
+public class ConstantExpression: ASTNode, InitializableNode {
+    public var expression: Expression? {
+        return firstChild()
+    }
     
-    public init(expression: String, location: SourceLocation = .invalid, existsInSource: Bool = true) {
-        self.expression = expression
+    public required init() {
         
-        super.init(location: location, existsInSource: existsInSource)
     }
 }

@@ -72,12 +72,19 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention {
 public class GlobalVariableGenerationIntention: FromSourceIntention {
     public var name: String
     public var type: ObjcType
-    public var initialValueExpr: String?
+    public var initialValueExpr: GlobalVariableInitialValueIntention?
     
     public init(name: String, type: ObjcType, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
         self.type = type
         super.init(accessLevel: accessLevel, source: source)
+    }
+}
+
+/// An intention to generate the initial value for a global variable.
+public class GlobalVariableInitialValueIntention: FromSourceIntention {
+    public var typedSource: InitialExpression? {
+        return source as? InitialExpression
     }
 }
 

@@ -582,8 +582,12 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 varDecl.addChild(TypeNameNode(type: type))
                 
                 if let initializer = initDeclarator.initializer() {
-                    let constantExpression = ConstantExpression(expression: initializer.getText())
+                    let expression = Expression()
+                    expression.sourceRuleContext = initializer.expression()
+                    expression.expression = initializer.expression()
+                    let constantExpression = ConstantExpression()
                     constantExpression.sourceRuleContext = initializer
+                    constantExpression.addChild(expression)
                     let initialExpression = InitialExpression()
                     initialExpression.sourceRuleContext = initializer
                     initialExpression.addChild(constantExpression)

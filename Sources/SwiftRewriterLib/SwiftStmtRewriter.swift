@@ -3,13 +3,19 @@ import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
 
-/// Main frontend class for performing Swift-conversion of Objective-C statements.
+/// Main frontend class for performing Swift-conversion of Objective-C statements
+/// and expressions.
 class SwiftStmtRewriter {
-    public func rewrite(_ compound: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
-        
+    public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
         let listener = StmtRewriterListener(target: target)
         let walker = ParseTreeWalker()
-        try? walker.walk(listener, compound)
+        try? walker.walk(listener, compoundStatement)
+    }
+    
+    public func rewrite(expression: ObjectiveCParser.ExpressionContext, into target: RewriterOutputTarget) {
+        let listener = StmtRewriterListener(target: target)
+        let walker = ParseTreeWalker()
+        try? walker.walk(listener, expression)
     }
 }
 

@@ -224,8 +224,10 @@ public class SwiftRewriter {
         
         intent.inNonnullContext = isNodeInNonnullContext(node)
         
-        if let expr = node.initialExpression?.expression {
-            intent.initialValueExpr = expr.expression
+        if let expr = node.initialExpression {
+            intent.initialValueExpr =
+                GlobalVariableInitialValueIntention(accessLevel: .internal,
+                                                    source: expr)
         }
         
         ctx.addGlobalVariable(intent)
