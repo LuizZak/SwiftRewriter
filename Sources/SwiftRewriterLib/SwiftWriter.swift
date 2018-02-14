@@ -324,6 +324,11 @@ public class SwiftWriter {
     
     public static func _varOrLet(fromType type: ObjcType) -> String {
         switch type {
+        case .qualified(_, let qualifiers),
+             .specified(_, .qualified(_, let qualifiers)):
+            if qualifiers.contains("const") {
+                return "let"
+            }
         case .specified(let specifiers, _):
             if specifiers.contains("const") {
                 return "let"
