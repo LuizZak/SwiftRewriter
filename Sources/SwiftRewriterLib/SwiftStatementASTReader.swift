@@ -62,6 +62,9 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         if let f = ctx.forStatement()?.accept(self) {
             return f
         }
+        if let forIn = ctx.forInStatement()?.accept(self) {
+            return forIn
+        }
         
         return nil
     }
@@ -123,6 +126,20 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         }
         
         return bodyWithWhile
+    }
+    
+    public override func visitForInStatement(_ ctx: ObjectiveCParser.ForInStatementContext) -> Statement? {
+        guard let identifier = ctx.typeVariableDeclarator()?.accept(VarDeclarationIdentifierNameExtractor()) else {
+            return nil
+        }
+        guard let expression = ctx.expression()?.accept(SwiftExprASTReader()) else {
+            return nil
+        }
+        guard let body = ctx.statement()?.accept(CompoundStatementVisitor()) else {
+            return nil
+        }
+        
+        return Statement.for(.identifier(identifier), expression, body: body)
     }
     
     // MARK: Compound statement visitor

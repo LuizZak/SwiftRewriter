@@ -6,14 +6,17 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     
     public var declaratorIndex: Int = 0
     
-    public static func extract(from rule: ObjectiveCParser.VarDeclarationContext) -> TypeName? {
-        return _extract(from: rule)
-    }
     public static func extract(from typeName: ObjectiveCParser.TypeNameContext) -> TypeName? {
         return _extract(from: typeName)
     }
-    public static func extract(from rule: ObjectiveCParser.ForLoopInitializerContext) -> TypeName? {
+    public static func extract(from rule: ObjectiveCParser.TypeVariableDeclaratorContext) -> TypeName? {
         return _extract(from: rule)
+    }
+    public static func extract(from rule: ObjectiveCParser.VarDeclarationContext, atIndex index: Int = 0) -> TypeName? {
+        return _extract(from: rule, atIndex: index)
+    }
+    public static func extract(from rule: ObjectiveCParser.ForLoopInitializerContext, atIndex index: Int = 0) -> TypeName? {
+        return _extract(from: rule, atIndex: index)
     }
     
     public static func extractAll(from rule: ObjectiveCParser.VarDeclarationContext) -> [TypeName] {

@@ -69,6 +69,8 @@ public indirect enum Expression: Equatable {
     case parens(Expression)
     case identifier(String)
     case cast(Expression, type: ObjcType)
+    case arrayLiteral([Expression])
+    case dictionaryLiteral([ExpressionDictionaryPair])
     
     /// `true` if this expression node requires parenthesis for unary, prefix, and
     /// postfix operations.
@@ -79,6 +81,16 @@ public indirect enum Expression: Equatable {
         default:
             return false
         }
+    }
+}
+
+public struct ExpressionDictionaryPair: Equatable {
+    public var key: Expression
+    public var value: Expression
+    
+    public init(key: Expression, value: Expression) {
+        self.key = key
+        self.value = value
     }
 }
 
@@ -166,6 +178,12 @@ public enum SwiftOperator: String {
 
 // MARK: - String Conversion
 
+extension ExpressionDictionaryPair: CustomStringConvertible {
+    public var description: String {
+        return key.description + ": " + value.description
+    }
+}
+
 extension Expression: CustomStringConvertible {
     public var description: String {
         switch self {
@@ -203,6 +221,15 @@ extension Expression: CustomStringConvertible {
             let cvt = TypeMapper(context: TypeContext())
             
             return "\(exp) as? \(cvt.swiftType(forObjcType: type, context: .alwaysNonnull))"
+        case .arrayLiteral(let exps):
+            return "[\(exps.map { $0.description }.joined(separator: ", "))]"
+            
+        case .dictionaryLiteral(let pairs):
+            if pairs.count == 0 {
+                return "[:]"
+            }
+            
+            return "[" + pairs.map { $0.description }.joined(separator: ", ") + "]"
         }
     }
 }

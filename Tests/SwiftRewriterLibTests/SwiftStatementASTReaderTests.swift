@@ -100,6 +100,16 @@ class SwiftStatementASTReaderTests: XCTestCase {
                readsAs: .while(.constant(true), body: .empty))
     }
     
+    func testForIn() {
+        assert(objcExpr: "for(NSString *item in list) { }",
+               readsAs: .for(.identifier("item"), .identifier("list"), body: .empty)
+        )
+        
+        assert(objcExpr: "for(NSString *item in @[]) { }",
+               readsAs: .for(.identifier("item"), .arrayLiteral([]), body: .empty)
+        )
+    }
+    
     func testExpressions() {
         assert(objcExpr: "abc;",
                readsAs: .expression(.identifier("abc"))

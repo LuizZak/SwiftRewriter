@@ -68,11 +68,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitUnaryExpression(_ ctx: ObjectiveCParser.UnaryExpressionContext) -> Expression? {
-        if let postfix = ctx.postfixExpression() {
-            return postfix.accept(self)
-        }
-        
-        return nil
+        return acceptFirst(from: ctx.postfixExpression())
     }
     
     public override func visitPostfixExpression(_ ctx: ObjectiveCParser.PostfixExpressionContext) -> Expression? {
@@ -185,28 +181,51 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
-        if let exp = ctx.expression() {
-            return exp.accept(self)
-        }
-        
-        return nil
+        return acceptFirst(from: ctx.expression())
     }
     
     public override func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> Expression? {
-        if let constant = ctx.constant() {
-            return constant.accept(self)
-        }
-        if let string = ctx.stringLiteral() {
-            return string.accept(self)
-        }
-        if let ident = ctx.identifier() {
-            return .identifier(ident.getText())
-        }
-        if let messageExpression = ctx.messageExpression() {
-            return messageExpression.accept(self)
+        return
+            acceptFirst(from: ctx.constant(),
+                        ctx.stringLiteral(),
+                        ctx.identifier(),
+                        ctx.messageExpression(),
+                        ctx.arrayExpression(),
+                        ctx.dictionaryExpression(),
+                        ctx.boxExpression()
+        )
+    }
+    
+    public override func visitArrayExpression(_ ctx: ObjectiveCParser.ArrayExpressionContext) -> Expression? {
+        guard let expressions = ctx.expressions() else {
+            return .arrayLiteral([])
         }
         
-        return nil
+        let exps = expressions.expression().compactMap { $0.accept(self) }
+        
+        return .arrayLiteral(exps)
+    }
+    
+    public override func visitDictionaryExpression(_ ctx: ObjectiveCParser.DictionaryExpressionContext) -> Expression? {
+        let dictionaryPairs = ctx.dictionaryPair()
+        
+        let pairs =
+            dictionaryPairs.compactMap { pair -> ExpressionDictionaryPair? in
+                guard let key = pair.castExpression()?.accept(self) else {
+                    return nil
+                }
+                guard let value = pair.expression()?.accept(self) else {
+                    return nil
+                }
+                
+                return ExpressionDictionaryPair(key: key, value: value)
+            }
+        
+        return .dictionaryLiteral(pairs)
+    }
+    
+    public override func visitBoxExpression(_ ctx: ObjectiveCParser.BoxExpressionContext) -> Expression? {
+        return acceptFirst(from: ctx.expression(), ctx.constant(), ctx.identifier())
     }
     
     public override func visitStringLiteral(_ ctx: ObjectiveCParser.StringLiteralContext) -> Expression? {
@@ -264,6 +283,20 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         if let float = ctx.FLOATING_POINT_LITERAL()?.getText(), let value = Float(dropFloatSuffixes(from: float)) {
             return .constant(.float(value))
+        }
+        
+        return nil
+    }
+    
+    public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> Expression? {
+        return .identifier(ctx.getText())
+    }
+    
+    private func acceptFirst(from rules: ParserRuleContext?...) -> Expression? {
+        for rule in rules {
+            if let expr = rule?.accept(self) {
+                return expr
+            }
         }
         
         return nil

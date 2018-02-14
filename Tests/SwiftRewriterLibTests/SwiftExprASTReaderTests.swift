@@ -117,6 +117,22 @@ class SwiftExprASTReaderTests: XCTestCase {
                readsAs: exp)
     }
     
+    func testArrayLiteral() {
+        assert(objcExpr: "@[]", readsAs: .arrayLiteral([]))
+        assert(objcExpr: "@[@\"abc\"]", readsAs: .arrayLiteral([.constant("abc")]))
+        assert(objcExpr: "@[@\"abc\", @1]", readsAs: .arrayLiteral([.constant("abc"), .constant(1)]))
+    }
+    
+    func testDictionaryLiteral() {
+        assert(objcExpr: "@{}", readsAs: .dictionaryLiteral([]))
+        assert(objcExpr: "@{@1: @2}", readsAs: .dictionaryLiteral([ExpressionDictionaryPair(key: .constant(1), value: .constant(2))]))
+        assert(objcExpr: "@{@1: @2, @3: @4}",
+               readsAs: .dictionaryLiteral([
+                ExpressionDictionaryPair(key: .constant(1), value: .constant(2)),
+                ExpressionDictionaryPair(key: .constant(3), value: .constant(4))
+                ]))
+    }
+    
     func assert(objcExpr: String, readsAs expected: Expression, file: String = #file, line: Int = #line) {
         let input = ANTLRInputStream(objcExpr)
         let lxr = ObjectiveCLexer(input)
