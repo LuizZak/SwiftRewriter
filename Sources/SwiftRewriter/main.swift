@@ -19,6 +19,9 @@ do {
         let output = StdoutWriterOutput()
         
         let converter = SwiftRewriter(input: input, output: output)
+        
+        converter.expressionPasses.append(CoreGraphicsExpressionPass())
+        
         try converter.rewrite()
         
         // Print diagnostics

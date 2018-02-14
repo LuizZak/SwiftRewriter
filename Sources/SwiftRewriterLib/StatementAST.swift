@@ -125,6 +125,13 @@ public indirect enum Postfix: Equatable {
 public enum FunctionArgument: Equatable {
     case labeled(String, Expression)
     case unlabeled(Expression)
+    
+    public var expression: Expression {
+        switch self {
+        case .labeled(_, let exp), .unlabeled(let exp):
+            return exp
+        }
+    }
 }
 
 /// One of the recognized constant values

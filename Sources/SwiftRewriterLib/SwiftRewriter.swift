@@ -18,6 +18,10 @@ public class SwiftRewriter {
     /// source processing.
     public let diagnostics: Diagnostics
     
+    /// An expression pass is executed for every method expression to allow custom
+    /// transformations to be applied to resulting code.
+    public var expressionPasses: [ExpressionPass] = []
+    
     public init(input: InputSourcesProvider, output: WriterOutput) {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input

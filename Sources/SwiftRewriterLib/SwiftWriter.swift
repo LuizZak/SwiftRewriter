@@ -8,6 +8,8 @@ public class SwiftWriter {
     let context = TypeContext()
     let typeMapper: TypeMapper
     
+    public var expressionPasses: [ExpressionPass] = []
+    
     public init(intentions: IntentionCollection, output: WriterOutput) {
         self.intentions = intentions
         self.output = output

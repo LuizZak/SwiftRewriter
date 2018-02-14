@@ -6,6 +6,8 @@ import ObjcParser
 /// Main frontend class for performing Swift-conversion of Objective-C statements
 /// and expressions.
 class SwiftStmtRewriter {
+    var expressionPasses: [ExpressionPass] = []
+    
     public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
 //        let listener = StmtRewriterListener(target: target)
 //        let walker = ParseTreeWalker()
@@ -17,7 +19,7 @@ class SwiftStmtRewriter {
             return
         }
         
-        let rewriter = StatementRewriter(target: target)
+        let rewriter = StatementRewriter(target: target, expressionPasses: expressionPasses)
         rewriter.visitStatement(result)
     }
     
@@ -33,7 +35,7 @@ class SwiftStmtRewriter {
         }
         
         let rewriter = ExpressionRewriter(target: target)
-        rewriter.visitExpression(result)
+        rewriter.rewrite(result, passes: expressionPasses)
     }
 }
 
@@ -44,7 +46,15 @@ fileprivate class ExpressionRewriter {
         self.target = target
     }
     
-    fileprivate func visitExpression(_ expression: Expression, parens: Bool = false) {
+    func rewrite(_ expression: Expression, passes: [ExpressionPass]) {
+        let exp = passes.reduce(into: expression, { (exp, pass) in
+            exp = pass.visitExpression(exp)
+        })
+        
+        visitExpression(exp)
+    }
+    
+    private func visitExpression(_ expression: Expression, parens: Bool = false) {
         if parens {
             target.outputInline("(")
         }
@@ -221,9 +231,11 @@ fileprivate class ExpressionRewriter {
 
 fileprivate class StatementRewriter {
     var target: RewriterOutputTarget
+    var expressionPasses: [ExpressionPass] = []
     
-    init(target: RewriterOutputTarget) {
+    init(target: RewriterOutputTarget, expressionPasses: [ExpressionPass]) {
         self.target = target
+        self.expressionPasses = expressionPasses
     }
     
     fileprivate func visitStatement(_ statement: Statement) {
@@ -392,7 +404,7 @@ fileprivate class StatementRewriter {
     
     private func emitExpr(_ expr: Expression) {
         let rewriter = ExpressionRewriter(target: target)
-        rewriter.visitExpression(expr)
+        rewriter.rewrite(expr, passes: expressionPasses)
     }
 }
 
