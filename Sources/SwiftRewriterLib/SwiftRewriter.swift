@@ -214,6 +214,8 @@ public class SwiftRewriter {
             return
         }
         
+        
+        
         guard let name = node.identifier, let type = node.type else {
             return
         }

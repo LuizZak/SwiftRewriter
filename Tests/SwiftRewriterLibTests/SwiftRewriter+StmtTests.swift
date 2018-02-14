@@ -162,7 +162,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
         try assertSingleStatement(
             objc: "CGFloat x = [self offsetForDate:cell.startDate];",
-            swift: "var x: CGFloat = self.offsetForDate(cell.startDate)"
+            swift: "var x = self.offsetForDate(cell.startDate)"
         )
     }
     

@@ -261,8 +261,11 @@ public class SwiftWriter {
     }
     
     private func outputMethodBody(_ body: MethodBodyIntention, target: RewriterOutputTarget) {
-        // TODO: Convert and output Swift method body here.
         guard let stmt = body.typedSource?.statements else {
+            target.outputInline(" {")
+            target.outputLineFeed()
+            target.output(line: "}")
+            
             return
         }
         

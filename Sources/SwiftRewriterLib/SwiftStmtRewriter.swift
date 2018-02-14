@@ -239,7 +239,7 @@ fileprivate class StatementRewriter {
         case let .for(pattern, exp, body):
             visitForIn(pattern, exp, body)
         case let .defer(body):
-            visitCompound(body)
+            visitDefer(body)
         case let .return(expr):
             visitReturn(expr)
         case .break:
@@ -248,8 +248,8 @@ fileprivate class StatementRewriter {
             visitContinue()
         case let .expressions(exp):
             visitExpressions(exp)
-        case let .variableDeclaration(identifier, type, initialization):
-            visitVariableDeclaration(identifier, type, initialValue: initialization)
+        case .variableDeclarations(let variables):
+            visitVariableDeclarations(variables)
         }
     }
     
@@ -310,6 +310,7 @@ fileprivate class StatementRewriter {
     }
     
     private func visitDefer(_ body: CompoundStatement) {
+        target.outputIdentation()
         target.outputInline("defer ")
         visitCompound(body)
     }
@@ -319,6 +320,7 @@ fileprivate class StatementRewriter {
             target.outputIdentation()
             target.outputInline("return ")
             emitExpr(exp)
+            target.outputLineFeed()
         } else {
             target.output(line: "return")
         }
@@ -340,33 +342,49 @@ fileprivate class StatementRewriter {
         }
     }
     
-    private func visitVariableDeclaration(_ ident: String, _ type: ObjcType, initialValue: Expression?) {
-        let owner = SwiftWriter._ownershipPrefix(inType: type)
-        let varOrLet = SwiftWriter._varOrLet(fromType: type)
-        let null = SwiftWriter._typeNullability(inType: type)
-        
-        let mapper = TypeMapper(context: TypeContext())
-        
-        let typeString =
-            mapper.swiftType(forObjcType: type,
-                             context: .init(explicitNullability: null))
-        
-        var output = ""
-        if !owner.isEmpty {
-            output += owner
-            output += " "
+    private func visitVariableDeclarations(_ declarations: [StatementVariableDeclaration]) {
+        func emitDeclaration(_ declaration: StatementVariableDeclaration) {
+            let null = SwiftWriter._typeNullability(inType: declaration.type)
+            
+            let mapper = TypeMapper(context: TypeContext())
+            
+            let typeString =
+                mapper.swiftType(forObjcType: declaration.type,
+                                 context: .init(explicitNullability: null))
+            
+            target.outputInline(declaration.identifier)
+            
+            if let initial = declaration.initialization {
+                target.outputInline(" = ")
+                
+                emitExpr(initial)
+            } else {
+                target.outputInline(": \(typeString)")
+            }
         }
-        output += "\(varOrLet) "
-        output += ident
-        output += ": \(typeString)"
+        
+        if declarations.count == 0 {
+            return
+        }
+        
+        let owner = SwiftWriter._ownershipPrefix(inType: declarations[0].type)
+        let varOrLet = SwiftWriter._varOrLet(fromType: declarations[0].type)
         
         target.outputIdentation()
-        target.outputInline(output)
         
-        if let initial = initialValue {
-            target.outputInline(" = ")
+        if !owner.isEmpty {
+            target.outputInline(owner)
+            target.outputInline(" ")
+        }
+        target.outputInline(varOrLet)
+        target.outputInline(" ")
+        
+        for (i, decl) in declarations.enumerated() {
+            if i > 0 {
+                target.outputInline(", ")
+            }
             
-            emitExpr(initial)
+            emitDeclaration(decl)
         }
         
         target.outputLineFeed()

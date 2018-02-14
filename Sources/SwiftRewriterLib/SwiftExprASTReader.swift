@@ -324,7 +324,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             if let value = Float(suffixless) {
                 return .constant(.float(value))
             } else {
-                return .constant(.rawConstant(ctx.getText()))
+                return .constant(.rawConstant(suffixless))
             }
         }
         

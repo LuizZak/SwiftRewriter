@@ -121,12 +121,13 @@ class SwiftStatementASTReaderTests: XCTestCase {
     
     func testDeclaration() {
         assert(objcExpr: "CGFloat value = 1;",
+               parseBlock: { try $0.declaration() },
                readsAs: .variableDeclaration(identifier: "value",
                                              type: .struct("CGFloat"),
                                              initialization: .constant(1)))
     }
     
-    func assert(objcExpr: String, readsAs expected: Statement, file: String = #file, line: Int = #line) {
+    func assert(objcExpr: String, parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() }, readsAs expected: Statement, file: String = #file, line: Int = #line) {
         let input = ANTLRInputStream(objcExpr)
         let lxr = ObjectiveCLexer(input)
         tokens = CommonTokenStream(lxr)
@@ -135,7 +136,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         
         do {
             let parser = try ObjectiveCParser(tokens)
-            let expr = try parser.statement()
+            let expr = try parseBlock(parser)
             
             let result = expr.accept(sut)
             

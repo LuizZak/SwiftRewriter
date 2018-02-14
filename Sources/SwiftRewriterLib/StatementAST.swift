@@ -36,10 +36,16 @@ public indirect enum Statement: Equatable {
     case `break`
     case `continue`
     case expressions([Expression])
-    case variableDeclaration(identifier: String, type: ObjcType, initialization: Expression?)
+    case variableDeclarations([StatementVariableDeclaration])
     
     public static func expression(_ expr: Expression) -> Statement {
         return .expressions([expr])
+    }
+    
+    public static func variableDeclaration(identifier: String, type: ObjcType, initialization: Expression?) -> Statement {
+        return .variableDeclarations([
+            StatementVariableDeclaration(identifier: identifier, type: type, initialization: initialization)
+        ])
     }
 }
 
@@ -55,6 +61,18 @@ public enum Pattern: Equatable {
         default:
             return self
         }
+    }
+}
+
+public struct StatementVariableDeclaration: Equatable {
+    public var identifier: String
+    public var type: ObjcType
+    public var initialization: Expression?
+    
+    public init(identifier: String, type: ObjcType, initialization: Expression?) {
+        self.identifier = identifier
+        self.type = type
+        self.initialization = initialization
     }
 }
 
