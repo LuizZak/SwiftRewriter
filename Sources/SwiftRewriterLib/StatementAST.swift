@@ -3,7 +3,14 @@ import GrammarModels
 /// Encapsulates a compound statement, that is, a series of statements enclosed
 /// within braces.
 public struct CompoundStatement: Equatable {
-    public var statements: [Statement] = []
+    /// An empty compound statement.
+    public static var empty = CompoundStatement()
+    
+    public var statements: [Statement]
+    
+    public init() {
+        self.statements = []
+    }
     
     public init(statements: [Statement]) {
         self.statements = statements
@@ -19,14 +26,36 @@ extension CompoundStatement: ExpressibleByArrayLiteral {
 /// A top-level statement
 public indirect enum Statement: Equatable {
     case semicolon
-    case compound([Statement])
-    case `if`(Expression, body: Statement, `else`: Statement?)
-    case `while`(Expression, body: Statement)
+    case compound(CompoundStatement)
+    case `if`(Expression, body: CompoundStatement, `else`: CompoundStatement?)
+    case `while`(Expression, body: CompoundStatement)
+    case `for`(Pattern, Expression, body: CompoundStatement)
+    // TODO: case `switch`(...)
+    case `defer`(CompoundStatement)
     case `return`(Expression?)
     case `break`
     case `continue`
-    case expression(Expression)
+    case expressions([Expression])
     case variableDeclaration(identifier: String, type: ObjcType, initialization: Expression?)
+    
+    public static func expression(_ expr: Expression) -> Statement {
+        return .expressions([expr])
+    }
+}
+
+/// A pattern for pattern-matching
+public enum Pattern: Equatable {
+    case identifier(String)
+    indirect case tuple([Pattern])
+    
+    public var simplified: Pattern {
+        switch self {
+        case .tuple(let pt) where pt.count == 1:
+            return pt[0]
+        default:
+            return self
+        }
+    }
 }
 
 /// An expression
@@ -81,6 +110,17 @@ public enum Constant: Equatable {
 
 /// Describes an operator across one or two operands
 public enum SwiftOperator: String {
+    /// If `true`, a spacing is suggested to be placed in between operands.
+    /// True for most operators except range operators.
+    public var requiresSpacing: Bool {
+        switch self {
+        case .openRange, .closedRange:
+            return false
+        default:
+            return true
+        }
+    }
+    
     case add = "+"
     case subtract = "-"
     case multiply = "*"
@@ -119,6 +159,9 @@ public enum SwiftOperator: String {
     case unequals = "!="
     
     case nullCoallesce = "??"
+    
+    case openRange = "..<"
+    case closedRange = "..."
 }
 
 // MARK: - String Conversion
@@ -128,14 +171,23 @@ extension Expression: CustomStringConvertible {
         switch self {
         case let .assignment(lhs, op, rhs),
              let .binary(lhs, op, rhs):
-            return "\(lhs.description) \(op) \(rhs.description)"
+            
+            // With spacing
+            if op.requiresSpacing {
+                return "\(lhs.description) \(op) \(rhs.description)"
+            }
+            
+            // No spacing
+            return "\(lhs.description)\(op)\(rhs.description)"
         case let .unary(op, exp), let .prefix(op, exp):
+            // Parenthesized
             if exp.requiresParens {
                 return "\(op)(\(exp))"
             }
             
             return "\(op)\(exp)"
         case let .postfix(exp, op):
+            // Parenthesized
             if exp.requiresParens {
                 return "(\(exp))\(op)"
             }

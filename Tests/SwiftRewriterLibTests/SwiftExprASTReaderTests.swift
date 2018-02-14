@@ -27,8 +27,11 @@ class SwiftExprASTReaderTests: XCTestCase {
     func testFunctionCall() {
         assert(objcExpr: "print()", readsAs: .postfix(.identifier("print"), .functionCall(arguments: [])))
         assert(objcExpr: "a.method()", readsAs: .postfix(.postfix(.identifier("a"), .member("method")), .functionCall(arguments: [])))
-        assert(objcExpr: "print(123, 456)", readsAs: .postfix(.identifier("print"), .functionCall(arguments: [.unlabeled(.constant(123)),
-                                                                                                              .unlabeled(.constant(456))])))
+        assert(objcExpr: "print(123, 456)",
+               readsAs: .postfix(.identifier("print"),
+                                 .functionCall(arguments: [.unlabeled(.constant(123)),
+                                                           .unlabeled(.constant(456))]))
+        )
     }
     
     func testSubscript() {
@@ -80,6 +83,27 @@ class SwiftExprASTReaderTests: XCTestCase {
                 [[UIView alloc] initWithFrame:CGRectMake(0, kCPDefaultTimelineRowHeight, self.ganttWidth, self.ganttHeight)];
             """,
             readsAs: .assignment(lhs: .identifier("_cellContainerView"), op: .assign, rhs: exp))
+    }
+    
+    func testBinaryOperator() {
+        assert(objcExpr: "i + 10",
+               readsAs: .binary(lhs: .identifier("i"), op: .add, rhs: .constant(10)))
+        
+        assert(objcExpr: "i - 10",
+               readsAs: .binary(lhs: .identifier("i"), op: .subtract, rhs: .constant(10)))
+        
+        assert(objcExpr: "i > 10",
+               readsAs: .binary(lhs: .identifier("i"), op: .greaterThan, rhs: .constant(10)))
+        
+        assert(objcExpr: "i < 10",
+               readsAs: .binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)))
+    }
+    
+    func testPostfixIncrementDecrement() {
+        assert(objcExpr: "i++",
+               readsAs: .assignment(lhs: .identifier("i"), op: .addAssign, rhs: .constant(1)))
+        assert(objcExpr: "i--",
+               readsAs: .assignment(lhs: .identifier("i"), op: .subtractAssign, rhs: .constant(1)))
     }
     
     func testPostfixStructAccessWithAssignment() {

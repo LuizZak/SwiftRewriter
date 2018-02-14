@@ -39,10 +39,35 @@ class StatementASTTests: XCTestCase {
             "(abc as? String)?.count")
     }
     
+    func testDescriptionBinaryOps() {
+        XCTAssertEqual(
+            (Expression.constant(10) + Expression.constant(11)).description,
+            "10 + 11")
+        XCTAssertEqual(
+            (Expression.constant(10) - Expression.constant(11)).description,
+            "10 - 11")
+        XCTAssertEqual(
+            (Expression.constant(10) / Expression.constant(11)).description,
+            "10 / 11")
+        XCTAssertEqual(
+            (Expression.constant(10) * Expression.constant(11)).description,
+            "10 * 11")
+    }
+    
     func testDescriptionNullCoallesce() {
         XCTAssertEqual(
             Expression.binary(lhs: .identifier("abc"), op: .nullCoallesce, rhs: .identifier("def")).description,
             "abc ?? def")
+    }
+    
+    func testRangeExpressions() {
+        XCTAssertEqual(
+            Expression.binary(lhs: .constant(10), op: .closedRange, rhs: .constant(11)).description,
+            "10...11")
+        
+        XCTAssertEqual(
+            Expression.binary(lhs: .constant(10), op: .openRange, rhs: .constant(11)).description,
+            "10..<11")
     }
     
     func testDescriptionCostants() {

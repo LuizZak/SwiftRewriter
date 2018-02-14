@@ -27,6 +27,30 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return
                 Expression.assignment(lhs: unaryExpr, op: op, rhs: assignExpr)
         }
+        // Binary expression
+        if ctx.expression().count == 2 {
+            guard let lhs = ctx.expression(0)?.accept(self) else {
+                return nil
+            }
+            guard let rhs = ctx.expression(1)?.accept(self) else {
+                return nil
+            }
+            guard let op = ctx.op?.getText() else {
+                return nil
+            }
+            
+            // << / >>
+            if ctx.LT().count == 2 {
+                return Expression.binary(lhs: lhs, op: .bitwiseShiftLeft, rhs: rhs)
+            }
+            if ctx.GT().count == 2 {
+                return Expression.binary(lhs: lhs, op: .bitwiseShiftRight, rhs: rhs)
+            }
+            
+            if let op = SwiftOperator(rawValue: op) {
+                return Expression.binary(lhs: lhs, op: op, rhs: rhs)
+            }
+        }
         
         return nil
     }
@@ -96,6 +120,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 
                 // Subscription
                 result = .postfix(result, .subscript(expr))
+            } else if post.INC() != nil {
+                result = .assignment(lhs: result, op: .addAssign, rhs: .constant(1))
+            } else if post.DEC() != nil {
+                result = .assignment(lhs: result, op: .subtractAssign, rhs: .constant(1))
             }
         }
         

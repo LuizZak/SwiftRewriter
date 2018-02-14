@@ -6,14 +6,31 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     
     public var declaratorIndex: Int = 0
     
-    public static func extract(from rule: ParserRuleContext, atIndex index: Int = 0) -> TypeName? {
+    public static func extract(from rule: ObjectiveCParser.VarDeclarationContext) -> TypeName? {
+        return _extract(from: rule)
+    }
+    public static func extract(from typeName: ObjectiveCParser.TypeNameContext) -> TypeName? {
+        return _extract(from: typeName)
+    }
+    public static func extract(from rule: ObjectiveCParser.ForLoopInitializerContext) -> TypeName? {
+        return _extract(from: rule)
+    }
+    
+    public static func extractAll(from rule: ObjectiveCParser.VarDeclarationContext) -> [TypeName] {
+        return _extractAll(from: rule)
+    }
+    public static func extractAll(from rule: ObjectiveCParser.ForLoopInitializerContext) -> [TypeName] {
+        return _extractAll(from: rule)
+    }
+    
+    private static func _extract(from rule: ParserRuleContext, atIndex index: Int = 0) -> TypeName? {
         let ext = VarDeclarationTypeExtractor()
         ext.declaratorIndex = index
         
         return rule.accept(ext)
     }
     
-    public static func extractAll(from rule: ParserRuleContext) -> [TypeName] {
+    private static func _extractAll(from rule: ParserRuleContext) -> [TypeName] {
         let ext = VarDeclarationTypeExtractor()
         
         if let vdec = rule as? ObjectiveCParser.VarDeclarationContext {
