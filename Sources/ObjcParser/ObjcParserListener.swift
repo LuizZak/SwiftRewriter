@@ -548,10 +548,10 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
         }
     }
     
-    // Pick global variable declarations that are beneat the top-level, like inside
+    // Pick global variable declarations that are beneath the top-level, like inside
     // class @interface/@implementations etc.
     override func enterVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) {
-        if ctx.parent is ObjectiveCParser.DeclarationContext && ctx.parent?.parent is ObjectiveCParser.TopLevelDeclarationContext {
+        if ctx.context.scope != .class || !ctx.context.isStatic {
             return
         }
         
@@ -568,15 +568,12 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
             
             guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else { return nil }
             
-            for initDeclarator in initDeclarators {
+            let allTypes = VarDeclarationTypeExtractor.extractAll(from: ctx)
+            
+            for (initDeclarator, typeString) in zip(initDeclarators, allTypes) {
                 guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }
                 
                 // Get a type string to convert into a proper type
-                guard let declarationSpecifiers = ctx.declarationSpecifiers() else { continue }
-                let pointer = initDeclarator.declarator()?.pointer()
-                
-                let typeString = "\(declarationSpecifiers.getText()) \(pointer?.getText() ?? "")"
-                
                 guard let type = ObjcParserListener.parseObjcType(typeString) else { continue }
                 
                 let varDecl = VariableDeclaration()

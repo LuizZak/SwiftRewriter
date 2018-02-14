@@ -6,7 +6,7 @@ extension ParserRuleContext: ParseTreeContextable {
 }
 
 /// Protocol for parser rules
-public struct Contextable<Base> {
+public struct Contextable<Base> where Base: Tree {
     /// Base object to extend.
     public let base: Base
     
@@ -19,9 +19,9 @@ public struct Contextable<Base> {
 }
 
 /// A type for a parse tree that features extra computable state
-public protocol ParseTreeContextable {
+public protocol ParseTreeContextable: Tree {
     /// Extended type
-    associatedtype CompatibleType
+    associatedtype CompatibleType: Tree
     
     /// Context extensions.
     static var context: Contextable<CompatibleType>.Type { get }
@@ -45,17 +45,6 @@ public extension ParseTreeContextable {
         }
     }
 }
-
-public protocol DeclarationParserRule: Tree {
-    
-}
-
-public extension Contextable where Base: DeclarationParserRule {
-    public var scope: ContainmentScope {
-        return .global
-    }
-}
-
 
 public extension Tree {
     /// Returns true `iff` self is a descendent of any depth from a given `Tree`
@@ -81,11 +70,4 @@ public extension Tree {
         
         return nil
     }
-}
-
-/// Describes the contained scope of a declaration
-public enum ContainmentScope {
-    case global
-    case `class`
-    case local
 }

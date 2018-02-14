@@ -47,7 +47,7 @@ class TypeMapperTests: XCTestCase {
         
         expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
                withExplicitNullability: nil,
-               toConvertTo: "AnyObject!")
+               toConvertTo: "AnyObject?")
     }
     
     func testConcreteTypesWithProtocol() {
@@ -70,6 +70,15 @@ class TypeMapperTests: XCTestCase {
         expect(.blockType(name: "block", returnType: .struct("NSInteger"), parameters: [.qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"]), .pointer(.struct("NSString"))]),
                withExplicitNullability: nil,
                toConvertTo: "(String?, String!) -> Int")
+    }
+    
+    func testQualifiedWithinSpecified() {
+        expect(.specified(specifiers: ["static"], .qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"])),
+               withExplicitNullability: nil,
+               toConvertTo: "String?")
+        expect(.specified(specifiers: ["__weak"], .qualified(.pointer(.struct("NSString")), qualifiers: ["const"])),
+               withExplicitNullability: nil,
+               toConvertTo: "String?")
     }
     
     private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull, toConvertTo expected: String, file: String = #file, line: Int = #line) {

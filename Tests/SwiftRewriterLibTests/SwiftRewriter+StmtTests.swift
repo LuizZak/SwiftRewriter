@@ -223,6 +223,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             var myInt: Int
             var myInt2: Int = 5
+            
             class MyClass: NSObject {
                 func myMethod() {
                     var local = 5

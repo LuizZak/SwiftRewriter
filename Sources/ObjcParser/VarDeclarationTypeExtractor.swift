@@ -1,9 +1,48 @@
 import ObjcParserAntlr
+import Antlr4
 
 public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
+    public typealias TypeName = String
+    
     public var declaratorIndex: Int = 0
     
-    public override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> String? {
+    public static func extract(from rule: ParserRuleContext, atIndex index: Int = 0) -> TypeName? {
+        let ext = VarDeclarationTypeExtractor()
+        ext.declaratorIndex = index
+        
+        return rule.accept(ext)
+    }
+    
+    public static func extractAll(from rule: ParserRuleContext) -> [TypeName] {
+        let ext = VarDeclarationTypeExtractor()
+        
+        if let vdec = rule as? ObjectiveCParser.VarDeclarationContext {
+            guard let count = vdec.initDeclaratorList()?.initDeclarator().count else {
+                return []
+            }
+            
+            return (0..<count).compactMap { i -> TypeName? in
+                ext.declaratorIndex = i
+                
+                return vdec.accept(ext)
+            }
+        }
+        if let loopInit = rule as? ObjectiveCParser.ForLoopInitializerContext {
+            guard let count = loopInit.initDeclaratorList()?.initDeclarator().count else {
+                return []
+            }
+            
+            return (0..<count).compactMap { i -> TypeName? in
+                ext.declaratorIndex = i
+                
+                return loopInit.accept(ext)
+            }
+        }
+        
+        return rule.accept(ext).map { [$0] } ?? []
+    }
+    
+    public override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> TypeName? {
         guard let initDeclarator = ctx.initDeclaratorList()?.initDeclarator(declaratorIndex) else { return nil }
         
         // Get a type string to convert into a proper type
@@ -17,7 +56,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitForLoopInitializer(_ ctx: ObjectiveCParser.ForLoopInitializerContext) -> String? {
+    public override func visitForLoopInitializer(_ ctx: ObjectiveCParser.ForLoopInitializerContext) -> TypeName? {
         guard let initDeclarator = ctx.initDeclaratorList()?.initDeclarator(declaratorIndex) else { return nil }
         
         // Get a type string to convert into a proper type
@@ -30,7 +69,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitTypeVariableDeclarator(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> String? {
+    public override func visitTypeVariableDeclarator(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> TypeName? {
         guard let declarator = ctx.declarator() else { return nil }
         
         // Get a type string to convert into a proper type
@@ -43,7 +82,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext) -> String? {
+    public override func visitTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext) -> TypeName? {
         // TODO: Support typeofExpression
         if ctx.typeofExpression() != nil {
             return nil
@@ -64,7 +103,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return ctx.getText()
     }
     
-    public override func visitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
+    public override func visitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> TypeName? {
         if let typeName = ctx.typeName() {
             return typeName.accept(self)
         }
@@ -87,7 +126,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return typeString
     }
     
-    public override func visitBlockType(_ ctx: ObjectiveCParser.BlockTypeContext) -> String? {
+    public override func visitBlockType(_ ctx: ObjectiveCParser.BlockTypeContext) -> TypeName? {
         guard let returnTypeSpecifier = ctx.typeSpecifier(0) else {
             return nil
         }
@@ -110,7 +149,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return "(\(parameterTypes.joined(separator: ", "))) -> \(returnType)"
     }
     
-    public override func visitTypeName(_ ctx: ObjectiveCParser.TypeNameContext) -> String? {
+    public override func visitTypeName(_ ctx: ObjectiveCParser.TypeNameContext) -> TypeName? {
         // Block type
         if let blockType = ctx.blockType() {
             return blockType.accept(self)
@@ -126,7 +165,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return "\(specifierList) \(abstractDeclarator)"
     }
     
-    public override func visitPointer(_ ctx: ObjectiveCParser.PointerContext) -> String? {
+    public override func visitPointer(_ ctx: ObjectiveCParser.PointerContext) -> TypeName? {
         var pointerStr = "*"
         
         if let declSpecifier = ctx.declarationSpecifiers()?.accept(self) {
@@ -139,7 +178,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return pointerStr
     }
     
-    public override func visitSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext) -> String? {
+    public override func visitSpecifierQualifierList(_ ctx: ObjectiveCParser.SpecifierQualifierListContext) -> TypeName? {
         guard let children = ctx.children else {
             return nil
         }
@@ -149,7 +188,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         }.joined(separator: " ")
     }
     
-    public override func visitDeclarationSpecifiers(_ ctx: ObjectiveCParser.DeclarationSpecifiersContext) -> String? {
+    public override func visitDeclarationSpecifiers(_ ctx: ObjectiveCParser.DeclarationSpecifiersContext) -> TypeName? {
         guard let children = ctx.children else {
             return nil
         }

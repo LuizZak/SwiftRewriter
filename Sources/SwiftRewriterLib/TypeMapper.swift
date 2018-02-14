@@ -135,7 +135,11 @@ public class TypeMapper {
         
         switch type {
         case .struct, .void:
-            return final
+            return final;
+            
+        case .qualified:
+            return swiftType(forObjcType: type, context: locSpecifiers)
+            
         default:
             return swiftType(name: final, withNullability: locSpecifiers.nullability(),
                              parens: shouldParenthesize(type: type))
@@ -358,7 +362,7 @@ public class TypeMapper {
             }
             
             // Weak assumes nullable
-            if hasPropertyModifier(named: "weak") {
+            if hasSpecifierModifier(named: "__weak") || hasPropertyModifier(named: "weak") {
                 return .nullable
             }
             
