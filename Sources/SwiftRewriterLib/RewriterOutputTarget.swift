@@ -21,12 +21,25 @@ public struct RewriterOutputSettings {
 public protocol RewriterOutputTarget: class {
     init(settings: RewriterOutputSettings)
     
-    /// Outputs the given string and outputs a line feed at the end, with padding
-    /// for identation at the begginning.
+    /// Outputs the given string with a `.plain` text style and outputs a line
+    /// feed at the end, with padding for identation at the begginning.
     func output(line: String)
     
-    /// Outputs a given string inline without adding a line feed at the end.
+    /// Outputs a given string inline with a `.plain` text style without adding
+    /// a line feed at the end.
     func outputInline(_ content: String)
+    
+    /// Outputs the given string and outputs a line feed at the end, with padding
+    /// for identation at the begginning.
+    func output(line: String, style: TextStyle)
+    
+    /// Outputs a given string inline without adding a line feed at the end.
+    func outputInline(_ content: String, style: TextStyle)
+    
+    /// Outputs a given string inline and follows it with a space without adding
+    /// a line feed at the end.
+    /// The style is not applied to the spacing string.
+    func outputInlineWithSpace(_ content: String, style: TextStyle)
     
     /// Outputs a line feed character at the current position
     func outputLineFeed()
@@ -50,7 +63,33 @@ public protocol RewriterOutputTarget: class {
     func onAfterOutput()
 }
 
+/// Defines the style of a text to emit.
+public enum TextStyle {
+    case plain
+    case keyword
+    case typeName
+    case stringLiteral
+    case numberLiteral
+    case comment
+    case directive
+    case memberName
+}
+
 public extension RewriterOutputTarget {
+    
+    func output(line: String) {
+        output(line: line, style: .plain)
+    }
+    
+    func outputInline(_ content: String) {
+        outputInline(content, style: .plain)
+    }
+    
+    func outputInlineWithSpace(_ content: String, style: TextStyle) {
+        outputInline(content, style: style)
+        outputInline(" ")
+    }
+    
     func idented(perform block: () -> ()) {
         increaseIdentation()
         block()
@@ -72,7 +111,7 @@ public final class StringRewriterOutput: RewriterOutputTarget {
         self.settings = settings
     }
     
-    public func output(line: String) {
+    public func output(line: String, style: TextStyle) {
         ignoreCallChange = true
         
         outputIdentation()
@@ -94,7 +133,7 @@ public final class StringRewriterOutput: RewriterOutputTarget {
         callChangeCallback()
     }
     
-    public func outputInline(_ content: String) {
+    public func outputInline(_ content: String, style: TextStyle) {
         buffer += content
         callChangeCallback()
     }

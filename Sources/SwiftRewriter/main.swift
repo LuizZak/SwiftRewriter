@@ -12,12 +12,15 @@ let parser =
 let filesArg: PositionalArgument<[String]> =
     parser.add(positional: "<files>", kind: [String].self, usage: "Objective-C file(s) to convert")
 
+let colorArg: OptionArgument<Bool> =
+    parser.add(option: "-colorize", kind: Bool.self, usage: "Pass this parameter as true to enable terminal colorization during output.")
+
 do {
     let result = try parser.parse(arguments)
     
     if let files = result.get(filesArg) {
         let input = FileInputProvider(files: files)
-        let output = StdoutWriterOutput()
+        let output = StdoutWriterOutput(colorize: result.get(colorArg) ?? false)
         
         let converter = SwiftRewriter(input: input, output: output)
         

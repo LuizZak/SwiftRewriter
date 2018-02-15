@@ -15,7 +15,7 @@ class SwiftStmtRewriter {
     public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
         let parser = SwiftStatementASTReader()
         guard let result = compoundStatement.accept(parser) else {
-            target.output(line: "// Failed to parse method.")
+            target.output(line: "// Failed to parse method.", style: .comment)
             return
         }
         
@@ -26,7 +26,7 @@ class SwiftStmtRewriter {
     public func rewrite(expression: ObjectiveCParser.ExpressionContext, into target: RewriterOutputTarget) {
         let parser = SwiftExprASTReader()
         guard let result = expression.accept(parser) else {
-            target.output(line: "// Failed to parse method.")
+            target.output(line: "// Failed to parse method.", style: .comment)
             return
         }
         
@@ -85,9 +85,9 @@ fileprivate class ExpressionWriter {
         case let .block(parameters, returnType, body):
             visitBlock(parameters, returnType, body)
         case .unknown(let context):
-            target.outputInline("/*")
-            target.outputInline(context.description)
-            target.outputInline("*/")
+            target.outputInline("/*", style: .comment)
+            target.outputInline(context.description, style: .comment)
+            target.outputInline("*/", style: .comment)
         }
         
         if parens {
@@ -135,7 +135,7 @@ fileprivate class ExpressionWriter {
         switch op {
         case .member(let member):
             target.outputInline(".")
-            target.outputInline(member)
+            target.outputInline(member, style: .memberName)
         
         case .optionalAccess:
             target.outputInline("?")
@@ -164,7 +164,19 @@ fileprivate class ExpressionWriter {
     }
     
     private func visitConstant(_ constant: Constant) {
-        target.outputInline(constant.description)
+        switch constant {
+        case .binary, .hexadecimal, .int, .octal, .float:
+            target.outputInline(constant.description, style: .numberLiteral)
+            
+        case .nil:
+            target.outputInline(constant.description, style: .keyword)
+            
+        case .string:
+            target.outputInline(constant.description, style: .stringLiteral)
+            
+        default:
+            target.outputInline(constant.description)
+        }
     }
     
     private func visitParens(_ exp: Expression) {
@@ -174,7 +186,11 @@ fileprivate class ExpressionWriter {
     }
     
     private func visitIdentifier(_ identifier: String) {
-        target.outputInline(identifier)
+        if identifier == "self" || identifier == "super" {
+            target.outputInline(identifier, style: .keyword)
+        } else {
+            target.outputInline(identifier)
+        }
     }
     
     private func visitCast(_ exp: Expression, type: ObjcType) {
@@ -184,7 +200,10 @@ fileprivate class ExpressionWriter {
         let typeMapper = TypeMapper(context: context)
         let typeName = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
         
-        target.outputInline(" as? \(typeName)")
+        target.outputInline(" ")
+        target.outputInline("as?", style: .keyword)
+        target.outputInline(" ")
+        target.outputInline("\(typeName)", style: .typeName)
     }
     
     private func visitArray(_ array: [Expression]) {
@@ -237,14 +256,14 @@ fileprivate class ExpressionWriter {
             
             target.outputInline(param.name)
             target.outputInline(": ")
-            target.outputInline(typeMapper.swiftType(forObjcType: param.type))
+            target.outputInline(typeMapper.swiftType(forObjcType: param.type), style: .typeName)
         }
         target.outputInline(")")
         
         target.outputInline(" -> ")
-        target.outputInline(typeMapper.swiftType(forObjcType: returnType))
+        target.outputInline(typeMapper.swiftType(forObjcType: returnType), style: .typeName)
         
-        target.outputInline(" in")
+        target.outputInline(" in", style: .keyword)
         
         if body.isEmpty {
             target.outputInline(" }")
@@ -309,9 +328,9 @@ fileprivate class StatementWriter {
         case .variableDeclarations(let variables):
             visitVariableDeclarations(variables)
         case .unknown(let context):
-            target.output(line: "/*")
-            target.output(line: context.description)
-            target.output(line: "*/")
+            target.output(line: "/*", style: .comment)
+            target.output(line: context.description, style: .comment)
+            target.output(line: "*/", style: .comment)
         }
     }
     
@@ -335,13 +354,13 @@ fileprivate class StatementWriter {
         if withIdent {
             target.outputIdentation()
         }
-        target.outputInline("if ")
+        target.outputInline("if ", style: .keyword)
         emitExpr(exp)
         
         visitCompound(body, lineFeedAfter: elseBody == nil)
         
         if let elseBody = elseBody {
-            target.outputInline(" else")
+            target.outputInline(" else", style: .keyword)
             
             if elseBody.statements.count == 1,
                 case let .if(exp, body, elseBody) = elseBody.statements[0] {
@@ -355,7 +374,7 @@ fileprivate class StatementWriter {
     
     private func visitWhile(_ exp: Expression, _ body: CompoundStatement) {
         target.outputIdentation()
-        target.outputInline("while ")
+        target.outputInline("while ", style: .keyword)
         emitExpr(exp)
         
         visitCompound(body)
@@ -363,9 +382,9 @@ fileprivate class StatementWriter {
     
     private func visitForIn(_ pattern: Pattern, _ exp: Expression, _ body: CompoundStatement) {
         target.outputIdentation()
-        target.outputInline("for ")
+        target.outputInline("for ", style: .keyword)
         target.outputInline(pattern.simplified.description)
-        target.outputInline(" in ")
+        target.outputInline(" in ", style: .keyword)
         emitExpr(exp)
         
         visitCompound(body)
@@ -373,27 +392,27 @@ fileprivate class StatementWriter {
     
     private func visitDefer(_ body: CompoundStatement) {
         target.outputIdentation()
-        target.outputInline("defer")
+        target.outputInline("defer", style: .keyword)
         visitCompound(body)
     }
     
     private func visitReturn(_ exp: Expression?) {
         if let exp = exp {
             target.outputIdentation()
-            target.outputInline("return ")
+            target.outputInline("return ", style: .keyword)
             emitExpr(exp)
             target.outputLineFeed()
         } else {
-            target.output(line: "return")
+            target.output(line: "return", style: .keyword)
         }
     }
     
     private func visitContinue() {
-        target.output(line: "continue")
+        target.output(line: "continue", style: .keyword)
     }
     
     private func visitBreak() {
-        target.output(line: "break")
+        target.output(line: "break", style: .keyword)
     }
     
     private func visitExpressions(_ expr: [Expression]) {
@@ -421,7 +440,8 @@ fileprivate class StatementWriter {
                 
                 emitExpr(initial)
             } else {
-                target.outputInline(": \(typeString)")
+                target.outputInline(": ")
+                target.outputInline(typeString, style: .typeName)
             }
         }
         
@@ -435,11 +455,9 @@ fileprivate class StatementWriter {
         target.outputIdentation()
         
         if !owner.isEmpty {
-            target.outputInline(owner)
-            target.outputInline(" ")
+            target.outputInlineWithSpace(owner, style: .keyword)
         }
-        target.outputInline(varOrLet)
-        target.outputInline(" ")
+        target.outputInlineWithSpace(varOrLet, style: .keyword)
         
         for (i, decl) in declarations.enumerated() {
             if i > 0 {

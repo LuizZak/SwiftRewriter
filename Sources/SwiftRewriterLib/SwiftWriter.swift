@@ -64,7 +64,11 @@ public class SwiftWriter {
                                           inNonnull: typeali.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: typeali.fromType, context: ctx)
         
-        target.output(line: "typealias \(typeali.named) = \(typeName)")
+        target.outputIdentation()
+        target.outputInlineWithSpace("typealias", style: .keyword)
+        target.outputInline(typeali.named, style: .keyword)
+        target.outputInline(" = ")
+        target.outputInline(typeName, style: .keyword)
     }
     
     private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention, target: RewriterOutputTarget) {
@@ -72,33 +76,38 @@ public class SwiftWriter {
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr
         let varOrLet = SwiftWriter._varOrLet(fromType: type)
+        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: varDecl.accessLevel)
         
-        var decl = varOrLet + " "
-        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: varDecl.accessLevel)
+        if !accessModifier.isEmpty {
+            target.outputInlineWithSpace(accessModifier, style: .keyword)
+        }
         
-        decl += name
+        target.outputInlineWithSpace(varOrLet, style: .keyword)
+        
+        target.outputInlineWithSpace(name, style: .plain)
         
         let ctx =
             TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: type),
                                           inNonnull: varDecl.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
-        decl += ": \(typeName)"
+        target.outputInline(": ")
+        target.outputInlineWithSpace(typeName, style: .typeName)
         
         if let expression = initVal?.typedSource?.expression?.expression?.expression {
-            let exprTarget = StringRewriterOutput()
+            target.outputInline(" = ")
             
             let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
-            rewriter.rewrite(expression: expression, into: exprTarget)
-            
-            decl += " = \(exprTarget.buffer.trimmingCharacters(in: .whitespaces))"
+            rewriter.rewrite(expression: expression, into: target)
         }
         
-        target.output(line: decl)
+        target.outputLineFeed()
     }
     
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
-        var classDecl: String = "class \(cls.typeName)"
+        target.outputIdentation()
+        target.outputInlineWithSpace("class", style: .keyword)
+        target.outputInline(cls.typeName, style: .typeName)
         
         // Figure out inheritance clauses
         var inheritances: [String] = []
@@ -108,12 +117,21 @@ public class SwiftWriter {
         inheritances.append(contentsOf: cls.protocols.map { p in p.protocolName })
         
         if inheritances.count > 0 {
-            classDecl += ": \(inheritances.joined(separator: ", "))"
+            target.outputInline(": ")
+            
+            for (i, inheritance) in inheritances.enumerated() {
+                if i > 0 {
+                    target.outputInline(", ")
+                }
+                
+                target.outputInline(inheritance, style: .typeName)
+            }
         }
         
         // Start outputting class now
-        
-        target.output(line: "\(classDecl) {")
+        target.outputInline(" ")
+        target.outputInline("{")
+        target.outputLineFeed()
         target.idented {
             for ivar in cls.instanceVariables {
                 outputInstanceVar(ivar, target: target)
@@ -144,67 +162,88 @@ public class SwiftWriter {
     
     // TODO: See if we can reuse the PropertyGenerationIntention
     private func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
+        target.outputIdentation()
+        
         let type = ivar.type
+        
+        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: ivar.accessLevel)
         let varOrLet = SwiftWriter._varOrLet(fromType: type)
-        
-        var decl = _prependOwnership(in: varOrLet + " ", for: ivar.type)
-        
-        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: ivar.accessLevel)
+        let ownership = SwiftWriter._ownershipPrefix(inType: ivar.type)
         
         let ctx =
-            TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: ivar.type) ?? .unspecified,
-                                          inNonnull: ivar.inNonnullContext)
+            TypeMapper.TypeMappingContext(
+                explicitNullability: SwiftWriter._typeNullability(inType: ivar.type) ?? .unspecified,
+                inNonnull: ivar.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
-        decl += "\(ivar.name): \(typeName)"
-        
-        target.output(line: decl)
+        if !accessModifier.isEmpty {
+            target.outputInlineWithSpace(accessModifier, style: .keyword)
+        }
+        if !ownership.isEmpty {
+            target.outputInlineWithSpace(ownership, style: .keyword)
+        }
+        target.outputInlineWithSpace(varOrLet, style: .keyword)
+        target.outputInline(ivar.name)
+        target.outputInline(": ")
+        target.outputInline(typeName, style: .typeName)
+        target.outputLineFeed()
     }
     
     private func outputProperty(_ prop: PropertyGenerationIntention, target: RewriterOutputTarget) {
+        target.outputIdentation()
+        
         let type = prop.type
         
-        var decl = "var "
-        
-        /// Detect `weak` and `unowned` vars
-        if let modifiers = prop.propertySource?.modifierList?.keywordModifiers {
-            if modifiers.contains("weak") {
-                decl = "weak \(decl)"
-            } else if modifiers.contains("unsafe_unretained") || modifiers.contains("assign") {
-                decl = "unowned(unsafe) \(decl)"
-            }
-        }
-        
-        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: prop.accessLevel)
+        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
+        var ownership = SwiftWriter._ownershipPrefix(inType: type)
         
         let ctx =
             TypeMapper.TypeMappingContext(modifiers: prop.propertySource?.modifierList,
                                           inNonnull: prop.inNonnullContext)
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
-        decl += "\(prop.name): \(typeName)"
+        /// Detect `weak` and `unowned` vars
+        if let modifiers = prop.propertySource?.modifierList?.keywordModifiers {
+            if modifiers.contains("weak") {
+                ownership = "weak"
+            } else if modifiers.contains("unsafe_unretained") || modifiers.contains("assign") {
+                ownership = "unowned(unsafe)"
+            }
+        }
+        
+        if !accessModifier.isEmpty {
+            target.outputInlineWithSpace(ownership, style: .keyword)
+        }
+        if !ownership.isEmpty {
+            target.outputInlineWithSpace(ownership, style: .keyword)
+        }
+        
+        target.outputInlineWithSpace("var", style: .keyword)
+        target.outputInlineWithSpace(prop.name, style: .plain)
+        target.outputInline(": ")
+        
+        target.outputInlineWithSpace(typeName, style: .typeName)
         
         switch prop.mode {
         case .asField:
-            target.output(line: decl)
+            target.outputLineFeed()
             break
         case .computed(let body):
-            target.outputInline(decl)
+            target.outputLineFeed()
             
             target.idented {
                 outputMethodBody(body, target: target)
             }
         case let .property(getter, setter):
-            decl += " {"
-            
-            target.outputInline(decl)
+            target.outputInline(" {")
+            target.outputLineFeed()
             
             target.idented {
-                target.outputInline("get ")
+                target.outputInlineWithSpace("get", style: .keyword)
                 target.idented {
                     outputMethodBody(getter, target: target)
                 }
-                target.outputInline("set ")
+                target.outputInlineWithSpace("set", style: .keyword)
                 target.idented {
                     outputMethodBody(setter, target: target)
                 }
@@ -215,13 +254,21 @@ public class SwiftWriter {
     }
     
     private func outputInitMethod(_ initMethod: MethodGenerationIntention, target: RewriterOutputTarget) {
-        var decl = SwiftWriter._prependAccessModifier(in: "init", accessLevel: initMethod.accessLevel)
-        
-        decl += generateParameters(for: initMethod.signature,
-                                   inNonnullContext: initMethod.inNonnullContext)
-        
         target.outputIdentation()
-        target.outputInline(decl)
+        
+        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: initMethod.accessLevel)
+        
+        if !accessModifier.isEmpty {
+            target.outputInlineWithSpace(accessModifier, style: .keyword)
+        }
+        
+        target.outputInline("init", style: .keyword)
+        
+        generateParameters(for: initMethod.signature,
+                           into: target,
+                           inNonnullContext: initMethod.inNonnullContext)
+        
+        target.outputLineFeed()
         
         if let body = initMethod.body {
             outputMethodBody(body, target: target)
@@ -229,33 +276,39 @@ public class SwiftWriter {
     }
     
     private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
-        var decl = "func "
+        target.outputIdentation()
         
+        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
+        
+        if !accessModifier.isEmpty {
+            target.outputInlineWithSpace(accessModifier, style: .keyword)
+        }
         if method.isClassMethod {
-            decl = "static " + decl
+            target.outputInlineWithSpace("static", style: .keyword)
         }
         
-        decl = SwiftWriter._prependAccessModifier(in: decl, accessLevel: method.accessLevel)
+        target.outputInlineWithSpace("func", style: .keyword)
         
         let sign = method.signature
         
-        decl += sign.name
+        target.outputInline(sign.name)
         
-        decl += generateParameters(for: method.signature,
-                                   inNonnullContext: method.inNonnullContext)
+        generateParameters(for: method.signature,
+                           into: target,
+                           inNonnullContext: method.inNonnullContext)
         
         switch sign.returnType {
         case .void: // `-> Void` can be omitted for void functions.
             break
         default:
-            decl += " -> "
-            decl += typeMapper.swiftType(forObjcType: sign.returnType,
-                                         context: .init(explicitNullability: sign.returnTypeNullability,
-                                                        inNonnull: method.inNonnullContext))
+            target.outputInline(" -> ")
+            let typeName =
+                typeMapper.swiftType(forObjcType: sign.returnType,
+                                     context: .init(explicitNullability: sign.returnTypeNullability,
+                                                    inNonnull: method.inNonnullContext))
+            
+            target.outputInlineWithSpace(typeName, style: .typeName)
         }
-        
-        target.outputIdentation()
-        target.outputInline(decl)
         
         if let body = method.body {
             outputMethodBody(body, target: target)
@@ -276,30 +329,31 @@ public class SwiftWriter {
     }
     
     private func generateParameters(for signature: MethodGenerationIntention.Signature,
-                                    inNonnullContext: Bool = false) -> String {
-        var decl = "("
+                                    into target: RewriterOutputTarget,
+                                    inNonnullContext: Bool = false) {
+        
+        target.outputInline("(")
         
         for (i, param) in signature.parameters.enumerated() {
             if i > 0 {
-                decl += ", "
+                target.outputInline(", ")
             }
             
-            if param.label != param.name {
-                decl += param.label
-                decl += " "
-            }
-            
-            decl += "\(param.name): "
-            
-            decl +=
+            let typeName =
                 typeMapper.swiftType(forObjcType: param.type,
                                      context: .init(explicitNullability: param.nullability,
                                                     inNonnull: inNonnullContext))
+            
+            if param.label != param.name {
+                target.outputInlineWithSpace(param.label, style: .plain)
+            }
+            
+            target.outputInline(param.name)
+            target.outputInline(": ")
+            target.outputInline(typeName, style: .typeName)
         }
         
-        decl += ")"
-        
-        return decl
+        target.outputInline(")")
     }
     
     private func _prependOwnership(in decl: String, for type: ObjcType) -> String {
@@ -374,7 +428,13 @@ public class SwiftWriter {
         return "\(_accessModifierFor(accessLevel: accessLevel)) \(decl)"
     }
     
-    public static func _accessModifierFor(accessLevel: AccessLevel) -> String {
+    public static func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
+        // In Swift, omitting the access level specifier infers 'internal', so we
+        // allow the user to decide whether to omit the keyword here
+        if omitInternal && accessLevel == .internal {
+            return ""
+        }
+        
         return accessLevel.rawValue
     }
 }

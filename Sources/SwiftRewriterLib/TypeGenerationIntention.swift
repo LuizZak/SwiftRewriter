@@ -86,6 +86,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
         return source as? PropertySynthesizeItem
     }
     
+    public var isSourceReadOnly: Bool {
+        return propertySource?.modifierList?.keywordModifiers.contains("readonly") ?? false
+    }
+    
     public var name: String
     public var type: ObjcType
     public var mode: Mode = .asField

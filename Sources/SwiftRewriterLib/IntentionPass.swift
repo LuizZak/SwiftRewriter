@@ -12,7 +12,8 @@ public protocol IntentionPass {
 public enum IntentionPasses {
     public static var passes: [IntentionPass] = [
         FileGroupingIntentionPass(),
-        RemoveDuplicatedTypeIntentIntentionPass()
+        RemoveDuplicatedTypeIntentIntentionPass(),
+        PropertyMergeIntentionPass()
     ]
 }
 
@@ -184,5 +185,89 @@ public class FileGroupingIntentionPass: IntentionPass {
     private struct Pair {
         var header: FileGenerationIntention
         var implementation: FileGenerationIntention
+    }
+}
+
+public class PropertyMergeIntentionPass: IntentionPass {
+    public func apply(on intentionCollection: IntentionCollection) {
+        for cls in intentionCollection.intentions(ofType: ClassGenerationIntention.self) {
+            apply(on: cls)
+        }
+    }
+    
+    func apply(on classIntention: ClassGenerationIntention) {
+        let properties = collectProperties(fromClass: classIntention)
+        let methods = collectMethods(fromClass: classIntention)
+        
+        // Match property intentions with the appropriately named methods
+        var matches: [PropertySet] = []
+        
+        for property in properties where property.name.count > 1 {
+            let capitalizedName =
+                property.name.prefix(1).uppercased() + property.name.dropFirst()
+            
+            // Getters
+            let potentialGetters =
+                methods.filter { $0.name == property.name }
+                    .filter { $0.returnType == property.type }
+                    .filter { $0.parameters.count == 0 }
+            let potentialSetters =
+                methods.filter { $0.returnType == .void }
+                    .filter { $0.parameters.count == 1 }
+                    .filter { $0.parameters[0].type == property.type }
+                    .filter { $0.name == "set\(capitalizedName)" }
+            
+            var propSet = PropertySet(property: property, getter: nil, setter: nil)
+            
+            if potentialGetters.count == 1 {
+                propSet.getter = potentialGetters[0]
+            }
+            if potentialSetters.count == 1 {
+                propSet.setter = potentialSetters[0]
+            }
+            
+            if propSet.getter == nil && propSet.setter == nil {
+                continue
+            }
+            
+            matches.append(propSet)
+        }
+        
+        // Flatten properties now
+        for match in matches {
+            joinPropertySet(match, on: classIntention)
+        }
+    }
+    
+    func collectProperties(fromClass classIntention: ClassGenerationIntention) -> [PropertyGenerationIntention] {
+        return classIntention.properties
+    }
+    
+    func collectMethods(fromClass classIntention: ClassGenerationIntention) -> [MethodGenerationIntention] {
+        return classIntention.methods
+    }
+    
+    private func joinPropertySet(_ propertySet: PropertySet, on classIntention: ClassGenerationIntention) {
+        switch (propertySet.getter, propertySet.setter) {
+        case let (getter?, setter?):
+            if let getterBody = getter.body, let setterBody = setter.body {
+                propertySet.property.mode = .property(get: getterBody, set: setterBody)
+            }
+        case let (getter?, nil) where propertySet.property.isSourceReadOnly:
+            if let body = getter.body {
+                propertySet.property.mode = .computed(body)
+            }
+        case let (nil, setter?):
+            _=setter
+            break
+        default:
+            break
+        }
+    }
+    
+    private struct PropertySet {
+        var property: PropertyGenerationIntention
+        var getter: MethodGenerationIntention?
+        var setter: MethodGenerationIntention?
     }
 }
