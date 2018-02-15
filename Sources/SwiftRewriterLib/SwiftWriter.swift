@@ -229,11 +229,7 @@ public class SwiftWriter {
             target.outputLineFeed()
             break
         case .computed(let body):
-            target.outputLineFeed()
-            
-            target.idented {
-                outputMethodBody(body, target: target)
-            }
+            outputMethodBody(body, target: target)
         case let .property(getter, setter):
             target.outputInline(" ")
             target.outputInline("{")
