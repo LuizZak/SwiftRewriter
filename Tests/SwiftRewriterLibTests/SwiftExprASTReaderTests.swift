@@ -149,6 +149,29 @@ class SwiftExprASTReaderTests: XCTestCase {
                 ]))
     }
     
+    func testBlockExpression() {
+        assert(objcExpr: "^{ thing(); }",
+               readsAs: .block(parameters: [], return: .void, body: [
+                .expression(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                ]))
+        assert(objcExpr: "^NSString*{ return thing(); }",
+               readsAs: .block(parameters: [], return: .pointer(.struct("NSString")), body: [
+                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                ]))
+        assert(objcExpr: "^NSString*(NSInteger inty){ return thing(); }",
+               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .struct("NSInteger"))],
+                               return: .pointer(.struct("NSString")),
+                               body: [
+                                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                ]))
+        assert(objcExpr: "^(NSInteger inty){ return thing(); }",
+               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .struct("NSInteger"))],
+                               return: .void,
+                               body: [
+                                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                ]))
+    }
+    
     func assert(objcExpr: String, readsAs expected: Expression, file: String = #file, line: Int = #line) {
         let input = ANTLRInputStream(objcExpr)
         let lxr = ObjectiveCLexer(input)

@@ -206,6 +206,58 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testBlockLiteral() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                ^{ };
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    { () -> Void in }
+                }
+            }
+            """)
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                const void(^myBlock)() = ^{ };
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    let myBlock = { () -> Void in }
+                }
+            }
+            """)
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                const void(^myBlock)() = ^{
+                    [self doThing];
+                };
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    let myBlock = { () -> Void in
+                        self.doThing()
+                    }
+                }
+            }
+            """)
+    }
+    
     func testVarDeclarationOmitsTypeOnLocalWithInitialValue() throws {
         try assertObjcParse(
             objc: """

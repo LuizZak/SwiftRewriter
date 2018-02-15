@@ -14,6 +14,7 @@ public indirect enum Expression: Equatable {
     case arrayLiteral([Expression])
     case dictionaryLiteral([ExpressionDictionaryPair])
     case ternary(Expression, `true`: Expression, `false`: Expression)
+    case block(parameters: [BlockParameter], `return`: ObjcType, body: CompoundStatement)
     case unknown(UnknownASTContext)
     
     /// `true` if this expression node requires parenthesis for unary, prefix, and
@@ -25,6 +26,16 @@ public indirect enum Expression: Equatable {
         default:
             return false
         }
+    }
+}
+
+public struct BlockParameter: Equatable {
+    var name: String
+    var type: ObjcType
+    
+    public init(name: String, type: ObjcType) {
+        self.name = name
+        self.type = type
     }
 }
 
@@ -206,6 +217,26 @@ extension Expression: CustomStringConvertible {
                 exp.description + " ? " +
                     ifTrue.description + " : " +
                     ifFalse.description
+            
+        case let .block(parameters, ret, _):
+            let cvt = TypeMapper(context: TypeContext())
+            
+            var buff = "{ "
+            
+            buff += "("
+            buff += parameters.map { $0.description }.joined(separator: ", ")
+            buff += ") -> "
+            buff += cvt.swiftType(forObjcType: ret)
+            buff += " in "
+            
+            buff += "< body >"
+            
+            buff += " }"
+            
+            return buff
+            
+        case .unknown(let context):
+            return context.description
         }
     }
 }
@@ -222,6 +253,14 @@ extension Postfix: CustomStringConvertible {
         case .functionCall(let arguments):
             return "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
         }
+    }
+}
+
+extension BlockParameter: CustomStringConvertible {
+    public var description: String {
+        let cvt = TypeMapper(context: TypeContext())
+        
+        return "\(self.name): \(cvt.swiftType(forObjcType: type))"
     }
 }
 

@@ -228,7 +228,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                         ctx.arrayExpression(),
                         ctx.dictionaryExpression(),
                         ctx.boxExpression(),
-                        ctx.selectorExpression()
+                        ctx.selectorExpression(),
+                        ctx.blockExpression()
                 ) ?? .unknown(UnknownASTContext(context: ctx))
     }
     
@@ -275,6 +276,42 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }.joined()
         
         return .constant(.string(value))
+    }
+    
+    public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
+        let returnType = ctx.typeSpecifier().flatMap { typeSpecifier -> ObjcType? in
+            guard let typeName = VarDeclarationTypeExtractor.extract(from: typeSpecifier) else {
+                return nil
+            }
+            return try? ObjcParser(string: typeName).parseObjcType()
+        } ?? .void
+        
+        let parameters: [BlockParameter]
+        if let blockParameters = ctx.blockParameters() {
+            parameters =
+                blockParameters
+                    .typeVariableDeclaratorOrName().map { param -> BlockParameter in
+                        guard let name = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
+                            return BlockParameter(name: "<unknown>", type: .void)
+                        }
+                        guard let typeName = VarDeclarationTypeExtractor.extract(from: param) else {
+                            return BlockParameter(name: name, type: .void)
+                        }
+                        guard let type = try? ObjcParser(string: typeName).parseObjcType() else {
+                            return BlockParameter(name: name, type: .void)
+                        }
+                        
+                        return BlockParameter(name: name, type: type)
+                    }
+        } else {
+            parameters = []
+        }
+        
+        guard let body = ctx.compoundStatement()?.accept(SwiftStatementASTReader.CompoundStatementVisitor()) else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        
+        return .block(parameters: parameters, return: returnType, body: body)
     }
     
     public override func visitConstant(_ ctx: ObjectiveCParser.ConstantContext) -> Expression? {

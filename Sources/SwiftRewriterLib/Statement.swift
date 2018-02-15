@@ -1,11 +1,15 @@
 import GrammarModels
 
-public struct UnknownASTContext: CustomStringConvertible, Equatable {
+public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomReflectable {
     public var description: String {
         return context.description
     }
     
     public var context: CustomStringConvertible
+    
+    public var customMirror: Mirror {
+        return Mirror(reflecting: "")
+    }
     
     public init(context: CustomStringConvertible) {
         self.context = context
@@ -36,6 +40,30 @@ public struct CompoundStatement: Equatable {
 extension CompoundStatement: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: Statement...) {
         self.statements = elements
+    }
+}
+
+extension CompoundStatement: Sequence {
+    public func makeIterator() -> IndexingIterator<[Statement]> {
+        return statements.makeIterator()
+    }
+}
+
+extension CompoundStatement: RandomAccessCollection {
+    public func index(after i: Int) -> Int {
+        return statements.index(after: i)
+    }
+    
+    public var startIndex: Int {
+        return statements.startIndex
+    }
+    
+    public var endIndex: Int {
+        return statements.endIndex
+    }
+    
+    public subscript(_ index: Int) -> Statement {
+        return statements[index]
     }
 }
 

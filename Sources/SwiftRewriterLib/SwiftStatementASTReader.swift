@@ -173,7 +173,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     }
     
     // MARK: Compound statement visitor
-    private class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
+    class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
         override func visitStatement(_ ctx: ObjectiveCParser.StatementContext) -> CompoundStatement? {
             if let compoundStatement = ctx.compoundStatement() {
                 return compoundStatement.accept(self)

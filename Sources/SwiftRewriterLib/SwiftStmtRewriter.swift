@@ -30,20 +30,22 @@ class SwiftStmtRewriter {
             return
         }
         
-        let rewriter = ExpressionWriter(target: target)
-        rewriter.rewrite(result, passes: expressionPasses)
+        let rewriter = ExpressionWriter(target: target, expressionPasses: expressionPasses)
+        rewriter.rewrite(result)
     }
 }
 
 fileprivate class ExpressionWriter {
     var target: RewriterOutputTarget
+    var expressionPasses: [ExpressionPass]
     
-    init(target: RewriterOutputTarget) {
+    init(target: RewriterOutputTarget, expressionPasses: [ExpressionPass]) {
         self.target = target
+        self.expressionPasses = expressionPasses
     }
     
-    func rewrite(_ expression: Expression, passes: [ExpressionPass]) {
-        let exp = passes.reduce(into: expression, { (exp, pass) in
+    func rewrite(_ expression: Expression) {
+        let exp = expressionPasses.reduce(into: expression, { (exp, pass) in
             exp = pass.applyPass(on: exp)
         })
         
@@ -80,6 +82,8 @@ fileprivate class ExpressionWriter {
             visitDictionary(pairs)
         case let .ternary(exp, ifTrue, ifFalse):
             visitTernary(exp, ifTrue, ifFalse)
+        case let .block(parameters, returnType, body):
+            visitBlock(parameters, returnType, body)
         case .unknown(let context):
             target.outputInline("/*")
             target.outputInline(context.description)
@@ -216,6 +220,48 @@ fileprivate class ExpressionWriter {
         visitExpression(ifTrue)
         target.outputInline(" : ")
         visitExpression(ifFalse)
+    }
+    
+    private func visitBlock(_ parameters: [BlockParameter], _ returnType: ObjcType, _ body: CompoundStatement) {
+        let visitor = StatementWriter(target: target, expressionPasses: expressionPasses)
+        let typeMapper = TypeMapper(context: TypeContext())
+        
+        // Print signature
+        target.outputInline("{ ")
+        
+        target.outputInline("(")
+        for (i, param) in parameters.enumerated() {
+            if i > 0 {
+                target.outputInline(", ")
+            }
+            
+            target.outputInline(param.name)
+            target.outputInline(": ")
+            target.outputInline(typeMapper.swiftType(forObjcType: param.type))
+        }
+        target.outputInline(")")
+        
+        target.outputInline(" -> ")
+        target.outputInline(typeMapper.swiftType(forObjcType: returnType))
+        
+        target.outputInline(" in")
+        
+        if body.isEmpty {
+            target.outputInline(" }")
+            return
+        }
+        
+        target.outputLineFeed()
+        
+        target.idented {
+            // Print each statement now
+            for statement in body.statements {
+                visitor.visitStatement(statement)
+            }
+        }
+        
+        target.outputIdentation()
+        target.outputInline("}")
     }
     
     private func commaSeparated<T>(_ values: [T], do block: (T) -> ()) {
@@ -407,12 +453,36 @@ fileprivate class StatementWriter {
     }
     
     private func emitExpr(_ expr: Expression) {
-        let rewriter = ExpressionWriter(target: target)
-        rewriter.rewrite(expr, passes: expressionPasses)
+        let rewriter = ExpressionWriter(target: target, expressionPasses: expressionPasses)
+        rewriter.rewrite(expr)
     }
 }
 
 class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<String> {
+    // MARK: Static shortcuts
+    public static func extract(from ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
+        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+    }
+    public static func extract(from ctx: ObjectiveCParser.TypeDeclaratorContext) -> String? {
+        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+    }
+    public static func extract(from ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> String? {
+        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+    }
+    public static func extract(from ctx: ObjectiveCParser.DeclaratorContext) -> String? {
+        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+    }
+    public static func extract(from ctx: ObjectiveCParser.DirectDeclaratorContext) -> String? {
+        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+    }
+    public static func extract(from ctx: ObjectiveCParser.IdentifierContext) -> String? {
+        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+    }
+    
+    // MARK: Members
+    override func visitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
+        return ctx.typeVariableDeclarator()?.accept(self)
+    }
     override func visitTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext) -> String? {
         return ctx.directDeclarator()?.accept(self)
     }

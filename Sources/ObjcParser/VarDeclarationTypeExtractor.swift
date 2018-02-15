@@ -6,6 +6,12 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     
     public var declaratorIndex: Int = 0
     
+    public static func extract(from typeDeclaratorOrName: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> TypeName? {
+        return _extract(from: typeDeclaratorOrName)
+    }
+    public static func extract(from typeSpecifier: ObjectiveCParser.TypeSpecifierContext) -> TypeName? {
+        return _extract(from: typeSpecifier)
+    }
     public static func extract(from typeName: ObjectiveCParser.TypeNameContext) -> TypeName? {
         return _extract(from: typeName)
     }

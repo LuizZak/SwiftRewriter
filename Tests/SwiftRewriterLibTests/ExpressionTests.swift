@@ -1,5 +1,5 @@
 //
-//  StatementASTTests.swift
+//  ExpressionTests.swift
 //  SwiftRewriterLibTests
 //
 //  Created by Luiz Fernando Silva on 07/02/2018.
@@ -9,7 +9,7 @@ import XCTest
 import GrammarModels
 import SwiftRewriterLib
 
-class StatementASTTests: XCTestCase {
+class ExpressionTests: XCTestCase {
     
     func testDescriptionExpressions() {
        XCTAssertEqual(
