@@ -7,6 +7,11 @@ open class ExpressionPass {
         
     }
     
+    /// Entry point for expression pass
+    public func applyPass(on expression: Expression) -> Expression {
+        return visitExpression(expression)
+    }
+    
     open func visitExpression(_ expression: Expression) -> Expression {
         switch expression {
         case let .assignment(lhs, op, rhs):

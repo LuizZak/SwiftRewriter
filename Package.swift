@@ -40,7 +40,10 @@ let package = Package(
             dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer", "TypeLexing"]),
         .target(
             name: "SwiftRewriter",
-            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility"]),
+            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility", "ExpressionPasses"]),
+        .target(
+            name: "ExpressionPasses",
+            dependencies: ["SwiftRewriterLib"]),
         .testTarget(
             name: "ObjcParserTests",
             dependencies: ["GrammarModels", "ObjcParser"]),
@@ -50,5 +53,8 @@ let package = Package(
         .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "GrammarModels", "ObjcParser"]),
+        .testTarget(
+            name: "ExpressionPassesTests",
+            dependencies: ["ExpressionPasses", "SwiftRewriterLib", "Antlr4", "ObjcParser", "ObjcParserAntlr"])
     ]
 )

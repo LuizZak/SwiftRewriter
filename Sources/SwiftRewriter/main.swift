@@ -1,6 +1,7 @@
 import SwiftRewriterLib
 import Utility
 import Foundation
+import ExpressionPasses
 
 let arguments = Array(ProcessInfo.processInfo.arguments.dropFirst())
 
@@ -20,6 +21,7 @@ do {
         
         let converter = SwiftRewriter(input: input, output: output)
         
+        converter.expressionPasses.append(AllocInitExpressionPass())
         converter.expressionPasses.append(CoreGraphicsExpressionPass())
         
         try converter.rewrite()

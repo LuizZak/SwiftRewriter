@@ -132,6 +132,24 @@ public enum FunctionArgument: Equatable {
             return exp
         }
     }
+    
+    public var label: String? {
+        switch self {
+        case .labeled(let label, _):
+            return label
+        case .unlabeled:
+            return nil
+        }
+    }
+    
+    public var isLabeled: Bool {
+        switch self {
+        case .labeled:
+            return true
+        case .unlabeled:
+            return false
+        }
+    }
 }
 
 /// One of the recognized constant values
