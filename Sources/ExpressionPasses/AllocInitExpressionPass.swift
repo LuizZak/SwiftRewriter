@@ -33,7 +33,7 @@ public class AllocInitExpressionPass: ExpressionPass {
             }
             
             // All good! Collapse the identifier into a more 'swifty' construct
-            args[0] = .labeled(split[1].lowercased(), args[0].expression)
+            args[0] = .labeled(split[1].prefix(1).lowercased() + split[1].dropFirst(), args[0].expression)
             
             return .postfix(.identifier(typeName), .functionCall(arguments: args))
         default:

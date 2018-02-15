@@ -80,6 +80,10 @@ fileprivate class ExpressionWriter {
             visitDictionary(pairs)
         case let .ternary(exp, ifTrue, ifFalse):
             visitTernary(exp, ifTrue, ifFalse)
+        case .unknown(let context):
+            target.outputInline("/*")
+            target.outputInline(context.description)
+            target.outputInline("*/")
         }
         
         if parens {
@@ -258,6 +262,10 @@ fileprivate class StatementWriter {
             visitExpressions(exp)
         case .variableDeclarations(let variables):
             visitVariableDeclarations(variables)
+        case .unknown(let context):
+            target.output(line: "/*")
+            target.output(line: context.description)
+            target.output(line: "*/")
         }
     }
     
