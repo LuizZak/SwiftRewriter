@@ -253,10 +253,17 @@ public class PropertyMergeIntentionPass: IntentionPass {
             if let getterBody = getter.body, let setterBody = setter.body {
                 propertySet.property.mode = .property(get: getterBody, set: setterBody)
             }
+            
+            // Remove the original method intentions
+            classIntention.methods.remove(where: { $0 === getter })
+            classIntention.methods.remove(where: { $0 === setter })
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
             if let body = getter.body {
                 propertySet.property.mode = .computed(body)
             }
+            
+            // Remove the original method intention
+            classIntention.methods.remove(where: { $0 === getter })
         case let (nil, setter?):
             _=setter
             break
@@ -269,5 +276,16 @@ public class PropertyMergeIntentionPass: IntentionPass {
         var property: PropertyGenerationIntention
         var getter: MethodGenerationIntention?
         var setter: MethodGenerationIntention?
+    }
+}
+
+private extension RangeReplaceableCollection where Index == Int {
+    mutating func remove(where predicate: (Element) -> Bool) {
+        for (i, item) in enumerated() {
+            if predicate(item) {
+                remove(at: i)
+                return
+            }
+        }
     }
 }

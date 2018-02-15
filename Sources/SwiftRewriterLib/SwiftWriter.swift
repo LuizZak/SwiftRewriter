@@ -84,7 +84,7 @@ public class SwiftWriter {
         
         target.outputInlineWithSpace(varOrLet, style: .keyword)
         
-        target.outputInlineWithSpace(name, style: .plain)
+        target.outputInline(name, style: .plain)
         
         let ctx =
             TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: type),
@@ -92,7 +92,7 @@ public class SwiftWriter {
         let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
         
         target.outputInline(": ")
-        target.outputInlineWithSpace(typeName, style: .typeName)
+        target.outputInline(typeName, style: .typeName)
         
         if let expression = initVal?.typedSource?.expression?.expression?.expression {
             target.outputInline(" = ")
@@ -219,10 +219,10 @@ public class SwiftWriter {
         }
         
         target.outputInlineWithSpace("var", style: .keyword)
-        target.outputInlineWithSpace(prop.name, style: .plain)
+        target.outputInline(prop.name, style: .plain)
         target.outputInline(": ")
         
-        target.outputInlineWithSpace(typeName, style: .typeName)
+        target.outputInline(typeName, style: .typeName)
         
         switch prop.mode {
         case .asField:
@@ -235,18 +235,18 @@ public class SwiftWriter {
                 outputMethodBody(body, target: target)
             }
         case let .property(getter, setter):
-            target.outputInline(" {")
+            target.outputInline(" ")
+            target.outputInline("{")
             target.outputLineFeed()
             
             target.idented {
-                target.outputInlineWithSpace("get", style: .keyword)
-                target.idented {
-                    outputMethodBody(getter, target: target)
-                }
-                target.outputInlineWithSpace("set", style: .keyword)
-                target.idented {
-                    outputMethodBody(setter, target: target)
-                }
+                target.outputIdentation()
+                target.outputInline("get", style: .keyword)
+                outputMethodBody(getter, target: target)
+                
+                target.outputIdentation()
+                target.outputInline("set", style: .keyword)
+                outputMethodBody(setter, target: target)
             }
             
             target.output(line: "}")
@@ -267,8 +267,6 @@ public class SwiftWriter {
         generateParameters(for: initMethod.signature,
                            into: target,
                            inNonnullContext: initMethod.inNonnullContext)
-        
-        target.outputLineFeed()
         
         if let body = initMethod.body {
             outputMethodBody(body, target: target)
@@ -307,7 +305,7 @@ public class SwiftWriter {
                                      context: .init(explicitNullability: sign.returnTypeNullability,
                                                     inNonnull: method.inNonnullContext))
             
-            target.outputInlineWithSpace(typeName, style: .typeName)
+            target.outputInline(typeName, style: .typeName)
         }
         
         if let body = method.body {

@@ -25,7 +25,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             @end
             """,
             swift: """
-            class MyClass {
+            class MyClass: NSObject {
                 var value: Bool {
                     get {
                         return false
