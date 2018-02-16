@@ -1,3 +1,4 @@
+import Antlr4
 import GrammarModels
 
 public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomReflectable {
@@ -12,7 +13,11 @@ public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomRefle
     }
     
     public init(context: CustomStringConvertible) {
-        self.context = context
+        if let ctx = context as? ParserRuleContext {
+            self.context = ctx.getText()
+        } else {
+            self.context = context
+        }
     }
     
     public static func ==(lhs: UnknownASTContext, rhs: UnknownASTContext) -> Bool {

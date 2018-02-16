@@ -8,8 +8,31 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         if let varDecl = ctx.varDeclaration()?.accept(self) {
             return varDecl
         }
+        if let funcCall = ctx.functionCallExpression()?.accept(self) {
+            return funcCall
+        }
         
         return .unknown(UnknownASTContext(context: ctx))
+    }
+    
+    public override func visitFunctionCallExpression(_ ctx: ObjectiveCParser.FunctionCallExpressionContext) -> Statement? {
+        guard let ident = ctx.identifier() else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        guard let directDeclarator = ctx.directDeclarator() else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        
+        guard let param = VarDeclarationIdentifierNameExtractor.extract(from: directDeclarator) else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        
+        return
+            Statement.expression(
+                .postfix(.identifier(ident.getText()),
+                         .functionCall(arguments: [.unlabeled(.identifier(param))]
+                    ))
+            )
     }
     
     public override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> Statement? {

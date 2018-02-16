@@ -311,7 +311,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @implementation MyClass
             - (void)myMethod {
                 if(true) {
-                    stmt();
+                    stmt(abc);
                 }
                 if(true)
                     stmt();
@@ -322,7 +322,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 func myMethod() {
                     if true {
-                        stmt()
+                        stmt(abc)
                     }
                     if true {
                         stmt()
