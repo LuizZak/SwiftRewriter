@@ -32,4 +32,14 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                                 ]))
         )
     }
+    
+    func testAddObjectsFromArray() {
+        assertTransformParsed(
+            original: "[array addObjectsFromArray:@[]]",
+            expected: .postfix(.postfix(.identifier("array"), .member("addObjects")),
+                               .functionCall(arguments: [
+                                .labeled("from", .arrayLiteral([]))
+                                ]))
+        )
+    }
 }

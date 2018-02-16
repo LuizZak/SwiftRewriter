@@ -25,6 +25,14 @@ public class FoundationExpressionPass: ExpressionPass {
             ] + args.dropFirst()
             
             (exp, op) = (.identifier("String"), .functionCall(arguments: newArgs))
+            
+        case (.postfix(let innerExp, .member("addObjectsFromArray")),
+              .functionCall(let args)) where args.count == 1:
+            let newArgs: [FunctionArgument] = [
+                .labeled("from", args[0].expression),
+            ]
+            
+            (exp, op) = (.postfix(innerExp, .member("addObjects")), .functionCall(arguments: newArgs))
         default:
             break
         }
