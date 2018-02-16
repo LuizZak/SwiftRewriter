@@ -177,12 +177,25 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                 ])))
     }
     
-    func testCGRectIntersects() {
+    func testCGRectIntersection() {
         assertTransformParsed(
             original: "CGRectIntersection(self.frame, self.frame)",
             expected: .postfix(.postfix(.postfix(.identifier("self"),
                                                  .member("frame")),
                                         .member("intersection")),
+                               .functionCall(arguments: [
+                                .unlabeled(.postfix(.identifier("self"),
+                                                    .member("frame")))
+                                ]))
+        )
+    }
+    
+    func testCGRectIntersectsRect() {
+        assertTransformParsed(
+            original: "CGRectIntersectsRect(self.frame, self.frame)",
+            expected: .postfix(.postfix(.postfix(.identifier("self"),
+                                                 .member("frame")),
+                                        .member("intersects")),
                                .functionCall(arguments: [
                                 .unlabeled(.postfix(.identifier("self"),
                                                     .member("frame")))
