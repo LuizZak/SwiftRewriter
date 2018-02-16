@@ -514,4 +514,24 @@ class SwiftRewriterTests: XCTestCase {
             Warning: Property 'anInt' has ownership attribute 'assign' but is not a pointer type at line 0 column 0
             """)
     }
+    
+    func testConvertThing() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass : NSObject
+            @property (nonnull) NSString *name;
+            @property (nonnull) NSString *surname;
+
+            - (void)printMyName;
+            @end
+            
+            @implementation MyClass
+            - (void)printMyName {
+                NSLog(@"%@ %@", self.name, self.surname);
+            }
+            @end
+            """,
+            swift: """
+            """)
+    }
 }
