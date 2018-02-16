@@ -27,6 +27,28 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
             
             return .postfix(.identifier("CGRect"), .functionCall(arguments: newArgs))
             
+        // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>) -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
+        case (.identifier("UIEdgeInsetsMake"), .functionCall(let args)) where args.count == 4 && !args.hasLabeledArguments():
+            let newArgs = args.enumerated().map { (i, arg) -> FunctionArgument in
+                let lbl: String
+                switch i {
+                case 0:
+                    lbl = "top"
+                case 1:
+                    lbl = "left"
+                case 2:
+                    lbl = "bottom"
+                case 3:
+                    lbl = "right"
+                default:
+                    lbl = "_"
+                }
+                
+                return .labeled(lbl, arg.expression)
+            }
+            
+            return .postfix(.identifier("UIEdgeInsets"), .functionCall(arguments: newArgs))
+            
         // CGRectGetWidth(<exp>) -> <exp>.width
         case (.identifier("CGRectGetWidth"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
             return .postfix(args[0].expression, .member("width"))

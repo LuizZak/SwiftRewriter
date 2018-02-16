@@ -250,7 +250,25 @@ open class ExpressionPass: ExpressionVisitor {
     
     open func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
         let exp = exp.accept(self)
-        return .postfix(exp, op)
+        let op2: Postfix
+        
+        switch op {
+        case .functionCall(let arguments):
+            op2 = .functionCall(arguments: arguments.map { arg in
+                switch arg {
+                case .unlabeled(let exp):
+                    return .unlabeled(exp.accept(self))
+                case let .labeled(label, exp):
+                    return .labeled(label, exp.accept(self))
+                }
+            })
+        case .subscript(let exp):
+            op2 = .subscript(exp.accept(self))
+        default:
+            op2 = op
+        }
+        
+        return .postfix(exp, op2)
     }
     
     open func visitConstant(_ constant: Constant) -> Expression {
