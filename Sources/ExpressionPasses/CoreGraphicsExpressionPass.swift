@@ -22,7 +22,7 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
                     lbl = "_"
                 }
                 
-                return .labeled(lbl, arg.expression)
+                return .labeled(lbl, arg.expression.accept(self))
             }
             
             return .postfix(.identifier("CGRect"), .functionCall(arguments: newArgs))
@@ -44,36 +44,36 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
                     lbl = "_"
                 }
                 
-                return .labeled(lbl, arg.expression)
+                return .labeled(lbl, arg.expression.accept(self))
             }
             
             return .postfix(.identifier("UIEdgeInsets"), .functionCall(arguments: newArgs))
             
         // CGRectGetWidth(<exp>) -> <exp>.width
         case (.identifier("CGRectGetWidth"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
-            return .postfix(args[0].expression, .member("width"))
+            return .postfix(args[0].expression.accept(self), .member("width"))
             
         // CGRectGetHeight(<exp>) -> <exp>.height
         case (.identifier("CGRectGetHeight"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
-            return .postfix(args[0].expression, .member("height"))
+            return .postfix(args[0].expression.accept(self), .member("height"))
             
         // CGRectIsNull(<exp>) -> <exp>.isNull
         case (.identifier("CGRectIsNull"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
-            return .postfix(args[0].expression, .member("isNull"))
+            return .postfix(args[0].expression.accept(self), .member("isNull"))
             
         // CGPointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
         case (.identifier("CGPointMake"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
             return .postfix(.identifier("CGPoint"),
                             .functionCall(arguments: [
-                                .labeled("x", args[0].expression),
-                                .labeled("y", args[1].expression)
+                                .labeled("x", args[0].expression.accept(self)),
+                                .labeled("y", args[1].expression.accept(self))
                                 ]))
             
         // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
         case (.identifier("CGRectIntersection"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
-            return .postfix(.postfix(args[0].expression, .member("intersection")),
+            return .postfix(.postfix(args[0].expression.accept(self), .member("intersection")),
                             .functionCall(arguments: [
-                                .unlabeled(args[1].expression)
+                                .unlabeled(args[1].expression.accept(self))
                                 ]))
             
         default:

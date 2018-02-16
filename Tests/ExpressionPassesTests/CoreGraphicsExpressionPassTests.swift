@@ -94,6 +94,19 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             expected: "CGRectIsNull(self.frame, self.frame)")
     }
     
+    func testCGRectIsNullWithCGRectMake() {
+        assertTransformParsed(
+            original: "CGRectIsNull(CGRectMake(1, 2, 3, 4))",
+            expected: .postfix(.postfix(.identifier("CGRect"),
+                                        .functionCall(arguments: [
+                                            .labeled("x", .constant(1)),
+                                            .labeled("y", .constant(2)),
+                                            .labeled("width", .constant(3)),
+                                            .labeled("height", .constant(4))
+                                            ])),
+                               .member("isNull")))
+    }
+    
     func testCGRectIntersects() {
         assertTransformParsed(
             original: "CGRectIntersection(self.frame, self.frame)",
