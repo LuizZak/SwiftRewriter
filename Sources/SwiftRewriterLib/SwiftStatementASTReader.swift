@@ -97,7 +97,12 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         
         if let sections = ctx.switchBlock()?.switchSection() {
             for section in sections {
-                let statements = section.statement().compactMap { $0.accept(self) }
+                var statements = section.statement().compactMap { $0.accept(self) }
+                
+                if statements.count == 1, case .compound(let stmt) = statements[0] {
+                    statements = stmt.statements
+                }
+                
                 let labels = section.switchLabel()
                 // Default case
                 if labels.contains(where: { $0.rangeExpression() == nil }) {
