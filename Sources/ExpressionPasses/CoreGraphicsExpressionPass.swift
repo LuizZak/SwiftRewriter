@@ -88,6 +88,14 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
                 .labeled("y", args[1].expression)
                 ])
             
+        // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
+        case (.identifier("CGSizeMake"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+            exp = .identifier("CGSize")
+            op = .functionCall(arguments: [
+                .labeled("width", args[0].expression),
+                .labeled("height", args[1].expression)
+                ])
+            
         // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
         case (.identifier("CGRectIntersection"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
             exp = .postfix(args[0].expression, .member("intersection"))

@@ -210,7 +210,8 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                .functionCall(arguments: [
                                 .labeled("x", .constant(1)),
                                 .labeled("y", .constant(2))
-                                ])))
+                                ]))
+        )
         
         assertTransformParsed(
             original: "abc = [[UIView alloc] initWithPoint:CGPointMake(1, 2)]",
@@ -227,6 +228,18 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                                                                 .labeled("x", .constant(1)),
                                                                                 .labeled("y", .constant(2))
                                                                                 ])))])))
+        )
+    }
+    
+    func testCGSizeMake() {
+        assertTransformParsed(
+            original: "CGSizeMake(1, 2)",
+            expected: .postfix(.identifier("CGSize"),
+                               .functionCall(arguments: [
+                                .labeled("width", .constant(1)),
+                                .labeled("height", .constant(2))
+                                ])
+            )
         )
     }
 }
