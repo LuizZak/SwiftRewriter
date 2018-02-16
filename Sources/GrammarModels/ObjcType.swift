@@ -84,4 +84,18 @@ public enum ObjcType: Equatable, CustomStringConvertible {
             return self
         }
     }
+    
+    /// Returns true if this is a pointer type
+    public var isPointer: Bool {
+        switch self {
+        case .pointer, .id:
+            return true
+        case .specified(_, let type):
+            return type.isPointer
+        case .qualified(let type, _):
+            return type.isPointer
+        default:
+            return false
+        }
+    }
 }

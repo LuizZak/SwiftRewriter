@@ -191,11 +191,9 @@ public class TypeMapper {
         }
         
         for type in types {
-            if case .pointer = type {
-                continue
+            if !type.isPointer {
+                return false
             }
-            
-            return false
         }
         
         return true

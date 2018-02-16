@@ -27,7 +27,7 @@ public class Diagnostics {
         }
         
         for warning in warnings {
-            print("Warnings: " + warning.description, to: &output)
+            print("Warning: " + warning.description, to: &output)
         }
         
         if includeNotes {

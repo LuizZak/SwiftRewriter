@@ -157,7 +157,10 @@ public class SwiftRewriter {
     }
     
     private func outputDefinitions() {
-        let writer = SwiftWriter(intentions: intentionCollection, output: outputTarget)
+        let writer = SwiftWriter(intentions: intentionCollection,
+                                 diagnostics: diagnostics,
+                                 output: outputTarget)
+        
         writer.expressionPasses = expressionPasses
         writer.execute()
     }

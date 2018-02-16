@@ -488,4 +488,28 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testConvertAssignProperty() throws {
+        try assertObjcParse(
+            objc: """
+            __weak NSObject *aWeakGlobal;
+            __weak NSInteger anIntGlobal;
+            @interface MyClass
+            @property (assign) AClass *aClass;
+            @property (assign) NSInteger anInt;
+            @end
+            """,
+            swift: """
+            weak var aWeakGlobal: NSObject?
+            var anIntGlobal: Int
+
+            class MyClass: NSObject {
+                unowned(unsafe) var aClass: AClass!
+                var anInt: Int
+            }
+            """).assertDiagnostics("""
+            Warning: Global variable 'anIntGlobal' has specifier '__weak' but is not a pointer type at line 0 column 0
+            Warning: Property 'anInt' has ownership attribute 'assign' but is not a pointer type at line 0 column 0
+            """)
+    }
 }
