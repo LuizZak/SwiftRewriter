@@ -33,6 +33,21 @@ public class FoundationExpressionPass: ExpressionPass {
             ]
             
             (exp, op) = (.postfix(innerExp, .member("addObjects")), .functionCall(arguments: newArgs))
+            
+        // [NSArray array], [NSDictionary dictionary], etc. constructs
+        case (.postfix(.identifier(let ident), .member(let member)), .functionCall(arguments: [])):
+            
+            switch (ident, member) {
+            case ("NSArray", "array"),
+                 ("NSMutableArray", "array"),
+                 ("NSDictionary", "dictionary"),
+                 ("NSMutableDictionary", "dictionary"),
+                 ("NSSet", "set"),
+                 ("NSMutableSet", "set"):
+                (exp, op) = (.identifier(ident), .functionCall(arguments: []))
+            default:
+                break
+            }
         default:
             break
         }
