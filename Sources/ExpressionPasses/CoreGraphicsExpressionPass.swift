@@ -76,6 +76,20 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
                                 .unlabeled(args[1].expression.accept(self))
                                 ]))
             
+        // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
+        case (.identifier("CGRectContainsRect"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+            return .postfix(.postfix(args[0].expression.accept(self), .member("contains")),
+                            .functionCall(arguments: [
+                                .unlabeled(args[1].expression.accept(self))
+                                ]))
+            
+        // CGRectContainsPoint(<r1>, <r2>) -> <r1>.contains(<r2>)
+        case (.identifier("CGRectContainsPoint"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+            return .postfix(.postfix(args[0].expression.accept(self), .member("contains")),
+                            .functionCall(arguments: [
+                                .unlabeled(args[1].expression.accept(self))
+                                ]))
+            
         default:
             return super.visitPostfix(exp, op: op)
         }

@@ -107,6 +107,48 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                .member("isNull")))
     }
     
+    func testCGRectContainsRectWithCGRectMake() {
+        assertTransformParsed(
+            original: "CGRectContainsRect(CGRectMake(1, 2, 3, 4), CGRectMake(1, 2, 3, 4))",
+            expected: .postfix(.postfix(.postfix(.identifier("CGRect"),
+                                        .functionCall(arguments: [
+                                            .labeled("x", .constant(1)),
+                                            .labeled("y", .constant(2)),
+                                            .labeled("width", .constant(3)),
+                                            .labeled("height", .constant(4))
+                                            ])),
+                                        .member("contains")),
+                               .functionCall(arguments: [
+                                .unlabeled(.postfix(.identifier("CGRect"),
+                                                    .functionCall(arguments: [
+                                                        .labeled("x", .constant(1)),
+                                                        .labeled("y", .constant(2)),
+                                                        .labeled("width", .constant(3)),
+                                                        .labeled("height", .constant(4))
+                                                        ])))
+                                ])))
+    }
+    
+    func testCGRectContainsPointWithCGPointMake() {
+        assertTransformParsed(
+            original: "CGRectContainsPoint(CGRectMake(1, 2, 3, 4), CGPointMake(1, 2))",
+            expected: .postfix(.postfix(.postfix(.identifier("CGRect"),
+                                                 .functionCall(arguments: [
+                                                    .labeled("x", .constant(1)),
+                                                    .labeled("y", .constant(2)),
+                                                    .labeled("width", .constant(3)),
+                                                    .labeled("height", .constant(4))
+                                                    ])),
+                                        .member("contains")),
+                               .functionCall(arguments: [
+                                .unlabeled(.postfix(.identifier("CGPoint"),
+                                                    .functionCall(arguments: [
+                                                        .labeled("x", .constant(1)),
+                                                        .labeled("y", .constant(2))
+                                                        ])))
+                                ])))
+    }
+    
     func testCGRectIntersects() {
         assertTransformParsed(
             original: "CGRectIntersection(self.frame, self.frame)",
