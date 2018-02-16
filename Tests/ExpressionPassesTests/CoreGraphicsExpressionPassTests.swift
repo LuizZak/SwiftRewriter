@@ -69,7 +69,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         )
     }
     
-    func testCGRectGetWidthAndGetHeightAndIsNull() {
+    func testCGRecsGetters() {
         assertTransformParsed(
             original: "CGRectGetWidth(self.frame)",
             expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("width")))
@@ -77,6 +77,22 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             original: "CGRectGetHeight(self.frame)",
             expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("height")))
+        
+        assertTransformParsed(
+            original: "CGRectGetMinX(self.frame)",
+            expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("minX")))
+        
+        assertTransformParsed(
+            original: "CGRectGetMaxX(self.frame)",
+            expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("maxX")))
+        
+        assertTransformParsed(
+            original: "CGRectGetMinY(self.frame)",
+            expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("minY")))
+        
+        assertTransformParsed(
+            original: "CGRectGetMaxY(self.frame)",
+            expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("maxY")))
         
         assertTransformParsed(
             original: "CGRectIsNull(self.frame)",
@@ -89,6 +105,18 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             original: "CGRectGetHeight(self.frame, self.frame)",
             expected: "CGRectGetHeight(self.frame, self.frame)")
+        assertTransformParsed(
+            original: "CGRectGetMinX(self.frame, self.frame)",
+            expected: "CGRectGetMinX(self.frame, self.frame)")
+        assertTransformParsed(
+            original: "CGRectGetMinY(self.frame, self.frame)",
+            expected: "CGRectGetMinY(self.frame, self.frame)")
+        assertTransformParsed(
+            original: "CGRectGetMaxX(self.frame, self.frame)",
+            expected: "CGRectGetMaxX(self.frame, self.frame)")
+        assertTransformParsed(
+            original: "CGRectGetMaxY(self.frame, self.frame)",
+            expected: "CGRectGetMaxY(self.frame, self.frame)")
         assertTransformParsed(
             original: "CGRectIsNull(self.frame, self.frame)",
             expected: "CGRectIsNull(self.frame, self.frame)")

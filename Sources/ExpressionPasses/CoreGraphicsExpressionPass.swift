@@ -50,16 +50,26 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
             return .postfix(.identifier("UIEdgeInsets"), .functionCall(arguments: newArgs))
             
         // CGRectGetWidth(<exp>) -> <exp>.width
-        case (.identifier("CGRectGetWidth"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
-            return .postfix(args[0].expression.accept(self), .member("width"))
+        case (.identifier("CGRectGetWidth"), _):
+            return convertMethodToField(field: "width", exp, op)
             
         // CGRectGetHeight(<exp>) -> <exp>.height
-        case (.identifier("CGRectGetHeight"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
-            return .postfix(args[0].expression.accept(self), .member("height"))
+        case (.identifier("CGRectGetHeight"), _):
+            return convertMethodToField(field: "height", exp, op)
+            
+        // CGRectGet[Min/Max][X/Y](<exp>) -> <exp>.height
+        case (.identifier("CGRectGetMinX"), _):
+            return convertMethodToField(field: "minX", exp, op)
+        case (.identifier("CGRectGetMinY"), _):
+            return convertMethodToField(field: "minY", exp, op)
+        case (.identifier("CGRectGetMaxX"), _):
+            return convertMethodToField(field: "maxX", exp, op)
+        case (.identifier("CGRectGetMaxY"), _):
+            return convertMethodToField(field: "maxY", exp, op)
             
         // CGRectIsNull(<exp>) -> <exp>.isNull
-        case (.identifier("CGRectIsNull"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
-            return .postfix(args[0].expression.accept(self), .member("isNull"))
+        case (.identifier("CGRectIsNull"), _):
+            return convertMethodToField(field: "isNull", exp, op)
             
         // CGPointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
         case (.identifier("CGPointMake"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
@@ -92,6 +102,16 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
             
         default:
             return super.visitPostfix(exp, op: op)
+        }
+    }
+    
+    /// Converts a method to a field access, e.g.: `CGRectGetWidth(<exp>)` -> `<exp>.width`.
+    private func convertMethodToField(field: String, _ exp: Expression, _ op: Postfix) -> Expression {
+        switch (exp, op) {
+        case (.identifier, .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
+            return .postfix(args[0].expression.accept(self), .member(field))
+        default:
+            return .postfix(exp.accept(self), op)
         }
     }
 }
