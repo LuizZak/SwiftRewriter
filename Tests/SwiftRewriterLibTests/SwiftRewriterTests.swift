@@ -497,6 +497,7 @@ class SwiftRewriterTests: XCTestCase {
             @interface MyClass
             @property (assign) AClass *aClass;
             @property (assign) NSInteger anInt;
+            @property NSInteger aProperInt;
             @end
             """,
             swift: """
@@ -506,6 +507,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject {
                 unowned(unsafe) var aClass: AClass!
                 var anInt: Int
+                var aProperInt: Int
             }
             """).assertDiagnostics("""
             Warning: Global variable 'anIntGlobal' has specifier '__weak' but is not a pointer type at line 0 column 0

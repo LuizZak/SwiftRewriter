@@ -34,11 +34,11 @@ do {
         for diag in converter.diagnostics.diagnostics {
             switch diag {
             case .note:
-                print("Note: \(diag)")
+                print("// Note: \(diag)")
             case .warning:
-                print("Warning: \(diag)")
+                print("// Warning: \(diag)")
             case .error:
-                print("Error: \(diag)")
+                print("// Error: \(diag)")
             }
         }
     }

@@ -501,7 +501,7 @@ public class SwiftWriter {
             }
         }
         
-        if !type.isPointer {
+        if !ownershipPrefix.isEmpty && !type.isPointer {
             let name: String
             let location: SourceLocation?
             
