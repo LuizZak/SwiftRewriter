@@ -364,7 +364,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Protocol Declaration
     override func enterProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
-        guard let protocolNode = context.currentContextNode(as: ProtocolDeclaration.self) else {
+        guard context.currentContextNode(as: ProtocolDeclaration.self) != nil else {
             return
         }
         

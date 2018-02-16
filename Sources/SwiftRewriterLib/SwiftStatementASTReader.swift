@@ -66,7 +66,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         return .unknown(UnknownASTContext(context: ctx))
     }
     
-    // MARK: - if / select
+    // MARK: - if / switch
     public override func visitSelectionStatement(_ ctx: ObjectiveCParser.SelectionStatementContext) -> Statement? {
         if let expression = ctx.expression() {
             guard let expr = expression.accept(SwiftExprASTReader()) else {
@@ -80,8 +80,52 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             
             return .if(expr, body: body, else: elseStmt)
         }
+        if let switchStmt = ctx.switchStatement() {
+            return visitSwitchStatement(switchStmt)
+        }
         
         return .unknown(UnknownASTContext(context: ctx))
+    }
+    
+    public override func visitSwitchStatement(_ ctx: ObjectiveCParser.SwitchStatementContext) -> Statement? {
+        guard let exp = ctx.expression()?.accept(SwiftExprASTReader()) else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        
+        var cases: [SwitchCase] = []
+        var def: [Statement]?
+        
+        if let sections = ctx.switchBlock()?.switchSection() {
+            for section in sections {
+                let statements = section.statement().compactMap { $0.accept(self) }
+                let labels = section.switchLabel()
+                // Default case
+                if labels.contains(where: { $0.rangeExpression() == nil }) {
+                    def = statements
+                } else {
+                    let expr =
+                        labels
+                            .compactMap { $0.rangeExpression() }
+                            .compactMap { label in
+                                label.accept(SwiftExprASTReader())
+                            }
+                    
+                    let c =
+                        SwitchCase(patterns: expr.map { .expression($0) },
+                                   statements: statements)
+                    
+                    cases.append(c)
+                }
+            }
+        }
+        
+        // Always emit a default break statement, since switches in Swift must
+        // be exhaustive
+        if def == nil {
+            def = [.break]
+        }
+        
+        return Statement.switch(exp, cases: cases, default: def)
     }
     
     // MARK: - while / do-while / for / for-in

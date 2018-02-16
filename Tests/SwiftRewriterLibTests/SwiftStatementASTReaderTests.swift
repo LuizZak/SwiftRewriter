@@ -110,6 +110,47 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
     }
     
+    func testSwitch() {
+        assert(objcExpr: "switch(value) { case 0: break; }",
+               readsAs: .switch(.identifier("value"),
+                                cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [.break])],
+                                default: [.break])
+        )
+        
+        assert(objcExpr: "switch(value) { case 0: break; case 1: break }",
+               readsAs: .switch(.identifier("value"),
+                                cases: [
+                                    SwitchCase(patterns: [.expression(.constant(0))], statements: [.break]),
+                                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break])
+                                ],
+                                default: [.break])
+        )
+        
+        assert(objcExpr: "switch(value) { case 0: case 1: break }",
+               readsAs: .switch(.identifier("value"),
+                                cases: [
+                                    SwitchCase(patterns: [.expression(.constant(0)), .expression(.constant(1))], statements: [.break])
+                                ],
+                                default: [.break])
+        )
+        
+        assert(objcExpr: "switch(value) { case 0: case 1: break; default: stmt(); }",
+               readsAs: .switch(.identifier("value"),
+                                cases: [
+                                    SwitchCase(patterns: [.expression(.constant(0)),
+                                                          .expression(.constant(1))],
+                                               statements: [.break])
+                                ],
+                                default: [
+                                    .expression(
+                                        .postfix(.identifier("stmt"),
+                                                 .functionCall(arguments: [])
+                                        )
+                                    )
+                                ])
+        )
+    }
+    
     func testExpressions() {
         assert(objcExpr: "abc;",
                readsAs: .expression(.identifier("abc"))

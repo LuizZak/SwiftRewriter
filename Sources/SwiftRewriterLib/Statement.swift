@@ -60,7 +60,7 @@ public indirect enum Statement: Equatable {
     case `if`(Expression, body: CompoundStatement, `else`: CompoundStatement?)
     case `while`(Expression, body: CompoundStatement)
     case `for`(Pattern, Expression, body: CompoundStatement)
-    // TODO: case `switch`(...)
+    case `switch`(Expression, cases: [SwitchCase], default: [Statement]?)
     case `defer`(CompoundStatement)
     case `return`(Expression?)
     case `break`
@@ -80,9 +80,27 @@ public indirect enum Statement: Equatable {
     }
 }
 
+public struct SwitchCase: Equatable {
+    /// Patterns for this switch case
+    public var patterns: [Pattern]
+    /// Statements for the switch case
+    public var statements: [Statement]
+    
+    public init(patterns: [Pattern], statements: [Statement]) {
+        self.patterns = patterns
+        self.statements = statements
+    }
+}
+
 /// A pattern for pattern-matching
 public enum Pattern: Equatable {
+    /// An identifier pattern
     case identifier(String)
+    
+    /// An expression pattern
+    case expression(Expression)
+    
+    /// A tupple pattern
     indirect case tuple([Pattern])
     
     public var simplified: Pattern {
@@ -93,8 +111,17 @@ public enum Pattern: Equatable {
             return self
         }
     }
+    
+    public static func fromExpressions(_ expr: [Expression]) -> Pattern {
+        if expr.count == 1 {
+            return .expression(expr[0])
+        }
+        
+        return .tuple(expr.map { .expression($0) })
+    }
 }
 
+/// A variable declaration statement
 public struct StatementVariableDeclaration: Equatable {
     public var identifier: String
     public var type: ObjcType
@@ -112,6 +139,8 @@ extension Pattern: CustomStringConvertible {
         switch self.simplified {
         case .tuple(let tups):
             return "(" + tups.map({ $0.description }).joined(separator: ", ") + ")"
+        case .expression(let exp):
+            return exp.description
         case .identifier(let ident):
             return ident
         }

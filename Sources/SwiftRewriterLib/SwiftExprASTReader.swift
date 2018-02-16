@@ -74,6 +74,33 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         return .unknown(UnknownASTContext(context: ctx))
     }
     
+    public override func visitRangeExpression(_ ctx: ObjectiveCParser.RangeExpressionContext) -> Expression? {
+        let constantExpressions = ctx.constantExpression()
+        
+        if constantExpressions.count == 1 {
+            return constantExpressions[0].accept(self)
+        }
+        if constantExpressions.count == 2,
+            let exp1 = constantExpressions[0].accept(self),
+            let exp2 = constantExpressions[1].accept(self) {
+            
+            return .binary(lhs: exp1, op: .closedRange, rhs: exp2)
+        }
+        
+        return .unknown(UnknownASTContext(context: ctx))
+    }
+    
+    public override func visitConstantExpression(_ ctx: ObjectiveCParser.ConstantExpressionContext) -> Expression? {
+        if let identifier = ctx.identifier() {
+            return identifier.accept(self)
+        }
+        if let constant = ctx.constant() {
+            return constant.accept(self)
+        }
+        
+        return .unknown(UnknownASTContext(context: ctx))
+    }
+    
     public override func visitCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) -> Expression? {
         if let unary = ctx.unaryExpression() {
             return unary.accept(self)

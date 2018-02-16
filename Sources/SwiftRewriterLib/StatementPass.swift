@@ -30,6 +30,16 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the `if` statement node
     func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> StmtResult
     
+    /// Visits a `switch` statement with this visitor
+    ///
+    /// - Parameters:
+    ///   - expression: The `switch`'s control expression
+    ///   - cases: The `switch`'s cases
+    ///   - cases: Cases to match with the switch
+    ///   - default: An optional set of statements to fill the default body with.
+    /// - Returns: Result of visiting the `switch` statement node
+    func visitSwitch(_ expression: Expression, _ cases: [SwitchCase], _ default: [Statement]?) -> StmtResult
+    
     /// Visits a `while` statement with this visitor
     ///
     /// - Parameters:
@@ -107,6 +117,8 @@ public extension Statement {
             return visitor.visitCompound(body)
         case let .if(exp, body, elseBody):
             return visitor.visitIf(exp, body, elseBody)
+        case let .switch(exp, cases, def):
+            return visitor.visitSwitch(exp, cases, def)
         case let .while(exp, body):
             return visitor.visitWhile(exp, body)
         case let .for(pattern, exp, body):
@@ -144,6 +156,9 @@ open class StatementPass: StatementVisitor {
             
         case let .if(exp, body, elseBody):
             return visitIf(exp, body, elseBody)
+            
+        case let .switch(exp, cases, def):
+            return visitSwitch(exp, cases, def)
             
         case let .while(exp, body):
             return visitWhile(exp, body)
@@ -184,6 +199,15 @@ open class StatementPass: StatementVisitor {
     
     open func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> Statement {
         return .if(expression, body: visitStatementsInCompound(body), else: visitStatementsInCompound(elseBody))
+    }
+    
+    open func visitSwitch(_ expression: Expression, _ cases: [SwitchCase], _ def: [Statement]?) -> Statement {
+        let cases = cases.map {
+            SwitchCase(patterns: $0.patterns, statements: $0.statements.map { $0.accept(self) })
+        }
+        let def = def?.map { $0.accept(self) }
+        
+        return .switch(expression, cases: cases, default: def)
     }
     
     open func visitWhile(_ expression: Expression, _ body: CompoundStatement) -> Statement {

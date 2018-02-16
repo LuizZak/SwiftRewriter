@@ -442,6 +442,36 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testSwitchStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                switch(value) {
+                case 0:
+                    stmt();
+                case 1:
+                    break;
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    switch(value) {
+                    case 0:
+                        stmt()
+                    case 1:
+                        break
+                    default:
+                        break
+                    }
+                }
+            }
+            """)
+    }
+    
     func testWhileStatement() throws {
         try assertObjcParse(
             objc: """

@@ -311,6 +311,8 @@ fileprivate class StatementWriter {
             visitCompound(body)
         case let .if(exp, body, elseBody):
             visitIf(exp, body, elseBody: elseBody)
+        case let .switch(exp, cases, def):
+            visitSwitch(exp, cases, def)
         case let .while(exp, body):
             visitWhile(exp, body)
         case let .for(pattern, exp, body):
@@ -372,6 +374,10 @@ fileprivate class StatementWriter {
         }
     }
     
+    private func visitSwitch(_ exp: Expression, _ cases: [SwitchCase], _ def: [Statement]?) {
+        
+    }
+    
     private func visitWhile(_ exp: Expression, _ body: CompoundStatement) {
         target.outputIdentation()
         target.outputInline("while ", style: .keyword)
@@ -383,7 +389,7 @@ fileprivate class StatementWriter {
     private func visitForIn(_ pattern: Pattern, _ exp: Expression, _ body: CompoundStatement) {
         target.outputIdentation()
         target.outputInline("for ", style: .keyword)
-        target.outputInline(pattern.simplified.description)
+        emitPattern(pattern)
         target.outputInline(" in ", style: .keyword)
         emitExpr(exp)
         
@@ -468,6 +474,24 @@ fileprivate class StatementWriter {
         }
         
         target.outputLineFeed()
+    }
+    
+    private func emitPattern(_ pattern: Pattern) {
+        switch pattern.simplified {
+        case .expression(let exp):
+            emitExpr(exp)
+        case .tuple(let patterns):
+            target.outputInline("(")
+            for (i, pattern) in patterns.enumerated() {
+                if i > 0 {
+                    target.outputInline(", ")
+                }
+                emitPattern(pattern)
+            }
+            target.outputInline(")")
+        case .identifier(let ident):
+            target.outputInline(ident)
+        }
     }
     
     private func emitExpr(_ expr: Expression) {

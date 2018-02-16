@@ -61,4 +61,35 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             }
             """)
     }
+    
+    func testPassWithGetterAndSetterWithSynthesizedField() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass
+            @property BOOL value;
+            @end
+
+            @implementation MyClass
+            - (void)setValue:(BOOL)value {
+                self->_value = value;
+            }
+            - (BOOL)value {
+                return self->_value;
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                private var _value: Bool
+                var value: Bool {
+                    get {
+                        return self._value
+                    }
+                    set(value) {
+                        self._value = value
+                    }
+                }
+            }
+            """)
+    }
 }

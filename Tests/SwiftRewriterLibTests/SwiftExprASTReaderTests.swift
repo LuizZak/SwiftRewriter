@@ -172,7 +172,22 @@ class SwiftExprASTReaderTests: XCTestCase {
                 ]))
     }
     
-    func assert(objcExpr: String, readsAs expected: Expression, file: String = #file, line: Int = #line) {
+    func testRangeExpression() {
+        assert(objcExpr: "0",
+               parseWith: { try $0.rangeExpression() },
+               readsAs: .constant(0)
+        )
+        assert(objcExpr: "0 ... 20",
+               parseWith: { try $0.rangeExpression() },
+               readsAs: .binary(lhs: .constant(0), op: .closedRange, rhs: .constant(20))
+        )
+        assert(objcExpr: "ident ... 20",
+               parseWith: { try $0.rangeExpression() },
+               readsAs: .binary(lhs: .identifier("ident"), op: .closedRange, rhs: .constant(20))
+        )
+    }
+    
+    func assert(objcExpr: String, parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() }, readsAs expected: Expression, file: String = #file, line: Int = #line) {
         let input = ANTLRInputStream(objcExpr)
         let lxr = ObjectiveCLexer(input)
         tokens = CommonTokenStream(lxr)
@@ -181,7 +196,7 @@ class SwiftExprASTReaderTests: XCTestCase {
         
         do {
             let parser = try ObjectiveCParser(tokens)
-            let expr = try parser.expression()
+            let expr = try parseWith(parser)
             
             let result = expr.accept(sut)
             
