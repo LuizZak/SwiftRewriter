@@ -14,4 +14,22 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                               op: .equals,
                               rhs: .constant("abc")))
     }
+    
+    func testNSStringWithFormat() {
+        assertTransformParsed(
+            original: "[NSString stringWithFormat:@\"%@\", self]",
+            expected: .postfix(.identifier("String"),
+                               .functionCall(arguments: [
+                                .labeled("format", .constant("%@")),
+                                .unlabeled(.identifier("self"))
+                                ]))
+        )
+        assertTransformParsed(
+            original: "[NSString stringWithFormat:@\"%@\"]",
+            expected: .postfix(.identifier("String"),
+                               .functionCall(arguments: [
+                                .labeled("format", .constant("%@"))
+                                ]))
+        )
+    }
 }

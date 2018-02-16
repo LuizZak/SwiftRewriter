@@ -29,7 +29,7 @@ class ExpressionPassTestCase: XCTestCase {
             dump(expected, to: &expString)
             dump(result, to: &resString)
             
-            recordFailure(withDescription: "Failed to convert: Expected to convert expression\n\(expString)\nbut received\n\(resString)", inFile: file, atLine: line, expected: false)
+            recordFailure(withDescription: "Failed to convert: Expected to convert expression into\n\(expString)\nbut received\n\(resString)", inFile: file, atLine: line, expected: false)
         }
     }
     
