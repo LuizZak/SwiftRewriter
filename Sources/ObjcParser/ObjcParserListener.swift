@@ -197,6 +197,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.InstanceVariablesContext.self, nodeType: IVarsList.self)
         mapper.addRuleMap(rule: ObjectiveCParser.TypedefDeclarationContext.self, nodeType: TypedefNode.self)
         mapper.addRuleMap(rule: ObjectiveCParser.BlockParametersContext.self, nodeType: BlockParametersNode.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.ProtocolDeclarationContext.self, nodeType: ProtocolDeclaration.self)
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -358,6 +359,19 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             ivar.sourceRuleContext = declarator
             
             context.addChildNode(ivar)
+        }
+    }
+    
+    // MARK: - Protocol Declaration
+    override func enterProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
+        guard let protocolNode = context.currentContextNode(as: ProtocolDeclaration.self) else {
+            return
+        }
+        
+        if let identifier = ctx.protocolName()?.identifier() {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            context.addChildNode(identifierNode)
         }
     }
     

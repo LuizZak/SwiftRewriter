@@ -474,4 +474,18 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteProtocol() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol MyProtocol
+            - (void)myMethod;
+            @end
+            """,
+            swift: """
+            @objc protocol MyProtocol {
+                func myMethod()
+            }
+            """)
+    }
 }

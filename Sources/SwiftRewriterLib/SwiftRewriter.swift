@@ -310,7 +310,7 @@ public class SwiftRewriter {
     
     // MARK: - ProtocolDeclaration
     private func enterProtocolDeclarationNode(_ node: ProtocolDeclaration) {
-        guard let name = node.identifier.name else {
+        guard let name = node.identifier?.name else {
             return
         }
         
@@ -327,7 +327,7 @@ public class SwiftRewriter {
     }
     
     private func exitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
-        if node.identifier.name != nil {
+        if node.identifier?.name != nil {
             context.popContext() // ProtocolGenerationIntention
         }
     }
@@ -362,9 +362,11 @@ public class SwiftRewriter {
         
         method.inNonnullContext = isNodeInNonnullContext(node)
         
-        let methodBodyIntention = MethodBodyIntention(accessLevel: .public, source: node.body)
-        
-        method.body = methodBodyIntention
+        if node.body != nil {
+            let methodBodyIntention = MethodBodyIntention(accessLevel: .public, source: node.body)
+            
+            method.body = methodBodyIntention
+        }
         
         ctx.addMethod(method)
     }

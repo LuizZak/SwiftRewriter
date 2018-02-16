@@ -17,7 +17,9 @@ public extension ObjcParser {
         
         try parseKeyword(.atProtocol)
         
-        node.identifier = try asNodeRef(try parseIdentifierNode())
+        if let ident = try? parseIdentifierNode() {
+            node.addChild(ident)
+        }
         
         if lexer.tokenType(.operator(.lessThan)) {
             try parseProtocolReferenceList()

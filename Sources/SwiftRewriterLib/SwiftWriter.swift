@@ -28,6 +28,7 @@ public class SwiftWriter {
         let file = output.createFile(path: fileIntent.filePath)
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+        let protocols = fileIntent.protocolIntentions
         var addSeparator = false
         
         for typeali in fileIntent.typealiasIntentions {
@@ -41,6 +42,16 @@ public class SwiftWriter {
         
         for varDef in fileIntent.globalVariableIntentions {
             outputVariableDeclaration(varDef, target: out)
+            addSeparator = true
+        }
+        
+        if addSeparator {
+            out.output(line: "")
+            addSeparator = false
+        }
+        
+        for prot in protocols {
+            outputProtocol(prot, target: out)
             addSeparator = true
         }
         
@@ -145,6 +156,40 @@ public class SwiftWriter {
             }
             
             for method in cls.methods {
+                // Init methods are treated differently
+                // TODO: Create a separate GenerationIntention entirely for init
+                // methods and detect them during SwiftRewriter's parsing instead
+                // of postponing to here.
+                if method.signature.name == "init" {
+                    outputInitMethod(method, target: target)
+                } else {
+                    outputMethod(method, target: target)
+                }
+            }
+        }
+        
+        target.output(line: "}")
+    }
+    
+    private func outputProtocol(_ prot: ProtocolGenerationIntention, target: RewriterOutputTarget) {
+        target.outputIdentation()
+        
+        target.outputInlineWithSpace("@objc", style: .keyword)
+        target.outputInlineWithSpace("protocol", style: .keyword)
+        target.outputInlineWithSpace(prot.typeName, style: .typeName)
+        target.outputInline("{")
+        target.outputLineFeed()
+        
+        target.idented {
+            for prop in prot.properties {
+                outputProperty(prop, target: target)
+            }
+            
+            if prot.properties.count > 0 && prot.methods.count > 0 {
+                target.output(line: "")
+            }
+            
+            for method in prot.methods {
                 // Init methods are treated differently
                 // TODO: Create a separate GenerationIntention entirely for init
                 // methods and detect them during SwiftRewriter's parsing instead
@@ -272,6 +317,8 @@ public class SwiftWriter {
         
         if let body = initMethod.body {
             outputMethodBody(body, target: target)
+        } else {
+            target.outputLineFeed()
         }
     }
     
@@ -312,6 +359,8 @@ public class SwiftWriter {
         
         if let body = method.body {
             outputMethodBody(body, target: target)
+        } else {
+            target.outputLineFeed()
         }
     }
     
