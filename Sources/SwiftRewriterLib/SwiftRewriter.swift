@@ -232,10 +232,14 @@ public class SwiftRewriter {
         
         intent.inNonnullContext = isNodeInNonnullContext(node)
         
-        if let expr = node.initialExpression {
+        if let initialExpression = node.initialExpression,
+            let expression = initialExpression.expression?.expression?.expression {
+            let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
+            let expression = rewriter.parseExpression(expression: expression)
+            
             intent.initialValueExpr =
-                GlobalVariableInitialValueIntention(accessLevel: .internal,
-                                                    source: expr)
+                GlobalVariableInitialValueIntention(expression: expression,
+                                                    source: initialExpression)
         }
         
         ctx.addGlobalVariable(intent)
@@ -365,9 +369,11 @@ public class SwiftRewriter {
         
         method.inNonnullContext = isNodeInNonnullContext(node)
         
-        if node.body != nil {
-            let methodBodyIntention = MethodBodyIntention(accessLevel: .public, source: node.body)
+        if let body = node.body, let statements = body.statements {
+            let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
+            let compound = rewriter.parseStatements(compoundStatement: statements)
             
+            let methodBodyIntention = MethodBodyIntention(body: compound, source: body)
             method.body = methodBodyIntention
         }
         

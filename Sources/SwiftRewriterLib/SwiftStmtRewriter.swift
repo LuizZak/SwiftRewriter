@@ -12,26 +12,42 @@ class SwiftStmtRewriter {
         self.expressionPasses = expressionPasses
     }
     
-    public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
-        let parser = SwiftStatementASTReader()
+    public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement {
+        let parser = SwiftStatementASTReader.CompoundStatementVisitor()
         guard let result = compoundStatement.accept(parser) else {
-            target.output(line: "// Failed to parse method.", style: .comment)
-            return
+            return [.unknown(UnknownASTContext(context: compoundStatement))]
         }
         
+        return result
+    }
+    
+    public func parseExpression(expression: ObjectiveCParser.ExpressionContext) -> Expression {
+        let parser = SwiftExprASTReader()
+        guard let result = expression.accept(parser) else {
+            return .unknown(UnknownASTContext(context: expression))
+        }
+        
+        return result
+    }
+    
+    public func rewrite(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
         let rewriter = StatementWriter(target: target, expressionPasses: expressionPasses)
-        rewriter.visitStatement(result)
+        rewriter.visitStatement(.compound(compoundStatement))
+    }
+    
+    public func rewrite(expression: Expression, into target: RewriterOutputTarget) {
+        let rewriter = ExpressionWriter(target: target, expressionPasses: expressionPasses)
+        rewriter.rewrite(expression)
+    }
+    
+    public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
+        let result = parseStatements(compoundStatement: compoundStatement)
+        rewrite(compoundStatement: result, into: target)
     }
     
     public func rewrite(expression: ObjectiveCParser.ExpressionContext, into target: RewriterOutputTarget) {
-        let parser = SwiftExprASTReader()
-        guard let result = expression.accept(parser) else {
-            target.output(line: "// Failed to parse method.", style: .comment)
-            return
-        }
-        
-        let rewriter = ExpressionWriter(target: target, expressionPasses: expressionPasses)
-        rewriter.rewrite(result)
+        let result = parseExpression(expression: expression)
+        rewrite(expression: result, into: target)
     }
 }
 

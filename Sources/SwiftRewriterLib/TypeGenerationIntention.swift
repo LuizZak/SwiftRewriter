@@ -155,8 +155,13 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
 /// An intention to generate a body of Swift code from an equivalent Objective-C
 /// source.
 public class MethodBodyIntention: FromSourceIntention {
-    public var typedSource: MethodBody? {
-        return source as? MethodBody
+    /// Original source code body to generate
+    public var body: CompoundStatement
+    
+    public init(body: CompoundStatement, source: MethodBody) {
+        self.body = body
+        
+        super.init(accessLevel: .public, source: source)
     }
 }
 

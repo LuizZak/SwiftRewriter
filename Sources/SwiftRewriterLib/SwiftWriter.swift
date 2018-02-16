@@ -112,7 +112,7 @@ public class SwiftWriter {
         target.outputInline(": ")
         target.outputInline(typeName, style: .typeName)
         
-        if let expression = initVal?.typedSource?.expression?.expression?.expression {
+        if let expression = initVal?.expression {
             target.outputInline(" = ")
             
             let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
@@ -372,16 +372,8 @@ public class SwiftWriter {
     }
     
     private func outputMethodBody(_ body: MethodBodyIntention, target: RewriterOutputTarget) {
-        guard let stmt = body.typedSource?.statements else {
-            target.outputInline(" {")
-            target.outputLineFeed()
-            target.output(line: "}")
-            
-            return
-        }
-        
         let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
-        rewriter.rewrite(compoundStatement: stmt, into: target)
+        rewriter.rewrite(compoundStatement: body.body, into: target)
     }
     
     private func generateParameters(for signature: MethodGenerationIntention.Signature,
