@@ -69,7 +69,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         )
     }
     
-    func testCGRectGetWidthAndGetHeight() {
+    func testCGRectGetWidthAndGetHeightAndIsNull() {
         assertTransformParsed(
             original: "CGRectGetWidth(self.frame)",
             expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("width")))
@@ -78,6 +78,10 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             original: "CGRectGetHeight(self.frame)",
             expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("height")))
         
+        assertTransformParsed(
+            original: "CGRectIsNull(self.frame)",
+            expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("isNull")))
+        
         // Test transformations keep unrecognized members alone
         assertTransformParsed(
             original: "CGRectGetWidth(self.frame, self.frame)",
@@ -85,5 +89,48 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             original: "CGRectGetHeight(self.frame, self.frame)",
             expected: "CGRectGetHeight(self.frame, self.frame)")
+        assertTransformParsed(
+            original: "CGRectIsNull(self.frame, self.frame)",
+            expected: "CGRectIsNull(self.frame, self.frame)")
+    }
+    
+    func testCGRectIntersects() {
+        assertTransformParsed(
+            original: "CGRectIntersection(self.frame, self.frame)",
+            expected: .postfix(.postfix(.postfix(.identifier("self"),
+                                                 .member("frame")),
+                                        .member("intersection")),
+                               .functionCall(arguments: [
+                                .unlabeled(.postfix(.identifier("self"),
+                                                    .member("frame")))
+                                ]))
+        )
+    }
+    
+    func testCGPointMake() {
+        assertTransformParsed(
+            original: "CGPointMake(1, 2)",
+            expected: .postfix(.identifier("CGPoint"),
+                               .functionCall(arguments: [
+                                .labeled("x", .constant(1)),
+                                .labeled("y", .constant(2))
+                                ])))
+        
+        assertTransformParsed(
+            original: "abc = [[UIView alloc] initWithPoint:CGPointMake(1, 2)]",
+            expected: .binary(lhs: .identifier("abc"),
+                              op: .assign,
+                              rhs: .postfix(
+                                .postfix(
+                                    .postfix(
+                                        .postfix(.identifier("UIView"), .member("alloc")),
+                                        .functionCall(arguments: [])), .member("initWithPoint")
+                                ),
+                                .functionCall(arguments: [.unlabeled(.postfix(.identifier("CGPoint"),
+                                                                              .functionCall(arguments: [
+                                                                                .labeled("x", .constant(1)),
+                                                                                .labeled("y", .constant(2))
+                                                                                ])))])))
+        )
     }
 }

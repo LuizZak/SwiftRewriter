@@ -57,6 +57,25 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
         case (.identifier("CGRectGetHeight"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
             return .postfix(args[0].expression, .member("height"))
             
+        // CGRectIsNull(<exp>) -> <exp>.isNull
+        case (.identifier("CGRectIsNull"), .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
+            return .postfix(args[0].expression, .member("isNull"))
+            
+        // CGPointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
+        case (.identifier("CGPointMake"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+            return .postfix(.identifier("CGPoint"),
+                            .functionCall(arguments: [
+                                .labeled("x", args[0].expression),
+                                .labeled("y", args[1].expression)
+                                ]))
+            
+        // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
+        case (.identifier("CGRectIntersection"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+            return .postfix(.postfix(args[0].expression, .member("intersection")),
+                            .functionCall(arguments: [
+                                .unlabeled(args[1].expression)
+                                ]))
+            
         default:
             return super.visitPostfix(exp, op: op)
         }
