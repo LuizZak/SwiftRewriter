@@ -179,23 +179,23 @@ open class StatementPass: StatementVisitor {
     }
     
     open func visitCompound(_ compoundStatement: CompoundStatement) -> Statement {
-        return .compound(compoundStatement)
+        return .compound(visitStatementsInCompound(compoundStatement))
     }
     
     open func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> Statement {
-        return .if(expression, body: body, else: elseBody)
+        return .if(expression, body: visitStatementsInCompound(body), else: visitStatementsInCompound(elseBody))
     }
     
     open func visitWhile(_ expression: Expression, _ body: CompoundStatement) -> Statement {
-        return .while(expression, body: body)
+        return .while(expression, body: visitStatementsInCompound(body))
     }
     
     open func visitFor(_ pattern: Pattern, _ expression: Expression, _ compoundStatement: CompoundStatement) -> Statement {
-        return .for(pattern, expression, body: compoundStatement)
+        return .for(pattern, expression, body: visitStatementsInCompound(compoundStatement))
     }
     
     open func visitDefer(_ body: CompoundStatement) -> Statement {
-        return .defer(body)
+        return .defer(visitStatementsInCompound(body))
     }
     
     open func visitReturn(_ expression: Expression?) -> Statement {
@@ -220,5 +220,16 @@ open class StatementPass: StatementVisitor {
     
     open func visitUnknown(_ context: UnknownASTContext) -> Statement {
         return .unknown(context)
+    }
+    
+    open func visitStatementsInCompound(_ compound: CompoundStatement) -> CompoundStatement {
+        return CompoundStatement(statements: compound.statements.map { $0.accept(self) })
+    }
+    
+    open func visitStatementsInCompound(_ compound: CompoundStatement?) -> CompoundStatement? {
+        if let compound = compound {
+            return visitStatementsInCompound(compound)
+        }
+        return nil
     }
 }

@@ -177,6 +177,8 @@ public extension Expression {
 
 /// A base class for expression rewriting passes.
 open class ExpressionPass: ExpressionVisitor {
+    public var inspectBlocks = false
+    
     public init() {
         
     }
@@ -307,10 +309,52 @@ open class ExpressionPass: ExpressionVisitor {
     }
     
     open func visitBlock(_ parameters: [BlockParameter], _ returnType: ObjcType, _ body: CompoundStatement) -> Expression {
+        var body = body
+        if inspectBlocks {
+            let pass = ExpStatementPass(target: self)
+            body.statements = body.statements.map { $0.accept(pass) }
+        }
+        
         return .block(parameters: parameters, return: returnType, body: body)
     }
     
     open func visitUnknown(_ context: UnknownASTContext) -> Expression {
         return .unknown(context)
+    }
+    
+    private class ExpStatementPass: StatementPass {
+        var target: ExpressionPass
+        
+        init(target: ExpressionPass) {
+            self.target = target
+        }
+        
+        override func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> Statement {
+            return super.visitIf(expression.accept(target), body, elseBody)
+        }
+        
+        override func visitWhile(_ expression: Expression, _ body: CompoundStatement) -> Statement {
+            return super.visitWhile(expression.accept(target), body)
+        }
+        
+        override func visitFor(_ pattern: Pattern, _ expression: Expression, _ compoundStatement: CompoundStatement) -> Statement {
+            return super.visitFor(pattern, expression.accept(target), compoundStatement)
+        }
+        
+        override func visitReturn(_ expression: Expression?) -> Statement {
+            return super.visitReturn(expression?.accept(target))
+        }
+        
+        override func visitExpressions(_ expressions: [Expression]) -> Statement {
+            return super.visitExpressions(expressions.map { $0.accept(target) })
+        }
+        
+        override func visitVariableDeclarations(_ variables: [StatementVariableDeclaration]) -> Statement {
+            return super.visitVariableDeclarations(variables.map { v in
+                var v = v
+                v.initialization = v.initialization?.accept(target)
+                return v
+            })
+        }
     }
 }

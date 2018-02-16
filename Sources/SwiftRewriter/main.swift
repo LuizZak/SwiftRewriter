@@ -26,6 +26,7 @@ do {
         
         converter.expressionPasses.append(AllocInitExpressionPass())
         converter.expressionPasses.append(CoreGraphicsExpressionPass())
+        converter.expressionPasses.append(FoundationExpressionPass())
         
         try converter.rewrite()
         

@@ -3,6 +3,12 @@ import SwiftRewriterLib
 
 /// Converts Type.alloc().init[...]() expression chains into proper Type() calls.
 public class AllocInitExpressionPass: ExpressionPass {
+    
+    public override init() {
+        super.init()
+        inspectBlocks = true
+    }
+    
     public override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
         var (exp, op) = (exp, op)
         

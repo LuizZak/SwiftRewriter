@@ -3,6 +3,11 @@ import SwiftRewriterLib
 
 public class CoreGraphicsExpressionPass: ExpressionPass {
     
+    public override init() {
+        super.init()
+        inspectBlocks = true
+    }
+    
     public override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
         var (exp, op) = (exp, op)
         
@@ -129,13 +134,13 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
     }
 }
 
-private extension Sequence where Element == FunctionArgument {
+internal extension Sequence where Element == FunctionArgument {
     func hasLabeledArguments() -> Bool {
         return any(pass: { $0.isLabeled })
     }
 }
 
-private extension Sequence {
+internal extension Sequence {
     func none(pass predicate: (Element) -> Bool) -> Bool {
         return !any(pass: predicate)
     }
