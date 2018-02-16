@@ -356,7 +356,7 @@ fileprivate class StatementWriter {
         if withIdent {
             target.outputIdentation()
         }
-        target.outputInline("if ", style: .keyword)
+        target.outputInlineWithSpace("if", style: .keyword)
         emitExpr(exp)
         
         visitCompound(body, lineFeedAfter: elseBody == nil)
@@ -375,12 +375,69 @@ fileprivate class StatementWriter {
     }
     
     private func visitSwitch(_ exp: Expression, _ cases: [SwitchCase], _ def: [Statement]?) {
+        target.outputIdentation()
+        target.outputInlineWithSpace("switch", style: .keyword)
+        emitExpr(exp)
+        target.outputInline(" {")
+        target.outputLineFeed()
         
+        for cs in cases {
+            target.outputIdentation()
+            target.outputInlineWithSpace("case", style: .keyword)
+            for (i, pattern) in cs.patterns.enumerated() {
+                if i > 0 {
+                    target.outputInline(", ")
+                }
+                emitPattern(pattern)
+            }
+            target.outputInline(":")
+            target.outputLineFeed()
+            
+            target.idented {
+                for (i, stmt) in cs.statements.enumerated() {
+                    // No need to emit the last break statement
+                    if i > 0 && i == cs.statements.count - 1 && stmt == .break {
+                        break
+                    }
+                    
+                    visitStatement(stmt)
+                }
+                
+                let hasBreak = cs.statements.last == .break
+                if !hasBreak {
+                    target.output(line: "fallthrough", style: .keyword)
+                }
+            }
+        }
+        
+        if let def = def {
+            target.outputIdentation()
+            target.outputInline("default", style: .keyword)
+            target.outputInline(":")
+            target.outputLineFeed()
+            
+            target.idented {
+                for (i, stmt) in def.enumerated() {
+                    // No need to emit the last break statement
+                    if i > 0 && i == def.count - 1 && stmt == .break {
+                        break
+                    }
+                    
+                    visitStatement(stmt)
+                }
+            }
+        }
+        
+        if cases.count == 0 && def == nil {
+            target.outputLineFeed()
+        }
+        
+        target.output(line: "}")
     }
     
     private func visitWhile(_ exp: Expression, _ body: CompoundStatement) {
         target.outputIdentation()
-        target.outputInline("while ", style: .keyword)
+        target.outputInlineWithSpace("while", style: .keyword)
         emitExpr(exp)
         
         visitCompound(body)
@@ -388,7 +445,7 @@ fileprivate class StatementWriter {
     
     private func visitForIn(_ pattern: Pattern, _ exp: Expression, _ body: CompoundStatement) {
         target.outputIdentation()
-        target.outputInline("for ", style: .keyword)
+        target.outputInlineWithSpace("for", style: .keyword)
         emitPattern(pattern)
         target.outputInline(" in ", style: .keyword)
         emitExpr(exp)

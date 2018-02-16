@@ -450,6 +450,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 switch(value) {
                 case 0:
                     stmt();
+                    break
                 case 1:
                     break;
                 }
@@ -459,11 +460,43 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    switch(value) {
+                    switch value {
                     case 0:
                         stmt()
                     case 1:
                         break
+                    default:
+                        break
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testSwitchStatementWithFallthroughCases() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                switch(value) {
+                case 0:
+                    stmt();
+                case 1:
+                    otherStmt();
+                    break;
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    switch value {
+                    case 0:
+                        stmt()
+                        fallthrough
+                    case 1:
+                        otherStmt()
                     default:
                         break
                     }
