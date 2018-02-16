@@ -113,6 +113,9 @@ class SwiftExprASTReaderTests: XCTestCase {
         
         assert(objcExpr: "i < 10",
                readsAs: .binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)))
+        
+        assert(objcExpr: "i % 10",
+               readsAs: .binary(lhs: .identifier("i"), op: .mod, rhs: .constant(10)))
     }
     
     func testPostfixIncrementDecrement() {

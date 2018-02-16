@@ -147,6 +147,8 @@ public enum SwiftOperator: String {
     case greaterThan = ">"
     case greaterThanOrEqual = ">="
     
+    case mod = "%"
+    
     case assign = "="
     case equals = "=="
     case unequals = "!="
