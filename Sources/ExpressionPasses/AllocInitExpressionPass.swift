@@ -4,6 +4,8 @@ import SwiftRewriterLib
 /// Converts Type.alloc().init[...]() expression chains into proper Type() calls.
 public class AllocInitExpressionPass: ExpressionPass {
     public override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
+        var (exp, op) = (exp, op)
+        
         switch (exp, op) {
         // Plain [[Class alloc] init] -> Class()
         case (.postfix(.postfix(.postfix(.identifier(let typeName),
@@ -13,7 +15,7 @@ public class AllocInitExpressionPass: ExpressionPass {
               .functionCall(arguments: let args))
             where initCall == "init" && args.count == 0:
             
-            return .postfix(.identifier(typeName), .functionCall(arguments: []))
+            (exp, op) = (.identifier(typeName), .functionCall(arguments: []))
             
         // [[Class alloc] initWithThing:[...]] -> Class(thing: [...])
         case (.postfix(.postfix(.postfix(.identifier(let typeName),
@@ -36,7 +38,7 @@ public class AllocInitExpressionPass: ExpressionPass {
             let lowercasedFirstLetter = split[1].prefix(1).lowercased() + split[1].dropFirst()
             args[0] = .labeled(lowercasedFirstLetter, args[0].expression)
             
-            return .postfix(.identifier(typeName), .functionCall(arguments: args))
+            (exp, op) = (.identifier(typeName), .functionCall(arguments: args))
         default:
             break
         }
