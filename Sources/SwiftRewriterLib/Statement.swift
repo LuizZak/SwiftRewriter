@@ -26,6 +26,10 @@ public struct CompoundStatement: Equatable {
     /// An empty compound statement.
     public static var empty = CompoundStatement()
     
+    public var isEmpty: Bool {
+        return statements.isEmpty
+    }
+    
     public var statements: [Statement]
     
     public init() {
@@ -46,24 +50,6 @@ extension CompoundStatement: ExpressibleByArrayLiteral {
 extension CompoundStatement: Sequence {
     public func makeIterator() -> IndexingIterator<[Statement]> {
         return statements.makeIterator()
-    }
-}
-
-extension CompoundStatement: RandomAccessCollection {
-    public func index(after i: Int) -> Int {
-        return statements.index(after: i)
-    }
-    
-    public var startIndex: Int {
-        return statements.startIndex
-    }
-    
-    public var endIndex: Int {
-        return statements.endIndex
-    }
-    
-    public subscript(_ index: Int) -> Statement {
-        return statements[index]
     }
 }
 

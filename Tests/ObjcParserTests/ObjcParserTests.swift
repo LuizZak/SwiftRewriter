@@ -52,6 +52,9 @@ class ObjcParserTests: XCTestCase {
 
             @implementation MyClass
             - (void)myMethod:(NSString*)param1 {
+                for(int i = 0; i < 10; i++) {
+                    NSLog(@"%@", i);
+                }
             }
             + (void)classMethod:(NSArray<NSObject*>*)anyArray {
             }

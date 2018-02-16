@@ -206,6 +206,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
             let capitalizedName =
                 property.name.prefix(1).uppercased() + property.name.dropFirst()
             
+            let expectedName = "set" + capitalizedName
+            
             // Getters
             let potentialGetters =
                 methods.filter { $0.name == property.name }
@@ -215,7 +217,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 methods.filter { $0.returnType == .void }
                     .filter { $0.parameters.count == 1 }
                     .filter { $0.parameters[0].type == property.type }
-                    .filter { $0.name == "set\(capitalizedName)" }
+                    .filter { $0.name == expectedName }
             
             var propSet = PropertySet(property: property, getter: nil, setter: nil)
             
@@ -251,7 +253,22 @@ public class PropertyMergeIntentionPass: IntentionPass {
         switch (propertySet.getter, propertySet.setter) {
         case let (getter?, setter?):
             if let getterBody = getter.body, let setterBody = setter.body {
-                propertySet.property.mode = .property(get: getterBody, set: setterBody)
+                let setter =
+                    PropertyGenerationIntention.Setter(valueIdentifier: setter.parameters[0].name,
+                                                       body: setterBody)
+                
+                propertySet.property.mode =
+                    .property(get: getterBody, set: setter)
+                
+                let field =
+                    PropertyGenerationIntention(name: "_" + propertySet.property.name,
+                                                type: propertySet.property.type,
+                                                accessLevel: .private,
+                                                source: propertySet.property.source)
+                
+                if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
+                    classIntention.properties.insert(field, at: index)
+                }
             }
             
             // Remove the original method intentions

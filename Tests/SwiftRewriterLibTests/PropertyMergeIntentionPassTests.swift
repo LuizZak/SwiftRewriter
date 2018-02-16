@@ -18,6 +18,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
 
             @implementation MyClass
             - (void)setValue:(BOOL)value {
+                self->_value = value;
             }
             - (BOOL)value {
                 return NO;
@@ -26,11 +27,13 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                private var _value: Bool
                 var value: Bool {
                     get {
                         return false
                     }
-                    set {
+                    set(value) {
+                        self._value = value
                     }
                 }
             }

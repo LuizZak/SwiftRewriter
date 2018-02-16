@@ -103,7 +103,14 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
     public enum Mode {
         case asField
         case computed(MethodBodyIntention)
-        case property(get: MethodBodyIntention, set: MethodBodyIntention)
+        case property(get: MethodBodyIntention, set: Setter)
+    }
+    
+    public struct Setter {
+        /// Identifier for the setter's received value
+        var valueIdentifier: String
+        /// The body for the setter
+        var body: MethodBodyIntention
     }
 }
 

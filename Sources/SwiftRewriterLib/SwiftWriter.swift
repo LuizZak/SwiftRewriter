@@ -212,7 +212,7 @@ public class SwiftWriter {
         }
         
         if !accessModifier.isEmpty {
-            target.outputInlineWithSpace(ownership, style: .keyword)
+            target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
         if !ownership.isEmpty {
             target.outputInlineWithSpace(ownership, style: .keyword)
@@ -242,7 +242,13 @@ public class SwiftWriter {
                 
                 target.outputIdentation()
                 target.outputInline("set", style: .keyword)
-                outputMethodBody(setter, target: target)
+                
+                // Avoid emitting setter's default new value identifier
+                if setter.valueIdentifier != "newValue" {
+                    target.outputInline("(\(setter.valueIdentifier))")
+                }
+                
+                outputMethodBody(setter.body, target: target)
             }
             
             target.output(line: "}")
