@@ -101,10 +101,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     
     public func method(withSignature signature: MethodGenerationIntention.Signature) -> MethodGenerationIntention? {
         return methods.first(where: {
-            return
-                MethodGenerationIntention
-                    .Signature
-                    .match(lhs: signature, rhs: $0.signature, ignoreNullability: true)
+            return signature.droppingNullability == $0.signature.droppingNullability
         })
     }
 }
@@ -129,12 +126,14 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
     }
     
     public var name: String
-    public var type: ObjcType
+    public var type: SwiftType
+    public var ownership: Ownership
     public var mode: Mode = .asField
     
-    public init(name: String, type: ObjcType, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String, type: SwiftType, ownership: Ownership, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
         self.type = type
+        self.ownership = ownership
         super.init(accessLevel: accessLevel, source: source)
     }
     
@@ -182,20 +181,17 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     public var name: String {
         return signature.name
     }
-    public var returnType: ObjcType {
+    public var returnType: SwiftType {
         return signature.returnType
     }
     public var parameters: [Parameter] {
         return signature.parameters
     }
     
-    public init(name: String, returnType: ObjcType,
-                returnTypeNullabilitySpecifier: TypeNullability,
-                parameters: [Parameter], accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
+    public init(name: String, returnType: SwiftType, parameters: [Parameter],
+                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.signature =
             Signature(name: name, returnType: returnType,
-                      returnTypeNullability: returnTypeNullabilitySpecifier,
                       parameters: parameters)
         super.init(accessLevel: accessLevel, source: source)
     }
@@ -208,48 +204,21 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     
     public struct Signature: Equatable {
         public var name: String
-        public var returnType: ObjcType
-        public var returnTypeNullability: TypeNullability?
+        public var returnType: SwiftType
         public var parameters: [Parameter]
         
-        public static func match(lhs: Signature, rhs: Signature, ignoreNullability: Bool = false) -> Bool {
-            if lhs.parameters.count != rhs.parameters.count {
-                return false
-            }
-            
-            if lhs.name != rhs.name || lhs.returnType.normalized != lhs.returnType.normalized {
-                return false
-            }
-            if !ignoreNullability && lhs.returnTypeNullability != rhs.returnTypeNullability {
-                return false
-            }
-            
-            for (p1, p2) in zip(lhs.parameters, rhs.parameters) {
-                if !Parameter.match(lhs: p1, rhs: p2, ignoreNullability: ignoreNullability) {
-                    return false
-                }
-            }
-            
-            return true
+        public var droppingNullability: Signature {
+            return Signature(name: name, returnType: returnType.deepUnwrapped,
+                             parameters: parameters.map {
+                                Parameter(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
+                            })
         }
     }
     
     public struct Parameter: Equatable {
         public var label: String
         public var name: String
-        public var nullability: TypeNullability?
-        public var type: ObjcType
-        
-        public static func match(lhs: Parameter, rhs: Parameter, ignoreNullability: Bool = false) -> Bool {
-            if lhs.label != rhs.label || lhs.type.normalized != lhs.type.normalized {
-                return false
-            }
-            if !ignoreNullability && lhs.nullability != rhs.nullability {
-                return false
-            }
-            
-            return true
-        }
+        public var type: SwiftType
     }
 }
 

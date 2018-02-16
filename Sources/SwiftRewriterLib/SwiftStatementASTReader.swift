@@ -286,6 +286,8 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     }
     
     private class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
+        let typeMapper = TypeMapper(context: TypeContext())
+        
         override func visitForLoopInitializer(_ ctx: ObjectiveCParser.ForLoopInitializerContext) -> Statement? {
             guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else {
                 return .unknown(UnknownASTContext(context: ctx))
@@ -308,7 +310,15 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 
                 let expr = initDeclarator.initializer()?.expression()?.accept(SwiftExprASTReader())
                 
-                let declaration = StatementVariableDeclaration(identifier: identifier, type: type, initialization: expr)
+                let swiftType = typeMapper.swiftType(forObjcType: type)
+                
+                let ownership = SwiftWriter._ownershipPrefix(inType: type)
+                let isConstant = SwiftWriter._isConstant(fromType: type)
+                
+                let declaration =
+                    StatementVariableDeclaration(identifier: identifier, type: swiftType,
+                                                 ownership: ownership, isConstant: isConstant,
+                                                 initialization: expr)
                 declarations.append(declaration)
             }
             
@@ -337,7 +347,15 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 
                 let expr = initDeclarator.initializer()?.expression()?.accept(SwiftExprASTReader())
                 
-                let declaration = StatementVariableDeclaration(identifier: identifier, type: type, initialization: expr)
+                let swiftType = typeMapper.swiftType(forObjcType: type)
+                
+                let ownership = SwiftWriter._ownershipPrefix(inType: type)
+                let isConstant = SwiftWriter._isConstant(fromType: type)
+                
+                let declaration =
+                    StatementVariableDeclaration(identifier: identifier, type: swiftType,
+                                                 ownership: ownership, isConstant: isConstant,
+                                                 initialization: expr)
                 declarations.append(declaration)
             }
             

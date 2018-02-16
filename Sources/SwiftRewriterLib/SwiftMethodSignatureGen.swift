@@ -17,8 +17,7 @@ public class SwiftMethodSignatureGen {
         var sign =
             MethodGenerationIntention
                 .Signature(name: "__",
-                           returnType: ObjcType.id(protocols: []),
-                           returnTypeNullability: nil,
+                           returnType: .anyObject,
                            parameters: [])
         
         if let sel = objcMethod.methodSelector?.selector {
@@ -30,14 +29,19 @@ public class SwiftMethodSignatureGen {
             }
         }
         
-        if let type = objcMethod.returnType?.type?.type {
-            sign.returnType = type
+        var nullability = TypeNullability.unspecified
+        
+        // Nullability specifiers (from e.g. `... arg:(nullable NSString*)paramName ...`
+        if let nullSpecs = objcMethod.returnType?.nullabilitySpecifiers {
+            nullability = nullabilityFrom(specifiers: nullSpecs) ?? .unspecified
         }
         
-        /// Nullability specifiers (from e.g. `... arg:(nullable NSString*)paramName ...`
-        if let nullSpecs = objcMethod.returnType?.nullabilitySpecifiers {
-            sign.returnTypeNullability =
-                nullabilityFrom(specifiers: nullSpecs)
+        if let type = objcMethod.returnType?.type?.type {
+            let swiftType =
+                typeMapper.swiftType(forObjcType: type,
+                                     context: .init(explicitNullability: nullability))
+            
+            sign.returnType = swiftType
         }
         
         return sign
@@ -57,7 +61,7 @@ public class SwiftMethodSignatureGen {
         for (i, kw) in keywords.enumerated() {
             var label = kw.selector?.name ?? "_"
             let identifier = kw.identifier?.name ?? "_\(i)"
-            var nullability: TypeNullability? = nil
+            var nullability: TypeNullability = .unspecified
             let type = kw.type?.type?.type ?? ObjcType.id(protocols: [])
             
             // The first label name is always equal to its keyword's identifier.
@@ -67,10 +71,14 @@ public class SwiftMethodSignatureGen {
             }
             
             if let nullSpecs = kw.type?.nullabilitySpecifiers {
-                nullability = nullabilityFrom(specifiers: nullSpecs)
+                nullability = nullabilityFrom(specifiers: nullSpecs) ?? .unspecified
             }
             
-            let param = Parameter(label: label, name: identifier, nullability: nullability, type: type)
+            let swiftType =
+                typeMapper.swiftType(forObjcType: type,
+                                     context: .init(explicitNullability: nullability))
+            
+            let param = Parameter(label: label, name: identifier, type: swiftType)
             
             target.parameters.append(param)
         }

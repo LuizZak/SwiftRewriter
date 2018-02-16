@@ -25,16 +25,16 @@ class ExpressionTests: XCTestCase {
     
     func testDescriptionCasts() {
         XCTAssertEqual(
-            Expression.cast(.identifier("abc"), type: .pointer(.struct("NSString"))).description,
+            Expression.cast(.identifier("abc"), type: .string).description,
             "abc as? String")
         XCTAssertEqual(
-            Expression.postfix(.cast(.identifier("abc"), type: .pointer(.struct("NSString"))), .member("count")).description,
+            Expression.postfix(.cast(.identifier("abc"), type: .string), .member("count")).description,
             "(abc as? String).count")
     }
     
     func testDescriptionOptionalAccess() {
         XCTAssertEqual(
-            Expression.postfix(.postfix(.cast(.identifier("abc"), type: .pointer(.struct("NSString"))), .optionalAccess),
+            Expression.postfix(.postfix(.cast(.identifier("abc"), type: .string), .optionalAccess),
                                .member("count")).description,
             "(abc as? String)?.count")
     }

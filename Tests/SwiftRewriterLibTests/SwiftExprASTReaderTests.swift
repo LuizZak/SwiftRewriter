@@ -66,7 +66,7 @@ class SwiftExprASTReaderTests: XCTestCase {
     
     func testCastExpression() {
         assert(objcExpr: "(NSString*)abc",
-               readsAs: .cast(.identifier("abc"), type: .pointer(.struct("NSString"))))
+               readsAs: .cast(.identifier("abc"), type: .string))
     }
     
     func testSelectorExpression() {
@@ -158,17 +158,17 @@ class SwiftExprASTReaderTests: XCTestCase {
                 .expression(.postfix(.identifier("thing"), .functionCall(arguments: [])))
                 ]))
         assert(objcExpr: "^NSString*{ return thing(); }",
-               readsAs: .block(parameters: [], return: .pointer(.struct("NSString")), body: [
+               readsAs: .block(parameters: [], return: .string, body: [
                 .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
                 ]))
         assert(objcExpr: "^NSString*(NSInteger inty){ return thing(); }",
-               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .struct("NSInteger"))],
-                               return: .pointer(.struct("NSString")),
+               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
+                               return: .string,
                                body: [
                                 .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
                 ]))
         assert(objcExpr: "^(NSInteger inty){ return thing(); }",
-               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .struct("NSInteger"))],
+               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
                                return: .void,
                                body: [
                                 .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))

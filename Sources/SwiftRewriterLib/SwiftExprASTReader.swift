@@ -107,7 +107,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         if let typeName = ctx.typeName(), let typeNameString = VarDeclarationTypeExtractor.extract(from: typeName),
             let cast = ctx.castExpression()?.accept(self), let type = try? ObjcParser(string: typeNameString).parseObjcType() {
-            return Expression.cast(cast, type: type)
+            let typeMapper = TypeMapper(context: TypeContext())
+            return Expression.cast(cast, type: typeMapper.swiftType(forObjcType: type))
         }
         
         return .unknown(UnknownASTContext(context: ctx))
@@ -328,7 +329,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                             return BlockParameter(name: name, type: .void)
                         }
                         
-                        return BlockParameter(name: name, type: type)
+                        let swiftType =
+                            TypeMapper(context: TypeContext()).swiftType(forObjcType: type)
+                        
+                        return BlockParameter(name: name, type: swiftType)
                     }
         } else {
             parameters = []
@@ -338,7 +342,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
-        return .block(parameters: parameters, return: returnType, body: body)
+        let swiftReturnType =
+            TypeMapper(context: TypeContext()).swiftType(forObjcType: returnType)
+        
+        return .block(parameters: parameters, return: swiftReturnType, body: body)
     }
     
     public override func visitConstant(_ ctx: ObjectiveCParser.ConstantContext) -> Expression? {

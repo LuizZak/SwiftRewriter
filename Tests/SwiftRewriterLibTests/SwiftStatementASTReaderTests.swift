@@ -40,7 +40,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
     func testFor() {
         assert(objcExpr: "for(int i = 0; i < 10; i++) { }",
                readsAs: .compound([
-                    .variableDeclaration(identifier: "i", type: .struct("int"), initialization: .constant(0)),
+                .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                     .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
                            body: [
                             .defer([
@@ -52,7 +52,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         
         assert(objcExpr: "for(int i = 0; i < 10; i++, j--) { }",
                readsAs: .compound([
-                .variableDeclaration(identifier: "i", type: .struct("int"), initialization: .constant(0)),
+                .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
                        body: [
                         .defer([
@@ -78,7 +78,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         
         assert(objcExpr: "for(int i = 0;; i++) { }",
                readsAs: .compound([
-                .variableDeclaration(identifier: "i", type: .struct("int"), initialization: .constant(0)),
+                .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.constant(true),
                        body: [
                         .defer([
@@ -90,7 +90,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         
         assert(objcExpr: "for(int i = 0; i < 10;) { }",
                readsAs: .compound([
-                .variableDeclaration(identifier: "i", type: .struct("int"), initialization: .constant(0)),
+                .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
                        body: .empty)
                 ])
@@ -164,7 +164,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         assert(objcExpr: "CGFloat value = 1;",
                parseBlock: { try $0.declaration() },
                readsAs: .variableDeclaration(identifier: "value",
-                                             type: .struct("CGFloat"),
+                                             type: .typeName("CGFloat"),
                                              initialization: .constant(1)))
     }
     

@@ -10,11 +10,11 @@ public indirect enum Expression: Equatable {
     case constant(Constant)
     case parens(Expression)
     case identifier(String)
-    case cast(Expression, type: ObjcType)
+    case cast(Expression, type: SwiftType)
     case arrayLiteral([Expression])
     case dictionaryLiteral([ExpressionDictionaryPair])
     case ternary(Expression, `true`: Expression, `false`: Expression)
-    case block(parameters: [BlockParameter], `return`: ObjcType, body: CompoundStatement)
+    case block(parameters: [BlockParameter], `return`: SwiftType, body: CompoundStatement)
     case unknown(UnknownASTContext)
     
     /// `true` if this expression node requires parenthesis for unary, prefix, and
@@ -31,9 +31,9 @@ public indirect enum Expression: Equatable {
 
 public struct BlockParameter: Equatable {
     var name: String
-    var type: ObjcType
+    var type: SwiftType
     
-    public init(name: String, type: ObjcType) {
+    public init(name: String, type: SwiftType) {
         self.name = name
         self.type = type
     }
@@ -203,7 +203,7 @@ extension Expression: CustomStringConvertible {
         case .cast(let exp, let type):
             let cvt = TypeMapper(context: TypeContext())
             
-            return "\(exp) as? \(cvt.swiftType(forObjcType: type, context: .alwaysNonnull))"
+            return "\(exp) as? \(cvt.typeNameString(for: type))"
         case .arrayLiteral(let exps):
             return "[\(exps.map { $0.description }.joined(separator: ", "))]"
             
@@ -228,7 +228,7 @@ extension Expression: CustomStringConvertible {
             buff += "("
             buff += parameters.map { $0.description }.joined(separator: ", ")
             buff += ") -> "
-            buff += cvt.swiftType(forObjcType: ret)
+            buff += cvt.typeNameString(for: ret)
             buff += " in "
             
             buff += "< body >"
@@ -262,7 +262,7 @@ extension BlockParameter: CustomStringConvertible {
     public var description: String {
         let cvt = TypeMapper(context: TypeContext())
         
-        return "\(self.name): \(cvt.swiftType(forObjcType: type))"
+        return "\(self.name): \(cvt.typeNameString(for: type))"
     }
 }
 

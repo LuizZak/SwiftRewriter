@@ -226,8 +226,16 @@ public class SwiftRewriter {
             return
         }
         
+        let typeContext =
+            TypeMapper.TypeMappingContext(inNonnull: isNodeInNonnullContext(node))
+        
+        let swiftType = typeMapper.swiftType(forObjcType: type.type, context: typeContext)
+        let ownership = evaluateOwnershipPrefix(inType: type.type, diagnostics: diagnostics)
+        let isConstant = SwiftWriter._isConstant(fromType: type.type)
+        
         let intent =
-            GlobalVariableGenerationIntention(name: name.name, type: type.type,
+            GlobalVariableGenerationIntention(name: name.name, type: swiftType,
+                                              ownership: ownership, isConstant: isConstant,
                                               source: node)
         
         intent.inNonnullContext = isNodeInNonnullContext(node)
@@ -343,9 +351,17 @@ public class SwiftRewriter {
             return
         }
         
+        var swiftType: SwiftType = .anyObject
+        var ownership: Ownership = .strong
+        if let type = node.type?.type {
+            swiftType = typeMapper.swiftType(forObjcType: type,
+                                             context: .init(inNonnull: isNodeInNonnullContext(node)))
+            ownership = evaluateOwnershipPrefix(inType: type, diagnostics: diagnostics)
+        }
+        
         let prop =
             PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                        type: node.type?.type ?? .struct(""),
+                                        type: swiftType, ownership: ownership,
                                         source: node)
         
         prop.inNonnullContext = isNodeInNonnullContext(node)
@@ -410,17 +426,25 @@ public class SwiftRewriter {
         guard let classCtx = context.findContext(ofType: ClassGenerationIntention.self) else {
             return
         }
-        let ivarCtx =
-            context.findContext(ofType: IVarListContext.self)
+        let ivarCtx = context.findContext(ofType: IVarListContext.self)
         
         let access = ivarCtx?.accessLevel ?? .private
         
+        var swiftType: SwiftType = .anyObject
+        var ownership = Ownership.strong
+        var isConstant = false
+        if let type = node.type?.type {
+            swiftType = typeMapper.swiftType(forObjcType: type)
+            ownership =
+                evaluateOwnershipPrefix(inType: type, diagnostics: diagnostics)
+            isConstant = SwiftWriter._isConstant(fromType: type)
+        }
+        
         let ivar =
-            InstanceVariableGenerationIntention(
-                name: node.identifier?.name ?? "",
-                type: node.type?.type ?? .struct(""),
-                accessLevel: access,
-                source: node)
+            InstanceVariableGenerationIntention(name: node.identifier?.name ?? "",
+                                                type: swiftType, ownership: ownership,
+                                                isConstant: isConstant,
+                                                accessLevel: access, source: node)
         
         ivar.inNonnullContext = isNodeInNonnullContext(node)
         

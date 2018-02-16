@@ -78,9 +78,11 @@ public indirect enum Statement: Equatable {
         return .expressions([expr])
     }
     
-    public static func variableDeclaration(identifier: String, type: ObjcType, initialization: Expression?) -> Statement {
+    public static func variableDeclaration(identifier: String, type: SwiftType, ownership: Ownership = .strong, isConstant: Bool = false, initialization: Expression?) -> Statement {
         return .variableDeclarations([
-            StatementVariableDeclaration(identifier: identifier, type: type, initialization: initialization)
+            StatementVariableDeclaration(identifier: identifier, type: type,
+                                         ownership: ownership, isConstant: isConstant,
+                                         initialization: initialization)
         ])
     }
 }
@@ -129,12 +131,16 @@ public enum Pattern: Equatable {
 /// A variable declaration statement
 public struct StatementVariableDeclaration: Equatable {
     public var identifier: String
-    public var type: ObjcType
+    public var type: SwiftType
+    public var ownership: Ownership
+    public var isConstant: Bool
     public var initialization: Expression?
     
-    public init(identifier: String, type: ObjcType, initialization: Expression?) {
+    public init(identifier: String, type: SwiftType, ownership: Ownership, isConstant: Bool, initialization: Expression?) {
         self.identifier = identifier
         self.type = type
+        self.ownership = ownership
+        self.isConstant = isConstant
         self.initialization = initialization
     }
 }

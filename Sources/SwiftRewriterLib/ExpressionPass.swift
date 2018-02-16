@@ -79,7 +79,7 @@ public protocol ExpressionVisitor {
     ///   - exp: The expression being casted
     ///   - type: The target casting type
     /// - Returns: Result of visiting this cast node
-    func visitCast(_ exp: Expression, type: ObjcType) -> ExprResult
+    func visitCast(_ exp: Expression, type: SwiftType) -> ExprResult
     
     /// Visits an array literal node
     ///
@@ -101,7 +101,7 @@ public protocol ExpressionVisitor {
     ///   - returnType: The return type of the block
     ///   - body: The block's statements body
     /// - Returns: Result of visiting this block expression node
-    func visitBlock(_ parameters: [BlockParameter], _ returnType: ObjcType, _ body: CompoundStatement) -> ExprResult
+    func visitBlock(_ parameters: [BlockParameter], _ returnType: SwiftType, _ body: CompoundStatement) -> ExprResult
     
     /// Visits a ternary operation node
     ///
@@ -285,7 +285,7 @@ open class ExpressionPass: ExpressionVisitor {
         return .identifier(identifier)
     }
     
-    open func visitCast(_ exp: Expression, type: ObjcType) -> Expression {
+    open func visitCast(_ exp: Expression, type: SwiftType) -> Expression {
         let exp = exp.accept(self)
         return .cast(exp, type: type)
     }
@@ -308,7 +308,7 @@ open class ExpressionPass: ExpressionVisitor {
         return .ternary(exp, true: ifTrue, false: ifFalse)
     }
     
-    open func visitBlock(_ parameters: [BlockParameter], _ returnType: ObjcType, _ body: CompoundStatement) -> Expression {
+    open func visitBlock(_ parameters: [BlockParameter], _ returnType: SwiftType, _ body: CompoundStatement) -> Expression {
         var body = body
         if inspectBlocks {
             let pass = ExpStatementPass(target: self)

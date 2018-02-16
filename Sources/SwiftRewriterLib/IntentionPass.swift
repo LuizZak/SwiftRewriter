@@ -164,10 +164,10 @@ public class FileGroupingIntentionPass: IntentionPass {
     }
     
     private func mergeMethod(_ method1: MethodGenerationIntention, into method2: MethodGenerationIntention) {
-        if method1.signature.returnTypeNullability != nil &&
-            (method2.signature.returnTypeNullability == nil || method2.signature.returnTypeNullability == .unspecified) {
-            method2.signature.returnTypeNullability =
-                method1.signature.returnTypeNullability
+        if !method1.signature.returnType.isImplicitlyUnwrapped && method2.signature.returnType.isImplicitlyUnwrapped {
+            if method1.signature.returnType.deepUnwrapped == method2.signature.returnType.deepUnwrapped {
+                method2.signature.returnType = method1.signature.returnType
+            }
         }
         
         for (i, p1) in method1.signature.parameters.enumerated() {
@@ -176,8 +176,8 @@ public class FileGroupingIntentionPass: IntentionPass {
             }
             
             let p2 = method2.signature.parameters[i]
-            if p1.nullability != nil && (p2.nullability == nil || p2.nullability == .unspecified) {
-                method2.signature.parameters[i].nullability = p1.nullability
+            if !p1.type.isImplicitlyUnwrapped && p2.type.isImplicitlyUnwrapped && p1.type.deepUnwrapped == p2.type.deepUnwrapped {
+                method2.signature.parameters[i].type = p1.type
             }
         }
     }
@@ -263,6 +263,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 let field =
                     PropertyGenerationIntention(name: "_" + propertySet.property.name,
                                                 type: propertySet.property.type,
+                                                ownership: propertySet.property.ownership,
                                                 accessLevel: .private,
                                                 source: propertySet.property.source)
                 

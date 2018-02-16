@@ -209,12 +209,12 @@ fileprivate class ExpressionWriter {
         }
     }
     
-    private func visitCast(_ exp: Expression, type: ObjcType) {
+    private func visitCast(_ exp: Expression, type: SwiftType) {
         visitExpression(exp)
         
         let context = TypeContext()
         let typeMapper = TypeMapper(context: context)
-        let typeName = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
+        let typeName = typeMapper.typeNameString(for: type)
         
         target.outputInline(" ")
         target.outputInline("as?", style: .keyword)
@@ -257,7 +257,7 @@ fileprivate class ExpressionWriter {
         visitExpression(ifFalse)
     }
     
-    private func visitBlock(_ parameters: [BlockParameter], _ returnType: ObjcType, _ body: CompoundStatement) {
+    private func visitBlock(_ parameters: [BlockParameter], _ returnType: SwiftType, _ body: CompoundStatement) {
         let visitor = StatementWriter(target: target, expressionPasses: expressionPasses)
         let typeMapper = TypeMapper(context: TypeContext())
         
@@ -272,12 +272,12 @@ fileprivate class ExpressionWriter {
             
             target.outputInline(param.name)
             target.outputInline(": ")
-            target.outputInline(typeMapper.swiftType(forObjcType: param.type), style: .typeName)
+            target.outputInline(typeMapper.typeNameString(for: param.type), style: .typeName)
         }
         target.outputInline(")")
         
         target.outputInline(" -> ")
-        target.outputInline(typeMapper.swiftType(forObjcType: returnType), style: .typeName)
+        target.outputInline(typeMapper.typeNameString(for: returnType), style: .typeName)
         
         target.outputInline(" in", style: .keyword)
         
@@ -504,13 +504,9 @@ fileprivate class StatementWriter {
     
     private func visitVariableDeclarations(_ declarations: [StatementVariableDeclaration]) {
         func emitDeclaration(_ declaration: StatementVariableDeclaration) {
-            let null = SwiftWriter._typeNullability(inType: declaration.type)
-            
             let mapper = TypeMapper(context: TypeContext())
             
-            let typeString =
-                mapper.swiftType(forObjcType: declaration.type,
-                                 context: .init(explicitNullability: null))
+            let typeString = mapper.typeNameString(for: declaration.type)
             
             target.outputInline(declaration.identifier)
             
@@ -528,15 +524,14 @@ fileprivate class StatementWriter {
             return
         }
         
-        let owner = SwiftWriter._ownershipPrefix(inType: declarations[0].type)
-        let varOrLet = SwiftWriter._varOrLet(fromType: declarations[0].type)
+        let ownership = declarations[0].ownership
         
         target.outputIdentation()
         
-        if !owner.isEmpty {
-            target.outputInlineWithSpace(owner, style: .keyword)
+        if ownership != .strong {
+            target.outputInlineWithSpace(ownership.rawValue, style: .keyword)
         }
-        target.outputInlineWithSpace(varOrLet, style: .keyword)
+        target.outputInlineWithSpace(declarations[0].isConstant ? "let" : "var", style: .keyword)
         
         for (i, decl) in declarations.enumerated() {
             if i > 0 {

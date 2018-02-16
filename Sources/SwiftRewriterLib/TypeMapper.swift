@@ -8,10 +8,18 @@ public class TypeMapper {
         self.context = context
     }
     
-    public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext = .empty) -> String {
+    public func typeNameString(for swiftType: SwiftType) -> String {
+        return swiftType.description
+    }
+    
+    public func typeNameString(for objcType: ObjcType, context: TypeMappingContext = .empty) -> String {
+        return swiftType(forObjcType: objcType, context: context).description
+    }
+    
+    public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext = .empty) -> SwiftType {
         switch type {
         case .void:
-            return "Void"
+            return .void
             
         case .struct(let str):
             return swiftType(forObjcStructType: str, context: context)
@@ -36,31 +44,30 @@ public class TypeMapper {
         }
     }
     
-    private func swiftType(forObjcStructType structType: String, context: TypeMappingContext) -> String {
+    private func swiftType(forObjcStructType structType: String, context: TypeMappingContext) -> SwiftType {
         // Check scalars first
         if let scalar = TypeMapper._scalarMappings[structType] {
             return scalar
         }
         
-        return structType
+        return .typeName(structType)
     }
     
-    private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> String {
-        let type: String
+    private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> SwiftType {
+        let type: SwiftType
         
         if protocols.count == 0 {
-            type = "AnyObject"
+            type = .anyObject
         } else {
-            type = "AnyObject<\(protocols.joined(separator: ", "))>"
+            type = .generic("AnyObject", parameters: protocols.map { .typeName($0) })
         }
         
-        let final = swiftType(name: type, withNullability: context.nullability(), parens: false)
-        return final
+        return swiftType(type: type, withNullability: context.nullability())
     }
     
-    private func swiftType(forGenericObjcType name: String, parameters: [ObjcType], context: TypeMappingContext) -> String {
+    private func swiftType(forGenericObjcType name: String, parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
         if parameters.count == 0 {
-            return "\(name)"
+            return .typeName(name)
         }
         
         // Array conversion
@@ -71,7 +78,7 @@ public class TypeMapper {
                           // to generic types in Objective-C (they always map to non-null).
                           context: context.asAlwaysNonNull())
             
-            return "[\(inner)]"
+            return .array(inner)
         }
         
         let types =
@@ -81,54 +88,43 @@ public class TypeMapper {
             }
         
         if isPointerOnly(types: parameters) {
-            // Generic type
-            return "\(name)<\(types.joined(separator: ", "))>"
+            return .generic(name, parameters: types)
         } else {
-            // Concrete class + protocol conformance list
-            return ([name] + types).joined(separator: " & ")
+            return .protocolComposition([.typeName(name)] + types)
         }
     }
     
-    private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> String {
-        let final: String
+    private func swiftType(forObjcPointerType type: ObjcType, context: TypeMappingContext) -> SwiftType {
+        let final: SwiftType
         
         if case .struct(let inner) = type {
             if let ptr = TypeMapper._pointerMappings[inner] {
                 final = ptr
             } else {
                 // Assume it's a class type here
-                final = inner
+                final = .typeName(inner)
             }
             
-            return swiftType(name: final, withNullability: context.nullability(), parens: false)
+            return swiftType(type: final, withNullability: context.nullability())
         }
         
         final = swiftType(forObjcType: type, context: context)
         
-        return swiftType(name: final, withNullability: context.nullability(),
-                         parens: shouldParenthesize(type: type))
+        return swiftType(type: final, withNullability: context.nullability())
     }
     
-    private func swiftType(name: String, withNullability nullability: TypeNullability, parens: Bool) -> String {
+    private func swiftType(type: SwiftType, withNullability nullability: TypeNullability) -> SwiftType {
         switch nullability {
         case .nonnull:
-            return name
+            return type
         case .nullable:
-            if parens {
-                return "(" + name + ")?"
-            }
-            
-            return name + "?"
+            return .optional(type)
         case .nullResettable, .unspecified:
-            if parens {
-                return "(" + name + ")!"
-            }
-            
-            return name + "!"
+            return .implicitUnwrappedOptional(type)
         }
     }
     
-    private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String], context: TypeMappingContext) -> String {
+    private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String], context: TypeMappingContext) -> SwiftType {
         let locSpecifiers = context.withSpecifiers(specifiers)
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
@@ -141,37 +137,22 @@ public class TypeMapper {
             return swiftType(forObjcType: type, context: locSpecifiers)
             
         default:
-            return swiftType(name: final, withNullability: locSpecifiers.nullability(),
-                             parens: shouldParenthesize(type: type))
+            return swiftType(type: final, withNullability: locSpecifiers.nullability())
         }
     }
     
-    private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String], context: TypeMappingContext) -> String {
+    private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String], context: TypeMappingContext) -> SwiftType {
         let locQualifiers = context.withQualifiers(qualifiers)
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
         return
-            swiftType(name: final, withNullability: locQualifiers.nullability(),
-                      parens: shouldParenthesize(type: type))
+            swiftType(type: final, withNullability: locQualifiers.nullability())
     }
     
-    private func swiftBlockType(forReturnType returnType: ObjcType, parameters: [ObjcType], context: TypeMappingContext) -> String {
-        // Parameters
-        var buffer = "("
-        
-        buffer +=
-            parameters.map {
-                swiftType(forObjcType: $0, context: context)
-            }.joined(separator: ", ")
-        
-        buffer += ")"
-        
-        // Return type
-        buffer += " -> "
-        buffer += swiftType(forObjcType: returnType, context: context)
-        
-        return buffer
+    private func swiftBlockType(forReturnType returnType: ObjcType, parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
+        return .block(returnType: swiftType(forObjcType: returnType, context: context),
+                      parameters: parameters.map { swiftType(forObjcType: $0, context: context) })
     }
     
     private func shouldParenthesize(type: ObjcType) -> Bool {
@@ -199,21 +180,21 @@ public class TypeMapper {
         return true
     }
     
-    private static let _scalarMappings: [String: String] = [
-        "BOOL": "Bool",
-        "NSInteger": "Int",
-        "NSUInteger": "UInt",
-        "CGFloat": "CGFloat",
-        "instancetype": "AnyObject"
+    private static let _scalarMappings: [String: SwiftType] = [
+        "BOOL": .bool,
+        "NSInteger": .int,
+        "NSUInteger": .uint,
+        "CGFloat": .cgFloat,
+        "instancetype": .anyObject
     ]
     
     /// For mapping pointer-reference structs (could be Objc-C classes) into
     /// known Swift types
-    private static let _pointerMappings: [String: String] = [
-        "NSObject": "NSObject",
-        "NSNumber": "NSNumber",
-        "NSArray": "NSArray",
-        "NSString": "String"
+    private static let _pointerMappings: [String: SwiftType] = [
+        "NSObject": .typeName("NSObject"),
+        "NSNumber": .typeName("NSNumber"),
+        "NSArray": .typeName("NSArray"),
+        "NSString": .string
     ]
     
     /// Contexts used during type mapping.
@@ -272,6 +253,10 @@ public class TypeMapper {
                     inNonnull: Bool = false) {
             self.nullabilitySpecifiers = nullabilitySpecs
             self.alwaysNonnull = alwaysNonnull
+            self.inNonnullContext = inNonnull
+        }
+        
+        public init(inNonnull: Bool = false) {
             self.inNonnullContext = inNonnull
         }
         
@@ -385,5 +370,5 @@ public enum TypeNullability {
     case nonnull
     case nullable
     case unspecified
-    case nullResettable // Only applicable to Obj-c @properties
+    case nullResettable // Only applicable to Obj-C @properties
 }

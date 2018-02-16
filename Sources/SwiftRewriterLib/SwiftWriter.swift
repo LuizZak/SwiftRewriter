@@ -1,5 +1,6 @@
 import GrammarModels
 import ObjcParser
+import ObjcParserAntlr
 
 /// Gets as inputs a series of intentions and outputs actual files and script
 /// contents.
@@ -76,7 +77,7 @@ public class SwiftWriter {
         let ctx =
             TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: typeali.fromType),
                                           inNonnull: typeali.inNonnullContext)
-        let typeName = typeMapper.swiftType(forObjcType: typeali.fromType, context: ctx)
+        let typeName = typeMapper.typeNameString(for: typeali.fromType, context: ctx)
         
         target.outputIdentation()
         target.outputInlineWithSpace("typealias", style: .keyword)
@@ -90,24 +91,21 @@ public class SwiftWriter {
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: varDecl.accessLevel)
-        let ownership = evaluateOwnershipPrefix(inType: type, global: varDecl)
-        let varOrLet = SwiftWriter._varOrLet(fromType: type)
+        let ownership = varDecl.ownership
+        let varOrLet = varDecl.isConstant ? "let" : "var"
         
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
-        if !ownership.isEmpty {
-            target.outputInlineWithSpace(ownership, style: .keyword)
+        if ownership != .strong {
+            target.outputInlineWithSpace(ownership.rawValue, style: .keyword)
         }
         
         target.outputInlineWithSpace(varOrLet, style: .keyword)
         
         target.outputInline(name, style: .plain)
         
-        let ctx =
-            TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: type),
-                                          inNonnull: varDecl.inNonnullContext)
-        let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
+        let typeName = typeMapper.typeNameString(for: type)
         
         target.outputInline(": ")
         target.outputInline(typeName, style: .typeName)
@@ -216,23 +214,17 @@ public class SwiftWriter {
     private func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
         target.outputIdentation()
         
-        let type = ivar.type
-        
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: ivar.accessLevel)
-        let ownership = evaluateOwnershipPrefix(inType: ivar.type, ivar: ivar)
-        let varOrLet = SwiftWriter._varOrLet(fromType: type)
+        let ownership = ivar.ownership
+        let varOrLet = ivar.isConstant ? "let" : "var"
         
-        let ctx =
-            TypeMapper.TypeMappingContext(
-                explicitNullability: SwiftWriter._typeNullability(inType: ivar.type) ?? .unspecified,
-                inNonnull: ivar.inNonnullContext)
-        let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
+        let typeName = typeMapper.typeNameString(for: ivar.type)
         
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
-        if !ownership.isEmpty {
-            target.outputInlineWithSpace(ownership, style: .keyword)
+        if ownership != .strong {
+            target.outputInlineWithSpace(ownership.rawValue, style: .keyword)
         }
         target.outputInlineWithSpace(varOrLet, style: .keyword)
         target.outputInline(ivar.name)
@@ -247,17 +239,13 @@ public class SwiftWriter {
         let type = prop.type
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
-        let ownership = evaluateOwnershipPrefix(inType: type, property: prop)
-        let ctx =
-            TypeMapper.TypeMappingContext(modifiers: prop.propertySource?.modifierList,
-                                          inNonnull: prop.inNonnullContext)
-        let typeName = typeMapper.swiftType(forObjcType: type, context: ctx)
+        let typeName = typeMapper.typeNameString(for: type)
         
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
-        if !ownership.isEmpty {
-            target.outputInlineWithSpace(ownership, style: .keyword)
+        if prop.ownership != .strong {
+            target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
         }
         
         target.outputInlineWithSpace("var", style: .keyword)
@@ -351,10 +339,7 @@ public class SwiftWriter {
             break
         default:
             target.outputInline(" -> ")
-            let typeName =
-                typeMapper.swiftType(forObjcType: sign.returnType,
-                                     context: .init(explicitNullability: sign.returnTypeNullability,
-                                                    inNonnull: method.inNonnullContext))
+            let typeName = typeMapper.typeNameString(for: sign.returnType)
             
             target.outputInline(typeName, style: .typeName)
         }
@@ -387,10 +372,7 @@ public class SwiftWriter {
                 target.outputInline(", ")
             }
             
-            let typeName =
-                typeMapper.swiftType(forObjcType: param.type,
-                                     context: .init(explicitNullability: param.nullability,
-                                                    inNonnull: inNonnullContext))
+            let typeName = typeMapper.typeNameString(for: param.type)
             
             if param.label != param.name {
                 target.outputInlineWithSpace(param.label, style: .plain)
@@ -404,34 +386,25 @@ public class SwiftWriter {
         target.outputInline(")")
     }
     
-    private func _prependOwnership(in decl: String, for type: ObjcType) -> String {
-        let pref = SwiftWriter._ownershipPrefix(inType: type)
-        if pref.isEmpty {
-            return decl
-        }
-        
-        return "\(pref) \(decl)"
-    }
-    
-    public static func _varOrLet(fromType type: ObjcType) -> String {
+    internal static func _isConstant(fromType type: ObjcType) -> Bool {
         switch type {
         case .qualified(_, let qualifiers),
              .specified(_, .qualified(_, let qualifiers)):
             if qualifiers.contains("const") {
-                return "let"
+                return true
             }
         case .specified(let specifiers, _):
             if specifiers.contains("const") {
-                return "let"
+                return true
             }
         default:
             break
         }
         
-        return "var"
+        return false
     }
     
-    public static func _typeNullability(inType type: ObjcType) -> TypeNullability? {
+    internal static func _typeNullability(inType type: ObjcType) -> TypeNullability? {
         switch type {
         case .specified(let specifiers, let type):
             // Struct types are never null.
@@ -451,92 +424,22 @@ public class SwiftWriter {
         }
     }
     
-    public func evaluateOwnershipPrefix(inType type: ObjcType,
-                                        property: PropertyGenerationIntention? = nil,
-                                        global: GlobalVariableGenerationIntention? = nil,
-                                        ivar: InstanceVariableGenerationIntention? = nil) -> String {
-        var ownershipPrefix = ""
-        var specifierContext = ""
-        var specifierContextName = "specifier"
-        
+    internal static func _ownershipPrefix(inType type: ObjcType) -> Ownership {
         switch type {
         case .specified(let specifiers, _):
             if specifiers.last == "__weak" {
-                specifierContext = specifiers.last!
-                ownershipPrefix = "weak"
+                return .weak
             } else if specifiers.last == "__unsafe_unretained" {
-                specifierContext = specifiers.last!
-                ownershipPrefix = "unowned(unsafe)"
-            } else {
-                ownershipPrefix = ""
+                return .unownedUnsafe
             }
+            
+            return .strong
         default:
-            ownershipPrefix = ""
-        }
-        
-        // Search in property
-        if let property = property {
-            if let modifiers = property.propertySource?.modifierList?.keywordModifiers {
-                if modifiers.contains("weak") {
-                    ownershipPrefix = "weak"
-                    specifierContext = "weak"
-                    specifierContextName = "ownership attribute"
-                } else if modifiers.contains("unsafe_unretained") {
-                    ownershipPrefix = "unowned(unsafe)"
-                    specifierContext = "unsafe_unretained"
-                    specifierContextName = "ownership attribute"
-                } else if modifiers.contains("assign") {
-                    ownershipPrefix = "unowned(unsafe)"
-                    specifierContext = "assign"
-                    specifierContextName = "ownership attribute"
-                }
-            }
-        }
-        
-        if !ownershipPrefix.isEmpty && !type.isPointer {
-            let name: String
-            let location: SourceLocation?
-            
-            if let property = property {
-                name = "Property '\(property.name)'"
-                location = property.source?.location
-            } else if let global = global {
-                name = "Global variable '\(global.name)'"
-                location = global.source?.location
-            } else if let ivar = ivar {
-                name = "Instance variable '\(ivar.name)'"
-                location = ivar.source?.location
-            } else {
-                name = "Variable"
-                location = nil
-            }
-            
-            diagnostics.warning(
-                "\(name) has \(specifierContextName) '\(specifierContext)' but is not a pointer type",
-                location: location ?? .invalid)
-            
-            return ""
-        }
-        
-        return ownershipPrefix
-    }
-    
-    public static func _ownershipPrefix(inType type: ObjcType) -> String {
-        switch type {
-        case .specified(let specifiers, _):
-            if specifiers.last == "__weak" {
-                return "weak"
-            } else if specifiers.last == "__unsafe_unretained" {
-                return "unowned(unsafe)"
-            }
-            
-            return ""
-        default:
-            return ""
+            return .strong
         }
     }
     
-    public static func _prependAccessModifier(in decl: String, accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
+    internal static func _prependAccessModifier(in decl: String, accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
         // In Swift, omitting the access level specifier infers 'internal', so we
         // allow the user to decide whether to omit the keyword here
         if omitInternal && accessLevel == .internal {
@@ -546,7 +449,7 @@ public class SwiftWriter {
         return "\(_accessModifierFor(accessLevel: accessLevel)) \(decl)"
     }
     
-    public static func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
+    internal static func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
         // In Swift, omitting the access level specifier infers 'internal', so we
         // allow the user to decide whether to omit the keyword here
         if omitInternal && accessLevel == .internal {
@@ -555,4 +458,73 @@ public class SwiftWriter {
         
         return accessLevel.rawValue
     }
+}
+
+internal func evaluateOwnershipPrefix(inType type: ObjcType,
+                                      diagnostics: Diagnostics,
+                                      property: PropertyGenerationIntention? = nil,
+                                      global: GlobalVariableGenerationIntention? = nil,
+                                      ivar: InstanceVariableGenerationIntention? = nil) -> Ownership {
+    var ownership: Ownership = .strong
+    var specifierContext = ""
+    var specifierContextName = "specifier"
+
+    switch type {
+    case .specified(let specifiers, _):
+        if specifiers.last == "__weak" {
+            specifierContext = specifiers.last!
+            ownership = .weak
+        } else if specifiers.last == "__unsafe_unretained" {
+            specifierContext = specifiers.last!
+            ownership = .unownedUnsafe
+        }
+    default:
+        break
+    }
+
+    // Search in property
+    if let property = property {
+        if let modifiers = property.propertySource?.modifierList?.keywordModifiers {
+            if modifiers.contains("weak") {
+                ownership = .weak
+                specifierContext = "weak"
+                specifierContextName = "ownership attribute"
+            } else if modifiers.contains("unsafe_unretained") {
+                ownership = .unownedUnsafe
+                specifierContext = "unsafe_unretained"
+                specifierContextName = "ownership attribute"
+            } else if modifiers.contains("assign") {
+                ownership = .unownedUnsafe
+                specifierContext = "assign"
+                specifierContextName = "ownership attribute"
+            }
+        }
+    }
+
+    if ownership != .strong && !type.isPointer {
+        let name: String
+        let location: SourceLocation?
+        
+        if let property = property {
+            name = "Property '\(property.name)'"
+            location = property.source?.location
+        } else if let global = global {
+            name = "Global variable '\(global.name)'"
+            location = global.source?.location
+        } else if let ivar = ivar {
+            name = "Instance variable '\(ivar.name)'"
+            location = ivar.source?.location
+        } else {
+            name = "Variable"
+            location = nil
+        }
+        
+        diagnostics.warning(
+            "\(name) has \(specifierContextName) '\(specifierContext)' but is not a pointer type",
+            location: location ?? .invalid)
+        
+        return .strong
+    }
+
+    return ownership
 }

@@ -99,6 +99,6 @@ class TypeMapperTests: XCTestCase {
             ctx = TypeMapper.TypeMappingContext(explicitNullability: nul)
         }
         
-        return mapper.swiftType(forObjcType: type, context: ctx)
+        return mapper.typeNameString(for: type, context: ctx)
     }
 }

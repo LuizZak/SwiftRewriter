@@ -82,12 +82,17 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention {
 /// An intention to generate a global variable.
 public class GlobalVariableGenerationIntention: FromSourceIntention {
     public var name: String
-    public var type: ObjcType
+    public var type: SwiftType
+    public var ownership: Ownership
+    public var isConstant: Bool
     public var initialValueExpr: GlobalVariableInitialValueIntention?
     
-    public init(name: String, type: ObjcType, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String, type: SwiftType, ownership: Ownership, isConstant: Bool,
+                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
         self.type = type
+        self.ownership = ownership
+        self.isConstant = isConstant
         super.init(accessLevel: accessLevel, source: source)
     }
 }
