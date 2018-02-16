@@ -6,6 +6,8 @@ public class FromSourceIntention: NonNullScopedIntention {
     public var source: ASTNode?
     public var accessLevel: AccessLevel
     
+    weak public var parent: Intention?
+    
     // NOTE: This is a hack- shouldn't be recorded on the intention but passed to
     // it in a more abstract way.
     // For now we leave as it makes things work!
@@ -23,9 +25,9 @@ public class FromSourceIntention: NonNullScopedIntention {
 public class TypeGenerationIntention: FromSourceIntention {
     public var typeName: String
     
-    public var protocols: [ProtocolInheritanceIntention] = []
-    public var properties: [PropertyGenerationIntention] = []
-    public var methods: [MethodGenerationIntention] = []
+    private(set) public var protocols: [ProtocolInheritanceIntention] = []
+    private(set) public var properties: [PropertyGenerationIntention] = []
+    private(set) public var methods: [MethodGenerationIntention] = []
     
     public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
@@ -33,16 +35,52 @@ public class TypeGenerationIntention: FromSourceIntention {
         super.init(accessLevel: accessLevel, source: source)
     }
     
-    public func addProtocol(_ intention: ProtocolInheritanceIntention) {
-        self.protocols.append(intention)
+    public func addProtocol(_ intention: ProtocolInheritanceIntention, at index: Int? = nil) {
+        if let index = index {
+            self.protocols.insert(intention, at: index)
+        } else {
+            self.protocols.append(intention)
+        }
+        
+        intention.parent = self
+    }
+    public func removeProtocol(_ intention: ProtocolInheritanceIntention) {
+        if let index = protocols.index(where: { $0 === intention }) {
+            intention.parent = nil
+            protocols.remove(at: index)
+        }
     }
     
-    public func addProperty(_ intention: PropertyGenerationIntention) {
-        self.properties.append(intention)
+    public func addProperty(_ intention: PropertyGenerationIntention, at index: Int? = nil) {
+        if let index = index {
+            self.properties.insert(intention, at: index)
+        } else {
+            self.properties.append(intention)
+        }
+        
+        intention.parent = self
+    }
+    public func removeProperty(_ intention: PropertyGenerationIntention) {
+        if let index = properties.index(where: { $0 === intention }) {
+            intention.parent = nil
+            properties.remove(at: index)
+        }
     }
     
-    public func addMethod(_ intention: MethodGenerationIntention) {
-        self.methods.append(intention)
+    public func addMethod(_ intention: MethodGenerationIntention, at index: Int? = nil) {
+        if let index = index {
+            self.methods.insert(intention, at: index)
+        } else {
+            self.methods.append(intention)
+        }
+        
+        intention.parent = self
+    }
+    public func removeMethod(_ intention: MethodGenerationIntention) {
+        if let index = methods.index(where: { $0 === intention }) {
+            intention.parent = nil
+            methods.remove(at: index)
+        }
     }
     
     public func hasProtocol(named name: String) -> Bool {

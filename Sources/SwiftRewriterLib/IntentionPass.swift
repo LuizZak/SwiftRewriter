@@ -267,20 +267,20 @@ public class PropertyMergeIntentionPass: IntentionPass {
                                                 source: propertySet.property.source)
                 
                 if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
-                    classIntention.properties.insert(field, at: index)
+                    classIntention.addProperty(field, at: index)
                 }
             }
             
             // Remove the original method intentions
-            classIntention.methods.remove(where: { $0 === getter })
-            classIntention.methods.remove(where: { $0 === setter })
+            classIntention.removeMethod(getter)
+            classIntention.removeMethod(setter)
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
             if let body = getter.body {
                 propertySet.property.mode = .computed(body)
             }
             
             // Remove the original method intention
-            classIntention.methods.remove(where: { $0 === getter })
+            classIntention.removeMethod(getter)
         case let (nil, setter?):
             _=setter
             break

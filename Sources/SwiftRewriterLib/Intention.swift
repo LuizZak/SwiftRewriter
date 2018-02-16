@@ -2,10 +2,13 @@ import GrammarModels
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
-public protocol Intention: Context {
+public protocol Intention: class, Context {
     /// Reference to an AST node that originated this source-code generation
     /// intention
     var source: ASTNode? { get }
+    
+    /// Parent for this intention
+    var parent: Intention? { get }
 }
 
 /// An intention to create a .swift file
@@ -30,21 +33,26 @@ public class FileGenerationIntention: Intention {
     
     public var source: ASTNode?
     
+    weak public var parent: Intention?
+    
     public init(filePath: String) {
         self.filePath = filePath
     }
     
     public func addType(_ intention: TypeGenerationIntention) {
         typeIntentions.append(intention)
+        intention.parent = self
     }
     
     public func addTypealias(_ intention: TypealiasIntention) {
         typealiasIntentions.append(intention)
+        intention.parent = self
     }
     
     public func removeTypes(where predicate: (TypeGenerationIntention) -> Bool) {
         for (i, type) in typeIntentions.enumerated().reversed() {
             if predicate(type) {
+                type.parent = nil
                 typeIntentions.remove(at: i)
             }
         }
@@ -52,14 +60,17 @@ public class FileGenerationIntention: Intention {
     
     public func addProtocol(_ intention: ProtocolGenerationIntention) {
         protocolIntentions.append(intention)
+        intention.parent = self
     }
     
     public func addGlobalFunction(_ intention: GlobalFunctionGenerationIntention) {
         globalFunctionIntentions.append(intention)
+        intention.parent = self
     }
     
     public func addGlobalVariable(_ intention: GlobalVariableGenerationIntention) {
         globalVariableIntentions.append(intention)
+        intention.parent = self
     }
 }
 

@@ -317,6 +317,11 @@ public class SwiftWriter {
         
         if let body = initMethod.body {
             outputMethodBody(body, target: target)
+        } else if initMethod.parent is ClassGenerationIntention {
+            // Class definitions _must_ have a method body, even if empty.
+            target.outputInline(" {")
+            target.outputLineFeed()
+            target.output(line: "}")
         } else {
             target.outputLineFeed()
         }
@@ -359,6 +364,11 @@ public class SwiftWriter {
         
         if let body = method.body {
             outputMethodBody(body, target: target)
+        } else if method.parent is ClassGenerationIntention {
+            // Class definitions _must_ have a method body, even if empty.
+            target.outputInline(" {")
+            target.outputLineFeed()
+            target.output(line: "}")
         } else {
             target.outputLineFeed()
         }
