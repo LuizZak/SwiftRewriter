@@ -10,13 +10,15 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
     func testPlainInit() {
         assertTransformParsed(
             original: "[[ClassName alloc] init]",
-            expected: .postfix(.identifier("ClassName"), .functionCall(arguments: [])))
+            expected: .postfix(.identifier("ClassName"), .functionCall(arguments: []))
+        )
     }
     
     func testInitWith() {
         assertTransformParsed(
             original: "[[ClassName alloc] initWithName:@\"abc\"]",
-            expected: .postfix(.identifier("ClassName"), .functionCall(arguments: [.labeled("name", .constant("abc"))])))
+            expected: .postfix(.identifier("ClassName"), .functionCall(arguments: [.labeled("name", .constant("abc"))]))
+        )
     }
     
     func testInitWithCompoundName() {
@@ -24,6 +26,25 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
             original: "[[ClassName alloc] initWithFirstName:@\"John\" secondName:@\"Doe\"]",
             expected: .postfix(.identifier("ClassName"),
                                .functionCall(arguments: [.labeled("firstName", .constant("John")),
-                                                         .labeled("secondName", .constant("Doe"))])))
+                                                         .labeled("secondName", .constant("Doe"))]))
+        )
+    }
+    
+    func testSuperInitWith() {
+        assertTransformParsed(
+            original: "[super initWithFrame:frame]",
+            expected: .postfix(.postfix(.identifier("super"),
+                                        .member("init")),
+                               .functionCall(arguments: [
+                                .labeled("frame", .identifier("frame"))
+                                ]))
+        )
+        
+        // Test we leave simple super.init() calls alone
+        assertTransformParsed(
+            original: "[super init]",
+            expected: .postfix(.postfix(.identifier("super"), .member("init")),
+                               .functionCall(arguments: []))
+        )
     }
 }

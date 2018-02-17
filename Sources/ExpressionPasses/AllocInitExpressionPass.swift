@@ -18,7 +18,7 @@ public class AllocInitExpressionPass: ExpressionPass {
                                          .member("alloc")),
                                 .functionCall(arguments: [])),
                        .member("init")),
-              .functionCall(arguments: let args))
+              .functionCall(let args))
             where args.count == 0:
             
             (exp, op) = (.identifier(typeName), .functionCall(arguments: []))
@@ -28,7 +28,7 @@ public class AllocInitExpressionPass: ExpressionPass {
                                          .member("alloc")),
                                 .functionCall(arguments: [])),
                        .member(let initCall)),
-              .functionCall(arguments: var args))
+              .functionCall(var args))
             where args.count > 0 && initCall.hasPrefix("initWith"):
             
             // Do a little Clang-like-magic here: If the method selector is in the
@@ -46,6 +46,27 @@ public class AllocInitExpressionPass: ExpressionPass {
             args[0] = .labeled(lowercasedFirstLetter, args[0].expression)
             
             (exp, op) = (.identifier(typeName), .functionCall(arguments: args))
+        // super.initWithThing(thing) -> super.init(with: thing)
+        case (.postfix(.identifier("super"),
+                       .member(let initMethod)),
+              .functionCall(var args)) where args.count > 0 && initMethod.hasPrefix("initWith"):
+            
+            // Do a little Clang-like-magic here: If the method selector is in the
+            // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
+            // noun is followed by a parameter that has the same name, we collapse
+            // such selector in Swift as `lorem(with:)`.
+            let split = initMethod.components(separatedBy: "With")
+            if split.count != 2 || split.contains(where: { $0.count < 2 }) {
+                break
+            }
+            
+            // All good! Collapse the identifier into a more 'swifty' construct
+            let lowercasedFirstLetter =
+                split[1].prefix(1).lowercased() + split[1].dropFirst()
+            args[0] = .labeled(lowercasedFirstLetter, args[0].expression)
+            
+            (exp, op) = (.postfix(.identifier("super"), .member("init")),
+                         .functionCall(arguments: args))
         default:
             break
         }
