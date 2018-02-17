@@ -113,7 +113,7 @@ public class MemberGenerationIntention: FromSourceIntention {
 
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
-public class PropertyGenerationIntention: MemberGenerationIntention {
+public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
     public var propertySource: PropertyDefinition? {
         return source as? PropertyDefinition
     }

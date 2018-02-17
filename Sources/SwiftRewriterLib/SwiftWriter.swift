@@ -88,11 +88,12 @@ public class SwiftWriter {
     
     private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention, target: RewriterOutputTarget) {
         let name = varDecl.name
-        let type = varDecl.storage.type
+        let type = varDecl.type
         let initVal = varDecl.initialValueExpr
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: varDecl.accessLevel)
-        let ownership = varDecl.storage.ownership
-        let varOrLet = varDecl.storage.isConstant ? "let" : "var"
+        let ownership = varDecl.ownership
+        let varOrLet = varDecl.isConstant ? "let" : "var"
+        let typeName = typeMapper.typeNameString(for: type)
         
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -101,7 +102,7 @@ public class SwiftWriter {
             // Check for non-pointers
             if let original = varDecl.variableSource?.type?.type, !original.isPointer {
                 diagnostics.warning("""
-                    Property '\(name)' specified as '\(ownership.rawValue)' \
+                    Variable '\(name)' specified as '\(ownership.rawValue)' \
                     but original type '\(original)' is not a pointer type.
                     """, location: varDecl.variableSource?.location ?? .invalid)
             } else {
@@ -110,11 +111,7 @@ public class SwiftWriter {
         }
         
         target.outputInlineWithSpace(varOrLet, style: .keyword)
-        
         target.outputInline(name, style: .plain)
-        
-        let typeName = typeMapper.typeNameString(for: type)
-        
         target.outputInline(": ")
         target.outputInline(typeName, style: .typeName)
         
@@ -224,12 +221,11 @@ public class SwiftWriter {
         target.output(line: "}")
     }
     
-    // TODO: See if we can reuse the PropertyGenerationIntention
+    // TODO: See if we can reuse outputVariableDeclaration
     private func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
         target.outputIdentation()
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: ivar.accessLevel)
-        let ownership = ivar.ownership
         let varOrLet = ivar.isConstant ? "let" : "var"
         
         let typeName = typeMapper.typeNameString(for: ivar.type)
@@ -237,9 +233,18 @@ public class SwiftWriter {
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
-        if ownership != .strong {
-            target.outputInlineWithSpace(ownership.rawValue, style: .keyword)
+        if ivar.ownership != .strong {
+            // Check for non-pointers
+            if let original = ivar.typedSource?.type?.type, !original.isPointer {
+                diagnostics.warning("""
+                    Ivar '\(ivar.name)' specified as '\(ivar.ownership.rawValue)' \
+                    but original type '\(original)' is not a pointer type.
+                    """, location: ivar.typedSource?.location ?? .invalid)
+            } else {
+                target.outputInlineWithSpace(ivar.ownership.rawValue, style: .keyword)
+            }
         }
+        
         target.outputInlineWithSpace(varOrLet, style: .keyword)
         target.outputInline(ivar.name)
         target.outputInline(": ")
@@ -250,23 +255,21 @@ public class SwiftWriter {
     private func outputProperty(_ prop: PropertyGenerationIntention, target: RewriterOutputTarget) {
         target.outputIdentation()
         
-        let type = prop.storage.type
-        
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
-        let typeName = typeMapper.typeNameString(for: type)
+        let typeName = typeMapper.typeNameString(for: prop.type)
         
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
-        if prop.storage.ownership != .strong {
+        if prop.ownership != .strong {
             // Check for non-pointers
             if let original = prop.propertySource?.type?.type, !original.isPointer {
                 diagnostics.warning("""
-                    Property '\(prop.name)' specified as '\(prop.storage.ownership.rawValue)' \
+                    Property '\(prop.name)' specified as '\(prop.ownership.rawValue)' \
                     but original type '\(original)' is not a pointer type.
                     """, location: prop.propertySource?.location ?? .invalid)
             } else {
-                target.outputInlineWithSpace(prop.storage.ownership.rawValue, style: .keyword)
+                target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
             }
         }
         

@@ -576,7 +576,7 @@ class SwiftRewriterTests: XCTestCase {
                 var aProperInt: Int
             }
             """).assertDiagnostics("""
-            Warning: Property 'anIntGlobal' specified as 'weak' but original type '__weak NSInteger' is not a pointer type. at line 0 column 0
+            Warning: Variable 'anIntGlobal' specified as 'weak' but original type '__weak NSInteger' is not a pointer type. at line 0 column 0
             Warning: Property 'anInt' specified as 'unowned(unsafe)' but original type 'NSInteger' is not a pointer type. at line 0 column 0
             """)
     }

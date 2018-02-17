@@ -80,7 +80,7 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention {
 }
 
 /// An intention to generate a global variable.
-public class GlobalVariableGenerationIntention: FromSourceIntention {
+public class GlobalVariableGenerationIntention: FromSourceIntention, ValueStorageIntention {
     public var variableSource: VariableDeclaration? {
         return source as? VariableDeclaration
     }
@@ -114,4 +114,24 @@ public protocol NonNullScopedIntention: Intention {
     /// Gets a value indicating whether this intention was defined within
     /// NS_ASSUME_NONNULL contexts
     var inNonnullContext: Bool { get }
+}
+
+/// Defines a protocol for a value storage intention.
+public protocol ValueStorageIntention: Intention {
+    var name: String { get }
+    var storage: ValueStorage { get }
+}
+
+public extension ValueStorageIntention {
+    public var type: SwiftType {
+        return storage.type
+    }
+    
+    public var ownership: Ownership {
+        return storage.ownership
+    }
+    
+    public var isConstant: Bool {
+        return storage.isConstant
+    }
 }

@@ -30,22 +30,18 @@ public class ProtocolInheritanceIntention: FromSourceIntention {
 }
 
 /// An intention to create an instance variable (Objective-C's 'ivar').
-public class InstanceVariableGenerationIntention: MemberGenerationIntention {
+public class InstanceVariableGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
     public var typedSource: IVarDeclaration? {
         return source as? IVarDeclaration
     }
     
     public var name: String
-    public var type: SwiftType
-    public var ownership: Ownership
-    public var isConstant: Bool
+    public var storage: ValueStorage
     
-    public init(name: String, type: SwiftType, ownership: Ownership, isConstant: Bool,
-                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal,
+                source: ASTNode? = nil) {
         self.name = name
-        self.type = type
-        self.ownership = ownership
-        self.isConstant = isConstant
+        self.storage = storage
         super.init(accessLevel: accessLevel, source: source)
     }
 }

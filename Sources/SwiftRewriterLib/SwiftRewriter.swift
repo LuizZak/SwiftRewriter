@@ -442,11 +442,11 @@ public class SwiftRewriter {
             isConstant = SwiftWriter._isConstant(fromType: type)
         }
         
+        let storage = ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
         let ivar =
             InstanceVariableGenerationIntention(name: node.identifier?.name ?? "",
-                                                type: swiftType, ownership: ownership,
-                                                isConstant: isConstant,
-                                                accessLevel: access, source: node)
+                                                storage: storage, accessLevel: access,
+                                                source: node)
         
         ivar.inNonnullContext = isNodeInNonnullContext(node)
         
