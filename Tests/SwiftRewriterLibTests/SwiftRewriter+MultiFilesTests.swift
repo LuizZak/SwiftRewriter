@@ -71,7 +71,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             class MyClass: NSObject {
                 var property: String
                 
-                func myMethod(parameter: String) -> AnyObject {
+                func myMethod(_ parameter: String) -> AnyObject {
                 }
             }
             // End of file objc.m

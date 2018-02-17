@@ -212,15 +212,15 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject {
                 func myMethod() {
                 }
-                func myOtherMethod(abc: Int, aString str: String) -> Int {
+                func myOtherMethod(_ abc: Int, aString str: String) -> Int {
                 }
-                func myAnonParamMethod(abc: Int, _ str: String) -> Int {
+                func myAnonParamMethod(_ abc: Int, _ str: String) -> Int {
                 }
                 func someNullArray() -> NSArray? {
                 }
-                func __(a: AnyObject!) {
+                func __(_ a: AnyObject!) {
                 }
-                func __(a: AnyObject!) -> AnyObject! {
+                func __(_ a: AnyObject!) -> AnyObject! {
                 }
             }
             """)
@@ -430,9 +430,9 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class AClass: NSObject {
-                func aBlocky(blocky: () -> Void) {
+                func aBlocky(_ blocky: () -> Void) {
                 }
-                func aBlockyWithString(blocky: (String) -> Void) {
+                func aBlockyWithString(_ blocky: (String) -> Void) {
                 }
             }
             """)
@@ -452,11 +452,11 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass1: NSObject {
-                func aMethod(param: String) -> AnyObject {
+                func aMethod(_ param: String) -> AnyObject {
                 }
             }
             class MyClass2: NSObject {
-                func aMethod(param: String!) -> AnyObject! {
+                func aMethod(_ param: String!) -> AnyObject! {
                 }
             }
             """)
@@ -477,7 +477,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                func aMethod(param: String) -> AnyObject {
+                func aMethod(_ param: String) -> AnyObject {
                 }
             }
             """)

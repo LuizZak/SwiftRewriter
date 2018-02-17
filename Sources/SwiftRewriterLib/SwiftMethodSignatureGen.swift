@@ -64,10 +64,12 @@ public class SwiftMethodSignatureGen {
             var nullability: TypeNullability = .unspecified
             let type = kw.type?.type?.type ?? ObjcType.id(protocols: [])
             
-            // The first label name is always equal to its keyword's identifier.
-            // This is because the first label is actually used as the method's name.
+            // The first label name is always empty.
+            // This matches the original Objective-C behavior of using the first
+            // keyword as the method's name and the remaining keywords as labels
+            // more closely.
             if i == 0 {
-                label = identifier
+                label = "_"
             }
             
             if let nullSpecs = kw.type?.nullabilitySpecifiers {
