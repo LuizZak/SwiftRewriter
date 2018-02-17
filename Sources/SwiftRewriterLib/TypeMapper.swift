@@ -59,6 +59,9 @@ public class TypeMapper {
         case .void:
             return .void
             
+        case .instancetype:
+            return swiftType(type: .anyObject, withNullability: context.nullability())
+            
         case .struct(let str):
             return swiftType(forObjcStructType: str, context: context)
             

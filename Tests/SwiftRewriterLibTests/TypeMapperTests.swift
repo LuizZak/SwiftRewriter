@@ -41,6 +41,13 @@ class TypeMapperTests: XCTestCase {
         expect(.id(protocols: []),
                toConvertTo: "AnyObject")
         
+        expect(.instancetype,
+               toConvertTo: "AnyObject")
+        
+        expect(.instancetype,
+               withExplicitNullability: .nullable,
+               toConvertTo: "AnyObject?")
+        
         expect(.id(protocols: ["UITableViewDelegate"]),
                withExplicitNullability: .nullable,
                toConvertTo: "UITableViewDelegate?")

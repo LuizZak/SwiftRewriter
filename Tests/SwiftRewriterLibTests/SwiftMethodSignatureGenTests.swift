@@ -172,6 +172,34 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         XCTAssertEqual(sign.parameters[0].name, "color")
     }
     
+    func testInitWithRewrite() {
+        let sign = genSignature("""
+            - (instancetype)initWithThing:(id)thing;
+            """)
+        
+        XCTAssertEqual(sign.name, "init")
+        XCTAssertEqual(sign.returnType, .implicitUnwrappedOptional(.anyObject))
+        XCTAssertEqual(sign.parameters.count, 1)
+        
+        XCTAssertEqual(sign.parameters[0].label, "with")
+        XCTAssertEqual(sign.parameters[0].type, .implicitUnwrappedOptional(.anyObject))
+        XCTAssertEqual(sign.parameters[0].name, "thing")
+    }
+    
+    func testInitWithRewriteDifferentCasing() {
+        let sign = genSignature("""
+            - (instancetype)initWithThingId:(id)thingID;
+            """)
+        
+        XCTAssertEqual(sign.name, "init")
+        XCTAssertEqual(sign.returnType, .implicitUnwrappedOptional(.anyObject))
+        XCTAssertEqual(sign.parameters.count, 1)
+        
+        XCTAssertEqual(sign.parameters[0].label, "with")
+        XCTAssertEqual(sign.parameters[0].type, .implicitUnwrappedOptional(.anyObject))
+        XCTAssertEqual(sign.parameters[0].name, "thingID")
+    }
+    
     private func genSignature(_ objc: String) -> MethodGenerationIntention.Signature {
         let node = parseMethodSign(objc)
         let gen = createSwiftMethodSignatureGen()

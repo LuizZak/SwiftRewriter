@@ -94,7 +94,7 @@ public class SwiftMethodSignatureGen {
             if split.count != 2 || split.contains(where: { $0.count < 2 }) {
                 return
             }
-            if split[1].lowercased() != keywords[0].identifier?.name {
+            if split[1].lowercased() != keywords[0].identifier?.name.lowercased() {
                 return
             }
             

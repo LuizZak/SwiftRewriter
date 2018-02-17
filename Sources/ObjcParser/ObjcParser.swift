@@ -166,6 +166,8 @@ public class ObjcParser {
                                              addTokensToContext: false,
                                              itemParser: parseObjcType)
                 type = .generic(typeName, parameters: types)
+            } else if typeName == "instancetype" {
+                type = .instancetype
             } else {
                 type = .struct(typeName)
             }

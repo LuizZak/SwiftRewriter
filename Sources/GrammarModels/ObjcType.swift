@@ -5,6 +5,10 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     /// Objective-c's `id` type, with optional protocol array specifiers
     case id(protocols: [String])
     
+    /// Special 'generic'-like specifier.
+    /// Closely related to `id` type.
+    case instancetype
+    
     /// A struct-type.
     /// May be any type that is not an `id`.
     case `struct`(String)
@@ -35,6 +39,8 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     /// Always maps to valid objc type
     public var description: String {
         switch self {
+        case .instancetype:
+            return "instancetype"
         case .void:
             return "void"
         case .struct(let s):
@@ -88,7 +94,7 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     /// Returns true if this is a pointer type
     public var isPointer: Bool {
         switch self {
-        case .pointer, .id:
+        case .pointer, .id, .instancetype:
             return true
         case .specified(_, let type):
             return type.isPointer
