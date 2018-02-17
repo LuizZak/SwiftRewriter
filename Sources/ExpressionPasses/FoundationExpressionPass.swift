@@ -12,12 +12,14 @@ public class FoundationExpressionPass: ExpressionPass {
         var (exp, op) = (exp, op)
         
         switch (exp, op) {
+        // [<lhs> isEqualToString:<rhs>] -> <lhs> == <rhs>
         case (.postfix(let innerExp, .member("isEqualToString")),
               .functionCall(arguments: let args))
             where args.count == 1 && !args.hasLabeledArguments():
             
             return visitBinary(lhs: innerExp, op: .equals, rhs: args[0].expression)
             
+        // [NSString stringWithFormat:@"format", <...>] -> String(format: "format", <...>)
         case (.postfix(.identifier("NSString"), .member("stringWithFormat")),
               .functionCall(let args)) where args.count > 0:
             let newArgs: [FunctionArgument] = [
@@ -26,6 +28,7 @@ public class FoundationExpressionPass: ExpressionPass {
             
             (exp, op) = (.identifier("String"), .functionCall(arguments: newArgs))
             
+        // [<array> addObjectsFromArray:<exp>] -> <array>.addObjects(from: <exp>)
         case (.postfix(let innerExp, .member("addObjectsFromArray")),
               .functionCall(let args)) where args.count == 1:
             let newArgs: [FunctionArgument] = [

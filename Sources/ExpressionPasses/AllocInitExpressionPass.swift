@@ -17,9 +17,9 @@ public class AllocInitExpressionPass: ExpressionPass {
         case (.postfix(.postfix(.postfix(.identifier(let typeName),
                                          .member("alloc")),
                                 .functionCall(arguments: [])),
-                       .member(let initCall)),
+                       .member("init")),
               .functionCall(arguments: let args))
-            where initCall == "init" && args.count == 0:
+            where args.count == 0:
             
             (exp, op) = (.identifier(typeName), .functionCall(arguments: []))
             
@@ -41,7 +41,8 @@ public class AllocInitExpressionPass: ExpressionPass {
             }
             
             // All good! Collapse the identifier into a more 'swifty' construct
-            let lowercasedFirstLetter = split[1].prefix(1).lowercased() + split[1].dropFirst()
+            let lowercasedFirstLetter =
+                split[1].prefix(1).lowercased() + split[1].dropFirst()
             args[0] = .labeled(lowercasedFirstLetter, args[0].expression)
             
             (exp, op) = (.identifier(typeName), .functionCall(arguments: args))
