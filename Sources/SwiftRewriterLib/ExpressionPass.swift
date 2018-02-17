@@ -1,6 +1,3 @@
-import GrammarModels
-import ObjcParser
-
 /// Represents the base protocol for visitors of an expression tree.
 /// Visitors visit nodes while performing operations on each node along the way,
 /// returning the resulting value after done traversing.
@@ -331,6 +328,27 @@ open class ExpressionPass: ExpressionVisitor {
         
         override func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> Statement {
             return super.visitIf(expression.accept(target), body, elseBody)
+        }
+        
+        override func visitSwitch(_ expression: Expression, _ cases: [SwitchCase], _ def: [Statement]?) -> Statement {
+            func recurseIntoPatterns(_ pattern: Pattern) -> Pattern {
+                switch pattern {
+                case .expression(let exp):
+                    return .expression(exp.accept(target))
+                case .tuple(let tups):
+                    return .tuple(tups.map(recurseIntoPatterns))
+                case .identifier:
+                    return pattern
+                }
+            }
+            
+            let expression = expression.accept(target)
+            let cases = cases.map { cs in
+                return SwitchCase(patterns: cs.patterns.map(recurseIntoPatterns),
+                                  statements: cs.statements)
+            }
+            
+            return super.visitSwitch(expression, cases, def)
         }
         
         override func visitWhile(_ expression: Expression, _ body: CompoundStatement) -> Statement {

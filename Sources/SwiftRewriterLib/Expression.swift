@@ -21,7 +21,7 @@ public indirect enum Expression: Equatable {
     /// postfix operations.
     public var requiresParens: Bool {
         switch self {
-        case .cast:
+        case .cast, .block, .ternary:
             return true
         default:
             return false
