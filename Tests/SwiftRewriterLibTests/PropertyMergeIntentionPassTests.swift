@@ -149,4 +149,33 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             }
             """)
     }
+    
+    func testSetterOnly() throws {
+        try assertObjcParse(
+            objc: """
+            NS_ASSUME_NONNULL_BEGIN
+            
+            @interface MyClass
+            @property (nonatomic) NSDate *ganttStartDate;
+            @end
+            
+            NS_ASSUME_NONNULL_END
+            
+            @implementation MyClass
+            - (void)setGanttStartDate:(NSDate*)ganttStartDate {
+                self->_ganttStartDate = ganttStartDate;
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                private var _ganttStartDate: NSDate
+                var ganttStartDate: NSDate {
+                    set(ganttStartDate) {
+                        self._ganttStartDate = ganttStartDate
+                    }
+                }
+            }
+            """)
+    }
 }

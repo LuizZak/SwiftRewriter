@@ -259,19 +259,6 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 
                 propertySet.property.mode =
                     .property(get: getterBody, set: setter)
-                
-                /*
-                let field =
-                    PropertyGenerationIntention(name: "_" + propertySet.property.name,
-                                                type: propertySet.property.type,
-                                                ownership: propertySet.property.ownership,
-                                                accessLevel: .private,
-                                                source: propertySet.property.source)
-                
-                if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
-                    classIntention.addProperty(field, at: index)
-                }
-                */
             }
             
             // Remove the original method intentions
@@ -285,7 +272,28 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // Remove the original method intention
             classIntention.removeMethod(getter)
         case let (nil, setter?):
-            _=setter
+            if let setterBody = setter.body {
+                let setter =
+                    PropertyGenerationIntention
+                        .Setter(valueIdentifier: setter.parameters[0].name,
+                                body: setterBody)
+                
+                propertySet.property.mode = .setter(setter)
+                
+                let field =
+                    PropertyGenerationIntention(name: "_" + propertySet.property.name,
+                                                type: propertySet.property.type,
+                                                ownership: propertySet.property.ownership,
+                                                accessLevel: .private,
+                                                source: propertySet.property.source)
+                
+                if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
+                    classIntention.addProperty(field, at: index)
+                }
+            }
+            
+            // Remove the original method intentions
+            classIntention.removeMethod(setter)
             break
         default:
             break

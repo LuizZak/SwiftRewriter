@@ -141,6 +141,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
         case asField
         case computed(MethodBodyIntention)
         case property(get: MethodBodyIntention, set: Setter)
+        case setter(Setter)
     }
     
     public struct Setter {
