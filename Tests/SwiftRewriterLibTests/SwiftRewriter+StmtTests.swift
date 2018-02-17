@@ -602,6 +602,33 @@ class SwiftRewriter_StmtTests: XCTestCase {
             )
     }
     
+    func testSynchronizedStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                @synchronized(self) {
+                    stuff();
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    do {
+                        objc_sync_enter(self)
+                        defer {
+                            objc_sync_exit(self)
+                        }
+                        
+                        stuff()
+                    }
+                }
+            }
+            """)
+    }
+    
     func testForInStatement() throws {
         try assertObjcParse(
             objc: """
