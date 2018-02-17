@@ -253,6 +253,24 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteIVarBetweenAssumeNonNulls() throws {
+        try assertObjcParse(
+            objc: """
+            NS_ASSUME_NONNULL_BEGIN
+            @interface MyClass
+            {
+                NSString *_myString;
+            }
+            @end
+            NS_ASSUME_NONNULL_END
+            """,
+            swift: """
+            class MyClass: NSObject {
+                private var _myString: String
+            }
+            """)
+    }
+    
     func testRewriteInterfaceWithImplementation() throws {
         try assertObjcParse(
             objc: """

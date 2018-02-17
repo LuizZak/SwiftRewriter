@@ -432,7 +432,8 @@ public class SwiftRewriter {
         var ownership = Ownership.strong
         var isConstant = false
         if let type = node.type?.type {
-            swiftType = typeMapper.swiftType(forObjcType: type)
+            swiftType = typeMapper.swiftType(forObjcType: type,
+                                             context: .init(inNonnull: isNodeInNonnullContext(node)))
             ownership = evaluateOwnershipPrefix(inType: type)
             isConstant = SwiftWriter._isConstant(fromType: type)
         }
