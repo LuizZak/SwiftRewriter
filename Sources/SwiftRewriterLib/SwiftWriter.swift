@@ -137,6 +137,9 @@ public class SwiftWriter {
         var inheritances: [String] = []
         if let sup = cls.superclassName {
             inheritances.append(sup)
+        } else {
+            // Always inherit from NSObject, at least.
+            inheritances.append("NSObject")
         }
         inheritances.append(contentsOf: cls.protocols.map { p in p.protocolName })
         

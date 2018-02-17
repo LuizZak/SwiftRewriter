@@ -49,6 +49,21 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteSubclassInInterface() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass : MyBaseClass
+            @end
+
+            @implementation MyClass
+            @end
+            """,
+            swift: """
+            class MyClass: MyBaseClass {
+            }
+            """)
+    }
+    
     func testRewriteProtocolSpecification() throws {
         try assertObjcParse(
             objc: """
@@ -101,7 +116,7 @@ class SwiftRewriterTests: XCTestCase {
                 var nonNullWithQualifier: String
                 var nonSpecifiedNull: String!
                 var idType: AnyObject!
-                weak var delegate: AnyObject<MyDelegate, MyDataSource>?
+                weak var delegate: (MyDelegate & MyDataSource)?
                 var tableWithDataSource: UITableView & UITableViewDataSource
                 weak var weakViewWithDelegate: (UIView & UIDelegate)?
                 unowned(unsafe) var assignProp: MyClass

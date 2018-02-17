@@ -127,6 +127,13 @@ public class FileGroupingIntentionPass: IntentionPass {
     }
     
     private func mergeTypes(from first: TypeGenerationIntention, into second: TypeGenerationIntention) {
+        // Inheritance
+        if let first = first as? ClassGenerationIntention, let second = second as? ClassGenerationIntention {
+            if second.superclassName == nil {
+                second.superclassName = first.superclassName
+            }
+        }
+        
         // Protocols
         for prot in first.protocols {
             if !second.hasProtocol(named: prot.protocolName) {
