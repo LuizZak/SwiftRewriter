@@ -62,7 +62,7 @@ extension CompoundStatement: Sequence {
 public indirect enum Statement: Equatable {
     case semicolon
     case compound(CompoundStatement)
-    case `if`(Expression, body: CompoundStatement, `else`: CompoundStatement?)
+    case `if`(Expression, body: CompoundStatement, else: CompoundStatement?)
     case `while`(Expression, body: CompoundStatement)
     case `for`(Pattern, Expression, body: CompoundStatement)
     case `switch`(Expression, cases: [SwitchCase], default: [Statement]?)
@@ -74,6 +74,19 @@ public indirect enum Statement: Equatable {
     case expressions([Expression])
     case variableDeclarations([StatementVariableDeclaration])
     case unknown(UnknownASTContext)
+    
+    /// Returns `true` if this statement resolve to an unconditional jump out
+    /// of the current context.
+    ///
+    /// Returns true for `.break`, `.continue` and `.return` statements.
+    public var isUnconditionalJump: Bool {
+        switch self {
+        case .break, .continue, .return:
+            return true
+        default:
+            return false
+        }
+    }
     
     public static func expression(_ expr: Expression) -> Statement {
         return .expressions([expr])

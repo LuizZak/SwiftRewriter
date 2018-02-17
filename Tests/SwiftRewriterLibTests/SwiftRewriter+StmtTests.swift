@@ -531,6 +531,41 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testSwitchStatementAvoidFallthroghIfLastStatementIsUnconditionalJump() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                switch(value) {
+                case 0:
+                    return stmt();
+                case 1:
+                    continue;
+                case 2:
+                    otherStmt();
+                    break;
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    switch value {
+                    case 0:
+                        return stmt()
+                    case 1:
+                        continue
+                    case 2:
+                        otherStmt()
+                    default:
+                        break
+                    }
+                }
+            }
+            """)
+    }
+    
     func testSwitchStatementWithCompoundStatementCases() throws {
         try assertObjcParse(
             objc: """

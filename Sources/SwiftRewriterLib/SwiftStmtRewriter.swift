@@ -457,7 +457,7 @@ fileprivate class StatementWriter {
                     visitStatement(stmt)
                 }
                 
-                let hasBreak = cs.statements.last == .break
+                let hasBreak = cs.statements.last?.isUnconditionalJump ?? false
                 if !hasBreak {
                     target.output(line: "fallthrough", style: .keyword)
                 }
