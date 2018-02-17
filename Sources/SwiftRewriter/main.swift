@@ -27,6 +27,7 @@ do {
         converter.expressionPasses.append(AllocInitExpressionPass())
         converter.expressionPasses.append(CoreGraphicsExpressionPass())
         converter.expressionPasses.append(FoundationExpressionPass())
+        converter.expressionPasses.append(UIKitExpressionPass())
         
         try converter.rewrite()
         

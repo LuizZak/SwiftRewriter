@@ -22,6 +22,7 @@ class SingleFileTestBuilder {
         sut.expressionPasses.append(AllocInitExpressionPass())
         sut.expressionPasses.append(CoreGraphicsExpressionPass())
         sut.expressionPasses.append(FoundationExpressionPass())
+        sut.expressionPasses.append(UIKitExpressionPass())
         
         do {
             try sut.rewrite()
