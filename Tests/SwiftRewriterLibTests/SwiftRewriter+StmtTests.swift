@@ -206,6 +206,30 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testSingleBlockArgument() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                [self doThing:a b:^{
+                }];
+                [self doThing:^{
+                }];
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    self.doThing(a) { () -> Void in
+                    }
+                    self.doThing { () -> Void in
+                    }
+                }
+            }
+            """)
+    }
+    
     func testBlockLiteral() throws {
         try assertObjcParse(
             objc: """
@@ -218,7 +242,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    { () -> Void in }
+                    { () -> Void in
+                    }
                 }
             }
             """)
@@ -233,7 +258,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    let myBlock = { () -> Void in }
+                    let myBlock = { () -> Void in
+                    }
                 }
             }
             """)
@@ -627,9 +653,9 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    autoreleasepool({ () -> Void in
+                    autoreleasepool { () -> Void in
                         stuff()
-                    })
+                    }
                 }
             }
             """)

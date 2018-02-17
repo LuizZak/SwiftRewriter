@@ -76,30 +76,43 @@ fileprivate class ExpressionWriter {
         switch expression {
         case let .assignment(lhs, op, rhs):
             visitAssignment(lhs: lhs, op: op, rhs: rhs)
+            
         case let .binary(lhs, op, rhs):
             visitBinary(lhs: lhs, op: op, rhs: rhs)
+            
         case let .unary(op, expr):
             visitUnary(op: op, expr)
+            
         case let .prefix(op, expr):
             visitPrefix(op: op, expr)
+            
         case let .postfix(expr, post):
             visitPostfix(expr, op: post)
+            
         case .constant(let constant):
             visitConstant(constant)
+            
         case let .parens(expr):
             visitParens(expr)
+            
         case .identifier(let ident):
             visitIdentifier(ident)
+            
         case let .cast(expr, type):
             visitCast(expr, type: type)
+            
         case .arrayLiteral(let expressions):
             visitArray(expressions)
+            
         case .dictionaryLiteral(let pairs):
             visitDictionary(pairs)
+            
         case let .ternary(exp, ifTrue, ifFalse):
             visitTernary(exp, ifTrue, ifFalse)
+            
         case let .block(parameters, returnType, body):
             visitBlock(parameters, returnType, body)
+            
         case .unknown(let context):
             target.outputInline("/*", style: .comment)
             target.outputInline(context.description, style: .comment)
@@ -161,21 +174,42 @@ fileprivate class ExpressionWriter {
             visitExpression(exp)
             target.outputInline("]")
             
-        case .functionCall(let arguments):
-            target.outputInline("(")
-            
-            commaSeparated(arguments) { arg in
-                switch arg {
-                case let .labeled(lbl, expr):
-                    target.outputInline(lbl)
-                    target.outputInline(": ")
-                    visitExpression(expr)
-                case let .unlabeled(expr):
-                    visitExpression(expr)
-                }
+        case .functionCall(var arguments):
+            var trailingClosure: Expression?
+            // If the last argument is a block type, close the
+            // parameters list earlier and use the block as a
+            // trailing closure.
+            if case .block? = arguments.last?.expression {
+                trailingClosure = arguments.last?.expression
+                arguments.removeLast()
             }
             
-            target.outputInline(")")
+            
+            // No need to emit parenthesis if a trailing closure
+            // is present as the only argument of the function
+            if arguments.count > 0 || trailingClosure == nil {
+                target.outputInline("(")
+                
+                commaSeparated(arguments) { arg in
+                    switch arg {
+                    case let .labeled(lbl, expr):
+                        target.outputInline(lbl)
+                        target.outputInline(": ")
+                        visitExpression(expr)
+                    case let .unlabeled(expr):
+                        visitExpression(expr)
+                    }
+                }
+                
+                target.outputInline(")")
+            }
+            
+            // Emit trailing closure now, if present
+            if let trailingClosure = trailingClosure {
+                // Nicer spacing
+                target.outputInline(" ")
+                visitExpression(trailingClosure)
+            }
         }
     }
     
@@ -282,7 +316,9 @@ fileprivate class ExpressionWriter {
         target.outputInline(" in", style: .keyword)
         
         if body.isEmpty {
-            target.outputInline(" }")
+            target.outputLineFeed()
+            target.outputIdentation()
+            target.outputInline("}")
             return
         }
         
