@@ -43,7 +43,11 @@ class TypeMapperTests: XCTestCase {
         
         expect(.id(protocols: ["UITableViewDelegate"]),
                withExplicitNullability: .nullable,
-               toConvertTo: "AnyObject<UITableViewDelegate>?")
+               toConvertTo: "UITableViewDelegate?")
+        
+        expect(.id(protocols: ["UITableViewDelegate", "UITableViewDataSource"]),
+               withExplicitNullability: .nullable,
+               toConvertTo: "(UITableViewDelegate & UITableViewDataSource)?")
         
         expect(.pointer(.generic("NSArray", parameters: [.struct("NSInteger")])),
                toConvertTo: "[Int]")

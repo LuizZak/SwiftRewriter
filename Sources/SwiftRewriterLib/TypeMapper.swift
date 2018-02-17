@@ -97,7 +97,7 @@ public class TypeMapper {
         if protocols.count == 0 {
             type = .anyObject
         } else {
-            type = .generic("AnyObject", parameters: protocols.map { .typeName($0) })
+            type = .protocolComposition(protocols.map { .typeName($0) })
         }
         
         return swiftType(type: type, withNullability: context.nullability())
