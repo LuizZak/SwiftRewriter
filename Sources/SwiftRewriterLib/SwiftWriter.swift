@@ -88,11 +88,11 @@ public class SwiftWriter {
     
     private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention, target: RewriterOutputTarget) {
         let name = varDecl.name
-        let type = varDecl.type
+        let type = varDecl.storage.type
         let initVal = varDecl.initialValueExpr
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: varDecl.accessLevel)
-        let ownership = varDecl.ownership
-        let varOrLet = varDecl.isConstant ? "let" : "var"
+        let ownership = varDecl.storage.ownership
+        let varOrLet = varDecl.storage.isConstant ? "let" : "var"
         
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -250,7 +250,7 @@ public class SwiftWriter {
     private func outputProperty(_ prop: PropertyGenerationIntention, target: RewriterOutputTarget) {
         target.outputIdentation()
         
-        let type = prop.type
+        let type = prop.storage.type
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: type)
@@ -258,15 +258,15 @@ public class SwiftWriter {
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
-        if prop.ownership != .strong {
+        if prop.storage.ownership != .strong {
             // Check for non-pointers
             if let original = prop.propertySource?.type?.type, !original.isPointer {
                 diagnostics.warning("""
-                    Property '\(prop.name)' specified as '\(prop.ownership.rawValue)' \
+                    Property '\(prop.name)' specified as '\(prop.storage.ownership.rawValue)' \
                     but original type '\(original)' is not a pointer type.
                     """, location: prop.propertySource?.location ?? .invalid)
             } else {
-                target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
+                target.outputInlineWithSpace(prop.storage.ownership.rawValue, style: .keyword)
             }
         }
         

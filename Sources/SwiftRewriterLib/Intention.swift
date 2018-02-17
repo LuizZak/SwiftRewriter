@@ -86,17 +86,13 @@ public class GlobalVariableGenerationIntention: FromSourceIntention {
     }
     
     public var name: String
-    public var type: SwiftType
-    public var ownership: Ownership
-    public var isConstant: Bool
+    public var storage: ValueStorage
     public var initialValueExpr: GlobalVariableInitialValueIntention?
     
-    public init(name: String, type: SwiftType, ownership: Ownership, isConstant: Bool,
-                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal,
+                source: ASTNode? = nil) {
         self.name = name
-        self.type = type
-        self.ownership = ownership
-        self.isConstant = isConstant
+        self.storage = storage
         super.init(accessLevel: accessLevel, source: source)
     }
 }

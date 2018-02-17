@@ -233,9 +233,11 @@ public class SwiftRewriter {
         let ownership = evaluateOwnershipPrefix(inType: type.type)
         let isConstant = SwiftWriter._isConstant(fromType: type.type)
         
+        let storage =
+            ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
+        
         let intent =
-            GlobalVariableGenerationIntention(name: name.name, type: swiftType,
-                                              ownership: ownership, isConstant: isConstant,
+            GlobalVariableGenerationIntention(name: name.name, storage: storage,
                                               source: node)
         
         intent.inNonnullContext = isNodeInNonnullContext(node)
@@ -361,10 +363,12 @@ public class SwiftRewriter {
             ownership = evaluateOwnershipPrefix(inType: type, property: node)
         }
         
+        let storage =
+            ValueStorage(type: swiftType, ownership: ownership, isConstant: false)
+        
         let prop =
             PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                        type: swiftType, ownership: ownership,
-                                        source: node)
+                                        storage: storage, source: node)
         
         prop.inNonnullContext = isNodeInNonnullContext(node)
         

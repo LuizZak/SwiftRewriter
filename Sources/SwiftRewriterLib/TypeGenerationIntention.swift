@@ -126,14 +126,12 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
     }
     
     public var name: String
-    public var type: SwiftType
-    public var ownership: Ownership
+    public var storage: ValueStorage
     public var mode: Mode = .asField
     
-    public init(name: String, type: SwiftType, ownership: Ownership, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
-        self.type = type
-        self.ownership = ownership
+        self.storage = storage
         super.init(accessLevel: accessLevel, source: source)
     }
     
