@@ -1,6 +1,7 @@
 import XCTest
 import ObjcParser
 import SwiftRewriterLib
+import ExpressionPasses
 
 class MultiFileTestBuilder {
     var test: XCTestCase
