@@ -141,7 +141,6 @@ public class PropertyGenerationIntention: MemberGenerationIntention {
         case asField
         case computed(MethodBodyIntention)
         case property(get: MethodBodyIntention, set: Setter)
-        case setter(Setter)
     }
     
     public struct Setter {
@@ -158,7 +157,7 @@ public class MethodBodyIntention: FromSourceIntention {
     /// Original source code body to generate
     public var body: CompoundStatement
     
-    public init(body: CompoundStatement, source: MethodBody) {
+    public init(body: CompoundStatement, source: ASTNode? = nil) {
         self.body = body
         
         super.init(accessLevel: .public, source: source)

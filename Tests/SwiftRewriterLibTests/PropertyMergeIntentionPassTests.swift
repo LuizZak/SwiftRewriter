@@ -171,6 +171,9 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             class MyClass: NSObject {
                 private var _ganttStartDate: NSDate
                 var ganttStartDate: NSDate {
+                    get {
+                        return _ganttStartDate
+                    }
                     set(ganttStartDate) {
                         self._ganttStartDate = ganttStartDate
                     }

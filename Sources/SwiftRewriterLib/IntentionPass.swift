@@ -273,15 +273,22 @@ public class PropertyMergeIntentionPass: IntentionPass {
             classIntention.removeMethod(getter)
         case let (nil, setter?):
             if let setterBody = setter.body {
+                let backingFieldName = "_" + propertySet.property.name
                 let setter =
                     PropertyGenerationIntention
                         .Setter(valueIdentifier: setter.parameters[0].name,
                                 body: setterBody)
                 
-                propertySet.property.mode = .setter(setter)
+                // Synthesize a simple getter that has the following statement within:
+                // return self._backingField
+                let getterIntention =
+                    MethodBodyIntention(body: [.return(.identifier(backingFieldName))],
+                                        source: propertySet.setter?.body?.source)
+                
+                propertySet.property.mode = .property(get: getterIntention, set: setter)
                 
                 let field =
-                    PropertyGenerationIntention(name: "_" + propertySet.property.name,
+                    PropertyGenerationIntention(name: backingFieldName,
                                                 type: propertySet.property.type,
                                                 ownership: propertySet.property.ownership,
                                                 accessLevel: .private,

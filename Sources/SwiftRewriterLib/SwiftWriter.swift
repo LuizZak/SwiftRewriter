@@ -276,24 +276,6 @@ public class SwiftWriter {
             break
         case .computed(let body):
             outputMethodBody(body, target: target)
-        case let .setter(setter):
-            target.outputInline(" ")
-            target.outputInline("{")
-            target.outputLineFeed()
-            
-            target.idented {
-                target.outputIdentation()
-                target.outputInline("set", style: .keyword)
-                
-                // Avoid emitting setter's default new value identifier
-                if setter.valueIdentifier != "newValue" {
-                    target.outputInline("(\(setter.valueIdentifier))")
-                }
-                
-                outputMethodBody(setter.body, target: target)
-            }
-            
-            target.output(line: "}")
         case let .property(getter, setter):
             target.outputInline(" ")
             target.outputInline("{")
