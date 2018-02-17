@@ -247,6 +247,24 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteDeallocMethod() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)dealloc {
+                thing()
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                deinit {
+                    thing()
+                }
+            }
+            """)
+    }
+    
     func testRewriteIVarsWithAccessControls() throws {
         try assertObjcParse(objc: """
             @interface MyClass
@@ -530,7 +548,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc protocol MyProtocol {
+            @objc
+            protocol MyProtocol {
                 func myMethod()
             }
             """)

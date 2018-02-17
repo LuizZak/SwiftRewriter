@@ -172,12 +172,14 @@ public class SwiftWriter {
             }
             
             for method in cls.methods {
-                // Init methods are treated differently
+                // Init and dealloc methods are treated differently
                 // TODO: Create a separate GenerationIntention entirely for init
-                // methods and detect them during SwiftRewriter's parsing instead
-                // of postponing to here.
+                // and dealloc methods and detect them during SwiftRewriter's
+                // parsing with IntentionPass's instead of postponing to here.
                 if method.signature.name == "init" {
                     outputInitMethod(method, target: target)
+                } else if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
+                    outputDeinit(method, target: target)
                 } else {
                     outputMethod(method, target: target)
                 }
@@ -188,9 +190,8 @@ public class SwiftWriter {
     }
     
     private func outputProtocol(_ prot: ProtocolGenerationIntention, target: RewriterOutputTarget) {
+        target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
-        
-        target.outputInlineWithSpace("@objc", style: .keyword)
         target.outputInlineWithSpace("protocol", style: .keyword)
         target.outputInlineWithSpace(prot.typeName, style: .typeName)
         target.outputInline("{")
@@ -212,6 +213,8 @@ public class SwiftWriter {
                 // of postponing to here.
                 if method.signature.name == "init" {
                     outputInitMethod(method, target: target)
+                } else if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
+                    outputDeinit(method, target: target)
                 } else {
                     outputMethod(method, target: target)
                 }
@@ -322,6 +325,29 @@ public class SwiftWriter {
         if let body = initMethod.body {
             outputMethodBody(body, target: target)
         } else if initMethod.parent is ClassGenerationIntention {
+            // Class definitions _must_ have a method body, even if empty.
+            target.outputInline(" {")
+            target.outputLineFeed()
+            target.output(line: "}")
+        } else {
+            target.outputLineFeed()
+        }
+    }
+    
+    private func outputDeinit(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+        target.outputIdentation()
+        
+        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
+        
+        if !accessModifier.isEmpty {
+            target.outputInlineWithSpace(accessModifier, style: .keyword)
+        }
+        
+        target.outputInline("deinit", style: .keyword)
+        
+        if let body = method.body {
+            outputMethodBody(body, target: target)
+        } else if method.parent is ClassGenerationIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
             target.outputLineFeed()
