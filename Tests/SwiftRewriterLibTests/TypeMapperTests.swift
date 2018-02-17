@@ -13,6 +13,10 @@ class TypeMapperTests: XCTestCase {
         expectSwift(.dictionary(key: .int, value: .string), toConvertTo: "[Int: String]")
         expectSwift(.optional(.array(.int)), toConvertTo: "[Int]?")
         expectSwift(.optional(.dictionary(key: .int, value: .string)), toConvertTo: "[Int: String]?")
+        expectSwift(.protocolComposition([.typeName("Type1"), .typeName("Type2")]), toConvertTo: "Type1 & Type2")
+        expectSwift(.optional(.protocolComposition([.typeName("Type1"), .typeName("Type2")])), toConvertTo: "(Type1 & Type2)?")
+        expectSwift(.block(returnType: .int, parameters: [.int]), toConvertTo: "(Int) -> Int")
+        expectSwift(.optional(.block(returnType: .int, parameters: [.int])), toConvertTo: "((Int) -> Int)?")
     }
     
     func testMapSimpleTypes() {
@@ -24,9 +28,8 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "Int")
         
         expect(.struct("NSInteger"), toConvertTo: "Int")
-        
+        expect(.struct("int"), toConvertTo: "Int")
         expect(.struct("BOOL"), toConvertTo: "Bool")
-        
         expect(.struct("CGColor"), toConvertTo: "CGColor")
         
         expect(.pointer(.struct("NSString")),
