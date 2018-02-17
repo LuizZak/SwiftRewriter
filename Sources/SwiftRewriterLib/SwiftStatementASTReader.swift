@@ -50,7 +50,8 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                            ctx.iterationStatement(),
                            ctx.expressions(),
                            ctx.jumpStatement(),
-                           ctx.synchronizedStatement())
+                           ctx.synchronizedStatement(),
+                           ctx.autoreleaseStatement())
             ?? .unknown(UnknownASTContext(context: ctx))
     }
     
@@ -110,6 +111,22 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         doBody.statements.append(contentsOf: compoundStatement.statements)
         
         return Statement.do(doBody)
+    }
+    
+    public override func visitAutoreleaseStatement(_ ctx: ObjectiveCParser.AutoreleaseStatementContext) -> Statement? {
+        guard let compoundStatement = ctx.compoundStatement()?.accept(compoundStatementVisitor()) else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        
+        let expression: Expression =
+            .postfix(.identifier("autoreleasepool"),
+                     .functionCall(arguments: [
+                        .unlabeled(.block(parameters: [],
+                                          return: .void,
+                                          body: compoundStatement))
+                        ]))
+        
+        return .expression(expression)
     }
     
     // MARK: - return / continue / break

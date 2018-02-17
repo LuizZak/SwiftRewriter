@@ -629,6 +629,28 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testAutoreleasePoolStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                @autoreleasepool {
+                    stuff();
+                }
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                func myMethod() {
+                    autoreleasepool({ () -> Void in
+                        stuff()
+                    })
+                }
+            }
+            """)
+    }
+    
     func testForInStatement() throws {
         try assertObjcParse(
             objc: """
