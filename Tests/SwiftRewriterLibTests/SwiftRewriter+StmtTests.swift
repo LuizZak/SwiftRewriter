@@ -566,9 +566,6 @@ class SwiftRewriter_StmtTests: XCTestCase {
     }
     
     func testForStatement() throws {
-        // TODO: This should detect and convert to a proper range-based for,
-        // but for now the while trick should do it.
-        
         try assertObjcParse(
             objc: """
             @implementation MyClass
@@ -581,24 +578,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 func myMethod() {
-                    var i = 0
-                    while i < 10 {
-                        defer {
-                            i += 1
-                        }
+                    for i in 0..<10 {
                     }
                 }
             }
             """
-            // This is the expected result!
-//            swift: """
-//            class MyClass: NSObject {
-//                func myMethod() {
-//                    for i in 0..<10 {
-//                    }
-//                }
-//            }
-//            """
             )
     }
     

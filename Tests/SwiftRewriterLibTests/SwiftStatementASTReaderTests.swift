@@ -39,17 +39,83 @@ class SwiftStatementASTReaderTests: XCTestCase {
     
     func testFor() {
         assert(objcExpr: "for(int i = 0; i < 10; i++) { }",
+               readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .openRange, rhs: .constant(10)),
+                             body: [])
+        )
+        assert(objcExpr: "for(int i = 0; i <= 10; i++) { }",
+               readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .closedRange, rhs: .constant(10)),
+                             body: [])
+        )
+        
+        assert(objcExpr: "for(int i = 16; i <= 59; i += 1) { }",
+               readsAs: .for(.identifier("i"), .binary(lhs: .constant(16), op: .closedRange, rhs: .constant(59)),
+                             body: [])
+        )
+        
+        // Loop variable is being accessed, but not modified, within loop
+        assert(objcExpr: "for(int i = 0; i < 10; i++) { print(i); }",
+               readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .openRange, rhs: .constant(10)),
+                             body: [
+                                .expression(.postfix(.identifier("print"),
+                                                     .functionCall(arguments: [
+                                                        .unlabeled(.identifier("i"))
+                                                        ])))
+                            ])
+        )
+    }
+    
+    func testForConvertingToWhile() {
+        // In some cases, the parser has to unwrap for loops that cannot be cleanly
+        // converted into `for-in` statements into equivalent while loops.
+        // This test method tests for such behavior.
+        
+        // Loop iterator is being modified within the loop's body
+        assert(objcExpr: "for(int i = 0; i < 10; i++) { i++; }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
-                    .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
-                           body: [
-                            .defer([
-                                .expression(.assignment(lhs: .identifier("i"), op: .addAssign, rhs: .constant(1)))
-                                ])
-                        ])
+                .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
+                       body: [
+                        .defer([
+                            .expression(
+                                .assignment(lhs: .identifier("i"), op: .addAssign, rhs: .constant(1))
+                            )
+                            ]),
+                        .expression(.assignment(lhs: .identifier("i"), op: .addAssign, rhs: .constant(1)))
+                    ])
                 ])
         )
         
+        // Loop iterator is not incrementing the loop variable.
+        assert(objcExpr: "for(int i = 0; i < 10; i--) { }",
+               readsAs: .compound([
+                .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
+                .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
+                       body: [
+                        .defer([
+                            .expression(
+                                .assignment(lhs: .identifier("i"), op: .subtractAssign, rhs: .constant(1))
+                                )
+                            ])
+                    ])
+                ])
+        )
+        
+        // Loop iterator is assigning to different variable than loop variable
+        assert(objcExpr: "for(int i = 0; i < 10; j++) { }",
+               readsAs: .compound([
+                .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
+                .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
+                       body: [
+                        .defer([
+                            .expression(
+                                .assignment(lhs: .identifier("j"), op: .addAssign, rhs: .constant(1))
+                                )
+                            ])
+                    ])
+                ])
+        )
+        
+        // Loop iterator is complex (changing two values)
         assert(objcExpr: "for(int i = 0; i < 10; i++, j--) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
@@ -59,13 +125,13 @@ class SwiftStatementASTReaderTests: XCTestCase {
                             .expressions([
                                 .assignment(lhs: .identifier("i"), op: .addAssign, rhs: .constant(1)),
                                 .assignment(lhs: .identifier("j"), op: .subtractAssign, rhs: .constant(1))
-                                ]
-                                )
+                                ])
                             ])
                     ])
                 ])
         )
         
+        // Missing loop start
         assert(objcExpr: "for(; i < 10; i++) { }",
                readsAs:
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -76,6 +142,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                     ])
         )
         
+        // Missing loop condition
         assert(objcExpr: "for(int i = 0;; i++) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
@@ -88,6 +155,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                 ])
         )
         
+        // Missing loop iterator
         assert(objcExpr: "for(int i = 0; i < 10;) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
@@ -96,6 +164,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                 ])
         )
         
+        // Missing all loop components
         assert(objcExpr: "for(;;) { }",
                readsAs: .while(.constant(true), body: .empty))
     }

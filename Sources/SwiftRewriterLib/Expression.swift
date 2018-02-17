@@ -99,6 +99,27 @@ public enum Constant: Equatable {
     case string(String)
     case rawConstant(String)
     case `nil`
+    
+    /// Returns an integer value if this constant represents one, or nil, in case
+    /// it does not.
+    public var integerValue: Int? {
+        switch self {
+        case .int(let i), .binary(let i), .octal(let i), .hexadecimal(let i):
+            return i
+        default:
+            return nil
+        }
+    }
+    
+    /// Returns `true` if this constant represents an integer value.
+    public var isInteger: Bool {
+        switch self {
+        case .int, .binary, .octal, .hexadecimal:
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 /// Describes an operator across one or two operands

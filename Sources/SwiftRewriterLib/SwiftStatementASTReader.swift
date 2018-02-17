@@ -248,10 +248,57 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         // for(<initExprs>; <condition>; <iteration>)
         let initExpr = ctx.forLoopInitializer()?.accept(VarDeclarationExtractor(expressionReader: expressionReader))
         
-        let condition = ctx.expression()?.accept(expressionReader) ?? .constant(true)
+        let condition = ctx.expression()?.accept(expressionReader)
         
         // for(<loop>; <condition>; <iteration>)
         let iteration = ctx.expressions()?.accept(self)
+        
+        // Try to come up with a clean for-in loop with a range
+        simplifyFor:
+        if let initExpr = initExpr, let condition = condition, let iteration = iteration {
+            // Search for inits like 'int i = <value>'
+            guard case Statement.variableDeclarations(let decl) = initExpr, decl.count == 1 else {
+                break simplifyFor
+            }
+            let loopVar = decl[0]
+            if loopVar.type != .int {
+                break simplifyFor
+            }
+            guard case .constant(let loopStart)? = loopVar.initialization, loopStart.isInteger else {
+                break simplifyFor
+            }
+            
+            // Look for conditions of the form 'i < <value>'
+            guard case .binary(.identifier(loopVar.identifier), let op, .constant(let loopEnd)) = condition else {
+                break simplifyFor
+            }
+            if !loopEnd.isInteger || (op != .lessThan && op != .lessThanOrEqual) {
+                break simplifyFor
+            }
+            
+            // Look for loop iterations of the form 'i++'
+            guard case .expressions(let exps) = iteration, exps.count == 1 else {
+                break simplifyFor
+            }
+            guard case .assignment(.identifier(loopVar.identifier), .addAssign, .constant(1)) = exps[0] else {
+                break simplifyFor
+            }
+            
+            // Check if the loop variable is not being modified within the loop's
+            // body
+            for exp in expressions(in: compoundStatement, inspectBlocks: true) {
+                if case .assignment(.identifier(loopVar.identifier), _, _) = exp {
+                    break simplifyFor
+                }
+            }
+            
+            // All good! Simplify now.
+            let rangeOp: SwiftOperator = op == .lessThan ? .openRange : .closedRange
+            
+            return Statement.for(.identifier(loopVar.identifier),
+                                 .binary(lhs: .constant(loopStart), op: rangeOp, rhs: .constant(loopEnd)),
+                                 body: compoundStatement)
+        }
         
         // Come up with a while loop, now
         
@@ -268,7 +315,8 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         
         body.statements.append(contentsOf: compoundStatement.statements)
         
-        let whileBody = Statement.while(condition, body: body)
+        let whileBody = Statement.while(condition ?? .constant(true),
+                                        body: body)
         
         // Loop init (pre-loop)
         let bodyWithWhile: Statement
@@ -299,8 +347,24 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         return Statement.for(.identifier(identifier), expression, body: body)
     }
     
+    // MARK: - Helper methods
     func compoundStatementVisitor() -> CompoundStatementVisitor {
         return CompoundStatementVisitor(expressionReader: expressionReader)
+    }
+    
+    private func expressions(in compoundStatement: CompoundStatement, inspectBlocks: Bool) -> AnyIterator<Expression> {
+        let iterator =
+            ExpressionIterator(statement: .compound(compoundStatement),
+                               inspectBlocks: inspectBlocks)
+        
+        return AnyIterator(iterator)
+    }
+    
+    private func expressions(in statement: Statement, inspectBlocks: Bool) -> AnyIterator<Expression> {
+        let iterator =
+            ExpressionIterator(statement: statement, inspectBlocks: inspectBlocks)
+        
+        return AnyIterator(iterator)
     }
     
     private func acceptFirst(from rules: ParserRuleContext?...) -> Statement? {
@@ -313,7 +377,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         return nil
     }
     
-    // MARK: Compound statement visitor
+    // MARK: - Compound statement visitor
     class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
         var expressionReader = SwiftExprASTReader()
         
@@ -362,6 +426,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         }
     }
     
+    // MARK: - Variable declaration extractor visitor
     private class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
         let typeMapper = TypeMapper(context: TypeContext())
         var expressionReader = SwiftExprASTReader()
