@@ -54,9 +54,6 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             guard let rhs = ctx.expression(1)?.accept(self) else {
                 return .unknown(UnknownASTContext(context: ctx))
             }
-            guard let op = ctx.op?.getText() else {
-                return .unknown(UnknownASTContext(context: ctx))
-            }
             
             // << / >>
             if ctx.LT().count == 2 {
@@ -64,6 +61,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             }
             if ctx.GT().count == 2 {
                 return Expression.binary(lhs: lhs, op: .bitwiseShiftRight, rhs: rhs)
+            }
+            
+            guard let op = ctx.op?.getText() else {
+                return .unknown(UnknownASTContext(context: ctx))
             }
             
             if let op = SwiftOperator(rawValue: op) {
