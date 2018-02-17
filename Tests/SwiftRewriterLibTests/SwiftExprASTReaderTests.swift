@@ -158,21 +158,23 @@ class SwiftExprASTReaderTests: XCTestCase {
                 .expression(.postfix(.identifier("thing"), .functionCall(arguments: [])))
                 ]))
         assert(objcExpr: "^NSString*{ return thing(); }",
-               readsAs: .block(parameters: [], return: .string, body: [
-                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
-                ]))
-        assert(objcExpr: "^NSString*(NSInteger inty){ return thing(); }",
-               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
-                               return: .string,
+               readsAs: .block(parameters: [],
+                               return: SwiftType.string.asImplicitUnwrapped,
                                body: [
                                 .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
-                ]))
+                                ]))
+        assert(objcExpr: "^NSString*(NSInteger inty){ return thing(); }",
+               readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
+                               return: SwiftType.string.asImplicitUnwrapped,
+                               body: [
+                                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                                ]))
         assert(objcExpr: "^(NSInteger inty){ return thing(); }",
                readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
                                return: .void,
                                body: [
                                 .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
-                ]))
+                                ]))
     }
     
     func testRangeExpression() {

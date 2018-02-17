@@ -81,6 +81,10 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention {
 
 /// An intention to generate a global variable.
 public class GlobalVariableGenerationIntention: FromSourceIntention {
+    public var variableSource: VariableDeclaration? {
+        return source as? VariableDeclaration
+    }
+    
     public var name: String
     public var type: SwiftType
     public var ownership: Ownership

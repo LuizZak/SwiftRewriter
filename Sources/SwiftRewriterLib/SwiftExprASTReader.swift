@@ -108,7 +108,9 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         if let typeName = ctx.typeName(), let typeNameString = VarDeclarationTypeExtractor.extract(from: typeName),
             let cast = ctx.castExpression()?.accept(self), let type = try? ObjcParser(string: typeNameString).parseObjcType() {
             let typeMapper = TypeMapper(context: TypeContext())
-            return Expression.cast(cast, type: typeMapper.swiftType(forObjcType: type))
+            
+            let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
+            return Expression.cast(cast, type: swiftType)
         }
         
         return .unknown(UnknownASTContext(context: ctx))

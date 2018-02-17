@@ -230,7 +230,7 @@ public class SwiftRewriter {
             TypeMapper.TypeMappingContext(inNonnull: isNodeInNonnullContext(node))
         
         let swiftType = typeMapper.swiftType(forObjcType: type.type, context: typeContext)
-        let ownership = evaluateOwnershipPrefix(inType: type.type, diagnostics: diagnostics)
+        let ownership = evaluateOwnershipPrefix(inType: type.type)
         let isConstant = SwiftWriter._isConstant(fromType: type.type)
         
         let intent =
@@ -354,9 +354,11 @@ public class SwiftRewriter {
         var swiftType: SwiftType = .anyObject
         var ownership: Ownership = .strong
         if let type = node.type?.type {
-            swiftType = typeMapper.swiftType(forObjcType: type,
-                                             context: .init(inNonnull: isNodeInNonnullContext(node)))
-            ownership = evaluateOwnershipPrefix(inType: type, diagnostics: diagnostics)
+            let context = TypeMapper
+                .TypeMappingContext(modifiers: node.modifierList, inNonnull: isNodeInNonnullContext(node))
+            
+            swiftType = typeMapper.swiftType(forObjcType: type, context: context)
+            ownership = evaluateOwnershipPrefix(inType: type, property: node)
         }
         
         let prop =
@@ -374,14 +376,10 @@ public class SwiftRewriter {
             return
         }
         
-        let signGen =
-            SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+        let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+        let sign = signGen.generateDefinitionSignature(from: node)
         
-        let sign =
-            signGen.generateDefinitionSignature(from: node)
-        
-        let method =
-            MethodGenerationIntention(signature: sign, source: node)
+        let method = MethodGenerationIntention(signature: sign, source: node)
         
         method.inNonnullContext = isNodeInNonnullContext(node)
         
@@ -435,8 +433,7 @@ public class SwiftRewriter {
         var isConstant = false
         if let type = node.type?.type {
             swiftType = typeMapper.swiftType(forObjcType: type)
-            ownership =
-                evaluateOwnershipPrefix(inType: type, diagnostics: diagnostics)
+            ownership = evaluateOwnershipPrefix(inType: type)
             isConstant = SwiftWriter._isConstant(fromType: type)
         }
         

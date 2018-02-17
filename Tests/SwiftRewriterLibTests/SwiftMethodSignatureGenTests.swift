@@ -124,7 +124,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
             """)
         
         XCTAssertEqual(sign.name, "__")
-        XCTAssertEqual(sign.returnType, .anyObject)
+        XCTAssertEqual(sign.returnType, .implicitUnwrappedOptional(.anyObject))
         XCTAssertEqual(sign.parameters.count, 4)
         
         XCTAssertEqual(sign.parameters[0].label, "a")
@@ -150,7 +150,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
             """)
         
         XCTAssertEqual(sign.name, "__")
-        XCTAssertEqual(sign.returnType, .anyObject)
+        XCTAssertEqual(sign.returnType, .implicitUnwrappedOptional(.anyObject))
         XCTAssertEqual(sign.parameters.count, 1)
         
         XCTAssertEqual(sign.parameters[0].label, "a")

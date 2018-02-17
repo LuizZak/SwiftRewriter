@@ -98,7 +98,15 @@ public class SwiftWriter {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
         if ownership != .strong {
-            target.outputInlineWithSpace(ownership.rawValue, style: .keyword)
+            // Check for non-pointers
+            if let original = varDecl.variableSource?.type?.type, !original.isPointer {
+                diagnostics.warning("""
+                    Property '\(name)' specified as '\(ownership.rawValue)' \
+                    but original type '\(original)' is not a pointer type.
+                    """, location: varDecl.variableSource?.location ?? .invalid)
+            } else {
+                target.outputInlineWithSpace(ownership.rawValue, style: .keyword)
+            }
         }
         
         target.outputInlineWithSpace(varOrLet, style: .keyword)
@@ -245,7 +253,15 @@ public class SwiftWriter {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
         if prop.ownership != .strong {
-            target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
+            // Check for non-pointers
+            if let original = prop.propertySource?.type?.type, !original.isPointer {
+                diagnostics.warning("""
+                    Property '\(prop.name)' specified as '\(prop.ownership.rawValue)' \
+                    but original type '\(original)' is not a pointer type.
+                    """, location: prop.propertySource?.location ?? .invalid)
+            } else {
+                target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
+            }
         }
         
         target.outputInlineWithSpace("var", style: .keyword)
@@ -461,70 +477,32 @@ public class SwiftWriter {
 }
 
 internal func evaluateOwnershipPrefix(inType type: ObjcType,
-                                      diagnostics: Diagnostics,
-                                      property: PropertyGenerationIntention? = nil,
-                                      global: GlobalVariableGenerationIntention? = nil,
-                                      ivar: InstanceVariableGenerationIntention? = nil) -> Ownership {
+                                      property: PropertyDefinition? = nil) -> Ownership {
     var ownership: Ownership = .strong
-    var specifierContext = ""
-    var specifierContextName = "specifier"
-
+    
     switch type {
     case .specified(let specifiers, _):
         if specifiers.last == "__weak" {
-            specifierContext = specifiers.last!
             ownership = .weak
         } else if specifiers.last == "__unsafe_unretained" {
-            specifierContext = specifiers.last!
             ownership = .unownedUnsafe
         }
     default:
         break
     }
-
+    
     // Search in property
     if let property = property {
-        if let modifiers = property.propertySource?.modifierList?.keywordModifiers {
+        if let modifiers = property.modifierList?.keywordModifiers {
             if modifiers.contains("weak") {
                 ownership = .weak
-                specifierContext = "weak"
-                specifierContextName = "ownership attribute"
             } else if modifiers.contains("unsafe_unretained") {
                 ownership = .unownedUnsafe
-                specifierContext = "unsafe_unretained"
-                specifierContextName = "ownership attribute"
             } else if modifiers.contains("assign") {
                 ownership = .unownedUnsafe
-                specifierContext = "assign"
-                specifierContextName = "ownership attribute"
             }
         }
     }
-
-    if ownership != .strong && !type.isPointer {
-        let name: String
-        let location: SourceLocation?
-        
-        if let property = property {
-            name = "Property '\(property.name)'"
-            location = property.source?.location
-        } else if let global = global {
-            name = "Global variable '\(global.name)'"
-            location = global.source?.location
-        } else if let ivar = ivar {
-            name = "Instance variable '\(ivar.name)'"
-            location = ivar.source?.location
-        } else {
-            name = "Variable"
-            location = nil
-        }
-        
-        diagnostics.warning(
-            "\(name) has \(specifierContextName) '\(specifierContext)' but is not a pointer type",
-            location: location ?? .invalid)
-        
-        return .strong
-    }
-
+    
     return ownership
 }

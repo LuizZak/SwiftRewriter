@@ -17,7 +17,7 @@ public class SwiftMethodSignatureGen {
         var sign =
             MethodGenerationIntention
                 .Signature(name: "__",
-                           returnType: .anyObject,
+                           returnType: SwiftType.anyObject.asImplicitUnwrapped,
                            parameters: [])
         
         if let sel = objcMethod.methodSelector?.selector {

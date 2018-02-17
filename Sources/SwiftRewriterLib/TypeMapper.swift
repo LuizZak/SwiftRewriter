@@ -9,11 +9,49 @@ public class TypeMapper {
     }
     
     public func typeNameString(for swiftType: SwiftType) -> String {
-        return swiftType.description
+        switch swiftType {
+        case let .block(returnType, parameters):
+            return
+                "(" + parameters.map(typeNameString(for:)).joined(separator: ", ")
+                    + ") -> "
+                    + typeNameString(for: returnType)
+            
+        case .typeName(let name):
+            return name
+            
+        case .optional(let type):
+            var typeName = typeNameString(for: type)
+            if type.requiresParens {
+                typeName = "(" + typeName + ")"
+            }
+            
+            return typeName + "?"
+            
+        case .implicitUnwrappedOptional(let type):
+            var typeName = typeNameString(for: type)
+            if type.requiresParens {
+                typeName = "(" + typeName + ")"
+            }
+            
+            return typeName + "!"
+            
+        // Simplify known generic types
+        case .generic("Array", let parameters) where parameters.count == 1:
+            return "[" + typeNameString(for: parameters[0]) + "]"
+        case .generic("Dictionary", let parameters) where parameters.count == 2:
+            return "[" + typeNameString(for: parameters[0]) + ": " + typeNameString(for: parameters[1]) + "]"
+            
+        case let .generic(type, parameters):
+            return type + "<" + parameters.map(typeNameString(for:)).joined(separator: ", ") + ">"
+            
+        case let .protocolComposition(types):
+            return types.map(typeNameString(for:)).joined(separator: " & ")
+        }
     }
     
     public func typeNameString(for objcType: ObjcType, context: TypeMappingContext = .empty) -> String {
-        return swiftType(forObjcType: objcType, context: context).description
+        let type = swiftType(forObjcType: objcType, context: context)
+        return typeNameString(for: type)
     }
     
     public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext = .empty) -> SwiftType {
@@ -152,7 +190,7 @@ public class TypeMapper {
     
     private func swiftBlockType(forReturnType returnType: ObjcType, parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
         return .block(returnType: swiftType(forObjcType: returnType, context: context),
-                      parameters: parameters.map { swiftType(forObjcType: $0, context: context) })
+                      parameters: parameters.map { swiftType(forObjcType: $0) })
     }
     
     private func shouldParenthesize(type: ObjcType) -> Bool {
@@ -183,6 +221,7 @@ public class TypeMapper {
     private static let _scalarMappings: [String: SwiftType] = [
         "BOOL": .bool,
         "NSInteger": .int,
+        "int": .int,
         "NSUInteger": .uint,
         "CGFloat": .cgFloat,
         "instancetype": .anyObject

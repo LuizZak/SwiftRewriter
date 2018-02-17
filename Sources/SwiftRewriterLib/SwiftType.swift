@@ -42,6 +42,16 @@ indirect public enum SwiftType: Equatable {
         }
     }
     
+    /// Returns `self` wrapped over an `.optional` case.
+    public var asOptional: SwiftType {
+        return .optional(self)
+    }
+    
+    /// Returns `self` wrapped over an `.implicitUnwrappedOptional` case.
+    public var asImplicitUnwrapped: SwiftType {
+        return .implicitUnwrappedOptional(self)
+    }
+    
     case typeName(String)
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)

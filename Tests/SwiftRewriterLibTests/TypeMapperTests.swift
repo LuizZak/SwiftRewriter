@@ -4,6 +4,17 @@ import ObjcParser
 import GrammarModels
 
 class TypeMapperTests: XCTestCase {
+    func testTypeNameString() {
+        expectSwift(.typeName("MyType"), toConvertTo: "MyType")
+        expectSwift(.optional(.typeName("MyType")), toConvertTo: "MyType?")
+        expectSwift(.implicitUnwrappedOptional(.typeName("MyType")), toConvertTo: "MyType!")
+        expectSwift(.int, toConvertTo: "Int")
+        expectSwift(.array(.int), toConvertTo: "[Int]")
+        expectSwift(.dictionary(key: .int, value: .string), toConvertTo: "[Int: String]")
+        expectSwift(.optional(.array(.int)), toConvertTo: "[Int]?")
+        expectSwift(.optional(.dictionary(key: .int, value: .string)), toConvertTo: "[Int: String]?")
+    }
+    
     func testMapSimpleTypes() {
         expect(.specified(specifiers: ["const"], .struct("NSInteger")),
                toConvertTo: "Int")
@@ -62,14 +73,36 @@ class TypeMapperTests: XCTestCase {
         expect(.blockType(name: "block", returnType: .void, parameters: []),
                toConvertTo: "() -> Void")
         
-        expect(.blockType(name: "block", returnType: .struct("NSInteger"), parameters: []),
+        expect(.blockType(name: "block", returnType: .struct("NSInteger"),
+                          parameters: []),
                toConvertTo: "() -> Int")
         
-        expect(.blockType(name: "block", returnType: .struct("NSInteger"), parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSString"))]),
-               toConvertTo: "(String, String) -> Int")
-        expect(.blockType(name: "block", returnType: .struct("NSInteger"), parameters: [.qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"]), .pointer(.struct("NSString"))]),
+        expect(.blockType(name: "block",
+                          returnType: .struct("NSInteger"),
+                          parameters: [.pointer(.struct("NSString")),
+                                       .pointer(.struct("NSString"))]),
+               toConvertTo: "(String!, String!) -> Int")
+        
+        expect(.blockType(name: "block",
+                          returnType: .struct("NSInteger"),
+                          parameters: [.pointer(.struct("NSString")),
+                                       .pointer(.struct("NSString"))]),
+               withExplicitNullability: .nonnull,
+               toConvertTo: "(String!, String!) -> Int")
+        
+        expect(.blockType(name: "block",
+                          returnType: .struct("NSInteger"),
+                          parameters: [.qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"]),
+                                       .pointer(.struct("NSString"))]),
                withExplicitNullability: nil,
                toConvertTo: "(String?, String!) -> Int")
+        
+        expect(.blockType(name: "block",
+                          returnType: .struct("NSInteger"),
+                          parameters: [.specified(specifiers: ["nonnull"], .pointer(.struct("NSString"))),
+                                       .pointer(.struct("NSString"))]),
+               withExplicitNullability: nil,
+               toConvertTo: "(String, String!) -> Int")
     }
     
     func testQualifiedWithinSpecified() {
@@ -81,13 +114,36 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "String?")
     }
     
-    private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull, toConvertTo expected: String, file: String = #file, line: Int = #line) {
+    private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull,
+                        toConvertTo expected: String, file: String = #file, line: Int = #line) {
         let converted = typeMapperConvert(type, nullability: nullability)
         
         if converted != expected {
-            recordFailure(withDescription: "Expected type \(type) to convert into '\(expected)', but received '\(converted)' instead.",
+            recordFailure(withDescription: """
+                Expected Objective-C type \(type) to convert into '\(expected)', \
+                but received '\(converted)' instead.
+                """,
                 inFile: file, atLine: line, expected: false)
         }
+    }
+    
+    private func expectSwift(_ type: SwiftType, toConvertTo expected: String, file: String = #file, line: Int = #line) {
+        let converted = typeMapperConvert(type)
+        
+        if converted != expected {
+            recordFailure(withDescription: """
+                Expected Swift type \(type) to convert into '\(expected)', but \
+                received '\(converted)' instead.
+                """,
+                inFile: file, atLine: line, expected: false)
+        }
+    }
+    
+    private func typeMapperConvert(_ type: SwiftType) -> String {
+        let context = TypeContext()
+        let mapper = TypeMapper(context: context)
+        
+        return mapper.typeNameString(for: type)
     }
     
     private func typeMapperConvert(_ type: ObjcType, nullability: TypeNullability?) -> String {
