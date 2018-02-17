@@ -617,11 +617,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 func myMethod() {
                     do {
-                        objc_sync_enter(self)
+                        let _lockTarget = self
+                        objc_sync_enter(_lockTarget)
                         defer {
-                            objc_sync_exit(self)
+                            objc_sync_exit(_lockTarget)
                         }
-                        
                         stuff()
                     }
                 }

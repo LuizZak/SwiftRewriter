@@ -66,6 +66,7 @@ public indirect enum Statement: Equatable {
     case `while`(Expression, body: CompoundStatement)
     case `for`(Pattern, Expression, body: CompoundStatement)
     case `switch`(Expression, cases: [SwitchCase], default: [Statement]?)
+    case `do`(CompoundStatement)
     case `defer`(CompoundStatement)
     case `return`(Expression?)
     case `break`

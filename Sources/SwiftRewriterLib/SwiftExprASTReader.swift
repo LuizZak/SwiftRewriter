@@ -340,7 +340,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             parameters = []
         }
         
-        guard let body = ctx.compoundStatement()?.accept(SwiftStatementASTReader.CompoundStatementVisitor()) else {
+        let compoundVisitor = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: self)
+        guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
         

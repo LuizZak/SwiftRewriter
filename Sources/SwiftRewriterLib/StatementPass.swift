@@ -59,6 +59,12 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the `for` node
     func visitFor(_ pattern: Pattern, _ expression: Expression, _ compoundStatement: CompoundStatement) -> StmtResult
     
+    /// Visits a `do` statement node
+    ///
+    /// - Parameter body: Statements to be executed within the `do` statement
+    /// - Returns: Result of visiting the `do` statement
+    func visitDo(_ body: CompoundStatement) -> StmtResult
+    
     /// Visits a `defer` statement node
     ///
     /// - Parameter body: Statements to be executed when the `defer` statement
@@ -123,6 +129,8 @@ public extension Statement {
             return visitor.visitWhile(exp, body)
         case let .for(pattern, exp, body):
             return visitor.visitFor(pattern, exp, body)
+        case let .do(body):
+            return visitor.visitDo(body)
         case let .defer(body):
             return visitor.visitDefer(body)
         case let .return(expr):
@@ -165,6 +173,9 @@ open class StatementPass: StatementVisitor {
             
         case let .for(pattern, exp, body):
             return visitFor(pattern, exp, body)
+            
+        case let .do(body):
+            return visitDo(body)
             
         case let .defer(body):
             return visitDefer(body)
@@ -216,6 +227,10 @@ open class StatementPass: StatementVisitor {
     
     open func visitFor(_ pattern: Pattern, _ expression: Expression, _ compoundStatement: CompoundStatement) -> Statement {
         return .for(pattern, expression, body: visitStatementsInCompound(compoundStatement))
+    }
+    
+    open func visitDo(_ body: CompoundStatement) -> Statement {
+        return .do(visitStatementsInCompound(body))
     }
     
     open func visitDefer(_ body: CompoundStatement) -> Statement {

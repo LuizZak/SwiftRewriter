@@ -13,7 +13,7 @@ class SwiftStmtRewriter {
     }
     
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement {
-        let parser = SwiftStatementASTReader.CompoundStatementVisitor()
+        let parser = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: SwiftExprASTReader())
         guard let result = compoundStatement.accept(parser) else {
             return [.unknown(UnknownASTContext(context: compoundStatement))]
         }
@@ -333,6 +333,8 @@ fileprivate class StatementWriter {
             visitWhile(exp, body)
         case let .for(pattern, exp, body):
             visitForIn(pattern, exp, body)
+        case let .do(body):
+            visitDo(body)
         case let .defer(body):
             visitDefer(body)
         case let .return(expr):
@@ -466,6 +468,12 @@ fileprivate class StatementWriter {
         target.outputInline(" in ", style: .keyword)
         emitExpr(exp)
         
+        visitCompound(body)
+    }
+    
+    private func visitDo(_ body: CompoundStatement) {
+        target.outputIdentation()
+        target.outputInline("do", style: .keyword)
         visitCompound(body)
     }
     

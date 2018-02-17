@@ -4,6 +4,8 @@ import ObjcParser
 import Antlr4
 
 public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
+    var expressionReader = SwiftExprASTReader()
+    
     public override func visitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) -> Statement? {
         if let varDecl = ctx.varDeclaration()?.accept(self) {
             return varDecl
@@ -36,48 +38,84 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     }
     
     public override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> Statement? {
-        return ctx.accept(VarDeclarationExtractor())
+        return ctx.accept(VarDeclarationExtractor(expressionReader: expressionReader))
     }
     
     public override func visitStatement(_ ctx: ObjectiveCParser.StatementContext) -> Statement? {
-        if let sel = ctx.selectionStatement()?.accept(self) {
-            return sel
-        }
-        if let cpd = ctx.compoundStatement(), let compound = cpd.accept(CompoundStatementVisitor()) {
+        if let cpd = ctx.compoundStatement(), let compound = cpd.accept(compoundStatementVisitor()) {
             return .compound(compound)
         }
-        if let iterationStatement = ctx.iterationStatement() {
-            return iterationStatement.accept(self)
-        }
-        if let expressions = ctx.expressions() {
-            return expressions.accept(self)
-        }
-        if let jumpStatement = ctx.jumpStatement() {
-            return jumpStatement.accept(self)
-        }
         
-        return .unknown(UnknownASTContext(context: ctx))
+        return acceptFirst(from: ctx.selectionStatement(),
+                           ctx.iterationStatement(),
+                           ctx.expressions(),
+                           ctx.jumpStatement(),
+                           ctx.synchronizedStatement())
+            ?? .unknown(UnknownASTContext(context: ctx))
     }
     
     public override func visitExpressions(_ ctx: ObjectiveCParser.ExpressionsContext) -> Statement? {
-        let visitor = SwiftExprASTReader()
-        let expressions = ctx.expression().compactMap { $0.accept(visitor) }
+        let expressions = ctx.expression().compactMap { $0.accept(expressionReader) }
         
         return .expressions(expressions)
     }
     
     public override func visitCompoundStatement(_ ctx: ObjectiveCParser.CompoundStatementContext) -> Statement? {
-        guard let compound = ctx.accept(CompoundStatementVisitor()) else {
+        guard let compound = ctx.accept(compoundStatementVisitor()) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
         return .compound(compound)
     }
     
+    // MARK: @synchronized / @autoreleasepool
+    public override func visitSynchronizedStatement(_ ctx: ObjectiveCParser.SynchronizedStatementContext) -> Statement? {
+        guard let expression = ctx.expression()?.accept(expressionReader) else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        guard let compoundStatement = ctx.compoundStatement()?.accept(compoundStatementVisitor()) else {
+            return .unknown(UnknownASTContext(context: ctx))
+        }
+        
+        var doBody: CompoundStatement = []
+        
+        // Generate an equivalent locking structure as follows:
+        
+        // do {
+        //   let _lockTarget = <expression>
+        //   objc_sync_enter(_lockTarget)
+        //   defer {
+        //     objc_sync_exit(_lockTarget)
+        //   }
+        //   <statements>
+        // }
+        
+        let lockIdent = "_lockTarget"
+        doBody.statements.append(
+            .variableDeclaration(identifier: lockIdent, type: .any,
+                                 ownership: .strong, isConstant: true,
+                                 initialization: expression)
+        )
+        doBody.statements.append(
+            .expression(.postfix(.identifier("objc_sync_enter"),
+                                 .functionCall(arguments: [.unlabeled(.identifier(lockIdent))])))
+        )
+        doBody.statements.append(
+            .defer([
+                .expression(.postfix(.identifier("objc_sync_exit"),
+                                     .functionCall(arguments: [.unlabeled(.identifier(lockIdent))])))
+            ])
+        )
+        
+        doBody.statements.append(contentsOf: compoundStatement.statements)
+        
+        return Statement.do(doBody)
+    }
+    
     // MARK: - return / continue / break
     public override func visitJumpStatement(_ ctx: ObjectiveCParser.JumpStatementContext) -> Statement? {
         if ctx.RETURN() != nil {
-            return Statement.return(ctx.expression()?.accept(SwiftExprASTReader()))
+            return Statement.return(ctx.expression()?.accept(expressionReader))
         }
         if ctx.CONTINUE() != nil {
             return Statement.continue
@@ -92,14 +130,14 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     // MARK: - if / switch
     public override func visitSelectionStatement(_ ctx: ObjectiveCParser.SelectionStatementContext) -> Statement? {
         if let expression = ctx.expression() {
-            guard let expr = expression.accept(SwiftExprASTReader()) else {
+            guard let expr = expression.accept(expressionReader) else {
                 return .unknown(UnknownASTContext(context: ctx))
             }
-            guard let body = ctx.ifBody?.accept(CompoundStatementVisitor()) else {
+            guard let body = ctx.ifBody?.accept(compoundStatementVisitor()) else {
                 return .unknown(UnknownASTContext(context: ctx))
             }
             
-            let elseStmt = ctx.elseBody?.accept(CompoundStatementVisitor())
+            let elseStmt = ctx.elseBody?.accept(compoundStatementVisitor())
             
             return .if(expr, body: body, else: elseStmt)
         }
@@ -111,7 +149,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     }
     
     public override func visitSwitchStatement(_ ctx: ObjectiveCParser.SwitchStatementContext) -> Statement? {
-        guard let exp = ctx.expression()?.accept(SwiftExprASTReader()) else {
+        guard let exp = ctx.expression()?.accept(expressionReader) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
@@ -135,7 +173,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                         labels
                             .compactMap { $0.rangeExpression() }
                             .compactMap { label in
-                                label.accept(SwiftExprASTReader())
+                                label.accept(expressionReader)
                             }
                     
                     let c =
@@ -172,10 +210,10 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     }
     
     public override func visitWhileStatement(_ ctx: ObjectiveCParser.WhileStatementContext) -> Statement? {
-        guard let expr = ctx.expression()?.accept(SwiftExprASTReader()) else {
+        guard let expr = ctx.expression()?.accept(expressionReader) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
-        guard let body = ctx.statement()?.accept(CompoundStatementVisitor()) else {
+        guard let body = ctx.statement()?.accept(compoundStatementVisitor()) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
@@ -183,7 +221,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     }
     
     public override func visitForStatement(_ ctx: ObjectiveCParser.ForStatementContext) -> Statement? {
-        guard let compoundStatement = ctx.statement()?.accept(CompoundStatementVisitor()) else {
+        guard let compoundStatement = ctx.statement()?.accept(compoundStatementVisitor()) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
@@ -191,9 +229,9 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         // loop that is compatible with the original for-loop's behavior
         
         // for(<initExprs>; <condition>; <iteration>)
-        let initExpr = ctx.forLoopInitializer()?.accept(VarDeclarationExtractor())
+        let initExpr = ctx.forLoopInitializer()?.accept(VarDeclarationExtractor(expressionReader: expressionReader))
         
-        let condition = ctx.expression()?.accept(SwiftExprASTReader()) ?? .constant(true)
+        let condition = ctx.expression()?.accept(expressionReader) ?? .constant(true)
         
         // for(<loop>; <condition>; <iteration>)
         let iteration = ctx.expressions()?.accept(self)
@@ -234,24 +272,45 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         guard let identifier = ctx.typeVariableDeclarator()?.accept(VarDeclarationIdentifierNameExtractor()) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
-        guard let expression = ctx.expression()?.accept(SwiftExprASTReader()) else {
+        guard let expression = ctx.expression()?.accept(expressionReader) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
-        guard let body = ctx.statement()?.accept(CompoundStatementVisitor()) else {
+        guard let body = ctx.statement()?.accept(compoundStatementVisitor()) else {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
         return Statement.for(.identifier(identifier), expression, body: body)
     }
     
+    func compoundStatementVisitor() -> CompoundStatementVisitor {
+        return CompoundStatementVisitor(expressionReader: expressionReader)
+    }
+    
+    private func acceptFirst(from rules: ParserRuleContext?...) -> Statement? {
+        for rule in rules {
+            if let expr = rule?.accept(self) {
+                return expr
+            }
+        }
+        
+        return nil
+    }
+    
     // MARK: Compound statement visitor
     class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
+        var expressionReader = SwiftExprASTReader()
+        
+        init(expressionReader: SwiftExprASTReader) {
+            self.expressionReader = expressionReader
+        }
+        
         override func visitStatement(_ ctx: ObjectiveCParser.StatementContext) -> CompoundStatement? {
             if let compoundStatement = ctx.compoundStatement() {
                 return compoundStatement.accept(self)
             }
             
             let reader = SwiftStatementASTReader()
+            reader.expressionReader = expressionReader
             
             if let stmt = reader.visitStatement(ctx) {
                 return CompoundStatement(statements: [stmt])
@@ -262,6 +321,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         
         override func visitCompoundStatement(_ ctx: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement? {
             let reader = SwiftStatementASTReader()
+            reader.expressionReader = expressionReader
             
             let rules: [ParserRuleContext] =
                 ctx.declaration().map { $0 } + ctx.statement().map { $0 }
@@ -287,6 +347,11 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     private class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
         let typeMapper = TypeMapper(context: TypeContext())
+        var expressionReader = SwiftExprASTReader()
+        
+        init(expressionReader: SwiftExprASTReader) {
+            self.expressionReader = expressionReader
+        }
         
         override func visitForLoopInitializer(_ ctx: ObjectiveCParser.ForLoopInitializerContext) -> Statement? {
             guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else {
@@ -308,7 +373,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                     continue
                 }
                 
-                let expr = initDeclarator.initializer()?.expression()?.accept(SwiftExprASTReader())
+                let expr = initDeclarator.initializer()?.expression()?.accept(expressionReader)
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
@@ -345,7 +410,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                     continue
                 }
                 
-                let expr = initDeclarator.initializer()?.expression()?.accept(SwiftExprASTReader())
+                let expr = initDeclarator.initializer()?.expression()?.accept(expressionReader)
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
