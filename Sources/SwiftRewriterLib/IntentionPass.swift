@@ -211,12 +211,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // Getters
             let potentialGetters =
                 methods.filter { $0.name == property.name }
-                    .filter { $0.returnType == property.type }
+                    .filter { $0.returnType.deepUnwrapped == property.type.deepUnwrapped }
                     .filter { $0.parameters.count == 0 }
             let potentialSetters =
                 methods.filter { $0.returnType == .void }
                     .filter { $0.parameters.count == 1 }
-                    .filter { $0.parameters[0].type == property.type }
+                    .filter { $0.parameters[0].type.deepUnwrapped == property.type.deepUnwrapped }
                     .filter { $0.name == expectedName }
             
             var propSet = PropertySet(property: property, getter: nil, setter: nil)
@@ -260,6 +260,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 propertySet.property.mode =
                     .property(get: getterBody, set: setter)
                 
+                /*
                 let field =
                     PropertyGenerationIntention(name: "_" + propertySet.property.name,
                                                 type: propertySet.property.type,
@@ -270,6 +271,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
                     classIntention.addProperty(field, at: index)
                 }
+                */
             }
             
             // Remove the original method intentions

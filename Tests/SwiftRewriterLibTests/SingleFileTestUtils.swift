@@ -1,6 +1,7 @@
 import XCTest
 import SwiftRewriterLib
 import ObjcParser
+import ExpressionPasses
 
 class SingleFileTestBuilder {
     var test: XCTestCase
@@ -17,6 +18,10 @@ class SingleFileTestBuilder {
         let input = TestSingleInputProvider(code: objc)
         
         let sut = SwiftRewriter(input: input, output: output)
+        
+        sut.expressionPasses.append(AllocInitExpressionPass())
+        sut.expressionPasses.append(CoreGraphicsExpressionPass())
+        sut.expressionPasses.append(FoundationExpressionPass())
         
         do {
             try sut.rewrite()
