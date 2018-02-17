@@ -108,4 +108,41 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             expected: "NSMutableSet.set(thing)"
         )
     }
+    
+    func testClassTypeMethod() {
+        // Uppercase -> <Type>.self
+        assertTransformParsed(
+            original: "[NSObject class]",
+            expected: .postfix(.identifier("NSObject"), .member("self"))
+        )
+        // lowercase -> type(of: <object>)
+        assertTransformParsed(
+            original: "[object class]",
+            expected: .postfix(.identifier("type"),
+                               .functionCall(arguments: [
+                                .labeled("of", .identifier("object"))
+                                ]))
+        )
+        assertTransformParsed(
+            original: "[[an expression] class]",
+            expected: .postfix(.identifier("type"),
+                               .functionCall(arguments: [
+                                .labeled("of", .postfix(.postfix(.identifier("an"), .member("expression")), .functionCall(arguments: [])))
+                                ]))
+        )
+        
+        // Test we don't accidentally convert things that do not match [<exp> class]
+        // by mistake.
+        assertTransformParsed(
+            original: "[NSObject class:aThing]",
+            expected: .postfix(.postfix(.identifier("NSObject"), .member("class")),
+                               .functionCall(arguments: [.unlabeled(.identifier("aThing"))]))
+        )
+        
+        assertTransformParsed(
+            original: "[object class:aThing]",
+            expected: .postfix(.postfix(.identifier("object"), .member("class")),
+                               .functionCall(arguments: [.unlabeled(.identifier("aThing"))]))
+        )
+    }
 }

@@ -60,25 +60,29 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
             
         // CGRectGetWidth(<exp>) -> <exp>.width
         case (.identifier("CGRectGetWidth"), _):
-            (exp, op) = convertMethodToField(field: "width", exp, op)
+            (exp, op) = convertMethodToField(field: "width", ifArgCountIs: 1, exp, op)
             
         // CGRectGetHeight(<exp>) -> <exp>.height
         case (.identifier("CGRectGetHeight"), _):
-            (exp, op) = convertMethodToField(field: "height", exp, op)
+            (exp, op) = convertMethodToField(field: "height", ifArgCountIs: 1, exp, op)
             
-        // CGRectGet[Min/Max][X/Y](<exp>) -> <exp>.height
+        // CGRectGet[Min/Max/Mid][X/Y](<exp>) -> <exp>.height
         case (.identifier("CGRectGetMinX"), _):
-            (exp, op) = convertMethodToField(field: "minX", exp, op)
+            (exp, op) = convertMethodToField(field: "minX", ifArgCountIs: 1, exp, op)
         case (.identifier("CGRectGetMinY"), _):
-            (exp, op) = convertMethodToField(field: "minY", exp, op)
+            (exp, op) = convertMethodToField(field: "minY", ifArgCountIs: 1, exp, op)
         case (.identifier("CGRectGetMaxX"), _):
-            (exp, op) = convertMethodToField(field: "maxX", exp, op)
+            (exp, op) = convertMethodToField(field: "maxX", ifArgCountIs: 1, exp, op)
         case (.identifier("CGRectGetMaxY"), _):
-            (exp, op) = convertMethodToField(field: "maxY", exp, op)
+            (exp, op) = convertMethodToField(field: "maxY", ifArgCountIs: 1, exp, op)
+        case (.identifier("CGRectGetMidX"), _):
+            (exp, op) = convertMethodToField(field: "midX", ifArgCountIs: 1, exp, op)
+        case (.identifier("CGRectGetMidY"), _):
+            (exp, op) = convertMethodToField(field: "midY", ifArgCountIs: 1, exp, op)
             
         // CGRectIsNull(<exp>) -> <exp>.isNull
         case (.identifier("CGRectIsNull"), _):
-            (exp, op) = convertMethodToField(field: "isNull", exp, op)
+            (exp, op) = convertMethodToField(field: "isNull", ifArgCountIs: 1, exp, op)
             
         // CGPointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
         case (.identifier("CGPointMake"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
@@ -132,9 +136,9 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
     }
     
     /// Converts a method to a field access, e.g.: `CGRectGetWidth(<exp>)` -> `<exp>.width`.
-    private func convertMethodToField(field: String, _ exp: Expression, _ op: Postfix) -> (Expression, Postfix) {
+    private func convertMethodToField(field: String, ifArgCountIs argCount: Int, _ exp: Expression, _ op: Postfix) -> (Expression, Postfix) {
         switch (exp, op) {
-        case (.identifier, .functionCall(let args)) where args.count == 1 && !args.hasLabeledArguments():
+        case (.identifier, .functionCall(let args)) where args.count == argCount && !args.hasLabeledArguments():
             return (args[0].expression.accept(self), .member(field))
         default:
             return (exp.accept(self), op)

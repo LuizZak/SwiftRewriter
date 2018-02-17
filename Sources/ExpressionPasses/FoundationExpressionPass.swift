@@ -34,6 +34,22 @@ public class FoundationExpressionPass: ExpressionPass {
             
             (exp, op) = (.postfix(innerExp, .member("addObjects")), .functionCall(arguments: newArgs))
             
+        // [Type class], [expression class]
+        case (.postfix(let innerExp, .member("class")), .functionCall(arguments: [])):
+            
+            switch innerExp {
+            // Upper cased identifier: Type's metatype
+            case .identifier(let ident)
+                where ident.count > 0 && ident[...ident.startIndex] == ident[...ident.startIndex].uppercased():
+                (exp, op) = (.identifier(ident), .member("self"))
+            // Any other case: expression's type
+            default:
+                (exp, op) = (.identifier("type"),
+                             .functionCall(arguments: [
+                                .labeled("of", innerExp)
+                                ]))
+            }
+            
         // [NSArray array], [NSDictionary dictionary], etc. constructs
         case (.postfix(.identifier(let ident), .member(let member)), .functionCall(arguments: [])):
             

@@ -95,6 +95,14 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("maxY")))
         
         assertTransformParsed(
+            original: "CGRectGetMidX(self.frame)",
+            expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("midX")))
+        
+        assertTransformParsed(
+            original: "CGRectGetMidY(self.frame)",
+            expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("midY")))
+        
+        assertTransformParsed(
             original: "CGRectIsNull(self.frame)",
             expected: .postfix(.postfix(.identifier("self"), .member("frame")), .member("isNull")))
         
@@ -117,6 +125,12 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             original: "CGRectGetMaxY(self.frame, self.frame)",
             expected: "CGRectGetMaxY(self.frame, self.frame)")
+        assertTransformParsed(
+            original: "CGRectGetMidX(self.frame, self.frame)",
+            expected: "CGRectGetMidX(self.frame, self.frame)")
+        assertTransformParsed(
+            original: "CGRectGetMidY(self.frame, self.frame)",
+            expected: "CGRectGetMidY(self.frame, self.frame)")
         assertTransformParsed(
             original: "CGRectIsNull(self.frame, self.frame)",
             expected: "CGRectIsNull(self.frame, self.frame)")
