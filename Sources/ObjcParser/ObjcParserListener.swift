@@ -27,6 +27,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         configureMappers()
     }
     
+    // TODO: Abstract all of this away into a specialized class.
+    
     // Helper for mapping Objective-C types from raw strings into a structured types
     fileprivate static func parseObjcType(_ source: String) -> ObjcType? {
         let parser = ObjcParser(source: StringCodeSource(source: source))
@@ -141,14 +143,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         var paramTypes: [ObjcType] = []
         
         for typeVariableDeclaratorOrName in typeVariableDeclaratorOrNames {
-            let paramType: ObjcType
-            if let typeName = typeVariableDeclaratorOrName.typeName(),
-                let type = ObjcParserListener.parseObjcType(fromTypeName: typeName) {
-                paramType = type
-            } else if let typeVariableDecl = typeVariableDeclaratorOrName.typeVariableDeclarator(),
-                let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclarator: typeVariableDecl) {
-                paramType = type
-            } else {
+            guard let paramType = parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
                 continue
             }
             
@@ -159,19 +154,52 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     private static func parseObjcType(fromTypeVariableDeclaratorOrTypeName typeContext: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
-        let visitor = VarDeclarationTypeExtractor()
-        guard let typeString = typeContext.accept(visitor) else {
+        if let typeName = typeContext.typeName(),
+            let type = ObjcParserListener.parseObjcType(fromTypeName: typeName) {
+            return type
+        } else if let typeVariableDecl = typeContext.typeVariableDeclarator() {
+            if typeVariableDecl.declarator()?.directDeclarator()?.blockParameters() != nil {
+                return parseObjcType(fromTypeVariableDeclarator: typeVariableDecl)
+            }
+            
+            if let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclarator: typeVariableDecl) {
+                return type
+            } else {
+                return nil
+            }
+        }
+        
+        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeContext) else {
             return nil
         }
         
-        guard let type = ObjcParserListener.parseObjcType(typeString) else {
-            return nil
-        }
-        
-        return type
+        return ObjcParserListener.parseObjcType(typeString)
     }
     
     private static func parseObjcType(fromTypeVariableDeclarator typeVariableDecl: ObjectiveCParser.TypeVariableDeclaratorContext) -> ObjcType? {
+        if let blockParameters = typeVariableDecl.declarator()?.directDeclarator()?.blockParameters() {
+            guard let declarationSpecifiers = typeVariableDecl.declarationSpecifiers() else {
+                return nil
+            }
+            
+            let parameters = parseObjcTypes(fromBlockParameters: blockParameters)
+            
+            guard let returnTypeName = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else { return nil }
+            guard let returnType = ObjcParserListener.parseObjcType(returnTypeName) else { return nil }
+            
+            let identifier = VarDeclarationIdentifierNameExtractor.extract(from: typeVariableDecl)
+            
+            var type: ObjcType = .blockType(name: identifier ?? "",
+                                            returnType: returnType,
+                                            parameters: parameters)
+            
+            if let nullability = typeVariableDecl.declarator()?.directDeclarator()?.nullabilitySpecifier() {
+                type = .qualified(type, qualifiers: [nullability.getText()])
+            }
+            
+            return type
+        }
+        
         guard let typeString = VarDeclarationTypeExtractor.extract(from: typeVariableDecl) else {
             return nil
         }

@@ -520,6 +520,22 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteBlockWithinBlocksIvars() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass
+            {
+                void(^callback)(void(^_Nullable)());
+            }
+            @end
+            """,
+            swift: """
+            class MyClass: NSObject {
+                private var callback: ((() -> Void)?) -> Void
+            }
+            """)
+    }
+    
     func testRewriterUsesNonnullMacrosForNullabilityInferring() throws {
         try assertObjcParse(
             objc: """
