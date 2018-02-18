@@ -34,7 +34,7 @@ let package = Package(
             dependencies: ["ObjcParserAntlr"]),
         .target(
             name: "SwiftRewriterLib",
-            dependencies: ["GrammarModels", "ObjcParser"]),
+            dependencies: ["GrammarModels", "ObjcParser", "Utils"]),
         .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),
@@ -46,7 +46,7 @@ let package = Package(
             dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility", "ExpressionPasses"]),
         .target(
             name: "ExpressionPasses",
-            dependencies: ["SwiftRewriterLib"]),
+            dependencies: ["SwiftRewriterLib", "Utils"]),
         .testTarget(
             name: "UtilsTests",
             dependencies: ["Utils"]),
