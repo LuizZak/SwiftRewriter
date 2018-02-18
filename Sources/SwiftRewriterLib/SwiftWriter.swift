@@ -315,7 +315,7 @@ public class SwiftWriter {
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: initMethod.accessLevel)
         
-        if !accessModifier.isEmpty {
+        if !accessModifier.isEmpty && !(initMethod.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
         
@@ -342,7 +342,7 @@ public class SwiftWriter {
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
         
-        if !accessModifier.isEmpty {
+        if !accessModifier.isEmpty && !(method.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
         
@@ -365,7 +365,7 @@ public class SwiftWriter {
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
         
-        if !accessModifier.isEmpty {
+        if !accessModifier.isEmpty && !(method.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
         if method.isClassMethod {

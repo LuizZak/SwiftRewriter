@@ -404,6 +404,29 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteClassThatImplementsProtocolOverridesSignatureNullabilityOnImplementation() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol MyProtocol
+            - (nonnull NSString*)myMethod:(nullable NSObject*)object;
+            @end
+            
+            @interface MyClass : NSObject <MyProtocol>
+            - (NSString*)myMethod:(NSObject*)object;
+            @end
+            """, swift: """
+            @objc
+            protocol MyProtocol {
+                func myMethod(_ object: NSObject?) -> String
+            }
+            
+            class MyClass: NSObject, MyProtocol {
+                func myMethod(_ object: NSObject?) -> String {
+                }
+            }
+            """)
+    }
+    
     func testRewriteGlobalVariableDeclaration() throws {
         try assertObjcParse(
             objc: """

@@ -13,7 +13,8 @@ public enum IntentionPasses {
     public static var passes: [IntentionPass] = [
         FileGroupingIntentionPass(),
         RemoveDuplicatedTypeIntentIntentionPass(),
-        PropertyMergeIntentionPass()
+        ProtocolNullabilityPropagationToConformersIntentionPass(),
+        PropertyMergeIntentionPass(),
     ]
 }
 
@@ -40,6 +41,36 @@ public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
     }
 }
 
+/// Propagates known protocol nullability signautres from protocol intentions into
+/// classes that implement them.
+public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionPass {
+    public func apply(on intentionCollection: IntentionCollection) {
+        // Collect protocols
+        let protocols =
+            intentionCollection.intentions(ofType: ProtocolGenerationIntention.self)
+        let classes =
+            intentionCollection.intentions(ofType: ClassGenerationIntention.self)
+        
+        if protocols.count == 0 || classes.count == 0 {
+            return
+        }
+        
+        for cls in classes {
+            // Find conforming protocols
+            let knownProtocols =
+                protocols.filter { prot in
+                    cls.protocols.contains {
+                        $0.protocolName == prot.typeName
+                    }
+                }
+            
+            for prot in knownProtocols {
+                FileGroupingIntentionPass.mergeMethodSignatures(from: prot, into: cls)
+            }
+        }
+    }
+}
+
 public class FileGroupingIntentionPass: IntentionPass {
     public func apply(on intentionCollection: IntentionCollection) {
         // Collect .h/.m pairs
@@ -61,7 +92,7 @@ public class FileGroupingIntentionPass: IntentionPass {
         // class intent within
         for implementation in implementations {
             // Merge definitions from within an implementation file first
-            mergeDefinitions(in: implementation)
+            FileGroupingIntentionPass.mergeDefinitions(in: implementation)
             
             let implFile =
                 (implementation.filePath as NSString).deletingPathExtension
@@ -75,7 +106,7 @@ public class FileGroupingIntentionPass: IntentionPass {
                 continue
             }
             
-            mergeDefinitions(from: header, into: implementation)
+            FileGroupingIntentionPass.mergeDefinitions(from: header, into: implementation)
         }
         
         // Remove all header intentions that have a matching implementation
@@ -98,7 +129,7 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
     }
     
-    private func mergeDefinitions(from header: FileGenerationIntention,
+    fileprivate static func mergeDefinitions(from header: FileGenerationIntention,
                                   into implementation: FileGenerationIntention) {
         let total = header.typeIntentions + implementation.typeIntentions
         
@@ -109,7 +140,7 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
     }
     
-    private func mergeDefinitions(in implementation: FileGenerationIntention) {
+    fileprivate static func mergeDefinitions(in implementation: FileGenerationIntention) {
         let groupedTypes = Dictionary(grouping: implementation.typeIntentions,
                                       by: { $0.typeName })
         
@@ -118,7 +149,7 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
     }
     
-    private func mergeAllTypeDefinitions(in types: [TypeGenerationIntention]) {
+    fileprivate static func mergeAllTypeDefinitions(in types: [TypeGenerationIntention]) {
         let target = types.reversed().first { $0.source is ObjcClassImplementation } ?? types.last!
         
         for type in types.dropLast() {
@@ -126,7 +157,9 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
     }
     
-    private func mergeTypes(from first: TypeGenerationIntention, into second: TypeGenerationIntention) {
+    fileprivate
+    static func mergeTypes(from first: TypeGenerationIntention,
+                           into second: TypeGenerationIntention) {
         // Inheritance
         if let first = first as? ClassGenerationIntention, let second = second as? ClassGenerationIntention {
             if second.superclassName == nil {
@@ -159,18 +192,27 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
         
         // Methods
+        mergeMethodSignatures(from: first, into: second)
+    }
+    
+    fileprivate
+    static func mergeMethodSignatures(from first: TypeGenerationIntention,
+                                      into second: TypeGenerationIntention) {
+        // Methods
         // TODO: Figure out how to deal with same-signature selectors properly when
         // trying to find repeated method definitions.
         for method in first.methods {
             if let existing = second.method(withSignature: method.signature) {
-                mergeMethod(method, into: existing)
+                mergeMethodSignature(method, into: existing)
             } else {
                 second.addMethod(method)
             }
         }
     }
     
-    private func mergeMethod(_ method1: MethodGenerationIntention, into method2: MethodGenerationIntention) {
+    fileprivate
+    static func mergeMethodSignature(_ method1: MethodGenerationIntention,
+                                     into method2: MethodGenerationIntention) {
         if !method1.signature.returnType.isImplicitlyUnwrapped && method2.signature.returnType.isImplicitlyUnwrapped {
             if method1.signature.returnType.deepUnwrapped == method2.signature.returnType.deepUnwrapped {
                 method2.signature.returnType = method1.signature.returnType
