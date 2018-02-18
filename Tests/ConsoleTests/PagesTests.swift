@@ -61,7 +61,8 @@ class PagesTests: ConsoleTestCase {
                 menu.addAction(name: "Show pages") { _ in
                     let pages = menu.console.makePages()
                     
-                    pages.displayPages(withValues: pageItems, perPageCount: 2)
+                    pages.displayPages(withValues: pageItems, header: "A list of things",
+                                       perPageCount: 2)
                 }
             }
         }
@@ -74,12 +75,14 @@ class PagesTests: ConsoleTestCase {
             Please select an option bellow:
             """)
             .checkNext("""
+            A list of things
             ----
             1: Item 1
             2: Item 2
             ---- 1 to 2
             = Page 1 of 2
             [INPUT] '2'
+            A list of things
             ----
             3: Item 3
             4: Item 4

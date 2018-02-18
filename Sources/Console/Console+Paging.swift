@@ -27,6 +27,10 @@ public class Pages {
                 let minItem = min(page * perPageCount, provider.count)
                 let maxItem = min(minItem + perPageCount, provider.count)
                 
+                if !provider.header.isEmpty {
+                    console.printLine(provider.header)
+                }
+                
                 // Use this to pad the numbers
                 console.printLine("----")
                 
@@ -49,21 +53,21 @@ public class Pages {
                 // Closure that validates two types of inputs:
                 // - Relative page changes (e.g.: '+1', '-10', '+2' etc., with no bounds)
                 // - Absolute page (e.g. 1, 2, 3, etc., from 1 - pageCount)
-                let pageValidateNew: (String) -> Bool = { [console] in
+                let pageValidateNew: (String) -> Bool = { [console, configuration] input in
                     // Command
-                    if($0.hasPrefix("=") && self.configuration?.commandClosure != nil) {
+                    if input.hasPrefix("=") && configuration?.commandHandler.commandClosure != nil {
                         return true
                     }
                     
                     // Decrease/increase page
-                    if($0.hasPrefix("-") || $0.hasPrefix("+")) {
-                        if($0.count == 1) {
-                            console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                    if input.hasPrefix("-") || input.hasPrefix("+") {
+                        if(input.count == 1) {
+                            console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
                             return false
                         }
                         // Try to read an integer value
-                        if Int($0[$0.index(after: $0.startIndex)...]) == nil {
-                            console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                        if Int(input.dropFirst()) == nil {
+                            console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
                             return false
                         }
                         
@@ -71,12 +75,17 @@ public class Pages {
                     }
                     
                     // Direct page
-                    guard let index = Int($0) else {
-                        console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                    guard let index = Int(input) else {
+                        // If not a number, check with command
+                        if configuration?.commandHandler.commandClosure != nil {
+                            return true
+                        }
+                        
+                        console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
                         return false
                     }
                     if(index != 0 && (index < 1 || index > pageCount)) {
-                        console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                        console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
                         return false
                     }
                     
@@ -84,7 +93,7 @@ public class Pages {
                 }
                 
                 var prompt: String = "Input page (0 or empty to close):"
-                if let configPrompt = configuration?.commandPrompt {
+                if let configPrompt = configuration?.commandHandler.commandPrompt {
                     prompt += "\n\(configPrompt)"
                 }
                 prompt += "\n>"
@@ -94,11 +103,31 @@ public class Pages {
                 }
                 
                 // Command
-                if(newPage.hasPrefix("=") && configuration?.commandClosure != nil) {
-                    if let command = configuration?.commandClosure {
+                if (newPage.hasPrefix("=") || Int(newPage) == nil) && configuration?.commandHandler.commandClosure != nil {
+                    if let command = configuration?.commandHandler.commandClosure {
                         do {
                             return try autoreleasepool {
-                                try command(String(newPage[newPage.index(after: newPage.startIndex)...]))
+                                let com = newPage.hasPrefix("=") ? String(newPage.dropFirst()) : newPage
+                                
+                                switch try command(com) {
+                                case .loop(let msg):
+                                    if let msg = msg {
+                                        console.printLine(msg)
+                                    }
+                                    return .loop
+                                    
+                                case .quit(let msg):
+                                    if let msg = msg {
+                                        console.printLine(msg)
+                                    }
+                                    return .quit
+                                    
+                                case .modifyList(let closure):
+                                    defer {
+                                        closure(self)
+                                    }
+                                    return .quit
+                                }
                             }
                         } catch {
                             console.printLine("\(error)")
@@ -115,7 +144,7 @@ public class Pages {
                 if(newPage.hasPrefix("-") || newPage.hasPrefix("+")) {
                     let increment = newPage.hasPrefix("+")
                     
-                    if let skipCount = Int(newPage[newPage.index(after: newPage.startIndex)...]) {
+                    if let skipCount = Int(newPage.dropFirst()) {
                         let change = increment ? skipCount : -skipCount
                         page = min(pageCount - 1, max(0, page + change))
                         return .loop
@@ -144,7 +173,7 @@ public class Pages {
     /// Displays a sequence of items as a paged list of items, which the user 
     /// can interact by selecting the page to display
     public func displayPages<T: ConsoleDataProvider>(withProvider provider: T,
-                                              perPageCount: Int = 30) where T.Data == String {
+                                                     perPageCount: Int = 30) where T.Data == String {
         
         let provider = AnyConsoleDataProvider(provider: provider) { (source: String) -> [String] in
             return [source]
@@ -155,8 +184,8 @@ public class Pages {
     
     /// Displays a sequence of items as a paged list of items, which the user
     /// can interact by selecting the page to display
-    public func displayPages(withValues values: [String], perPageCount: Int = 30) {
-        let provider = AnyConsoleDataProvider(count: values.count) { index -> [String] in
+    public func displayPages(withValues values: [String], header: String = "", perPageCount: Int = 30) {
+        let provider = AnyConsoleDataProvider(count: values.count, header: header) { index -> [String] in
             return [values[index]]
         }
         
@@ -165,12 +194,43 @@ public class Pages {
     
     /// Structure for customization of paged displays
     public struct PageDisplayConfiguration {
-        public var commandPrompt: String?
-        public var commandClosure: ((String) throws -> Console.CommandMenuResult)?
+        public let commandHandler: PagesCommandHandler
         
-        public init(commandPrompt: String? = nil, commandClosure: ((String) throws -> Console.CommandMenuResult)? = nil) {
+        public init(commandPrompt: String? = nil, commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
+            commandHandler =
+                InnerPageCommandHandler(commandPrompt: commandPrompt, commandClosure: commandClosure)
+        }
+        
+        public init(commandHandler: PagesCommandHandler) {
+            self.commandHandler = commandHandler
+        }
+    }
+    
+    /// Result of a paging command
+    ///
+    /// - loop: Loops the page back to where it is
+    /// - quit: Quits the page back to the calling menu
+    /// - print: Prints a message to the console and re-loops
+    /// - modifyList: Called to modify the contents being displayed on the list
+    public enum PagesCommandResult {
+        case loop(String?)
+        case quit(String?)
+        case modifyList((Pages) -> ())
+    }
+    
+    private struct InnerPageCommandHandler: PagesCommandHandler {
+        public let commandPrompt: String?
+        public let commandClosure: ((String) throws -> PagesCommandResult)?
+        
+        public init(commandPrompt: String? = nil, commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
             self.commandPrompt = commandPrompt
             self.commandClosure = commandClosure
         }
     }
+}
+
+/// Handler for paging commands
+public protocol PagesCommandHandler {
+    var commandPrompt: String? { get }
+    var commandClosure: ((String) throws -> Pages.PagesCommandResult)? { get }
 }
