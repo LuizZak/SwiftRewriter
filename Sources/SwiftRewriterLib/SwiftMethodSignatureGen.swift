@@ -13,12 +13,11 @@ public class SwiftMethodSignatureGen {
     
     /// Generates a function definition from an objective-c signature to use as
     /// a class-type function definition.
-    public func generateDefinitionSignature(from objcMethod: MethodDefinition) -> MethodGenerationIntention.Signature {
+    public func generateDefinitionSignature(from objcMethod: MethodDefinition) -> FunctionSignature {
         var sign =
-            MethodGenerationIntention
-                .Signature(name: "__",
-                           returnType: SwiftType.anyObject.asImplicitUnwrapped,
-                           parameters: [])
+            FunctionSignature(name: "__",
+                              returnType: SwiftType.anyObject.asImplicitUnwrapped,
+                              parameters: [])
         
         if let sel = objcMethod.methodSelector?.selector {
             switch sel {
@@ -48,9 +47,7 @@ public class SwiftMethodSignatureGen {
     }
     
     private func processKeywords(_ keywords: [KeywordDeclarator],
-                                 _ target: inout MethodGenerationIntention.Signature) {
-        typealias Parameter = MethodGenerationIntention.Parameter // To shorten up type names within the method
-        
+                                 _ target: inout FunctionSignature) {
         guard keywords.count > 0 else {
             return
         }
@@ -80,7 +77,7 @@ public class SwiftMethodSignatureGen {
                 typeMapper.swiftType(forObjcType: type,
                                      context: .init(explicitNullability: nullability))
             
-            let param = Parameter(label: label, name: identifier, type: swiftType)
+            let param = ParameterSignature(label: label, name: identifier, type: swiftType)
             
             target.parameters.append(param)
         }

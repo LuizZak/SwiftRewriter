@@ -75,8 +75,15 @@ public class FileGenerationIntention: Intention {
 }
 
 /// An intention to generate a global function.
-public class GlobalFunctionGenerationIntention: FromSourceIntention {
+public class GlobalFunctionGenerationIntention: FromSourceIntention, FunctionIntention {
+    public var signature: FunctionSignature
     
+    public var body: MethodBodyIntention?
+    
+    public init(signature: FunctionSignature, accessLevel: AccessLevel, source: ASTNode?) {
+        self.signature = signature
+        super.init(accessLevel: accessLevel, source: source)
+    }
 }
 
 /// An intention to generate a global variable.
@@ -114,6 +121,33 @@ public protocol NonNullScopedIntention: Intention {
     /// Gets a value indicating whether this intention was defined within
     /// NS_ASSUME_NONNULL contexts
     var inNonnullContext: Bool { get }
+}
+
+/// Defines a protocol for function-generating intentions
+public protocol FunctionIntention: Intention {
+    var signature: FunctionSignature { get }
+    
+    var body: MethodBodyIntention? { get }
+}
+
+/// Signature for a function intention
+public struct FunctionSignature: Equatable {
+    public var name: String
+    public var returnType: SwiftType
+    public var parameters: [ParameterSignature]
+    
+    public var droppingNullability: FunctionSignature {
+        return FunctionSignature(name: name, returnType: returnType.deepUnwrapped,
+                                 parameters: parameters.map {
+                                    ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
+        })
+    }
+}
+
+public struct ParameterSignature: Equatable {
+    public var label: String
+    public var name: String
+    public var type: SwiftType
 }
 
 /// Defines a protocol for a value storage intention.

@@ -409,7 +409,7 @@ public class SwiftWriter {
         rewriter.rewrite(compoundStatement: body.body, into: target)
     }
     
-    private func generateParameters(for signature: MethodGenerationIntention.Signature,
+    private func generateParameters(for signature: FunctionSignature,
                                     into target: RewriterOutputTarget,
                                     inNonnullContext: Bool = false) {
         

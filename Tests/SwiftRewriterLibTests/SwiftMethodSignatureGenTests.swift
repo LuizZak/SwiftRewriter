@@ -200,7 +200,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
         XCTAssertEqual(sign.parameters[0].name, "thingID")
     }
     
-    private func genSignature(_ objc: String) -> MethodGenerationIntention.Signature {
+    private func genSignature(_ objc: String) -> FunctionSignature {
         let node = parseMethodSign(objc)
         let gen = createSwiftMethodSignatureGen()
         

@@ -95,11 +95,11 @@ public class TypeGenerationIntention: FromSourceIntention {
         return methods.contains(where: { $0.name == name })
     }
     
-    public func hasMethod(withSignature signature: MethodGenerationIntention.Signature) -> Bool {
+    public func hasMethod(withSignature signature: FunctionSignature) -> Bool {
         return method(withSignature: signature) != nil
     }
     
-    public func method(withSignature signature: MethodGenerationIntention.Signature) -> MethodGenerationIntention? {
+    public func method(withSignature signature: FunctionSignature) -> MethodGenerationIntention? {
         return methods.first(where: {
             return signature.droppingNullability == $0.signature.droppingNullability
         })
@@ -163,7 +163,7 @@ public class MethodBodyIntention: FromSourceIntention {
 }
 
 /// An intention to generate a static/instance function for a type.
-public class MethodGenerationIntention: MemberGenerationIntention {
+public class MethodGenerationIntention: MemberGenerationIntention, FunctionIntention {
     public var typedSource: MethodDefinition? {
         return source as? MethodDefinition
     }
@@ -172,7 +172,7 @@ public class MethodGenerationIntention: MemberGenerationIntention {
         return typedSource?.isClassMethod ?? false
     }
     
-    public var signature: Signature
+    public var signature: FunctionSignature
     
     public var body: MethodBodyIntention?
     
@@ -182,41 +182,22 @@ public class MethodGenerationIntention: MemberGenerationIntention {
     public var returnType: SwiftType {
         return signature.returnType
     }
-    public var parameters: [Parameter] {
+    public var parameters: [ParameterSignature] {
         return signature.parameters
     }
     
-    public init(name: String, returnType: SwiftType, parameters: [Parameter],
+    public init(name: String, returnType: SwiftType, parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.signature =
-            Signature(name: name, returnType: returnType,
+            FunctionSignature(name: name, returnType: returnType,
                       parameters: parameters)
         super.init(accessLevel: accessLevel, source: source)
     }
     
-    public init(signature: Signature, accessLevel: AccessLevel = .internal,
+    public init(signature: FunctionSignature, accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)
-    }
-    
-    public struct Signature: Equatable {
-        public var name: String
-        public var returnType: SwiftType
-        public var parameters: [Parameter]
-        
-        public var droppingNullability: Signature {
-            return Signature(name: name, returnType: returnType.deepUnwrapped,
-                             parameters: parameters.map {
-                                Parameter(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
-                            })
-        }
-    }
-    
-    public struct Parameter: Equatable {
-        public var label: String
-        public var name: String
-        public var type: SwiftType
     }
 }
 
