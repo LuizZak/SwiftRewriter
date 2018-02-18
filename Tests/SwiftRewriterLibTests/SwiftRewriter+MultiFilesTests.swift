@@ -16,6 +16,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             .translatesToSwift(
             """
             class MyClass: NSObject {
+                @objc
                 func myMethod() {
                 }
             }
@@ -41,6 +42,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             .translatesToSwift(
             """
             class MyClass: NSObject {
+                @objc
                 func myMethod() {
                 }
             }
@@ -69,8 +71,9 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             .translatesToSwift(
             """
             class MyClass: NSObject {
-                var property: String
+                @objc var property: String
                 
+                @objc
                 func myMethod(_ parameter: String) -> AnyObject {
                 }
             }

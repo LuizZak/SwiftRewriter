@@ -28,43 +28,17 @@ public class AllocInitExpressionPass: ExpressionPass {
                                          .member("alloc")),
                                 .functionCall(arguments: [])),
                        .member(let initCall)),
-              .functionCall(var args))
-            where args.count > 0 && initCall.hasPrefix("initWith"):
+              .functionCall(let args)) where args.count > 0 && initCall.hasPrefix("initWith"):
             
-            // Do a little Clang-like-magic here: If the method selector is in the
-            // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
-            // noun is followed by a parameter that has the same name, we collapse
-            // such selector in Swift as `lorem(with:)`.
-            let split = initCall.components(separatedBy: "With")
-            if split.count != 2 || split.contains(where: { $0.count < 2 }) {
-                break
-            }
-            
-            // All good! Collapse the identifier into a more 'swifty' construct
-            let lowercasedFirstLetter =
-                split[1].prefix(1).lowercased() + split[1].dropFirst()
-            args[0] = .labeled(lowercasedFirstLetter, args[0].expression)
-            
+            let args = clangify(methodName: initCall, arguments: args)
             (exp, op) = (.identifier(typeName), .functionCall(arguments: args))
-        // super.initWithThing(thing) -> super.init(with: thing)
+        
+        // [super initWithThing:[...]] -> super.init(thing: [...])
         case (.postfix(.identifier("super"),
                        .member(let initMethod)),
-              .functionCall(var args)) where args.count > 0 && initMethod.hasPrefix("initWith"):
+              .functionCall(let args)) where args.count > 0 && initMethod.hasPrefix("initWith"):
             
-            // Do a little Clang-like-magic here: If the method selector is in the
-            // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
-            // noun is followed by a parameter that has the same name, we collapse
-            // such selector in Swift as `lorem(with:)`.
-            let split = initMethod.components(separatedBy: "With")
-            if split.count != 2 || split.contains(where: { $0.count < 2 }) {
-                break
-            }
-            
-            // All good! Collapse the identifier into a more 'swifty' construct
-            let lowercasedFirstLetter =
-                split[1].prefix(1).lowercased() + split[1].dropFirst()
-            args[0] = .labeled(lowercasedFirstLetter, args[0].expression)
-            
+            let args = clangify(methodName: initMethod, arguments: args)
             (exp, op) = (.postfix(.identifier("super"), .member("init")),
                          .functionCall(arguments: args))
         default:
@@ -72,5 +46,22 @@ public class AllocInitExpressionPass: ExpressionPass {
         }
         
         return super.visitPostfix(exp, op: op)
+    }
+    
+    func clangify(methodName: String, arguments: [FunctionArgument]) -> [FunctionArgument] {
+        // Do a little Clang-like-magic here: If the method selector is in the
+        // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
+        // noun is followed by a parameter that has the same name, we collapse
+        // such selector in Swift as `lorem(with:)`.
+        let split = methodName.components(separatedBy: "With")
+        if split.count != 2 || split.contains(where: { $0.count < 2 }) {
+            return arguments
+        }
+        
+        // All good! Collapse the identifier into a more 'swifty' construct
+        var arguments = arguments
+        arguments[0] = .labeled(split[1].lowercasedFirstLetter, arguments[0].expression)
+        
+        return arguments
     }
 }

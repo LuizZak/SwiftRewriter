@@ -13,6 +13,9 @@ public class PropertyDefinition: ASTNode, InitializableNode {
         return firstChild()
     }
     
+    // For use in protocol methods only
+    public var isOptionalProperty: Bool = false
+    
     public required init() {
         super.init()
     }

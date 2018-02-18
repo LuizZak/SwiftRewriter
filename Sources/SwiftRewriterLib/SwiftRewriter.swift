@@ -379,14 +379,28 @@ public class SwiftRewriter {
         let storage =
             ValueStorage(type: swiftType, ownership: ownership, isConstant: false)
         
-        let prop =
-            PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                        storage: storage, attributes: attributes,
-                                        source: node)
-        
-        prop.inNonnullContext = isNodeInNonnullContext(node)
-        
-        ctx.addProperty(prop)
+        // Protocol property
+        if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
+            let prop =
+                ProtocolPropertyGenerationIntention(name: node.identifier?.name ?? "",
+                                                    storage: storage, attributes: attributes,
+                                                    source: node)
+            
+            prop.isOptional = node.isOptionalProperty
+            
+            prop.inNonnullContext = isNodeInNonnullContext(node)
+            
+            ctx.addProperty(prop)
+        } else {
+            let prop =
+                PropertyGenerationIntention(name: node.identifier?.name ?? "",
+                                            storage: storage, attributes: attributes,
+                                            source: node)
+            
+            prop.inNonnullContext = isNodeInNonnullContext(node)
+            
+            ctx.addProperty(prop)
+        }
     }
     
     private func visitObjcClassMethodNode(_ node: MethodDefinition) {
@@ -397,7 +411,16 @@ public class SwiftRewriter {
         let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
         let sign = signGen.generateDefinitionSignature(from: node)
         
-        let method = MethodGenerationIntention(signature: sign, source: node)
+        let method: MethodGenerationIntention
+        
+        if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
+            let protMethod = ProtocolMethodGenerationIntention(signature: sign, source: node)
+            protMethod.isOptional = node.isOptionalMethod
+            
+            method = protMethod
+        } else {
+            method = MethodGenerationIntention(signature: sign, source: node)
+        }
         
         method.inNonnullContext = isNodeInNonnullContext(node)
         

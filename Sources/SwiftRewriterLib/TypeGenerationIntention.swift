@@ -39,11 +39,14 @@ public class TypeGenerationIntention: FromSourceIntention {
     /// conformance.
     ///
     /// - Parameter knownProtocol: A known protocol conformance.
-    public func generateProtocolConformance(from knownProtocol: KnownProtocolConformance) {
+    @discardableResult
+    public func generateProtocolConformance(from knownProtocol: KnownProtocolConformance) -> ProtocolInheritanceIntention {
         let intention =
             ProtocolInheritanceIntention(protocolName: knownProtocol.protocolName)
         
         addProtocol(intention)
+        
+        return intention
     }
     public func addProtocol(_ intention: ProtocolInheritanceIntention, at index: Int? = nil) {
         if let index = index {
@@ -65,13 +68,16 @@ public class TypeGenerationIntention: FromSourceIntention {
     /// name and storage information.
     ///
     /// - Parameter knownProperty: A known property declaration.
-    public func generateProperty(from knownProperty: KnownProperty) {
+    @discardableResult
+    public func generateProperty(from knownProperty: KnownProperty) -> PropertyGenerationIntention {
         let intention =
             PropertyGenerationIntention(name: knownProperty.name,
                                         storage: knownProperty.storage,
                                         attributes: knownProperty.attributes)
         
         addProperty(intention)
+        
+        return intention
     }
     public func addProperty(_ intention: PropertyGenerationIntention, at index: Int? = nil) {
         if let index = index {
@@ -92,12 +98,15 @@ public class TypeGenerationIntention: FromSourceIntention {
     /// Generates a new empty method from a given known method's signature.
     ///
     /// - Parameter knownMethod: A known method with an available signature.
-    public func generateMethod(from knownMethod: KnownMethod, source: ASTNode? = nil) {
+    @discardableResult
+    public func generateMethod(from knownMethod: KnownMethod, source: ASTNode? = nil) -> MethodGenerationIntention {
         let method =
             MethodGenerationIntention(signature: knownMethod.signature,
                                       accessLevel: .internal, source: source)
         
         addMethod(method)
+        
+        return method
     }
     
     public func addMethod(_ intention: MethodGenerationIntention, at index: Int? = nil) {
@@ -226,6 +235,12 @@ public class MethodBodyIntention: FromSourceIntention {
         self.body = body
         
         super.init(accessLevel: .public, source: source)
+    }
+    
+    /// Returns an iterator for all expressions within this method body.
+    public func expressionsIterator(inspectBlocks: Bool) -> AnyIterator<Expression> {
+        return AnyIterator(ExpressionIterator(statement: .compound(body),
+                                              inspectBlocks: inspectBlocks))
     }
 }
 

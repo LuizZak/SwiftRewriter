@@ -255,6 +255,8 @@ public class SwiftWriter {
     private func outputProperty(_ prop: PropertyGenerationIntention, target: RewriterOutputTarget) {
         target.outputIdentation()
         
+        target.outputInlineWithSpace("@objc", style: .keyword)
+        
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: prop.type)
         
@@ -311,12 +313,23 @@ public class SwiftWriter {
     }
     
     private func outputInitMethod(_ initMethod: MethodGenerationIntention, target: RewriterOutputTarget) {
+        target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: initMethod.accessLevel)
         
         if !accessModifier.isEmpty && !(initMethod.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
+        }
+        
+        // Emit required "override" keyword
+        if initMethod.parent is ClassGenerationIntention && initMethod.signature.parameters.count == 0 {
+            target.outputInlineWithSpace("override", style: .keyword)
+        }
+        
+        // Protocol 'optional' keyword
+        if let protocolMethod = initMethod as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
+            target.outputInlineWithSpace("optional", style: .keyword)
         }
         
         target.outputInline("init", style: .keyword)
@@ -338,6 +351,7 @@ public class SwiftWriter {
     }
     
     private func outputDeinit(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+        target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
@@ -361,6 +375,8 @@ public class SwiftWriter {
     }
     
     private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+        target.output(line: "@objc", style: .keyword)
+        
         target.outputIdentation()
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
@@ -370,6 +386,11 @@ public class SwiftWriter {
         }
         if method.isClassMethod {
             target.outputInlineWithSpace("static", style: .keyword)
+        }
+        
+        // Protocol 'optional' keyword
+        if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
+            target.outputInlineWithSpace("optional", style: .keyword)
         }
         
         target.outputInlineWithSpace("func", style: .keyword)

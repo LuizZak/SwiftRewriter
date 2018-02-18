@@ -1,5 +1,6 @@
 import GrammarModels
 import Foundation
+import Utils
 
 /// A protocol for objects that perform passes through intentions collected and
 /// perform changes and optimizations on them.
@@ -196,9 +197,6 @@ public class FileGroupingIntentionPass: IntentionPass {
     fileprivate
     static func mergeMethodSignatures(from first: KnownType,
                                       into second: TypeGenerationIntention) {
-        // Methods
-        // TODO: Figure out how to deal with same-signature selectors properly when
-        // trying to find repeated method definitions.
         for knownMethod in first.knownMethods {
             if let existing = second.method(withSignature: knownMethod.signature) {
                 mergeMethodSignature(knownMethod, into: existing)
@@ -279,10 +277,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         var matches: [PropertySet] = []
         
         for property in properties where property.name.count > 1 {
-            let capitalizedName =
-                property.name.prefix(1).uppercased() + property.name.dropFirst()
-            
-            let expectedName = "set" + capitalizedName
+            let expectedName = "set" + property.name.uppercasedFirstLetter
             
             // Getters
             let potentialGetters =
@@ -367,6 +362,15 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     .Setter(valueIdentifier: setter.parameters[0].name,
                             body: setterBody)
             
+            // Search if the backing field is being used anywhere within the class
+            for body in classIntention.methods.compactMap({ $0.body }) {
+                let exps = body.expressionsIterator(inspectBlocks: true)
+                if exps.contains(.identifier(backingFieldName)) ||
+                    exps.contains(.postfix(.identifier("self"), .member(backingFieldName))) {
+                    
+                }
+            }
+            
             // Synthesize a simple getter that has the following statement within:
             // return self._backingField
             let getterIntention =
@@ -376,15 +380,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
             propertySet.property.mode = .property(get: getterIntention, set: setter)
             
             let field =
-                PropertyGenerationIntention(name: backingFieldName,
-                                            storage: propertySet.property.storage,
-                                            attributes: [],
-                                            accessLevel: .private,
-                                            source: propertySet.property.source)
+                InstanceVariableGenerationIntention(name: backingFieldName,
+                                                    storage: propertySet.property.storage,
+                                                    accessLevel: .private,
+                                                    source: propertySet.property.source)
             
-            if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
-                classIntention.addProperty(field, at: index)
-            }
+            classIntention.addInstanceVariable(field)
         default:
             break
         }

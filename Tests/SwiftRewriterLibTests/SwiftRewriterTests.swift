@@ -85,7 +85,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                weak var myClass: MyClass?
+                @objc weak var myClass: MyClass?
             }
             """)
     }
@@ -109,17 +109,17 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                var someField: Bool
-                var someOtherField: Int
-                var aRatherStringlyField: String
-                var specifiedNull: String?
-                var nonNullWithQualifier: String
-                var nonSpecifiedNull: String!
-                var idType: AnyObject!
-                weak var delegate: (MyDelegate & MyDataSource)?
-                var tableWithDataSource: UITableView & UITableViewDataSource
-                weak var weakViewWithDelegate: (UIView & UIDelegate)?
-                unowned(unsafe) var assignProp: MyClass
+                @objc var someField: Bool
+                @objc var someOtherField: Int
+                @objc var aRatherStringlyField: String
+                @objc var specifiedNull: String?
+                @objc var nonNullWithQualifier: String
+                @objc var nonSpecifiedNull: String!
+                @objc var idType: AnyObject!
+                @objc weak var delegate: (MyDelegate & MyDataSource)?
+                @objc var tableWithDataSource: UITableView & UITableViewDataSource
+                @objc weak var weakViewWithDelegate: (UIView & UIDelegate)?
+                @objc unowned(unsafe) var assignProp: MyClass
             }
             """)
     }
@@ -138,12 +138,12 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                var nontypedArray: NSArray
-                var nontypedArrayNull: NSArray?
-                var stringArray: [String]!
-                var clsArray: [SomeType]
-                var clsArrayNull: [SomeType]?
-                var delegateable: SomeType & SomeDelegate
+                @objc var nontypedArray: NSArray
+                @objc var nontypedArrayNull: NSArray?
+                @objc var stringArray: [String]!
+                @objc var clsArray: [SomeType]
+                @objc var clsArrayNull: [SomeType]?
+                @objc var delegateable: SomeType & SomeDelegate
             }
             """)
     }
@@ -175,6 +175,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 func myMethod() {
                 }
             }
@@ -190,6 +191,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 static func myMethod() {
                 }
             }
@@ -210,16 +212,22 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 func myMethod() {
                 }
+                @objc
                 func myOtherMethod(_ abc: Int, aString str: String) -> Int {
                 }
+                @objc
                 func myAnonParamMethod(_ abc: Int, _ str: String) -> Int {
                 }
+                @objc
                 func someNullArray() -> NSArray? {
                 }
+                @objc
                 func __(_ a: AnyObject!) {
                 }
+                @objc
                 func __(_ a: AnyObject!) -> AnyObject! {
                 }
             }
@@ -237,10 +245,13 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                init() {
+                @objc
+                override init() {
                 }
+                @objc
                 init(with thing: AnyObject!) {
                 }
+                @objc
                 init(with number: NSNumber) {
                 }
             }
@@ -258,6 +269,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 deinit {
                     thing()
                 }
@@ -323,9 +335,11 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 init(with thing: AnyObject!) {
                     self.thing()
                 }
+                @objc
                 func myMethod() {
                     self.thing()
                 }
@@ -363,12 +377,15 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject, MyDelegate {
                 private var anIVar: Int
                 
+                @objc
                 init(with thing: AnyObject!) {
                     self.thing()
                 }
+                @objc
                 func myMethod() {
                     self.thing()
                 }
+                @objc
                 func methodFromCategory() {
                 }
             }
@@ -394,9 +411,11 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 init(with thing: AnyObject) {
                     self.thing()
                 }
+                @objc
                 func myMethod() {
                     self.thing()
                 }
@@ -417,10 +436,12 @@ class SwiftRewriterTests: XCTestCase {
             """, swift: """
             @objc
             protocol MyProtocol {
+                @objc
                 func myMethod(_ object: NSObject?) -> String
             }
             
             class MyClass: NSObject, MyProtocol {
+                @objc
                 func myMethod(_ object: NSObject?) -> String {
                 }
             }
@@ -471,8 +492,10 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class AClass: NSObject {
+                @objc
                 func aBlocky(_ blocky: () -> Void) {
                 }
+                @objc
                 func aBlockyWithString(_ blocky: (String) -> Void) {
                 }
             }
@@ -493,10 +516,12 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass1: NSObject {
+                @objc
                 func aMethod(_ param: String) -> AnyObject {
                 }
             }
             class MyClass2: NSObject {
+                @objc
                 func aMethod(_ param: String!) -> AnyObject! {
                 }
             }
@@ -518,6 +543,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 func aMethod(_ param: String) -> AnyObject {
                 }
             }
@@ -554,6 +580,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
+                @objc
                 func myMethod() {
                     if self.respondsToSelector("abc:") {
                         thing()
@@ -573,7 +600,34 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol {
+                @objc
                 func myMethod()
+            }
+            """)
+    }
+    
+    func testRewriteProtocolOptionalRequiredSections() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol MyProtocol
+            - (void)f1;
+            @optional
+            - (void)f2;
+            - (void)f3;
+            @required
+            - (void)f4;
+            @end
+            """, swift: """
+            @objc
+            protocol MyProtocol {
+                @objc
+                func f1()
+                @objc
+                optional func f2()
+                @objc
+                optional func f3()
+                @objc
+                func f4()
             }
             """)
     }
@@ -594,9 +648,9 @@ class SwiftRewriterTests: XCTestCase {
             var anIntGlobal: Int
 
             class MyClass: NSObject {
-                unowned(unsafe) var aClass: AClass!
-                var anInt: Int
-                var aProperInt: Int
+                @objc unowned(unsafe) var aClass: AClass!
+                @objc var anInt: Int
+                @objc var aProperInt: Int
             }
             """).assertDiagnostics("""
             Warning: Variable 'anIntGlobal' specified as 'weak' but original type '__weak NSInteger' is not a pointer type. at line 0 column 0

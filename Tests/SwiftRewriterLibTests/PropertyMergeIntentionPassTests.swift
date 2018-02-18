@@ -27,7 +27,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                var value: Bool {
+                @objc var value: Bool {
                     get {
                         return false
                     }
@@ -54,7 +54,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                var value: Bool {
+                @objc var value: Bool {
                     return false
                 }
             }
@@ -83,7 +83,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 private var _value: Bool
-                var value: Bool {
+                @objc var value: Bool {
                     get {
                         return self._value
                     }
@@ -109,7 +109,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                var value: Bool {
+                @objc var value: Bool {
                     return false
                 }
             }
@@ -138,7 +138,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """,
             swift: """
             class MyClass: NSObject {
-                var value: MyClass {
+                @objc var value: MyClass {
                     get {
                         return MyClass()
                     }
@@ -170,7 +170,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 private var _ganttStartDate: NSDate
-                var ganttStartDate: NSDate {
+                @objc var ganttStartDate: NSDate {
                     get {
                         return _ganttStartDate
                     }

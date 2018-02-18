@@ -1,4 +1,5 @@
 import SwiftRewriterLib
+import Utils
 
 /// Applies passes to simplify known Foundation methods
 public class FoundationExpressionPass: ExpressionPass {
@@ -42,8 +43,7 @@ public class FoundationExpressionPass: ExpressionPass {
             
             switch innerExp {
             // Upper cased identifier: Type's metatype
-            case .identifier(let ident)
-                where ident.count > 0 && ident[...ident.startIndex] == ident[...ident.startIndex].uppercased():
+            case .identifier(let ident) where ident.startsUppercased:
                 (exp, op) = (.identifier(ident), .member("self"))
             // Any other case: expression's type
             default:

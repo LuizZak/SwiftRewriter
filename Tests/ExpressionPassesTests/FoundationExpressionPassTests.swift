@@ -48,6 +48,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             original: "[NSArray array]",
             expected: .postfix(.identifier("NSArray"), .functionCall(arguments: []))
         )
+        // Test unrecognized members are left alone
         assertTransformParsed(
             original: "[NSArray array:thing]",
             expected: "NSArray.array(thing)"
@@ -59,6 +60,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             original: "[NSMutableArray array]",
             expected: .postfix(.identifier("NSMutableArray"), .functionCall(arguments: []))
         )
+        // Test unrecognized members are left alone
         assertTransformParsed(
             original: "[NSMutableArray array:thing]",
             expected: "NSMutableArray.array(thing)"
@@ -70,6 +72,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             original: "[NSDictionary dictionary]",
             expected: .postfix(.identifier("NSDictionary"), .functionCall(arguments: []))
         )
+        // Test unrecognized members are left alone
         assertTransformParsed(
             original: "[NSDictionary dictionary:thing]",
             expected: "NSDictionary.dictionary(thing)"
@@ -92,6 +95,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             original: "[NSSet set]",
             expected: .postfix(.identifier("NSSet"), .functionCall(arguments: []))
         )
+        // Test unrecognized members are left alone
         assertTransformParsed(
             original: "[NSSet set:thing]",
             expected: "NSSet.set(thing)"
@@ -103,6 +107,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             original: "[NSMutableSet set]",
             expected: .postfix(.identifier("NSMutableSet"), .functionCall(arguments: []))
         )
+        // Test unrecognized members are left alone
         assertTransformParsed(
             original: "[NSMutableSet set:thing]",
             expected: "NSMutableSet.set(thing)"

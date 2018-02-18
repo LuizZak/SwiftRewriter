@@ -9,6 +9,10 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     private let sourceString: String
     private let source: Source
     
+    /// Whether the listener is currently visiting a @protocol section that was
+    /// marked @optional.
+    private var inOptionalContext: Bool = false
+    
     init(sourceString: String, source: Source) {
         self.sourceString = sourceString
         self.source = source
@@ -375,11 +379,25 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterProtocolDeclarationSection(_ ctx: ObjectiveCParser.ProtocolDeclarationSectionContext) {
+        inOptionalContext = ctx.OPTIONAL() != nil
+    }
+    
+    override func exitProtocolDeclarationSection(_ ctx: ObjectiveCParser.ProtocolDeclarationSectionContext) {
+        inOptionalContext = false
+    }
+    
+    override func exitProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
+        inOptionalContext = false
+    }
+    
     // MARK: - Property Declaration
     override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
         let listener = PropertyListener()
         let walker = ParseTreeWalker()
         try? walker.walk(listener, ctx)
+        
+        listener.property.isOptionalProperty = inOptionalContext
         
         context.pushContext(node: listener.property)
     }
@@ -445,6 +463,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
+        node.isOptionalMethod = inOptionalContext
         node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDeclarationContext
     }
     

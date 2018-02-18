@@ -19,6 +19,9 @@ public class MethodDefinition: ASTNode, InitializableNode {
     
     public var isClassMethod: Bool = false
     
+    // For use in protocol methods only
+    public var isOptionalMethod: Bool = false
+    
     public required init() {
         super.init()
     }

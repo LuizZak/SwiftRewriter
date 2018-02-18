@@ -28,6 +28,13 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                                .functionCall(arguments: [.labeled("firstName", .constant("John")),
                                                          .labeled("secondName", .constant("Doe"))]))
         )
+        
+        assertTransformParsed(
+            original: "[[ClassName alloc] initWith:@\"John\" secondName:@\"Doe\"]",
+            expected: .postfix(.identifier("ClassName"),
+                               .functionCall(arguments: [.unlabeled(.constant("John")),
+                                                         .labeled("secondName", .constant("Doe"))]))
+        )
     }
     
     func testSuperInitWith() {
