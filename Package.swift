@@ -43,10 +43,16 @@ let package = Package(
             dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer", "TypeLexing"]),
         .target(
             name: "SwiftRewriter",
-            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility", "ExpressionPasses"]),
+            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility", "ExpressionPasses", "Utils", "Console"]),
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "Utils"]),
+        .target(
+            name: "Console",
+            dependencies: ["MiniLexer", "TypeLexing", "Utils"]),
+        .testTarget(
+            name: "ConsoleTests",
+            dependencies: ["Console"]),
         .testTarget(
             name: "UtilsTests",
             dependencies: ["Utils"]),

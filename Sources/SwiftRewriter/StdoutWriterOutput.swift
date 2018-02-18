@@ -1,4 +1,5 @@
 import SwiftRewriterLib
+import Utils
 
 public class StdoutWriterOutput: WriterOutput, FileOutput {
     var buffer: String = ""

@@ -1,3 +1,13 @@
+//
+//  ConsoleColor+Terminal.swift
+//  LogParser
+//
+//  Created by Luiz Fernando Silva on 19/01/17.
+//  Copyright © 2017 Luiz Fernando Silva. All rights reserved.
+//
+
+import Cocoa
+
 // This code is based off Vapor's Console library
 //
 // http://github.com/vapor/console
@@ -12,6 +22,35 @@ extension String {
         
         #if !DEBUG
             return color.terminalForeground.ansi + self + UInt8(0).ansi
+        #else
+            return self
+        #endif
+    }
+    
+    /**
+     Strips this entire string of terminal color commands
+     */
+    public func stripTerminalColors() -> String {
+        #if !DEBUG
+            guard let regex = try? NSRegularExpression(pattern: "\\e\\[(\\d+;)*(\\d+)?[ABCDHJKfmsu]", options: []) else {
+                return self
+            }
+            
+            let results = regex.matches(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count))
+            //let removed = results.reduce(0) { $0 + $1.range.length }
+            
+            // Remove ranges in descending order
+            
+            var output = self
+            
+            for res in results.sorted(by: { $0.range.location > $1.range.location }) {
+                let startIndex = output.index(output.startIndex, offsetBy: res.range.location)
+                let endIndex = output.index(output.startIndex, offsetBy: res.range.location + res.range.length)
+                
+                output.removeSubrange(startIndex..<endIndex)
+            }
+            
+            return output
         #else
             return self
         #endif

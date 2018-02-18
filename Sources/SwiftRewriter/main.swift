@@ -2,6 +2,7 @@ import SwiftRewriterLib
 import Utility
 import Foundation
 import ExpressionPasses
+import Console
 
 let arguments = Array(ProcessInfo.processInfo.arguments.dropFirst())
 
@@ -16,32 +17,39 @@ let colorArg: OptionArgument<Bool> =
     parser.add(option: "-colorize", kind: Bool.self, usage: "Pass this parameter as true to enable terminal colorization during output.")
 
 do {
-    let result = try parser.parse(arguments)
-    
-    if let files = result.get(filesArg) {
-        let input = FileInputProvider(files: files)
-        let output = StdoutWriterOutput(colorize: result.get(colorArg) ?? false)
-        
-        let converter = SwiftRewriter(input: input, output: output)
-        
-        converter.expressionPasses.append(AllocInitExpressionPass())
-        converter.expressionPasses.append(CoreGraphicsExpressionPass())
-        converter.expressionPasses.append(FoundationExpressionPass())
-        converter.expressionPasses.append(UIKitExpressionPass())
-        
-        try converter.rewrite()
-        
-        // Print diagnostics
-        for diag in converter.diagnostics.diagnostics {
-            switch diag {
-            case .note:
-                print("// Note: \(diag)")
-            case .warning:
-                print("// Warning: \(diag)")
-            case .error:
-                print("// Error: \(diag)")
+    if let result = try? parser.parse(arguments) {
+        if let files = result.get(filesArg) {
+            let input = FileInputProvider(files: files)
+            let output = StdoutWriterOutput(colorize: result.get(colorArg) ?? false)
+            
+            let converter = SwiftRewriter(input: input, output: output)
+            
+            converter.expressionPasses.append(AllocInitExpressionPass())
+            converter.expressionPasses.append(CoreGraphicsExpressionPass())
+            converter.expressionPasses.append(FoundationExpressionPass())
+            converter.expressionPasses.append(UIKitExpressionPass())
+            
+            try converter.rewrite()
+            
+            // Print diagnostics
+            for diag in converter.diagnostics.diagnostics {
+                switch diag {
+                case .note:
+                    print("// Note: \(diag)")
+                case .warning:
+                    print("// Warning: \(diag)")
+                case .error:
+                    print("// Error: \(diag)")
+                }
             }
+        } else {
+            throw Utility.ArgumentParserError.expectedValue(option: "<files>")
         }
+    } else {
+        let console = Console()
+        let menu = Menu(console: console)
+        
+        menu.main()
     }
 } catch {
     print("Error: \(error)")
