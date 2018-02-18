@@ -32,4 +32,20 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
             expected: "UIColor.Color(1)"
         )
     }
+    
+    func testAddTarget() {
+        assertTransformParsed(
+            original: "[self.button addTarget:self action:@selector(didTapButton:) forControlEvents: UIControlEventTouchUpInside]",
+            expected: .postfix(.postfix(.postfix(.identifier("self"), .member("button")),
+                                        .member("addTarget")),
+                               .functionCall(arguments: [
+                                .unlabeled(.identifier("self")),
+                                .labeled("action", .postfix(.identifier("Selector"),
+                                                            .functionCall(arguments: [
+                                                                .unlabeled(.constant("didTapButton:"))
+                                                                ]))),
+                                .labeled("for", .postfix(.identifier("UIControlEvents"), .member("touchUpInside")))
+                                ]))
+        )
+    }
 }

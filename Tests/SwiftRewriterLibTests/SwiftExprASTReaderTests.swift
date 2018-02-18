@@ -71,7 +71,10 @@ class SwiftExprASTReaderTests: XCTestCase {
     
     func testSelectorExpression() {
         assert(objcExpr: "@selector(abc:def:)",
-               readsAs: .constant("abc:def:")
+               readsAs: .postfix(.identifier("Selector"),
+                                 .functionCall(arguments: [
+                                    .unlabeled(.constant("abc:def:"))
+                                    ]))
         )
     }
     

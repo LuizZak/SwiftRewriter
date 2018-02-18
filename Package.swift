@@ -58,7 +58,7 @@ let package = Package(
             dependencies: ["GrammarModels"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
-            dependencies: ["SwiftRewriterLib", "GrammarModels", "ObjcParser"]),
+            dependencies: ["SwiftRewriterLib", "GrammarModels", "ObjcParser", "ExpressionPasses"]),
         .testTarget(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftRewriterLib", "Antlr4", "ObjcParser", "ObjcParserAntlr"])

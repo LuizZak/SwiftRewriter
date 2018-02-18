@@ -413,7 +413,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
-        return .constant(.string(selectorName))
+        return .postfix(.identifier("Selector"),
+                        .functionCall(arguments: [
+                            .unlabeled(.constant(.string(selectorName)))
+                            ]))
     }
     
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> Expression? {
