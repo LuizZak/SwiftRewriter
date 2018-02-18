@@ -116,6 +116,13 @@ public class Pages {
                                     }
                                     return .loop
                                     
+                                case .showMessageThenLoop(let msg):
+                                    if let msg = msg {
+                                        console.printLine(msg)
+                                        _=console.readLineWith(prompt: "Press [Enter] to continue")
+                                    }
+                                    return .loop
+                                    
                                 case .quit(let msg):
                                     if let msg = msg {
                                         console.printLine(msg)
@@ -209,11 +216,14 @@ public class Pages {
     /// Result of a paging command
     ///
     /// - loop: Loops the page back to where it is
+    /// - showMessageThenLoop: Shows a message, halting the standard input until
+    /// the user presses enter, then resumes in loop mode.
     /// - quit: Quits the page back to the calling menu
     /// - print: Prints a message to the console and re-loops
     /// - modifyList: Called to modify the contents being displayed on the list
     public enum PagesCommandResult {
         case loop(String?)
+        case showMessageThenLoop(String?)
         case quit(String?)
         case modifyList((Pages) -> ())
     }

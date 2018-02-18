@@ -238,9 +238,8 @@ public class MethodBodyIntention: FromSourceIntention {
     }
     
     /// Returns an iterator for all expressions within this method body.
-    public func expressionsIterator(inspectBlocks: Bool) -> AnyIterator<Expression> {
-        return AnyIterator(ExpressionIterator(statement: .compound(body),
-                                              inspectBlocks: inspectBlocks))
+    public func expressionsIterator(inspectBlocks: Bool) -> ExpressionSequence {
+        return ExpressionSequence(statement: .compound(body), inspectBlocks: inspectBlocks)
     }
 }
 

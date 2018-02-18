@@ -103,7 +103,6 @@ public class FilesExplorer: PagesCommandHandler {
             return false
         }
         
-        
         // Raw .h/.m file
         if file.hasSuffix(".h") || file.hasSuffix(".m") {
             guard FileManager.default.fileExists(atPath: newPath.relativePath, isDirectory: &isDirectory) && !isDirectory.boolValue else {
@@ -114,6 +113,7 @@ public class FilesExplorer: PagesCommandHandler {
                 try rewriterService.rewrite(files: [newPath])
             } catch {
                 console.printLine("Error during rewriting: \(error)")
+                _=console.readLineWith(prompt: "Press [Enter] to continue")
             }
             
             return true
@@ -125,10 +125,12 @@ public class FilesExplorer: PagesCommandHandler {
             if !FileManager.default.fileExists(atPath: searchPath.relativePath,
                                                isDirectory: &isDirectory) {
                 console.printLine("Directory \(searchPath) does not exists.")
+                _=console.readLineWith(prompt: "Press [Enter] to continue")
                 return false
             }
             if !isDirectory.boolValue {
                 console.printLine("Path \(searchPath) is not a directory")
+                _=console.readLineWith(prompt: "Press [Enter] to continue")
                 return false
             }
             
@@ -144,37 +146,27 @@ public class FilesExplorer: PagesCommandHandler {
             // Match all files in directory
             let matches =
                 filesInDir.filter {
-                    $0.absoluteURL.relativePath.hasPrefix(newPath.relativePath)
+                    $0.absoluteURL.relativePath
+                        .lowercased()
+                        .hasPrefix(newPath.relativePath.lowercased())
                 }
             
-            if matches.count != 2 {
-                console.printLine("Search is ambiguous: Found the following files:")
-                for (i, path) in matches.enumerated() {
-                    console.printLine("\((i + 1)): \(path.lastPathComponent)")
-                }
-                return true
+            if matches.count == 0 {
+                return false
             }
             
-            guard let header = matches.first(where: { $0.lastPathComponent.hasSuffix(".h") }),
-                let impl = matches.first(where: { $0.lastPathComponent.hasSuffix(".m") }) else
-            {
-                console.printLine("""
-                    Expected search '\(file)' to find a .h header and .m \
-                    implementation, but found \(matches.map { $0.lastPathComponent }.joined(separator: ", ")) \
-                    files instead.
-                    """)
-                return true
+            console.printLine("Found \(matches.count) files to convert:")
+            for (i, path) in matches.enumerated() {
+                console.printLine("\((i + 1)): \(path.lastPathComponent)")
             }
-            
-            console.printLine("""
-                Found files \(header.deletingPathExtension().lastPathComponent) \
-                .h/.m to convert, converting...
-                """)
-            
-            try rewriterService.rewrite(files: [header, impl])
+            let result = console.readLineWith(prompt: "Continue with conversion? y/n")
+            if result?.lowercased() == "y" {
+                try rewriterService.rewrite(files: matches)
+            }
             return true
         } catch {
             console.printLine("Error while loading files: \(error)")
+            _=console.readLineWith(prompt: "Press [Enter] to continue")
             return false
         }
     }

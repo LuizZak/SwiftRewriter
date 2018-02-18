@@ -362,15 +362,6 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     .Setter(valueIdentifier: setter.parameters[0].name,
                             body: setterBody)
             
-            // Search if the backing field is being used anywhere within the class
-            for body in classIntention.methods.compactMap({ $0.body }) {
-                let exps = body.expressionsIterator(inspectBlocks: true)
-                if exps.contains(.identifier(backingFieldName)) ||
-                    exps.contains(.postfix(.identifier("self"), .member(backingFieldName))) {
-                    
-                }
-            }
-            
             // Synthesize a simple getter that has the following statement within:
             // return self._backingField
             let getterIntention =

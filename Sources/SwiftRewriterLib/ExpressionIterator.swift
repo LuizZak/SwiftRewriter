@@ -1,5 +1,5 @@
 /// A class for iterating over Expression trees.
-public class ExpressionIterator: IteratorProtocol {
+public final class ExpressionIterator: IteratorProtocol {
     private var queue: [ExpressionOrStatement] = []
     var inspectBlocks: Bool
     
@@ -152,6 +152,35 @@ public class ExpressionIterator: IteratorProtocol {
     
     private func enqueue<S: Sequence>(contentsOf statements: S) where S.Element == Statement {
         queue.append(contentsOf: statements.map { .statement($0) })
+    }
+    
+    private enum ExpressionOrStatement {
+        case expression(Expression)
+        case statement(Statement)
+    }
+}
+
+public final class ExpressionSequence: Sequence {
+    private var source: ExpressionOrStatement
+    private var inspectBlocks: Bool
+    
+    public init(expression: Expression, inspectBlocks: Bool) {
+        self.source = .expression(expression)
+        self.inspectBlocks = inspectBlocks
+    }
+    
+    public init(statement: Statement, inspectBlocks: Bool) {
+        self.source = .statement(statement)
+        self.inspectBlocks = inspectBlocks
+    }
+    
+    public func makeIterator() -> ExpressionIterator {
+        switch source {
+        case .expression(let exp):
+            return ExpressionIterator(expression: exp, inspectBlocks: inspectBlocks)
+        case .statement(let stmt):
+            return ExpressionIterator(statement: stmt, inspectBlocks: inspectBlocks)
+        }
     }
     
     private enum ExpressionOrStatement {
