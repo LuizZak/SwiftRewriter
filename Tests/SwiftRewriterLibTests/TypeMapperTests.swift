@@ -119,6 +119,14 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "(String, String!) -> Int")
     }
     
+    func testNullableBlock() {
+        expect(.qualified(.blockType(name: "block", returnType: .void, parameters: []),
+                          qualifiers: ["_Nullable"]),
+               withExplicitNullability: nil,
+               toConvertTo: "(() -> Void)?"
+        )
+    }
+    
     func testQualifiedWithinSpecified() {
         expect(.specified(specifiers: ["static"], .qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"])),
                withExplicitNullability: nil,

@@ -66,13 +66,55 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         return type
     }
     
+    fileprivate static func parseObjcType(inSpecifierQualifierList specQual: ObjectiveCParser.SpecifierQualifierListContext) -> ObjcType? {
+        guard let typeName = VarDeclarationTypeExtractor.extract(from: specQual) else {
+            return nil
+        }
+        
+        return parseObjcType(typeName)
+    }
+    
+    fileprivate static func parseObjcType(inSpecifierQualifierList specifierQualifierList: ObjectiveCParser.SpecifierQualifierListContext,
+                                          declarator: ObjectiveCParser.DeclaratorContext) -> ObjcType? {
+        guard let directDeclarator = declarator.directDeclarator() else {
+            return nil
+        }
+        guard let specifiersString = VarDeclarationTypeExtractor.extract(from: specifierQualifierList) else {
+            return nil
+        }
+        
+        let pointer = declarator.pointer()?.accept(VarDeclarationTypeExtractor())
+        
+        let typeString = "\(specifiersString) \(pointer ?? "")"
+        
+        guard var type = ObjcParserListener.parseObjcType(typeString) else {
+            return nil
+        }
+        
+        // Block type
+        if let blockIdentifier = directDeclarator.identifier(),
+            let blockParameters = directDeclarator.blockParameters() {
+            let blockParameterTypes = parseObjcTypes(fromBlockParameters: blockParameters)
+            
+            type = .blockType(name: blockIdentifier.getText(),
+                              returnType: type,
+                              parameters: blockParameterTypes)
+            
+            if let nullability = directDeclarator.nullabilitySpecifier()?.getText() {
+                type = .qualified(type, qualifiers: [nullability])
+            }
+        }
+        
+        return type
+    }
+    
     fileprivate static func parseObjcType(inDeclarationSpecifiers declarationSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext,
                                           typeDeclarator: ObjectiveCParser.TypeDeclaratorContext) -> ObjcType? {
-        let pointer = typeDeclarator.pointer()
+        guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
+            return nil
+        }
         
-        let specifiersString = declarationSpecifiers.children?.map {
-            $0.getText()
-        }.joined(separator: " ") ?? ""
+        let pointer = typeDeclarator.pointer()
         
         let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
         
@@ -83,21 +125,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         // Block type
         if let blockIdentifier = typeDeclarator.directDeclarator()?.identifier(),
             let blockParameters = typeDeclarator.directDeclarator()?.blockParameters() {
-            let typeVariableDeclaratorOrNames = blockParameters.typeVariableDeclaratorOrName()
-            
-            var blockParameterTypes: [ObjcType] = []
-            
-            for typeVariableDeclaratorOrName in typeVariableDeclaratorOrNames {
-                let paramType: ObjcType
-                if let typeName = typeVariableDeclaratorOrName.typeName(),
-                    let type = ObjcParserListener.parseObjcType(typeName.getText()) {
-                    paramType = type
-                } else {
-                    continue
-                }
-                
-                blockParameterTypes.append(paramType)
-            }
+            let blockParameterTypes = parseObjcTypes(fromBlockParameters: blockParameters)
             
             type = .blockType(name: blockIdentifier.getText(),
                               returnType: type,
@@ -105,6 +133,29 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         return type
+    }
+    
+    private static func parseObjcTypes(fromBlockParameters blockParameters: ObjectiveCParser.BlockParametersContext) -> [ObjcType] {
+        let typeVariableDeclaratorOrNames = blockParameters.typeVariableDeclaratorOrName()
+        
+        var paramTypes: [ObjcType] = []
+        
+        for typeVariableDeclaratorOrName in typeVariableDeclaratorOrNames {
+            let paramType: ObjcType
+            if let typeName = typeVariableDeclaratorOrName.typeName(),
+                let type = ObjcParserListener.parseObjcType(fromTypeName: typeName) {
+                paramType = type
+            } else if let typeVariableDecl = typeVariableDeclaratorOrName.typeVariableDeclarator(),
+                let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclarator: typeVariableDecl) {
+                paramType = type
+            } else {
+                continue
+            }
+            
+            paramTypes.append(paramType)
+        }
+        
+        return paramTypes
     }
     
     private static func parseObjcType(fromTypeVariableDeclaratorOrTypeName typeContext: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
@@ -120,9 +171,19 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         return type
     }
     
+    private static func parseObjcType(fromTypeVariableDeclarator typeVariableDecl: ObjectiveCParser.TypeVariableDeclaratorContext) -> ObjcType? {
+        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeVariableDecl) else {
+            return nil
+        }
+        guard let type = ObjcParserListener.parseObjcType(typeString) else {
+            return nil
+        }
+        
+        return type
+    }
+    
     private static func parseObjcType(fromTypeSpecifier typeSpecifier: ObjectiveCParser.TypeSpecifierContext) -> ObjcType? {
-        let visitor = VarDeclarationTypeExtractor()
-        guard let typeString = typeSpecifier.accept(visitor) else {
+        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeSpecifier) else {
             return nil
         }
         guard let type = ObjcParserListener.parseObjcType(typeString) else {
@@ -161,8 +222,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return parseObjcType(fromBlockType: blockType)
         }
         
-        let visitor = VarDeclarationTypeExtractor()
-        guard let typeString = visitor.visitTypeName(typeName) else {
+        guard let typeString = VarDeclarationTypeExtractor.extract(from: typeName) else {
             return nil
         }
         guard let type = ObjcParserListener.parseObjcType(typeString) else {
@@ -340,6 +400,58 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         let declarations = ctx.fieldDeclaration()
         
         for decl in declarations {
+            guard let specifierQualifierList = decl.specifierQualifierList() else {
+                continue
+            }
+            guard let fieldDeclarators = decl.fieldDeclaratorList()?.fieldDeclarator() else {
+                continue
+            }
+            
+            for fieldDeclarator in fieldDeclarators {
+                guard let declarator = fieldDeclarator.declarator() else {
+                    continue
+                }
+                guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
+                    continue
+                }
+                guard let type = ObjcParserListener.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
+                    continue
+                }
+                
+                let typeNode = TypeNameNode(type: type)
+                typeNode.sourceRuleContext = decl
+                let ident = Identifier(name: identifier)
+                ident.sourceRuleContext = declarator.directDeclarator()?.identifier()
+                
+                let ivar = IVarDeclaration()
+                ivar.addChild(typeNode)
+                ivar.addChild(ident)
+                ivar.sourceRuleContext = declarator
+                
+                context.addChildNode(ivar)
+            }
+            
+            /*
+            for (i, (typeName, identifier)) in zip(types, identifiers).enumerated() {
+                guard let type = ObjcParserListener.parseObjcType(typeName) else {
+                    continue
+                }
+                
+                let typeNode = TypeNameNode(type: type)
+                typeNode.sourceRuleContext = decl
+                let ident = Identifier(name: identifier)
+                ident.sourceRuleContext = fieldDeclarators[i].declarator()?.directDeclarator()?.identifier()
+                
+                let ivar = IVarDeclaration()
+                ivar.addChild(typeNode)
+                ivar.addChild(ident)
+                ivar.sourceRuleContext = fieldDeclarators[i].declarator()
+                
+                context.addChildNode(ivar)
+            }
+            */
+            
+            /*
             guard let declarator = decl.fieldDeclaratorList()?.fieldDeclarator(0)?.declarator() else {
                 continue
             }
@@ -363,6 +475,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             ivar.sourceRuleContext = declarator
             
             context.addChildNode(ivar)
+            */
         }
     }
     

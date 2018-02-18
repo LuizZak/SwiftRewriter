@@ -18,6 +18,12 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
     public static func extract(from rule: ObjectiveCParser.TypeVariableDeclaratorContext) -> TypeName? {
         return _extract(from: rule)
     }
+    public static func extract(from rule: ObjectiveCParser.SpecifierQualifierListContext) -> TypeName? {
+        return _extract(from: rule)
+    }
+    public static func extract(from rule: ObjectiveCParser.DeclarationSpecifiersContext) -> TypeName? {
+        return _extract(from: rule)
+    }
     public static func extract(from rule: ObjectiveCParser.VarDeclarationContext, atIndex index: Int = 0) -> TypeName? {
         return _extract(from: rule, atIndex: index)
     }
@@ -29,6 +35,12 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         return _extractAll(from: rule)
     }
     public static func extractAll(from rule: ObjectiveCParser.ForLoopInitializerContext) -> [TypeName] {
+        return _extractAll(from: rule)
+    }
+    public static func extractAll(from rule: ObjectiveCParser.BlockParametersContext) -> [TypeName] {
+        return _extractAll(from: rule)
+    }
+    public static func extractAll(from rule: ObjectiveCParser.FieldDeclarationContext) -> [TypeName] {
         return _extractAll(from: rule)
     }
     
@@ -63,6 +75,64 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
                 
                 return loopInit.accept(ext)
             }
+        }
+        if let blockParameters = rule as? ObjectiveCParser.BlockParametersContext {
+            var parameterTypes: [TypeName] = []
+            
+            for param in blockParameters.typeVariableDeclaratorOrName() {
+                guard let paramType = param.accept(ext) else {
+                    continue
+                }
+                
+                parameterTypes.append(paramType)
+            }
+            
+            return parameterTypes
+        }
+        if let fieldDeclaration = rule as? ObjectiveCParser.FieldDeclarationContext {
+            var typeNames: [TypeName] = []
+            
+            guard let fieldDeclaratorList = fieldDeclaration.fieldDeclaratorList() else {
+                return []
+            }
+            guard let specifierQualifierList = fieldDeclaration.specifierQualifierList()?.accept(ext) else {
+                return []
+            }
+            for declarator in fieldDeclaratorList.fieldDeclarator() {
+                guard let directDeclarator = declarator.declarator()?.directDeclarator() else {
+                    continue
+                }
+                
+                if let blockParameters = directDeclarator.blockParameters() {
+                    var blockType = TypeName()
+                    
+                    let parameters = extractAll(from: blockParameters)
+                    
+                    blockType += specifierQualifierList
+                    
+                    blockType += "(^"
+                    
+                    if let nullabilitySpecifier = directDeclarator.nullabilitySpecifier() {
+                        blockType += nullabilitySpecifier.getText()
+                    }
+                    
+                    blockType += ")"
+                    
+                    blockType += "("
+                    blockType += parameters.joined(separator: ", ")
+                    blockType += ")"
+                    
+                    typeNames.append(blockType)
+                } else {
+                    if let pointer = declarator.declarator()?.pointer()?.accept(ext) {
+                        typeNames.append(specifierQualifierList + " " + pointer)
+                    } else {
+                        typeNames.append(specifierQualifierList)
+                    }
+                }
+            }
+            
+            return typeNames
         }
         
         return rule.accept(ext).map { [$0] } ?? []
@@ -100,10 +170,10 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         
         // Get a type string to convert into a proper type
         guard let declarationSpecifiers = ctx.declarationSpecifiers() else { return nil }
-        let pointer = declarator.pointer()?.accept(self) ?? ""
+        let decl = declarator.accept(self) ?? ""
         let specifiersString = declarationSpecifiers.accept(self) ?? ""
         
-        let typeString = "\(specifiersString) \(pointer)"
+        let typeString = "\(specifiersString) \(decl)"
         
         return typeString
     }
@@ -160,19 +230,77 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
             return nil
         }
         
-        var parameterTypes: [String] = []
+        var type = TypeName()
         
-        if let blockParameters = ctx.blockParameters() {
-            for param in blockParameters.typeVariableDeclaratorOrName() {
-                guard let paramType = param.accept(self) else {
-                    continue
-                }
-                
-                parameterTypes.append(paramType)
-            }
+        if let blockNullability = ctx.nullabilitySpecifier(0) {
+            type += "\(blockNullability.getText()) "
         }
         
-        return "(\(parameterTypes.joined(separator: ", "))) -> \(returnType)"
+        type += "\(returnType) "
+        
+        if let returnNullability = ctx.nullabilitySpecifier(1) {
+            type += "\(returnNullability.getText()) "
+        }
+        
+        type += "(^"
+        
+        if let blockNullability = ctx.nullabilitySpecifier(2) {
+            type += "\(blockNullability.getText()) "
+        } else if let typeSpecifier = ctx.typeSpecifier(1)?.accept(self) {
+            type += "\(typeSpecifier) "
+        }
+        
+        type += ")"
+        
+        if let blockParameters = ctx.blockParameters() {
+            let parameterTypes = VarDeclarationTypeExtractor.extractAll(from: blockParameters)
+            
+            type += "("
+            type += parameterTypes.joined(separator: ", ")
+            type += ")"
+        }
+        
+        return type
+    }
+    
+    public override func visitDeclarator(_ ctx: ObjectiveCParser.DeclaratorContext) -> TypeName? {
+        guard let directDeclarator = ctx.directDeclarator()?.accept(self) else {
+            return nil
+        }
+        
+        if let pointer = ctx.pointer()?.accept(self) {
+            return pointer + " " + directDeclarator
+        }
+        
+        return directDeclarator
+    }
+    
+    public override func visitDirectDeclarator(_ ctx: ObjectiveCParser.DirectDeclaratorContext) -> TypeName? {
+        if let blockParameters = ctx.blockParameters() {
+            let parameterTypes = VarDeclarationTypeExtractor.extractAll(from: blockParameters)
+            
+            var type = TypeName()
+            
+            type += "(^"
+            
+            if let blockNullability = ctx.nullabilitySpecifier() {
+                type += blockNullability.getText()
+            }
+            
+            type += ")"
+            
+            type += "(" + parameterTypes.joined(separator: ", ") + ")"
+            
+            return type
+        }
+        if let declarator = ctx.declarator() {
+            return declarator.accept(self)
+        }
+        if let identifier = ctx.identifier() {
+            return identifier.getText()
+        }
+        
+        return nil
     }
     
     public override func visitTypeName(_ ctx: ObjectiveCParser.TypeNameContext) -> TypeName? {

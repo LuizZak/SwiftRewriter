@@ -133,7 +133,7 @@ public class ObjcParser {
     
     public func parseObjcType() throws -> ObjcType {
         // Here we simplify the grammar for types as:
-        // TypeName: specifiers* IDENTIFIER ('<' TypeName '>')? '*'? qualifiers*
+        // TypeName: specifier* IDENTIFIER ('<' TypeName '>')? '*'? qualifier*
         
         var type: ObjcType
         
