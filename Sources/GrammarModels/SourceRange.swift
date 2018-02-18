@@ -49,7 +49,10 @@ public enum SourceRange: Equatable {
             return .range(min(lhs, rhs)..<max(lhs, rhs))
             
         case let (.range(lhs), .range(rhs)):
-            return .range(lhs.lowerBound..<rhs.upperBound)
+            let lower = min(lhs.lowerBound, rhs.lowerBound)
+            let upper = max(lhs.upperBound, rhs.upperBound)
+            
+            return .range(lower..<upper)
         case let (.range(rang), .location(loc)),
              let (.location(loc), .range(rang)):
             if rang.contains(loc) {

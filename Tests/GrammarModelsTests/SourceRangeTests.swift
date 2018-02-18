@@ -19,6 +19,23 @@ class SourceRangeTests: XCTestCase {
         }
     }
     
+    func testUnionOutOrOrder() {
+        let string = "abcde"
+        let expected = string.startIndex..<string.endIndex
+        let range1 = SourceRange.range(string.index(string.startIndex, offsetBy: 2)..<string.endIndex)
+        let range2 = SourceRange.range(string.startIndex..<string.index(string.startIndex, offsetBy: 1))
+        
+        let result = range1.union(with: range2)
+        
+        switch result {
+        case .range(let range) where range == expected:
+            // Success!
+            break
+        default:
+            XCTFail("Failed to receive expected range \(expected), received \(result) instead.")
+        }
+    }
+    
     func testUnionRangeWithLocation() {
         let string = "abcde"
         let expected = string.startIndex..<string.endIndex
