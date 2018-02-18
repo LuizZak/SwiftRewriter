@@ -1,7 +1,7 @@
 import Console
 import XCTest
 
-class ConsoleMenuControllerTests: XCTestCase {
+class ConsoleMenuControllerTests: ConsoleTestCase {
     func testExitMenu() {
         let mock = makeMockConsole()
         mock.addMockInput(line: "0")
@@ -10,7 +10,7 @@ class ConsoleMenuControllerTests: XCTestCase {
         
         sut.main()
         
-        mock.assert()
+        mock.beginOutputAssertion()
             .checkNext("""
             = Menu
             Please select an option bellow:
@@ -28,7 +28,7 @@ class ConsoleMenuControllerTests: XCTestCase {
         
         sut.main()
         
-        mock.assert()
+        mock.beginOutputAssertion()
             .checkNext("Please select an option bellow:")
             .checkNext("[INPUT] '1'")
             .checkNext("Invalid option index 1")
@@ -48,7 +48,7 @@ class ConsoleMenuControllerTests: XCTestCase {
             
             sut.main()
             
-            mock.assert()
+            mock.beginOutputAssertion()
                 .checkNext("Please select an option bellow:")
                 .checkNext("[INPUT] '1'")
                 .checkNext("Selected menu 1!")
@@ -83,7 +83,7 @@ class ConsoleMenuControllerTests: XCTestCase {
             
             sut.main()
             
-            mock.assert()
+            mock.beginOutputAssertion()
                 .checkNext("= Menu 1")
                 .checkNext("Please select an option bellow:")
                 .checkNext("[INPUT] '1'")
@@ -99,15 +99,16 @@ class ConsoleMenuControllerTests: XCTestCase {
         
         XCTAssert(didDeinit)
     }
-    
-    func makeMockConsole(file: String = #file, line: Int = #line) -> MockConsole {
-        return MockConsole(testCase: self, file: file, line: line)
-    }
 }
 
 class TestMenuController: MenuController {
     var onDeinit: () -> ()
     var builder: ((MenuController) -> (MenuController.MenuItem))?
+    
+    override init(console: ConsoleClient) {
+        self.onDeinit = { () in }
+        super.init(console: console)
+    }
     
     init(console: ConsoleClient, onDeinit: @escaping () -> ()) {
         self.onDeinit = onDeinit

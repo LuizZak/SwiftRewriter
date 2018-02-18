@@ -1,11 +1,3 @@
-//
-//  ConsoleDataProvider.swift
-//  LogParser
-//
-//  Created by Luiz Fernando Silva on 20/01/17.
-//  Copyright © 2017 Luiz Fernando Silva. All rights reserved.
-//
-
 import Cocoa
 
 /// Protocol to be implemented by objects that lazyly feed data to a console output routine.

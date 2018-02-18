@@ -1,13 +1,7 @@
-//
-//  Console+Paging.swift
-//  LogParser
-//
-//  Created by Luiz Fernando Silva on 20/01/17.
-//  Copyright © 2017 Luiz Fernando Silva. All rights reserved.
-//
-
 import Cocoa
 
+/// Allows the user to navigate and select through pages of items, allowing them
+/// to perform specific actions on items, as well.
 public class Pages {
     
     var console: Console
@@ -34,7 +28,7 @@ public class Pages {
                 let maxItem = min(minItem + perPageCount, provider.count)
                 
                 // Use this to pad the numbers
-                print("----")
+                console.printLine("----")
                 
                 // Map each value into [[1, item1], [2, item2], [3, item3], ...]
                 // and pass it into the table display routine to allow it to evenly nice the items
@@ -49,13 +43,13 @@ public class Pages {
                 
                 console.displayTable(withValues: table, separator: " ")
                 
-                print("---- \(minItem + 1) to \(maxItem)")
-                print("= Page \(page + 1) of \(pageCount)")
+                console.printLine("---- \(minItem + 1) to \(maxItem)")
+                console.printLine("= Page \(page + 1) of \(pageCount)")
                 
                 // Closure that validates two types of inputs:
                 // - Relative page changes (e.g.: '+1', '-10', '+2' etc., with no bounds)
                 // - Absolute page (e.g. 1, 2, 3, etc., from 1 - pageCount)
-                let pageValidateNew: (String) -> Bool = {
+                let pageValidateNew: (String) -> Bool = { [console] in
                     // Command
                     if($0.hasPrefix("=") && self.configuration?.commandClosure != nil) {
                         return true
@@ -64,12 +58,12 @@ public class Pages {
                     // Decrease/increase page
                     if($0.hasPrefix("-") || $0.hasPrefix("+")) {
                         if($0.count == 1) {
-                            print("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                            console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
                             return false
                         }
                         // Try to read an integer value
                         if Int($0[$0.index(after: $0.startIndex)...]) == nil {
-                            print("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                            console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
                             return false
                         }
                         
@@ -78,11 +72,11 @@ public class Pages {
                     
                     // Direct page
                     guard let index = Int($0) else {
-                        print("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                        console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
                         return false
                     }
                     if(index != 0 && (index < 1 || index > pageCount)) {
-                        print("Invalid page index \($0). Must be between 1 and \(pageCount)")
+                        console.printLine("Invalid page index \($0). Must be between 1 and \(pageCount)")
                         return false
                     }
                     
@@ -107,12 +101,12 @@ public class Pages {
                                 try command(String(newPage[newPage.index(after: newPage.startIndex)...]))
                             }
                         } catch {
-                            print(error)
+                            console.printLine("\(error)")
                             _=readLine()
                             return .loop
                         }
                     } else {
-                        print("Commands not supported/not setup for this page displayer")
+                        console.printLine("Commands not supported/not setup for this page displayer")
                         return .loop
                     }
                 }

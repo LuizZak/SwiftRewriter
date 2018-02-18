@@ -2,6 +2,12 @@ import Foundation
 import XCTest
 import Console
 
+public class ConsoleTestCase: XCTestCase {
+    func makeMockConsole(file: String = #file, line: Int = #line) -> MockConsole {
+        return MockConsole(testCase: self, file: file, line: line)
+    }
+}
+
 class MockConsole: Console {
     private var _buffer = OutputBuffer()
     var buffer: String {
@@ -27,6 +33,16 @@ class MockConsole: Console {
         commandsInput.append(line)
     }
     
+    override func readSureLineWith(prompt: String) -> String {
+        if commandsInput.isEmpty {
+            testCase.recordFailure(withDescription: "Unexpected readLineWith with prompt: \(prompt)",
+                inFile: file, atLine: line, expected: false)
+            return "0"
+        }
+        
+        return super.readSureLineWith(prompt: prompt)
+    }
+    
     override func readLineWith(prompt: String) -> String? {
         if commandsInput.isEmpty {
             testCase.recordFailure(withDescription: "Unexpected readLineWith with prompt: \(prompt)",
@@ -40,7 +56,7 @@ class MockConsole: Console {
             scalar == "\n" ? "\\n" : scalar.escaped(asASCII: true)
             }.joined(separator: "")
         
-        _buffer.output += "[INPUT] '\(ascii ?? "<nil>")'"
+        _buffer.output += "[INPUT] '\(ascii ?? "<nil>")'\n"
         
         return command
     }
@@ -52,7 +68,7 @@ class MockConsole: Console {
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
     }
     
-    public func assert() -> MockConsoleOutputAsserter {
+    public func beginOutputAssertion() -> MockConsoleOutputAsserter {
         return MockConsoleOutputAsserter(output: _buffer.output, testCase: testCase)
     }
     
@@ -112,6 +128,13 @@ public class MockConsoleOutputAsserter {
     func printIfAsserted(file: String = #file, line: Int = #line) {
         if didAssert {
             assert(message: output, file: file, line: line)
+        }
+    }
+    
+    /// Unconditionally prints the buffer output to the standard output
+    func printOutput() {
+        if didAssert {
+            print(output)
         }
     }
     

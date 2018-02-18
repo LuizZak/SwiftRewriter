@@ -5,9 +5,13 @@ import Console
 public class Menu: MenuController {
     public override func initMenus() -> MenuController.MenuItem {
         
-        return createMenu(name: "Main menu") { menu, item in
-            menu.addAction(name: "Test menu") { menu in
-                menu.console.printLine("Oppie!")
+        return createMenu(name: "Main") { menu, item in
+            item.initAction = .closure {
+                menu.console.printLine("Welcome to Swift Rewriter")
+            }
+            
+            menu.createMenu(name: "Explore files") { menu, item in
+                
             }
         }
     }

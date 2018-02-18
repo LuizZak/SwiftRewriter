@@ -1,11 +1,3 @@
-//
-//  Console.swift
-//  LogParser
-//
-//  Created by Luiz Fernando Silva on 20/01/17.
-//  Copyright © 2017 Luiz Fernando Silva. All rights reserved.
-//
-
 import Foundation
 import Cocoa
 import MiniLexer
@@ -51,6 +43,12 @@ public protocol ConsoleClient {
     
     /// Called to record the given exit code for the console's program
     func recordExitCode(_ code: Int)
+    
+    /// Makes a new paging client
+    func makePages() -> Pages
+    
+    /// Makes a new paging client with a given set of configurations
+    func makePages(configuration: Pages.PageDisplayConfiguration) -> Pages
 }
 
 /// Helper console-interation interface
@@ -179,6 +177,14 @@ open class Console: ConsoleClient {
     
     open func recordExitCode(_ code: Int) {
         errno = Int32(code)
+    }
+    
+    public func makePages() -> Pages {
+        return makePages(configuration: Pages.PageDisplayConfiguration())
+    }
+    
+    public func makePages(configuration: Pages.PageDisplayConfiguration) -> Pages {
+        return Pages(console: self, configuration: configuration)
     }
     
     /// Measures the number of visible characters for a given string input
