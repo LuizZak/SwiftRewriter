@@ -61,8 +61,17 @@ class TypeMapperTests: XCTestCase {
                withExplicitNullability: .nullable,
                toConvertTo: "(UITableViewDelegate & UITableViewDataSource)?")
         
-        expect(.pointer(.generic("NSArray", parameters: [.struct("NSInteger")])),
-               toConvertTo: "[Int]")
+        expect(.struct("instancetype"),
+               toConvertTo: "AnyObject")
+        
+        expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
+               withExplicitNullability: nil,
+               toConvertTo: "AnyObject?")
+    }
+    
+    func testNSArray() {
+        expect(.pointer(.generic("NSArray", parameters: [.pointer(.struct("NSObject"))])),
+               toConvertTo: "[NSObject]")
         
         expect(.pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])),
                toConvertTo: "[String]")
@@ -71,13 +80,42 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "NSArray")
         expect(.pointer(.struct("NSArray")),
                toConvertTo: "NSArray")
+    }
+    
+    func testNSDictionary() {
+        expect(.pointer(.generic("NSDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))])),
+               toConvertTo: "[String: NSObject]")
         
-        expect(.struct("instancetype"),
-               toConvertTo: "AnyObject")
+        expect(.pointer(.generic("NSDictionary", parameters: [.pointer(.struct("NSString"))])),
+               toConvertTo: "NSDictionary<String>")
+        expect(.pointer(.struct("NSDictionary")),
+               toConvertTo: "NSDictionary")
+    }
+    
+    /// NSMutableArray is kept alone since its pass-by-reference semantics are
+    /// not fully compatible with Swift's array...
+    func testNSMutableArray() {
+        expect(.pointer(.generic("NSMutableArray", parameters: [.pointer(.struct("NSObject"))])),
+               toConvertTo: "NSMutableArray<NSObject>")
         
-        expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
-               withExplicitNullability: nil,
-               toConvertTo: "AnyObject?")
+        expect(.pointer(.generic("NSMutableArray", parameters: [.pointer(.struct("NSString"))])),
+               toConvertTo: "NSMutableArray<String>")
+        
+        expect(.pointer(.generic("NSMutableArray", parameters: [])),
+               toConvertTo: "NSMutableArray")
+        expect(.pointer(.struct("NSMutableArray")),
+               toConvertTo: "NSMutableArray")
+    }
+    
+    /// ...ditto for NSMutableDictionary
+    func testNSMutableDictionary() {
+        expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))])),
+               toConvertTo: "NSMutableDictionary<String, NSObject>")
+        
+        expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString"))])),
+               toConvertTo: "NSMutableDictionary<String>")
+        expect(.pointer(.struct("NSMutableDictionary")),
+               toConvertTo: "NSMutableDictionary")
     }
     
     func testConcreteTypesWithProtocol() {

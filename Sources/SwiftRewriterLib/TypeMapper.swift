@@ -111,7 +111,7 @@ public class TypeMapper {
             return .typeName(name)
         }
         
-        // Array conversion
+        // NSArray<> -> Array<> conversion
         if name == "NSArray" && parameters.count == 1 {
             let inner =
                 swiftType(forObjcType: parameters[0],
@@ -120,6 +120,19 @@ public class TypeMapper {
                           context: context.asAlwaysNonNull())
             
             return .array(inner)
+        }
+        
+        // NSDictionary<,> -> Dictionary<,> conversion
+        if name == "NSDictionary" && parameters.count == 2 {
+            let inner0 =
+                swiftType(forObjcType: parameters[0],
+                          // See above
+                          context: context.asAlwaysNonNull())
+            let inner1 =
+                swiftType(forObjcType: parameters[1],
+                          context: context.asAlwaysNonNull())
+            
+            return .dictionary(key: inner0, value: inner1)
         }
         
         let types =
@@ -238,6 +251,7 @@ public class TypeMapper {
         "NSObject": .typeName("NSObject"),
         "NSNumber": .typeName("NSNumber"),
         "NSArray": .typeName("NSArray"),
+        "NSMutableArray": .typeName("NSMutableArray"),
         "NSString": .string
     ]
     
