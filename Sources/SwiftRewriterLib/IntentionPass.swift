@@ -325,13 +325,18 @@ public class PropertyMergeIntentionPass: IntentionPass {
         return classIntention.methods
     }
     
+    /// From a given found joined set of @property definition and potential
+    /// getter/setter definitions, reworks the intented signatures on the class
+    /// definition such that properties are correctly flattened with their non-synthesized
+    /// getter/setters into `var myVar { get set }` Swift computed properties.
     private func joinPropertySet(_ propertySet: PropertySet, on classIntention: ClassGenerationIntention) {
         switch (propertySet.getter, propertySet.setter) {
         case let (getter?, setter?):
             if let getterBody = getter.body, let setterBody = setter.body {
                 let setter =
-                    PropertyGenerationIntention.Setter(valueIdentifier: setter.parameters[0].name,
-                                                       body: setterBody)
+                    PropertyGenerationIntention
+                        .Setter(valueIdentifier: setter.parameters[0].name,
+                                body: setterBody)
                 
                 propertySet.property.mode =
                     .property(get: getterBody, set: setter)
@@ -340,6 +345,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // Remove the original method intentions
             classIntention.removeMethod(getter)
             classIntention.removeMethod(setter)
+            
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
             if let body = getter.body {
                 propertySet.property.mode = .computed(body)
@@ -347,6 +353,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             // Remove the original method intention
             classIntention.removeMethod(getter)
+            
         case let (nil, setter?):
             if let setterBody = setter.body {
                 let backingFieldName = "_" + propertySet.property.name
