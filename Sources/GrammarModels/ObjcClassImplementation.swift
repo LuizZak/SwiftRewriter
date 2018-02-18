@@ -1,7 +1,9 @@
 /// A syntax node for an Objective-C class implementation (`@implementation`)
 /// declaration.
 public class ObjcClassImplementation: ASTNode, InitializableNode {
-    public var identifier: ASTNodeRef<Identifier> = .invalid(InvalidNode())
+    public var identifier: Identifier? {
+        return firstChild()
+    }
     
     public required init() {
         

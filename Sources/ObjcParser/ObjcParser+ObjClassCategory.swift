@@ -55,13 +55,13 @@ public extension ObjcParser {
         try parseKeyword(.atInterface, onMissing: "Expected \(Keyword.atInterface) to start class declaration")
         
         // Class name
-        classNode.identifier = .valid(try parseIdentifierNode())
+        classNode.addChild(try parseIdentifierNode())
         
         // Category name
         try parseTokenNode(.openParens)
         
         if lexer.tokenType(.identifier) {
-            classNode.categoryName = try parseIdentifierNode()
+            classNode.addChild(try parseIdentifierNode())
         }
         
         if lexer.tokenType(.closeParens) {

@@ -32,6 +32,7 @@ public class SwiftWriter {
         let file = output.createFile(path: fileIntent.filePath)
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+        let classExtensions = fileIntent.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         let protocols = fileIntent.protocolIntentions
         var addSeparator = false
         
@@ -66,6 +67,10 @@ public class SwiftWriter {
         
         for cls in classes {
             outputClass(cls, target: out)
+        }
+        
+        for cls in classExtensions {
+            outputClassExtension(cls, target: out)
         }
         
         out.onAfterOutput()
@@ -125,18 +130,35 @@ public class SwiftWriter {
         target.outputLineFeed()
     }
     
+    private func outputClassExtension(_ cls: ClassExtensionGenerationIntention, target: RewriterOutputTarget) {
+        target.output(line: "// MARK: - \(cls.extensionName ?? "")", style: .comment)
+        target.output(line: "@objc", style: .keyword)
+        target.outputIdentation()
+        target.outputInlineWithSpace("extension", style: .keyword)
+        target.outputInline(cls.typeName, style: .typeName)
+        
+        outputClassBodyCommon(cls, target: target)
+    }
+    
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
+        target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         target.outputInlineWithSpace("class", style: .keyword)
         target.outputInline(cls.typeName, style: .typeName)
         
+        outputClassBodyCommon(cls, target: target)
+    }
+    
+    private func outputClassBodyCommon(_ cls: BaseClassIntention, target: RewriterOutputTarget) {
         // Figure out inheritance clauses
         var inheritances: [String] = []
-        if let sup = cls.superclassName {
-            inheritances.append(sup)
-        } else {
-            // Always inherit from NSObject, at least.
-            inheritances.append("NSObject")
+        if let cls = cls as? ClassGenerationIntention {
+            if let sup = cls.superclassName {
+                inheritances.append(sup)
+            } else {
+                // Always inherit from NSObject, at least.
+                inheritances.append("NSObject")
+            }
         }
         inheritances.append(contentsOf: cls.protocols.map { p in p.protocolName })
         
@@ -340,7 +362,7 @@ public class SwiftWriter {
         
         if let body = initMethod.body {
             outputMethodBody(body, target: target)
-        } else if initMethod.parent is ClassGenerationIntention {
+        } else if initMethod.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
             target.outputLineFeed()
@@ -364,7 +386,7 @@ public class SwiftWriter {
         
         if let body = method.body {
             outputMethodBody(body, target: target)
-        } else if method.parent is ClassGenerationIntention {
+        } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
             target.outputLineFeed()
@@ -415,7 +437,7 @@ public class SwiftWriter {
         
         if let body = method.body {
             outputMethodBody(body, target: target)
-        } else if method.parent is ClassGenerationIntention {
+        } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
             target.outputLineFeed()

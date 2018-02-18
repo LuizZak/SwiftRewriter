@@ -312,7 +312,7 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         let result = _parseTestObjcCategoryNode(source: source, parser: sut)
         
-        XCTAssertEqual(result.identifier.name, "MyClass")
+        XCTAssertEqual(result.identifier?.name, "MyClass")
         XCTAssertNil(result.ivarsList)
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }

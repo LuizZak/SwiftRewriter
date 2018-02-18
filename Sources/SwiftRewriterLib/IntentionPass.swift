@@ -35,7 +35,7 @@ public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
                 
                 return
                     file.typeIntentions.contains {
-                        $0.typeName == type.typeName && $0.source is ObjcClassImplementation
+                        $0.typeName == type.typeName && ($0.source is ObjcClassImplementation || $0.source is ObjcClassCategoryImplementation)
                     }
             })
         }
@@ -151,7 +151,7 @@ public class FileGroupingIntentionPass: IntentionPass {
     }
     
     fileprivate static func mergeAllTypeDefinitions(in types: [TypeGenerationIntention]) {
-        let target = types.reversed().first { $0.source is ObjcClassImplementation } ?? types.last!
+        let target = types.reversed().first { $0.source is ObjcClassImplementation || $0.source is ObjcClassCategoryImplementation } ?? types.last!
         
         for type in types.dropLast() {
             mergeTypes(from: type, into: target)
@@ -174,7 +174,10 @@ public class FileGroupingIntentionPass: IntentionPass {
             if second.superclassName == nil {
                 second.superclassName = first.superclassName
             }
-            
+        }
+        
+        if let first = first as? BaseClassIntention,
+            let second = second as? BaseClassIntention {
             // Instance vars
             for ivar in first.instanceVariables {
                 if !second.hasInstanceVariable(named: ivar.name) {

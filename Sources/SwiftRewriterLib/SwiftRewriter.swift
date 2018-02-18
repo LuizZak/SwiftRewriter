@@ -83,6 +83,8 @@ public class SwiftRewriter {
                 self.enterObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.enterObjcClassImplementationNode(n)
+            case let n as ObjcClassCategoryImplementation:
+                self.enterObjcClassCategoryImplementationNode(n)
             case let n as ProtocolDeclaration:
                 self.enterProtocolDeclarationNode(n)
             case let n as IVarsList:
@@ -138,6 +140,8 @@ public class SwiftRewriter {
                 self.exitObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.exitObjcClassImplementationNode(n)
+            case let n as ObjcClassCategoryImplementation:
+                self.exitObjcClassCategoryImplementationNode(n)
             case let n as ProtocolDeclaration:
                 self.exitProtocolDeclarationNode(n)
             case let n as IVarsList:
@@ -281,12 +285,13 @@ public class SwiftRewriter {
     
     // MARK: - ObjcClassCategory
     private func enterObjcClassCategoryNode(_ node: ObjcClassCategory) {
-        guard let name = node.identifier.name else {
+        guard let name = node.identifier?.name else {
             return
         }
         
         let intent =
-            ClassGenerationIntention(typeName: name, source: node)
+            ClassExtensionGenerationIntention(typeName: name, source: node)
+        intent.extensionName = node.categoryName?.name
         
         intentionCollection.addIntention(intent)
         
@@ -298,14 +303,14 @@ public class SwiftRewriter {
     }
     
     private func exitObjcClassCategoryNode(_ node: ObjcClassCategory) {
-        if node.identifier.name != nil {
-            context.popContext() // ClassGenerationIntention
+        if node.identifier?.name != nil {
+            context.popContext() // ClassExtensionGenerationIntention
         }
     }
     
     // MARK: - ObjcClassImplementation
     private func enterObjcClassImplementationNode(_ node: ObjcClassImplementation) {
-        guard let name = node.identifier.name else {
+        guard let name = node.identifier?.name else {
             return
         }
         
@@ -323,6 +328,29 @@ public class SwiftRewriter {
     
     private func exitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
         context.popContext() // ClassGenerationIntention
+    }
+    
+    // MARK: - ObjcClassCategoryImplementation
+    private func enterObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementation) {
+        guard let name = node.identifier?.name else {
+            return
+        }
+        
+        let intent =
+            ClassExtensionGenerationIntention(typeName: name, source: node)
+        intent.extensionName = node.categoryName?.name
+        
+        intentionCollection.addIntention(intent)
+        
+        context
+            .findContext(ofType: FileGenerationIntention.self)?
+            .addType(intent)
+        
+        context.pushContext(intent)
+    }
+    
+    private func exitObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementation) {
+        context.popContext() // ClassExtensionGenerationIntention
     }
     
     // MARK: - ProtocolDeclaration
@@ -462,7 +490,7 @@ public class SwiftRewriter {
     }
     
     private func visitObjcClassIVarDeclarationNode(_ node: IVarDeclaration) {
-        guard let classCtx = context.findContext(ofType: ClassGenerationIntention.self) else {
+        guard let classCtx = context.findContext(ofType: BaseClassIntention.self) else {
             return
         }
         let ivarCtx = context.findContext(ofType: IVarListContext.self)

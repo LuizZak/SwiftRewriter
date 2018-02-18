@@ -281,6 +281,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
         mapper.addRuleMap(rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
         mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategory.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.CategoryImplementationContext.self, nodeType: ObjcClassCategoryImplementation.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDefinitionContext.self, nodeType: MethodDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.KeywordDeclaratorContext.self, nodeType: KeywordDeclarator.self)
@@ -357,11 +358,20 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
-        // Class name
-        if let identifier = ctx.categoryName?.identifier() {
+        // Note: In the original Antlr's grammar, 'className' and 'categoryName'
+        // seem to be switched around. We undo that here while parsing.
+        
+        if let className = ctx.categoryName?.identifier() {
+            let identifierNode = Identifier(name: className.getText())
+            identifierNode.sourceRuleContext = ctx.className
+            classNode.addChild(identifierNode)
+        }
+        
+        // Class category name
+        if let identifier = ctx.className {
             let identifierNode = Identifier(name: identifier.getText())
             identifierNode.sourceRuleContext = identifier
-            classNode.identifier = .valid(identifierNode)
+            classNode.addChild(identifierNode)
         }
         
         // Protocol list
@@ -393,7 +403,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         if let identifier = ctx.className?.identifier() {
             let identNode = Identifier(name: identifier.getText())
             identNode.sourceRuleContext = identifier
-            classNode.identifier = .valid(identNode)
+            classNode.addChild(identNode)
         }
         
         // Super class name
@@ -401,6 +411,26 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             let supName = SuperclassName(name: sup)
             supName.sourceRuleContext = ctx.superclassName
             context.addChildNode(supName)
+        }
+    }
+    
+    override func enterCategoryImplementation(_ ctx: ObjectiveCParser.CategoryImplementationContext) {
+        guard let classNode = context.currentContextNode(as: ObjcClassCategoryImplementation.self) else {
+            return
+        }
+        
+        // Class name
+        if let identifier = ctx.categoryName?.identifier() {
+            let identNode = Identifier(name: identifier.getText())
+            identNode.sourceRuleContext = identifier
+            classNode.addChild(identNode)
+        }
+        
+        // Category name
+        if let identifier = ctx.className {
+            let identNode = Identifier(name: identifier.getText())
+            identNode.sourceRuleContext = identifier
+            classNode.addChild(identNode)
         }
     }
     

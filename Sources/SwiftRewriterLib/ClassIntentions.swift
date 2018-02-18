@@ -1,8 +1,7 @@
 import GrammarModels
 
-/// An intention to generate a Swift class type
-public class ClassGenerationIntention: TypeGenerationIntention {
-    public var superclassName: String?
+/// Base intention for Class and Class Category intentions
+public class BaseClassIntention: TypeGenerationIntention {
     public var instanceVariables: [InstanceVariableGenerationIntention] = []
     
     public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
@@ -12,10 +11,20 @@ public class ClassGenerationIntention: TypeGenerationIntention {
     public func hasInstanceVariable(named name: String) -> Bool {
         return instanceVariables.contains(where: { $0.name == name })
     }
+}
+
+/// An intention to generate a Swift class type
+public class ClassGenerationIntention: BaseClassIntention {
+    public var superclassName: String?
     
     public func setSuperclassIntention(_ superclassName: String) {
         self.superclassName = superclassName
     }
+}
+
+/// An intention to generate a class extension from an existing class
+public class ClassExtensionGenerationIntention: BaseClassIntention {
+    public var extensionName: String?
 }
 
 /// An intention to conform a class to a protocol

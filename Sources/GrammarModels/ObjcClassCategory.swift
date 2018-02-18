@@ -1,7 +1,11 @@
 /// A class category that extends a class with additional properties/methods/ivars/protocols.
 public class ObjcClassCategory: ASTNode, InitializableNode {
-    public var identifier: ASTNodeRef<Identifier> = .invalid(InvalidNode())
-    public var categoryName: Identifier?
+    public var identifier: Identifier? {
+        return firstChild()
+    }
+    public var categoryName: Identifier? {
+        return child(ofType: Identifier.self, atIndex: 1)
+    }
     
     public required init() {
         
@@ -17,6 +21,31 @@ public extension ObjcClassCategory {
         return firstChild()
     }
     
+    public var ivarsList: IVarsList? {
+        return firstChild()
+    }
+    
+    public var methods: [MethodDefinition] {
+        return childrenMatching()
+    }
+}
+
+/// A syntax node for an Objective-C class implementation (`@implementation`)
+/// declaration for a category.
+public class ObjcClassCategoryImplementation: ASTNode, InitializableNode {
+    public var identifier: Identifier? {
+        return firstChild()
+    }
+    public var categoryName: Identifier? {
+        return child(ofType: Identifier.self, atIndex: 1)
+    }
+    
+    public required init() {
+        
+    }
+}
+
+public extension ObjcClassCategoryImplementation {
     public var ivarsList: IVarsList? {
         return firstChild()
     }

@@ -103,6 +103,10 @@ class TestFileOutput: FileOutput {
     func close() {
         buffer += "\n// End of file \(path)"
         
+        if !writerOutput.buffer.isEmpty {
+            writerOutput.buffer += "\n"
+        }
+        
         writerOutput.buffer += buffer
     }
     

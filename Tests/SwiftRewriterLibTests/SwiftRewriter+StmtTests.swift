@@ -219,6 +219,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -241,6 +242,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -258,6 +260,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -277,6 +280,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -306,6 +310,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             var myInt: Int
             var myInt2: Int = 5
             
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -350,6 +355,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -378,6 +384,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -407,6 +414,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -437,6 +445,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -465,6 +474,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -494,6 +504,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -526,6 +537,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -561,6 +573,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -597,6 +610,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -627,6 +641,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -652,6 +667,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -675,6 +691,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -703,6 +720,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -725,6 +743,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -762,6 +781,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """
         let swift = """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {

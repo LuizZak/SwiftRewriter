@@ -15,6 +15,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -41,6 +42,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
+            @objc
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
@@ -70,6 +72,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
+            @objc
             class MyClass: NSObject {
                 @objc var property: String
                 
@@ -78,6 +81,58 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
             }
             // End of file objc.m
+            """)
+    }
+    
+    func testClassCategory() throws {
+        assertThat()
+            .file(name: "MyClass.h",
+            """
+            @interface MyClass
+            - (void)originalMethod;
+            @end
+            """)
+            .file(name: "MyClass.m",
+            """
+            @implementation MyClass
+            - (void)originalMethod {
+            }
+            @end
+            """)
+            .file(name: "MyClass+Ext.h",
+            """
+            @interface MyClass (Extension)
+            - (void)fromExtension;
+            - (void)fromExtensionInterfaceOnly;
+            @end
+            """)
+            .file(name: "MyClass+Ext.m",
+            """
+            @implementation MyClass (Extension)
+            - (void)fromExtension {
+            }
+            @end
+            """)
+            .translatesToSwift(
+            """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func originalMethod() {
+                }
+            }
+            // End of file MyClass.m
+            // MARK: - Extension
+            @objc
+            extension MyClass {
+                @objc
+                func fromExtension() {
+                }
+                @objc
+                func fromExtensionInterfaceOnly() {
+                }
+            }
+            // End of file MyClass+Ext.m
             """)
     }
     

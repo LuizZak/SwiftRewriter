@@ -35,7 +35,7 @@ extension ObjcParser {
         try parseKeyword(.atImplementation, onMissing: "Expected \(Keyword.atImplementation) to start class definition")
         
         // Class name
-        classNode.identifier = .valid(try parseIdentifierNode())
+        classNode.addChild(try parseIdentifierNode())
         
         // Super class name
         if lexer.tokenType(.colon) {
