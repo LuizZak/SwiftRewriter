@@ -12,9 +12,13 @@ public class FilesExplorer: PagesCommandHandler {
     
     public var commandClosure: ((String) throws -> Pages.PagesCommandResult)?
     
+    public var console: ConsoleClient
+    public var rewriterService: SwiftRewriterService
     public var path: URL
     
-    public init(path: URL) {
+    public init(console: ConsoleClient, rewriterService: SwiftRewriterService, path: URL) {
+        self.console = console
+        self.rewriterService = rewriterService
         self.path = path
         
         commandClosure = { [weak self] input in
@@ -53,6 +57,10 @@ public class FilesExplorer: PagesCommandHandler {
             newPathAttempt = nil
         }
         
+        if verifyFilesNamed(input, from: path) {
+            return .loop(nil)
+        }
+        
         // Work with relative paths
         if let newPathAttempt = newPathAttempt, FileManager.default.fileExists(atPath: newPathAttempt.absoluteURL.relativePath) {
             newPath = newPathAttempt.absoluteURL
@@ -79,6 +87,95 @@ public class FilesExplorer: PagesCommandHandler {
         
         return .modifyList { pages in
             pages.displayPages(withProvider: newList)
+        }
+    }
+    
+    func verifyFilesNamed(_ file: String, from url: URL) -> Bool {
+        let newPath = url.appendingPathComponent(file).absoluteURL
+        
+        var isDirectory = ObjCBool(false)
+        
+        // Check if we're not pointing at a directory the user might want to navigate
+        // to
+        if FileManager.default.fileExists(atPath: newPath.relativePath,
+                                          isDirectory: &isDirectory)
+            && isDirectory.boolValue {
+            return false
+        }
+        
+        
+        // Raw .h/.m file
+        if file.hasSuffix(".h") || file.hasSuffix(".m") {
+            guard FileManager.default.fileExists(atPath: newPath.relativePath, isDirectory: &isDirectory) && !isDirectory.boolValue else {
+                return false
+            }
+            
+            do {
+                try rewriterService.rewrite(files: [newPath])
+            } catch {
+                console.printLine("Error during rewriting: \(error)")
+            }
+            
+            return true
+        }
+        
+        do {
+            let searchPath = newPath.deletingLastPathComponent()
+            
+            if !FileManager.default.fileExists(atPath: searchPath.relativePath,
+                                               isDirectory: &isDirectory) {
+                console.printLine("Directory \(searchPath) does not exists.")
+                return false
+            }
+            if !isDirectory.boolValue {
+                console.printLine("Path \(searchPath) is not a directory")
+                return false
+            }
+            
+            // Search for .h/.m pairs with a similar name
+            let filesInDir =
+                try
+                    FileManager.default
+                        .contentsOfDirectory(at: newPath.deletingLastPathComponent(),
+                                             includingPropertiesForKeys: nil,
+                                             options: [.skipsHiddenFiles,
+                                                       .skipsSubdirectoryDescendants])
+            
+            // Match all files in directory
+            let matches =
+                filesInDir.filter {
+                    $0.absoluteURL.relativePath.hasPrefix(newPath.relativePath)
+                }
+            
+            if matches.count != 2 {
+                console.printLine("Search is ambiguous: Found the following files:")
+                for (i, path) in matches.enumerated() {
+                    console.printLine("\((i + 1)): \(path.lastPathComponent)")
+                }
+                return true
+            }
+            
+            guard let header = matches.first(where: { $0.lastPathComponent.hasSuffix(".h") }),
+                let impl = matches.first(where: { $0.lastPathComponent.hasSuffix(".m") }) else
+            {
+                console.printLine("""
+                    Expected search '\(file)' to find a .h header and .m \
+                    implementation, but found \(matches.map { $0.lastPathComponent }.joined(separator: ", ")) \
+                    files instead.
+                    """)
+                return true
+            }
+            
+            console.printLine("""
+                Found files \(header.deletingPathExtension().lastPathComponent) \
+                .h/.m to convert, converting...
+                """)
+            
+            try rewriterService.rewrite(files: [header, impl])
+            return true
+        } catch {
+            console.printLine("Error while loading files: \(error)")
+            return false
         }
     }
 }

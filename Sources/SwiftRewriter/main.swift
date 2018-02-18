@@ -46,8 +46,10 @@ do {
             throw Utility.ArgumentParserError.expectedValue(option: "<files>")
         }
     } else {
+        let output = StdoutWriterOutput(colorize: true)
+        let service = SwiftRewriterServiceImpl(output: output)
         let console = Console()
-        let menu = Menu(console: console)
+        let menu = Menu(rewriterService: service, console: console)
         
         menu.main()
     }
