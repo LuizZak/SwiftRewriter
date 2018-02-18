@@ -160,13 +160,6 @@ public class FileGroupingIntentionPass: IntentionPass {
     fileprivate
     static func mergeTypes(from first: TypeGenerationIntention,
                            into second: TypeGenerationIntention) {
-        // Inheritance
-        if let first = first as? ClassGenerationIntention, let second = second as? ClassGenerationIntention {
-            if second.superclassName == nil {
-                second.superclassName = first.superclassName
-            }
-        }
-        
         // Protocols
         for prot in first.protocols {
             if !second.hasProtocol(named: prot.protocolName) {
@@ -174,12 +167,17 @@ public class FileGroupingIntentionPass: IntentionPass {
             }
         }
         
-        if let firstCls = first as? ClassGenerationIntention,
-            let secondCls = second as? ClassGenerationIntention {
+        if let first = first as? ClassGenerationIntention,
+            let second = second as? ClassGenerationIntention {
+            // Inheritance
+            if second.superclassName == nil {
+                second.superclassName = first.superclassName
+            }
+            
             // Instance vars
-            for ivar in firstCls.instanceVariables {
-                if !secondCls.hasInstanceVariable(named: ivar.name) {
-                    secondCls.addInstanceVariable(ivar)
+            for ivar in first.instanceVariables {
+                if !second.hasInstanceVariable(named: ivar.name) {
+                    second.addInstanceVariable(ivar)
                 }
             }
         }
@@ -210,6 +208,35 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
     }
     
+    /// Merges signatures such that incoming signatures with optional or
+    /// non-optional (except implicitly-unwrapped optionals) overwrite the optionality
+    /// of implicitly-unwrapped optional signatures.
+    ///
+    /// This rewrites methods such that:
+    ///
+    /// ```
+    /// class IncomingType {
+    ///     func myFunc(_ param: AnObject?) -> String
+    /// }
+    ///
+    /// class TargetType {
+    ///     func myFunc(_ param: AnObject!) -> String!
+    /// }
+    /// ```
+    /// have their signatures merged into the target type so they match:
+    ///
+    /// ```
+    /// class TargetType {
+    ///     // Nullability from IncomingType.myFunc() has
+    ///     // overwritten the implicitly-unwrapped
+    ///     // nullability from TartgetType.myFunc()
+    ///     func myFunc(_ param: AnObject?) -> String
+    /// }
+    /// ```
+    ///
+    /// This is mostly used for @interface/@implementation pairing, where @interface
+    /// contains the proper nullability annotations, and for @protocol conformance
+    /// nullability pairing.
     fileprivate
     static func mergeMethodSignature(_ method1: MethodGenerationIntention,
                                      into method2: MethodGenerationIntention) {
