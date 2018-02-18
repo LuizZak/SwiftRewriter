@@ -64,6 +64,8 @@ indirect public enum SwiftType: Equatable {
     public static var uint = SwiftType.typeName("UInt")
     public static var string = SwiftType.typeName("String")
     public static var bool = SwiftType.typeName("Bool")
+    public static var float = SwiftType.typeName("Float")
+    public static var double = SwiftType.typeName("Double")
     public static var cgFloat = SwiftType.typeName("CGFloat")
     public static var any = SwiftType.typeName("Any")
     public static var anyObject = SwiftType.typeName("AnyObject")

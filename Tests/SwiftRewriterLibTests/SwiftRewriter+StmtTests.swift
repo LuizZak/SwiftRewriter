@@ -166,6 +166,64 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    /// Leaving Swift to infer the proper type of numeric types can be troublesome
+    /// sometimes, as it may not get the correct Float/Integer types while inferring
+    /// initial expressions.
+    /// Aid the compiler by keeping the type patterns for int/float literals.
+    func testKeepVarTypePatternsOnNumericTypes() throws {
+        try assertSingleStatement(
+            objc: "NSInteger x = 10;",
+            swift: "var x: Int = 10"
+        )
+        try assertSingleStatement(
+            objc: "NSUInteger x = 10;",
+            swift: "var x: UInt = 10"
+        )
+        try assertSingleStatement(
+            objc: "CGFloat x = 10;",
+            swift: "var x: CGFloat = 10"
+        )
+        try assertSingleStatement(
+            objc: "double x = 10;",
+            swift: "var x: Double = 10"
+        )
+        
+        // Keep inferring on for literal-based expressions as well
+        try assertSingleStatement(
+            objc: "NSInteger x = 10 + 5;",
+            swift: "var x: Int = 10 + 5"
+        )
+        try assertSingleStatement(
+            objc: "NSUInteger x = 10 + 5;",
+            swift: "var x: UInt = 10 + 5"
+        )
+        try assertSingleStatement(
+            objc: "CGFloat x = 10 + 5.0;",
+            swift: "var x: CGFloat = 10 + 5.0"
+        )
+        try assertSingleStatement(
+            objc: "double x = 10 + 5.0;",
+            swift: "var x: Double = 10 + 5.0"
+        )
+        
+        // Type expressions from non-literal sources are not needed as they can
+        // be inferred
+        try assertSingleStatement(
+            objc: "CGFloat x = self.frame.size.width;",
+            swift: "var x = self.frame.size.width"
+        )
+        
+        // No need to keep inferrence for Boolean or String types
+        try assertSingleStatement(
+            objc: "BOOL x = YES;",
+            swift: "var x = true"
+        )
+        try assertSingleStatement(
+            objc: "NSString *x = @\"A string\";",
+            swift: "var x = \"A string\""
+        )
+    }
+    
     func testArrayLiterals() throws {
         try assertSingleStatement(
             objc: "@[];",
@@ -314,10 +372,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    var local = 5
-                    let constLocal = 5
+                    var local: Int = 5
+                    let constLocal: Int = 5
                     var local2: Int
-                    var localS1 = 5, localS2: Int
+                    var localS1: Int = 5, localS2: Int
                 }
             }
             """)

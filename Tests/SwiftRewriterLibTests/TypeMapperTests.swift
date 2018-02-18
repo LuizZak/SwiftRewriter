@@ -19,6 +19,16 @@ class TypeMapperTests: XCTestCase {
         expectSwift(.optional(.block(returnType: .int, parameters: [.int])), toConvertTo: "((Int) -> Int)?")
     }
     
+    func testPrimitiveTypes() {
+        expect(.struct("NSInteger"), toConvertTo: "Int")
+        expect(.struct("NSUInteger"), toConvertTo: "UInt")
+        expect(.struct("float"), toConvertTo: "Float")
+        expect(.struct("double"), toConvertTo: "Double")
+        expect(.struct("int"), toConvertTo: "Int")
+        expect(.struct("BOOL"), toConvertTo: "Bool")
+        expect(.struct("CGColor"), toConvertTo: "CGColor")
+    }
+    
     func testMapSimpleTypes() {
         expect(.specified(specifiers: ["const"], .struct("NSInteger")),
                toConvertTo: "Int")
@@ -26,11 +36,6 @@ class TypeMapperTests: XCTestCase {
         expect(.specified(specifiers: ["const"], .struct("NSInteger")),
                withExplicitNullability: nil,
                toConvertTo: "Int")
-        
-        expect(.struct("NSInteger"), toConvertTo: "Int")
-        expect(.struct("int"), toConvertTo: "Int")
-        expect(.struct("BOOL"), toConvertTo: "Bool")
-        expect(.struct("CGColor"), toConvertTo: "CGColor")
         
         expect(.pointer(.struct("NSString")),
                toConvertTo: "String")

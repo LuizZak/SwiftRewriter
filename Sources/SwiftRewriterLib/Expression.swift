@@ -27,6 +27,31 @@ public indirect enum Expression: Equatable {
             return false
         }
     }
+    
+    /// `true` if this expression sub-tree contains only literal-based sub-expressions.
+    /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
+    /// `.unary`, `.prefix`, `.parens`, and `.ternary` which only feature
+    /// literal sub-expressions.
+    ///
+    /// For ternary expressions, the test expression to the left of the question
+    /// mark operand does not affect the result of literal-based tests.
+    public var isLiteralExpression: Bool {
+        switch self {
+        case .constant(.int), .constant(.hexadecimal), .constant(.float),
+             .constant(.binary), .constant(.octal), .constant(.string),
+             .constant(.nil), .constant(.boolean):
+            return true
+            
+        case let .binary(lhs, _, rhs), let .ternary(_, lhs, rhs):
+            return lhs.isLiteralExpression && rhs.isLiteralExpression
+            
+        case .unary(_, let exp), .prefix(_, let exp), .parens(let exp):
+            return exp.isLiteralExpression
+            
+        default:
+            return false
+        }
+    }
 }
 
 public struct BlockParameter: Equatable {
@@ -140,6 +165,8 @@ public enum SwiftOperator: String {
     case multiply = "*"
     case divide = "/"
     
+    case mod = "%"
+    
     case addAssign = "+="
     case subtractAssign = "-="
     case multiplyAssign = "*="
@@ -168,8 +195,6 @@ public enum SwiftOperator: String {
     case greaterThan = ">"
     case greaterThanOrEqual = ">="
     
-    case mod = "%"
-    
     case assign = "="
     case equals = "=="
     case unequals = "!="
@@ -178,6 +203,53 @@ public enum SwiftOperator: String {
     
     case openRange = "..<"
     case closedRange = "..."
+    
+    /// Gets the category for this operator
+    public var category: SwiftOperatorCategory {
+        switch self {
+        // Arithmetic
+        case .add, .subtract, .multiply, .divide, .mod:
+            return .arithmetic
+        
+        // Logical
+        case .and, .or, .negate:
+            return .logical
+            
+        // Bitwise
+        case .bitwiseAnd, .bitwiseOr, .bitwiseXor, .bitwiseNot, .bitwiseShiftLeft,
+             .bitwiseShiftRight:
+            return .bitwise
+            
+        // Assignment
+        case .assign, .addAssign, .subtractAssign, .multiplyAssign, .divideAssign,
+             .bitwiseAndAssign, .bitwiseOrAssign, .bitwiseXorAssign, .bitwiseNotAssign,
+             .bitwiseShiftLeftAssign, .bitwiseShiftRightAssign:
+            return .assignment
+            
+        // Comparison
+        case .lessThan, .lessThanOrEqual, .greaterThan, .greaterThanOrEqual,
+             .equals, .unequals:
+            return .comparison
+            
+        // Null-coallesce
+        case .nullCoallesce:
+            return .nullCoallesce
+            
+        // Range-making operators
+        case .openRange, .closedRange:
+            return .range
+        }
+    }
+}
+
+public enum SwiftOperatorCategory: Equatable {
+    case arithmetic
+    case comparison
+    case logical
+    case bitwise
+    case nullCoallesce
+    case assignment
+    case range
 }
 
 // MARK: - String Conversion

@@ -224,8 +224,10 @@ public class TypeMapper {
     private static let _scalarMappings: [String: SwiftType] = [
         "BOOL": .bool,
         "NSInteger": .int,
-        "int": .int,
         "NSUInteger": .uint,
+        "int": .int,
+        "float": .float,
+        "double": .double,
         "CGFloat": .cgFloat,
         "instancetype": .anyObject
     ]

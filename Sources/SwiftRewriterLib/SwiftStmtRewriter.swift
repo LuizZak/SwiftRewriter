@@ -554,13 +554,22 @@ fileprivate class StatementWriter {
             
             target.outputInline(declaration.identifier)
             
+            let shouldEmitType =
+                declaration
+                    .initialization
+                    .map(shouldEmitTypeSignature(forInitVal:))
+                    ?? true
+            
+            if shouldEmitType {
+                // Type signature
+                target.outputInline(": ")
+                target.outputInline(typeString, style: .typeName)
+            }
+            
             if let initial = declaration.initialization {
                 target.outputInline(" = ")
                 
                 emitExpr(initial)
-            } else {
-                target.outputInline(": ")
-                target.outputInline(typeString, style: .typeName)
             }
         }
         
@@ -609,5 +618,116 @@ fileprivate class StatementWriter {
     private func emitExpr(_ expr: Expression) {
         let rewriter = ExpressionWriter(target: target, expressionPasses: expressionPasses)
         rewriter.rewrite(expr)
+    }
+    
+    private func shouldEmitTypeSignature(forInitVal exp: Expression) -> Bool {
+        if !exp.isLiteralExpression {
+            return false
+        }
+        
+        switch deduceType(from: exp) {
+        case .int, .float:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    /// Attempts to make basic deductions about an expression's resulting type.
+    /// Used only for deciding whether to infer types for variable definitions
+    /// with initial values.
+    private func deduceType(from exp: Expression) -> DeducedType {
+        switch exp {
+        case .constant(let cons) where cons.isInteger:
+            return .int
+        case .constant(.float):
+            return .float
+        case .constant(.boolean):
+            return .bool
+        case .constant(.string):
+            return .string
+            
+        case let .binary(lhs, op, rhs):
+            switch op.category {
+            case .arithmetic, .bitwise:
+                let lhsType = deduceType(from: lhs)
+                let rhsType = deduceType(from: rhs)
+                
+                // Arithmetic and bitwise operators keep operand types, if they
+                // are the same.
+                if lhsType == rhsType {
+                    return lhsType
+                }
+                
+                // Float takes precedence over ints on arithmetic operators
+                if op.category == .arithmetic {
+                    switch (lhsType, rhsType) {
+                    case (.float, .int), (.int, .float):
+                        return .float
+                    default:
+                        break
+                    }
+                } else if op.category == .bitwise {
+                    // Bitwise operators always cast the result to integers, if
+                    // one of the operands is an integer
+                    switch (lhsType, rhsType) {
+                    case (_, .int), (.int, _):
+                        return .int
+                    default:
+                        break
+                    }
+                }
+                
+                return .other
+                
+            case .assignment:
+                return deduceType(from: rhs)
+                
+            case .comparison:
+                return .bool
+                
+            case .logical:
+                return .bool
+                
+            case .nullCoallesce, .range:
+                return .other
+            }
+            
+        case .parens(let exp):
+            return deduceType(from: exp)
+            
+        case let .prefix(op, _), let .unary(op, _):
+            switch op {
+            case .negate:
+                return .bool
+            case .bitwiseNot:
+                return .int
+                
+            // Pointer types
+            case .multiply, .bitwiseAnd:
+                return .other
+                
+            default:
+                return .other
+            }
+            
+        case .ternary(_, let lhs, let rhs):
+            let lhsType = deduceType(from: lhs)
+            if lhsType == deduceType(from: rhs) {
+                return lhsType
+            }
+            
+            return .other
+        default:
+            return .other
+        }
+    }
+    
+    private enum DeducedType {
+        case int
+        case float
+        case bool
+        case string
+        case other
     }
 }
