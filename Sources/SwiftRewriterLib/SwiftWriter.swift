@@ -525,7 +525,7 @@ internal func evaluateOwnershipPrefix(inType type: ObjcType,
     
     // Search in property
     if let property = property {
-        if let modifiers = property.modifierList?.keywordModifiers {
+        if let modifiers = property.attributesList?.keywordAttributes {
             if modifiers.contains("weak") {
                 ownership = .weak
             } else if modifiers.contains("unsafe_unretained") {

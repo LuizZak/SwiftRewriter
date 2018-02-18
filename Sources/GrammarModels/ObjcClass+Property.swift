@@ -4,7 +4,7 @@ public class PropertyDefinition: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public var modifierList: PropertyModifierList? {
+    public var attributesList: PropertyAttributesList? {
         return firstChild()
     }
     
@@ -18,14 +18,14 @@ public class PropertyDefinition: ASTNode, InitializableNode {
     }
 }
 
-public class PropertyModifierList: ASTNode, InitializableNode {
-    public var modifiers: [PropertyModifier] {
+public class PropertyAttributesList: ASTNode, InitializableNode {
+    public var attributes: [PropertyAttributeNode] {
         return childrenMatching()
     }
     
-    public var keywordModifiers: [String] {
-        return modifiers.compactMap { mod in
-            switch mod.modifier {
+    public var keywordAttributes: [String] {
+        return attributes.compactMap { mod in
+            switch mod.attribute {
             case .keyword(let kw):
                 return kw
             default:
@@ -34,9 +34,9 @@ public class PropertyModifierList: ASTNode, InitializableNode {
         }
     }
     
-    public var getterModifiers: [String] {
-        return modifiers.compactMap { mod in
-            switch mod.modifier {
+    public var getterAttributes: [String] {
+        return attributes.compactMap { mod in
+            switch mod.attribute {
             case .getter(let gt):
                 return gt
             default:
@@ -45,9 +45,9 @@ public class PropertyModifierList: ASTNode, InitializableNode {
         }
     }
     
-    public var setterModifiers: [String] {
-        return modifiers.compactMap { mod in
-            switch mod.modifier {
+    public var setterAttributes: [String] {
+        return attributes.compactMap { mod in
+            switch mod.attribute {
             case .setter(let st):
                 return st
             default:
@@ -61,30 +61,30 @@ public class PropertyModifierList: ASTNode, InitializableNode {
     }
 }
 
-public class PropertyModifier: ASTNode {
-    public var modifier: Modifier
+public class PropertyAttributeNode: ASTNode {
+    public var attribute: Attribute
     
     public init(name: String, location: SourceLocation = .invalid) {
-        self.modifier = .keyword(name)
+        self.attribute = .keyword(name)
         super.init(location: location)
     }
     
     public init(getter: String, location: SourceLocation = .invalid) {
-        self.modifier = .getter(getter)
+        self.attribute = .getter(getter)
         super.init(location: location)
     }
     
     public init(setter: String, location: SourceLocation = .invalid) {
-        self.modifier = .setter(setter)
+        self.attribute = .setter(setter)
         super.init(location: location)
     }
     
-    public init(modifier: Modifier, location: SourceLocation = .invalid) {
-        self.modifier = modifier
+    public init(modifier: Attribute, location: SourceLocation = .invalid) {
+        self.attribute = modifier
         super.init(location: location)
     }
     
-    public enum Modifier {
+    public enum Attribute {
         case keyword(String)
         case getter(String)
         case setter(String)

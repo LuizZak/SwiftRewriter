@@ -158,12 +158,12 @@ public class FileGroupingIntentionPass: IntentionPass {
     }
     
     fileprivate
-    static func mergeTypes(from first: TypeGenerationIntention,
+    static func mergeTypes(from first: KnownType,
                            into second: TypeGenerationIntention) {
         // Protocols
-        for prot in first.protocols {
+        for prot in first.knownProtocolConformances {
             if !second.hasProtocol(named: prot.protocolName) {
-                second.addProtocol(prot)
+                second.generateProtocolConformance(from: prot)
             }
         }
         
@@ -183,9 +183,9 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
         
         // Properties
-        for prop in first.properties {
+        for prop in first.knownProperties {
             if !second.hasProperty(named: prop.name) {
-                second.addProperty(prop)
+                second.generateProperty(from: prop)
             }
         }
         
@@ -194,16 +194,16 @@ public class FileGroupingIntentionPass: IntentionPass {
     }
     
     fileprivate
-    static func mergeMethodSignatures(from first: TypeGenerationIntention,
+    static func mergeMethodSignatures(from first: KnownType,
                                       into second: TypeGenerationIntention) {
         // Methods
         // TODO: Figure out how to deal with same-signature selectors properly when
         // trying to find repeated method definitions.
-        for method in first.methods {
-            if let existing = second.method(withSignature: method.signature) {
-                mergeMethodSignature(method, into: existing)
+        for knownMethod in first.knownMethods {
+            if let existing = second.method(withSignature: knownMethod.signature) {
+                mergeMethodSignature(knownMethod, into: existing)
             } else {
-                second.addMethod(method)
+                second.generateMethod(from: knownMethod)
             }
         }
     }
@@ -238,7 +238,7 @@ public class FileGroupingIntentionPass: IntentionPass {
     /// contains the proper nullability annotations, and for @protocol conformance
     /// nullability pairing.
     fileprivate
-    static func mergeMethodSignature(_ method1: MethodGenerationIntention,
+    static func mergeMethodSignature(_ method1: KnownMethod,
                                      into method2: MethodGenerationIntention) {
         if !method1.signature.returnType.isImplicitlyUnwrapped && method2.signature.returnType.isImplicitlyUnwrapped {
             if method1.signature.returnType.deepUnwrapped == method2.signature.returnType.deepUnwrapped {
@@ -355,35 +355,36 @@ public class PropertyMergeIntentionPass: IntentionPass {
             classIntention.removeMethod(getter)
             
         case let (nil, setter?):
-            if let setterBody = setter.body {
-                let backingFieldName = "_" + propertySet.property.name
-                let setter =
-                    PropertyGenerationIntention
-                        .Setter(valueIdentifier: setter.parameters[0].name,
-                                body: setterBody)
-                
-                // Synthesize a simple getter that has the following statement within:
-                // return self._backingField
-                let getterIntention =
-                    MethodBodyIntention(body: [.return(.identifier(backingFieldName))],
-                                        source: propertySet.setter?.body?.source)
-                
-                propertySet.property.mode = .property(get: getterIntention, set: setter)
-                
-                let field =
-                    PropertyGenerationIntention(name: backingFieldName,
-                                                storage: propertySet.property.storage,
-                                                accessLevel: .private,
-                                                source: propertySet.property.source)
-                
-                if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
-                    classIntention.addProperty(field, at: index)
-                }
+            classIntention.removeMethod(setter)
+            
+            guard let setterBody = setter.body else {
+                break
             }
             
-            // Remove the original method intentions
-            classIntention.removeMethod(setter)
-            break
+            let backingFieldName = "_" + propertySet.property.name
+            let setter =
+                PropertyGenerationIntention
+                    .Setter(valueIdentifier: setter.parameters[0].name,
+                            body: setterBody)
+            
+            // Synthesize a simple getter that has the following statement within:
+            // return self._backingField
+            let getterIntention =
+                MethodBodyIntention(body: [.return(.identifier(backingFieldName))],
+                                    source: propertySet.setter?.body?.source)
+            
+            propertySet.property.mode = .property(get: getterIntention, set: setter)
+            
+            let field =
+                PropertyGenerationIntention(name: backingFieldName,
+                                            storage: propertySet.property.storage,
+                                            attributes: [],
+                                            accessLevel: .private,
+                                            source: propertySet.property.source)
+            
+            if let index = classIntention.properties.index(where: { $0 === propertySet.property }) {
+                classIntention.addProperty(field, at: index)
+            }
         default:
             break
         }

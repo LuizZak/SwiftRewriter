@@ -647,13 +647,13 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     }
     
     override func enterPropertyAttributesList(_ ctx: ObjectiveCParser.PropertyAttributesListContext) {
-        let node = PropertyModifierList()
+        let node = PropertyAttributesList()
         node.sourceRuleContext = ctx
         property.addChild(node)
     }
     
     override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
-        let modifier: PropertyModifier.Modifier
+        let modifier: PropertyAttributeNode.Attribute
         
         if let ident = ctx.identifier()?.getText() {
             if ctx.GETTER() != nil {
@@ -667,10 +667,10 @@ private class PropertyListener: ObjectiveCParserBaseListener {
             modifier = .keyword(ctx.getText())
         }
         
-        let node = PropertyModifier(modifier: modifier)
+        let node = PropertyAttributeNode(modifier: modifier)
         node.sourceRuleContext = ctx
         
-        property.modifierList?.addChild(node)
+        property.attributesList?.addChild(node)
     }
 }
 

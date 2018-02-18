@@ -357,18 +357,32 @@ public class SwiftRewriter {
         var ownership: Ownership = .strong
         if let type = node.type?.type {
             let context = TypeMapper
-                .TypeMappingContext(modifiers: node.modifierList, inNonnull: isNodeInNonnullContext(node))
+                .TypeMappingContext(modifiers: node.attributesList, inNonnull: isNodeInNonnullContext(node))
             
             swiftType = typeMapper.swiftType(forObjcType: type, context: context)
             ownership = evaluateOwnershipPrefix(inType: type, property: node)
         }
+        
+        let attributes =
+            node.attributesList?
+                .attributes.map { attr -> PropertyAttribute in
+                    switch attr.attribute {
+                    case .getter(let getter):
+                        return PropertyAttribute.getterName(getter)
+                    case .setter(let setter):
+                        return PropertyAttribute.setterName(setter)
+                    case .keyword(let keyword):
+                        return PropertyAttribute.attribute(keyword)
+                    }
+                } ?? []
         
         let storage =
             ValueStorage(type: swiftType, ownership: ownership, isConstant: false)
         
         let prop =
             PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                        storage: storage, source: node)
+                                        storage: storage, attributes: attributes,
+                                        source: node)
         
         prop.inNonnullContext = isNodeInNonnullContext(node)
         

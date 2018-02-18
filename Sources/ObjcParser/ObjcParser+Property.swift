@@ -36,7 +36,7 @@ public extension ObjcParser {
         func parsePropertyModifier() throws {
             do {
                 let range = startRange()
-                let node: PropertyModifier
+                let node: PropertyAttributeNode
                 
                 if lexer.tokenType(.keyword(.getter)) {
                     // 'getter' '=' IDENT
@@ -48,7 +48,7 @@ public extension ObjcParser {
                     // IDENT
                     let id = try parseIdentifierNode()
                     
-                    node = PropertyModifier(getter: id.name, location: range.makeLocation())
+                    node = PropertyAttributeNode(getter: id.name, location: range.makeLocation())
                 } else if lexer.tokenType(.keyword(.setter)) {
                     // 'setter' '=' IDENT ':'
                     try parseAnyKeyword()
@@ -62,11 +62,11 @@ public extension ObjcParser {
                     // ':'
                     try parseTokenNode(.colon, onMissing: "Expected a setter selector")
                     
-                    node = PropertyModifier(setter: id.name, location: range.makeLocation())
+                    node = PropertyAttributeNode(setter: id.name, location: range.makeLocation())
                 } else {
                     let token = try lexer.consume(tokenType: .identifier)
                     
-                    node = PropertyModifier(name: token.string, location: range.makeLocation())
+                    node = PropertyAttributeNode(name: token.string, location: range.makeLocation())
                 }
                 
                 context.addChildNode(node)
@@ -76,7 +76,7 @@ public extension ObjcParser {
             }
         }
         
-        let node = context.pushContext(nodeType: PropertyModifierList.self)
+        let node = context.pushContext(nodeType: PropertyAttributesList.self)
         defer {
             context.popContext()
         }

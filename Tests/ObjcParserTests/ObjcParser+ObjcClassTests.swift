@@ -186,10 +186,10 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         
         XCTAssertEqual(result.properties[0].type?.type, .struct("BOOL"))
         XCTAssertEqual(result.properties[0].identifier?.name, "myProperty1")
-        XCTAssertNotNil(result.properties[0].modifierList)
-        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[0], "atomic")
-        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[1], "nonatomic")
-        XCTAssertEqual(result.properties[0].modifierList?.keywordModifiers[2], "copy")
+        XCTAssertNotNil(result.properties[0].attributesList)
+        XCTAssertEqual(result.properties[0].attributesList?.keywordAttributes[0], "atomic")
+        XCTAssertEqual(result.properties[0].attributesList?.keywordAttributes[1], "nonatomic")
+        XCTAssertEqual(result.properties[0].attributesList?.keywordAttributes[2], "copy")
         XCTAssertEqual(sut.diagnostics.errors.count, 0, sut.diagnostics.errors.description)
     }
     

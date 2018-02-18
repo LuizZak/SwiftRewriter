@@ -49,10 +49,10 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         
         XCTAssertEqual(result.type?.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier?.name, "myProperty1")
-        XCTAssertNotNil(result.modifierList)
-        XCTAssertEqual(result.modifierList?.keywordModifiers[0], "atomic")
-        XCTAssertEqual(result.modifierList?.keywordModifiers[1], "nonatomic")
-        XCTAssertEqual(result.modifierList?.keywordModifiers[2], "copy")
+        XCTAssertNotNil(result.attributesList)
+        XCTAssertEqual(result.attributesList?.keywordAttributes[0], "atomic")
+        XCTAssertEqual(result.attributesList?.keywordAttributes[1], "nonatomic")
+        XCTAssertEqual(result.attributesList?.keywordAttributes[2], "copy")
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
@@ -68,8 +68,8 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         
         XCTAssertEqual(result.type?.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier?.name, "enabled")
-        XCTAssertNotNil(result.modifierList)
-        XCTAssertEqual(result.modifierList?.getterModifiers[0], "isEnabled")
+        XCTAssertNotNil(result.attributesList)
+        XCTAssertEqual(result.attributesList?.getterAttributes[0], "isEnabled")
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     
@@ -85,8 +85,8 @@ class ObjcParser_ClassPropertyParseTests: XCTestCase {
         
         XCTAssertEqual(result.type?.type, .struct("BOOL"))
         XCTAssertEqual(result.identifier?.name, "enabled")
-        XCTAssertNotNil(result.modifierList)
-        XCTAssertEqual(result.modifierList?.setterModifiers[0], "setIsEnabled")
+        XCTAssertNotNil(result.attributesList)
+        XCTAssertEqual(result.attributesList?.setterAttributes[0], "setIsEnabled")
         XCTAssert(sut.diagnostics.errors.count == 0, sut.diagnostics.errors.description)
     }
     

@@ -248,7 +248,7 @@ public class TypeMapper {
         public static let alwaysNonnull = TypeMappingContext(modifiers: nil, qualifiers: [], alwaysNonnull: true)
         
         /// Modifiers fetched from a @property declaraion
-        public var modifiers: PropertyModifierList?
+        public var modifiers: PropertyAttributesList?
         /// Nullability specifiers from a method definition's type decl
         public var nullabilitySpecifiers: [NullabilitySpecifier] = []
         
@@ -276,7 +276,7 @@ public class TypeMapper {
         /// Is overriden by `alwaysNonnull`.
         public var explicitNullability: TypeNullability?
         
-        public init(modifiers: PropertyModifierList?, specifiers: [String] = [],
+        public init(modifiers: PropertyAttributesList?, specifiers: [String] = [],
                     qualifiers: [String] = [], alwaysNonnull: Bool = false,
                     inNonnull: Bool = false) {
             self.modifiers = modifiers
@@ -323,7 +323,7 @@ public class TypeMapper {
         /// Returns whether a modifier with a given name can be found within this
         /// type mapping context
         public func hasPropertyModifier(named name: String) -> Bool {
-            guard let mods = modifiers?.keywordModifiers else {
+            guard let mods = modifiers?.keywordAttributes else {
                 return false
             }
             

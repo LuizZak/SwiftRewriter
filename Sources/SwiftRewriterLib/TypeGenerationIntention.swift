@@ -35,6 +35,16 @@ public class TypeGenerationIntention: FromSourceIntention {
         super.init(accessLevel: accessLevel, source: source)
     }
     
+    /// Generates a new protocol conformance intention from a given known protocol
+    /// conformance.
+    ///
+    /// - Parameter knownProtocol: A known protocol conformance.
+    public func generateProtocolConformance(from knownProtocol: KnownProtocolConformance) {
+        let intention =
+            ProtocolInheritanceIntention(protocolName: knownProtocol.protocolName)
+        
+        addProtocol(intention)
+    }
     public func addProtocol(_ intention: ProtocolInheritanceIntention, at index: Int? = nil) {
         if let index = index {
             self.protocols.insert(intention, at: index)
@@ -51,6 +61,18 @@ public class TypeGenerationIntention: FromSourceIntention {
         }
     }
     
+    /// Generates a new property intention from a given known property and its
+    /// name and storage information.
+    ///
+    /// - Parameter knownProperty: A known property declaration.
+    public func generateProperty(from knownProperty: KnownProperty) {
+        let intention =
+            PropertyGenerationIntention(name: knownProperty.name,
+                                        storage: knownProperty.storage,
+                                        attributes: knownProperty.attributes)
+        
+        addProperty(intention)
+    }
     public func addProperty(_ intention: PropertyGenerationIntention, at index: Int? = nil) {
         if let index = index {
             self.properties.insert(intention, at: index)
@@ -65,6 +87,17 @@ public class TypeGenerationIntention: FromSourceIntention {
             intention.parent = nil
             properties.remove(at: index)
         }
+    }
+    
+    /// Generates a new empty method from a given known method's signature.
+    ///
+    /// - Parameter knownMethod: A known method with an available signature.
+    public func generateMethod(from knownMethod: KnownMethod, source: ASTNode? = nil) {
+        let method =
+            MethodGenerationIntention(signature: knownMethod.signature,
+                                      accessLevel: .internal, source: source)
+        
+        addMethod(method)
     }
     
     public func addMethod(_ intention: MethodGenerationIntention, at index: Int? = nil) {
@@ -106,6 +139,18 @@ public class TypeGenerationIntention: FromSourceIntention {
     }
 }
 
+extension TypeGenerationIntention: KnownType {
+    public var knownMethods: [KnownMethod] {
+        return methods
+    }
+    public var knownProperties: [KnownProperty] {
+        return properties
+    }
+    public var knownProtocolConformances: [KnownProtocolConformance] {
+        return protocols
+    }
+}
+
 /// An intention to generate a property or method on a type
 public class MemberGenerationIntention: FromSourceIntention {
     
@@ -122,16 +167,20 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     }
     
     public var isSourceReadOnly: Bool {
-        return propertySource?.modifierList?.keywordModifiers.contains("readonly") ?? false
+        return attributes.contains { $0.rawString == "readonly" }
     }
     
+    public var isReadOnly: Bool = false
     public var name: String
     public var storage: ValueStorage
     public var mode: Mode = .asField
+    public var attributes: [PropertyAttribute]
     
-    public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String, storage: ValueStorage, attributes: [PropertyAttribute],
+                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name
         self.storage = storage
+        self.attributes = attributes
         super.init(accessLevel: accessLevel, source: source)
     }
     
@@ -146,6 +195,24 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         var valueIdentifier: String
         /// The body for the setter
         var body: MethodBodyIntention
+    }
+}
+
+extension PropertyGenerationIntention: KnownProperty {
+    
+}
+
+/// Specifies an attribute for a property
+public enum PropertyAttribute {
+    case attribute(String)
+    case setterName(String)
+    case getterName(String)
+    
+    public var rawString: String {
+        switch self {
+        case .attribute(let str), .setterName(let str), .getterName(let str):
+            return str
+        }
     }
 }
 
@@ -199,6 +266,10 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)
     }
+}
+
+extension MethodGenerationIntention: KnownMethod {
+    
 }
 
 /// Access level visibility for a member or type
