@@ -187,6 +187,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: "double x = 10;",
             swift: "var x: Double = 10"
         )
+        // Should avoid omitting types for nil values, as well
+        try assertSingleStatement(
+            objc: "NSString *x = nil;",
+            swift: "var x: String! = nil"
+        )
         
         // Keep inferring on for literal-based expressions as well
         try assertSingleStatement(

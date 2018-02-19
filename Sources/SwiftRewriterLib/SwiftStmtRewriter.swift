@@ -626,7 +626,7 @@ fileprivate class StatementWriter {
         }
         
         switch deduceType(from: exp) {
-        case .int, .float:
+        case .int, .float, .nil:
             return true
         default:
             return false
@@ -646,6 +646,8 @@ fileprivate class StatementWriter {
             return .bool
         case .constant(.string):
             return .string
+        case .constant(.nil):
+            return .nil
             
         case let .binary(lhs, op, rhs):
             switch op.category {
@@ -728,6 +730,7 @@ fileprivate class StatementWriter {
         case float
         case bool
         case string
+        case `nil`
         case other
     }
 }
