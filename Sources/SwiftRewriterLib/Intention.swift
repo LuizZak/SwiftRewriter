@@ -156,6 +156,28 @@ public struct FunctionSignature: Equatable {
                                  returnType: returnType.deepUnwrapped,
                                  parameters: parameters)
     }
+    
+    /// Returns `true` iff `self` and `other` match using Objective-C signature
+    /// matching rules.
+    public func matchesAsSelector(_ other: FunctionSignature) -> Bool {
+        if isStatic != other.isStatic {
+            return false
+        }
+        if name != other.name {
+            return false
+        }
+        if parameters.count != other.parameters.count {
+            return false
+        }
+        
+        for (p1, p2) in zip(parameters, other.parameters) {
+            if p1.label != p2.label {
+                return false
+            }
+        }
+        
+        return true
+    }
 }
 
 public struct ParameterSignature: Equatable {

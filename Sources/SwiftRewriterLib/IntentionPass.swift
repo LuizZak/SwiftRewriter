@@ -16,7 +16,8 @@ public enum IntentionPasses {
         RemoveDuplicatedTypeIntentIntentionPass(),
         StoredPropertyToNominalTypesIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),
-        PropertyMergeIntentionPass()
+        PropertyMergeIntentionPass(),
+        ClangifyMethodSignaturesIntentionPass()
     ]
 }
 
@@ -231,7 +232,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
     static func mergeMethodSignatures(from first: KnownType,
                                       into second: TypeGenerationIntention) {
         for knownMethod in first.knownMethods {
-            if let existing = second.method(withSignature: knownMethod.signature) {
+            if let existing = second.method(matchingSelector: knownMethod.signature) {
                 mergeMethods(knownMethod, into: existing)
             } else {
                 second.generateMethod(from: knownMethod)
@@ -475,6 +476,50 @@ public class PropertyMergeIntentionPass: IntentionPass {
         var property: PropertyGenerationIntention
         var getter: MethodGenerationIntention?
         var setter: MethodGenerationIntention?
+    }
+}
+
+/// Performs Clang-style alterations of method signatures to attempt to match
+/// somewhat its behavior when coming up with Swift names for Objective-C methods.
+///
+/// Examples include [[Class alloc] initWithThing:thing] -> Class(thing: thing)
+public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
+    public func apply(on intentionCollection: IntentionCollection) {
+        let types = intentionCollection.typeIntentions()
+        
+        for type in types {
+            apply(on: type)
+        }
+    }
+    
+    private func apply(on type: TypeGenerationIntention) {
+        let methods = type.methods
+        
+        for method in methods {
+            apply(on: method)
+        }
+    }
+    
+    private func apply(on method: MethodGenerationIntention) {
+        let signature = method.signature
+        
+        // Do a little Clang-like-magic here: If the method selector is in the
+        // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
+        // noun is followed by a parameter that has the same name, we collapse
+        // such selector in Swift as `lorem(with:)`.
+        if signature.name.contains("With") {
+            let split = signature.name.components(separatedBy: "With")
+            if split.count != 2 || split.contains(where: { $0.count < 2 }) {
+                return
+            }
+            if split[1].lowercased() != signature.parameters[0].name.lowercased() {
+                return
+            }
+            
+            // All good! Collapse the identifier into a more 'swifty' construct
+            method.signature.name = split[0]
+            method.signature.parameters[0].label = "with"
+        }
     }
 }
 

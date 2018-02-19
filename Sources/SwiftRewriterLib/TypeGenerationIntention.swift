@@ -145,10 +145,24 @@ public class TypeGenerationIntention: FromSourceIntention {
         return method(withSignature: signature) != nil
     }
     
+    public func hasMethod(withSelector signature: FunctionSignature) -> Bool {
+        return method(matchingSelector: signature) != nil
+    }
+    
     public func method(withSignature signature: FunctionSignature) -> MethodGenerationIntention? {
-        return methods.first(where: {
+        return methods.first {
             return signature.droppingNullability == $0.signature.droppingNullability
-        })
+        }
+    }
+    
+    /// Finds a method on this class that matches a given Objective-C selector
+    /// signature.
+    ///
+    /// Ignores method variable names and types of return/parameters.
+    public func method(matchingSelector signature: FunctionSignature) -> MethodGenerationIntention? {
+        return methods.first {
+            return $0.signature.matchesAsSelector(signature)
+        }
     }
 }
 

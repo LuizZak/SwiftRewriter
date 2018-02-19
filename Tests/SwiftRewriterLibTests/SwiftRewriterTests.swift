@@ -239,9 +239,6 @@ class SwiftRewriterTests: XCTestCase {
                 @objc
                 func __(_ a: AnyObject!) {
                 }
-                @objc
-                func __(_ a: AnyObject!) -> AnyObject! {
-                }
             }
             """)
     }
@@ -467,6 +464,48 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject, MyProtocol {
                 @objc
                 func myMethod(_ object: NSObject?) -> String {
+                }
+            }
+            """)
+    }
+    
+    func testRewriteInterfaceWithImplementationPerformsSelectorMatchingIgnoringArgumentNames() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass
+            - (void)myMethod:(BOOL)aParam;
+            @end
+            
+            @implementation MyClass
+            - (void)myMethod:(BOOL)aParamy {
+                thing();
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod(_ aParam: Bool) {
+                    thing()
+                }
+            }
+            """)
+    }
+    
+    func testRewriteSignatureContainingWithKeyword() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)doSomethingWithColor:(CGColor)color {
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func doSomething(with color: CGColor) {
                 }
             }
             """)

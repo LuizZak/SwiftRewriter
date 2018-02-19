@@ -83,6 +83,7 @@ public class SwiftMethodSignatureGen {
             target.parameters.append(param)
         }
         
+        /*
         // Do a little Clang-like-magic here: If the method selector is in the
         // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
         // noun is followed by a parameter that has the same name, we collapse
@@ -100,6 +101,7 @@ public class SwiftMethodSignatureGen {
             target.name = split[0]
             target.parameters[0].label = "with"
         }
+        */
     }
     
     private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability? {
