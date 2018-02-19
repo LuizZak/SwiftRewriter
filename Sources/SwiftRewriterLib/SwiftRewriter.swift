@@ -1,3 +1,4 @@
+import Foundation
 import GrammarModels
 import ObjcParser
 
@@ -50,7 +51,10 @@ public class SwiftRewriter {
     
     private func loadObjcSource(from source: InputSource) throws {
         // Generate intention for this source
-        let fileIntent = FileGenerationIntention(filePath: source.sourceName())
+        var path = source.sourceName()
+        path = (path as NSString).deletingPathExtension + ".swift"
+        
+        let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), filePath: path)
         intentionCollection.addIntention(fileIntent)
         context.pushContext(fileIntent)
         context.pushContext(AssumeNonnullContext(isNonnullOn: false))

@@ -13,6 +13,9 @@ public protocol Intention: class, Context {
 
 /// An intention to create a .swift file
 public class FileGenerationIntention: Intention {
+    /// The source path for this file
+    public var sourcePath: String
+    
     /// The intended output file path
     public var filePath: String
     
@@ -45,7 +48,8 @@ public class FileGenerationIntention: Intention {
     
     weak public var parent: Intention?
     
-    public init(filePath: String) {
+    public init(sourcePath: String, filePath: String) {
+        self.sourcePath = sourcePath
         self.filePath = filePath
     }
     

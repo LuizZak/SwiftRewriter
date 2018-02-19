@@ -148,7 +148,8 @@ public class FilesExplorer: PagesCommandHandler {
                 filesInDir.filter {
                     $0.absoluteURL.relativePath
                         .lowercased()
-                        .hasPrefix(newPath.relativePath.lowercased())
+                        .hasPrefix(newPath.relativePath.lowercased()) &&
+                    ($0.pathExtension == "h" || $0.pathExtension == "m")
                 }
             
             if matches.count == 0 {

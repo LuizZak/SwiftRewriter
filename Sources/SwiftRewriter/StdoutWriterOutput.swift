@@ -1,7 +1,8 @@
+import Foundation
 import SwiftRewriterLib
 import Utils
 
-public class StdoutWriterOutput: WriterOutput, FileOutput {
+public class StdoutWriterOutput: WriterOutput {
     var buffer: String = ""
     var colorize: Bool
     
@@ -10,22 +11,34 @@ public class StdoutWriterOutput: WriterOutput, FileOutput {
     }
     
     public func createFile(path: String) -> FileOutput {
-        return self
+        return StdFileOutput(path: path, colorize: colorize)
     }
     
-    public func outputTarget() -> RewriterOutputTarget {
-        let target = TerminalStringRewriterOutput()
-        target.colorize = colorize
+    private class StdFileOutput: FileOutput {
+        var buffer: String = ""
+        var colorize: Bool
+        var path: String
         
-        target.onChangeBuffer = { contents in
-            self.buffer = contents
+        init(path: String, colorize: Bool = true) {
+            self.colorize = colorize
+            self.path = path
         }
         
-        return target
-    }
-    
-    public func close() {
-        print(buffer)
+        func close() {
+            print(buffer)
+            print("// End of file \((path as NSString).lastPathComponent)")
+        }
+        
+        func outputTarget() -> RewriterOutputTarget {
+            let target = TerminalStringRewriterOutput()
+            target.colorize = colorize
+            
+            target.onChangeBuffer = { contents in
+                self.buffer = contents
+            }
+            
+            return target
+        }
     }
 }
 

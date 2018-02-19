@@ -38,7 +38,7 @@ public extension String {
             return self + "\n ~ Strings are equal."
         }
         
-        if self.first != string.first {
+        if first != string.first {
             return self + "\n ~ Difference at start of string."
         }
         
@@ -49,7 +49,7 @@ public extension String {
                     return chars.0 != chars.1
                 }?.0
         
-        let offset = _offset ?? self.endIndex
+        let offset = _offset ?? endIndex
         
         let column = columnOffset(at: offset)
         let line = lineNumber(at: offset)

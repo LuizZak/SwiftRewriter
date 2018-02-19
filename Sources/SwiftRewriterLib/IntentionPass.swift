@@ -83,9 +83,9 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         var implementations: [FileGenerationIntention] = []
         
         for intent in intentions {
-            if intent.filePath.hasSuffix(".m") {
+            if intent.sourcePath.hasSuffix(".m") {
                 implementations.append(intent)
-            } else if intent.filePath.hasSuffix(".h") {
+            } else if intent.sourcePath.hasSuffix(".h") {
                 headers.append(intent)
             }
         }
@@ -100,11 +100,11 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                                      intentionCollection: intentionCollection)
             
             let implFile =
-                (implementation.filePath as NSString).deletingPathExtension
+                (implementation.sourcePath as NSString).deletingPathExtension
             
             guard let header = headers.first(where: { hIntent -> Bool in
                 let headerFile =
-                    (hIntent.filePath as NSString).deletingPathExtension
+                    (hIntent.sourcePath as NSString).deletingPathExtension
                 
                 return implFile == headerFile
             }) else {
@@ -121,14 +121,14 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         // Remove all header intentions that have a matching implementation
         // (implementation intentions override them)
         intentionCollection.removeIntentions { (intent: FileGenerationIntention) -> Bool in
-            if !intent.filePath.hasSuffix(".h") {
+            if !intent.sourcePath.hasSuffix(".h") {
                 return false
             }
             
-            let headerFile = (intent.filePath as NSString).deletingPathExtension
+            let headerFile = (intent.sourcePath as NSString).deletingPathExtension
             
             if implementations.contains(where: { impl -> Bool in
-                (impl.filePath as NSString).deletingPathExtension == headerFile
+                (impl.sourcePath as NSString).deletingPathExtension == headerFile
             }) {
                 return true
             }

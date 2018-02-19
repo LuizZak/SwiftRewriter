@@ -21,7 +21,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 func myMethod() {
                 }
             }
-            // End of file objc.h
+            // End of file objc.swift
             """)
     }
     
@@ -48,7 +48,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 func myMethod() {
                 }
             }
-            // End of file objc.m
+            // End of file objc.swift
             """)
     }
     
@@ -80,7 +80,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 func myMethod(_ parameter: String) -> AnyObject {
                 }
             }
-            // End of file objc.m
+            // End of file objc.swift
             """)
     }
     
@@ -121,7 +121,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 func originalMethod() {
                 }
             }
-            // End of file MyClass.m
+            // End of file MyClass.swift
             // MARK: - Extension
             @objc
             extension MyClass {
@@ -132,7 +132,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 func fromExtensionInterfaceOnly() {
                 }
             }
-            // End of file MyClass+Ext.m
+            // End of file MyClass+Ext.swift
             """)
     }
     
@@ -177,7 +177,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @objc
             class MyClass: NSObject {
             }
-            // End of file Class.m
+            // End of file Class.swift
             // MARK: - Ext1
             @objc
             extension MyClass {
@@ -194,7 +194,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                     stmt2()
                 }
             }
-            // End of file Class+Ext.m
+            // End of file Class+Ext.swift
             """)
     }
     
@@ -228,7 +228,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 func doThing() {
                 }
             }
-            // End of file file.m
+            // End of file file.swift
             """)
     }
     
