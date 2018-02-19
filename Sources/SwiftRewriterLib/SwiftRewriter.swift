@@ -53,8 +53,14 @@ public class SwiftRewriter {
         }
     }
     
-    private func applyPreprocessors(_ source: String) -> String {
-        return preprocessors.reduce(source) { $1.preprocess(source: $0) }
+    private func applyPreprocessors(source: CodeSource) -> String {
+        let src = source.fetchSource()
+        
+        let context = _PreprocessingContext(filePath: source.fileName)
+        
+        return preprocessors.reduce(src) {
+            $1.preprocess(source: $0, context: context)
+        }
     }
     
     private func loadObjcSource(from source: InputSource) throws {
@@ -72,7 +78,7 @@ public class SwiftRewriter {
         
         let src = try source.loadSource()
         
-        let processedSrc = applyPreprocessors(src.fetchSource())
+        let processedSrc = applyPreprocessors(source: src)
         
         let parser = ObjcParser(string: processedSrc)
         parsers.append(parser)

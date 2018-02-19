@@ -32,7 +32,7 @@ class SwiftRewriter_SourcePreprocessor: XCTestCase {
             self.replaceWith = replaceWith
         }
         
-        func preprocess(source: String) -> String {
+        func preprocess(source: String, context: PreprocessingContext) -> String {
             return replaceWith
         }
     }

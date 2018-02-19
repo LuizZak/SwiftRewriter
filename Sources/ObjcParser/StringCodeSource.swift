@@ -1,6 +1,8 @@
 import GrammarModels
 
 public struct StringCodeSource: CodeSource {
+    public let fileName: String = ""
+    
     public var source: String
     
     public init(source: String) {

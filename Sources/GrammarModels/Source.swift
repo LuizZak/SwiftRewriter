@@ -2,6 +2,9 @@
 /// It is used to group up units of compilation to aid in checking of access control
 /// across compilation unit/file boundaries.
 public protocol Source {
+    /// Gets the full file name for this source file.
+    var fileName: String { get }
+    
     func isEqual(to other: Source) -> Bool
     
     func stringIndex(forCharOffset offset: Int) -> String.Index
@@ -16,6 +19,8 @@ public protocol Source {
 public struct InvalidSource: Source {
     /// Gets the default invalid source instance singleton.
     public static let invalid = InvalidSource()
+    
+    public let fileName: String = "<invalid>"
     
     private init() {
         

@@ -1,12 +1,13 @@
 import XCTest
 import SourcePreprocessors
+import SwiftRewriterLib
 import Utils
 
 class QuickSpecPreprocessorTests: XCTestCase {
     func testPreprocessorEmptyInput() {
         let sut = QuickSpecPreprocessor()
         
-        let result = sut.preprocess(source: "")
+        let result = sut.preprocess(source: "", context: EmptyContext())
         
         XCTAssertEqual(result, "")
     }
@@ -58,7 +59,7 @@ class QuickSpecPreprocessorTests: XCTestCase {
         
         let sut = QuickSpecPreprocessor()
         
-        let result = sut.preprocess(source: input)
+        let result = sut.preprocess(source: input, context: EmptyContext())
         
         XCTAssertEqual(result, input)
     }
@@ -104,7 +105,7 @@ class QuickSpecPreprocessorTests: XCTestCase {
                 });
 
             QuickSpecEnd
-            """)
+            """, context: EmptyContext())
         
         let expected = """
             #import <Foundation/Foundation.h>
@@ -159,9 +160,13 @@ class QuickSpecPreprocessorTests: XCTestCase {
             sut.preprocess(source: """
             //QuickSpecBegin(InComment)
             /* QuickSpecEnd */
-            """), """
+            """, context: EmptyContext()), """
             //QuickSpecBegin(InComment)
             /* QuickSpecEnd */
             """)
+    }
+    
+    private class EmptyContext: PreprocessingContext {
+        var filePath: String = ""
     }
 }

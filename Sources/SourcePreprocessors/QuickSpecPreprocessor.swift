@@ -11,7 +11,7 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
         
     }
     
-    public func preprocess(source: String) -> String {
+    public func preprocess(source: String, context: PreprocessingContext) -> String {
         // Find QuickSpecBegin/QuickSpecEnd pairs to preprocess
         if !source.contains("QuickSpecBegin(") || !source.contains("QuickSpecEnd") {
             return source

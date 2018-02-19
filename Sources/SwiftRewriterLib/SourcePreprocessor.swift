@@ -10,5 +10,15 @@ public protocol SourcePreprocessor {
     /// - Parameter source: Raw text to process.
     /// - Returns: Return of pre-transformation. The transformation must always
     /// generate a parseable code.
-    func preprocess(source: String) -> String
+    func preprocess(source: String, context: PreprocessingContext) -> String
+}
+
+/// Context for a preprocessor
+public protocol PreprocessingContext {
+    /// The original source file path
+    var filePath: String { get }
+}
+
+internal struct _PreprocessingContext: PreprocessingContext {
+    var filePath: String
 }

@@ -75,6 +75,6 @@ let package = Package(
             dependencies: ["ExpressionPasses", "SwiftRewriterLib", "Antlr4", "ObjcParser", "ObjcParserAntlr"]),
         .testTarget(
             name: "SourcePreprocessorsTests",
-            dependencies: ["SourcePreprocessors", "Utils"])
+            dependencies: ["SourcePreprocessors", "Utils", "SwiftRewriterLib"])
     ]
 )
