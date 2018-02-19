@@ -82,11 +82,15 @@ public class FilesExplorer: PagesCommandHandler {
             return .loop("Could not locate file or folder '\(input)'")
         }
         
-        path = newPath
-        let newList = try! self.getFileListProvider()
-        
-        return .modifyList { pages in
-            pages.displayPages(withProvider: newList)
+        do {
+            path = newPath
+            let newList = try self.getFileListProvider()
+            
+            return .modifyList { pages in
+                pages.displayPages(withProvider: newList)
+            }
+        } catch {
+            return .loop("Error during operation: \(error)")
         }
     }
     

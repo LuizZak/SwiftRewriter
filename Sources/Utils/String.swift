@@ -108,3 +108,66 @@ public extension String {
         return distance(from: lineStartOffset, to: index) + 1 // columns start at one
     }
 }
+
+public extension String {
+    /// Returns a range of sections of this string that represent single and mult-lined
+    /// comments.
+    func rangesOfCommentSections() -> [Range<Index>] {
+        if self.count < 2 {
+            return []
+        }
+        
+        enum State {
+            case normal
+            case singleLine(begin: Index)
+            case multiLine(begin: Index)
+        }
+        
+        var state = State.normal
+        
+        // Search for single-lined comments
+        var ranges: [Range<Index>] = []
+        
+        for index in indices.dropLast() {
+            switch state {
+            case .normal:
+                // Ignore anything other than '/' since it doesn't form comments.
+                if self[index] != "/" {
+                    continue
+                }
+                
+                let next = self[self.index(after: index)]
+                
+                // Single-line
+                if next == "/" {
+                    state = .singleLine(begin: index)
+                // Multi-line
+                } else if next == "*" {
+                    state = .multiLine(begin: index)
+                }
+            case .singleLine(let begin):
+                // End of single-line
+                if self[index] == "\n" {
+                    ranges.append(begin..<self.index(after: index))
+                    state = .normal
+                }
+            case .multiLine(let begin):
+                // End of multi-line
+                if self[index] == "*" && self[self.index(after: index)] == "/" {
+                    ranges.append(begin..<self.index(index, offsetBy: 2))
+                    state = .normal
+                }
+            }
+        }
+        
+        // Finish any open commentary ranges
+        switch state {
+        case .normal:
+            break
+        case .singleLine(let begin), .multiLine(let begin):
+            ranges.append(begin..<endIndex)
+        }
+        
+        return ranges
+    }
+}

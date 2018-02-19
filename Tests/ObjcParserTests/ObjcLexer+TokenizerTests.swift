@@ -50,6 +50,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("__weak", toTokenizeAs: .typeQualifier)
         expect("__strong", toTokenizeAs: .typeQualifier)
         expect("__kindof", toTokenizeAs: .typeQualifier)
+        expect("__block", toTokenizeAs: .typeQualifier)
     }
     
     func testTokenizeKeywords() {

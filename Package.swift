@@ -42,14 +42,19 @@ let package = Package(
             name: "ObjcParser",
             dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer", "TypeLexing"]),
         .target(
-            name: "SwiftRewriter",
-            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility", "ExpressionPasses", "Utils", "Console"]),
+            name: "Console",
+            dependencies: ["MiniLexer", "TypeLexing", "Utils"]),
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "Utils"]),
         .target(
-            name: "Console",
-            dependencies: ["MiniLexer", "TypeLexing", "Utils"]),
+            name: "SourcePreprocessors",
+            dependencies: ["SwiftRewriterLib", "Utils", "MiniLexer"]),
+        .target(
+            name: "SwiftRewriter",
+            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility", "ExpressionPasses", "Utils", "Console", "SourcePreprocessors"])
+        
+    ] + /* Tests */ [
         .testTarget(
             name: "ConsoleTests",
             dependencies: ["Console"]),
@@ -67,6 +72,9 @@ let package = Package(
             dependencies: ["SwiftRewriterLib", "GrammarModels", "ObjcParser", "ExpressionPasses"]),
         .testTarget(
             name: "ExpressionPassesTests",
-            dependencies: ["ExpressionPasses", "SwiftRewriterLib", "Antlr4", "ObjcParser", "ObjcParserAntlr"])
+            dependencies: ["ExpressionPasses", "SwiftRewriterLib", "Antlr4", "ObjcParser", "ObjcParserAntlr"]),
+        .testTarget(
+            name: "SourcePreprocessorsTests",
+            dependencies: ["SourcePreprocessors", "Utils"])
     ]
 )

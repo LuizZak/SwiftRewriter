@@ -166,6 +166,14 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    /// Tests __block specifier on local variable declaration
+    func testParseBlockVarDeclaration() throws {
+        try assertSingleStatement(
+            objc: "__block id value;",
+            swift: "var value: AnyObject!"
+        )
+    }
+    
     /// Leaving Swift to infer the proper type of numeric types can be troublesome
     /// sometimes, as it may not get the correct Float/Integer types while inferring
     /// initial expressions.

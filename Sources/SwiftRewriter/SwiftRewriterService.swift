@@ -1,6 +1,7 @@
 import Foundation
 import SwiftRewriterLib
 import ExpressionPasses
+import SourcePreprocessors
 
 /// Protocol for enabling Swift rewriting service from CLI
 public protocol SwiftRewriterService {
@@ -19,6 +20,8 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         let input = FileInputProvider(files: files)
         
         let converter = SwiftRewriter(input: input, output: output)
+        
+        converter.preprocessors.append(QuickSpecPreprocessor())
         
         converter.expressionPasses.append(AllocInitExpressionPass())
         converter.expressionPasses.append(CoreGraphicsExpressionPass())

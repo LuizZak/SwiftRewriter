@@ -58,6 +58,12 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
                                        .id(protocols: [])
                                     )
                                 )
+        
+        try assertObjcTypeParse("__block id",
+                                .specified(specifiers: ["__block"],
+                                           .id(protocols: [])
+            )
+        )
     }
     
     func testParseGenericObjcType() throws {

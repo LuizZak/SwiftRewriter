@@ -67,4 +67,48 @@ class StringTests: XCTestCase {
             Ghi
             """, result)
     }
+    
+    func testRangeOfComments() {
+        let input = """
+        // A comment!
+        Not a comment.
+        /*
+            A multi-lined comment!
+        */
+        Not a comment again.
+        """
+        
+        let ranges = input.rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 2)
+        XCTAssertEqual(ranges[0], input.range(of: "// A comment!\n")!)
+        XCTAssertEqual(ranges[1], input.range(of: """
+            /*
+                A multi-lined comment!
+            */
+            """))
+    }
+    
+    func testRangeOfCommentsEntireString() {
+        let input = "// A comment!"
+        
+        let ranges = input.rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 1)
+        XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+    }
+    
+    func testRangeOfCommentsEntireStringMultiLine() {
+        let input = "/* A comment! \n*/"
+        
+        let ranges = input.rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 1)
+        XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+    }
+    
+    func testRangeOfCommentsOpenMultiLineComment() {
+        let input = "/* A comment! \n"
+        
+        let ranges = input.rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 1)
+        XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+    }
 }
