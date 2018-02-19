@@ -198,6 +198,39 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
+    func testRespectsOrderingOfImplementation() {
+        // Tests that when coming up with the ordering of the method definitions
+        // within a file, try to stick with the ordering of the methods as they
+        // are on the @implementation for the class.
+        assertThat()
+            .file(name: "file.h",
+            """
+            @interface MyClass
+            - (void)doThing;
+            @end
+            """)
+            .file(name: "file.m",
+            """
+            @implementation MyClass
+            - (instancetype)initWithThing:(id)thing {
+            }
+            - (void)doThing {
+            }
+            @end
+            """)
+            .translatesToSwift("""
+            @objc
+            class MyClass: NSObject {
+                @objc
+                init(with thing: AnyObject!) {
+                }
+                @objc
+                func doThing() {
+                }
+            }
+            """)
+    }
+    
     private func assertThat() -> MultiFileTestBuilder {
         return MultiFileTestBuilder(test: self)
     }

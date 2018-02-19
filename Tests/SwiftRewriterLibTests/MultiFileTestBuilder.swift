@@ -41,6 +41,10 @@ class MultiFileTestBuilder {
                     \(expectedSwift)
                     but translated as:
                     \(output.buffer)
+                    
+                    Diff:
+                    
+                    \(expectedSwift.makeDifferenceMarkString(against: output.buffer))
                     """, inFile: file, atLine: line, expected: false)
             }
             

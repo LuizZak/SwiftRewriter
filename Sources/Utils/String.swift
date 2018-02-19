@@ -35,7 +35,7 @@ public extension String {
     /// that differs between `self` and a target string.
     public func makeDifferenceMarkString(against string: String) -> String {
         if self == string {
-            return self
+            return self + "\n ~ Strings are equal."
         }
         
         // Find first character differing across both strings
@@ -46,7 +46,7 @@ public extension String {
                 }?.0
         
         guard let offset = _offset else {
-            return self
+            return self + "\n ~ Difference at start of string."
         }
         
         let column = columnOffset(at: offset)
