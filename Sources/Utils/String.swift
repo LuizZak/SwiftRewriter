@@ -117,6 +117,8 @@ public extension String {
             return []
         }
         
+        let unicodes = unicodeScalars
+        
         enum State {
             case normal
             case singleLine(begin: Index)
@@ -128,15 +130,20 @@ public extension String {
         // Search for single-lined comments
         var ranges: [Range<Index>] = []
         
-        for index in indices.dropLast() {
+        var index = unicodes.startIndex
+        while index < unicodes.index(before: unicodes.endIndex) {
+            defer {
+                unicodes.formIndex(after: &index)
+            }
+            
             switch state {
             case .normal:
                 // Ignore anything other than '/' since it doesn't form comments.
-                if self[index] != "/" {
+                if unicodes[index] != "/" {
                     continue
                 }
                 
-                let next = self[self.index(after: index)]
+                let next = unicodes[unicodes.index(after: index)]
                 
                 // Single-line
                 if next == "/" {
@@ -148,13 +155,13 @@ public extension String {
             case .singleLine(let begin):
                 // End of single-line
                 if self[index] == "\n" {
-                    ranges.append(begin..<self.index(after: index))
+                    ranges.append(begin..<unicodes.index(after: index))
                     state = .normal
                 }
             case .multiLine(let begin):
                 // End of multi-line
-                if self[index] == "*" && self[self.index(after: index)] == "/" {
-                    ranges.append(begin..<self.index(index, offsetBy: 2))
+                if self[index] == "*" && unicodes[unicodes.index(after: index)] == "/" {
+                    ranges.append(begin..<unicodes.index(index, offsetBy: 2))
                     state = .normal
                 }
             }
