@@ -23,6 +23,10 @@ public class SwiftRewriter {
     /// transformations to be applied to resulting code.
     public var expressionPasses: [ExpressionPass] = []
     
+    /// Custom source pre-processors that are applied to each input source code
+    /// before parsing.
+    public var preprocessors: [SourcePreprocessor] = []
+    
     public init(input: InputSourcesProvider, output: WriterOutput) {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
@@ -49,6 +53,10 @@ public class SwiftRewriter {
         }
     }
     
+    private func applyPreprocessors(_ source: String) -> String {
+        return preprocessors.reduce(source) { $1.preprocess(source: $0) }
+    }
+    
     private func loadObjcSource(from source: InputSource) throws {
         // Generate intention for this source
         var path = source.sourceName()
@@ -64,7 +72,9 @@ public class SwiftRewriter {
         
         let src = try source.loadSource()
         
-        let parser = ObjcParser(source: src)
+        let processedSrc = applyPreprocessors(src.fetchSource())
+        
+        let parser = ObjcParser(string: processedSrc)
         parsers.append(parser)
         parser.diagnostics = diagnostics
         

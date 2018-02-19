@@ -329,6 +329,33 @@ class ExpressionIteratorTests: XCTestCase {
         assertStatement(.unknown(UnknownASTContext(context: "")), iteratesAs: [])
     }
     
+    /// When visiting expressions within blocks, enqueue them such that they happen
+    /// only after expressions within the depth the block was found where visited.
+    /// This allows the search to occur in a more controller breadth-first manner.
+    func testStatementVisitOrder() {
+        assertStatement(.expressions([.identifier("a"),
+                                      .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                                      .identifier("c")
+            ]),
+                        inspectingBlocks: true,
+                        iteratesAs: [
+                            .identifier("a"),
+                            .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                            .identifier("c"),
+                            .identifier("b")
+            ])
+        
+        // Test with block inspection off, just in case.
+        assertStatement(.expressions([.identifier("a"),
+                                      .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                                      .identifier("c")
+            ]), iteratesAs: [
+                .identifier("a"),
+                .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                .identifier("c")
+            ])
+    }
+    
     // MARK: -
     
     private func assertExpression(_ source: Expression, inspectingBlocks: Bool = false,
