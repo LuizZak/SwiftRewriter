@@ -228,6 +228,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 func doThing() {
                 }
             }
+            // End of file file.m
             """)
     }
     

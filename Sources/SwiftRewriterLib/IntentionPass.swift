@@ -110,7 +110,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                 continue
             }
             
-            let intentions = header.typeIntentions + implementation.typeIntentions
+            let intentions = implementation.typeIntentions + header.typeIntentions
             FileTypeMergingIntentionPass
                 .mergeTypeIntentions(typeIntentions: intentions,
                                      into: implementation,

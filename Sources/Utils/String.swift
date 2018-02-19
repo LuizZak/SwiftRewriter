@@ -38,6 +38,10 @@ public extension String {
             return self + "\n ~ Strings are equal."
         }
         
+        if self.first != string.first {
+            return self + "\n ~ Difference at start of string."
+        }
+        
         // Find first character differing across both strings
         let _offset =
             zip(indices, zip(self, string))
@@ -45,9 +49,7 @@ public extension String {
                     return chars.0 != chars.1
                 }?.0
         
-        guard let offset = _offset else {
-            return self + "\n ~ Difference at start of string."
-        }
+        let offset = _offset ?? self.endIndex
         
         let column = columnOffset(at: offset)
         let line = lineNumber(at: offset)
