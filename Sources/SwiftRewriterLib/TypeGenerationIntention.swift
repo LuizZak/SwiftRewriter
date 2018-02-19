@@ -104,6 +104,10 @@ public class TypeGenerationIntention: FromSourceIntention {
             MethodGenerationIntention(signature: knownMethod.signature,
                                       accessLevel: .internal, source: source)
         
+        if let body = knownMethod.body {
+            method.methodBody = MethodBodyIntention(body: body.body)
+        }
+        
         addMethod(method)
         
         return method
@@ -227,7 +231,7 @@ public enum PropertyAttribute {
 
 /// An intention to generate a body of Swift code from an equivalent Objective-C
 /// source.
-public class MethodBodyIntention: FromSourceIntention {
+public class MethodBodyIntention: FromSourceIntention, KnownMethodBody {
     /// Original source code body to generate
     public var body: CompoundStatement
     
@@ -249,14 +253,13 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
         return source as? MethodDefinition
     }
     
-    public var isClassMethod: Bool {
-        return typedSource?.isClassMethod ?? false
-    }
-    
     public var signature: FunctionSignature
     
-    public var body: MethodBodyIntention?
+    public var methodBody: MethodBodyIntention?
     
+    public var isStatic: Bool {
+        return signature.isStatic
+    }
     public var name: String {
         return signature.name
     }
@@ -267,10 +270,10 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
         return signature.parameters
     }
     
-    public init(name: String, returnType: SwiftType, parameters: [ParameterSignature],
+    public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.signature =
-            FunctionSignature(name: name, returnType: returnType,
+            FunctionSignature(isStatic: isStatic, name: name, returnType: returnType,
                       parameters: parameters)
         super.init(accessLevel: accessLevel, source: source)
     }
@@ -283,7 +286,9 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
 }
 
 extension MethodGenerationIntention: KnownMethod {
-    
+    public var body: KnownMethodBody? {
+        return methodBody
+    }
 }
 
 /// Access level visibility for a member or type

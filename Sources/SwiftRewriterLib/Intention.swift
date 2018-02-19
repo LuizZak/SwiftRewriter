@@ -19,6 +19,16 @@ public class FileGenerationIntention: Intention {
     /// Gets the types to create on this file.
     private(set) var typeIntentions: [TypeGenerationIntention] = []
     
+    /// Gets the extension intentions to create on this file.
+    public var extensionIntentions: [ClassExtensionGenerationIntention] {
+        return typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
+    }
+    
+    /// Gets the classes to create on this file.
+    public var classIntentions: [ClassGenerationIntention] {
+        return typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+    }
+    
     /// Gets the typealias intentions to create on this file.
     private(set) var typealiasIntentions: [TypealiasIntention] = []
     
@@ -78,7 +88,7 @@ public class FileGenerationIntention: Intention {
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FunctionIntention {
     public var signature: FunctionSignature
     
-    public var body: MethodBodyIntention?
+    public var methodBody: MethodBodyIntention?
     
     public init(signature: FunctionSignature, accessLevel: AccessLevel, source: ASTNode?) {
         self.signature = signature
@@ -127,20 +137,24 @@ public protocol NonNullScopedIntention: Intention {
 public protocol FunctionIntention: Intention {
     var signature: FunctionSignature { get }
     
-    var body: MethodBodyIntention? { get }
+    var methodBody: MethodBodyIntention? { get }
 }
 
 /// Signature for a function intention
 public struct FunctionSignature: Equatable {
+    public var isStatic: Bool
     public var name: String
     public var returnType: SwiftType
     public var parameters: [ParameterSignature]
     
     public var droppingNullability: FunctionSignature {
-        return FunctionSignature(name: name, returnType: returnType.deepUnwrapped,
-                                 parameters: parameters.map {
-                                    ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
-        })
+        let parameters = self.parameters.map {
+            ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
+        }
+        
+        return FunctionSignature(isStatic: isStatic, name: name,
+                                 returnType: returnType.deepUnwrapped,
+                                 parameters: parameters)
     }
 }
 

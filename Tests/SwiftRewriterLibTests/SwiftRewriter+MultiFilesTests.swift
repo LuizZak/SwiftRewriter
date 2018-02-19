@@ -5,7 +5,7 @@ import GrammarModels
 
 class SwiftRewriter_MultiFilesTests: XCTestCase {
     
-    func testEmittingHeaderWhenMissingImplementation() throws {
+    func testEmittingHeaderWhenMissingImplementation() {
         assertThat()
             .file(name: "objc.h",
             """
@@ -25,7 +25,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
-    func testAvoidEmittingHeaderWhenImplementationExists() throws {
+    func testAvoidEmittingHeaderWhenImplementationExists() {
         assertThat()
             .file(name: "objc.h",
             """
@@ -52,7 +52,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
-    func testProcessAssumeNonnullAcrossFiles() throws {
+    func testProcessAssumeNonnullAcrossFiles() {
         assertThat()
             .file(name: "objc.h",
             """
@@ -84,7 +84,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
-    func testClassCategory() throws {
+    func testClassCategory() {
         assertThat()
             .file(name: "MyClass.h",
             """
@@ -133,6 +133,68 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
             }
             // End of file MyClass+Ext.m
+            """)
+    }
+    
+    /// When merging categories in .h/.m files, try to group them by matching
+    /// category name on the resulting .swift file, such that `extension`s are
+    /// declared for each combined category name.
+    func testMergingCategoriesTakeCategoryNameInConsideration() {
+        assertThat()
+            .file(name: "Class.h",
+            """
+            @interface MyClass : NSObject
+            @end
+            """)
+            .file(name: "Class.m",
+            """
+            @implementation MyClass
+            @end
+            """)
+            .file(name: "Class+Ext.h",
+            """
+            @interface MyClass (Ext1)
+            - (void)f1;
+            @end
+            @interface MyClass (Ext2)
+            - (void)f2;
+            @end
+            """)
+            .file(name: "Class+Ext.m",
+            """
+            @implementation MyClass (Ext1)
+            - (void)f1 {
+                stmt1();
+            }
+            @end
+            @implementation MyClass (Ext2)
+            - (void)f2 {
+                stmt2();
+            }
+            @end
+            """)
+            .translatesToSwift("""
+            @objc
+            class MyClass: NSObject {
+            }
+            // End of file Class.m
+            // MARK: - Ext1
+            @objc
+            extension MyClass {
+                @objc
+                func f1() {
+                    stmt1()
+                }
+            }
+            // MARK: - Ext2
+            @objc
+            extension MyClass {
+                @objc
+                func f2() {
+                    stmt2()
+                }
+            }
+            // End of file Class+Ext.m
             """)
     }
     

@@ -2,14 +2,30 @@ import GrammarModels
 
 /// Base intention for Class and Class Category intentions
 public class BaseClassIntention: TypeGenerationIntention {
-    public var instanceVariables: [InstanceVariableGenerationIntention] = []
+    public var isInterfaceSource: Bool {
+        return source is ObjcClassInterface || source is ObjcClassCategoryInterface
+    }
+    
+    private(set) public var instanceVariables: [InstanceVariableGenerationIntention] = []
     
     public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
+        if let parent = intention.parent as? BaseClassIntention {
+            parent.removeInstanceVariable(named: intention.name)
+        }
+        
         self.instanceVariables.append(intention)
+        intention.parent = self
     }
     
     public func hasInstanceVariable(named name: String) -> Bool {
         return instanceVariables.contains(where: { $0.name == name })
+    }
+    
+    public func removeInstanceVariable(named name: String) {
+        if let index = instanceVariables.index(where: { $0.name == name }) {
+            instanceVariables[index].parent = nil
+            instanceVariables.remove(at: index)
+        }
     }
 }
 
@@ -24,7 +40,8 @@ public class ClassGenerationIntention: BaseClassIntention {
 
 /// An intention to generate a class extension from an existing class
 public class ClassExtensionGenerationIntention: BaseClassIntention {
-    public var extensionName: String?
+    /// Original Objective-C category name that originated this category.
+    public var categoryName: String?
 }
 
 /// An intention to conform a class to a protocol

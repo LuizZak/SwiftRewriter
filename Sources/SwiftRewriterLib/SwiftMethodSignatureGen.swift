@@ -15,7 +15,8 @@ public class SwiftMethodSignatureGen {
     /// a class-type function definition.
     public func generateDefinitionSignature(from objcMethod: MethodDefinition) -> FunctionSignature {
         var sign =
-            FunctionSignature(name: "__",
+            FunctionSignature(isStatic: objcMethod.isClassMethod,
+                              name: "__",
                               returnType: SwiftType.anyObject.asImplicitUnwrapped,
                               parameters: [])
         

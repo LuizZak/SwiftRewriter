@@ -21,7 +21,7 @@ public class SwiftWriter {
     }
     
     public func execute() {
-        let fileIntents = intentions.intentions(ofType: FileGenerationIntention.self)
+        let fileIntents = intentions.fileIntentions()
         
         for file in fileIntents {
             outputFile(file)
@@ -131,7 +131,11 @@ public class SwiftWriter {
     }
     
     private func outputClassExtension(_ cls: ClassExtensionGenerationIntention, target: RewriterOutputTarget) {
-        target.output(line: "// MARK: - \(cls.extensionName ?? "")", style: .comment)
+        if let categoryName = cls.categoryName, !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            target.output(line: "// MARK: - \(categoryName)", style: .comment)
+        } else {
+            target.output(line: "// MARK: -", style: .comment)
+        }
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         target.outputInlineWithSpace("extension", style: .keyword)
@@ -360,7 +364,7 @@ public class SwiftWriter {
                            into: target,
                            inNonnullContext: initMethod.inNonnullContext)
         
-        if let body = initMethod.body {
+        if let body = initMethod.methodBody {
             outputMethodBody(body, target: target)
         } else if initMethod.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
@@ -384,7 +388,7 @@ public class SwiftWriter {
         
         target.outputInline("deinit", style: .keyword)
         
-        if let body = method.body {
+        if let body = method.methodBody {
             outputMethodBody(body, target: target)
         } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
@@ -406,7 +410,7 @@ public class SwiftWriter {
         if !accessModifier.isEmpty && !(method.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
-        if method.isClassMethod {
+        if method.isStatic {
             target.outputInlineWithSpace("static", style: .keyword)
         }
         
@@ -435,7 +439,7 @@ public class SwiftWriter {
             target.outputInline(typeName, style: .typeName)
         }
         
-        if let body = method.body {
+        if let body = method.methodBody {
             outputMethodBody(body, target: target)
         } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
@@ -515,31 +519,6 @@ public class SwiftWriter {
         }
     }
     
-    internal static func _ownershipPrefix(inType type: ObjcType) -> Ownership {
-        switch type {
-        case .specified(let specifiers, _):
-            if specifiers.last == "__weak" {
-                return .weak
-            } else if specifiers.last == "__unsafe_unretained" {
-                return .unownedUnsafe
-            }
-            
-            return .strong
-        default:
-            return .strong
-        }
-    }
-    
-    internal static func _prependAccessModifier(in decl: String, accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
-        // In Swift, omitting the access level specifier infers 'internal', so we
-        // allow the user to decide whether to omit the keyword here
-        if omitInternal && accessLevel == .internal {
-            return decl
-        }
-        
-        return "\(_accessModifierFor(accessLevel: accessLevel)) \(decl)"
-    }
-    
     internal static func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
         // In Swift, omitting the access level specifier infers 'internal', so we
         // allow the user to decide whether to omit the keyword here
@@ -554,6 +533,9 @@ public class SwiftWriter {
 internal func evaluateOwnershipPrefix(inType type: ObjcType,
                                       property: PropertyDefinition? = nil) -> Ownership {
     var ownership: Ownership = .strong
+    if !type.isPointer {
+        return .strong
+    }
     
     switch type {
     case .specified(let specifiers, _):

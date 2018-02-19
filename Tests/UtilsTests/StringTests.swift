@@ -29,4 +29,42 @@ class StringTests: XCTestCase {
         XCTAssertEqual("", "".uppercasedFirstLetter)
         XCTAssertEqual(" ", " ".uppercasedFirstLetter)
     }
+    
+    func testMarkDifference() {
+        let str1 = """
+            Abcdef
+            """
+        let str2 = """
+            Abdef
+            """
+        
+        let result = str1.makeDifferenceMarkString(against: str2)
+        
+        XCTAssertEqual("""
+            Abcdef
+            ~~^ Difference starts here
+            """, result)
+    }
+    
+    func testMarkDifferenceBetweenLines() {
+        let str1 = """
+            Abc
+            Def
+            Ghi
+            """
+        let str2 = """
+            Abc
+            Df
+            Ghi
+            """
+        
+        let result = str1.makeDifferenceMarkString(against: str2)
+        
+        XCTAssertEqual("""
+            Abc
+            Def
+            ~^ Difference starts here
+            Ghi
+            """, result)
+    }
 }

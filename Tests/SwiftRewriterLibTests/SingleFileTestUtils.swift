@@ -39,6 +39,12 @@ class SingleFileTestBuilder {
                     but translated as
                     
                     \(formatCodeForDisplay(output.buffer))
+                    
+                    Diff:
+                    
+                    \(formatCodeForDisplay(output.buffer)
+                        .makeDifferenceMarkString(against:
+                            formatCodeForDisplay(expectedSwift)))
                     """, inFile: file, atLine: line, expected: false)
             }
             

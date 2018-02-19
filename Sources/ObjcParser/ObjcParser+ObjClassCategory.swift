@@ -46,7 +46,7 @@ public extension ObjcParser {
         //
         // @end
         
-        let classNode: ObjcClassCategory = context.pushContext()
+        let classNode: ObjcClassCategoryInterface = context.pushContext()
         defer {
             context.popContext()
         }

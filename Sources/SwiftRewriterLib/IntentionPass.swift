@@ -12,10 +12,11 @@ public protocol IntentionPass {
 /// Used by `SwiftRewriter` before it outputs the final intents to `SwiftWriter`.
 public enum IntentionPasses {
     public static var passes: [IntentionPass] = [
-        FileGroupingIntentionPass(),
+        FileTypeMergingIntentionPass(),
         RemoveDuplicatedTypeIntentIntentionPass(),
+        StoredPropertyToNominalTypesIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),
-        PropertyMergeIntentionPass(),
+        PropertyMergeIntentionPass()
     ]
 }
 
@@ -25,17 +26,19 @@ public enum IntentionPasses {
 /// @property declarations and the like.
 public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
     public func apply(on intentionCollection: IntentionCollection) {
-        for file in intentionCollection.intentions(ofType: FileGenerationIntention.self) {
+        for file in intentionCollection.fileIntentions() {
             // Remove from file implementation any class generation intent that came
             // from an @interface
             file.removeTypes(where: { type in
-                if !(type.source is ObjcClassInterface || type.source is ObjcClassCategory) {
+                if !(type.source is ObjcClassInterface || type.source is ObjcClassCategoryInterface) {
                     return false
                 }
                 
                 return
                     file.typeIntentions.contains {
-                        $0.typeName == type.typeName && ($0.source is ObjcClassImplementation || $0.source is ObjcClassCategoryImplementation)
+                        $0.typeName == type.typeName &&
+                            ($0.source is ObjcClassImplementation ||
+                                $0.source is ObjcClassCategoryImplementation)
                     }
             })
         }
@@ -47,10 +50,8 @@ public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
 public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionPass {
     public func apply(on intentionCollection: IntentionCollection) {
         // Collect protocols
-        let protocols =
-            intentionCollection.intentions(ofType: ProtocolGenerationIntention.self)
-        let classes =
-            intentionCollection.intentions(ofType: ClassGenerationIntention.self)
+        let protocols = intentionCollection.protocolIntentions()
+        let classes = intentionCollection.typeIntentions()
         
         if protocols.count == 0 || classes.count == 0 {
             return
@@ -66,17 +67,16 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                 }
             
             for prot in knownProtocols {
-                FileGroupingIntentionPass.mergeMethodSignatures(from: prot, into: cls)
+                FileTypeMergingIntentionPass.mergeMethodSignatures(from: prot, into: cls)
             }
         }
     }
 }
 
-public class FileGroupingIntentionPass: IntentionPass {
+public class FileTypeMergingIntentionPass: IntentionPass {
     public func apply(on intentionCollection: IntentionCollection) {
         // Collect .h/.m pairs
-        let intentions =
-            intentionCollection.intentions(ofType: FileGenerationIntention.self)
+        let intentions = intentionCollection.fileIntentions()
         
         var headers: [FileGenerationIntention] = []
         var implementations: [FileGenerationIntention] = []
@@ -93,7 +93,10 @@ public class FileGroupingIntentionPass: IntentionPass {
         // class intent within
         for implementation in implementations {
             // Merge definitions from within an implementation file first
-            FileGroupingIntentionPass.mergeDefinitions(in: implementation)
+            FileTypeMergingIntentionPass
+                .mergeTypeIntentions(typeIntentions: implementation.typeIntentions,
+                                     into: implementation,
+                                     intentionCollection: intentionCollection)
             
             let implFile =
                 (implementation.filePath as NSString).deletingPathExtension
@@ -107,7 +110,11 @@ public class FileGroupingIntentionPass: IntentionPass {
                 continue
             }
             
-            FileGroupingIntentionPass.mergeDefinitions(from: header, into: implementation)
+            let intentions = header.typeIntentions + implementation.typeIntentions
+            FileTypeMergingIntentionPass
+                .mergeTypeIntentions(typeIntentions: intentions,
+                                     into: implementation,
+                                     intentionCollection: intentionCollection)
         }
         
         // Remove all header intentions that have a matching implementation
@@ -117,8 +124,7 @@ public class FileGroupingIntentionPass: IntentionPass {
                 return false
             }
             
-            let headerFile =
-                (intent.filePath as NSString).deletingPathExtension
+            let headerFile = (intent.filePath as NSString).deletingPathExtension
             
             if implementations.contains(where: { impl -> Bool in
                 (impl.filePath as NSString).deletingPathExtension == headerFile
@@ -130,31 +136,55 @@ public class FileGroupingIntentionPass: IntentionPass {
         }
     }
     
-    fileprivate static func mergeDefinitions(from header: FileGenerationIntention,
-                                  into implementation: FileGenerationIntention) {
-        let total = header.typeIntentions + implementation.typeIntentions
+    fileprivate static func mergeTypeIntentions(typeIntentions: [TypeGenerationIntention],
+                                                into implementation: FileGenerationIntention,
+                                                intentionCollection: IntentionCollection) {
+        var newIntentions: [TypeGenerationIntention] = []
         
-        let groupedTypes = Dictionary(grouping: total, by: { $0.typeName })
+        let classes = typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+        let extensions = typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         
-        for (_, types) in groupedTypes where types.count >= 2 {
-            mergeAllTypeDefinitions(in: types)
+        let classesByName = Dictionary(grouping: classes, by: { $0.typeName })
+        let extensionsByName = Dictionary(grouping: extensions, by: { $0.typeName })
+        
+        for (name, classes) in classesByName.sorted(by: { (k1, k2) in k1.key < k2.key }) {
+            let intention =
+                ClassGenerationIntention(typeName: name)
+            
+            mergeAllTypeDefinitions(in: classes, on: intention)
+            
+            newIntentions.append(intention)
+        }
+        
+        for (className, allExtensions) in extensionsByName {
+            let allExtensions =
+                allExtensions.sorted { ($0.categoryName ?? "") < ($1.categoryName ?? "") }
+            
+            // Merge extensions by pairing them up by original category name
+            let extensionsByCategory = Dictionary(grouping: allExtensions, by: { $0.categoryName ?? "" })
+            
+            for (categoryName, extensions) in extensionsByCategory.sorted(by: { (k1, k2) in k1.key < k2.key }) {
+                let category = ClassExtensionGenerationIntention(typeName: className)
+                category.categoryName = categoryName
+                
+                mergeAllTypeDefinitions(in: extensions, on: category)
+                
+                newIntentions.append(category)
+            }
+        }
+        
+        // Replace all types
+        implementation.removeTypes(where: { _ in true })
+        for type in newIntentions {
+            implementation.addType(type)
         }
     }
     
-    fileprivate static func mergeDefinitions(in implementation: FileGenerationIntention) {
-        let groupedTypes = Dictionary(grouping: implementation.typeIntentions,
-                                      by: { $0.typeName })
-        
-        for (_, types) in groupedTypes where types.count >= 2 {
-            mergeAllTypeDefinitions(in: types)
-        }
-    }
-    
-    fileprivate static func mergeAllTypeDefinitions(in types: [TypeGenerationIntention]) {
-        let target = types.reversed().first { $0.source is ObjcClassImplementation || $0.source is ObjcClassCategoryImplementation } ?? types.last!
-        
-        for type in types.dropLast() {
-            mergeTypes(from: type, into: target)
+    fileprivate static func mergeAllTypeDefinitions(in types: [TypeGenerationIntention],
+                                                    on target: TypeGenerationIntention)
+    {
+        for source in types {
+            mergeTypes(from: source, into: target)
         }
     }
     
@@ -202,7 +232,7 @@ public class FileGroupingIntentionPass: IntentionPass {
                                       into second: TypeGenerationIntention) {
         for knownMethod in first.knownMethods {
             if let existing = second.method(withSignature: knownMethod.signature) {
-                mergeMethodSignature(knownMethod, into: existing)
+                mergeMethods(knownMethod, into: existing)
             } else {
                 second.generateMethod(from: knownMethod)
             }
@@ -239,8 +269,8 @@ public class FileGroupingIntentionPass: IntentionPass {
     /// contains the proper nullability annotations, and for @protocol conformance
     /// nullability pairing.
     fileprivate
-    static func mergeMethodSignature(_ method1: KnownMethod,
-                                     into method2: MethodGenerationIntention) {
+    static func mergeMethods(_ method1: KnownMethod,
+                             into method2: MethodGenerationIntention) {
         if !method1.signature.returnType.isImplicitlyUnwrapped && method2.signature.returnType.isImplicitlyUnwrapped {
             if method1.signature.returnType.deepUnwrapped == method2.signature.returnType.deepUnwrapped {
                 method2.signature.returnType = method1.signature.returnType
@@ -257,6 +287,10 @@ public class FileGroupingIntentionPass: IntentionPass {
                 method2.signature.parameters[i].type = p1.type
             }
         }
+        
+        if let body = method1.body, method2.methodBody == nil {
+            method2.methodBody = MethodBodyIntention(body: body.body)
+        }
     }
     
     private struct Pair {
@@ -265,10 +299,62 @@ public class FileGroupingIntentionPass: IntentionPass {
     }
 }
 
+/// An intention to move all instance variables/properties from extensions into
+/// the nominal types.
+///
+/// Extensions in Swift cannot declare stored variables, so they must be moved to
+/// the proper nominal instances.
+public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
+    public func apply(on intentionCollection: IntentionCollection) {
+        let classes = intentionCollection.classIntentions()
+        let extensions = intentionCollection.extensionIntentions()
+        
+        for cls in classes {
+            let ext = extensions.filter { $0.typeName == cls.typeName }
+            
+            mergeStoredProperties(from: ext, into: cls)
+        }
+    }
+    
+    public func mergeStoredProperties(from extensions: [ClassExtensionGenerationIntention],
+                                      into nominalClass: ClassGenerationIntention) {
+        for ext in extensions {
+            // IVar
+            StoredPropertyToNominalTypesIntentionPass
+                .moveInstanceVariables(from: ext, into: nominalClass)
+        }
+    }
+    
+    static func moveInstanceVariables(from first: BaseClassIntention,
+                                      into second: BaseClassIntention) {
+        for ivar in first.instanceVariables {
+            if !second.hasInstanceVariable(named: ivar.name) {
+                second.addInstanceVariable(ivar)
+            } else {
+                first.removeInstanceVariable(named: ivar.name)
+            }
+        }
+    }
+    
+    static func moveStoredProperties(from first: BaseClassIntention,
+                                     into second: BaseClassIntention) {
+        for prop in first.properties {
+            first.removeProperty(prop)
+            
+            if !second.hasProperty(named: prop.name) {
+                second.addProperty(prop)
+            }
+        }
+    }
+}
+
 public class PropertyMergeIntentionPass: IntentionPass {
     public func apply(on intentionCollection: IntentionCollection) {
-        for cls in intentionCollection.intentions(ofType: ClassGenerationIntention.self) {
-            apply(on: cls)
+        for file in intentionCollection.fileIntentions() {
+            
+            for cls in file.typeIntentions.compactMap({ $0 as? ClassGenerationIntention }) {
+                apply(on: cls)
+            }
         }
     }
     
@@ -330,7 +416,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     private func joinPropertySet(_ propertySet: PropertySet, on classIntention: ClassGenerationIntention) {
         switch (propertySet.getter, propertySet.setter) {
         case let (getter?, setter?):
-            if let getterBody = getter.body, let setterBody = setter.body {
+            if let getterBody = getter.methodBody, let setterBody = setter.methodBody {
                 let setter =
                     PropertyGenerationIntention
                         .Setter(valueIdentifier: setter.parameters[0].name,
@@ -345,7 +431,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             classIntention.removeMethod(setter)
             
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
-            if let body = getter.body {
+            if let body = getter.methodBody {
                 propertySet.property.mode = .computed(body)
             }
             
@@ -355,7 +441,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         case let (nil, setter?):
             classIntention.removeMethod(setter)
             
-            guard let setterBody = setter.body else {
+            guard let setterBody = setter.methodBody else {
                 break
             }
             
@@ -369,7 +455,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // return self._backingField
             let getterIntention =
                 MethodBodyIntention(body: [.return(.identifier(backingFieldName))],
-                                    source: propertySet.setter?.body?.source)
+                                    source: propertySet.setter?.methodBody?.source)
             
             propertySet.property.mode = .property(get: getterIntention, set: setter)
             

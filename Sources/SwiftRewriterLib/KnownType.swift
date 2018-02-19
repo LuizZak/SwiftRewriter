@@ -14,6 +14,14 @@ public protocol KnownType {
 public protocol KnownMethod {
     /// Gets the function signature for this method
     var signature: FunctionSignature { get }
+    
+    /// Gets a known body for this method
+    var body: KnownMethodBody? { get }
+}
+
+/// Describes a method body that is known to the transpiler
+public protocol KnownMethodBody {
+    var body: CompoundStatement { get }
 }
 
 /// A known property from a type

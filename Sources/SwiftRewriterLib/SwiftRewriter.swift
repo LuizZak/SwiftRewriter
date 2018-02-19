@@ -79,7 +79,7 @@ public class SwiftRewriter {
             switch node {
             case let n as ObjcClassInterface:
                 self.enterObjcClassInterfaceNode(n)
-            case let n as ObjcClassCategory:
+            case let n as ObjcClassCategoryInterface:
                 self.enterObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.enterObjcClassImplementationNode(n)
@@ -136,7 +136,7 @@ public class SwiftRewriter {
             switch node {
             case let n as ObjcClassInterface:
                 self.exitObjcClassInterfaceNode(n)
-            case let n as ObjcClassCategory:
+            case let n as ObjcClassCategoryInterface:
                 self.exitObjcClassCategoryNode(n)
             case let n as ObjcClassImplementation:
                 self.exitObjcClassImplementationNode(n)
@@ -268,8 +268,6 @@ public class SwiftRewriter {
         let intent =
             ClassGenerationIntention(typeName: name, source: node)
         
-        intentionCollection.addIntention(intent)
-        
         context
             .findContext(ofType: FileGenerationIntention.self)?
             .addType(intent)
@@ -284,16 +282,14 @@ public class SwiftRewriter {
     }
     
     // MARK: - ObjcClassCategory
-    private func enterObjcClassCategoryNode(_ node: ObjcClassCategory) {
+    private func enterObjcClassCategoryNode(_ node: ObjcClassCategoryInterface) {
         guard let name = node.identifier?.name else {
             return
         }
         
         let intent =
             ClassExtensionGenerationIntention(typeName: name, source: node)
-        intent.extensionName = node.categoryName?.name
-        
-        intentionCollection.addIntention(intent)
+        intent.categoryName = node.categoryName?.name
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
@@ -302,7 +298,7 @@ public class SwiftRewriter {
         context.pushContext(intent)
     }
     
-    private func exitObjcClassCategoryNode(_ node: ObjcClassCategory) {
+    private func exitObjcClassCategoryNode(_ node: ObjcClassCategoryInterface) {
         if node.identifier?.name != nil {
             context.popContext() // ClassExtensionGenerationIntention
         }
@@ -316,8 +312,6 @@ public class SwiftRewriter {
         
         let intent =
             ClassGenerationIntention(typeName: name, source: node)
-        
-        intentionCollection.addIntention(intent)
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
@@ -338,9 +332,7 @@ public class SwiftRewriter {
         
         let intent =
             ClassExtensionGenerationIntention(typeName: name, source: node)
-        intent.extensionName = node.categoryName?.name
-        
-        intentionCollection.addIntention(intent)
+        intent.categoryName = node.categoryName?.name
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
@@ -361,8 +353,6 @@ public class SwiftRewriter {
         
         let intent =
             ProtocolGenerationIntention(typeName: name, source: node)
-        
-        intentionCollection.addIntention(intent)
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
@@ -457,7 +447,7 @@ public class SwiftRewriter {
             let compound = rewriter.parseStatements(compoundStatement: statements)
             
             let methodBodyIntention = MethodBodyIntention(body: compound, source: body)
-            method.body = methodBodyIntention
+            method.methodBody = methodBodyIntention
         }
         
         ctx.addMethod(method)

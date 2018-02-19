@@ -280,7 +280,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.TranslationUnitContext.self, node: rootNode)
         mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
         mapper.addRuleMap(rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategory.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategoryInterface.self)
         mapper.addRuleMap(rule: ObjectiveCParser.CategoryImplementationContext.self, nodeType: ObjcClassCategoryImplementation.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDefinitionContext.self, nodeType: MethodDefinition.self)
@@ -354,7 +354,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Class Category
     override func enterCategoryInterface(_ ctx: ObjectiveCParser.CategoryInterfaceContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassCategory.self) else {
+        guard let classNode = context.currentContextNode(as: ObjcClassCategoryInterface.self) else {
             return
         }
         

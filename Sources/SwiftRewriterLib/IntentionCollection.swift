@@ -1,48 +1,52 @@
 /// Represents a centralization point where all source code generation intentions
 /// are placed and queried for.
 public class IntentionCollection {
-    private var _intentions: [Intention] = []
+    private var _intentions: [FileGenerationIntention] = []
     
-    public func allIntentions() -> [Intention] {
+    public func fileIntentions() -> [FileGenerationIntention] {
         return _intentions
     }
     
+    /// Performs a full search of all types intended to be created on all files.
+    public func typeIntentions() -> [TypeGenerationIntention] {
+        return _intentions.flatMap { $0.typeIntentions }
+    }
+    
+    /// Gets all nominal class generation intentions across all files
+    public func classIntentions() -> [ClassGenerationIntention] {
+        return _intentions.flatMap { $0.classIntentions }
+    }
+    
+    /// Gets all extension intentions across all files
+    public func extensionIntentions() -> [ClassExtensionGenerationIntention] {
+        return _intentions.flatMap { $0.extensionIntentions }
+    }
+    
+    /// Performs a full search of all protocols intended to be created on all files.
+    public func protocolIntentions() -> [ProtocolGenerationIntention] {
+        return _intentions.flatMap { $0.protocolIntentions }
+    }
+    
     public func intentionFor(fileNamed name: String) -> FileGenerationIntention? {
-        return intentions().first { $0.filePath == name }
+        return fileIntentions().first { $0.filePath == name }
     }
     
-    public func intentionFor(classNamed name: String) -> ClassGenerationIntention? {
-        return intentions().first { $0.typeName == name }
-    }
-    
-    public func intentionFor(structNamed name: String) -> StructGenerationIntention? {
-        return intentions().first { $0.typeName == name }
-    }
-    
-    public func intentionFor(enumNamed name: String) -> EnumGenerationIntention? {
-        return intentions().first { $0.typeName == name }
-    }
-    
-    public func addIntention(_ intention: Intention) {
+    public func addIntention(_ intention: FileGenerationIntention) {
         _intentions.append(intention)
     }
     
-    public func intentions<T>(ofType type: T.Type = T.self) -> [T] {
-        return _intentions.compactMap { $0 as? T }
-    }
-    
-    public func removeIntention<T>(where predicate: (T) -> Bool) {
+    public func removeIntention(where predicate: (FileGenerationIntention) -> Bool) {
         for (i, item) in _intentions.enumerated() {
-            if let it = item as? T, predicate(it) {
+            if predicate(item) {
                 _intentions.remove(at: i)
                 return
             }
         }
     }
     
-    public func removeIntentions<T>(where predicate: (T) -> Bool) {
+    public func removeIntentions(where predicate: (FileGenerationIntention) -> Bool) {
         for (i, item) in _intentions.enumerated().reversed() {
-            if let it = item as? T, predicate(it) {
+            if predicate(item) {
                 _intentions.remove(at: i)
             }
         }

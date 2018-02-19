@@ -1,5 +1,5 @@
 /// A class category that extends a class with additional properties/methods/ivars/protocols.
-public class ObjcClassCategory: ASTNode, InitializableNode {
+public class ObjcClassCategoryInterface: ASTNode, InitializableNode {
     public var identifier: Identifier? {
         return firstChild()
     }
@@ -12,7 +12,7 @@ public class ObjcClassCategory: ASTNode, InitializableNode {
     }
 }
 
-public extension ObjcClassCategory {
+public extension ObjcClassCategoryInterface {
     public var properties: [PropertyDefinition] {
         return childrenMatching()
     }

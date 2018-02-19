@@ -459,7 +459,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
-                let ownership = SwiftWriter._ownershipPrefix(inType: type)
+                let ownership = evaluateOwnershipPrefix(inType: type)
                 let isConstant = SwiftWriter._isConstant(fromType: type)
                 
                 let declaration =
@@ -496,7 +496,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
-                let ownership = SwiftWriter._ownershipPrefix(inType: type)
+                let ownership = evaluateOwnershipPrefix(inType: type)
                 let isConstant = SwiftWriter._isConstant(fromType: type)
                 
                 let declaration =

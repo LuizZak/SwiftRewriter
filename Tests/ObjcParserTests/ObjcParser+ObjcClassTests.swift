@@ -386,14 +386,14 @@ class ObjcParser_ObjcClassTests: XCTestCase {
         }
     }
     
-    private func _parseTestObjcCategoryNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> ObjcClassCategory {
+    private func _parseTestObjcCategoryNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> ObjcClassCategoryInterface {
         do {
             let root: GlobalContextNode =
                 try parser.withTemporaryContext {
                     try parser.parseClassCategoryNode()
             }
             
-            let node: ObjcClassCategory? = root.firstChild()
+            let node: ObjcClassCategoryInterface? = root.firstChild()
             return node!
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
