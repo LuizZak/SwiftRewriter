@@ -145,7 +145,7 @@ public class MockConsoleOutputAsserter {
     /// This method does not alter the index.
     ///
     /// - Parameter string: String to verify on the buffer
-    func checkNextNot(contains string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
+    func checkNextNot(contain string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
         let range =
             output.range(of: string, options: literal ? .literal : .caseInsensitive,
                          range: outputIndex..<output.endIndex)

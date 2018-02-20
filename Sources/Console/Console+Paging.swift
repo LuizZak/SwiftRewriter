@@ -108,7 +108,7 @@ public class Pages {
                 }
                 
                 // Quit
-                if newPage == "0" {
+                if newPage == "0" || newPage == "" {
                     return .quit
                 }
                 

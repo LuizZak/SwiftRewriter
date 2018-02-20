@@ -106,10 +106,10 @@ open class MenuController {
                 return .loop
             }
             
-            if(result == .quit) {
+            if result == .quit {
                 return
             }
-        } while(true)
+        } while true
     }
     
     @discardableResult
@@ -144,7 +144,11 @@ open class MenuController {
     public class MenuItem {
         public var name: String
         public var actions: [(title: String, action: Action)]
-        public var initAction: Action? // Action that is fired automatically when the menu is opened
+        
+        /// Action that is fired automatically when the submenu is opened.
+        /// Is not recurrent when returning to the menu from one of it's submenus,
+        /// firing only when displaying the menu from above.
+        public var initAction: Action?
         
         public init(name: String, actions: [(String, Action)] = [], initAction: Action? = nil) {
             self.name = name

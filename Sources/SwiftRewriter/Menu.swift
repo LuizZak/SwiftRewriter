@@ -13,28 +13,32 @@ public class Menu: MenuController {
     
     public override func initMenus() -> MenuController.MenuItem {
         
-        return createMenu(name: "Main") { [rewriterService] menu, item in
+        return createMenu(name: "Main") { menu, item in
             item.initAction = .closure {
                 menu.console.printLine("Welcome to Swift Rewriter")
             }
             
-            menu.createMenu(name: "Explore files") { menu, item in
-                let path = URL(fileURLWithPath: NSHomeDirectory())
-                let filesExplorer =
-                    FilesExplorer(console: menu.console,
-                                  rewriterService: rewriterService,
-                                  path: path)
+            makeExploreFilesMenu(in: menu)
+        }
+    }
+    
+    func makeExploreFilesMenu(in menu: MenuController) {
+        menu.addAction(name: "Explore files") { [rewriterService] menu in
+            let path = URL(fileURLWithPath: NSHomeDirectory())
+            let filesExplorer =
+                FilesExplorer(console: menu.console,
+                              rewriterService: rewriterService,
+                              path: path)
+            
+            let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
+            let pages = menu.console.makePages(configuration: config)
+            
+            do {
+                let filesList = try filesExplorer.getFileListProvider()
                 
-                let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
-                let pages = menu.console.makePages(configuration: config)
-                
-                do {
-                    let filesList = try filesExplorer.getFileListProvider()
-                    
-                    pages.displayPages(withProvider: filesList)
-                } catch {
-                    menu.console.printLine("Failed to navigate directory contents!")
-                }
+                pages.displayPages(withProvider: filesList)
+            } catch {
+                menu.console.printLine("Failed to navigate directory contents!")
             }
         }
     }

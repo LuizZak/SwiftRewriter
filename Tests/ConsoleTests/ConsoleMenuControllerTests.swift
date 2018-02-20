@@ -74,8 +74,10 @@ class ConsoleMenuControllerTests: ConsoleTestCase {
             sut.builder = { menu in
                 menu.createMenu(name: "Menu 1") { menu, item in
                     menu.createMenu(name: "Menu 2") { menu, item in
-                        menu.addAction(name: "An action") { _ in
+                        menu.addAction(name: "An action") { menu in
                             menu.console.printLine("Selected Menu 1 - Menu 2")
+                            
+                            menu.createMenu(name: "Menu 3") { _, _ in }
                         }
                     }
                 }

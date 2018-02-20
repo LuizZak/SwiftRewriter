@@ -75,6 +75,35 @@ class PagesTests: ConsoleTestCase {
             .printIfAsserted()
     }
     
+    func testEmptyLineQuitsPageMenu() {
+        let pageItems: [String] = [
+            "Item 1", "Item 2", "Item 3", "Item 4"
+        ]
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "")
+        mock.addMockInput(line: "0")
+        
+        let sut = makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2)
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            = Menu
+            Please select an option bellow:
+            """)
+            .checkNext("""
+            = Page 1 of 2
+            [INPUT] ''
+            = Menu
+            """)
+            .checkNextNot(contain: "Issued command")
+            .checkNext("Babye!")
+            .printIfAsserted()
+    }
+    
     func testPass0ToQuitPagesWithCommands() {
         let pageItems: [String] = [
             "Item 1", "Item 2", "Item 3", "Item 4"
@@ -99,15 +128,44 @@ class PagesTests: ConsoleTestCase {
             Please select an option bellow:
             """)
             .checkNext("""
-            A list of things
-            ----
-            1: Item 1
-            2: Item 2
-            ---- 1 to 2
             = Page 1 of 2
             [INPUT] '0'
+            = Menu
             """)
-            .checkNextNot(contains: "Issued command")
+            .checkNextNot(contain: "Issued command")
+            .checkNext("Babye!")
+            .printIfAsserted()
+    }
+    
+    func testEmptyLineQuitsPageMenuWithCommand() {
+        let pageItems: [String] = [
+            "Item 1", "Item 2", "Item 3", "Item 4"
+        ]
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "")
+        mock.addMockInput(line: "0")
+        
+        let sut =
+            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: { _ in
+                XCTFail("Did not expect to invoke command handler")
+                return .quit("Issued command")
+            })
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            = Menu
+            Please select an option bellow:
+            """)
+            .checkNext("""
+            = Page 1 of 2
+            [INPUT] ''
+            = Menu
+            """)
+            .checkNextNot(contain: "Issued command")
             .checkNext("Babye!")
             .printIfAsserted()
     }
