@@ -57,6 +57,12 @@ public protocol ConsoleClient {
     /// Prints a line into the console's output, with a given terminator
     func printLine(_ line: String, terminator: String)
     
+    /// Performs a terminal command to navigate/alter the output.
+    func command(_ command: Terminal.Command)
+
+    /// Clears the entire screen buffer
+    func clearScreen()
+
     /// Called to record the given exit code for the console's program
     func recordExitCode(_ code: Int)
     
@@ -220,6 +226,17 @@ open class Console: ConsoleClient {
     open func printLine(_ line: String, terminator: String) {
         print(line, terminator: terminator, to: &outputSink)
     }
+
+    open func command(_ command: Terminal.Command) {
+        #if !Xcode
+        printLine(command.ansi, terminator: "")
+        #endif
+    }
+
+    open func clearScreen() {
+        command(.eraseScreen)
+        command(.moveHome)
+    }
     
     open func recordExitCode(_ code: Int) {
         errno = Int32(code)
@@ -249,7 +266,7 @@ open class Console: ConsoleClient {
             return string.count
         }
     }
-    
+
     /// Helper closure for clarifying behavior of commands and actions that
     /// result in an interaction with the upper menu
     public enum CommandMenuResult {

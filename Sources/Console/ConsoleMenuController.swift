@@ -48,8 +48,12 @@ open class MenuController {
         
         let menusBreadcrumb = (parents + [menu]).map { $0.name }.joined(separator: " = ")
         
+        var message: String? = nil
+
         repeat {
             let result: Console.CommandMenuResult = autoreleasepool {
+                console.clearScreen()
+
                 console.printLine("= \(menusBreadcrumb)")
                 console.printLine("Please select an option bellow:")
                 
@@ -64,6 +68,11 @@ open class MenuController {
                 } else {
                     console.printLine("0: Exit")
                 }
+
+                if let msg = message {
+                    console.printLine(msg)
+                    message = nil
+                }
                 
                 guard let input = console.readLineWith(prompt: ">") else {
                     console.recordExitCode(0)
@@ -76,15 +85,12 @@ open class MenuController {
                 }
                 
                 guard let option = Int(input) else {
-                    console.printLine("Invalid option \(input)")
-                    console.printLine("")
+                    message = "Invalid option \(input)"
                     return .loop
                 }
                 
-                console.printLine("")
-                
                 if option > 0 && menu.actions.count == 0 {
-                    console.printLine("Invalid option index \(option)")
+                    message = "Invalid option index \(option)"
                     return .loop
                 }
                 
@@ -100,7 +106,7 @@ open class MenuController {
                 case (1...menu.actions.count):
                     performAction(action: menu.actions[option - 1].action, parents: parents + [menu])
                 default:
-                    console.printLine("Invalid option \(input)")
+                    message = "Invalid option \(input)"
                 }
                 
                 return .loop

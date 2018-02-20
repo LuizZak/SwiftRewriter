@@ -19,10 +19,16 @@ public class Pages {
     /// lines started with '=' with a special closure
     public func displayPages<T: ConsoleDataProvider>(withProvider provider: T,
                                                      perPageCount: Int = 30) where T.Data == [String] {
-        
         var page = 0
         let pageCount = Int(ceil(Float(provider.count) / Float(perPageCount)))
+
+        var message: String?
+
         repeat {
+            if configuration?.clearOnDisplay == true {
+                console.clearScreen()
+            }
+
             let result: Console.CommandMenuResult = autoreleasepool {
                 let minItem = min(page * perPageCount, provider.count)
                 let maxItem = min(minItem + perPageCount, provider.count)
@@ -62,12 +68,12 @@ public class Pages {
                     // Decrease/increase page
                     if input.hasPrefix("-") || input.hasPrefix("+") {
                         if(input.count == 1) {
-                            console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
+                            message = "Invalid page index \(input). Must be between 1 and \(pageCount)"
                             return false
                         }
                         // Try to read an integer value
                         if Int(input.dropFirst()) == nil {
-                            console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
+                            message = "Invalid page index \(input). Must be between 1 and \(pageCount)"
                             return false
                         }
                         
@@ -86,15 +92,20 @@ public class Pages {
                             return true
                         }
                         
-                        console.printLine("Invalid page number '\(input)'. Must be a number between 1 and \(pageCount)")
+                        message = "Invalid page number '\(input)'. Must be a number between 1 and \(pageCount)"
                         return false
                     }
                     if index != 0 && (index < 1 || index > pageCount) {
-                        console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
+                        message = "Invalid page index \(input). Must be between 1 and \(pageCount)"
                         return false
                     }
                     
                     return true
+                }
+
+                if let msg = message {
+                    console.printLine(msg)
+                    message = nil
                 }
                 
                 var prompt: String = "Input page (0 or empty to close):"
@@ -122,7 +133,7 @@ public class Pages {
                                 switch try command(com) {
                                 case .loop(let msg):
                                     if let msg = msg {
-                                        console.printLine(msg)
+                                        message = msg
                                     }
                                     return .loop
                                     
@@ -211,15 +222,18 @@ public class Pages {
     
     /// Structure for customization of paged displays
     public struct PageDisplayConfiguration {
+        public let clearOnDisplay: Bool
         public let commandHandler: PagesCommandHandler
         
-        public init(commandPrompt: String? = nil, commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
+        public init(clearOnDisplay: Bool = true, commandPrompt: String? = nil, commandClosure: ((String) throws -> PagesCommandResult)? = nil) {
+            self.clearOnDisplay = clearOnDisplay
             commandHandler =
                 InnerPageCommandHandler(commandPrompt: commandPrompt, commandClosure: commandClosure)
         }
         
-        public init(commandHandler: PagesCommandHandler) {
+        public init(commandHandler: PagesCommandHandler, clearOnDisplay: Bool = true) {
             self.commandHandler = commandHandler
+            self.clearOnDisplay = clearOnDisplay
         }
     }
     

@@ -79,6 +79,8 @@ fileprivate class FileFinderInterface {
         let console = menu.console
         let fileManager = FileManager.default
 
+        console.clearScreen()
+
         let _path = 
             console.parseLineWith(
                 prompt: """
@@ -119,6 +121,8 @@ fileprivate class FileFinderInterface {
         let fileManager = FileManager.default
 
         repeat {
+            console.clearScreen()
+
             guard let files = fileManager.enumerator(atPath: path)?.lazy else {
                 console.printLine("Failed to iterate files from path \(path)")
                 return
@@ -145,28 +149,30 @@ fileprivate class FileFinderInterface {
             matches.sort { s1, s2 in
                 s1.compare(s2, options: .numeric) == .orderedAscending
             }
-
+            
             if matches.count == 0 {
                 console.printLine("Found 0 matches in directory!")
                 _=console.readLineWith(prompt: "Press [Enter] to return")
                 continue
             }
 
-            // Present selection to user
-            let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
-            guard let index = presentSelection(in: menu, list: matches, prompt: "\(matchesString), select one to convert:") else {
-                return
-            }
-            
-            do {
-                let file = matches[index - 1]
-                try rewriterService.rewrite(files: [URL(fileURLWithPath: (path as NSString).appendingPathComponent(file))])
-                _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
-            } catch {
-                console.printLine("Error while converting file: \(error)")
-                _=console.readLineWith(prompt: "Press [Enter] to return")
-                return
-            }
+            repeat {
+                // Present selection to user
+                let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
+                guard let index = presentSelection(in: menu, list: matches, prompt: "\(matchesString), select one to convert:") else {
+                    return
+                }
+                
+                do {
+                    let file = matches[index - 1]
+                    try rewriterService.rewrite(files: [URL(fileURLWithPath: (path as NSString).appendingPathComponent(file))])
+                    _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
+                } catch {
+                    console.printLine("Error while converting file: \(error)")
+                    _=console.readLineWith(prompt: "Press [Enter] to return")
+                    return
+                }
+            } while true
         } while true
     }
 }
