@@ -1,6 +1,35 @@
 import Foundation
 import Console
 
+private func presentSelection(in menu: MenuController, list: [String], prompt: String) -> Int? {
+    var item: Int?
+
+    let config = 
+        Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
+            if input.isEmpty {
+                return .quit(nil)
+            }
+
+            if let index = list.index(of: input) {
+                item = index
+                return .quit(nil)
+            }
+
+            guard let int = Int(input), int > 0 && int <= list.count else {
+                return .showMessageThenLoop("Expected an value between 1 and \(list.count)")
+            }
+
+            item = int
+            
+            return .quit(nil)
+        }
+
+    let pages = menu.console.makePages(configuration: config)
+    pages.displayPages(withValues: list)
+
+    return item
+}
+
 /// Main CLI interface entry point for file exploring services
 public class FilesExplorerService {
     var rewriterService: SwiftRewriterService
@@ -10,6 +39,43 @@ public class FilesExplorerService {
     }
 
     func runFileFindMenu(in menu: MenuController) {
+        let interface = FileFinderInterface(rewriterService: rewriterService)
+
+        interface.run(in: menu)
+    }
+
+    func runFileExploreMenu(in menu: MenuController, url: URL) {
+        let path = URL(fileURLWithPath: NSHomeDirectory())
+        let filesExplorer =
+            FilesExplorer(console: menu.console,
+                          rewriterService: rewriterService,
+                          path: path)
+        
+        let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
+        let pages = menu.console.makePages(configuration: config)
+        
+        do {
+            let filesList = try filesExplorer.getFileListProvider()
+            
+            pages.displayPages(withProvider: filesList)
+        } catch {
+            menu.console.printLine("Failed to navigate directory contents!")
+        }
+    }
+}
+
+fileprivate class FileFinderInterface {
+    var rewriterService: SwiftRewriterService
+    
+    init(rewriterService: SwiftRewriterService) {
+        self.rewriterService = rewriterService
+    }
+
+    func run(in menu: MenuController) {
+        searchPathUi(menu: menu)
+    }
+
+    func searchPathUi(menu: MenuController) {
         let console = menu.console
         let fileManager = FileManager.default
 
@@ -29,10 +95,7 @@ public class FilesExplorerService {
                     let pathInput = (input as NSString).expandingTildeInPath
 
                     var isDirectory = ObjCBool(false)
-                    let exists = 
-                        FileManager.default
-                            .fileExists(atPath: pathInput,
-                                        isDirectory: &isDirectory)
+                    let exists = fileManager.fileExists(atPath: pathInput, isDirectory: &isDirectory)
 
                     if !exists {
                         return .error("Path '\(pathInput)' does not exists!")
@@ -47,6 +110,13 @@ public class FilesExplorerService {
         guard let path = _path else {
             return
         }
+        
+        exploreFilesUi(path: path, menu: menu)
+    }
+
+    func exploreFilesUi(path: String, menu: MenuController) {
+        let console = menu.console
+        let fileManager = FileManager.default
 
         repeat {
             guard let files = fileManager.enumerator(atPath: path)?.lazy else {
@@ -71,7 +141,10 @@ public class FilesExplorerService {
                 ($0 as NSString).pathExtension == "m" && 
                 ($0 as NSString).lastPathComponent.localizedCaseInsensitiveContains(fileName)
             }
-            let matches = Array(matchesSource.prefix(50))
+            var matches = Array(matchesSource.prefix(300))
+            matches.sort { s1, s2 in
+                s1.compare(s2, options: .numeric) == .orderedAscending
+            }
 
             if matches.count == 0 {
                 console.printLine("Found 0 matches in directory!")
@@ -95,54 +168,6 @@ public class FilesExplorerService {
                 return
             }
         } while true
-    }
-
-    func runFileExploreMenu(in menu: MenuController, url: URL) {
-        let path = URL(fileURLWithPath: NSHomeDirectory())
-        let filesExplorer =
-            FilesExplorer(console: menu.console,
-                          rewriterService: rewriterService,
-                          path: path)
-        
-        let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
-        let pages = menu.console.makePages(configuration: config)
-        
-        do {
-            let filesList = try filesExplorer.getFileListProvider()
-            
-            pages.displayPages(withProvider: filesList)
-        } catch {
-            menu.console.printLine("Failed to navigate directory contents!")
-        }
-    }
-
-    private func presentSelection(in menu: MenuController, list: [String], prompt: String) -> Int? {
-        var item: Int?
-
-        let config = 
-            Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
-                if input.isEmpty {
-                    return .quit(nil)
-                }
-
-                if let index = list.index(of: input) {
-                    item = index
-                    return .quit(nil)
-                }
-
-                guard let int = Int(input), int > 0 && int <= list.count else {
-                    return .showMessageThenLoop("Expected an value between 1 and \(list.count)")
-                }
-
-                item = int
-                
-                return .quit(nil)
-            }
-
-        let pages = menu.console.makePages(configuration: config)
-        pages.displayPages(withValues: list)
-
-        return item
     }
 }
 
