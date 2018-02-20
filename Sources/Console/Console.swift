@@ -28,6 +28,22 @@ public protocol ConsoleClient {
     /// - Returns: First input that was correctly validated, or if `allowEmpty` is
     /// `true`, an empty input line, if the user specified no input.
     func readLineWith(prompt: String, allowEmpty: Bool, validate: (String) -> Bool) -> String?
+
+    /// Reads a line from the console, performing a parsing step with the user's
+    /// input.
+    ///
+    /// The method then either returns a non-nil value for the parsing result, or nil,
+    /// in case the parsing was aborted/the user entered an empty string with `allowEmpty`
+    /// as `true` 
+    ///
+    /// - Parameters:
+    ///   - prompt: Textual prompt to present to the user
+    ///   - allowEmpty: Whether the method allows empty inputs - empty inputs
+    /// finish the console input and return `nil`.
+    ///   - parse: A parsing method that parses the user's input string and returns it.
+    /// - Returns: First input value that was correctly parsed, or if `allowEmpty` is
+    /// `true`, nil, if the user specified no input.
+    func parseLineWith<T>(prompt: String, allowEmpty: Bool, parse: (String) -> ValueReadResult<T>) -> T?
     
     /// Reads a line from the console, showing a given prompt to the user.
     func readLineWith(prompt: String) -> String?
@@ -49,6 +65,12 @@ public protocol ConsoleClient {
     
     /// Makes a new paging client with a given set of configurations
     func makePages(configuration: Pages.PageDisplayConfiguration) -> Pages
+}
+
+public enum ValueReadResult<T> {
+    case success(T)
+    case error(String?)
+    case abort
 }
 
 /// Helper console-interation interface
@@ -135,6 +157,30 @@ open class Console: ConsoleClient {
             }
             
             return input
+        } while true
+    }
+
+    open func parseLineWith<T>(prompt: String, allowEmpty: Bool, parse: (String) -> ValueReadResult<T>) -> T? {
+        repeat {
+            let input = readSureLineWith(prompt: prompt)
+            
+            if allowEmpty && input.isEmpty {
+                return nil
+            }
+
+            let parsed = parse(input)
+            
+            switch parsed {
+            case .error(let msg):
+                if let msg = msg {
+                    printLine(msg)
+                }
+                continue
+            case .success(let value):
+                return value
+            case .abort:
+                return nil
+            }
         } while true
     }
     

@@ -1,10 +1,155 @@
 import Foundation
 import Console
 
+/// Main CLI interface entry point for file exploring services
+public class FilesExplorerService {
+    var rewriterService: SwiftRewriterService
+
+    init(rewriterService: SwiftRewriterService) {
+        self.rewriterService = rewriterService
+    }
+
+    func runFileFindMenu(in menu: MenuController) {
+        let console = menu.console
+        let fileManager = FileManager.default
+
+        let _path = 
+            console.parseLineWith(
+                prompt: """
+                    Please input a path to search .h/.m files at (e.g.: /Users/Me/projects/my-objc-project/Sources)
+                    Input an empty line to abort.
+                    > 
+                    """,
+                allowEmpty: true,
+                parse: { input -> ValueReadResult<String> in
+                    if input == "" {
+                        return .abort
+                    }
+
+                    let pathInput = (input as NSString).expandingTildeInPath
+
+                    var isDirectory = ObjCBool(false)
+                    let exists = 
+                        FileManager.default
+                            .fileExists(atPath: pathInput,
+                                        isDirectory: &isDirectory)
+
+                    if !exists {
+                        return .error("Path '\(pathInput)' does not exists!")
+                    }
+                    if !isDirectory.boolValue {
+                        return .error("Path '\(pathInput)' is not a directory!")
+                    }
+
+                    return .success(pathInput)
+                })
+        
+        guard let path = _path else {
+            return
+        }
+
+        repeat {
+            guard let files = fileManager.enumerator(atPath: path)?.lazy else {
+                console.printLine("Failed to iterate files from path \(path)")
+                return
+            }
+
+            let fileName =
+                console.readSureLineWith(prompt: """
+                    \(path)
+                    Enter a file name to search on the current path (e.g.: MyFile.m), or empty to quit:
+                    > 
+                    """)
+            
+            if fileName.isEmpty {
+                return
+            }
+
+            console.printLine("Searching...")
+            
+            let matchesSource = files.compactMap { $0 as? String }.filter {
+                ($0 as NSString).pathExtension == "m" && 
+                ($0 as NSString).lastPathComponent.localizedCaseInsensitiveContains(fileName)
+            }
+            let matches = Array(matchesSource.prefix(50))
+
+            if matches.count == 0 {
+                console.printLine("Found 0 matches in directory!")
+                _=console.readLineWith(prompt: "Press [Enter] to return")
+                continue
+            }
+
+            // Present selection to user
+            let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
+            guard let index = presentSelection(in: menu, list: matches, prompt: "\(matchesString), select one to convert:") else {
+                return
+            }
+            
+            do {
+                let file = matches[index - 1]
+                try rewriterService.rewrite(files: [URL(fileURLWithPath: (path as NSString).appendingPathComponent(file))])
+                _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
+            } catch {
+                console.printLine("Error while converting file: \(error)")
+                _=console.readLineWith(prompt: "Press [Enter] to return")
+                return
+            }
+        } while true
+    }
+
+    func runFileExploreMenu(in menu: MenuController, url: URL) {
+        let path = URL(fileURLWithPath: NSHomeDirectory())
+        let filesExplorer =
+            FilesExplorer(console: menu.console,
+                          rewriterService: rewriterService,
+                          path: path)
+        
+        let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
+        let pages = menu.console.makePages(configuration: config)
+        
+        do {
+            let filesList = try filesExplorer.getFileListProvider()
+            
+            pages.displayPages(withProvider: filesList)
+        } catch {
+            menu.console.printLine("Failed to navigate directory contents!")
+        }
+    }
+
+    private func presentSelection(in menu: MenuController, list: [String], prompt: String) -> Int? {
+        var item: Int?
+
+        let config = 
+            Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
+                if input.isEmpty {
+                    return .quit(nil)
+                }
+
+                if let index = list.index(of: input) {
+                    item = index
+                    return .quit(nil)
+                }
+
+                guard let int = Int(input), int > 0 && int <= list.count else {
+                    return .showMessageThenLoop("Expected an value between 1 and \(list.count)")
+                }
+
+                item = int
+                
+                return .quit(nil)
+            }
+
+        let pages = menu.console.makePages(configuration: config)
+        pages.displayPages(withValues: list)
+
+        return item
+    }
+}
+
 /// Presents a CLI-gui for navigating folders and selecting files to process
 /// into SwiftRewriter
-public class FilesExplorer: PagesCommandHandler {
-    public var commandPrompt: String? {
+fileprivate class FilesExplorer: PagesCommandHandler {
+    var commandPrompt: String? {
         return "Select a file above or input '0' to quit"
     }
     
@@ -27,7 +172,7 @@ public class FilesExplorer: PagesCommandHandler {
             return sSelf.navigateOption(input)
         }
     }
-    
+
     public func getFileListProvider() throws -> FileListConsoleProvider {
         var files =
             try FileManager.default
