@@ -236,6 +236,7 @@ open class Console: ConsoleClient {
     open func clearScreen() {
         command(.eraseScreen)
         command(.moveHome)
+        command(.eraseScreenAndScrollback)
     }
     
     open func recordExitCode(_ code: Int) {

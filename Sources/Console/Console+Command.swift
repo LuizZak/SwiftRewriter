@@ -14,6 +14,7 @@ public extension Terminal {
     enum Command {
         case moveHome
         case eraseScreen
+        case eraseScreenAndScrollback
         case eraseLine
         case cursorUp
     }
@@ -31,6 +32,8 @@ public extension Terminal.Command {
             return "1A".ansi
         case .eraseScreen:
             return "2J".ansi
+        case .eraseScreenAndScrollback:
+            return "3J".ansi
         case .eraseLine:
             return "2K".ansi
         }
