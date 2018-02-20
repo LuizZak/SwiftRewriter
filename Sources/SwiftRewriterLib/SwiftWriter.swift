@@ -36,6 +36,8 @@ public class SwiftWriter {
         let protocols = fileIntent.protocolIntentions
         var addSeparator = false
         
+        outputPreprocessorDirectives(fileIntent.preprocessorDirectives, target: out)
+        
         for typeali in fileIntent.typealiasIntentions {
             outputTypealias(typeali, target: out)
             addSeparator = true
@@ -76,6 +78,17 @@ public class SwiftWriter {
         out.onAfterOutput()
         
         file.close()
+    }
+    
+    public func outputPreprocessorDirectives(_ preproc: [String], target: RewriterOutputTarget) {
+        if preproc.count == 0 {
+            return
+        }
+        
+        target.output(line: "// Preprocessor directives found in file:", style: .comment)
+        for pre in preproc {
+            target.output(line: "// \(pre)", style: .comment)
+        }
     }
     
     private func outputTypealias(_ typeali: TypealiasIntention, target: RewriterOutputTarget) {

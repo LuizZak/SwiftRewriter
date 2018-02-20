@@ -52,7 +52,10 @@ let package = Package(
             dependencies: ["SwiftRewriterLib", "Utils", "MiniLexer"]),
         .target(
             name: "SwiftRewriter",
-            dependencies: ["SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility", "ExpressionPasses", "Utils", "Console", "SourcePreprocessors"])
+            dependencies: [
+                "SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility",
+                "ExpressionPasses", "Utils", "Console", "SourcePreprocessors"
+            ])
         
     ] + /* Tests */ [
         .testTarget(

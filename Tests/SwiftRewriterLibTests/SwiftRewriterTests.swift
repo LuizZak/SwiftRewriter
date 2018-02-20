@@ -760,4 +760,38 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testKeepPreprocessorDirectives() throws {
+        try assertObjcParse(
+            objc: """
+            #import "File.h"
+            #import <File.h>
+            #if 0
+            #endif
+            #define MACRO 123
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #import "File.h"
+            // #import <File.h>
+            // #if 0
+            // #endif
+            // #define MACRO 123
+            """)
+    }
+    
+    func testIfFalseDirectivesHideCodeWithin() throws {
+        try assertObjcParse(
+            objc: """
+            #if 0
+            @interface MyClass
+            @end
+            #endif
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #if 0
+            // #endif
+            """)
+    }
 }

@@ -87,6 +87,7 @@ public class SwiftRewriter {
         try parser.parse()
         
         nonnullTokenRanges = parser.nonnullMacroRegionsTokenRange
+        fileIntent.preprocessorDirectives = parser.preprocessorDirectives
         
         let node = parser.rootNode
         let visitor = AnonymousASTVisitor()

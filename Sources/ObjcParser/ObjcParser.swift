@@ -10,7 +10,7 @@ public class ObjcParser {
     let lexer: ObjcLexer
     let source: CodeSource
     let context: NodeCreationContext
-    let tokens: CommonTokenStream
+    var tokens: CommonTokenStream?
     
     /// Whether a token has been read yet by this parser
     internal var _hasReadToken: Bool = false
@@ -29,6 +29,9 @@ public class ObjcParser {
     /// rewriter can leverage this information to infer nonnull contexts.
     public var nonnullMacroRegionsTokenRange: [(start: Int, end: Int)] = []
     
+    /// Preprocessor directives found on this file
+    public var preprocessorDirectives: [String] = []
+    
     public convenience init(string: String) {
         self.init(source: StringCodeSource(source: string))
     }
@@ -39,10 +42,6 @@ public class ObjcParser {
         context = NodeCreationContext()
         diagnostics = Diagnostics()
         rootNode = GlobalContextNode()
-        
-        let input = ANTLRInputStream(source.fetchSource())
-        let lxr = ObjectiveCLexer(input)
-        tokens = CommonTokenStream(lxr)
     }
     
     func startRange() -> RangeMarker {
@@ -82,16 +81,61 @@ public class ObjcParser {
     
     /// Parses the entire source string
     public func parse() throws {
-        try parseMainChannel()
-        try parseDirectivesChannel()
+        // Clear previous state
+        preprocessorDirectives = []
+        
+        let input = try parsePreprocessor()
+        try parseMainChannel(input: input)
+        try parseNSAssumeNonnullChannel()
     }
     
-    private func parseMainChannel() throws {
+    /// Main source parsing pass which takes in preprocessors while parsing
+    private func parsePreprocessor() throws -> String {
+        let src = source.fetchSource()
+        
+        let input = ANTLRInputStream(src)
+        let lxr = ObjectiveCPreprocessorLexer(input)
+        let tokens = CommonTokenStream(lxr)
+        
+        let parser = try ObjectiveCPreprocessorParser(tokens)
+        let root = try parser.objectiveCDocument()
+        
+        let preprocessors = ObjcPreprocessorListener.walk(root)
+        
+        // Extract preprocessors now
+        for preprocessor in preprocessors {
+            let start = src.index(src.startIndex, offsetBy: preprocessor.lowerBound)
+            let end = src.index(src.startIndex, offsetBy: preprocessor.upperBound)
+            let line = String(src[start..<end])
+            
+            preprocessorDirectives.append(line.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        
+        // Return proper code
+        let processed = ObjectiveCPreprocessor(commonTokenStream: tokens)
+        return processed.visitObjectiveCDocument(root) ?? ""
+    }
+    
+    private func initMainTokenStream(input: String) -> CommonTokenStream {
+        if let tokens = self.tokens {
+            return tokens
+        }
+        
+        let input = ANTLRInputStream(input)
+        let lxr = ObjectiveCLexer(input)
+        let tokens = CommonTokenStream(lxr)
+        
+        self.tokens = tokens
+        
+        return tokens
+    }
+    
+    private func parseMainChannel(input: String) throws {
         // Make a pass with ANTLR before traversing the parse tree and collecting
         // known constructs
         let src = source.fetchSource()
         
-        let parser = try ObjectiveCParser(tokens)
+        let parser = try ObjectiveCParser(initMainTokenStream(input: input))
         let root = try parser.translationUnit()
         
         let listener = ObjcParserListener(sourceString: src, source: source)
@@ -102,7 +146,34 @@ public class ObjcParser {
         rootNode = listener.rootNode
     }
     
-    private func parseDirectivesChannel() throws {
+    private func parsePreprocessorDirectivesChannel() throws {
+        let src = source.fetchSource()
+        
+        let input = ANTLRInputStream(src)
+        let lexer = ObjectiveCLexer(input)
+        lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
+        let tokens = CommonTokenStream(lexer)
+        try tokens.fill()
+        
+        let allTokens = tokens.getTokens()
+        
+        var lastBegin: Int?
+        
+        for tok in allTokens {
+            let tokType = tok.getType()
+            if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN {
+                lastBegin = tok.getTokenIndex()
+            } else if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END {
+                
+                if let lastBeginIndex = lastBegin {
+                    nonnullMacroRegionsTokenRange.append((start: lastBeginIndex, end: tok.getTokenIndex()))
+                    lastBegin = nil
+                }
+            }
+        }
+    }
+    
+    private func parseNSAssumeNonnullChannel() throws {
         nonnullMacroRegionsTokenRange = []
         
         let src = source.fetchSource()
