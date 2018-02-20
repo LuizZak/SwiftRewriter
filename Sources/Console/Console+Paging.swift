@@ -54,8 +54,8 @@ public class Pages {
                 // - Relative page changes (e.g.: '+1', '-10', '+2' etc., with no bounds)
                 // - Absolute page (e.g. 1, 2, 3, etc., from 1 - pageCount)
                 let pageValidateNew: (String) -> Bool = { [console, configuration] input in
-                    // Command
-                    if input.hasPrefix("=") && configuration?.commandHandler.commandClosure != nil {
+                    // 0: Return tu upper menu
+                    if input == "0" {
                         return true
                     }
                     
@@ -74,17 +74,22 @@ public class Pages {
                         return true
                     }
                     
-                    // Direct page
-                    guard let index = Int(input) else {
+                    // Command
+                    if !input.hasPrefix("=") && configuration?.commandHandler.commandClosure != nil {
+                        return true
+                    }
+                    
+                    // Direct page index
+                    guard input.hasPrefix("="), let index = Int(input.dropFirst()) else {
                         // If not a number, check with command
                         if configuration?.commandHandler.commandClosure != nil {
                             return true
                         }
                         
-                        console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
+                        console.printLine("Invalid page number '\(input)'. Must be a number between 1 and \(pageCount)")
                         return false
                     }
-                    if(index != 0 && (index < 1 || index > pageCount)) {
+                    if index != 0 && (index < 1 || index > pageCount) {
                         console.printLine("Invalid page index \(input). Must be between 1 and \(pageCount)")
                         return false
                     }
@@ -102,8 +107,13 @@ public class Pages {
                     return .quit
                 }
                 
+                // Quit
+                if newPage == "0" {
+                    return .quit
+                }
+                
                 // Command
-                if (newPage.hasPrefix("=") || Int(newPage) == nil) && configuration?.commandHandler.commandClosure != nil {
+                if (!newPage.hasPrefix("=") || Int(newPage.dropFirst()) == nil) && configuration?.commandHandler.commandClosure != nil {
                     if let command = configuration?.commandHandler.commandClosure {
                         do {
                             return try autoreleasepool {
@@ -148,7 +158,7 @@ public class Pages {
                 }
                 
                 // Page increment-decrement
-                if(newPage.hasPrefix("-") || newPage.hasPrefix("+")) {
+                if newPage.hasPrefix("-") || newPage.hasPrefix("+") {
                     let increment = newPage.hasPrefix("+")
                     
                     if let skipCount = Int(newPage.dropFirst()) {
@@ -158,11 +168,11 @@ public class Pages {
                     }
                 }
                 
-                guard let newPageIndex = Int(newPage) else {
+                guard newPage.hasPrefix("="), let newPageIndex = Int(newPage.dropFirst()) else {
                     return .quit
                 }
                 
-                if(newPageIndex == 0) {
+                if newPageIndex == 0 {
                     return .quit
                 }
                 
@@ -171,7 +181,7 @@ public class Pages {
                 return .loop
             }
             
-            if(result == .quit) {
+            if result == .quit {
                 return
             }
         } while(true)

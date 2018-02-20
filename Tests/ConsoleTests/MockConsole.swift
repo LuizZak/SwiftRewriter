@@ -33,6 +33,24 @@ class MockConsole: Console {
         commandsInput.append(line)
     }
     
+    override func readLineWith(prompt: String, allowEmpty: Bool = true, validate: (String) -> Bool = { _ in true }) -> String? {
+        let res = super.readLineWith(prompt: prompt, allowEmpty: allowEmpty, validate: { input in
+            if commandsInput.isEmpty {
+                testCase.recordFailure(withDescription: "Unexpected readLineWith with prompt: \(prompt)",
+                    inFile: file, atLine: line, expected: false)
+                return true
+            }
+            
+            return validate(input)
+        })
+        
+        if commandsInput.isEmpty {
+            return "0"
+        }
+        
+        return res
+    }
+    
     override func readSureLineWith(prompt: String) -> String {
         if commandsInput.isEmpty {
             testCase.recordFailure(withDescription: "Unexpected readLineWith with prompt: \(prompt)",
@@ -117,6 +135,23 @@ public class MockConsoleOutputAsserter {
             outputIndex = range.upperBound
         } else {
             let msg = "Did not find expected string '\(string)' from current string offset."
+            assert(message: msg, file: file, line: line)
+        }
+        
+        return self
+    }
+    
+    /// Asserts that from the current index, a given string cannot be found.
+    /// This method does not alter the index.
+    ///
+    /// - Parameter string: String to verify on the buffer
+    func checkNextNot(contains string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
+        let range =
+            output.range(of: string, options: literal ? .literal : .caseInsensitive,
+                         range: outputIndex..<output.endIndex)
+        
+        if range != nil {
+            let msg = "Found string '\(string)' from current string offset."
             assert(message: msg, file: file, line: line)
         }
         

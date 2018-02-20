@@ -138,7 +138,7 @@ open class Console: ConsoleClient {
         } while true
     }
     
-    open func readIntWith(prompt: String, allowEmpty: Bool = true, validate: (Int) -> Bool = { _ in true }) -> Int? {
+    open func readIntWith(prompt: String, validate: (Int) -> Bool = { _ in true }) -> Int? {
         repeat {
             let input = readSureLineWith(prompt: prompt)
             
