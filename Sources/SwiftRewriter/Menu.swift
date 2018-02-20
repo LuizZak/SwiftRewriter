@@ -18,24 +18,22 @@ public class Menu: MenuController {
                 menu.console.printLine("Welcome to Swift Rewriter")
             }
             
-            menu.addAction(name: "Explore files") { menu in
-                menu.createMenu(name: "Explore files") { menu, item in
-                    let path = URL(fileURLWithPath: NSHomeDirectory())
-                    let filesExplorer =
-                        FilesExplorer(console: menu.console,
-                                      rewriterService: rewriterService,
-                                      path: path)
+            menu.createMenu(name: "Explore files") { menu, item in
+                let path = URL(fileURLWithPath: NSHomeDirectory())
+                let filesExplorer =
+                    FilesExplorer(console: menu.console,
+                                  rewriterService: rewriterService,
+                                  path: path)
+                
+                let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
+                let pages = menu.console.makePages(configuration: config)
+                
+                do {
+                    let filesList = try filesExplorer.getFileListProvider()
                     
-                    let config = Pages.PageDisplayConfiguration(commandHandler: filesExplorer)
-                    let pages = menu.console.makePages(configuration: config)
-                    
-                    do {
-                        let filesList = try filesExplorer.getFileListProvider()
-                        
-                        pages.displayPages(withProvider: filesList)
-                    } catch {
-                        menu.console.printLine("Failed to navigate directory contents!")
-                    }
+                    pages.displayPages(withProvider: filesList)
+                } catch {
+                    menu.console.printLine("Failed to navigate directory contents!")
                 }
             }
         }
