@@ -1,7 +1,9 @@
 import Foundation
 import Console
+import Utils
 
-private func presentSelection(in menu: MenuController, list: [String], prompt: String) -> Int? {
+/// Helper for presenting selection of file names on a list
+private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> Int? {
     var item: Int?
 
     let config = 
@@ -9,21 +11,21 @@ private func presentSelection(in menu: MenuController, list: [String], prompt: S
             if input.isEmpty {
                 return .quit(nil)
             }
-
-            if let index = list.index(of: input) {
+            
+            if let index = list.indexOfFilename(matching: input, options: .caseInsensitive) {
                 item = index
                 return .quit(nil)
             }
-
+            
             guard let int = Int(input), int > 0 && int <= list.count else {
                 return .showMessageThenLoop("Expected an value between 1 and \(list.count)")
             }
-
+            
             item = int
             
             return .quit(nil)
         }
-
+    
     let pages = menu.console.makePages(configuration: config)
     pages.displayPages(withValues: list)
 
@@ -159,7 +161,7 @@ fileprivate class FileFinderInterface {
             repeat {
                 // Present selection to user
                 let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
-                guard let index = presentSelection(in: menu, list: matches, prompt: "\(matchesString), select one to convert:") else {
+                guard let index = presentFileSelection(in: menu, list: matches.asPaths, prompt: "\(matchesString), select one to convert:") else {
                     return
                 }
                 

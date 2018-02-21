@@ -15,8 +15,9 @@ class ConsoleMenuControllerTests: ConsoleTestCase {
             = Menu
             Please select an option bellow:
             """)
-            .checkNext("[INPUT] '0'")
+            .checkInputEntered("0")
             .checkNext("Babye!")
+            .printIfAsserted()
     }
     
     func testInvalidMenuIndex() {
@@ -30,11 +31,16 @@ class ConsoleMenuControllerTests: ConsoleTestCase {
         
         mock.beginOutputAssertion()
             .checkNext("Please select an option bellow:")
-            .checkNext("[INPUT] '1'")
-            .checkNext("Invalid option index 1")
-            .checkNext("Please select an option bellow:")
-            .checkNext("[INPUT] '0'")
+            .checkInputEntered("1")
+            .checkNext("""
+                = Menu
+                Please select an option bellow:
+                0: Exit
+                Invalid option index 1
+                """)
+            .checkInputEntered("0")
             .checkNext("Babye!")
+            .printIfAsserted()
     }
     
     func testNoMemoryCyclesInMenuBuilding() {
@@ -50,10 +56,10 @@ class ConsoleMenuControllerTests: ConsoleTestCase {
             
             mock.beginOutputAssertion()
                 .checkNext("Please select an option bellow:")
-                .checkNext("[INPUT] '1'")
+                .checkInputEntered("1")
                 .checkNext("Selected menu 1!")
                 .checkNext("Please select an option bellow:")
-                .checkNext("[INPUT] '0'")
+                .checkInputEntered("0")
                 .checkNext("Babye!")
                 .printIfAsserted()
         }
@@ -88,13 +94,13 @@ class ConsoleMenuControllerTests: ConsoleTestCase {
             mock.beginOutputAssertion()
                 .checkNext("= Menu 1")
                 .checkNext("Please select an option bellow:")
-                .checkNext("[INPUT] '1'")
+                .checkInputEntered("1")
                 .checkNext("= Menu 1 = Menu 2")
                 .checkNext("Selected Menu 1 - Menu 2")
-                .checkNext("[INPUT] '0'")
+                .checkInputEntered("0")
                 .checkNext("= Menu 1")
                 .checkNext("Please select an option bellow:")
-                .checkNext("[INPUT] '0'")
+                .checkInputEntered("0")
                 .checkNext("Babye!")
                 .printIfAsserted()
         }

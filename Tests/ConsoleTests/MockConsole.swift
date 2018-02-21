@@ -141,10 +141,39 @@ public class MockConsoleOutputAsserter {
         return self
     }
     
+    /// Asserts that from the current index, a given text input was found.
+    /// After asserting successfully, the method skips the index to just after
+    /// the input's end on the input buffer.
+    ///
+    /// - Parameter string: Input to verify on the buffer
+    @discardableResult
+    func checkInputEntered(_ string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
+        if didAssert { // Ignore further asserts since first assert failed.
+            return self
+        }
+        
+        let input = "[INPUT] '\(string)'"
+        
+        // Find next
+        let range =
+            output.range(of: input, options: literal ? .literal : .caseInsensitive,
+                         range: outputIndex..<output.endIndex)
+        
+        if let range = range {
+            outputIndex = range.upperBound
+        } else {
+            let msg = "Did not find expected input '\(string)' from current string offset."
+            assert(message: msg, file: file, line: line)
+        }
+        
+        return self
+    }
+    
     /// Asserts that from the current index, a given string cannot be found.
     /// This method does not alter the index.
     ///
     /// - Parameter string: String to verify on the buffer
+    @discardableResult
     func checkNextNot(contain string: String, literal: Bool = true, file: String = #file, line: Int = #line) -> MockConsoleOutputAsserter {
         let range =
             output.range(of: string, options: literal ? .literal : .caseInsensitive,

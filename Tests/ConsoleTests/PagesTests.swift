@@ -30,7 +30,7 @@ class PagesTests: ConsoleTestCase {
             4: Item 4
             ---- 1 to 4
             """)
-            .checkNext("[INPUT] '0'")
+            .checkInputEntered("0")
             .checkNext("Babye!")
             .printIfAsserted()
     }
@@ -69,8 +69,8 @@ class PagesTests: ConsoleTestCase {
             4: Item 4
             ---- 3 to 4
             = Page 2 of 2
-            [INPUT] '0'
             """)
+            .checkInputEntered("0")
             .checkNext("Babye!")
             .printIfAsserted()
     }
@@ -96,7 +96,9 @@ class PagesTests: ConsoleTestCase {
             """)
             .checkNext("""
             = Page 1 of 2
-            [INPUT] ''
+            """)
+            .checkInputEntered("")
+            .checkNext("""
             = Menu
             """)
             .checkNextNot(contain: "Issued command")
@@ -127,11 +129,9 @@ class PagesTests: ConsoleTestCase {
             = Menu
             Please select an option bellow:
             """)
-            .checkNext("""
-            = Page 1 of 2
-            [INPUT] '0'
-            = Menu
-            """)
+            .checkNext("= Page 1 of 2")
+            .checkInputEntered("0")
+            .checkNext("= Menu")
             .checkNextNot(contain: "Issued command")
             .checkNext("Babye!")
             .printIfAsserted()
@@ -160,13 +160,111 @@ class PagesTests: ConsoleTestCase {
             = Menu
             Please select an option bellow:
             """)
-            .checkNext("""
-            = Page 1 of 2
-            [INPUT] ''
-            = Menu
-            """)
+            .checkNext("= Page 1 of 2")
+            .checkInputEntered("")
+            .checkNext("= Menu")
             .checkNextNot(contain: "Issued command")
             .checkNext("Babye!")
+            .printIfAsserted()
+    }
+    
+    func testNumbersWithPlusAndMinusArePageNavigationAndNotCommandInputs() {
+        let pageItems: [String] = [
+            "Item 1", "Item 2", "Item 3", "Item 4"
+        ]
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "+1")
+        mock.addMockInput(line: "-1")
+        mock.addMockInput(line: "0")
+        mock.addMockInput(line: "0")
+        
+        let sut =
+            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: { _ in
+                XCTFail("Did not expect to invoke command handler")
+                return .quit("Issued command")
+            })
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            = Menu
+            Please select an option bellow:
+            """)
+            .checkNext("""
+            A list of things
+            ----
+            1: Item 1
+            2: Item 2
+            ---- 1 to 2
+            = Page 1 of 2
+            """)
+            .checkInputEntered("+1")
+            .checkNext("""
+            A list of things
+            ----
+            3: Item 3
+            4: Item 4
+            ---- 3 to 4
+            = Page 2 of 2
+            """)
+            .checkInputEntered("-1")
+            .checkNext("""
+            A list of things
+            ----
+            1: Item 1
+            2: Item 2
+            ---- 1 to 2
+            = Page 1 of 2
+            """)
+            .checkInputEntered("0")
+            .checkNext("Babye!")
+            .printIfAsserted()
+    }
+    
+    func testNavigatingPagesRelativelyDoesntOverflow() {
+        let pageItems: [String] = [
+            "Item 1", "Item 2", "Item 3", "Item 4"
+        ]
+        
+        let mock = makeMockConsole()
+        mock.addMockInput(line: "1")
+        mock.addMockInput(line: "+5")
+        mock.addMockInput(line: "0")
+        mock.addMockInput(line: "0")
+        
+        let sut =
+            makePagesTestMenu(console: mock, items: pageItems, perPageCount: 2, command: { _ in
+                XCTFail("Did not expect to invoke command handler")
+                return .quit("Issued command")
+            })
+        
+        sut.main()
+        
+        mock.beginOutputAssertion()
+            .checkNext("""
+            = Menu
+            Please select an option bellow:
+            """)
+            .checkNext("""
+            A list of things
+            ----
+            1: Item 1
+            2: Item 2
+            ---- 1 to 2
+            = Page 1 of 2
+            """)
+            .checkInputEntered("+5")
+            .checkNext("""
+            A list of things
+            ----
+            3: Item 3
+            4: Item 4
+            ---- 3 to 4
+            = Page 2 of 2
+            """)
             .printIfAsserted()
     }
 }

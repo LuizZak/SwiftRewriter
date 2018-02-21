@@ -123,6 +123,17 @@ public class Pages {
                     return .quit
                 }
                 
+                // Page increment-decrement
+                if newPage.hasPrefix("-") || newPage.hasPrefix("+") {
+                    let increment = newPage.hasPrefix("+")
+                    
+                    if let skipCount = Int(newPage.dropFirst()) {
+                        let change = increment ? skipCount : -skipCount
+                        page = min(pageCount - 1, max(0, page + change))
+                        return .loop
+                    }
+                }
+                
                 // Command
                 if (!newPage.hasPrefix("=") || Int(newPage.dropFirst()) == nil) && configuration?.commandHandler.commandClosure != nil {
                     if let command = configuration?.commandHandler.commandClosure {
@@ -168,17 +179,6 @@ public class Pages {
                     }
                 }
                 
-                // Page increment-decrement
-                if newPage.hasPrefix("-") || newPage.hasPrefix("+") {
-                    let increment = newPage.hasPrefix("+")
-                    
-                    if let skipCount = Int(newPage.dropFirst()) {
-                        let change = increment ? skipCount : -skipCount
-                        page = min(pageCount - 1, max(0, page + change))
-                        return .loop
-                    }
-                }
-                
                 guard newPage.hasPrefix("="), let newPageIndex = Int(newPage.dropFirst()) else {
                     return .quit
                 }
@@ -215,6 +215,16 @@ public class Pages {
     public func displayPages(withValues values: [String], header: String = "", perPageCount: Int = 30) {
         let provider = AnyConsoleDataProvider(count: values.count, header: header) { index -> [String] in
             return [values[index]]
+        }
+        
+        displayPages(withProvider: provider, perPageCount: perPageCount)
+    }
+    
+    /// Displays a sequence of items as a paged list of items, which the user
+    /// can interact by selecting the page to display
+    public func displayPages<S: CustomStringConvertible>(withValues values: [S], header: String = "", perPageCount: Int = 30) {
+        let provider = AnyConsoleDataProvider(count: values.count, header: header) { index -> [String] in
+            return [values[index].description]
         }
         
         displayPages(withProvider: provider, perPageCount: perPageCount)
