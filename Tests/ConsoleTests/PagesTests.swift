@@ -232,6 +232,7 @@ class PagesTests: ConsoleTestCase {
         let mock = makeMockConsole()
         mock.addMockInput(line: "1")
         mock.addMockInput(line: "+5")
+        mock.addMockInput(line: "-5")
         mock.addMockInput(line: "0")
         mock.addMockInput(line: "0")
         
@@ -264,6 +265,15 @@ class PagesTests: ConsoleTestCase {
             4: Item 4
             ---- 3 to 4
             = Page 2 of 2
+            """)
+            .checkInputEntered("-5")
+            .checkNext("""
+            A list of things
+            ----
+            1: Item 1
+            2: Item 2
+            ---- 1 to 2
+            = Page 1 of 2
             """)
             .printIfAsserted()
     }
