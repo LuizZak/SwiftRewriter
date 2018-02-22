@@ -118,6 +118,32 @@ extension Sequence {
     }
 }
 
+extension Sequence {
+    /// Returns `true` iff all elements from this sequence pass a given predicate.
+    /// Returns `true` if sequence is empty, as well.
+    public func all(_ predicate: (Element) -> Bool) -> Bool {
+        for element in self {
+            if !predicate(element) {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    /// Returns `true` iff any elements from this sequence pass a given predicate.
+    /// Returns `false` if sequence is empty.
+    public func any(_ predicate: (Element) -> Bool) -> Bool {
+        for element in self {
+            if predicate(element) {
+                return true
+            }
+        }
+        
+        return false
+    }
+}
+
 extension Sequence where Iterator.Element: Hashable {
     
     /// Flattens the grouped elements by the least common to most common, with

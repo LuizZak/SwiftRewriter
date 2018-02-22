@@ -108,6 +108,10 @@ public class BinaryExpression: Expression {
         return [lhs, rhs]
     }
     
+    public override var isLiteralExpression: Bool {
+        return lhs.isLiteralExpression && rhs.isLiteralExpression
+    }
+    
     public override var description: String {
         // With spacing
         if op.requiresSpacing {
@@ -155,6 +159,10 @@ public class UnaryExpression: Expression {
         return [exp]
     }
     
+    public override var isLiteralExpression: Bool {
+        return exp.isLiteralExpression
+    }
+    
     public override var description: String {
         // Parenthesized
         if exp.requiresParens {
@@ -198,6 +206,10 @@ public class PrefixExpression: Expression {
     
     public override var subExpressions: [Expression] {
         return [exp]
+    }
+    
+    public override var isLiteralExpression: Bool {
+        return exp.isLiteralExpression
     }
     
     public override var description: String {
@@ -292,6 +304,19 @@ extension Expression {
 public class ConstantExpression: Expression, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     public var constant: Constant
     
+    public override var isLiteralExpression: Bool {
+        if constant.isInteger {
+            return true
+        }
+        
+        switch constant {
+        case .boolean, .nil, .float, .string:
+            return true
+        default:
+            return false
+        }
+    }
+    
     public override var description: String {
         return constant.description
     }
@@ -338,6 +363,10 @@ public class ParensExpression: Expression {
     
     public override var subExpressions: [Expression] {
         return [exp]
+    }
+    
+    public override var isLiteralExpression: Bool {
+        return exp.isLiteralExpression
     }
     
     public override var description: String {
@@ -538,6 +567,10 @@ public class TernaryExpression: Expression {
     
     public override var subExpressions: [Expression] {
         return [exp, ifTrue, ifFalse]
+    }
+    
+    public override var isLiteralExpression: Bool {
+        return ifTrue.isLiteralExpression && ifFalse.isLiteralExpression
     }
     
     public override var description: String {
