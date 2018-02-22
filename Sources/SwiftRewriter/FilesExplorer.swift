@@ -13,7 +13,7 @@ private func presentFileSelection(in menu: MenuController, list: [Path], prompt:
             }
             
             if let index = list.indexOfFilename(matching: input, options: .caseInsensitive) {
-                item = index
+                item = index + 1
                 return .quit(nil)
             }
             
