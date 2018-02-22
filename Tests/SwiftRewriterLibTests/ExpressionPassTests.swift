@@ -41,6 +41,40 @@ class ExpressionPassTests: XCTestCase {
                         ]))
     }
     
+    func testTraverseThroughPostfixFunctionArgument() {
+        let exp: Expression =
+            .postfix(.identifier("a"),
+                     .functionCall(arguments: [
+                        .unlabeled(.postfix(.identifier("function"), .functionCall(arguments: [])))
+                        ]))
+        
+        let sut = TestExpressionPass()
+        
+        let result = sut.applyPass(on: exp)
+        
+        XCTAssert(sut.foundNeedle)
+        XCTAssertEqual(result,
+                       .postfix(.identifier("a"),
+                                .functionCall(arguments: [
+                                    .unlabeled(.postfix(.identifier("function2"), .functionCall(arguments: [])))
+                                    ])))
+    }
+    
+    func testTraverseThroughPostfixSubscriptArgument() {
+        let exp: Expression =
+            .postfix(.identifier("a"),
+                     .subscript(.postfix(.identifier("function"), .functionCall(arguments: []))))
+        
+        let sut = TestExpressionPass()
+        
+        let result = sut.applyPass(on: exp)
+        
+        XCTAssert(sut.foundNeedle)
+        XCTAssertEqual(result,
+                       .postfix(.identifier("a"),
+                                .subscript(.postfix(.identifier("function2"), .functionCall(arguments: [])))))
+    }
+    
     class TestExpressionPass: ExpressionPass {
         var foundNeedle = false
         

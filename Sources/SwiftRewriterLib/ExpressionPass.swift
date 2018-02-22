@@ -164,6 +164,22 @@ open class ExpressionPass: ExpressionVisitor {
     open func visitPostfix(_ exp: PostfixExpression) -> Expression {
         exp.exp = exp.exp.accept(self)
         
+        switch exp.op {
+        case .subscript(let inner):
+            exp.op = .subscript(inner.accept(self))
+        case .functionCall(arguments: let args):
+            exp.op = .functionCall(arguments: args.map { arg in
+                switch arg {
+                case .labeled(let label, let exp):
+                    return .labeled(label, exp.accept(self))
+                case .unlabeled(let exp):
+                    return .unlabeled(exp.accept(self))
+                }
+            })
+        default:
+            break
+        }
+        
         return exp
     }
     

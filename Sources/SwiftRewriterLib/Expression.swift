@@ -780,6 +780,17 @@ public enum FunctionArgument: Equatable {
             return false
         }
     }
+    
+    public static func ==(lhs: FunctionArgument, rhs: FunctionArgument) -> Bool {
+        switch (lhs, rhs) {
+        case (let .labeled(ll, le), let .labeled(rl, re)):
+            return ll == rl && le == re
+        case (.unlabeled(let l), .unlabeled(let r)):
+            return l == r
+        default:
+            return false
+        }
+    }
 }
 
 /// One of the recognized constant values
