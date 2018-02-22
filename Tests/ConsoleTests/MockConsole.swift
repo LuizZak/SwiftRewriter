@@ -79,6 +79,10 @@ class MockConsole: Console {
         return command
     }
     
+    override func command(_ command: Terminal.Command) {
+        // Consume events
+    }
+    
     override func recordExitCode(_ code: Int) {
         // Trim output so it's easier to test
         _buffer.output =
