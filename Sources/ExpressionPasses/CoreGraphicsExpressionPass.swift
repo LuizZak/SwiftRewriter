@@ -133,10 +133,6 @@ public class CoreGraphicsExpressionPass: ExpressionPass {
         return super.visitPostfix(exp)
     }
     
-    private func convertInit(name: String) {
-        
-    }
-    
     /// Converts a method to a field access, e.g.: `CGRectGetWidth(<exp>)` -> `<exp>.width`.
     private func convertMethodToField(field: String, ifArgCountIs argCount: Int, _ exp: PostfixExpression) {
         switch (exp.exp, exp.op) {
