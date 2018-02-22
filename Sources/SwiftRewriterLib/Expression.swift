@@ -38,8 +38,12 @@ public class Expression: Equatable, CustomStringConvertible {
         return visitor.visitExpression(self)
     }
     
+    public func isEqual(to other: Expression) -> Bool {
+        return false
+    }
+    
     public static func ==(lhs: Expression, rhs: Expression) -> Bool {
-        return type(of: lhs) == type(of: rhs) && lhs === rhs
+        return lhs.isEqual(to: rhs)
     }
     
     fileprivate func cast<T>() -> T? {
@@ -74,6 +78,15 @@ public class AssignmentExpression: Expression {
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitAssignment(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as AssignmentExpression:
+            return self == rhs
+        default:
+            return false
+        }
     }
     
     public static func ==(lhs: AssignmentExpression, rhs: AssignmentExpression) -> Bool {
@@ -115,6 +128,15 @@ public class BinaryExpression: Expression {
         return visitor.visitBinary(self)
     }
     
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as BinaryExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
     public static func ==(lhs: BinaryExpression, rhs: BinaryExpression) -> Bool {
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
     }
@@ -151,6 +173,15 @@ public class UnaryExpression: Expression {
         return visitor.visitUnary(self)
     }
     
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as UnaryExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
     public static func ==(lhs: UnaryExpression, rhs: UnaryExpression) -> Bool {
         return lhs.op == rhs.op && lhs.exp == rhs.exp
     }
@@ -185,6 +216,15 @@ public class PrefixExpression: Expression {
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitPrefix(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as PrefixExpression:
+            return self == rhs
+        default:
+            return false
+        }
     }
     
     public static func ==(lhs: PrefixExpression, rhs: PrefixExpression) -> Bool {
@@ -230,6 +270,15 @@ public class PostfixExpression: Expression {
         return visitor.visitPostfix(self)
     }
     
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as PostfixExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
     public static func ==(lhs: PostfixExpression, rhs: PostfixExpression) -> Bool {
         return lhs.exp == rhs.exp && lhs.op == rhs.op
     }
@@ -265,6 +314,15 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral, Express
         return visitor.visitConstant(self)
     }
     
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as ConstantExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
     public static func ==(lhs: ConstantExpression, rhs: ConstantExpression) -> Bool {
         return lhs.constant == rhs.constant
     }
@@ -294,6 +352,15 @@ public class ParensExpression: Expression {
         return visitor.visitParens(self)
     }
     
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as ParensExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
     public static func ==(lhs: ParensExpression, rhs: ParensExpression) -> Bool {
         return lhs.exp == rhs.exp
     }
@@ -317,6 +384,15 @@ public class IdentifierExpression: Expression {
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitIdentifier(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as IdentifierExpression:
+            return self == rhs
+        default:
+            return false
+        }
     }
     
     public static func ==(lhs: IdentifierExpression, rhs: IdentifierExpression) -> Bool {
@@ -356,6 +432,15 @@ public class CastExpression: Expression {
         return visitor.visitCast(self)
     }
     
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as CastExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
     public static func ==(lhs: CastExpression, rhs: CastExpression) -> Bool {
         return lhs.exp == rhs.exp && lhs.type == rhs.type
     }
@@ -383,6 +468,15 @@ public class ArrayLiteralExpression: Expression {
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitArray(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as ArrayLiteralExpression:
+            return self == rhs
+        default:
+            return false
+        }
     }
     
     public static func ==(lhs: ArrayLiteralExpression, rhs: ArrayLiteralExpression) -> Bool {
@@ -416,6 +510,15 @@ public class DictionaryLiteralExpression: Expression {
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitDictionary(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as DictionaryLiteralExpression:
+            return self == rhs
+        default:
+            return false
+        }
     }
     
     public static func ==(lhs: DictionaryLiteralExpression, rhs: DictionaryLiteralExpression) -> Bool {
@@ -453,6 +556,15 @@ public class TernaryExpression: Expression {
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitTernary(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as TernaryExpression:
+            return self == rhs
+        default:
+            return false
+        }
     }
     
     public static func ==(lhs: TernaryExpression, rhs: TernaryExpression) -> Bool {
@@ -502,6 +614,15 @@ public class BlockLiteralExpression: Expression {
         return visitor.visitBlock(self)
     }
     
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as BlockLiteralExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
     public static func ==(lhs: BlockLiteralExpression, rhs: BlockLiteralExpression) -> Bool {
         return lhs.parameters == rhs.parameters &&
             lhs.returnType == rhs.returnType &&
@@ -527,6 +648,10 @@ public class UnknownExpression: Expression {
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitUnknown(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        return other is UnknownExpression
     }
     
     public static func ==(lhs: UnknownExpression, rhs: UnknownExpression) -> Bool {

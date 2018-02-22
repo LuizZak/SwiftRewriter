@@ -44,13 +44,14 @@ class ExpressionPassTests: XCTestCase {
     class TestExpressionPass: ExpressionPass {
         var foundNeedle = false
         
-        override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
-            if exp == .identifier("function") && op == .functionCall(arguments: []) {
+        override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+            if exp.exp == .identifier("function") && exp.op == .functionCall(arguments: []) {
                 foundNeedle = true
-                return super.visitPostfix(.identifier("function2"), op: op)
+                
+                exp.exp = .identifier("function2")
             }
             
-            return super.visitPostfix(exp, op: op)
+            return super.visitPostfix(exp)
         }
     }
 }

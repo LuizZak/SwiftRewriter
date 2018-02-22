@@ -3,16 +3,21 @@ import Utils
 
 /// Applies passes to simplify known UIKit methods and constructs
 public class UIKitExpressionPass: ExpressionPass {
-    public override func visitIdentifier(_ identifier: String) -> Expression {
+    public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
+        return super.visitIdentifier(exp)
+        /*
         // 'enumifications'
         if identifier.hasPrefix("UIControlEvent") {
             return enumify(ident: identifier, enumPrefix: "UIControlEvent", swiftEnumName: "UIControlEvents")
         }
         
         return .identifier(identifier)
+        */
     }
     
-    public override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
+    public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        return super.visitPostfix(exp)
+        /*
         var (exp, op) = (exp, op)
         
         switch (exp, op) {
@@ -52,6 +57,7 @@ public class UIKitExpressionPass: ExpressionPass {
         }
         
         return super.visitPostfix(exp, op: op)
+        */
     }
     
     /// 'Enumify' an identifier it such that it reads like a Swift enum, in case

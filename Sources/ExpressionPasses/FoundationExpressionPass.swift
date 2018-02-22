@@ -9,10 +9,30 @@ public class FoundationExpressionPass: ExpressionPass {
         inspectBlocks = true
     }
     
-    public override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
-        var (exp, op) = (exp, op)
+    public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        // [<lhs> isEqualToString:<rhs>] -> <lhs> == <rhs>
+        if let postfix = exp.exp.asPostfix,
+            postfix.op == .member("isEqualToString"),
+            case .functionCall(let args) = exp.op, args.count == 1 && !args.hasLabeledArguments() {
+            
+            return visitBinary(.binary(lhs: postfix.exp, op: .equals, rhs: args[0].expression))
+        }
+        if exp.exp == .postfix(.identifier("NSString"), .member("stringWithFormat")),
+            case .functionCall(let args) = exp.op, args.count > 0 {
+            
+            let newArgs: [FunctionArgument] = [
+                .labeled("format", args[0].expression),
+            ] + args.dropFirst()
+            
+            exp.exp = .identifier("String")
+            exp.op = .functionCall(arguments: newArgs)
+        }
         
-        switch (exp, op) {
+        
+        return exp
+        
+        /*
+        switch (exp.exp, exp.op) {
         // [<lhs> isEqualToString:<rhs>] -> <lhs> == <rhs>
         case (.postfix(let innerExp, .member("isEqualToString")),
               .functionCall(arguments: let args))
@@ -72,5 +92,6 @@ public class FoundationExpressionPass: ExpressionPass {
         }
         
         return super.visitPostfix(exp, op: op)
+        */
     }
 }
