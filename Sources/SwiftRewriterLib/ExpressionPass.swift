@@ -17,7 +17,7 @@ public protocol ExpressionVisitor {
     ///   - op: Expression's operator
     ///   - rhs: Expression's right-hand side
     /// - Returns: Result of visiting this assignment operation node
-    func visitAssignment(lhs: Expression, op: SwiftOperator, rhs: Expression) -> ExprResult
+    func visitAssignment(_ exp: AssignmentExpression) -> ExprResult
     
     /// Visits a binary operation node
     ///
@@ -26,7 +26,7 @@ public protocol ExpressionVisitor {
     ///   - op: Expression's operator
     ///   - rhs: Expression's right-hand side
     /// - Returns: Result of visiting this binary operation node
-    func visitBinary(lhs: Expression, op: SwiftOperator, rhs: Expression) -> ExprResult
+    func visitBinary(_ exp: BinaryExpression) -> ExprResult
     
     /// Visits a unary operation node
     ///
@@ -34,7 +34,7 @@ public protocol ExpressionVisitor {
     ///   - op: The unary operator for the expression
     ///   - exp: The operand for the expression
     /// - Returns: Result of visiting this unary operation node
-    func visitUnary(op: SwiftOperator, _ exp: Expression) -> ExprResult
+    func visitUnary(_ exp: UnaryExpression) -> ExprResult
     
     /// Visits a prefix operation node
     ///
@@ -42,7 +42,7 @@ public protocol ExpressionVisitor {
     ///   - op: The prefix operator for the expression
     ///   - exp: The operand for the expression
     /// - Returns: Result of visiting this prefix operation node
-    func visitPrefix(op: SwiftOperator, _ exp: Expression) -> ExprResult
+    func visitPrefix(_ exp: PrefixExpression) -> ExprResult
     
     /// Visits a postfix operation node
     ///
@@ -50,25 +50,25 @@ public protocol ExpressionVisitor {
     ///   - exp: The operand for the expression
     ///   - op: The postfix operator for the expression
     /// - Returns: Result of visiting this postfix operation node
-    func visitPostfix(_ exp: Expression, op: Postfix) -> ExprResult
+    func visitPostfix(_ exp: PostfixExpression) -> ExprResult
     
     /// Visits a constant node
     ///
     /// - Parameter constant: The constant contained within the node
     /// - Returns: Result of visiting this constant node
-    func visitConstant(_ constant: Constant) -> ExprResult
+    func visitConstant(_ exp: ConstantExpression) -> ExprResult
     
     /// Visits a parenthesized expression node
     ///
     /// - Parameter exp: The expression contained within the parenthesis
     /// - Returns: Result of visiting this parenthesis node
-    func visitParens(_ exp: Expression) -> ExprResult
+    func visitParens(_ exp: ParensExpression) -> ExprResult
     
     /// Visits an identifier node
     ///
     /// - Parameter identifier: The identifier contained within the node
     /// - Returns: Result of visiting this identifier node
-    func visitIdentifier(_ identifier: String) -> ExprResult
+    func visitIdentifier(_ exp: IdentifierExpression) -> ExprResult
     
     /// Visits a type-casting expression node
     ///
@@ -76,20 +76,20 @@ public protocol ExpressionVisitor {
     ///   - exp: The expression being casted
     ///   - type: The target casting type
     /// - Returns: Result of visiting this cast node
-    func visitCast(_ exp: Expression, type: SwiftType) -> ExprResult
+    func visitCast(_ exp: CastExpression) -> ExprResult
     
     /// Visits an array literal node
     ///
     /// - Parameter array: The list of expressions that make up the array literal
     /// - Returns: Result of visiting this array literal node
-    func visitArray(_ array: [Expression]) -> ExprResult
+    func visitArray(_ exp: ArrayLiteralExpression) -> ExprResult
     
     /// Visits a dictionary literal node
     ///
     /// - Parameter dictionary: The list of dictionary entry pairs that make up
     /// the dictionary literal
     /// - Returns: Result of visiting this dictionary literal node
-    func visitDictionary(_ dictionary: [ExpressionDictionaryPair]) -> ExprResult
+    func visitDictionary(_ exp: DictionaryLiteralExpression) -> ExprResult
     
     /// Visits a block expression
     ///
@@ -98,7 +98,7 @@ public protocol ExpressionVisitor {
     ///   - returnType: The return type of the block
     ///   - body: The block's statements body
     /// - Returns: Result of visiting this block expression node
-    func visitBlock(_ parameters: [BlockParameter], _ returnType: SwiftType, _ body: CompoundStatement) -> ExprResult
+    func visitBlock(_ exp: BlockLiteralExpression) -> ExprResult
     
     /// Visits a ternary operation node
     ///
@@ -109,67 +109,13 @@ public protocol ExpressionVisitor {
     ///   - ifFalse: The expression executed when the control expression evaluates
     /// to false
     /// - Returns: Result of visiting this ternary expression node
-    func visitTernary(_ exp: Expression, _ ifTrue: Expression, _ ifFalse: Expression) -> ExprResult
+    func visitTernary(_ exp: TernaryExpression) -> ExprResult
     
     /// Visits an unknown expression node
     ///
     /// - Parameter context: Context for unknown expression node
     /// - Returns: Result of visiting this unknown expression node
-    func visitUnknown(_ context: UnknownASTContext) -> ExprResult
-}
-
-public extension Expression {
-    /// Accepts the given visitor instance, calling the appropriate visiting method
-    /// according to this expression's type.
-    ///
-    /// - Parameter visitor: The visitor to accept
-    /// - Returns: The result of the visitor's `visit-` call when applied to this
-    /// expression
-    public func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        switch self {
-        case let .assignment(lhs, op, rhs):
-            return visitor.visitAssignment(lhs: lhs, op: op, rhs: rhs)
-            
-        case let .binary(lhs, op, rhs):
-            return visitor.visitBinary(lhs: lhs, op: op, rhs: rhs)
-            
-        case let .unary(op, exp):
-            return visitor.visitUnary(op: op, exp)
-            
-        case let .prefix(op, exp):
-            return visitor.visitPrefix(op: op, exp)
-            
-        case let .postfix(exp, op):
-            return visitor.visitPostfix(exp, op: op)
-            
-        case .constant(let cst):
-            return visitor.visitConstant(cst)
-            
-        case .parens(let exp):
-            return visitor.visitParens(exp)
-            
-        case .identifier(let id):
-            return visitor.visitIdentifier(id)
-            
-        case let .cast(exp, type):
-            return visitor.visitCast(exp, type: type)
-            
-        case .arrayLiteral(let exps):
-            return visitor.visitArray(exps)
-            
-        case .dictionaryLiteral(let pairs):
-            return visitor.visitDictionary(pairs)
-            
-        case let .ternary(exp, ifTrue, ifFalse):
-            return visitor.visitTernary(exp, ifTrue, ifFalse)
-            
-        case let .block(parameters, ret, body):
-            return visitor.visitBlock(parameters, ret, body)
-            
-        case .unknown(let context):
-            return visitor.visitUnknown(context)
-        }
-    }
+    func visitUnknown(_ exp: UnknownExpression) -> ExprResult
 }
 
 /// A base class for expression rewriting passes.
@@ -185,138 +131,96 @@ open class ExpressionPass: ExpressionVisitor {
         return expression.accept(self)
     }
     
-    open func visitExpression(_ expression: Expression) -> Expression {
-        switch expression {
-        case let .assignment(lhs, op, rhs):
-            return visitAssignment(lhs: lhs, op: op, rhs: rhs)
-            
-        case let .binary(lhs, op, rhs):
-            return visitBinary(lhs: lhs, op: op, rhs: rhs)
-            
-        case let .unary(op, expr):
-            return visitUnary(op: op, expr)
-            
-        case let .prefix(op, expr):
-            return visitPrefix(op: op, expr)
-            
-        case let .postfix(expr, post):
-            return visitPostfix(expr, op: post)
-            
-        case .constant(let constant):
-            return visitConstant(constant)
-            
-        case let .parens(expr):
-            return visitParens(expr)
-            
-        case .identifier(let ident):
-            return visitIdentifier(ident)
-            
-        case let .cast(expr, type):
-            return visitCast(expr, type: type)
-            
-        case .arrayLiteral(let expressions):
-            return visitArray(expressions)
-            
-        case .dictionaryLiteral(let pairs):
-            return visitDictionary(pairs)
-            
-        case let .ternary(exp, ifTrue, ifFalse):
-            return visitTernary(exp, ifTrue, ifFalse)
-        }
+    open func visitExpression(_ exp: Expression) -> Expression {
+        return exp.accept(self)
     }
     
-    open func visitAssignment(lhs: Expression, op: SwiftOperator, rhs: Expression) -> Expression {
-        let lhs = lhs.accept(self)
-        let rhs = rhs.accept(self)
+    open func visitAssignment(_ exp: AssignmentExpression) -> Expression {
+        exp.lhs = exp.lhs.accept(self)
+        exp.rhs = exp.rhs.accept(self)
         
-        return .binary(lhs: lhs, op: op, rhs: rhs)
+        return exp
     }
     
-    open func visitBinary(lhs: Expression, op: SwiftOperator, rhs: Expression) -> Expression {
-        let lhs = lhs.accept(self)
-        let rhs = rhs.accept(self)
+    open func visitBinary(_ exp: BinaryExpression) -> Expression {
+        exp.lhs = exp.lhs.accept(self)
+        exp.rhs = exp.rhs.accept(self)
         
-        return .binary(lhs: lhs, op: op, rhs: rhs)
+        return exp
     }
     
-    open func visitUnary(op: SwiftOperator, _ exp: Expression) -> Expression {
-        return .unary(op: op, exp.accept(self))
-    }
-    
-    open func visitPrefix(op: SwiftOperator, _ exp: Expression) -> Expression {
-        return .prefix(op: op, exp.accept(self))
-    }
-    
-    open func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
-        let exp = exp.accept(self)
-        let op2: Postfix
+    open func visitUnary(_ exp: UnaryExpression) -> Expression {
+        exp.exp = exp.exp.accept(self)
         
-        switch op {
-        case .functionCall(let arguments):
-            op2 = .functionCall(arguments: arguments.map { arg in
-                switch arg {
-                case .unlabeled(let exp):
-                    return .unlabeled(exp.accept(self))
-                case let .labeled(label, exp):
-                    return .labeled(label, exp.accept(self))
-                }
-            })
-        case .subscript(let exp):
-            op2 = .subscript(exp.accept(self))
-        default:
-            op2 = op
+        return exp
+    }
+    
+    open func visitPrefix(_ exp: PrefixExpression) -> Expression {
+        exp.exp = exp.exp.accept(self)
+        
+        return exp
+    }
+    
+    open func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        exp.exp = exp.exp.accept(self)
+        
+        return exp
+    }
+    
+    open func visitConstant(_ exp: ConstantExpression) -> Expression {
+        return exp
+    }
+    
+    open func visitParens(_ exp: ParensExpression) -> Expression {
+        exp.exp = exp.exp.accept(self)
+        
+        return exp
+    }
+    
+    open func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
+        return exp
+    }
+    
+    open func visitCast(_ exp: CastExpression) -> Expression {
+        exp.exp = exp.exp.accept(self)
+        
+        return exp
+    }
+    
+    open func visitArray(_ exp: ArrayLiteralExpression) -> Expression {
+        exp.items = exp.items.map { $0.accept(self) }
+        
+        return exp
+    }
+    
+    open func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
+        for i in 0..<exp.pairs.count {
+            exp.pairs[i].key = exp.pairs[i].key.accept(self)
+            exp.pairs[i].value = exp.pairs[i].value.accept(self)
         }
         
-        return .postfix(exp, op2)
+        return exp
     }
     
-    open func visitConstant(_ constant: Constant) -> Expression {
-        return .constant(constant)
-    }
-    
-    open func visitParens(_ exp: Expression) -> Expression {
-        return .parens(exp.accept(self))
-    }
-    
-    open func visitIdentifier(_ identifier: String) -> Expression {
-        return .identifier(identifier)
-    }
-    
-    open func visitCast(_ exp: Expression, type: SwiftType) -> Expression {
-        let exp = exp.accept(self)
-        return .cast(exp, type: type)
-    }
-    
-    open func visitArray(_ array: [Expression]) -> Expression {
-        return .arrayLiteral(array.map { $0.accept(self) })
-    }
-    
-    open func visitDictionary(_ dictionary: [ExpressionDictionaryPair]) -> Expression {
-        return .dictionaryLiteral(dictionary.map { pair in
-            return ExpressionDictionaryPair(key: pair.key.accept(self), value: pair.value.accept(self))
-        })
-    }
-    
-    open func visitTernary(_ exp: Expression, _ ifTrue: Expression, _ ifFalse: Expression) -> Expression {
-        let exp = exp.accept(self)
-        let ifTrue = ifTrue.accept(self)
-        let ifFalse = ifFalse.accept(self)
+    open func visitTernary(_ exp: TernaryExpression) -> Expression {
+        exp.exp = exp.exp.accept(self)
+        exp.ifTrue = exp.ifTrue.accept(self)
+        exp.ifFalse = exp.ifFalse.accept(self)
         
-        return .ternary(exp, true: ifTrue, false: ifFalse)
+        return exp
     }
     
-    open func visitBlock(_ parameters: [BlockParameter], _ returnType: SwiftType, _ body: CompoundStatement) -> Expression {
-        var body = body
+    open func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
         if inspectBlocks {
             let pass = ExpStatementPass(target: self)
-            body.statements = body.statements.map { $0.accept(pass) }
+            exp.body.statements = exp.body.statements.map { $0.accept(pass) }
         }
         
-        return .block(parameters: parameters, return: returnType, body: body)
+        return exp
     }
     
-    open func visitUnknown(_ context: UnknownASTContext) -> Expression {
-        return .unknown(context)
+    open func visitUnknown(_ exp: UnknownExpression) -> Expression {
+        return exp
     }
     
     private class ExpStatementPass: StatementPass {

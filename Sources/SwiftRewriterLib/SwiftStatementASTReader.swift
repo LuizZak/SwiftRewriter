@@ -264,14 +264,19 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             if loopVar.type != .int {
                 break simplifyFor
             }
-            guard case .constant(let loopStart)? = loopVar.initialization, loopStart.isInteger else {
+            guard let loopStart = (loopVar.initialization as? ConstantExpression)?.constant else {
                 break simplifyFor
             }
             
             // Look for conditions of the form 'i < <value>'
-            guard case .binary(.identifier(loopVar.identifier), let op, .constant(let loopEnd)) = condition else {
+            guard let binary = condition.asBinary, let loopEnd = binary.rhs.asConstant?.constant else {
                 break simplifyFor
             }
+            let op = binary.op
+            guard binary.lhs.asIdentifier?.identifier == loopVar.identifier else {
+                break simplifyFor
+            }
+            
             if !loopEnd.isInteger || (op != .lessThan && op != .lessThanOrEqual) {
                 break simplifyFor
             }
@@ -280,14 +285,14 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             guard case .expressions(let exps) = iteration, exps.count == 1 else {
                 break simplifyFor
             }
-            guard case .assignment(.identifier(loopVar.identifier), .addAssign, .constant(1)) = exps[0] else {
+            guard exps[0].asAssignment == AssignmentExpression(lhs: IdentifierExpression(identifier: loopVar.identifier), op: .addAssign, rhs: 1 as ConstantExpression) else {
                 break simplifyFor
             }
             
             // Check if the loop variable is not being modified within the loop's
             // body
             for exp in expressions(in: compoundStatement, inspectBlocks: true) {
-                if case .assignment(.identifier(loopVar.identifier), _, _) = exp {
+                if exp.asAssignment?.lhs.asIdentifier?.identifier == loopVar.identifier {
                     break simplifyFor
                 }
             }

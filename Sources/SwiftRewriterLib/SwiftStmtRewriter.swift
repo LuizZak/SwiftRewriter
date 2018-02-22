@@ -51,7 +51,10 @@ class SwiftStmtRewriter {
     }
 }
 
-fileprivate class ExpressionWriter {
+fileprivate class ExpressionWriter: ExpressionVisitor {
+    
+    typealias ExprResult = Void
+    
     var target: RewriterOutputTarget
     var expressionPasses: [ExpressionPass]
     
@@ -68,100 +71,60 @@ fileprivate class ExpressionWriter {
         visitExpression(exp)
     }
     
-    private func visitExpression(_ expression: Expression, parens: Bool = false) {
+    func visitExpression(_ expression: Expression) {
+        visitExpression(expression, parens: false)
+    }
+    
+    private func visitExpression(_ expression: Expression, parens: Bool) {
         if parens {
             target.outputInline("(")
         }
         
-        switch expression {
-        case let .assignment(lhs, op, rhs):
-            visitAssignment(lhs: lhs, op: op, rhs: rhs)
-            
-        case let .binary(lhs, op, rhs):
-            visitBinary(lhs: lhs, op: op, rhs: rhs)
-            
-        case let .unary(op, expr):
-            visitUnary(op: op, expr)
-            
-        case let .prefix(op, expr):
-            visitPrefix(op: op, expr)
-            
-        case let .postfix(expr, post):
-            visitPostfix(expr, op: post)
-            
-        case .constant(let constant):
-            visitConstant(constant)
-            
-        case let .parens(expr):
-            visitParens(expr)
-            
-        case .identifier(let ident):
-            visitIdentifier(ident)
-            
-        case let .cast(expr, type):
-            visitCast(expr, type: type)
-            
-        case .arrayLiteral(let expressions):
-            visitArray(expressions)
-            
-        case .dictionaryLiteral(let pairs):
-            visitDictionary(pairs)
-            
-        case let .ternary(exp, ifTrue, ifFalse):
-            visitTernary(exp, ifTrue, ifFalse)
-            
-        case let .block(parameters, returnType, body):
-            visitBlock(parameters, returnType, body)
-            
-        case .unknown(let context):
-            target.outputInline("/*", style: .comment)
-            target.outputInline(context.description, style: .comment)
-            target.outputInline("*/", style: .comment)
-        }
+        expression.accept(self)
         
         if parens {
             target.outputInline(")")
         }
     }
     
-    private func visitAssignment(lhs: Expression, op: SwiftOperator, rhs: Expression) {
-        visitExpression(lhs)
+    func visitAssignment(_ exp: AssignmentExpression) {
+        visitExpression(exp.lhs)
         
-        if op.requiresSpacing {
-            target.outputInline(" \(op.description) ")
+        if exp.op.requiresSpacing {
+            target.outputInline(" \(exp.op.description) ")
         } else {
-            target.outputInline("\(op.description)")
+            target.outputInline("\(exp.op.description)")
         }
         
-        visitExpression(rhs)
+        visitExpression(exp.rhs)
     }
     
-    private func visitBinary(lhs: Expression, op: SwiftOperator, rhs: Expression) {
-        visitExpression(lhs)
+    func visitBinary(_ exp: BinaryExpression) {
+        visitExpression(exp.lhs)
         
-        if op.requiresSpacing {
-            target.outputInline(" \(op.description) ")
+        if exp.op.requiresSpacing {
+            target.outputInline(" \(exp.op.description) ")
         } else {
-            target.outputInline("\(op.description)")
+            target.outputInline("\(exp.op.description)")
         }
         
-        visitExpression(rhs)
+        visitExpression(exp.rhs)
     }
     
-    private func visitUnary(op: SwiftOperator, _ exp: Expression) {
-        target.outputInline(op.description)
-        visitExpression(exp, parens: exp.requiresParens)
+    func visitUnary(_ exp: UnaryExpression) {
+        target.outputInline(exp.op.description)
+        visitExpression(exp.exp, parens: exp.exp.requiresParens)
     }
     
-    private func visitPrefix(op: SwiftOperator, _ exp: Expression) {
-        target.outputInline(op.description)
-        visitExpression(exp, parens: exp.requiresParens)
+    func visitPrefix(_ exp: PrefixExpression) {
+        target.outputInline(exp.op.description)
+        visitExpression(exp.exp, parens: exp.exp.requiresParens)
     }
     
-    private func visitPostfix(_ exp: Expression, op: Postfix) {
-        visitExpression(exp, parens: exp.requiresParens)
+    func visitPostfix(_ exp: PostfixExpression) {
+        visitExpression(exp.exp, parens: exp.exp.requiresParens)
         
-        switch op {
+        switch exp.op {
         case .member(let member):
             target.outputInline(".")
             target.outputInline(member, style: .memberName)
@@ -179,11 +142,10 @@ fileprivate class ExpressionWriter {
             // If the last argument is a block type, close the
             // parameters list earlier and use the block as a
             // trailing closure.
-            if case .block? = arguments.last?.expression {
+            if arguments.last?.expression is BlockLiteralExpression {
                 trailingClosure = arguments.last?.expression
                 arguments.removeLast()
             }
-            
             
             // No need to emit parenthesis if a trailing closure
             // is present as the only argument of the function
@@ -213,7 +175,9 @@ fileprivate class ExpressionWriter {
         }
     }
     
-    private func visitConstant(_ constant: Constant) {
+    func visitConstant(_ exp: ConstantExpression) {
+        let constant = exp.constant
+        
         switch constant {
         case .binary, .hexadecimal, .int, .octal, .float:
             target.outputInline(constant.description, style: .numberLiteral)
@@ -229,13 +193,15 @@ fileprivate class ExpressionWriter {
         }
     }
     
-    private func visitParens(_ exp: Expression) {
+    func visitParens(_ exp: ParensExpression) {
         target.outputInline("(")
-        visitExpression(exp)
+        visitExpression(exp.exp)
         target.outputInline(")")
     }
     
-    private func visitIdentifier(_ identifier: String) {
+    func visitIdentifier(_ exp: IdentifierExpression) {
+        let identifier = exp.identifier
+        
         if identifier == "self" || identifier == "super" {
             target.outputInline(identifier, style: .keyword)
         } else {
@@ -243,12 +209,12 @@ fileprivate class ExpressionWriter {
         }
     }
     
-    private func visitCast(_ exp: Expression, type: SwiftType) {
-        visitExpression(exp)
+    func visitCast(_ exp: CastExpression) {
+        visitExpression(exp.exp)
         
         let context = TypeContext()
         let typeMapper = TypeMapper(context: context)
-        let typeName = typeMapper.typeNameString(for: type)
+        let typeName = typeMapper.typeNameString(for: exp.type)
         
         target.outputInline(" ")
         target.outputInline("as?", style: .keyword)
@@ -256,25 +222,25 @@ fileprivate class ExpressionWriter {
         target.outputInline("\(typeName)", style: .typeName)
     }
     
-    private func visitArray(_ array: [Expression]) {
+    func visitArray(_ exp: ArrayLiteralExpression) {
         target.outputInline("[")
         
-        commaSeparated(array) { exp in
+        commaSeparated(exp.items) { exp in
             visitExpression(exp)
         }
         
         target.outputInline("]")
     }
     
-    private func visitDictionary(_ dictionary: [ExpressionDictionaryPair]) {
-        if dictionary.count == 0 {
+    func visitDictionary(_ exp: DictionaryLiteralExpression) {
+        if exp.pairs.count == 0 {
             target.outputInline("[:]")
             return
         }
         
         target.outputInline("[")
         
-        commaSeparated(dictionary) { value in
+        commaSeparated(exp.pairs) { value in
             visitExpression(value.key)
             target.outputInline(": ")
             visitExpression(value.value)
@@ -283,15 +249,19 @@ fileprivate class ExpressionWriter {
         target.outputInline("]")
     }
     
-    private func visitTernary(_ exp: Expression, _ ifTrue: Expression, _ ifFalse: Expression) {
-        visitExpression(exp)
+    func visitTernary(_ exp: TernaryExpression) {
+        visitExpression(exp.exp)
         target.outputInline(" ? ")
-        visitExpression(ifTrue)
+        visitExpression(exp.ifTrue)
         target.outputInline(" : ")
-        visitExpression(ifFalse)
+        visitExpression(exp.ifFalse)
     }
     
-    private func visitBlock(_ parameters: [BlockParameter], _ returnType: SwiftType, _ body: CompoundStatement) {
+    func visitBlock(_ exp: BlockLiteralExpression) {
+        let parameters = exp.parameters
+        let returnType = exp.returnType
+        let body = exp.body
+        
         let visitor = StatementWriter(target: target, expressionPasses: expressionPasses)
         let typeMapper = TypeMapper(context: TypeContext())
         
@@ -333,6 +303,12 @@ fileprivate class ExpressionWriter {
         
         target.outputIdentation()
         target.outputInline("}")
+    }
+    
+    func visitUnknown(_ exp: UnknownExpression) -> Void {
+        target.outputInline("/*", style: .comment)
+        target.outputInline(exp.context.description, style: .comment)
+        target.outputInline("*/", style: .comment)
     }
     
     private func commaSeparated<T>(_ values: [T], do block: (T) -> ()) {
@@ -637,19 +613,28 @@ fileprivate class StatementWriter {
     /// Used only for deciding whether to infer types for variable definitions
     /// with initial values.
     private func deduceType(from exp: Expression) -> DeducedType {
-        switch exp {
-        case .constant(let cons) where cons.isInteger:
-            return .int
-        case .constant(.float):
-            return .float
-        case .constant(.boolean):
-            return .bool
-        case .constant(.string):
-            return .string
-        case .constant(.nil):
-            return .nil
+        if let constant = exp.asConstant?.constant {
+            if constant.isInteger {
+                return .int
+            }
+            switch constant {
+            case .float:
+                return .float
+            case .boolean:
+                return .bool
+            case .string:
+                return .string
+            case .nil:
+                return .nil
+            default:
+                break
+            }
+            return .other
+        } else if let binary = exp.asBinary {
+            let lhs = binary.lhs
+            let op = binary.op
+            let rhs = binary.rhs
             
-        case let .binary(lhs, op, rhs):
             switch op.category {
             case .arithmetic, .bitwise:
                 let lhsType = deduceType(from: lhs)
@@ -694,35 +679,36 @@ fileprivate class StatementWriter {
             case .nullCoallesce, .range:
                 return .other
             }
+        } else if let assignment = exp.asAssignment {
+            return deduceType(from: assignment.rhs)
+        } else if let parens = exp.asParens {
+            return deduceType(from: parens.exp)
+        } else if exp is PrefixExpression || exp is UnaryExpression {
+            let op = exp.asPrefix?.op ?? exp.asUnary?.op
             
-        case .parens(let exp):
-            return deduceType(from: exp)
-            
-        case let .prefix(op, _), let .unary(op, _):
             switch op {
-            case .negate:
+            case .some(.negate):
                 return .bool
-            case .bitwiseNot:
+            case .some(.bitwiseNot):
                 return .int
                 
             // Pointer types
-            case .multiply, .bitwiseAnd:
+            case .some(.multiply), .some(.bitwiseAnd):
                 return .other
                 
             default:
                 return .other
             }
-            
-        case .ternary(_, let lhs, let rhs):
-            let lhsType = deduceType(from: lhs)
-            if lhsType == deduceType(from: rhs) {
+        } else if let ternary = exp.asTernary {
+            let lhsType = deduceType(from: ternary.ifTrue)
+            if lhsType == deduceType(from: ternary.ifFalse) {
                 return lhsType
             }
             
             return .other
-        default:
-            return .other
         }
+        
+        return .other
     }
     
     private enum DeducedType {

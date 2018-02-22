@@ -9,8 +9,10 @@ public class AllocInitExpressionPass: ExpressionPass {
         inspectBlocks = true
     }
     
-    public override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
-        var (exp, op) = (exp, op)
+    public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        //var (exp, op) = (exp, op)
+        
+        // Plain [[Class alloc] init] -> Class()
         
         switch (exp, op) {
         // Plain [[Class alloc] init] -> Class()
