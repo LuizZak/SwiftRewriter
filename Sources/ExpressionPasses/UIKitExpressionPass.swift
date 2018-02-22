@@ -4,60 +4,70 @@ import Utils
 /// Applies passes to simplify known UIKit methods and constructs
 public class UIKitExpressionPass: ExpressionPass {
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
-        return super.visitIdentifier(exp)
-        /*
         // 'enumifications'
-        if identifier.hasPrefix("UIControlEvent") {
-            return enumify(ident: identifier, enumPrefix: "UIControlEvent", swiftEnumName: "UIControlEvents")
+        if let exp = enumify(ident: exp.identifier, enumPrefix: "UIControlEvent", swiftEnumName: "UIControlEvents") {
+            return exp
         }
         
-        return .identifier(identifier)
-        */
+        return super.visitIdentifier(exp)
     }
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        return super.visitPostfix(exp)
-        /*
-        var (exp, op) = (exp, op)
-        
-        switch (exp, op) {
-            
-        // UIColor.orangeColor() -> UIColor.orange, etc.
-        case (.postfix(.identifier("UIColor"), .member(let colorName)),
-              .functionCall(arguments: [])) where colorName.hasSuffix("Color") && colorName.count > "Color".count:
-            
-            exp = .identifier("UIColor")
-            op = .member(String(colorName.dropLast("Color".count)))
-            
-            
-        // [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>] -> <exp>.addTarget(<a1>, action: <a2>, for: <a3>)
-        case (.postfix(_, .member("addTarget")),
-              .functionCall(let args)) where args.count == 3:
-            
-            // Arg0
-            guard case .unlabeled = args[0] else {
-                break
-            }
-            // action:
-            guard case .labeled("action", _) = args[1] else {
-                break
-            }
-            // forControlEvents:
-            guard case .labeled("forControlEvents", let controlEvents) = args[2] else {
-                break
-            }
-            
-            op = .functionCall(arguments: [
-                args[0],
-                args[1],
-                .labeled("for", controlEvents)
-                ])
-        default:
-            break
+        if let exp = convertUIColorStaticColorMethodCall(exp) {
+            return super.visitExpression(exp)
+        }
+        if let exp = convertAddTargetForControlEvents(exp) {
+            return super.visitExpression(exp)
         }
         
-        return super.visitPostfix(exp, op: op)
-        */
+        return super.visitPostfix(exp)
+    }
+    
+    /// Converts UIColor.orangeColor() -> UIColor.orange, etc.
+    func convertUIColorStaticColorMethodCall(_ exp: PostfixExpression) -> Expression? {
+        guard case .functionCall(let args) = exp.op, args.count == 0 else {
+            return nil
+        }
+        guard let colorMember = exp.exp.asPostfix, colorMember.exp == .identifier("UIColor"), case .member(let colorName) = colorMember.op else {
+            return nil
+        }
+        guard colorName.hasSuffix("Color") && !colorName.replacingOccurrences(of: "Color", with: "").isEmpty else {
+            return nil
+        }
+        
+        exp.exp = .identifier("UIColor")
+        exp.op = .member(String(colorName.dropLast("Color".count)))
+        
+        return exp
+    }
+    
+    /// Converts [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>] -> <exp>.addTarget(<a1>, action: <a2>, for: <a3>)
+    func convertAddTargetForControlEvents(_ exp: PostfixExpression) -> Expression? {
+        guard case .functionCall(let args) = exp.op, args.count == 3 else {
+            return nil
+        }
+        guard let memberExp = exp.exp.asPostfix, memberExp.op == .member("addTarget") else {
+            return nil
+        }
+        
+        // Arg0
+        guard case .unlabeled = args[0] else {
+            return nil
+        }
+        // action:
+        guard case .labeled("action", _) = args[1] else {
+            return nil
+        }
+        // forControlEvents:
+        guard case .labeled("forControlEvents", let controlEvents) = args[2] else {
+            return nil
+        }
+        
+        exp.op = .functionCall(arguments: [args[0],
+                                           args[1],
+                                           .labeled("for", controlEvents)])
+        
+        return exp
     }
     
     /// 'Enumify' an identifier it such that it reads like a Swift enum, in case
@@ -66,9 +76,9 @@ public class UIKitExpressionPass: ExpressionPass {
     /// E.g.: "UIControlEventTouchUpInside" enumified over "UIControlEvent" (Objective-C) to
     /// "UIControlEvents" (Swift)
     /// will return `.postfix(.identifier("UIControlEvents"), .member("touchUpInside"))`.
-    func enumify(ident: String, enumPrefix: String, swiftEnumName: String) -> Expression {
+    func enumify(ident: String, enumPrefix: String, swiftEnumName: String) -> Expression? {
         if !ident.hasPrefix(enumPrefix) {
-            return .identifier(ident)
+            return nil
         }
         
         let suffix = ident.suffix(from: enumPrefix.endIndex)
