@@ -32,7 +32,7 @@ class SwiftStmtRewriter {
     
     public func rewrite(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
         let rewriter = StatementWriter(target: target, expressionPasses: expressionPasses)
-        rewriter.visitStatement(.compound(compoundStatement))
+        rewriter.visitStatement(compoundStatement)
     }
     
     public func rewrite(expression: Expression, into target: RewriterOutputTarget) {
@@ -322,7 +322,9 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     }
 }
 
-fileprivate class StatementWriter {
+fileprivate class StatementWriter: StatementVisitor {
+    public typealias StmtResult = Void
+    
     var target: RewriterOutputTarget
     var expressionPasses: [ExpressionPass] = []
     
@@ -331,42 +333,25 @@ fileprivate class StatementWriter {
         self.expressionPasses = expressionPasses
     }
     
-    fileprivate func visitStatement(_ statement: Statement) {
-        switch statement {
-        case .semicolon:
-            target.output(line: ";")
-        case let .compound(body):
-            visitCompound(body)
-        case let .if(exp, body, elseBody):
-            visitIf(exp, body, elseBody: elseBody)
-        case let .switch(exp, cases, def):
-            visitSwitch(exp, cases, def)
-        case let .while(exp, body):
-            visitWhile(exp, body)
-        case let .for(pattern, exp, body):
-            visitForIn(pattern, exp, body)
-        case let .do(body):
-            visitDo(body)
-        case let .defer(body):
-            visitDefer(body)
-        case let .return(expr):
-            visitReturn(expr)
-        case .break:
-            visitBreak()
-        case .continue:
-            visitContinue()
-        case let .expressions(exp):
-            visitExpressions(exp)
-        case .variableDeclarations(let variables):
-            visitVariableDeclarations(variables)
-        case .unknown(let context):
-            target.output(line: "/*", style: .comment)
-            target.output(line: context.description, style: .comment)
-            target.output(line: "*/", style: .comment)
-        }
+    func visitStatement(_ statement: Statement) -> Void {
+        statement.accept(self)
     }
     
-    private func visitCompound(_ compound: CompoundStatement, lineFeedAfter: Bool = true) {
+    func visitSemicolon(_ stmt: SemicolonStatement) -> Void {
+        target.output(line: ";")
+    }
+    
+    func visitUnknown(_ stmt: UnknownStatement) {
+        target.output(line: "/*", style: .comment)
+        target.output(line: stmt.context.description, style: .comment)
+        target.output(line: "*/", style: .comment)
+    }
+    
+    func visitCompound(_ compound: CompoundStatement) {
+        visitCompound(compound, lineFeedAfter: true)
+    }
+    
+    func visitCompound(_ compound: CompoundStatement, lineFeedAfter: Bool) {
         target.outputInline(" {")
         target.outputLineFeed()
         target.increaseIdentation()
@@ -382,29 +367,36 @@ fileprivate class StatementWriter {
         }
     }
     
-    private func visitIf(_ exp: Expression, _ body: CompoundStatement, elseBody: CompoundStatement?, _ withIdent: Bool = true) {
+    func visitIf(_ stmt: IfStatement) {
+        visitIf(stmt, withIdent: true)
+    }
+    
+    func visitIf(_ stmt: IfStatement, withIdent: Bool) {
         if withIdent {
             target.outputIdentation()
         }
         target.outputInlineWithSpace("if", style: .keyword)
-        emitExpr(exp)
+        emitExpr(stmt.exp)
         
-        visitCompound(body, lineFeedAfter: elseBody == nil)
+        visitCompound(stmt.body, lineFeedAfter: stmt.elseBody == nil)
         
-        if let elseBody = elseBody {
+        if let elseBody = stmt.elseBody {
             target.outputInline(" else", style: .keyword)
             
-            if elseBody.statements.count == 1,
-                case let .if(exp, body, elseBody) = elseBody.statements[0] {
+            if elseBody.statements.count == 1, let ifStmt = elseBody.statements[0].asIf {
                 target.outputInline(" ")
-                visitIf(exp, body, elseBody: elseBody, false)
+                visitIf(ifStmt, withIdent: false)
             } else {
                 visitCompound(elseBody)
             }
         }
     }
     
-    private func visitSwitch(_ exp: Expression, _ cases: [SwitchCase], _ def: [Statement]?) {
+    func visitSwitch(_ stmt: SwitchStatement) {
+        let exp = stmt.exp
+        let cases = stmt.cases
+        let def = stmt.defaultCase
+        
         target.outputIdentation()
         target.outputInlineWithSpace("switch", style: .keyword)
         emitExpr(exp)
@@ -465,38 +457,38 @@ fileprivate class StatementWriter {
         target.output(line: "}")
     }
     
-    private func visitWhile(_ exp: Expression, _ body: CompoundStatement) {
+    func visitWhile(_ stmt: WhileStatement) {
         target.outputIdentation()
         target.outputInlineWithSpace("while", style: .keyword)
-        emitExpr(exp)
+        emitExpr(stmt.exp)
         
-        visitCompound(body)
+        visitCompound(stmt.body)
     }
     
-    private func visitForIn(_ pattern: Pattern, _ exp: Expression, _ body: CompoundStatement) {
+    func visitFor(_ stmt: ForStatement) {
         target.outputIdentation()
         target.outputInlineWithSpace("for", style: .keyword)
-        emitPattern(pattern)
+        emitPattern(stmt.pattern)
         target.outputInline(" in ", style: .keyword)
-        emitExpr(exp)
+        emitExpr(stmt.exp)
         
-        visitCompound(body)
+        visitCompound(stmt.body)
     }
     
-    private func visitDo(_ body: CompoundStatement) {
+    func visitDo(_ stmt: DoStatement) {
         target.outputIdentation()
         target.outputInline("do", style: .keyword)
-        visitCompound(body)
+        visitCompound(stmt.body)
     }
     
-    private func visitDefer(_ body: CompoundStatement) {
+    func visitDefer(_ stmt: DeferStatement) {
         target.outputIdentation()
         target.outputInline("defer", style: .keyword)
-        visitCompound(body)
+        visitCompound(stmt.body)
     }
     
-    private func visitReturn(_ exp: Expression?) {
-        if let exp = exp {
+    func visitReturn(_ stmt: ReturnStatement) {
+        if let exp = stmt.exp {
             target.outputIdentation()
             target.outputInline("return ", style: .keyword)
             emitExpr(exp)
@@ -506,23 +498,23 @@ fileprivate class StatementWriter {
         }
     }
     
-    private func visitContinue() {
+    func visitContinue(_ stmt: ContinueStatement) {
         target.output(line: "continue", style: .keyword)
     }
     
-    private func visitBreak() {
+    func visitBreak(_ stmt: BreakStatement) {
         target.output(line: "break", style: .keyword)
     }
     
-    private func visitExpressions(_ expr: [Expression]) {
-        for exp in expr {
+    func visitExpressions(_ stmt: ExpressionsStatement) {
+        for exp in stmt.expressions {
             target.outputIdentation()
             emitExpr(exp)
             target.outputLineFeed()
         }
     }
     
-    private func visitVariableDeclarations(_ declarations: [StatementVariableDeclaration]) {
+    func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         func emitDeclaration(_ declaration: StatementVariableDeclaration) {
             let mapper = TypeMapper(context: TypeContext())
             
@@ -549,20 +541,20 @@ fileprivate class StatementWriter {
             }
         }
         
-        if declarations.count == 0 {
+        if stmt.decl.count == 0 {
             return
         }
         
-        let ownership = declarations[0].ownership
+        let ownership = stmt.decl[0].ownership
         
         target.outputIdentation()
         
         if ownership != .strong {
             target.outputInlineWithSpace(ownership.rawValue, style: .keyword)
         }
-        target.outputInlineWithSpace(declarations[0].isConstant ? "let" : "var", style: .keyword)
+        target.outputInlineWithSpace(stmt.decl[0].isConstant ? "let" : "var", style: .keyword)
         
-        for (i, decl) in declarations.enumerated() {
+        for (i, decl) in stmt.decl.enumerated() {
             if i > 0 {
                 target.outputInline(", ")
             }

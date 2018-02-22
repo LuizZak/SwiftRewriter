@@ -19,7 +19,7 @@ public class Expression: Equatable, CustomStringConvertible {
     }
     
     public var description: String {
-        return ""
+        return "\(type(of: self))"
     }
     
     /// Returns an array of sub-expressions contained within this expression, in

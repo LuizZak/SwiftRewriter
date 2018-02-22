@@ -43,7 +43,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     public override func visitStatement(_ ctx: ObjectiveCParser.StatementContext) -> Statement? {
         if let cpd = ctx.compoundStatement(), let compound = cpd.accept(compoundStatementVisitor()) {
-            return .compound(compound)
+            return compound
         }
         
         return acceptFirst(from: ctx.selectionStatement(),
@@ -66,7 +66,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
-        return .compound(compound)
+        return compound
     }
     
     // MARK: @synchronized / @autoreleasepool
@@ -78,7 +78,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             return .unknown(UnknownASTContext(context: ctx))
         }
         
-        var doBody: CompoundStatement = []
+        let doBody: CompoundStatement = []
         
         // Generate an equivalent locking structure as follows:
         
@@ -177,7 +177,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             for section in sections {
                 var statements = section.statement().compactMap { $0.accept(self) }
                 
-                if statements.count == 1, case .compound(let stmt) = statements[0] {
+                if statements.count == 1, let stmt = statements[0].asCompound {
                     statements = stmt.statements
                 }
                 
@@ -257,7 +257,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         simplifyFor:
         if let initExpr = initExpr, let condition = condition, let iteration = iteration {
             // Search for inits like 'int i = <value>'
-            guard case Statement.variableDeclarations(let decl) = initExpr, decl.count == 1 else {
+            guard let decl = initExpr.asVariableDeclaration?.decl, decl.count == 1 else {
                 break simplifyFor
             }
             let loopVar = decl[0]
@@ -282,7 +282,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             }
             
             // Look for loop iterations of the form 'i++'
-            guard case .expressions(let exps) = iteration, exps.count == 1 else {
+            guard let exps = iteration.asExpressions?.expressions, exps.count == 1 else {
                 break simplifyFor
             }
             guard exps[0].asAssignment == AssignmentExpression(lhs: IdentifierExpression(identifier: loopVar.identifier), op: .addAssign, rhs: 1 as ConstantExpression) else {
@@ -308,7 +308,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         // Come up with a while loop, now
         
         // Loop body
-        var body = CompoundStatement()
+        let body = CompoundStatement()
         if let iteration = iteration {
             body.statements.append(
                 .defer([
@@ -326,11 +326,11 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         // Loop init (pre-loop)
         let bodyWithWhile: Statement
         if let initExpr = initExpr {
-            var body = CompoundStatement()
+            let body = CompoundStatement()
             body.statements.append(initExpr)
             body.statements.append(whileBody)
             
-            bodyWithWhile = .compound(body)
+            bodyWithWhile = body
         } else {
             bodyWithWhile = whileBody
         }
@@ -359,8 +359,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     private func expressions(in compoundStatement: CompoundStatement, inspectBlocks: Bool) -> AnyIterator<Expression> {
         let iterator =
-            ExpressionIterator(statement: .compound(compoundStatement),
-                               inspectBlocks: inspectBlocks)
+            ExpressionIterator(statement: compoundStatement, inspectBlocks: inspectBlocks)
         
         return AnyIterator(iterator)
     }
@@ -422,7 +421,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 return .unknown(UnknownASTContext(context: stmt))
             }.flatMap { stmt -> [Statement] in
                 // Free compound blocks cannot be declared in Swift
-                if case .compound(let inner) = stmt {
+                if let inner = stmt.asCompound {
                     return inner.statements
                 }
                 

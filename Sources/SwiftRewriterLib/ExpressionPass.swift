@@ -246,53 +246,66 @@ open class ExpressionPass: ExpressionVisitor {
             self.target = target
         }
         
-        override func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> Statement {
-            return super.visitIf(expression.accept(target), body, elseBody)
+        override func visitIf(_ stmt: IfStatement) -> Statement {
+            stmt.exp = stmt.exp.accept(target)
+            
+            return super.visitIf(stmt)
         }
         
-        override func visitSwitch(_ expression: Expression, _ cases: [SwitchCase], _ def: [Statement]?) -> Statement {
-            func recurseIntoPatterns(_ pattern: Pattern) -> Pattern {
-                switch pattern {
-                case .expression(let exp):
-                    return .expression(exp.accept(target))
-                case .tuple(let tups):
-                    return .tuple(tups.map(recurseIntoPatterns))
-                case .identifier:
-                    return pattern
-                }
-            }
-            
-            let expression = expression.accept(target)
-            let cases = cases.map { cs in
+        override func visitSwitch(_ stmt: SwitchStatement) -> Statement {
+            stmt.exp = stmt.exp.accept(target)
+            stmt.cases = stmt.cases.map { cs in
                 return SwitchCase(patterns: cs.patterns.map(recurseIntoPatterns),
                                   statements: cs.statements)
             }
             
-            return super.visitSwitch(expression, cases, def)
+            return super.visitSwitch(stmt)
         }
         
-        override func visitWhile(_ expression: Expression, _ body: CompoundStatement) -> Statement {
-            return super.visitWhile(expression.accept(target), body)
+        override func visitWhile(_ stmt: WhileStatement) -> Statement {
+            stmt.exp = stmt.exp.accept(target)
+            
+            return super.visitWhile(stmt)
         }
         
-        override func visitFor(_ pattern: Pattern, _ expression: Expression, _ compoundStatement: CompoundStatement) -> Statement {
-            return super.visitFor(pattern, expression.accept(target), compoundStatement)
+        override func visitFor(_ stmt: ForStatement) -> Statement {
+            stmt.pattern = recurseIntoPatterns(stmt.pattern)
+            stmt.exp = stmt.exp.accept(target)
+            
+            return super.visitFor(stmt)
         }
         
-        override func visitReturn(_ expression: Expression?) -> Statement {
-            return super.visitReturn(expression?.accept(target))
+        override func visitReturn(_ stmt: ReturnStatement) -> Statement {
+            stmt.exp = stmt.exp?.accept(target)
+            
+            return super.visitReturn(stmt)
         }
         
-        override func visitExpressions(_ expressions: [Expression]) -> Statement {
-            return super.visitExpressions(expressions.map { $0.accept(target) })
+        override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
+            stmt.expressions = stmt.expressions.map { $0.accept(target) }
+            
+            return super.visitExpressions(stmt)
         }
         
-        override func visitVariableDeclarations(_ variables: [StatementVariableDeclaration]) -> Statement {
-            return super.visitVariableDeclarations(variables.map { v in
+        override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
+            stmt.decl = stmt.decl.map { v in
                 var v = v
                 v.initialization = v.initialization?.accept(target)
                 return v
-            })
+            }
+            
+            return super.visitVariableDeclarations(stmt)
+        }
+        
+        private func recurseIntoPatterns(_ pattern: Pattern) -> Pattern {
+            switch pattern {
+            case .expression(let exp):
+                return .expression(exp.accept(target))
+            case .tuple(let tups):
+                return .tuple(tups.map(recurseIntoPatterns))
+            case .identifier:
+                return pattern
+            }
         }
     }
 }

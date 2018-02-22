@@ -30,49 +30,46 @@ public final class ExpressionIterator: IteratorProtocol {
             
             return exp
         case .statement(let statement):
+            
             switch statement {
-            case .expressions(let exps):
-                enqueue(contentsOf: exps)
-                
-            case let .if(exp, body, elBody):
-                enqueue(exp)
-                enqueue(contentsOf: body)
-                if let elBody = elBody {
-                    enqueue(contentsOf: elBody)
+            case let stmt as ExpressionsStatement:
+                enqueue(contentsOf: stmt.expressions)
+            case let stmt as IfStatement:
+                enqueue(stmt.exp)
+                enqueue(contentsOf: stmt.body)
+                if let elseBody = stmt.elseBody {
+                    enqueue(contentsOf: elseBody)
                 }
-                
-            case .compound(let cpd), .defer(let cpd), .do(let cpd):
-                enqueue(contentsOf: cpd)
-                
-            case let .for(pt, exp, body):
-                enqueue(pattern: pt)
-                enqueue(exp)
-                enqueue(contentsOf: body)
-                
-            case .return(let exp):
-                if let exp = exp {
+            case let stmt as CompoundStatement:
+                enqueue(contentsOf: stmt)
+            case let stmt as ReturnStatement:
+                if let exp = stmt.exp {
                     enqueue(exp)
                 }
-                
-            case let .switch(exp, cases, def):
-                enqueue(exp)
-                cases.forEach(enqueue)
-                if let def = def {
+            case let stmt as DeferStatement:
+                enqueue(contentsOf: stmt.body)
+            case let stmt as DoStatement:
+                enqueue(contentsOf: stmt.body)
+            case let stmt as ForStatement:
+                enqueue(pattern: stmt.pattern)
+                enqueue(stmt.exp)
+                enqueue(contentsOf: stmt.body)
+            case let stmt as SwitchStatement:
+                enqueue(stmt.exp)
+                stmt.cases.forEach(enqueue)
+                if let def = stmt.defaultCase {
                     enqueue(contentsOf: def)
                 }
-                
-            case .variableDeclarations(let declarations):
-                for decl in declarations {
+            case let stmt as VariableDeclarationsStatement:
+                for decl in stmt.decl {
                     if let exp = decl.initialization {
                         enqueue(exp)
                     }
                 }
-                
-            case let .while(exp, body):
-                enqueue(exp)
-                enqueue(contentsOf: body)
-                
-            case .continue, .break, .semicolon, .unknown:
+            case let stmt as WhileStatement:
+                enqueue(stmt.exp)
+                enqueue(contentsOf: stmt.body)
+            default:
                 break
             }
             

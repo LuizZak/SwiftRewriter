@@ -13,13 +13,13 @@ public protocol StatementVisitor {
     /// Visits a semicolon node
     ///
     /// - Returns: Result of visiting a semicolon with this visitor
-    func visitSemicolon() -> StmtResult
+    func visitSemicolon(_ stmt: SemicolonStatement) -> StmtResult
     
     /// Visits a compound statement with this visitor
     ///
     /// - Parameter compoundStatement: Compound statement for the statement
     /// - Returns: Result of visiting the compound statement
-    func visitCompound(_ compoundStatement: CompoundStatement) -> StmtResult
+    func visitCompound(_ stmt: CompoundStatement) -> StmtResult
     
     /// Visits an `if` statement with this visitor
     ///
@@ -28,7 +28,7 @@ public protocol StatementVisitor {
     ///   - body: Body to execute if the control expression evaluates to true
     ///   - elseBody: Body to execute if the control expression evaluates to false
     /// - Returns: Result of visiting the `if` statement node
-    func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> StmtResult
+    func visitIf(_ stmt: IfStatement) -> StmtResult
     
     /// Visits a `switch` statement with this visitor
     ///
@@ -38,7 +38,7 @@ public protocol StatementVisitor {
     ///   - cases: Cases to match with the switch
     ///   - default: An optional set of statements to fill the default body with.
     /// - Returns: Result of visiting the `switch` statement node
-    func visitSwitch(_ expression: Expression, _ cases: [SwitchCase], _ default: [Statement]?) -> StmtResult
+    func visitSwitch(_ stmt: SwitchStatement) -> StmtResult
     
     /// Visits a `while` statement with this visitor
     ///
@@ -46,7 +46,7 @@ public protocol StatementVisitor {
     ///   - expression: The `while`'s control expression
     ///   - body: Body to execute while the control expression evaluates to true
     /// - Returns: Result of visiting the `while` statement node
-    func visitWhile(_ expression: Expression, _ body: CompoundStatement) -> StmtResult
+    func visitWhile(_ stmt: WhileStatement) -> StmtResult
     
     /// Visits a `for` loop statement with this visitor
     ///
@@ -57,96 +57,55 @@ public protocol StatementVisitor {
     /// consumes
     ///   - compoundStatement: Statements executed for each item being looped over
     /// - Returns: Result of visiting the `for` node
-    func visitFor(_ pattern: Pattern, _ expression: Expression, _ compoundStatement: CompoundStatement) -> StmtResult
+    func visitFor(_ stmt: ForStatement) -> StmtResult
     
     /// Visits a `do` statement node
     ///
     /// - Parameter body: Statements to be executed within the `do` statement
     /// - Returns: Result of visiting the `do` statement
-    func visitDo(_ body: CompoundStatement) -> StmtResult
+    func visitDo(_ stmt: DoStatement) -> StmtResult
     
     /// Visits a `defer` statement node
     ///
     /// - Parameter body: Statements to be executed when the `defer` statement
     /// leaves the scope
     /// - Returns: Result of visiting the `defer` statement
-    func visitDefer(_ body: CompoundStatement) -> StmtResult
+    func visitDefer(_ stmt: DeferStatement) -> StmtResult
     
     /// Visits a return statement
     ///
     /// - Parameter expression: An optional expression that evaluates to the return
     /// value of the containing scope of the `return` statement
     /// - Returns: Result of visiting the `return` statement
-    func visitReturn(_ expression: Expression?) -> StmtResult
+    func visitReturn(_ stmt: ReturnStatement) -> StmtResult
     
     /// Visits a break statement
     ///
     /// - Returns: Result of visiting the break statement
-    func visitBreak() -> StmtResult
+    func visitBreak(_ stmt: BreakStatement) -> StmtResult
     
     /// Visits a continue statement
     ///
     /// - Returns: Result of visiting the continue statement
-    func visitContinue() -> StmtResult
+    func visitContinue(_ stmt: ContinueStatement) -> StmtResult
     
     /// Visits an expression sequence statement
     ///
     /// - Parameter expressions: Expressions to be executed
     /// - Returns: Result of visiting the expressions statement
-    func visitExpressions(_ expressions: [Expression]) -> StmtResult
+    func visitExpressions(_ stmt: ExpressionsStatement) -> StmtResult
     
     /// Visits a variable declaration statement
     ///
     /// - Parameter variables: Variables being declared within the statement
     /// - Returns: Result of visiting the variables statement
-    func visitVariableDeclarations(_ variables: [StatementVariableDeclaration]) -> StmtResult
+    func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> StmtResult
     
     /// Visits an unknown statement node
     ///
     /// - Parameter context: Context for the unknown node
     /// - Returns: Result of visiting the unknown statement context
-    func visitUnknown(_ context: UnknownASTContext) -> StmtResult
-}
-
-public extension Statement {
-    /// Accepts the given visitor instance, calling the appropriate visiting method
-    /// according to this statement's type.
-    ///
-    /// - Parameter visitor: The visitor to accept
-    /// - Returns: The result of the visitor's `visit-` call when applied to this
-    /// statement
-    public func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        switch self {
-        case .semicolon:
-            return visitor.visitSemicolon()
-        case let .compound(body):
-            return visitor.visitCompound(body)
-        case let .if(exp, body, elseBody):
-            return visitor.visitIf(exp, body, elseBody)
-        case let .switch(exp, cases, def):
-            return visitor.visitSwitch(exp, cases, def)
-        case let .while(exp, body):
-            return visitor.visitWhile(exp, body)
-        case let .for(pattern, exp, body):
-            return visitor.visitFor(pattern, exp, body)
-        case let .do(body):
-            return visitor.visitDo(body)
-        case let .defer(body):
-            return visitor.visitDefer(body)
-        case let .return(expr):
-            return visitor.visitReturn(expr)
-        case .break:
-            return visitor.visitBreak()
-        case .continue:
-            return visitor.visitContinue()
-        case let .expressions(exp):
-            return visitor.visitExpressions(exp)
-        case .variableDeclarations(let variables):
-            return visitor.visitVariableDeclarations(variables)
-        case .unknown(let context):
-            return visitor.visitUnknown(context)
-        }
-    }
+    func visitUnknown(_ stmt: UnknownStatement) -> StmtResult
 }
 
 open class StatementPass: StatementVisitor {
@@ -155,110 +114,63 @@ open class StatementPass: StatementVisitor {
     }
     
     open func visitStatement(_ statement: Statement) -> Statement {
-        switch statement {
-        case .semicolon:
-            return visitSemicolon()
-            
-        case let .compound(body):
-            return visitCompound(body)
-            
-        case let .if(exp, body, elseBody):
-            return visitIf(exp, body, elseBody)
-            
-        case let .switch(exp, cases, def):
-            return visitSwitch(exp, cases, def)
-            
-        case let .while(exp, body):
-            return visitWhile(exp, body)
-            
-        case let .for(pattern, exp, body):
-            return visitFor(pattern, exp, body)
-            
-        case let .do(body):
-            return visitDo(body)
-            
-        case let .defer(body):
-            return visitDefer(body)
-            
-        case let .return(expr):
-            return visitReturn(expr)
-            
-        case .break:
-            return visitBreak()
-            
-        case .continue:
-            return visitContinue()
-            
-        case let .expressions(exp):
-            return visitExpressions(exp)
-            
-        case .variableDeclarations(let variables):
-            return visitVariableDeclarations(variables)
-            
-        case .unknown(let context):
-            return visitUnknown(context)
-        }
+        return statement.accept(self)
     }
     
-    open func visitSemicolon() -> Statement {
-        return .semicolon
+    open func visitSemicolon(_ stmt: SemicolonStatement) -> Statement {
+        return stmt
     }
     
-    open func visitCompound(_ compoundStatement: CompoundStatement) -> Statement {
-        return .compound(visitStatementsInCompound(compoundStatement))
+    open func visitCompound(_ stmt: CompoundStatement) -> Statement {
+        return visitStatementsInCompound(stmt)
     }
     
-    open func visitIf(_ expression: Expression, _ body: CompoundStatement, _ elseBody: CompoundStatement?) -> Statement {
-        return .if(expression, body: visitStatementsInCompound(body), else: visitStatementsInCompound(elseBody))
+    open func visitIf(_ stmt: IfStatement) -> Statement {
+        return stmt
     }
     
-    open func visitSwitch(_ expression: Expression, _ cases: [SwitchCase], _ def: [Statement]?) -> Statement {
-        let cases = cases.map {
-            SwitchCase(patterns: $0.patterns, statements: $0.statements.map { $0.accept(self) })
-        }
-        let def = def?.map { $0.accept(self) }
-        
-        return .switch(expression, cases: cases, default: def)
+    open func visitSwitch(_ stmt: SwitchStatement) -> Statement {
+        return stmt
     }
     
-    open func visitWhile(_ expression: Expression, _ body: CompoundStatement) -> Statement {
-        return .while(expression, body: visitStatementsInCompound(body))
+    open func visitWhile(_ stmt: WhileStatement) -> Statement {
+        return stmt
     }
     
-    open func visitFor(_ pattern: Pattern, _ expression: Expression, _ compoundStatement: CompoundStatement) -> Statement {
-        return .for(pattern, expression, body: visitStatementsInCompound(compoundStatement))
+    open func visitFor(_ stmt: ForStatement) -> Statement {
+        return stmt
     }
     
-    open func visitDo(_ body: CompoundStatement) -> Statement {
-        return .do(visitStatementsInCompound(body))
+    open func visitDo(_ stmt: DoStatement) -> Statement {
+        return stmt
     }
     
-    open func visitDefer(_ body: CompoundStatement) -> Statement {
-        return .defer(visitStatementsInCompound(body))
+    open func visitDefer(_ stmt: DeferStatement) -> Statement {
+        return visitStatementsInCompound(stmt.body)
     }
     
-    open func visitReturn(_ expression: Expression?) -> Statement {
-        return .return(expression)
+    open func visitReturn(_ stmt: ReturnStatement) -> Statement {
+        return stmt
     }
     
-    open func visitBreak() -> Statement {
-        return .break
+    open func visitBreak(_ stmt: BreakStatement) -> Statement {
+        return stmt
     }
     
-    open func visitContinue() -> Statement {
-        return .continue
+    open func visitContinue(_ stmt: ContinueStatement) -> Statement {
+        return stmt
     }
     
-    open func visitExpressions(_ expressions: [Expression]) -> Statement {
-        return .expressions(expressions)
+    open func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
+        return stmt
     }
     
-    open func visitVariableDeclarations(_ variables: [StatementVariableDeclaration]) -> Statement {
-        return .variableDeclarations(variables)
+    open func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
+        return stmt
     }
     
-    open func visitUnknown(_ context: UnknownASTContext) -> Statement {
-        return .unknown(context)
+    open func visitUnknown(_ stmt: UnknownStatement) -> Statement {
+        return stmt
     }
     
     open func visitStatementsInCompound(_ compound: CompoundStatement) -> CompoundStatement {

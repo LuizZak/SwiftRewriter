@@ -257,7 +257,7 @@ public class MethodBodyIntention: FromSourceIntention, KnownMethodBody {
     
     /// Returns an iterator for all expressions within this method body.
     public func expressionsIterator(inspectBlocks: Bool) -> ExpressionSequence {
-        return ExpressionSequence(statement: .compound(body), inspectBlocks: inspectBlocks)
+        return ExpressionSequence(statement: body, inspectBlocks: inspectBlocks)
     }
 }
 
