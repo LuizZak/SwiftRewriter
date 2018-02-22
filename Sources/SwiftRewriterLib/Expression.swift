@@ -47,7 +47,7 @@ public class Expression: Equatable, CustomStringConvertible {
     }
     
     public static func ==(lhs: Expression, rhs: Expression) -> Bool {
-        return lhs.isEqual(to: rhs)
+        return lhs.resolvedType == rhs.resolvedType && lhs.isEqual(to: rhs)
     }
     
     fileprivate func cast<T>() -> T? {

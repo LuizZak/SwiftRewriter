@@ -6,10 +6,8 @@ import ObjcParser
 /// Main frontend class for performing Swift-conversion of Objective-C statements
 /// and expressions.
 class SwiftStmtRewriter {
-    var expressionPasses: [ExpressionPass] = []
-    
-    public init(expressionPasses: [ExpressionPass]) {
-        self.expressionPasses = expressionPasses
+    public init() {
+        
     }
     
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement {
@@ -31,12 +29,12 @@ class SwiftStmtRewriter {
     }
     
     public func rewrite(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
-        let rewriter = StatementWriter(target: target, expressionPasses: expressionPasses)
+        let rewriter = StatementWriter(target: target)
         rewriter.visitStatement(compoundStatement)
     }
     
     public func rewrite(expression: Expression, into target: RewriterOutputTarget) {
-        let rewriter = ExpressionWriter(target: target, expressionPasses: expressionPasses)
+        let rewriter = ExpressionWriter(target: target)
         rewriter.rewrite(expression)
     }
     
@@ -56,19 +54,13 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     typealias ExprResult = Void
     
     var target: RewriterOutputTarget
-    var expressionPasses: [ExpressionPass]
     
-    init(target: RewriterOutputTarget, expressionPasses: [ExpressionPass]) {
+    init(target: RewriterOutputTarget) {
         self.target = target
-        self.expressionPasses = expressionPasses
     }
     
     func rewrite(_ expression: Expression) {
-        let exp = expressionPasses.reduce(into: expression, { (exp, pass) in
-            exp = pass.applyPass(on: exp)
-        })
-        
-        visitExpression(exp)
+        visitExpression(expression)
     }
     
     func visitExpression(_ expression: Expression) {
@@ -262,7 +254,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
         let returnType = exp.returnType
         let body = exp.body
         
-        let visitor = StatementWriter(target: target, expressionPasses: expressionPasses)
+        let visitor = StatementWriter(target: target)
         let typeMapper = TypeMapper(context: TypeContext())
         
         // Print signature
@@ -326,11 +318,9 @@ fileprivate class StatementWriter: StatementVisitor {
     public typealias StmtResult = Void
     
     var target: RewriterOutputTarget
-    var expressionPasses: [ExpressionPass] = []
     
-    init(target: RewriterOutputTarget, expressionPasses: [ExpressionPass]) {
+    init(target: RewriterOutputTarget) {
         self.target = target
-        self.expressionPasses = expressionPasses
     }
     
     func visitStatement(_ statement: Statement) -> Void {
@@ -584,7 +574,7 @@ fileprivate class StatementWriter: StatementVisitor {
     }
     
     private func emitExpr(_ expr: Expression) {
-        let rewriter = ExpressionWriter(target: target, expressionPasses: expressionPasses)
+        let rewriter = ExpressionWriter(target: target)
         rewriter.rewrite(expr)
     }
     

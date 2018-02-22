@@ -1,5 +1,11 @@
 /// Describes a known type with known properties and methods and their signatures.
 public protocol KnownType {
+    /// The supertype for this known type, if any.
+    var supertype: KnownType? { get }
+    
+    /// Name for this known type
+    var typeName: String { get }
+    
     /// Gets an array of all known methods for this type
     var knownMethods: [KnownMethod] { get }
     
@@ -8,6 +14,12 @@ public protocol KnownType {
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
+}
+
+public extension KnownType {
+    public var supertype: KnownType? {
+        return nil
+    }
 }
 
 /// Describes a known method to the transpiler

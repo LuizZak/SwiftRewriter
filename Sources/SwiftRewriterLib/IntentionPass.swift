@@ -5,7 +5,13 @@ import Utils
 /// A protocol for objects that perform passes through intentions collected and
 /// perform changes and optimizations on them.
 public protocol IntentionPass {
-    func apply(on intentionCollection: IntentionCollection)
+    func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext)
+}
+
+/// Context for an intention pass
+public struct IntentionPassContext {
+    public let intentions: IntentionCollection
+    public let types: KnownTypeStorage
 }
 
 /// Gets an array of intention passes to apply before writing the final Swift code.
@@ -26,7 +32,7 @@ public enum IntentionPasses {
 /// Must be executed after a pass of `FileGroupingIntentionPass` to avoid dropping
 /// @property declarations and the like.
 public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
-    public func apply(on intentionCollection: IntentionCollection) {
+    public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         for file in intentionCollection.fileIntentions() {
             // Remove from file implementation any class generation intent that came
             // from an @interface
@@ -49,7 +55,7 @@ public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
 /// Propagates known protocol nullability signautres from protocol intentions into
 /// classes that implement them.
 public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionPass {
-    public func apply(on intentionCollection: IntentionCollection) {
+    public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         // Collect protocols
         let protocols = intentionCollection.protocolIntentions()
         let classes = intentionCollection.typeIntentions()
@@ -75,7 +81,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
 }
 
 public class FileTypeMergingIntentionPass: IntentionPass {
-    public func apply(on intentionCollection: IntentionCollection) {
+    public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         // Collect .h/.m pairs
         let intentions = intentionCollection.fileIntentions()
         
@@ -306,7 +312,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
 /// Extensions in Swift cannot declare stored variables, so they must be moved to
 /// the proper nominal instances.
 public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
-    public func apply(on intentionCollection: IntentionCollection) {
+    public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         let classes = intentionCollection.classIntentions()
         let extensions = intentionCollection.extensionIntentions()
         
@@ -350,7 +356,7 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
 }
 
 public class PropertyMergeIntentionPass: IntentionPass {
-    public func apply(on intentionCollection: IntentionCollection) {
+    public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         for file in intentionCollection.fileIntentions() {
             
             for cls in file.typeIntentions.compactMap({ $0 as? ClassGenerationIntention }) {
@@ -484,7 +490,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
 ///
 /// Examples include [[Class alloc] initWithThing:thing] -> Class(thing: thing)
 public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
-    public func apply(on intentionCollection: IntentionCollection) {
+    public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         let types = intentionCollection.typeIntentions()
         
         for type in types {

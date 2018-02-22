@@ -126,6 +126,9 @@ open class StatementPass: StatementVisitor {
     }
     
     open func visitIf(_ stmt: IfStatement) -> Statement {
+        stmt.body.accept(self)
+        stmt.elseBody?.accept(self)
+        
         return stmt
     }
     

@@ -11,6 +11,7 @@ public class SwiftRewriter {
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
     private var nonnullTokenRanges: [(start: Int, end: Int)] = []
+    private var knownTypes: KnownTypeStorage = KnownTypeStorageImpl()
     
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
@@ -42,6 +43,10 @@ public class SwiftRewriter {
         try loadInputSources()
         performIntentionPasses()
         outputDefinitions()
+    }
+    
+    public func addExpressionPass<T: ExpressionPass>(type: T.Type) {
+        
     }
     
     private func loadInputSources() throws {
@@ -176,13 +181,16 @@ public class SwiftRewriter {
     }
     
     private func performIntentionPasses() {
+        let context = IntentionPassContext(intentions: intentionCollection, types: knownTypes)
+        
         for pass in IntentionPasses.passes {
-            pass.apply(on: intentionCollection)
+            pass.apply(on: intentionCollection, context: context)
         }
     }
     
     private func outputDefinitions() {
         let writer = SwiftWriter(intentions: intentionCollection,
+                                 knownTypes: knownTypes,
                                  diagnostics: diagnostics,
                                  output: outputTarget)
         
@@ -269,7 +277,7 @@ public class SwiftRewriter {
         
         if let initialExpression = node.initialExpression,
             let expression = initialExpression.expression?.expression?.expression {
-            let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
+            let rewriter = SwiftStmtRewriter()
             let expression = rewriter.parseExpression(expression: expression)
             
             intent.initialValueExpr =
@@ -464,7 +472,7 @@ public class SwiftRewriter {
         method.inNonnullContext = isNodeInNonnullContext(node)
         
         if let body = node.body, let statements = body.statements {
-            let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
+            let rewriter = SwiftStmtRewriter()
             let compound = rewriter.parseStatements(compoundStatement: statements)
             
             let methodBodyIntention = MethodBodyIntention(body: compound, source: body)

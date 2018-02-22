@@ -70,6 +70,9 @@ indirect public enum SwiftType: Equatable {
     public static var any = SwiftType.typeName("Any")
     public static var anyObject = SwiftType.typeName("AnyObject")
     
+    public static var nsArray = SwiftType.typeName("NSArray")
+    public static var nsDictionary = SwiftType.typeName("NSDictionary")
+    
     public static func array(_ type: SwiftType) -> SwiftType {
         return .generic("Array", parameters: [type])
     }

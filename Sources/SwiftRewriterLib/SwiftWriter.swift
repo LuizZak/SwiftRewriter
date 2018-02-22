@@ -10,11 +10,13 @@ public class SwiftWriter {
     let context = TypeContext()
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
+    let knownTypes: KnownTypeStorage
     
     public var expressionPasses: [ExpressionPass] = []
     
-    public init(intentions: IntentionCollection, diagnostics: Diagnostics, output: WriterOutput) {
+    public init(intentions: IntentionCollection, knownTypes: KnownTypeStorage, diagnostics: Diagnostics, output: WriterOutput) {
         self.intentions = intentions
+        self.knownTypes = knownTypes
         self.diagnostics = diagnostics
         self.output = output
         self.typeMapper = TypeMapper(context: context)
@@ -136,7 +138,7 @@ public class SwiftWriter {
         if let expression = initVal?.expression {
             target.outputInline(" = ")
             
-            let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
+            let rewriter = SwiftStmtRewriter()
             rewriter.rewrite(expression: expression, into: target)
         }
         
@@ -465,7 +467,7 @@ public class SwiftWriter {
     }
     
     private func outputMethodBody(_ body: MethodBodyIntention, target: RewriterOutputTarget) {
-        let rewriter = SwiftStmtRewriter(expressionPasses: expressionPasses)
+        let rewriter = SwiftStmtRewriter()
         rewriter.rewrite(compoundStatement: body.body, into: target)
     }
     

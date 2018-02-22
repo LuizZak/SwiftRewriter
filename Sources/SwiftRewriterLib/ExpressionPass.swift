@@ -118,9 +118,27 @@ public protocol ExpressionVisitor {
     func visitUnknown(_ exp: UnknownExpression) -> ExprResult
 }
 
+/// Context for an `ExpressionPass` execution.
+public struct ExpressionPassContext {
+    public static let empty = ExpressionPassContext(knownTypes: _Source())
+    
+    public let knownTypes: KnownTypeSource
+    
+    public init(knownTypes: KnownTypeSource) {
+        self.knownTypes = knownTypes
+    }
+    
+    private struct _Source: KnownTypeSource {
+        func recoverType(named name: String) -> KnownType? {
+            return nil
+        }
+    }
+}
+
 /// A base class for expression rewriting passes.
 open class ExpressionPass: ExpressionVisitor {
     public var inspectBlocks = false
+    public var context: ExpressionPassContext = .empty
     
     public init() {
         
