@@ -28,6 +28,10 @@ public class Expression: Equatable, CustomStringConvertible {
         return []
     }
     
+    /// Resolved type of this expression.
+    /// Is `nil`, in case it has not been resolved yet.
+    public var resolvedType: SwiftType?
+    
     /// Accepts the given visitor instance, calling the appropriate visiting method
     /// according to this expression's type.
     ///
