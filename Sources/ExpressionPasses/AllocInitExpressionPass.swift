@@ -9,43 +9,73 @@ public class AllocInitExpressionPass: ExpressionPass {
         inspectBlocks = true
     }
     
-    public override func visitPostfix(_ exp: Expression, op: Postfix) -> Expression {
-        var (exp, op) = (exp, op)
-        
-        switch (exp, op) {
-        // Plain [[Class alloc] init] -> Class()
-        case (.postfix(.postfix(.postfix(.identifier(let typeName),
-                                         .member("alloc")),
-                                .functionCall(arguments: [])),
-                       .member("init")),
-              .functionCall(let args))
-            where args.count == 0:
-            
-            (exp, op) = (.identifier(typeName), .functionCall(arguments: []))
-            
-        // [[Class alloc] initWithThing:[...]] -> Class(thing: [...])
-        case (.postfix(.postfix(.postfix(.identifier(let typeName),
-                                         .member("alloc")),
-                                .functionCall(arguments: [])),
-                       .member(let initCall)),
-              .functionCall(let args)) where args.count > 0 && initCall.hasPrefix("initWith"):
-            
-            let args = clangify(methodName: initCall, arguments: args)
-            (exp, op) = (.identifier(typeName), .functionCall(arguments: args))
-        
-        // [super initWithThing:[...]] -> super.init(thing: [...])
-        case (.postfix(.identifier("super"),
-                       .member(let initMethod)),
-              .functionCall(let args)) where args.count > 0 && initMethod.hasPrefix("initWith"):
-            
-            let args = clangify(methodName: initMethod, arguments: args)
-            (exp, op) = (.postfix(.identifier("super"), .member("init")),
-                         .functionCall(arguments: args))
-        default:
-            break
+    public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        if let newInit = convertAllocInit(exp: exp) {
+            return newInit
+        }
+        if let newInitParametrized = convertAllocInitWithParameters(exp: exp) {
+            return newInitParametrized
+        }
+        if let newInit = convertSuperInit(exp: exp) {
+            return newInit
         }
         
-        return super.visitPostfix(exp, op: op)
+        return super.visitPostfix(exp)
+    }
+    
+    /// Converts plain [[Class alloc] init] -> Class()
+    func convertAllocInit(exp: PostfixExpression) -> Expression? {
+        guard let initInvocation = exp.asPostfix, initInvocation.op == .functionCall(arguments: []) else {
+            return nil
+        }
+        guard let initTarget = initInvocation.exp.asPostfix, initTarget.op == .member("init") else {
+            return nil
+        }
+        guard let allocInvocation = initTarget.exp.asPostfix, allocInvocation.op == .functionCall(arguments: []) else {
+            return nil
+        }
+        guard let alloc = allocInvocation.exp.asPostfix, alloc.exp is IdentifierExpression, alloc.op == .member("alloc") else {
+            return nil
+        }
+        
+        return Expression.postfix(alloc.exp, .functionCall(arguments: []))
+    }
+    
+    /// Converts [[Class alloc] initWithThing:[...]] -> Class(thing: [...])
+    func convertAllocInitWithParameters(exp: PostfixExpression) -> Expression? {
+        guard let initInvocation = exp.asPostfix, case .functionCall(let args) = initInvocation.op, args.count > 0 else {
+            return nil
+        }
+        guard let initTarget = initInvocation.exp.asPostfix, case .member(let initName) = initTarget.op, initName.hasPrefix("initWith") else {
+            return nil
+        }
+        guard let allocInvocation = initTarget.exp.asPostfix, allocInvocation.op == .functionCall(arguments: []) else {
+            return nil
+        }
+        guard let alloc = allocInvocation.exp.asPostfix, let typeName = alloc.exp.asIdentifier?.identifier, alloc.op == .member("alloc") else {
+            return nil
+        }
+        
+        let newArgs = clangify(methodName: initName, arguments: args)
+        
+        return Expression.postfix(.identifier(typeName), .functionCall(arguments: newArgs))
+    }
+    
+    /// Convert [super initWithThing:[...]] -> super.init(thing: [...])
+    func convertSuperInit(exp: PostfixExpression) -> Expression? {
+        guard let initInvocation = exp.asPostfix, case .functionCall(let args) = initInvocation.op, args.count > 0 else {
+            return nil
+        }
+        guard let initTarget = initInvocation.exp.asPostfix, case .member(let initName) = initTarget.op, initName.hasPrefix("initWith") else {
+            return nil
+        }
+        guard let superTarget = initTarget.exp.asIdentifier, superTarget.identifier == "super" else {
+            return nil
+        }
+        
+        let newArgs = clangify(methodName: initName, arguments: args)
+        
+        return .postfix(.postfix(.identifier("super"), .member("init")), .functionCall(arguments: newArgs))
     }
     
     func clangify(methodName: String, arguments: [FunctionArgument]) -> [FunctionArgument] {

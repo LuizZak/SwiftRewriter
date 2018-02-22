@@ -22,49 +22,13 @@ public final class ExpressionIterator: IteratorProtocol {
         
         switch next {
         case .expression(let exp):
-            switch exp {
-            case .cast(let exp, _), .prefix(_, let exp), .unary(_, let exp), .parens(let exp):
-                enqueue(exp)
-                
-            case .arrayLiteral(let exp):
-                enqueue(contentsOf: exp)
-                
-            case let .assignment(lhs, _, rhs: rhs),
-                 let .binary(lhs, _, rhs):
-                enqueue(lhs)
-                enqueue(rhs)
-                
-            case .dictionaryLiteral(let pairs):
-                enqueue(contentsOf: pairs.flatMap { pair in
-                    return [pair.key, pair.value]
-                })
-                
-            case .postfix(let exp, let op):
-                enqueue(exp)
-                switch op {
-                case .subscript(let exp):
-                    enqueue(exp)
-                case .functionCall(let arguments):
-                    enqueue(contentsOf: arguments.map { $0.expression })
-                default:
-                    break
-                }
-                
-            case let .ternary(lhs, ifTrue, ifFalse):
-                enqueue(lhs)
-                enqueue(ifTrue)
-                enqueue(ifFalse)
-                
-            case .block(_, _, let body):
-                if !inspectBlocks {
-                    break
-                }
-                
-                enqueue(contentsOf: body)
+            enqueue(contentsOf: exp.subExpressions)
+            
+            if inspectBlocks, let block = exp as? BlockLiteralExpression {
+                enqueue(contentsOf: block.body)
             }
             
             return exp
-            
         case .statement(let statement):
             switch statement {
             case .expressions(let exps):
