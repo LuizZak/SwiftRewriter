@@ -64,30 +64,59 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testBitwiseBinary() {
         func test(_ op: SwiftOperator, line: Int = #line) {
-            self.assertResolve(.binary(lhs: .constant(1), op: op, rhs: .constant(2)),
-                               expect: .int, line: line)
-            self.assertResolve(.binary(lhs: .constant(2.0), op: op, rhs: .constant(2.0)),
-                               expect: nil, line: line) // Invalid operands
-            self.assertResolve(.binary(lhs: .constant(true), op: op, rhs: .constant(2)),
-                               expect: nil, line: line) // Invalid operands
+            assertResolve(.binary(lhs: .constant(1), op: op, rhs: .constant(2)),
+                          expect: .int, line: line)
+            assertResolve(.binary(lhs: .constant(2.0), op: op, rhs: .constant(2.0)),
+                          expect: nil, line: line) // Invalid operands
+            assertResolve(.binary(lhs: .constant(true), op: op, rhs: .constant(2)),
+                          expect: nil, line: line) // Invalid operands
         }
         
         test(.bitwiseAnd)
         test(.bitwiseOr)
         test(.bitwiseXor)
         
-        self.assertResolve(.binary(lhs: .constant(1), op: .bitwiseNot, rhs: .constant(2)),
-                           expect: nil) // Bitwise not is a unary operator
+        assertResolve(.binary(lhs: .constant(1), op: .bitwiseNot, rhs: .constant(2)),
+                      expect: nil) // Bitwise not is a unary operator
+    }
+    
+    func testNullCoallesce() {
+        // Null-coallesce with non-null right-handside
+        assertResolve(.binary(lhs: makeAnOptional(.constant(1)),
+                              op: .nullCoallesce,
+                              rhs: .constant(1)),
+                      expect: .int)
+        
+        // Null-coallesce with nullable right-handside
+        assertResolve(.binary(lhs: makeAnOptional(.constant(1)),
+                              op: .nullCoallesce,
+                              rhs: makeAnOptional(.constant(1))),
+                      expect: .optional(.int))
+        
+        // Nonnull type
+        assertResolve(.binary(lhs: .constant(1), op: .nullCoallesce, rhs: .constant(1)),
+                      expect: .int)
+    }
+    
+    func makeAnOptional(_ exp: Expression) -> Expression {
+        let typeSystem = DefaultTypeSystem()
+        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        
+        _=resolver.visitExpression(exp)
+        
+        exp.resolvedType = exp.resolvedType.map { .optional($0) }
+        return exp
     }
     
     func assertResolve(_ exp: Expression, expect type: SwiftType?, file: String = #file, line: Int = #line) {
         let typeSystem = DefaultTypeSystem()
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        resolver.ignoreResolvedExpressions = true
         
         let result = resolver.visitExpression(exp)
         
         if result.resolvedType != type {
-            recordFailure(withDescription: "Expected expression to resolve as \(type?.description ?? "nil"), but expected \(result.resolvedType?.description ?? "nil")",
+            recordFailure(withDescription: "Expected expression to resolve as \(type?.description ?? "nil"), but received \(result.resolvedType?.description ?? "nil")",
                           inFile: file, atLine: line, expected: false)
         }
     }

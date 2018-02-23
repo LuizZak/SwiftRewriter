@@ -2,7 +2,11 @@
 open class SyntaxNode {
     internal(set) public weak var parent: SyntaxNode?
     
-    public var children: [SyntaxNode] {
+    open var children: [SyntaxNode] {
         return []
+    }
+    
+    public init() {
+        
     }
 }

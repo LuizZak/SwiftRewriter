@@ -1,6 +1,6 @@
 import Foundation
 
-public class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomReflectable {
+open class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomReflectable {
     /// Custom metadata that can be associated with this expression node
     public var metadata: [String: Any] = [:]
     
@@ -11,33 +11,37 @@ public class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomR
     ///
     /// For ternary expressions, the test expression to the left of the question
     /// mark operand does not affect the result of literal-based tests.
-    public var isLiteralExpression: Bool {
+    open var isLiteralExpression: Bool {
         return false
     }
     
     /// `true` if this expression node requires parenthesis for unary, prefix, and
     /// postfix operations.
-    public var requiresParens: Bool {
+    open var requiresParens: Bool {
         return false
     }
     
-    public var description: String {
+    open var description: String {
         return "\(type(of: self))"
     }
     
-    public var customMirror: Mirror {
+    open var customMirror: Mirror {
         return Mirror(reflecting: "")
     }
     
     /// Returns an array of sub-expressions contained within this expression, in
     /// case it is an expression formed of other expressions.
-    public var subExpressions: [Expression] {
+    open var subExpressions: [Expression] {
         return []
     }
     
     /// Resolved type of this expression.
     /// Is `nil`, in case it has not been resolved yet.
-    public var resolvedType: SwiftType?
+    open var resolvedType: SwiftType?
+    
+    public override init() {
+        super.init()
+    }
     
     /// Accepts the given visitor instance, calling the appropriate visiting method
     /// according to this expression's type.
@@ -45,11 +49,11 @@ public class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomR
     /// - Parameter visitor: The visitor to accept
     /// - Returns: The result of the visitor's `visit-` call when applied to this
     /// expression
-    public func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
+    open func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitExpression(self)
     }
     
-    public func isEqual(to other: Expression) -> Bool {
+    open func isEqual(to other: Expression) -> Bool {
         return false
     }
     

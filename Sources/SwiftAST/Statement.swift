@@ -18,7 +18,7 @@ public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomRefle
     }
 }
 
-public class Statement: SyntaxNode, Equatable {
+open class Statement: SyntaxNode, Equatable {
     /// Returns `true` if this statement resolve to an unconditional jump out
     /// of the current context.
     ///

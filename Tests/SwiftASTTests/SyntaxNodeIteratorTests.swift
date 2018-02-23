@@ -2,7 +2,6 @@ import XCTest
 import SwiftAST
 
 class SyntaxNodeIteratorTests: XCTestCase {
-    
     func testAssignmentExpression() {
         assertExpression(.assignment(lhs: .identifier("a"), op: .assign, rhs: .identifier("b")),
                          iteratesAs: [
@@ -352,36 +351,37 @@ class SyntaxNodeIteratorTests: XCTestCase {
         ]
         
         assertStatement(.switch(makeBlock(),
-                                cases: cases, default: nil),
+                                cases: cases,
+                                default: [Statement.expression(.identifier("d"))]),
                         inspectingBlocks: true,
                         iteratesAs: [
                             Statement.switch(makeBlock("a"),
-                                             cases: cases, default: nil),
+                                             cases: cases,
+                                             default: [Statement.expression(.identifier("d"))]),
                             // switch expression -> block
                             makeBlock(),
                             // case 0 -> [pattern] -> block
                             makeBlock("b"),
-                            // default -> statement(s)
+                            // case 0 -> statement(s)
                             Statement.expression(.identifier("c")),
+                            // default -> statement(s)
+                            Statement.expression(.identifier("d")),
                             
                             // switch expression -> block -> compound statement
                             Statement.compound([.expression(.identifier("a"))]),
-                            
                             // case 0 -> [pattern] -> block -> compound statement
                             Statement.compound([.expression(.identifier("b"))]),
-                            
-                            // default -> statement(s) -> expression
+                            // case 0 -> statement(s) -> expression
                             Expression.identifier("c"),
+                            // default -> statement(s) -> expression
+                            Expression.identifier("d"),
                             
                             // switch expression -> block -> compound statement -> expression statement
                             Statement.expression(.identifier("a")),
-                            
                             // case 0 -> [pattern] -> block -> compound statement -> expression statement
                             Statement.expression(.identifier("b")),
-                            
                             // switch expression -> block -> compound statement -> expression statement
                             Expression.identifier("a"),
-                            
                             // case 0 -> [pattern] -> block -> compound statement -> expression statement -> expression
                             Expression.identifier("b")
             ]
@@ -632,6 +632,41 @@ class SyntaxNodeIteratorTests: XCTestCase {
                             
                             Expression.identifier("a"),
                             Expression.identifier("b"),
+                            Expression.identifier("c")
+            ])
+    }
+    
+    /// When visiting expressions within blocks, enqueue them such that they happen
+    /// only after expressions within the depth the block was found where visited.
+    /// This allows the search to occur in a more controller breadth-first manner.
+    func testStatementVisitOrder() {
+        assertStatement(.expressions([.identifier("a"),
+                                      .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                                      .identifier("c")]),
+                        inspectingBlocks: true,
+                        iteratesAs: [
+                            Statement.expressions([.identifier("a"),
+                                                   .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                                                   .identifier("c")]),
+                            Expression.identifier("a"),
+                            Expression.block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                            Expression.identifier("c"),
+                            Statement.compound([.expression(.identifier("b"))]),
+                            Statement.expression(.identifier("b")),
+                            Expression.identifier("b")
+            ])
+        
+        // Test with block inspection off, just in case.
+        assertStatement(.expressions([.identifier("a"),
+                                      .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                                      .identifier("c")]),
+                        inspectingBlocks: false,
+                        iteratesAs: [
+                            Statement.expressions([.identifier("a"),
+                                                   .block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
+                                                   .identifier("c")]),
+                            Expression.identifier("a"),
+                            Expression.block(parameters: [], return: .void, body: [.expression(.identifier("b"))]),
                             Expression.identifier("c")
             ])
     }

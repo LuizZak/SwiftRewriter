@@ -47,12 +47,24 @@ public class DefaultTypeSystem: TypeSystem {
 public class ExpressionTypeResolver: SyntaxNodeRewriter {
     public var typeSystem: TypeSystem
     
+    /// If `true`, the expression type resolver ignores resolving expressions that
+    /// already have a non-nil `resolvedType` field.
+    public var ignoreResolvedExpressions: Bool = false
+    
     public init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
         super.init()
     }
     
+    public override func visitExpression(_ exp: Expression) -> Expression {
+        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        
+        return super.visitExpression(exp)
+    }
+    
     public override func visitConstant(_ exp: ConstantExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        
         switch exp.constant {
         case .int, .hexadecimal, .octal, .binary:
             exp.resolvedType = .int
@@ -72,6 +84,8 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     public override func visitUnary(_ exp: UnaryExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        
         _=super.visitUnary(exp)
         
         guard let type = exp.exp.resolvedType else {
@@ -95,6 +109,8 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        
         _=super.visitBinary(exp)
         
         switch exp.op.category {
@@ -124,6 +140,10 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
             }
             
             exp.resolvedType = exp.lhs.resolvedType
+        
+        case .nullCoallesce where exp.lhs.resolvedType?.deepUnwrapped == exp.rhs.resolvedType?.deepUnwrapped:
+            // Return rhs' nullability
+            exp.resolvedType = exp.rhs.resolvedType
         default:
             break
         }
