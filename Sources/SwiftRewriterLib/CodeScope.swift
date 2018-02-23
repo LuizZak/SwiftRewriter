@@ -2,7 +2,7 @@ import SwiftAST
 
 private var _codeScopeKey = "_codeScopeKey"
 
-/// Protocol for statements that feature code scoping
+/// Protocol for statements that feature code scoping.
 public protocol CodeScopeStatement: CodeScope {
     var definitions: CodeScope { get }
 }
