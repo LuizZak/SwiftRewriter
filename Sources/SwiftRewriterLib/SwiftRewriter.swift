@@ -180,7 +180,7 @@ public class SwiftRewriter {
     private func performIntentionPasses() {
         let context = IntentionPassContext(intentions: intentionCollection, types: knownTypes)
         
-        let applier = ExpressionPassApplier(passes: expressionPasses)
+        let applier = SyntaxNodeRewriterPassApplier(passes: expressionPasses)
         applier.apply(on: intentionCollection)
         
         for pass in IntentionPasses.passes {

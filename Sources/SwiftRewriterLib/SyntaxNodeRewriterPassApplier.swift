@@ -1,4 +1,6 @@
-public class ExpressionPassApplier {
+/// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
+/// all function bodies found in one go.
+public class SyntaxNodeRewriterPassApplier {
     public var passes: [SyntaxNodeRewriterPass]
     
     public init(passes: [SyntaxNodeRewriterPass]) {

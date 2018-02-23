@@ -1,6 +1,7 @@
 import SwiftAST
 
-private var _codeScopeKey = "_codeScopeKey"
+private let _codeScopeKey = "_codeScopeKey"
+private let _identifierDefinitionKey = "_identifierDefinitionKey"
 
 /// Protocol for statements that feature code scoping.
 public protocol CodeScopeStatement: CodeScope {
@@ -92,7 +93,8 @@ class DefaultCodeScopeStack: CodeScope {
     }
 }
 
-/// A code scope that stores definitions
+/// A code scope that stores definitions gathered during function body analysis.
+/// Is used only during statement rewriting phase.
 public protocol CodeScope {
     func definition(named name: String) -> CodeDefinition?
     func recordDefinition(_ definition: CodeDefinition)
@@ -135,5 +137,19 @@ public class CodeDefinition {
     public init(name: String, storage: ValueStorage) {
         self.name = name
         self.storage = storage
+    }
+}
+
+public extension IdentifierExpression {
+    /// Gets the definition this identifier references.
+    /// To gather definitions to identifiers, use a `ExpressionTypeResolver` on
+    /// the syntax tree this identifier is contained in.
+    public var definition: CodeDefinition? {
+        get {
+            return metadata[_identifierDefinitionKey] as? CodeDefinition
+        }
+        set {
+            metadata[_identifierDefinitionKey] = newValue
+        }
     }
 }

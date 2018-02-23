@@ -208,7 +208,10 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         _=super.visitIdentifier(exp)
         
         // Visit identifier's type from current context
-        exp.resolvedType = exp.nearestScope.definition(named: exp.identifier)?.type ?? .errorType
+        let definition = exp.nearestScope.definition(named: exp.identifier)
+        
+        exp.definition = definition
+        exp.resolvedType = definition?.type ?? .errorType
         
         return exp
     }

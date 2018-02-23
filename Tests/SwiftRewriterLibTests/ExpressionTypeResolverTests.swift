@@ -175,9 +175,13 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testIdentifier() {
         let ident = IdentifierExpression(identifier: "i")
-        makeScoped(exp: ident, withVars: CodeDefinition(name: "i", type: .int))
+        let definition = CodeDefinition(name: "i", type: .int)
+        makeScoped(exp: ident, withVars: definition)
         
         assertResolve(ident, expect: .int)
+        
+        // Check definition was properly set
+        XCTAssert(ident.definition === definition)
     }
     
     func testIdentifierTypePropagation() {
