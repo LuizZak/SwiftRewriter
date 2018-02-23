@@ -205,10 +205,41 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
         _=super.visitIdentifier(exp)
         
         // Visit identifier's type from current context
         exp.resolvedType = exp.nearestScope.definition(named: exp.identifier)?.type ?? .errorType
+        
+        return exp
+    }
+    
+    public override func visitArray(_ exp: ArrayLiteralExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitArray(exp)
+        
+        // Propagate error type
+        if exp.items.any({ e in e.isErrorTyped }) {
+            exp.resolvedType = .errorType
+            return exp
+        }
+        
+        guard let firstType = exp.items.first?.resolvedType else {
+            exp.resolvedType = .nsArray
+            return exp
+        }
+        
+        // Check if all items match type-wise
+        for item in exp.items {
+            if item.resolvedType != firstType {
+                exp.resolvedType = .nsArray
+                return exp
+            }
+        }
+        
+        exp.resolvedType = .array(firstType)
         
         return exp
     }

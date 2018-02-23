@@ -103,6 +103,20 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .int)
     }
     
+    func testArray() {
+        assertResolve(.arrayLiteral([]),
+                      expect: .nsArray) // Empty arrays deduce to NSArray
+        
+        assertResolve(.arrayLiteral([.constant(1), .constant(2), .constant(3)]),
+                      expect: .array(.int))
+        
+        assertResolve(.arrayLiteral([.constant("abc"), .constant("def"), .constant("jhi")]),
+                      expect: .array(.string))
+        
+        assertResolve(.arrayLiteral([.constant("abc"), .constant(1)]),
+                      expect: .nsArray) // Heterogeneous arrays deduce to NSArray
+    }
+    
     func testIdentifier() {
         let ident = IdentifierExpression(identifier: "i")
         makeScoped(exp: ident, withVars: CodeDefinition(name: "i", type: .int))
