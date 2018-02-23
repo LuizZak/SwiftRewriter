@@ -110,12 +110,30 @@ class DefaultCodeScope: CodeScope {
     }
 }
 
-public struct CodeDefinition {
+/// Specifies a definition for a local variable of a function.
+public class CodeDefinition {
     public var name: String
-    public var type: SwiftType
+    public var storage: ValueStorage
+    
+    public var type: SwiftType {
+        return storage.type
+    }
+    
+    public var isConstant: Bool {
+        return storage.isConstant
+    }
+    
+    public var ownership: Ownership {
+        return storage.ownership
+    }
     
     public init(name: String, type: SwiftType) {
         self.name = name
-        self.type = type
+        self.storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+    }
+    
+    public init(name: String, storage: ValueStorage) {
+        self.name = name
+        self.storage = storage
     }
 }
