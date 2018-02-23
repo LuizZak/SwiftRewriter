@@ -8,7 +8,7 @@ import SwiftAST
 public class SwiftWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
-    let context = TypeContext()
+    let context = TypeConstructionContext()
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     let knownTypes: KnownTypeStorage

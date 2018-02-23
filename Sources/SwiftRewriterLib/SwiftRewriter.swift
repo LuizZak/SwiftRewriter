@@ -7,7 +7,7 @@ import SwiftAST
 public class SwiftRewriter {
     
     private var outputTarget: WriterOutput
-    private let context: TypeContext
+    private let context: TypeConstructionContext
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
@@ -33,7 +33,7 @@ public class SwiftRewriter {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
         self.outputTarget = output
-        self.context = TypeContext()
+        self.context = TypeConstructionContext()
         self.typeMapper = TypeMapper(context: context)
         self.intentionCollection = IntentionCollection()
     }

@@ -109,7 +109,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         if let typeName = ctx.typeName(), let typeNameString = VarDeclarationTypeExtractor.extract(from: typeName),
             let cast = ctx.castExpression()?.accept(self), let type = try? ObjcParser(string: typeNameString).parseObjcType() {
-            let typeMapper = TypeMapper(context: TypeContext())
+            let typeMapper = TypeMapper(context: TypeConstructionContext())
             
             let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
             return Expression.cast(cast, type: swiftType)
@@ -334,7 +334,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                         }
                         
                         let swiftType =
-                            TypeMapper(context: TypeContext()).swiftType(forObjcType: type)
+                            TypeMapper(context: TypeConstructionContext()).swiftType(forObjcType: type)
                         
                         return BlockParameter(name: name, type: swiftType)
                     }
@@ -348,7 +348,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         
         let swiftReturnType =
-            TypeMapper(context: TypeContext()).swiftType(forObjcType: returnType)
+            TypeMapper(context: TypeConstructionContext()).swiftType(forObjcType: returnType)
         
         return .block(parameters: parameters, return: swiftReturnType, body: body)
     }

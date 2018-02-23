@@ -433,7 +433,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     // MARK: - Variable declaration extractor visitor
     private class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
-        let typeMapper = TypeMapper(context: TypeContext())
+        let typeMapper = TypeMapper(context: TypeConstructionContext())
         var expressionReader = SwiftExprASTReader()
         
         init(expressionReader: SwiftExprASTReader) {

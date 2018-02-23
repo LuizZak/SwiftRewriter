@@ -1,5 +1,5 @@
 /// Represents a local context for constructing types with.
-public class TypeContext {
+public class TypeConstructionContext {
     var contexts: [Context] = []
     
     public init() {
@@ -30,7 +30,7 @@ public class TypeContext {
     }
 }
 
-/// A context for a `TypeContext`
+/// A context for a `TypeConstructionContext`
 public protocol Context {
     
 }
@@ -46,8 +46,8 @@ public class AssumeNonnullContext: Context {
     }
 }
 
-// MARK: - AssumeNonnullContext-specific TypeContext extension
-public extension TypeContext {
+// MARK: - AssumeNonnullContext-specific TypeConstructionContext extension
+public extension TypeConstructionContext {
     /// Returns a value specifying whether assume nonnull is on for pointer types.
     public var isAssumeNonnullOn: Bool {
         return findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn ?? false

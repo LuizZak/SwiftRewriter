@@ -3,9 +3,9 @@ import GrammarModels
 
 /// Provides type-transforming support for a Swift rewritter
 public class TypeMapper {
-    let context: TypeContext
+    let context: TypeConstructionContext
     
-    public init(context: TypeContext) {
+    public init(context: TypeConstructionContext) {
         self.context = context
     }
     

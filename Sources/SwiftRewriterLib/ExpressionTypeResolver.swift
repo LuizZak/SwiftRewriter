@@ -1,7 +1,54 @@
 import SwiftAST
 
+/// A wrapper for querying the type system context for specific type knowledges
+public protocol TypeSystem {
+    /// Returns `true` if `type` represents a numerical type (int, float, CGFloat, etc.)
+    func isNumeric(_ type: SwiftType) -> Bool
+    
+    /// Returns `true` is an integer (signed or unsigned) type
+    func isInteger(_ type: SwiftType) -> Bool
+}
+
+/// Standard type system implementation
+public class DefaultTypeSystem: TypeSystem {
+    public init() {
+        
+    }
+    
+    public func isNumeric(_ type: SwiftType) -> Bool {
+        if isInteger(type) {
+            return true
+        }
+        
+        switch type {
+        case .float, .double, .cgFloat:
+            return true
+        case .typeName("Float80"):
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public func isInteger(_ type: SwiftType) -> Bool {
+        switch type {
+        case .int, .uint:
+            return true
+        case .typeName("Int64"), .typeName("Int32"), .typeName("Int16"), .typeName("Int8"):
+            return true
+        case .typeName("UInt64"), .typeName("UInt32"), .typeName("UInt16"), .typeName("UInt8"):
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 public class ExpressionTypeResolver: SyntaxNodeRewriter {
-    public override init() {
+    public var typeSystem: TypeSystem
+    
+    public init(typeSystem: TypeSystem) {
+        self.typeSystem = typeSystem
         super.init()
     }
     
@@ -19,10 +66,68 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
             exp.resolvedType = .optional(.anyObject)
         case .rawConstant:
             exp.resolvedType = .any
+        }
+        
+        return super.visitConstant(exp)
+    }
+    
+    public override func visitUnary(_ exp: UnaryExpression) -> Expression {
+        _=super.visitUnary(exp)
+        
+        guard let type = exp.exp.resolvedType else {
+            return exp
+        }
+        
+        switch exp.op {
+        case .negate where type == .bool:
+            exp.resolvedType = .bool
+        case .subtract, .add:
+            if typeSystem.isNumeric(type) {
+                exp.resolvedType = type
+            }
+        case .bitwiseNot where typeSystem.isInteger(type):
+            exp.resolvedType = type
         default:
             break
         }
         
-        return super.visitConstant(exp)
+        return exp
+    }
+    
+    public override func visitBinary(_ exp: BinaryExpression) -> Expression {
+        _=super.visitBinary(exp)
+        
+        switch exp.op.category {
+        case .arithmetic where exp.lhs.resolvedType == exp.rhs.resolvedType:
+            guard let type = exp.lhs.resolvedType else {
+                break
+            }
+            if !typeSystem.isNumeric(type) {
+                break
+            }
+            
+            exp.resolvedType = exp.lhs.resolvedType
+            
+        case .comparison:
+            exp.resolvedType = .bool
+            
+        case .logical where exp.lhs.resolvedType == .bool && exp.rhs.resolvedType == .bool:
+            exp.resolvedType = .bool
+            
+        case .bitwise where exp.op != .bitwiseNot && exp.lhs.resolvedType == exp.rhs.resolvedType:
+            guard let type = exp.lhs.resolvedType else {
+                break
+            }
+            
+            if !typeSystem.isInteger(type) {
+                break
+            }
+            
+            exp.resolvedType = exp.lhs.resolvedType
+        default:
+            break
+        }
+        
+        return exp
     }
 }

@@ -203,7 +203,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     func visitCast(_ exp: CastExpression) {
         visitExpression(exp.exp)
         
-        let context = TypeContext()
+        let context = TypeConstructionContext()
         let typeMapper = TypeMapper(context: context)
         let typeName = typeMapper.typeNameString(for: exp.type)
         
@@ -254,7 +254,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
         let body = exp.body
         
         let visitor = StatementWriter(target: target)
-        let typeMapper = TypeMapper(context: TypeContext())
+        let typeMapper = TypeMapper(context: TypeConstructionContext())
         
         // Print signature
         target.outputInline("{ ")
@@ -505,7 +505,7 @@ fileprivate class StatementWriter: StatementVisitor {
     
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         func emitDeclaration(_ declaration: StatementVariableDeclaration) {
-            let mapper = TypeMapper(context: TypeContext())
+            let mapper = TypeMapper(context: TypeConstructionContext())
             
             let typeString = mapper.typeNameString(for: declaration.type)
             

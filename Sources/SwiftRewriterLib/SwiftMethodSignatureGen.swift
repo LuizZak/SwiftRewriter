@@ -4,10 +4,10 @@ import SwiftAST
 /// A helper class that can be used to generate a proper swift method signature
 /// from an Objective-C method signature.
 public class SwiftMethodSignatureGen {
-    private let context: TypeContext
+    private let context: TypeConstructionContext
     private let typeMapper: TypeMapper
     
-    public init(context: TypeContext, typeMapper: TypeMapper) {
+    public init(context: TypeConstructionContext, typeMapper: TypeMapper) {
         self.context = context
         self.typeMapper = typeMapper
     }

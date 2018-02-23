@@ -166,7 +166,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
     }
     
     private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
-        let ctx = TypeContext()
+        let ctx = TypeConstructionContext()
         let mapper = TypeMapper(context: ctx)
         
         return SwiftMethodSignatureGen(context: ctx, typeMapper: mapper)
