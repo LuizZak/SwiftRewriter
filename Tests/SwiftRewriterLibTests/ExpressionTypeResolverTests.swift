@@ -134,6 +134,46 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .nsDictionary) // Empty dictionaries must resolve to NSDictionary
     }
     
+    func testSubscriptionInArray() {
+        let exp = Expression.postfix(.identifier("value"), .subscript(.constant(1)))
+        makeScoped(exp: exp,
+                   withVars: CodeDefinition(name: "value", type: .array(.string)))
+        
+        assertResolve(exp, expect: .string)
+    }
+    
+    func testSubscriptionInArrayWithNonInteger() {
+        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("Not an integer!")))
+        makeScoped(exp: exp,
+                   withVars: CodeDefinition(name: "value", type: .array(.string)))
+        
+        assertResolve(exp, expect: .errorType)
+    }
+    
+    func testSubscriptionInNSArray() {
+        let exp = Expression.postfix(.identifier("value"), .subscript(.constant(1)))
+        makeScoped(exp: exp,
+                   withVars: CodeDefinition(name: "value", type: .nsArray))
+        
+        assertResolve(exp, expect: .anyObject)
+    }
+    
+    func testSubscriptionInDictionary() {
+        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("abc")))
+        makeScoped(exp: exp,
+                   withVars: CodeDefinition(name: "value", type: .dictionary(key: .string, value: .string)))
+        
+        assertResolve(exp, expect: .string)
+    }
+    
+    func testSubscriptionInNSDictionary() {
+        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("abc")))
+        makeScoped(exp: exp,
+                   withVars: CodeDefinition(name: "value", type: .nsDictionary))
+        
+        assertResolve(exp, expect: .anyObject)
+    }
+    
     func testIdentifier() {
         let ident = IdentifierExpression(identifier: "i")
         makeScoped(exp: ident, withVars: CodeDefinition(name: "i", type: .int))
@@ -177,15 +217,18 @@ extension ExpressionTypeResolverTests {
     }
     
     func makeScoped(exp: Expression, withVars decl: CodeDefinition...) {
-        if exp.parent == nil {
-            makeScoped(exp: exp)
-        }
+        makeScoped(exp: exp)
+        
         for decl in decl {
             exp.nearestScope.recordDefinition(decl)
         }
     }
     
     func makeScoped(exp: Expression) {
+        if exp.parent != nil {
+            return
+        }
+        
         let scope = CompoundStatement(statements: [.expression(exp)])
         XCTAssert(exp.isDescendent(of: scope))
         

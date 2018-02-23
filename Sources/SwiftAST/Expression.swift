@@ -54,6 +54,15 @@ open class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomRef
         super.init()
     }
     
+    /// Changes this Expression's resolved type to be an error type.
+    /// This overwrites any existing type that may be assigned.
+    /// Returns self for potential chaining support.
+    @discardableResult
+    open func makeErrorTyped() -> Expression {
+        resolvedType = .errorType
+        return self
+    }
+    
     /// Accepts the given visitor instance, calling the appropriate visiting method
     /// according to this expression's type.
     ///

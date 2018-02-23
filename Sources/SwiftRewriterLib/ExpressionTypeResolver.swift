@@ -131,8 +131,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         // Propagte error type
         if exp.exp.isErrorTyped {
-            exp.resolvedType = .errorType
-            return exp
+            return exp.makeErrorTyped()
         }
         
         guard let type = exp.exp.resolvedType else {
@@ -162,8 +161,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         // Propagte error type
         if exp.lhs.isErrorTyped || exp.lhs.isErrorTyped {
-            exp.resolvedType = .errorType
-            return exp
+            return exp.makeErrorTyped()
         }
         
         switch exp.op.category {
@@ -214,7 +212,65 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         return exp
     }
+
+    // MARK: - Postfix type resolving
+    public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitPostfix(exp)
+        
+        // Propagate error type
+        if exp.exp.isErrorTyped {
+            return exp.makeErrorTyped()
+        }
+        
+        switch exp.op {
+        case .subscript(let sub):
+            guard let expType = exp.exp.resolvedType else {
+                return exp
+            }
+            guard let subType = sub.resolvedType else {
+                return exp
+            }
+            // Propagate error type
+            if sub.isErrorTyped {
+                return exp.makeErrorTyped()
+            }
+            
+            // Array<T> / Dictionary<T> resolving
+            switch expType {
+            case .generic("Array", let params) where params.count == 1:
+                // Can only subscript arrays with integers!
+                if subType != .int {
+                    return exp.makeErrorTyped()
+                }
+                
+                exp.resolvedType = params[0]
+            case .generic("Dictionary", let params) where params.count == 2:
+                exp.resolvedType = params[1]
+                
+            case .nsArray:
+                if subType != .int {
+                    return exp.makeErrorTyped()
+                }
+                
+                exp.resolvedType = .anyObject
+                
+            case .nsDictionary:
+                exp.resolvedType = .anyObject
+            default:
+                break
+            }
+            
+        // TODO: Support function calling and member lookup
+        default:
+            break
+        }
+        
+        return exp
+    }
     
+    // MARK: - Array and Dictionary literal resolving
     public override func visitArray(_ exp: ArrayLiteralExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
@@ -222,7 +278,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         // Propagate error type
         if exp.items.any({ e in e.isErrorTyped }) {
-            exp.resolvedType = .errorType
+            exp.makeErrorTyped()
             return exp
         }
         
@@ -251,8 +307,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         // Propagate error type
         if exp.pairs.any({ $0.key.isErrorTyped || $0.value.isErrorTyped }) {
-            exp.resolvedType = .errorType
-            return exp
+            return exp.makeErrorTyped()
         }
         
         guard let first = exp.pairs.first else {
