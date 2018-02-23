@@ -243,4 +243,37 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         return exp
     }
+    
+    public override func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitDictionary(exp)
+        
+        // Propagate error type
+        if exp.pairs.any({ $0.key.isErrorTyped || $0.value.isErrorTyped }) {
+            exp.resolvedType = .errorType
+            return exp
+        }
+        
+        guard let first = exp.pairs.first else {
+            exp.resolvedType = .nsDictionary
+            return exp
+        }
+        guard case let (firstKey?, firstValue?) = (first.key.resolvedType, first.value.resolvedType) else {
+            exp.resolvedType = .nsDictionary
+            return exp
+        }
+        
+        // Check if all pairs match type-wise
+        for pair in exp.pairs {
+            if pair.key.resolvedType != firstKey || pair.value.resolvedType != firstValue {
+                exp.resolvedType = .nsDictionary
+                return exp
+            }
+        }
+        
+        exp.resolvedType = .dictionary(key: firstKey, value: firstValue)
+        
+        return exp
+    }
 }

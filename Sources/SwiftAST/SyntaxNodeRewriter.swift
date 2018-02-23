@@ -127,7 +127,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting this dictionary literal node
     open func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
         exp.pairs = exp.pairs.map { pair in
-            ExpressionDictionaryPair(key: pair.key, value: pair.value)
+            ExpressionDictionaryPair(key: pair.key.accept(self), value: pair.value.accept(self))
         }
         
         return exp

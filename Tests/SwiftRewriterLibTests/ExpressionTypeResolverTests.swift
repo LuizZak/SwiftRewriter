@@ -104,17 +104,34 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testArray() {
-        assertResolve(.arrayLiteral([]),
-                      expect: .nsArray) // Empty arrays deduce to NSArray
-        
         assertResolve(.arrayLiteral([.constant(1), .constant(2), .constant(3)]),
                       expect: .array(.int))
         
         assertResolve(.arrayLiteral([.constant("abc"), .constant("def"), .constant("jhi")]),
                       expect: .array(.string))
         
+        assertResolve(.arrayLiteral([.identifier("Error Type")]),
+                      expect: .errorType) // Error types must propagate
+        assertResolve(.arrayLiteral([]),
+                      expect: .nsArray) // Empty arrays must resolve to NSArray
         assertResolve(.arrayLiteral([.constant("abc"), .constant(1)]),
-                      expect: .nsArray) // Heterogeneous arrays deduce to NSArray
+                      expect: .nsArray) // Heterogeneous arrays must resolve to NSArray
+    }
+    
+    func testDictionary() {
+        assertResolve(.dictionaryLiteral([.constant(1): .constant(2)]),
+                      expect: .dictionary(key: .int, value: .int))
+        
+        assertResolve(.dictionaryLiteral([.constant(1): .constant("abc"), .constant(1): .constant("abc")]),
+                      expect: .dictionary(key: .int, value: .string))
+        
+        
+        assertResolve(.dictionaryLiteral([.constant(1): .identifier("Error Type")]),
+                      expect: .errorType) // Error types must propagate
+        assertResolve(.dictionaryLiteral([.constant(1): .constant("abc"), .constant("<DIFFER>"): .constant("abc")]),
+                      expect: .nsDictionary) // Heterogeneous dictionaries must resolve to NSDictionary
+        assertResolve(.dictionaryLiteral([]),
+                      expect: .nsDictionary) // Empty dictionaries must resolve to NSDictionary
     }
     
     func testIdentifier() {

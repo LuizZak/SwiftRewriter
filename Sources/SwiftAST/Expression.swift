@@ -917,6 +917,10 @@ public extension Expression {
         return DictionaryLiteralExpression(pairs: pairs)
     }
     
+    public static func dictionaryLiteral(_ pairs: DictionaryLiteral<Expression, Expression>) -> DictionaryLiteralExpression {
+        return DictionaryLiteralExpression(pairs: pairs.map { ExpressionDictionaryPair(key: $0.key, value: $0.value) })
+    }
+    
     public static func ternary(_ exp: Expression, `true` ifTrue: Expression, `false` ifFalse: Expression) -> TernaryExpression {
         return TernaryExpression(exp: exp, ifTrue: ifTrue, ifFalse: ifFalse)
     }
