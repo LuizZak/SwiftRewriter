@@ -246,18 +246,19 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
                 }
                 
                 exp.resolvedType = params[0]
+                
             case .generic("Dictionary", let params) where params.count == 2:
-                exp.resolvedType = params[1]
+                exp.resolvedType = .optional(params[1])
                 
             case .nsArray:
                 if subType != .int {
                     return exp.makeErrorTyped()
                 }
                 
-                exp.resolvedType = .anyObject
+                exp.resolvedType = .optional(.anyObject)
                 
             case .nsDictionary:
-                exp.resolvedType = .anyObject
+                exp.resolvedType = .optional(.anyObject)
             default:
                 break
             }

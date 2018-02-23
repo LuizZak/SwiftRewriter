@@ -125,7 +125,6 @@ class ExpressionTypeResolverTests: XCTestCase {
         assertResolve(.dictionaryLiteral([.constant(1): .constant("abc"), .constant(1): .constant("abc")]),
                       expect: .dictionary(key: .int, value: .string))
         
-        
         assertResolve(.dictionaryLiteral([.constant(1): .identifier("Error Type")]),
                       expect: .errorType) // Error types must propagate
         assertResolve(.dictionaryLiteral([.constant(1): .constant("abc"), .constant("<DIFFER>"): .constant("abc")]),
@@ -155,7 +154,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         makeScoped(exp: exp,
                    withVars: CodeDefinition(name: "value", type: .nsArray))
         
-        assertResolve(exp, expect: .anyObject)
+        assertResolve(exp, expect: .optional(.anyObject))
     }
     
     func testSubscriptionInDictionary() {
@@ -163,7 +162,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         makeScoped(exp: exp,
                    withVars: CodeDefinition(name: "value", type: .dictionary(key: .string, value: .string)))
         
-        assertResolve(exp, expect: .string)
+        assertResolve(exp, expect: .optional(.string))
     }
     
     func testSubscriptionInNSDictionary() {
@@ -171,7 +170,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         makeScoped(exp: exp,
                    withVars: CodeDefinition(name: "value", type: .nsDictionary))
         
-        assertResolve(exp, expect: .anyObject)
+        assertResolve(exp, expect: .optional(.anyObject))
     }
     
     func testIdentifier() {
