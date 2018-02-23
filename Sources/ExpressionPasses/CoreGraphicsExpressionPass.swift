@@ -1,6 +1,7 @@
 import Foundation
 import SwiftRewriterLib
 import SwiftAST
+import Utils
 
 public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     
@@ -143,32 +144,6 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
 
 internal extension Sequence where Element == FunctionArgument {
     func hasLabeledArguments() -> Bool {
-        return any(pass: { $0.isLabeled })
-    }
-}
-
-internal extension Sequence {
-    func none(pass predicate: (Element) -> Bool) -> Bool {
-        return !any(pass: predicate)
-    }
-    
-    func all(pass predicate: (Element) -> Bool) -> Bool {
-        for item in self {
-            if !predicate(item) {
-                return false
-            }
-        }
-        
-        return true
-    }
-    
-    func any(pass predicate: (Element) -> Bool) -> Bool {
-        for item in self {
-            if predicate(item) {
-                return true
-            }
-        }
-        
-        return false
+        return any { $0.isLabeled }
     }
 }
