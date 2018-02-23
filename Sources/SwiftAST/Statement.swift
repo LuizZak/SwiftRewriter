@@ -19,12 +19,6 @@ public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomRefle
 }
 
 public class Statement: SyntaxNode, Equatable {
-    /// Returns an array of sub-statements contained within this statement, in
-    /// case it is an statement formed of other statements.
-    public var subStatements: [Statement] {
-        return []
-    }
-    
     /// Returns `true` if this statement resolve to an unconditional jump out
     /// of the current context.
     ///
@@ -89,7 +83,7 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         }
     }
     
-    public override var subStatements: [Statement] {
+    public override var children: [SyntaxNode] {
         return statements
     }
     
@@ -151,12 +145,11 @@ public class IfStatement: Statement {
         }
     }
     
-    public override var subStatements: [Statement] {
+    public override var children: [SyntaxNode] {
         if let elseBody = elseBody {
-            return [body, elseBody]
-        } else {
-            return [body]
+            return [exp, body, elseBody]
         }
+        return [exp, body]
     }
     
     public init(exp: Expression, body: CompoundStatement, elseBody: CompoundStatement?) {
@@ -204,8 +197,8 @@ public class WhileStatement: Statement {
         }
     }
     
-    public override var subStatements: [Statement] {
-        return [body]
+    public override var children: [SyntaxNode] {
+        return [exp, body]
     }
     
     public init(exp: Expression, body: CompoundStatement) {
@@ -238,27 +231,36 @@ public extension Statement {
 }
 
 public class ForStatement: Statement {
+    /// Cache of children nodes
+    private var _childrenNodes: [SyntaxNode] = []
+    
     public var pattern: Pattern {
         didSet {
             oldValue.setParent(nil)
             pattern.setParent(self)
+            
+            reloadChildrenNodes()
         }
     }
     public var exp: Expression {
         didSet {
             oldValue.parent = nil
             exp.parent = self
+            
+            reloadChildrenNodes()
         }
     }
     public var body: CompoundStatement {
         didSet {
             oldValue.parent = nil
             body.parent = self
+            
+            reloadChildrenNodes()
         }
     }
     
-    public override var subStatements: [Statement] {
-        return [body]
+    public override var children: [SyntaxNode] {
+        return _childrenNodes
     }
     
     public init(pattern: Pattern, exp: Expression, body: CompoundStatement) {
@@ -271,6 +273,16 @@ public class ForStatement: Statement {
         pattern.setParent(self)
         exp.parent = self
         body.parent = self
+    }
+    
+    private func reloadChildrenNodes() {
+        _childrenNodes.removeAll()
+        
+        _childrenNodes.append(exp)
+        
+        pattern.collect(expressions: &_childrenNodes)
+        
+        _childrenNodes.append(body)
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -293,10 +305,15 @@ public extension Statement {
 }
 
 public class SwitchStatement: Statement {
+    /// Cache of children expression and statements stored into each case pattern
+    private var _childrenNodes: [SyntaxNode] = []
+    
     public var exp: Expression {
         didSet {
             oldValue.parent = nil
             exp.parent = self
+            
+            reloadChildrenNodes()
         }
     }
     public var cases: [SwitchCase] {
@@ -318,17 +335,21 @@ public class SwitchStatement: Statement {
                     $0.parent = self
                 }
             }
+            
+            reloadChildrenNodes()
         }
     }
     public var defaultCase: [Statement]? {
         didSet {
             oldValue?.forEach { $0.parent = nil }
             defaultCase?.forEach { $0.parent = nil }
+            
+            reloadChildrenNodes()
         }
     }
     
-    public override var subStatements: [Statement] {
-        return cases.flatMap { $0.statements } + (defaultCase ?? [])
+    public override var children: [SyntaxNode] {
+        return _childrenNodes
     }
     
     public init(exp: Expression, cases: [SwitchCase], defaultCase: [Statement]?) {
@@ -348,6 +369,25 @@ public class SwitchStatement: Statement {
             }
         }
         defaultCase?.forEach { $0.parent = self }
+        
+        reloadChildrenNodes()
+    }
+    
+    private func reloadChildrenNodes() {
+        _childrenNodes.removeAll()
+        
+        _childrenNodes.append(exp)
+        
+        cases.forEach {
+            $0.patterns.forEach {
+                $0.collect(expressions: &_childrenNodes)
+            }
+            _childrenNodes.append(contentsOf: $0.statements)
+        }
+        
+        if let defaultCase = defaultCase {
+            _childrenNodes.append(contentsOf: defaultCase)
+        }
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -377,7 +417,7 @@ public class DoStatement: Statement {
         }
     }
     
-    public override var subStatements: [Statement] {
+    public override var children: [SyntaxNode] {
         return [body]
     }
     
@@ -416,7 +456,7 @@ public class DeferStatement: Statement {
         }
     }
     
-    public override var subStatements: [Statement] {
+    public override var children: [SyntaxNode] {
         return [body]
     }
     
@@ -457,6 +497,14 @@ public class ReturnStatement: Statement {
             oldValue?.parent = nil
             exp?.parent = self
         }
+    }
+    
+    public override var children: [SyntaxNode] {
+        if let exp = exp {
+            return [exp]
+        }
+        
+        return []
     }
     
     public init(exp: Expression? = nil) {
@@ -532,6 +580,10 @@ public class ExpressionsStatement: Statement {
         }
     }
     
+    public override var children: [SyntaxNode] {
+        return expressions
+    }
+    
     public init(expressions: [Expression]) {
         self.expressions = expressions
         
@@ -569,6 +621,10 @@ public class VariableDeclarationsStatement: Statement {
                 $0.initialization?.parent = self
             }
         }
+    }
+    
+    public override var children: [SyntaxNode] {
+        return decl.compactMap { $0.initialization }
     }
     
     public init(decl: [StatementVariableDeclaration]) {
@@ -723,6 +779,17 @@ public enum Pattern: Equatable {
             exp.parent = node
         case .tuple(let tuple):
             tuple.forEach { $0.setParent(node) }
+        case .identifier:
+            break
+        }
+    }
+    
+    internal func collect(expressions: inout [SyntaxNode]) {
+        switch self {
+        case .expression(let exp):
+            expressions.append(exp)
+        case .tuple(let tuple):
+            tuple.forEach { $0.collect(expressions: &expressions) }
         case .identifier:
             break
         }
