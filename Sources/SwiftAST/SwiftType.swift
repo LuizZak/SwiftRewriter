@@ -73,6 +73,9 @@ indirect public enum SwiftType: Equatable {
     public static var nsArray = SwiftType.typeName("NSArray")
     public static var nsDictionary = SwiftType.typeName("NSDictionary")
     
+    /// A special type used in place of definitions with improper typing
+    public static var errorType = SwiftType.typeName("<<error type>>")
+    
     public static func array(_ type: SwiftType) -> SwiftType {
         return .generic("Array", parameters: [type])
     }

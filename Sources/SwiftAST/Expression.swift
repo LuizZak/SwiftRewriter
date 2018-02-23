@@ -39,6 +39,17 @@ open class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomRef
     /// Is `nil`, in case it has not been resolved yet.
     open var resolvedType: SwiftType?
     
+    /// Returns `true` if this expression's type has been successfully resolved
+    /// with a non-error type.
+    public var isTypeResolved: Bool {
+        return resolvedType != nil && !isErrorTyped
+    }
+    
+    /// Returns `true` if this expression's type is currently resolved as an error type.
+    public var isErrorTyped: Bool {
+        return resolvedType == .errorType
+    }
+    
     public override init() {
         super.init()
     }

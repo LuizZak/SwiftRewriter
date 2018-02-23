@@ -1,24 +1,7 @@
-public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomReflectable {
-    public var description: String {
-        return context.description
-    }
-    
-    public var context: CustomStringConvertible
-    
-    public var customMirror: Mirror {
-        return Mirror(reflecting: "")
-    }
-    
-    public init(context: CustomStringConvertible) {
-        self.context = context
-    }
-    
-    public static func ==(lhs: UnknownASTContext, rhs: UnknownASTContext) -> Bool {
-        return true
-    }
-}
-
 open class Statement: SyntaxNode, Equatable {
+    /// Custom metadata that can be associated with this expression node
+    public var metadata: [String: Any] = [:]
+    
     /// Returns `true` if this statement resolve to an unconditional jump out
     /// of the current context.
     ///

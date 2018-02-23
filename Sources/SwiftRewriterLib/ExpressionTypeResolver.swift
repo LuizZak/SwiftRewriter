@@ -1,4 +1,5 @@
 import SwiftAST
+import ObjcParser
 
 /// A wrapper for querying the type system context for specific type knowledges
 public protocol TypeSystem {
@@ -56,14 +57,54 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         super.init()
     }
     
+    /// Invocates the resolution of a given expression's type.
+    public func resolveType(_ exp: Expression) {
+        _=exp.accept(self)
+    }
+    
+    // MARK: - Definition Collection
+    public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
+        for decl in stmt.decl {
+            let definition = CodeDefinition(name: decl.identifier, type: decl.type)
+            stmt.nearestScope.recordDefinition(definition)
+        }
+        
+        return super.visitVariableDeclarations(stmt)
+    }
+    
+    public override func visitFor(_ stmt: ForStatement) -> Statement {
+        _=super.visitFor(stmt)
+        
+        // Define loop variables
+        collectInPattern(stmt.pattern, exp: stmt.exp, to: stmt.body)
+        
+        return stmt
+    }
+    
+    func collectInPattern(_ pattern: Pattern, exp: Expression, to scope: CodeScope) {
+        switch pattern {
+        case .identifier(let ident):
+            if exp.resolvedType == nil {
+                resolveType(exp)
+            }
+            
+            scope.recordDefinition(CodeDefinition(name: ident, type: exp.resolvedType ?? .errorType))
+            break
+        default:
+            // Other (more complex) patterns are not (yet) supported!
+            break
+        }
+    }
+    
+    // MARK: - Expression Resolving
     public override func visitExpression(_ exp: Expression) -> Expression {
-        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         return super.visitExpression(exp)
     }
     
     public override func visitConstant(_ exp: ConstantExpression) -> Expression {
-        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         switch exp.constant {
         case .int, .hexadecimal, .octal, .binary:
@@ -84,9 +125,15 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     public override func visitUnary(_ exp: UnaryExpression) -> Expression {
-        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         _=super.visitUnary(exp)
+        
+        // Propagte error type
+        if exp.exp.isErrorTyped {
+            exp.resolvedType = .errorType
+            return exp
+        }
         
         guard let type = exp.exp.resolvedType else {
             return exp
@@ -109,9 +156,15 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
-        if ignoreResolvedExpressions && exp.resolvedType != nil { return exp }
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         _=super.visitBinary(exp)
+        
+        // Propagte error type
+        if exp.lhs.isErrorTyped || exp.lhs.isErrorTyped {
+            exp.resolvedType = .errorType
+            return exp
+        }
         
         switch exp.op.category {
         case .arithmetic where exp.lhs.resolvedType == exp.rhs.resolvedType:
@@ -147,6 +200,15 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         default:
             break
         }
+        
+        return exp
+    }
+    
+    public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
+        _=super.visitIdentifier(exp)
+        
+        // Visit identifier's type from current context
+        exp.resolvedType = exp.nearestScope.definition(named: exp.identifier)?.type ?? .errorType
         
         return exp
     }
