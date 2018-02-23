@@ -1,3 +1,4 @@
+import SwiftAST
 import GrammarModels
 
 /// Provides type-transforming support for a Swift rewritter

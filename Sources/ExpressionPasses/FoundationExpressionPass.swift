@@ -1,13 +1,9 @@
 import SwiftRewriterLib
 import Utils
+import SwiftAST
 
 /// Applies passes to simplify known Foundation methods
-public class FoundationExpressionPass: ExpressionPass {
-    
-    public override init() {
-        super.init()
-        inspectBlocks = true
-    }
+public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let new = convertIsEqualToString(exp) {

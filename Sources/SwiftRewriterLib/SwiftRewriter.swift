@@ -1,6 +1,7 @@
 import Foundation
 import GrammarModels
 import ObjcParser
+import SwiftAST
 
 /// Allows re-writing Objective-C constructs into Swift equivalents.
 public class SwiftRewriter {
@@ -22,7 +23,7 @@ public class SwiftRewriter {
     
     /// An expression pass is executed for every method expression to allow custom
     /// transformations to be applied to resulting code.
-    public var expressionPasses: [ExpressionPass] = []
+    public var expressionPasses: [SyntaxNodeRewriterPass] = []
     
     /// Custom source pre-processors that are applied to each input source code
     /// before parsing.
@@ -43,10 +44,6 @@ public class SwiftRewriter {
         try loadInputSources()
         performIntentionPasses()
         outputDefinitions()
-    }
-    
-    public func addExpressionPass<T: ExpressionPass>(type: T.Type) {
-        
     }
     
     private func loadInputSources() throws {
@@ -183,6 +180,9 @@ public class SwiftRewriter {
     private func performIntentionPasses() {
         let context = IntentionPassContext(intentions: intentionCollection, types: knownTypes)
         
+        let applier = ExpressionPassApplier(passes: expressionPasses)
+        applier.apply(on: intentionCollection)
+        
         for pass in IntentionPasses.passes {
             pass.apply(on: intentionCollection, context: context)
         }
@@ -194,7 +194,6 @@ public class SwiftRewriter {
                                  diagnostics: diagnostics,
                                  output: outputTarget)
         
-        writer.expressionPasses = expressionPasses
         writer.execute()
     }
     

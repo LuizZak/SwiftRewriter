@@ -2,6 +2,7 @@ import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
 import Antlr4
+import SwiftAST
 
 /// A visitor that reads simple Objective-C expressions and emits as Expression
 /// enum cases.

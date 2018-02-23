@@ -2,6 +2,7 @@ import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
 import Antlr4
+import SwiftAST
 
 public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     var expressionReader = SwiftExprASTReader()

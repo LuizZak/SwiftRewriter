@@ -789,7 +789,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                     let expression = ExpressionNode()
                     expression.sourceRuleContext = initializer.expression()
                     expression.expression = initializer.expression()
-                    let constantExpression = ConstantExpression()
+                    let constantExpression = ConstantExpressionNode()
                     constantExpression.sourceRuleContext = initializer
                     constantExpression.addChild(expression)
                     let initialExpression = InitialExpression()

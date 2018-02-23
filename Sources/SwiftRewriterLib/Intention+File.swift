@@ -1,3 +1,4 @@
+import SwiftAST
 import GrammarModels
 
 /// An intention to create a .swift file

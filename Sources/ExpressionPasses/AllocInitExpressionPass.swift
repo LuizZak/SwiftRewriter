@@ -1,13 +1,9 @@
 import Foundation
 import SwiftRewriterLib
+import SwiftAST
 
 /// Converts Type.alloc().init[...]() expression chains into proper Type() calls.
-public class AllocInitExpressionPass: ExpressionPass {
-    
-    public override init() {
-        super.init()
-        inspectBlocks = true
-    }
+public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let newInit = convertAllocInit(exp: exp) {

@@ -2,6 +2,7 @@ import XCTest
 import SwiftRewriterLib
 import ObjcParser
 import GrammarModels
+import SwiftAST
 
 class TypeMapperTests: XCTestCase {
     func testTypeNameString() {

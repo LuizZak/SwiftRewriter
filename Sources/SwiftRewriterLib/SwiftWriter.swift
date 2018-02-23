@@ -1,6 +1,7 @@
 import GrammarModels
 import ObjcParser
 import ObjcParserAntlr
+import SwiftAST
 
 /// Gets as inputs a series of intentions and outputs actual files and script
 /// contents.
@@ -11,8 +12,6 @@ public class SwiftWriter {
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     let knownTypes: KnownTypeStorage
-    
-    public var expressionPasses: [ExpressionPass] = []
     
     public init(intentions: IntentionCollection, knownTypes: KnownTypeStorage, diagnostics: Diagnostics, output: WriterOutput) {
         self.intentions = intentions

@@ -1,3 +1,4 @@
+import SwiftAST
 import GrammarModels
 
 /// An intention that comes from the reading of a source code file, instead of

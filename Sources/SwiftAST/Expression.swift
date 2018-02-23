@@ -1,6 +1,6 @@
-import GrammarModels
+import Foundation
 
-public class Expression: Equatable, CustomStringConvertible {
+public class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomReflectable {
     /// `true` if this expression sub-tree contains only literal-based sub-expressions.
     /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
     /// `.unary`, `.prefix`, `.parens`, and `.ternary` which only feature
@@ -20,6 +20,10 @@ public class Expression: Equatable, CustomStringConvertible {
     
     public var description: String {
         return "\(type(of: self))"
+    }
+    
+    public var customMirror: Mirror {
+        return Mirror(reflecting: "")
     }
     
     /// Returns an array of sub-expressions contained within this expression, in
@@ -447,9 +451,7 @@ public class CastExpression: Expression {
     }
     
     public override var description: String {
-        let cvt = TypeMapper(context: TypeContext())
-        
-        return "\(exp) as? \(cvt.typeNameString(for: type))"
+        return "\(exp) as? \(type)"
     }
     
     public override var requiresParens: Bool {
@@ -620,14 +622,12 @@ public class BlockLiteralExpression: Expression {
     public var body: CompoundStatement
     
     public override var description: String {
-        let cvt = TypeMapper(context: TypeContext())
-        
         var buff = "{ "
         
         buff += "("
         buff += parameters.map { $0.description }.joined(separator: ", ")
         buff += ") -> "
-        buff += cvt.typeNameString(for: returnType)
+        buff += returnType.description
         buff += " in "
         
         buff += "< body >"
@@ -761,8 +761,8 @@ public extension Expression {
 }
 
 public struct BlockParameter: Equatable {
-    var name: String
-    var type: SwiftType
+    public var name: String
+    public var type: SwiftType
     
     public init(name: String, type: SwiftType) {
         self.name = name
@@ -789,44 +789,29 @@ public indirect enum Postfix: Equatable {
 }
 
 /// A function argument kind
-public enum FunctionArgument: Equatable {
-    case labeled(String, Expression)
-    case unlabeled(Expression)
-    
-    public var expression: Expression {
-        switch self {
-        case .labeled(_, let exp), .unlabeled(let exp):
-            return exp
-        }
-    }
-    
-    public var label: String? {
-        switch self {
-        case .labeled(let label, _):
-            return label
-        case .unlabeled:
-            return nil
-        }
-    }
+public struct FunctionArgument: Equatable {
+    public var label: String?
+    public var expression: Expression
     
     public var isLabeled: Bool {
-        switch self {
-        case .labeled:
-            return true
-        case .unlabeled:
-            return false
-        }
+        return label != nil
+    }
+    
+    public init(label: String?, expression: Expression) {
+        self.label = label
+        self.expression = expression
     }
     
     public static func ==(lhs: FunctionArgument, rhs: FunctionArgument) -> Bool {
-        switch (lhs, rhs) {
-        case (let .labeled(ll, le), let .labeled(rl, re)):
-            return ll == rl && le == re
-        case (.unlabeled(let l), .unlabeled(let r)):
-            return l == r
-        default:
-            return false
-        }
+        return lhs.label == rhs.label && lhs.expression == rhs.expression
+    }
+    
+    public static func unlabeled(_ exp: Expression) -> FunctionArgument {
+        return FunctionArgument(label: nil, expression: exp)
+    }
+    
+    public static func labeled(_ label: String, _ exp: Expression) -> FunctionArgument {
+        return FunctionArgument(label: label, expression: exp)
     }
 }
 
@@ -994,20 +979,17 @@ extension Postfix: CustomStringConvertible {
 
 extension BlockParameter: CustomStringConvertible {
     public var description: String {
-        let cvt = TypeMapper(context: TypeContext())
-        
-        return "\(self.name): \(cvt.typeNameString(for: type))"
+        return "\(self.name): \(type)"
     }
 }
 
 extension FunctionArgument: CustomStringConvertible {
     public var description: String {
-        switch self {
-        case .labeled(let lbl, let exp):
-            return "\(lbl): \(exp)"
-        case .unlabeled(let exp):
-            return exp.description
+        if let label = label {
+            return "\(label): \(expression)"
         }
+        
+        return expression.description
     }
 }
 

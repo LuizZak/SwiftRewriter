@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import SwiftAST
 
 class StatementIteratorTests: XCTestCase {
     

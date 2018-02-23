@@ -1,3 +1,5 @@
+import SwiftAST
+
 public class ExpressionTypeResolver: ExpressionVisitor {
     public typealias ExprResult = SwiftType?
     

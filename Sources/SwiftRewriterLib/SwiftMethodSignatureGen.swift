@@ -1,4 +1,5 @@
 import GrammarModels
+import SwiftAST
 
 /// A helper class that can be used to generate a proper swift method signature
 /// from an Objective-C method signature.

@@ -3,12 +3,13 @@ import Antlr4
 import ObjcParser
 import ObjcParserAntlr
 import SwiftRewriterLib
+import SwiftAST
 
 class ExpressionPassTestCase: XCTestCase {
-    var sut: ExpressionPass!
+    var sut: SyntaxNodeRewriterPass!
     
     func assertTransformParsed(original: String, expected: String, file: String = #file, line: Int = #line) {
-        let result = sut.applyPass(on: parse(original))
+        let result = parse(original).accept(sut)
         
         if expected != result.description {
             recordFailure(withDescription: "Failed to convert: Expected to convert expression\n\n\(expected)\n\nbut received\n\n\(result.description)", inFile: file, atLine: line, expected: false)
@@ -20,7 +21,7 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     func assertTransform(original: Expression, expected: Expression, file: String = #file, line: Int = #line) {
-        let result = sut.applyPass(on: original)
+        let result = original.accept(sut)
         
         if expected != result {
             var expString = ""

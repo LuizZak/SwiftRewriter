@@ -1,8 +1,10 @@
 import SwiftRewriterLib
 import Utils
+import SwiftAST
 
 /// Applies passes to simplify known UIKit methods and constructs
-public class UIKitExpressionPass: ExpressionPass {
+public class UIKitExpressionPass: SyntaxNodeRewriterPass {
+    
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         // 'enumifications'
         if let exp = enumify(ident: exp.identifier, enumPrefix: "UIControlEvent", swiftEnumName: "UIControlEvents") {
@@ -51,21 +53,21 @@ public class UIKitExpressionPass: ExpressionPass {
         }
         
         // Arg0
-        guard case .unlabeled = args[0] else {
+        guard !args[0].isLabeled else {
             return nil
         }
         // action:
-        guard case .labeled("action", _) = args[1] else {
+        guard args[1].label == "action" else {
             return nil
         }
         // forControlEvents:
-        guard case .labeled("forControlEvents", let controlEvents) = args[2] else {
+        guard args[2].label == "forControlEvents" else {
             return nil
         }
         
         exp.op = .functionCall(arguments: [args[0],
                                            args[1],
-                                           .labeled("for", controlEvents)])
+                                           .labeled("for", args[2].expression)])
         
         return exp
     }

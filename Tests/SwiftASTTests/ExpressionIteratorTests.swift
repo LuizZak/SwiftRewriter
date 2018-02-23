@@ -1,5 +1,5 @@
 import XCTest
-import SwiftRewriterLib
+import SwiftAST
 
 class ExpressionIteratorTests: XCTestCase {
     func testAssignmentExpression() {

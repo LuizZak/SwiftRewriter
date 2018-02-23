@@ -1,3 +1,5 @@
+import SwiftAST
+
 /// Describes a known type with known properties and methods and their signatures.
 public protocol KnownType {
     /// The supertype for this known type, if any.

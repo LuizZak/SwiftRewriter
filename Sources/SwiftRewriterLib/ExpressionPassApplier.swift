@@ -1,11 +1,8 @@
 public class ExpressionPassApplier {
-    public var passes: [ExpressionPass]
+    public var passes: [SyntaxNodeRewriterPass]
     
-    public init(passes: [ExpressionPass]) {
+    public init(passes: [SyntaxNodeRewriterPass]) {
         self.passes = passes
-//        let exp = expressionPasses.reduce(into: expression, { (exp, pass) in
-//            exp = pass.applyPass(on: exp, context: )
-//        })
     }
     
     public func apply(on intentions: IntentionCollection) {
@@ -27,18 +24,36 @@ public class ExpressionPassApplier {
     }
     
     private func applyOnClass(_ cls: BaseClassIntention) {
+        for prop in cls.properties {
+            applyOnProperty(prop)
+        }
         
+        for method in cls.methods {
+            applyOnFunction(method)
+        }
     }
     
     private func applyOnFunction(_ f: FunctionIntention) {
-        
+        if let method = f.methodBody {
+            applyOnMethodBody(method)
+        }
     }
     
     private func applyOnMethodBody(_ methodBody: MethodBodyIntention) {
-//        let pass = StatementIterator
-//        
-//        let exp = passes.reduce(into: expression, { (exp, pass) in
-//            exp = pass.applyPass(on: exp, context: )
-//        })
+        passes.forEach {
+            _=methodBody.body.accept($0)
+        }
+    }
+    
+    private func applyOnProperty(_ property: PropertyGenerationIntention) {
+        switch property.mode {
+        case .computed(let intent):
+            applyOnMethodBody(intent)
+        case let .property(get, set):
+            applyOnMethodBody(get)
+            applyOnMethodBody(set.body)
+        case .asField:
+            break
+        }
     }
 }

@@ -93,7 +93,7 @@ public extension ObjcParser {
             
             parseAnyTokenNode()
             
-            let node = ConstantExpression()
+            let node = ConstantExpressionNode()
             context.addChildNode(node)
         } else {
             diagnostics.error("Expected initial expression after \(Operator.assign)",

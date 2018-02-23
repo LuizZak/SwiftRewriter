@@ -1,13 +1,7 @@
-//
-//  ExpressionTests.swift
-//  SwiftRewriterLibTests
-//
-//  Created by Luiz Fernando Silva on 07/02/2018.
-//
-
 import XCTest
 import GrammarModels
 import SwiftRewriterLib
+import SwiftAST
 
 class ExpressionTests: XCTestCase {
     

@@ -1,6 +1,3 @@
-import Antlr4
-import GrammarModels
-
 public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomReflectable {
     public var description: String {
         return context.description
@@ -13,11 +10,7 @@ public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomRefle
     }
     
     public init(context: CustomStringConvertible) {
-        if let ctx = context as? ParserRuleContext {
-            self.context = ctx.getText()
-        } else {
-            self.context = context
-        }
+        self.context = context
     }
     
     public static func ==(lhs: UnknownASTContext, rhs: UnknownASTContext) -> Bool {
@@ -25,7 +18,7 @@ public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomRefle
     }
 }
 
-public class Statement: Equatable {
+public class Statement: SyntaxNode, Equatable {
     /// Returns an array of sub-statements contained within this statement, in
     /// case it is an statement formed of other statements.
     public var subStatements: [Statement] {

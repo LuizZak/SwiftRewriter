@@ -3,6 +3,7 @@ import Antlr4
 import ObjcParser
 import ObjcParserAntlr
 import SwiftRewriterLib
+import SwiftAST
 
 class SwiftStatementASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!

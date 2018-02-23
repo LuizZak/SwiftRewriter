@@ -1,12 +1,8 @@
 import Foundation
 import SwiftRewriterLib
+import SwiftAST
 
-public class CoreGraphicsExpressionPass: ExpressionPass {
-    
-    public override init() {
-        super.init()
-        inspectBlocks = true
-    }
+public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         switch (exp.exp, exp.op) {

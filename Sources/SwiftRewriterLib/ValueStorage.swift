@@ -1,3 +1,5 @@
+import SwiftAST
+
 /// Defines common properties for a Swift's variable/constant definition.
 /// Stores information about the storage's type, ownership (strong/weak/unowned/etc.),
 /// and whether it is a constant value.

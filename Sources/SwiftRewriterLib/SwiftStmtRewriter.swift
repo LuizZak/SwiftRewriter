@@ -1,3 +1,4 @@
+import SwiftAST
 import Antlr4
 import GrammarModels
 import ObjcParserAntlr
@@ -145,14 +146,12 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
                 target.outputInline("(")
                 
                 commaSeparated(arguments) { arg in
-                    switch arg {
-                    case let .labeled(lbl, expr):
-                        target.outputInline(lbl)
+                    if let label = arg.label {
+                        target.outputInline(label)
                         target.outputInline(": ")
-                        visitExpression(expr)
-                    case let .unlabeled(expr):
-                        visitExpression(expr)
                     }
+                    
+                    visitExpression(arg.expression)
                 }
                 
                 target.outputInline(")")
