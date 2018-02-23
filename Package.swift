@@ -21,7 +21,8 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/LuizZak/MiniLexer.git", .branch("swift4.1-experiments")),
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0"),
-        .package(url: "https://cs-luiz-silva@bitbucket.org/cs-luiz-silva/antlr4-swift.git", from: "4.0.11")
+        .package(url: "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git", from: "4.0.11"),
+        .package(url: "https://bitbucket.org/cs-luiz-silva/console.git", from: "0.1.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -29,9 +30,6 @@ let package = Package(
         .target(
             name: "Utils",
             dependencies: []),
-        .target(
-            name: "Console",
-            dependencies: ["MiniLexer", "TypeLexing", "Utils"]),
         .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),
@@ -62,9 +60,6 @@ let package = Package(
             ])
         
     ] + /* Tests */ [
-        .testTarget(
-            name: "ConsoleTests",
-            dependencies: ["Console"]),
         .testTarget(
             name: "UtilsTests",
             dependencies: ["Utils"]),

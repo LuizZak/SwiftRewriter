@@ -1,6 +1,6 @@
 import Foundation
 import SwiftRewriterLib
-import Utils
+import Console
 
 public class StdoutWriterOutput: WriterOutput {
     var buffer: String = ""

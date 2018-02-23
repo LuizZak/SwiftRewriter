@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "Console",
+        "repositoryURL": "https://cs-luiz-silva@bitbucket.org/cs-luiz-silva/console.git",
+        "state": {
+          "branch": null,
+          "revision": "bae04df99e56117fea0649b5749a5dd1a71c302b",
+          "version": "0.1.0"
+        }
+      },
+      {
         "package": "MiniLexer",
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {

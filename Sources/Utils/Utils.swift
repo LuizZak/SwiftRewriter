@@ -182,9 +182,7 @@ extension Sequence {
     }
 }
 
-/// Flattens a pair of dictionary/array-in-array objects that where used to map
-/// a grouping into a single dictionary of arrays.
-public func flattenMakeshiftDictionary<T, U>(withArray array: [[T]], mappedBy dict: [U: Int]) -> [U: [T]] {
+func flattenMakeshiftDictionary<T, U>(withArray array: [[T]], mappedBy dict: [U: Int]) -> [U: [T]] {
     // Turn into a dictionary now
     var output: [U: [T]] = [:]
     
@@ -194,50 +192,4 @@ public func flattenMakeshiftDictionary<T, U>(withArray array: [[T]], mappedBy di
     }
     
     return output
-}
-
-/// Formats a time-stamp in seconds
-public func formatTimeInterval(_ interval: TimeInterval, colorized: Bool = true, color: ConsoleColor = .blue) -> String {
-    if(interval == 0) {
-        return "0s"
-    }
-    
-    let absInterval = abs(interval)
-    
-    let day: TimeInterval = 24 * 60 * 60
-    let hour: TimeInterval = 60 * 60
-    let minute: TimeInterval = 60
-    
-    var output = ""
-    
-    // Days
-    if(absInterval >= day) {
-        output += "\(String(format: "%02d", Int(floor(absInterval / day))))d "
-    }
-    // Hours
-    if(absInterval >= hour && floor((absInterval.truncatingRemainder(dividingBy: day)) / hour) > 0) {
-        output += "\(String(format: "%02d", Int(floor((absInterval.truncatingRemainder(dividingBy: day)) / hour))))h"
-    }
-    // Minutes
-    if(absInterval >= minute && floor((absInterval.truncatingRemainder(dividingBy: hour)) / minute) > 0) {
-        output += "\(String(format: "%02d", Int(floor((absInterval.truncatingRemainder(dividingBy: hour)) / minute))))m"
-    }
-    // Seconds
-    if(floor(absInterval.truncatingRemainder(dividingBy: minute)) > 0) {
-        output += "\(String(format: "%d", Int(floor(absInterval.truncatingRemainder(dividingBy: minute)))))s"
-    }
-    // Milliseconds - milliseconds are always displayed as milliseconds only
-    if(absInterval < 1 && absInterval - floor(absInterval) > 0) {
-        let milliseconds = floor(absInterval * 1000).truncatingRemainder(dividingBy: 1000)
-        output += "\(String(format: "%.2lf", milliseconds / 1000))s"
-    }
-    
-    
-    let result = interval < 0 ? "-\(output.trimmingCharacters(in: .whitespacesAndNewlines))" : output.trimmingCharacters(in: .whitespacesAndNewlines)
-    
-    if(!colorized) {
-        return result.stripTerminalColors()
-    }
-    
-    return result.terminalColorize(color)
 }
