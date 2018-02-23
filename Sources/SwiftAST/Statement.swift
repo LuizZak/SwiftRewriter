@@ -82,7 +82,12 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         return statements.isEmpty
     }
     
-    public var statements: [Statement] = []
+    public var statements: [Statement] = [] {
+        didSet {
+            oldValue.forEach { $0.parent = nil }
+            statements.forEach { $0.parent = self }
+        }
+    }
     
     public override var subStatements: [Statement] {
         return statements
@@ -90,6 +95,10 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     
     public init(statements: [Statement]) {
         self.statements = statements
+        
+        super.init()
+        
+        statements.forEach { $0.parent = self }
     }
     
     public required init(arrayLiteral elements: Statement...) {
@@ -123,9 +132,24 @@ public extension Statement {
 }
 
 public class IfStatement: Statement {
-    public var exp: Expression
-    public var body: CompoundStatement
-    public var elseBody: CompoundStatement?
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
+    public var body: CompoundStatement {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
+    public var elseBody: CompoundStatement? {
+        didSet {
+            oldValue?.parent = nil
+            elseBody?.parent = self
+        }
+    }
     
     public override var subStatements: [Statement] {
         if let elseBody = elseBody {
@@ -139,6 +163,12 @@ public class IfStatement: Statement {
         self.exp = exp
         self.body = body
         self.elseBody = elseBody
+        
+        super.init()
+        
+        exp.parent = self
+        body.parent = self
+        elseBody?.parent = self
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -161,8 +191,18 @@ public extension Statement {
 }
 
 public class WhileStatement: Statement {
-    public var exp: Expression
-    public var body: CompoundStatement
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
+    public var body: CompoundStatement {
+        didSet {
+            oldValue.parent = nil
+            body.parent = self
+        }
+    }
     
     public override var subStatements: [Statement] {
         return [body]
@@ -171,6 +211,11 @@ public class WhileStatement: Statement {
     public init(exp: Expression, body: CompoundStatement) {
         self.exp = exp
         self.body = body
+        
+        super.init()
+        
+        exp.parent = self
+        body.parent = self
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -193,9 +238,24 @@ public extension Statement {
 }
 
 public class ForStatement: Statement {
-    public var pattern: Pattern
-    public var exp: Expression
-    public var body: CompoundStatement
+    public var pattern: Pattern {
+        didSet {
+            oldValue.setParent(nil)
+            pattern.setParent(self)
+        }
+    }
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
+    public var body: CompoundStatement {
+        didSet {
+            oldValue.parent = nil
+            body.parent = self
+        }
+    }
     
     public override var subStatements: [Statement] {
         return [body]
@@ -205,6 +265,12 @@ public class ForStatement: Statement {
         self.pattern = pattern
         self.exp = exp
         self.body = body
+        
+        super.init()
+        
+        pattern.setParent(self)
+        exp.parent = self
+        body.parent = self
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -227,9 +293,39 @@ public extension Statement {
 }
 
 public class SwitchStatement: Statement {
-    public var exp: Expression
-    public var cases: [SwitchCase]
-    public var defaultCase: [Statement]?
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
+    public var cases: [SwitchCase] {
+        didSet {
+            oldValue.forEach {
+                $0.patterns.forEach {
+                    $0.setParent(self)
+                }
+                $0.statements.forEach {
+                    $0.parent = self
+                }
+            }
+            
+            cases.forEach {
+                $0.patterns.forEach {
+                    $0.setParent(self)
+                }
+                $0.statements.forEach {
+                    $0.parent = self
+                }
+            }
+        }
+    }
+    public var defaultCase: [Statement]? {
+        didSet {
+            oldValue?.forEach { $0.parent = nil }
+            defaultCase?.forEach { $0.parent = nil }
+        }
+    }
     
     public override var subStatements: [Statement] {
         return cases.flatMap { $0.statements } + (defaultCase ?? [])
@@ -239,6 +335,19 @@ public class SwitchStatement: Statement {
         self.exp = exp
         self.cases = cases
         self.defaultCase = defaultCase
+        
+        super.init()
+        
+        exp.parent = self
+        cases.forEach {
+            $0.patterns.forEach {
+                $0.setParent(self)
+            }
+            $0.statements.forEach {
+                $0.parent = self
+            }
+        }
+        defaultCase?.forEach { $0.parent = self }
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -261,7 +370,12 @@ public extension Statement {
 }
 
 public class DoStatement: Statement {
-    public var body: CompoundStatement
+    public var body: CompoundStatement {
+        didSet {
+            oldValue.parent = nil
+            body.parent = self
+        }
+    }
     
     public override var subStatements: [Statement] {
         return [body]
@@ -269,6 +383,10 @@ public class DoStatement: Statement {
     
     public init(body: CompoundStatement) {
         self.body = body
+        
+        super.init()
+        
+        body.parent = self
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -291,7 +409,12 @@ public extension Statement {
 }
 
 public class DeferStatement: Statement {
-    public var body: CompoundStatement
+    public var body: CompoundStatement {
+        didSet {
+            oldValue.parent = nil
+            body.parent = self
+        }
+    }
     
     public override var subStatements: [Statement] {
         return [body]
@@ -299,6 +422,10 @@ public class DeferStatement: Statement {
     
     public init(body: CompoundStatement) {
         self.body = body
+        
+        super.init()
+        
+        body.parent = self
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -325,10 +452,19 @@ public class ReturnStatement: Statement {
         return true
     }
     
-    public var exp: Expression?
+    public var exp: Expression? {
+        didSet {
+            oldValue?.parent = nil
+            exp?.parent = self
+        }
+    }
     
     public init(exp: Expression? = nil) {
         self.exp = exp
+        
+        super.init()
+        
+        exp?.parent = self
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -389,10 +525,19 @@ public extension Statement {
 }
 
 public class ExpressionsStatement: Statement {
-    public var expressions: [Expression]
+    public var expressions: [Expression] {
+        didSet {
+            oldValue.forEach { $0.parent = self }
+            expressions.forEach { $0.parent = self }
+        }
+    }
     
     public init(expressions: [Expression]) {
         self.expressions = expressions
+        
+        super.init()
+        
+        expressions.forEach { $0.parent = self }
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -415,10 +560,25 @@ public extension Statement {
 }
 
 public class VariableDeclarationsStatement: Statement {
-    public var decl: [StatementVariableDeclaration]
+    public var decl: [StatementVariableDeclaration] {
+        didSet {
+            oldValue.forEach {
+                $0.initialization?.parent = nil
+            }
+            decl.forEach {
+                $0.initialization?.parent = self
+            }
+        }
+    }
     
     public init(decl: [StatementVariableDeclaration]) {
         self.decl = decl
+        
+        super.init()
+        
+        decl.forEach {
+            $0.initialization?.parent = self
+        }
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -555,6 +715,17 @@ public enum Pattern: Equatable {
         }
         
         return .tuple(expr.map { .expression($0) })
+    }
+    
+    internal func setParent(_ node: SyntaxNode?) {
+        switch self {
+        case .expression(let exp):
+            exp.parent = node
+        case .tuple(let tuple):
+            tuple.forEach { $0.setParent(node) }
+        case .identifier:
+            break
+        }
     }
 }
 

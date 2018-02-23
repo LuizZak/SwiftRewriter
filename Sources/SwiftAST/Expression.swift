@@ -1,6 +1,9 @@
 import Foundation
 
 public class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomReflectable {
+    /// Custom metadata that can be associated with this expression node
+    public var metadata: [String: Any] = [:]
+    
     /// `true` if this expression sub-tree contains only literal-based sub-expressions.
     /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
     /// `.unary`, `.prefix`, `.parens`, and `.ternary` which only feature
@@ -60,9 +63,19 @@ public class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomR
 }
 
 public class AssignmentExpression: Expression {
-    public var lhs: Expression
+    public var lhs: Expression {
+        didSet {
+            oldValue.parent = nil
+            lhs.parent = self
+        }
+    }
     public var op: SwiftOperator
-    public var rhs: Expression
+    public var rhs: Expression {
+        didSet {
+            oldValue.parent = nil
+            rhs.parent = self
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return [lhs, rhs]
@@ -82,6 +95,11 @@ public class AssignmentExpression: Expression {
         self.lhs = lhs
         self.op = op
         self.rhs = rhs
+        
+        super.init()
+        
+        lhs.parent = self
+        rhs.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -108,9 +126,19 @@ public extension Expression {
 }
 
 public class BinaryExpression: Expression {
-    public var lhs: Expression
+    public var lhs: Expression {
+        didSet {
+            oldValue.parent = nil
+            lhs.parent = self
+        }
+    }
     public var op: SwiftOperator
-    public var rhs: Expression
+    public var rhs: Expression {
+        didSet {
+            oldValue.parent = nil
+            rhs.parent = self
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return [lhs, rhs]
@@ -134,6 +162,11 @@ public class BinaryExpression: Expression {
         self.lhs = lhs
         self.op = op
         self.rhs = rhs
+        
+        super.init()
+        
+        self.lhs.parent = self
+        self.rhs.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -161,7 +194,12 @@ extension Expression {
 
 public class UnaryExpression: Expression {
     public var op: SwiftOperator
-    public var exp: Expression
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return [exp]
@@ -183,6 +221,10 @@ public class UnaryExpression: Expression {
     public init(op: SwiftOperator, exp: Expression) {
         self.op = op
         self.exp = exp
+        
+        super.init()
+        
+        exp.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -210,7 +252,12 @@ extension Expression {
 
 public class PrefixExpression: Expression {
     public var op: SwiftOperator
-    public var exp: Expression
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return [exp]
@@ -232,6 +279,10 @@ public class PrefixExpression: Expression {
     public init(op: SwiftOperator, exp: Expression) {
         self.op = op
         self.exp = exp
+        
+        super.init()
+        
+        exp.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -258,8 +309,33 @@ extension Expression {
 }
 
 public class PostfixExpression: Expression {
-    public var exp: Expression
-    public var op: Postfix
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
+    public var op: Postfix {
+        didSet {
+            switch oldValue {
+            case .functionCall(arguments: let args):
+                args.forEach { $0.expression.parent = nil }
+            case .subscript(let exp):
+                exp.parent = nil
+            default:
+                break
+            }
+            
+            switch op {
+            case .functionCall(arguments: let args):
+                args.forEach { $0.expression.parent = self }
+            case .subscript(let exp):
+                exp.parent = self
+            default:
+                break
+            }
+        }
+    }
     
     public override var subExpressions: [Expression] {
         switch op {
@@ -284,6 +360,19 @@ public class PostfixExpression: Expression {
     public init(exp: Expression, op: Postfix) {
         self.exp = exp
         self.op = op
+        
+        super.init()
+        
+        exp.parent = self
+        
+        switch op {
+        case .functionCall(arguments: let args):
+            args.forEach { $0.expression.parent = self }
+        case .subscript(let exp):
+            exp.parent = self
+        default:
+            break
+        }
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -367,7 +456,12 @@ public extension Expression {
 }
 
 public class ParensExpression: Expression {
-    public var exp: Expression
+    public var exp: Expression{
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return [exp]
@@ -383,6 +477,10 @@ public class ParensExpression: Expression {
     
     public init(exp: Expression) {
         self.exp = exp
+        
+        super.init()
+        
+        exp.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -443,7 +541,12 @@ public extension Expression {
 }
 
 public class CastExpression: Expression {
-    public var exp: Expression
+    public var exp: Expression{
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
     public var type: SwiftType
     
     public override var subExpressions: [Expression] {
@@ -461,6 +564,10 @@ public class CastExpression: Expression {
     public init(exp: Expression, type: SwiftType) {
         self.exp = exp
         self.type = type
+        
+        super.init()
+        
+        exp.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -487,7 +594,12 @@ public extension Expression {
 }
 
 public class ArrayLiteralExpression: Expression {
-    public var items: [Expression]
+    public var items: [Expression]{
+        didSet {
+            oldValue.forEach { $0.parent = nil }
+            items.forEach { $0.parent = self }
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return items
@@ -499,6 +611,10 @@ public class ArrayLiteralExpression: Expression {
     
     public init(items: [Expression]) {
         self.items = items
+        
+        super.init()
+        
+        items.forEach { $0.parent = self }
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -525,7 +641,12 @@ public extension Expression {
 }
 
 public class DictionaryLiteralExpression: Expression {
-    public var pairs: [ExpressionDictionaryPair]
+    public var pairs: [ExpressionDictionaryPair] {
+        didSet {
+            oldValue.forEach { $0.key.parent = nil; $0.value.parent = nil }
+            pairs.forEach { $0.key.parent = self; $0.value.parent = self }
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return pairs.flatMap { [$0.key, $0.value] }
@@ -541,6 +662,10 @@ public class DictionaryLiteralExpression: Expression {
     
     public init(pairs: [ExpressionDictionaryPair]) {
         self.pairs = pairs
+        
+        super.init()
+        
+        pairs.forEach { $0.key.parent = self; $0.value.parent = self }
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -567,9 +692,24 @@ public extension Expression {
 }
 
 public class TernaryExpression: Expression {
-    public var exp: Expression
-    public var ifTrue: Expression
-    public var ifFalse: Expression
+    public var exp: Expression {
+        didSet {
+            oldValue.parent = nil
+            exp.parent = self
+        }
+    }
+    public var ifTrue: Expression {
+        didSet {
+            oldValue.parent = nil
+            ifTrue.parent = self
+        }
+    }
+    public var ifFalse: Expression {
+        didSet {
+            oldValue.parent = nil
+            ifTrue.parent = self
+        }
+    }
     
     public override var subExpressions: [Expression] {
         return [exp, ifTrue, ifFalse]
@@ -591,6 +731,12 @@ public class TernaryExpression: Expression {
         self.exp = exp
         self.ifTrue = ifTrue
         self.ifFalse = ifFalse
+        
+        super.init()
+        
+        exp.parent = self
+        ifTrue.parent = self
+        ifFalse.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -619,7 +765,12 @@ public extension Expression {
 public class BlockLiteralExpression: Expression {
     public var parameters: [BlockParameter]
     public var returnType: SwiftType
-    public var body: CompoundStatement
+    public var body: CompoundStatement {
+        didSet {
+            oldValue.parent = nil
+            body.parent = self
+        }
+    }
     
     public override var description: String {
         var buff = "{ "
@@ -645,6 +796,10 @@ public class BlockLiteralExpression: Expression {
         self.parameters = parameters
         self.returnType = returnType
         self.body = body
+        
+        super.init()
+        
+        self.body.parent = self
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
