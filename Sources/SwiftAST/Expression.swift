@@ -964,8 +964,8 @@ public struct ExpressionDictionaryPair: Equatable {
 }
 
 /// A postfix expression type
-public indirect enum Postfix: Equatable {
-    case optionalAccess
+public enum Postfix: Equatable {
+    indirect case optionalAccess(Postfix)
     case member(String)
     case `subscript`(Expression)
     case functionCall(arguments: [FunctionArgument])
@@ -1148,8 +1148,8 @@ extension ExpressionDictionaryPair: CustomStringConvertible {
 extension Postfix: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .optionalAccess:
-            return "?"
+        case .optionalAccess(let op):
+            return "?" + op.description
         case .member(let mbm):
             return "." + mbm
         case .subscript(let subs):
