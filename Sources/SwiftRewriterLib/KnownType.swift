@@ -8,6 +8,9 @@ public protocol KnownType {
     /// Name for this known type
     var typeName: String { get }
     
+    /// Gets an array of all known constructors for this type
+    var knownConstructors: [KnownConstructor] { get }
+    
     /// Gets an array of all known methods for this type
     var knownMethods: [KnownMethod] { get }
     
@@ -16,12 +19,29 @@ public protocol KnownType {
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
+    
+    /// Gets a constructor matching a given argument label set
+    func constructor(withArgumentLabels labels: [String]) -> KnownConstructor?
 }
 
+/// Default implementations
 public extension KnownType {
     public var supertype: KnownType? {
         return nil
     }
+    
+    /// Gets a constructor matching a given argument label set
+    public func constructor(withArgumentLabels labels: [String]) -> KnownConstructor? {
+        return knownConstructors.first {
+            $0.parameters.map { $0.label }.elementsEqual(labels)
+        }
+    }
+}
+
+/// Describes a known type constructor
+public protocol KnownConstructor {
+    /// Gets the parameters for this constructor
+    var parameters: [ParameterSignature] { get }
 }
 
 /// Describes a known method to the transpiler

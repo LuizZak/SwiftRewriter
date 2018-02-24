@@ -29,6 +29,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     private(set) public var protocols: [ProtocolInheritanceIntention] = []
     private(set) public var properties: [PropertyGenerationIntention] = []
     private(set) public var methods: [MethodGenerationIntention] = []
+    private(set) public var constructors: [MethodGenerationIntention] = []
     
     public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
@@ -130,6 +131,13 @@ public class TypeGenerationIntention: FromSourceIntention {
         }
     }
     
+    // TODO: Create a separate intention class for constructors
+    public func addConstructor(_ intention: MethodGenerationIntention) {
+        self.methods.append(intention)
+        
+        intention.parent = self
+    }
+    
     public func hasProtocol(named name: String) -> Bool {
         return protocols.contains(where: { $0.protocolName == name })
     }
@@ -170,6 +178,9 @@ public class TypeGenerationIntention: FromSourceIntention {
 extension TypeGenerationIntention: KnownType {
     public var knownMethods: [KnownMethod] {
         return methods
+    }
+    public var knownConstructors: [KnownConstructor] {
+        return constructors
     }
     public var knownProperties: [KnownProperty] {
         return properties
@@ -300,7 +311,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
     }
 }
 
-extension MethodGenerationIntention: KnownMethod {
+extension MethodGenerationIntention: KnownMethod, KnownConstructor {
     public var body: KnownMethodBody? {
         return methodBody
     }

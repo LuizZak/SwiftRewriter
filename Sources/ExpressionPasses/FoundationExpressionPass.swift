@@ -79,6 +79,17 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
             return nil
         }
         
+        // Use resolved expression type, if available
+        if case .metatype? = classMember.exp.resolvedType {
+            return Expression.postfix(classMember.exp, .member("self"))
+        } else if !classMember.exp.isErrorTyped && classMember.exp.resolvedType != nil {
+            return Expression.postfix(.identifier("type"),
+                                      .functionCall(arguments: [
+                                        .labeled("of", classMember.exp)
+                                        ]))
+        }
+        
+        // Deduce using identifier or expression capitalization
         switch classMember.exp {
         case let ident as IdentifierExpression where ident.identifier.startsUppercased:
             return Expression.postfix(classMember.exp, .member("self"))

@@ -1,6 +1,7 @@
 import XCTest
 import ExpressionPasses
 import SwiftRewriterLib
+import SwiftAST
 
 class FoundationExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
@@ -160,6 +161,32 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             original: "[object class:aThing]",
             expected: .postfix(.postfix(.identifier("object"), .member("class")),
                                .functionCall(arguments: [.unlabeled(.identifier("aThing"))]))
+        )
+    }
+    
+    func testClassTypeMethodWithResolvedExpressionType() {
+        // Tests that if an expression contains either a .metaType or other type
+        // assigned to it, that the expression pass takes advantage of that to
+        // make better deductions about whether a `[<exp> class]` invocation is
+        // a class or instance invocation
+        
+        let typeNameExp = Expression.identifier("aTypeName")
+        typeNameExp.resolvedType = .metatype(for: .typeName("aTypeName"))
+        
+        let valueExp = Expression.identifier("LocalName")
+        valueExp.resolvedType = .int
+        
+        assertTransform(
+            original: .postfix(.postfix(typeNameExp, .member("class")), .functionCall(arguments: [])),
+            expected: .postfix(typeNameExp, .member("self"))
+        )
+        
+        assertTransform(
+            original: .postfix(.postfix(valueExp, .member("class")), .functionCall(arguments: [])),
+            expected: .postfix(.identifier("type"),
+                               .functionCall(arguments: [
+                                .labeled("of", valueExp)
+                                ]))
         )
     }
 }

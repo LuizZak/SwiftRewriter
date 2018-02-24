@@ -162,12 +162,35 @@ public extension IdentifierExpression {
     /// Gets the definition this identifier references.
     /// To gather definitions to identifiers, use a `ExpressionTypeResolver` on
     /// the syntax tree this identifier is contained in.
-    public var definition: CodeDefinition? {
+    public var definition: Definition? {
         get {
-            return metadata[_identifierDefinitionKey] as? CodeDefinition
+            return metadata[_identifierDefinitionKey] as? Definition
         }
         set {
             metadata[_identifierDefinitionKey] = newValue
+        }
+    }
+    
+    public enum Definition {
+        case local(CodeDefinition)
+        case type(named: String)
+        
+        public var local: CodeDefinition? {
+            switch self {
+            case .local(let def):
+                return def
+            case .type:
+                return nil
+            }
+        }
+        
+        public var typeName: String? {
+            switch self {
+            case .local:
+                return nil
+            case .type(let name):
+                return name
+            }
         }
     }
 }

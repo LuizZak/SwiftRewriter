@@ -198,10 +198,16 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         _=super.visitIdentifier(exp)
         
         // Visit identifier's type from current context
-        let definition = exp.nearestScope.definition(named: exp.identifier)
-        
-        exp.definition = definition
-        exp.resolvedType = definition?.type ?? .errorType
+        if let definition = exp.nearestScope.definition(named: exp.identifier) {
+            exp.definition = .local(definition)
+            exp.resolvedType = definition.type
+        } else if let type = typeSystem.knownTypeWithName(exp.identifier) {
+            exp.definition = .type(named: type.typeName)
+            exp.resolvedType = .metatype(for: .typeName(type.typeName))
+        } else {
+            exp.definition = nil
+            exp.resolvedType = .errorType
+        }
         
         return exp
     }
@@ -255,8 +261,30 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
             default:
                 break
             }
+        
+        // Parameterless type constructor
+        case .functionCall(let args) where args.count == 0:
+            guard let typeName = exp.exp.asIdentifier?.definition?.typeName else {
+                break
+            }
             
-        // TODO: Support function calling and member lookup
+            // Search type names
+            guard let type = typeSystem.knownTypeWithName(typeName) else {
+                break
+            }
+            
+            // Verify a constructor matches a set of parameters
+            if type.constructor(withArgumentLabels: []) != nil {
+                exp.resolvedType = .typeName(typeName)
+            } else {
+                exp.resolvedType = .errorType
+            }
+            
+        // Meta-type fetching (TypeName.self, TypeName.self.self, etc.)
+        case .member("self"):
+            exp.resolvedType = exp.exp.resolvedType
+            
+        // TODO: Support general function calling and member lookup
         default:
             break
         }

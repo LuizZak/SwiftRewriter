@@ -7,12 +7,25 @@ public protocol TypeSystem {
     
     /// Returns `true` is an integer (signed or unsigned) type
     func isInteger(_ type: SwiftType) -> Bool
+    
+    /// Gets a known type with a given name from this type system
+    func knownTypeWithName(_ name: String) -> KnownType?
 }
 
 /// Standard type system implementation
 public class DefaultTypeSystem: TypeSystem {
+    var types: [KnownType] = []
+    
     public init() {
         
+    }
+    
+    public func addType(_ type: KnownType) {
+        types.append(type)
+    }
+    
+    public func knownTypeWithName(_ name: String) -> KnownType? {
+        return types.first { $0.typeName == name }
     }
     
     public func isNumeric(_ type: SwiftType) -> Bool {

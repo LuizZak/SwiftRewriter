@@ -194,7 +194,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .int)
             .thenAssert(with: { ident in
-                XCTAssert(ident.definition === definition)
+                XCTAssert(ident.definition?.local === definition)
             })
     }
     
@@ -224,15 +224,78 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: stmt)
             .thenAssertDefined(name: "a", type: .int)
     }
-}
-
-private extension ExpressionTypeResolverTests {
-    func startScopedTest<T: Statement>(with stmt: T) -> StatementTestBuilder<T> {
-        return StatementTestBuilder(testCase: self, statement: stmt)
+    
+    func testMetatypeFetching() {
+        // An expression `TypeName` should match the metatype resolution to
+        // `TypeName`...
+        startScopedTest(with:
+                Expression.identifier("TypeName")
+            )
+            .definingEmptyType(named: "TypeName")
+            .resolve()
+            .thenAssertExpression(resolvedAs: .metatype(for: .typeName("TypeName")))
+        
+        // ...so should be `TypeName.self`...
+        startScopedTest(with:
+                Expression.postfix(.identifier("TypeName"), .member("self"))
+            )
+            .definingEmptyType(named: "TypeName")
+            .resolve()
+            .thenAssertExpression(resolvedAs: .metatype(for: .typeName("TypeName")))
+        
+        // ...or `TypeName.self.self`, and so on.
+        startScopedTest(with:
+            Expression.postfix(.postfix(.identifier("TypeName"), .member("self")), .member("self"))
+            )
+            .definingEmptyType(named: "TypeName")
+            .resolve()
+            .thenAssertExpression(resolvedAs: .metatype(for: .typeName("TypeName")))
     }
     
-    func startScopedTest<T: Expression>(with exp: T) -> ExpressionTestBuilder<T> {
-        return ExpressionTestBuilder(testCase: self, expression: exp)
+    func testMetatypeFetchingOnNonMetatype() {
+        // Invoking `.self` on an expression that is _not_ of Swift.metatype type
+        // should return the same type as the expression, as well.
+        assertResolve(.postfix(.constant(1), .member("self")),
+                      expect: .int)
+        
+        assertResolve(.postfix(.identifier("Error Type"), .member("self")),
+                      expect: .errorType)
+    }
+    
+    func testConstructorInvocation() {
+        // Invoking `TypeName()` for a type with an empty constructor should
+        // return an instance of that type
+        let exp = Expression.postfix(.identifier("TypeName"), .functionCall(arguments: []))
+        
+        startScopedTest(with: exp)
+            .definingType(named: "TypeName") { builder in
+                return builder.addingConstructor().build()
+            }
+            .resolve()
+            .thenAssertExpression(resolvedAs: .typeName("TypeName"))
+    }
+    
+    func testConstructorInvocationOnTypeWithNoMatchingConstructor() {
+        // Invoking `TypeName()` for a type _without_ an empty constructor should
+        // return an .errorType
+        let exp = Expression.postfix(.identifier("TypeName"), .functionCall(arguments: []))
+        
+        startScopedTest(with: exp)
+            .definingEmptyType(named: "TypeName")
+            .resolve()
+            .thenAssertExpression(resolvedAs: .errorType)
+    }
+}
+
+// MARK: - Test Building Helpers
+
+private extension ExpressionTypeResolverTests {
+    func startScopedTest<T: Statement>(with stmt: T) -> StatementTypeTestBuilder<T> {
+        return StatementTypeTestBuilder(testCase: self, statement: stmt)
+    }
+    
+    func startScopedTest<T: Expression>(with exp: T) -> ExpressionTypeTestBuilder<T> {
+        return ExpressionTypeTestBuilder(testCase: self, expression: exp)
     }
     
     func makeAnOptional(_ exp: Expression) -> Expression {
@@ -249,147 +312,5 @@ private extension ExpressionTypeResolverTests {
         startScopedTest(with: exp)
             .resolve()
             .thenAssertExpression(resolvedAs: type, file: file, line: line)
-    }
-}
-
-private class StatementTestBuilder<T: Statement> {
-    let testCase: XCTestCase
-    let statement: T
-    let scope: CodeScopeStatement
-    var applied: Bool = false
-    
-    init(testCase: XCTestCase, statement: T) {
-        self.testCase = testCase
-        self.statement = statement
-        scope = CompoundStatement(statements: [statement])
-    }
-    
-    /// Defines a variable on the test fixture's context
-    func defineLocal(name: String, type: SwiftType) -> StatementTestBuilder {
-        let definition = CodeDefinition(name: name, type: type)
-        scope.definitions.recordDefinition(definition)
-        
-        return self
-    }
-    
-    /// Asserts a definition was created on the top-most scope.
-    @discardableResult
-    func thenAssertDefined(name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTestBuilder {
-        thenAssertDefined(name: name,
-                          storage: ValueStorage(type: type, ownership: .strong, isConstant: false),
-                          file: file,
-                          line: line)
-        return self
-    }
-    
-    /// Asserts a definition was created on the top-most scope.
-    @discardableResult
-    func thenAssertDefined(name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTestBuilder {
-        // Make sure to apply definitions just before starting assertions
-        if !applied {
-            let typeSystem = DefaultTypeSystem()
-            let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
-            resolver.ignoreResolvedExpressions = true
-            
-            _=statement.accept(resolver)
-            applied = true
-        }
-        
-        guard let defined = scope.definitions.definition(named: name) else {
-            testCase.recordFailure(withDescription: """
-                Failed to find expected local definition '\(name)' on scope.
-                """,
-                inFile: file, atLine: line, expected: false)
-            
-            return self
-        }
-        
-        if defined.storage != storage {
-            testCase.recordFailure(withDescription: """
-                Definition '\(name)' has different storage \(defined.storage) than \
-                expected storage \(storage)
-                """,
-                inFile: file, atLine: line, expected: false)
-        }
-        
-        return self
-    }
-}
-
-/// Test builder for expression type resolver tests that require scope for expression
-/// resolving.
-private class ExpressionTestBuilder<T: Expression> {
-    let testCase: XCTestCase
-    let expression: T
-    let scope: CodeScopeStatement
-    
-    init(testCase: XCTestCase, expression: T) {
-        self.testCase = testCase
-        self.expression = expression
-        scope = CompoundStatement(statements: [.expression(expression)])
-    }
-    
-    init(testCase: XCTestCase, expression: T, scope: CodeScopeStatement) {
-        self.testCase = testCase
-        self.expression = expression
-        self.scope = scope
-    }
-    
-    /// Defines a variable on the test fixture's context
-    func definingLocal(name: String, type: SwiftType) -> ExpressionTestBuilder {
-        let definition = CodeDefinition(name: name, type: type)
-        scope.definitions.recordDefinition(definition)
-        
-        return self
-    }
-    
-    /// Defines a given local variable on the test fixture's context
-    func definingLocal(_ definition: CodeDefinition) -> ExpressionTestBuilder {
-        scope.definitions.recordDefinition(definition)
-        
-        return self
-    }
-    
-    func resolve() -> ExpressionTestBuilderAsserter {
-        let typeSystem = DefaultTypeSystem()
-        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
-        resolver.ignoreResolvedExpressions = true
-        
-        _=resolver.visitExpression(expression)
-        
-        return ExpressionTestBuilderAsserter(testCase: testCase, expression: expression, scope: scope)
-    }
-    
-    /// Asserter for an ExpressionTestBuilder
-    class ExpressionTestBuilderAsserter {
-        let testCase: XCTestCase
-        let expression: T
-        let scope: CodeScopeStatement
-        
-        init(testCase: XCTestCase, expression: T, scope: CodeScopeStatement) {
-            self.testCase = testCase
-            self.expression = expression
-            self.scope = scope
-        }
-        
-        /// Makes an assertion the initial expression resolved to a given type
-        @discardableResult
-        func thenAssertExpression(resolvedAs type: SwiftType?, file: String = #file, line: Int = #line) -> ExpressionTestBuilderAsserter {
-            if expression.resolvedType != type {
-                testCase.recordFailure(withDescription: """
-                    Expected expression to resolve as \(type?.description ?? "nil"), \
-                    but received \(expression.resolvedType?.description ?? "nil")"
-                    """,
-                    inFile: file, atLine: line, expected: false)
-            }
-            
-            return self
-        }
-        
-        /// Opens a block to expose the original expression and allow the user to
-        /// perform custom assertions
-        func thenAssert(with block: (T) -> ()) {
-            block(expression)
-        }
     }
 }

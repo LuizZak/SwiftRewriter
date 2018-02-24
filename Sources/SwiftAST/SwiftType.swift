@@ -58,6 +58,7 @@ indirect public enum SwiftType: Equatable {
     case generic(String, parameters: [SwiftType])
     case protocolComposition([SwiftType])
     case block(returnType: SwiftType, parameters: [SwiftType])
+    case metatype(for: SwiftType)
     
     public static var void = SwiftType.typeName("Void")
     public static var int = SwiftType.typeName("Int")
@@ -108,10 +109,12 @@ extension SwiftType: CustomStringConvertible {
             return type + "<" + parameters.map { $0.description }.joined(separator: ", ") + ">"
         case let .protocolComposition(types):
             return types.map { $0.descriptionWithParens }.joined(separator: " & ")
+        case let .metatype(innerType):
+            return innerType.descriptionWithParens + ".self"
         }
     }
     
-    internal var descriptionWithParens: String {
+    private var descriptionWithParens: String {
         if requiresParens {
             return "(\(self))"
         }

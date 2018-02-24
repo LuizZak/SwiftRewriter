@@ -47,6 +47,14 @@ public class TypeMapper {
             
         case let .protocolComposition(types):
             return types.map(typeNameString(for:)).joined(separator: " & ")
+            
+        case let .metatype(type):
+            let inner = typeNameString(for: type)
+            if type.requiresParens {
+                return "(" + inner + ").self"
+            }
+            
+            return inner + ".self"
         }
     }
     
