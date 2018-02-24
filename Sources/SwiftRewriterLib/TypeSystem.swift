@@ -21,7 +21,7 @@ public class DefaultTypeSystem: TypeSystem {
     var types: [KnownType] = []
     
     public init() {
-        
+        registerInitialKnownTypes()
     }
     
     public func addType(_ type: KnownType) {
@@ -78,5 +78,34 @@ public class DefaultTypeSystem: TypeSystem {
         default:
             return false
         }
+    }
+}
+
+extension DefaultTypeSystem {
+    /// Initializes the default known types
+    func registerInitialKnownTypes() {
+        let nsObject =
+            KnownTypeBuilder(typeName: "NSObject")
+                .addingConstructor()
+                .build()
+        
+        let nsArray =
+            KnownTypeBuilder(typeName: "NSArray", supertype: nsObject)
+                .addingConstructor()
+                .build()
+        
+        let nsMutableArray =
+            KnownTypeBuilder(typeName: "NSMutableArray", supertype: nsArray)
+                .addingMethod(withSignature:
+                    FunctionSignature(isStatic: false, name: "addObject",
+                                      returnType: .void,
+                                      parameters: [
+                                        ParameterSignature(label: "_", name: "object", type: .anyObject)
+                        ]))
+                .build()
+        
+        addType(nsObject)
+        addType(nsArray)
+        addType(nsMutableArray)
     }
 }

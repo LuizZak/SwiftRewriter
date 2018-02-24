@@ -1,16 +1,16 @@
 import SwiftAST
-import SwiftRewriterLib
 
-/// Helper known-type builder used during tests that require such types
-class KnownTypeBuilder {
+/// Helper known-type builder used to come up with default types and during testing
+/// as well
+public class KnownTypeBuilder {
     private let type: DummyType
     
-    init(typeName: String, supertype: KnownType? = nil) {
+    public init(typeName: String, supertype: KnownType? = nil) {
         type = DummyType(typeName: typeName, supertype: supertype)
     }
     
     /// Adds a parameter-less constructor to this type
-    func addingConstructor() -> KnownTypeBuilder {
+    public func addingConstructor() -> KnownTypeBuilder {
         assert(!type.knownConstructors.contains { $0.parameters.count == 0 },
                "An empty constructor is already provided")
         
@@ -18,7 +18,7 @@ class KnownTypeBuilder {
     }
     
     /// Adds a new constructor to this type
-    func addingConstructor(withParameters parameters: [ParameterSignature]) -> KnownTypeBuilder {
+    public func addingConstructor(withParameters parameters: [ParameterSignature]) -> KnownTypeBuilder {
         let ctor = DummyConstructor(parameters: parameters)
         
         type.knownConstructors.append(ctor)
@@ -27,7 +27,7 @@ class KnownTypeBuilder {
     }
     
     /// Adds a void-returning, parameter-less instance method
-    func addingVoidMethod(named name: String) -> KnownTypeBuilder {
+    public func addingVoidMethod(named name: String) -> KnownTypeBuilder {
         let signature =
             FunctionSignature(isStatic: false, name: name, returnType: .void,
                               parameters: [])
@@ -36,7 +36,7 @@ class KnownTypeBuilder {
     }
     
     /// Adds a parameter-less instance method with a given return type
-    func addingMethod(named name: String, returning returnType: SwiftType) -> KnownTypeBuilder {
+    public func addingMethod(named name: String, returning returnType: SwiftType) -> KnownTypeBuilder {
         let signature =
             FunctionSignature(isStatic: false, name: name, returnType: returnType,
                               parameters: [])
@@ -45,7 +45,7 @@ class KnownTypeBuilder {
     }
     
     /// Adds a method with a given signature
-    func addingMethod(withSignature signature: FunctionSignature) -> KnownTypeBuilder {
+    public func addingMethod(withSignature signature: FunctionSignature) -> KnownTypeBuilder {
         let method = DummyMethod(body: nil, signature: signature)
         
         type.knownMethods.append(method)
@@ -54,7 +54,7 @@ class KnownTypeBuilder {
     }
     
     /// Adds a strong property with no attributes with a given name and type
-    func addingProperty(named name: String, type: SwiftType) -> KnownTypeBuilder {
+    public func addingProperty(named name: String, type: SwiftType) -> KnownTypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         let property = DummyProperty(name: name, storage: storage, attributes: [])
         
@@ -63,7 +63,7 @@ class KnownTypeBuilder {
         return self
     }
     
-    func addingProtocolConformance(protocolName: String) -> KnownTypeBuilder {
+    public func addingProtocolConformance(protocolName: String) -> KnownTypeBuilder {
         let conformance = DummyProtocolConformance(protocolName: protocolName)
         
         type.knownProtocolConformances.append(conformance)
@@ -73,7 +73,7 @@ class KnownTypeBuilder {
     
     /// Returns the constructed KnownType instance from this builder, with all
     /// methods and properties associated with `with[...]()` method calls.
-    func build() -> KnownType {
+    public func build() -> KnownType {
         return type
     }
 }
