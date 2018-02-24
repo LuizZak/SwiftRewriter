@@ -23,6 +23,20 @@ class ExpressionTypeResolverTests: XCTestCase {
         assertResolve(.unary(op: .bitwiseNot, .constant("abc")), expect: nil)
     }
     
+    func testCast() {
+        assertResolve(Expression.cast(.constant(1), type: .int),
+                      expect: .int) // Same-type casts don't need to result in optional
+        
+        assertResolve(Expression.cast(.constant(1), type: .float),
+                      expect: .optional(.float))
+        
+        assertResolve(Expression.cast(.constant(1), type: .string),
+                      expect: .optional(.string))
+        
+        assertResolve(Expression.cast(.identifier("Error Type"), type: .string),
+                      expect: .errorType) // Propagate error types
+    }
+    
     func testBinary() {
         // Arithmetic
         assertResolve(.binary(lhs: .constant(1), op: .add, rhs: .constant(1)),

@@ -154,6 +154,27 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         return exp
     }
     
+    public override func visitCast(_ exp: CastExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitCast(exp)
+        
+        // Propagte error type
+        if exp.exp.isErrorTyped {
+            return exp.makeErrorTyped()
+        }
+        
+        // Same-type casts always succeed
+        if exp.exp.resolvedType == exp.type {
+            exp.resolvedType = exp.type
+            return exp
+        }
+        
+        exp.resolvedType = .optional(exp.type)
+        
+        return exp
+    }
+    
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
