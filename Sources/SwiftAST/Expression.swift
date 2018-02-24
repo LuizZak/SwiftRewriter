@@ -985,10 +985,6 @@ public struct FunctionArgument: Equatable {
         self.expression = expression
     }
     
-    public static func ==(lhs: FunctionArgument, rhs: FunctionArgument) -> Bool {
-        return lhs.label == rhs.label && lhs.expression == rhs.expression
-    }
-    
     public static func unlabeled(_ exp: Expression) -> FunctionArgument {
         return FunctionArgument(label: nil, expression: exp)
     }

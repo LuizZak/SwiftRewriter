@@ -1,4 +1,4 @@
-public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomReflectable {
+public struct UnknownASTContext: CustomStringConvertible, CustomReflectable {
     public var description: String {
         return context.description
     }
@@ -11,9 +11,5 @@ public struct UnknownASTContext: CustomStringConvertible, Equatable, CustomRefle
     
     public init(context: CustomStringConvertible) {
         self.context = context
-    }
-    
-    public static func ==(lhs: UnknownASTContext, rhs: UnknownASTContext) -> Bool {
-        return true
     }
 }
