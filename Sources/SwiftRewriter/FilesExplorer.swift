@@ -3,8 +3,11 @@ import Console
 import Utils
 
 /// Helper for presenting selection of file names on a list
-private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> Int? {
-    var item: Int?
+private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> [Path] {
+    let prompt = prompt + """
+    Type ':all' to select all files.
+    """
+    var items: [Path] = []
 
     let config = 
         Pages.PageDisplayConfiguration(commandPrompt: prompt) { input in
@@ -12,8 +15,13 @@ private func presentFileSelection(in menu: MenuController, list: [Path], prompt:
                 return .quit(nil)
             }
             
+            if input == ":all" {
+                items = list
+                return .quit(nil)
+            }
+            
             if let index = list.indexOfFilename(matching: input, options: .caseInsensitive) {
-                item = index + 1
+                items = [list[index + 1]]
                 return .quit(nil)
             }
             
@@ -21,7 +29,7 @@ private func presentFileSelection(in menu: MenuController, list: [Path], prompt:
                 return .showMessageThenLoop("Expected an value between 1 and \(list.count)")
             }
             
-            item = int
+            items = [list[int]]
             
             return .quit(nil)
         }
@@ -29,7 +37,7 @@ private func presentFileSelection(in menu: MenuController, list: [Path], prompt:
     let pages = menu.console.makePages(configuration: config)
     pages.displayPages(withValues: list)
 
-    return item
+    return items
 }
 
 /// Main CLI interface entry point for file exploring services
@@ -161,13 +169,17 @@ fileprivate class FileFinderInterface {
             repeat {
                 // Present selection to user
                 let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
-                guard let index = presentFileSelection(in: menu, list: matches.asPaths, prompt: "\(matchesString), select one to convert:") else {
+                
+                let indexes = presentFileSelection(in: menu, list: matches.asPaths, prompt: "\(matchesString), select one to convert")
+                guard indexes.count > 0 else {
                     return
                 }
                 
                 do {
-                    let file = matches[index - 1]
-                    try rewriterService.rewrite(files: [URL(fileURLWithPath: (path as NSString).appendingPathComponent(file))])
+                    let fileUrls = indexes.map {
+                        URL(fileURLWithPath: (path as NSString).appendingPathComponent($0.fullPath))
+                    }
+                    try rewriterService.rewrite(files: fileUrls)
                     _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
                 } catch {
                     console.printLine("Error while converting file: \(error)")

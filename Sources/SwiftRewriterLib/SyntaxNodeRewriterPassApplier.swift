@@ -2,9 +2,11 @@
 /// all function bodies found in one go.
 public class SyntaxNodeRewriterPassApplier {
     public var passes: [SyntaxNodeRewriterPass]
+    public var typeResolver: ExpressionTypeResolver
     
-    public init(passes: [SyntaxNodeRewriterPass]) {
+    public init(passes: [SyntaxNodeRewriterPass], typeResolver: ExpressionTypeResolver) {
         self.passes = passes
+        self.typeResolver = typeResolver
     }
     
     public func apply(on intentions: IntentionCollection) {
@@ -41,12 +43,6 @@ public class SyntaxNodeRewriterPassApplier {
         }
     }
     
-    private func applyOnMethodBody(_ methodBody: MethodBodyIntention) {
-        passes.forEach {
-            _=methodBody.body.accept($0)
-        }
-    }
-    
     private func applyOnProperty(_ property: PropertyGenerationIntention) {
         switch property.mode {
         case .computed(let intent):
@@ -56,6 +52,16 @@ public class SyntaxNodeRewriterPassApplier {
             applyOnMethodBody(set.body)
         case .asField:
             break
+        }
+    }
+    
+    private func applyOnMethodBody(_ methodBody: MethodBodyIntention) {
+        passes.forEach {
+            _=methodBody.body.accept($0)
+            
+            // After each apply to the body, we must re-type check the result
+            // before handing it off to the next pass.
+            typeResolver.resolveTypes(in: methodBody.body)
         }
     }
 }

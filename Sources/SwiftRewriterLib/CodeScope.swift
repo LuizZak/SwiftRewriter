@@ -30,6 +30,10 @@ public extension CodeScopeStatement where Self: Statement {
     public func recordDefinition(_ definition: CodeDefinition) {
         definitions.recordDefinition(definition)
     }
+    
+    public func removeAllDefinitions() {
+        definitions.removeAllDefinitions()
+    }
 }
 
 public extension SyntaxNode {
@@ -65,6 +69,9 @@ class EmptyCodeScope: CodeScope {
     func recordDefinition(_ definition: CodeDefinition) {
         
     }
+    func removeAllDefinitions() {
+        
+    }
 }
 
 class DefaultCodeScopeStack: CodeScope {
@@ -91,6 +98,12 @@ class DefaultCodeScopeStack: CodeScope {
     func recordDefinition(_ definition: CodeDefinition) {
         scopes.last?.recordDefinition(definition)
     }
+    
+    func removeAllDefinitions() {
+        for scope in scopes {
+            scope.removeAllDefinitions()
+        }
+    }
 }
 
 /// A code scope that stores definitions gathered during function body analysis.
@@ -98,6 +111,7 @@ class DefaultCodeScopeStack: CodeScope {
 public protocol CodeScope {
     func definition(named name: String) -> CodeDefinition?
     func recordDefinition(_ definition: CodeDefinition)
+    func removeAllDefinitions()
 }
 
 class DefaultCodeScope: CodeScope {
@@ -109,6 +123,10 @@ class DefaultCodeScope: CodeScope {
     
     public func recordDefinition(_ definition: CodeDefinition) {
         definitions.append(definition)
+    }
+    
+    func removeAllDefinitions() {
+        definitions.removeAll()
     }
 }
 

@@ -2,7 +2,7 @@ import Foundation
 
 /// Helper class for dealing with path operations
 public struct Path: CustomStringConvertible {
-    var fullPath: String
+    public private(set) var fullPath: String
     
     public var description: String {
         return fullPath.description

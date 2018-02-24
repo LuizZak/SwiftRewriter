@@ -144,6 +144,21 @@ public struct FunctionSignature: Equatable {
     public var returnType: SwiftType
     public var parameters: [ParameterSignature]
     
+    public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature]) {
+        self.isStatic = isStatic
+        self.name = name
+        self.returnType = returnType
+        self.parameters = parameters
+    }
+    
+    /// Initializes a void-returning instance method with a given signature
+    public init(name: String, parameters: [ParameterSignature]) {
+        self.name = name
+        self.parameters = parameters
+        returnType = .void
+        isStatic = false
+    }
+    
     public var droppingNullability: FunctionSignature {
         let parameters = self.parameters.map {
             ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
@@ -202,4 +217,3 @@ public extension ValueStorageIntention {
         return storage.isConstant
     }
 }
-

@@ -1,50 +1,6 @@
 import SwiftAST
 import ObjcParser
 
-/// A wrapper for querying the type system context for specific type knowledges
-public protocol TypeSystem {
-    /// Returns `true` if `type` represents a numerical type (int, float, CGFloat, etc.)
-    func isNumeric(_ type: SwiftType) -> Bool
-    
-    /// Returns `true` is an integer (signed or unsigned) type
-    func isInteger(_ type: SwiftType) -> Bool
-}
-
-/// Standard type system implementation
-public class DefaultTypeSystem: TypeSystem {
-    public init() {
-        
-    }
-    
-    public func isNumeric(_ type: SwiftType) -> Bool {
-        if isInteger(type) {
-            return true
-        }
-        
-        switch type {
-        case .float, .double, .cgFloat:
-            return true
-        case .typeName("Float80"):
-            return true
-        default:
-            return false
-        }
-    }
-    
-    public func isInteger(_ type: SwiftType) -> Bool {
-        switch type {
-        case .int, .uint:
-            return true
-        case .typeName("Int64"), .typeName("Int32"), .typeName("Int16"), .typeName("Int8"):
-            return true
-        case .typeName("UInt64"), .typeName("UInt32"), .typeName("UInt16"), .typeName("UInt8"):
-            return true
-        default:
-            return false
-        }
-    }
-}
-
 public class ExpressionTypeResolver: SyntaxNodeRewriter {
     public var typeSystem: TypeSystem
     
@@ -55,6 +11,19 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     public init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
         super.init()
+    }
+    
+    /// Invocates the resolution of all expressions on a given statement recursively.
+    public func resolveTypes(in statement: Statement) {
+        // First, clear all variable definitions found, and their usages too.
+        for node in SyntaxNodeSequence(statement: statement, inspectBlocks: true) {
+            if let scoped = node as? CodeScopeStatement {
+                scoped.removeAllDefinitions()
+            }
+            if let ident = node as? IdentifierExpression {
+                ident.definition = nil
+            }
+        }
     }
     
     /// Invocates the resolution of a given expression's type.

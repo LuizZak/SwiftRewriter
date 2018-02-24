@@ -11,8 +11,14 @@ public class SwiftRewriter {
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
-    private var nonnullTokenRanges: [(start: Int, end: Int)] = []
     private var knownTypes: KnownTypeStorage = KnownTypeStorageImpl()
+    private var typeSystem: TypeSystem = DefaultTypeSystem()
+    
+    /// During parsing, the index of each NS_ASSUME_NONNULL_BEGIN/END pair is
+    /// collected so during source analysis by SwiftRewriter we can verify whether
+    /// or not a declaration is under the effects of NS_ASSUME_NONNULL by checking
+    /// whether it is contained within one of these ranges.
+    private var nonnullTokenRanges: [(start: Int, end: Int)] = []
     
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
@@ -182,7 +188,9 @@ public class SwiftRewriter {
         
         let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
         
-        let applier = SyntaxNodeRewriterPassApplier(passes: syntaxPasses)
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        
+        let applier = SyntaxNodeRewriterPassApplier(passes: syntaxPasses, typeResolver: typeResolver)
         applier.apply(on: intentionCollection)
         
         for pass in IntentionPasses.passes {

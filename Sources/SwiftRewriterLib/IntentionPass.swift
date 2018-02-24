@@ -513,7 +513,7 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
         // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
         // noun is followed by a parameter that has the same name, we collapse
         // such selector in Swift as `lorem(with:)`.
-        if signature.name.contains("With") {
+        if signature.name.contains("With") && signature.parameters.count > 0 {
             let split = signature.name.components(separatedBy: "With")
             if split.count != 2 || split.contains(where: { $0.count < 2 }) {
                 return
