@@ -45,19 +45,30 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         _=super.visitFor(stmt)
         
         // Define loop variables
-        collectInPattern(stmt.pattern, exp: stmt.exp, to: stmt.body)
+        if stmt.exp.resolvedType == nil {
+            resolveType(stmt.exp)
+        }
+        
+        let iteratorType: SwiftType
+        
+        switch stmt.exp.resolvedType {
+        case .generic("Array", let args)? where args.count == 1:
+            iteratorType = args[0]
+        case .nsArray?:
+            iteratorType = .anyObject
+        default:
+            iteratorType = .errorType
+        }
+        
+        collectInPattern(stmt.pattern, type: iteratorType, to: stmt.body)
         
         return stmt
     }
     
-    func collectInPattern(_ pattern: Pattern, exp: Expression, to scope: CodeScope) {
+    func collectInPattern(_ pattern: Pattern, type: SwiftType, to scope: CodeScope) {
         switch pattern {
         case .identifier(let ident):
-            if exp.resolvedType == nil {
-                resolveType(exp)
-            }
-            
-            scope.recordDefinition(CodeDefinition(name: ident, type: exp.resolvedType ?? .errorType))
+            scope.recordDefinition(CodeDefinition(name: ident, type: type))
             break
         default:
             // Other (more complex) patterns are not (yet) supported!

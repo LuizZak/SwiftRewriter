@@ -10,6 +10,10 @@ public protocol TypeSystem {
     
     /// Gets a known type with a given name from this type system
     func knownTypeWithName(_ name: String) -> KnownType?
+    
+    /// Returns `true` if a type represented by a given type name is a subtype of
+    /// another type
+    func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool
 }
 
 /// Standard type system implementation
@@ -26,6 +30,26 @@ public class DefaultTypeSystem: TypeSystem {
     
     public func knownTypeWithName(_ name: String) -> KnownType? {
         return types.first { $0.typeName == name }
+    }
+    
+    public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
+        guard let type = knownTypeWithName(typeName) else {
+            return false
+        }
+        guard let supertype = knownTypeWithName(supertypeName) else {
+            return false
+        }
+        
+        var current: KnownType? = type
+        while let c = current {
+            if c.typeName == supertype.typeName {
+                return true
+            }
+            
+            current = c.supertype
+        }
+        
+        return false
     }
     
     public func isNumeric(_ type: SwiftType) -> Bool {

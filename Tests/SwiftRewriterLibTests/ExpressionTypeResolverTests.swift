@@ -285,6 +285,56 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
     }
+    
+    func testForLoopArrayTypeResolving() {
+        let exp = Expression.identifier("")
+        exp.resolvedType = .array(.int)
+        
+        let stmt: ForStatement =
+            .for(.identifier("i"), exp, body: [])
+        
+        startScopedTest(with: stmt)
+            .thenAssertDefined(in: stmt.body, name: "i", type: .int)
+    }
+    
+    func testForLoopArrayTypeResolving_NSArray() {
+        // Iterating over an NSArray should produce `AnyObject` values
+        
+        let exp = Expression.identifier("")
+        exp.resolvedType = .nsArray
+        
+        let stmt: ForStatement =
+            .for(.identifier("i"), exp, body: [])
+        
+        startScopedTest(with: stmt)
+            .thenAssertDefined(in: stmt.body, name: "i", type: .anyObject)
+    }
+
+    func testForLoopArrayTypeResolving_NSMutableArray() {
+        // Iterating over an NSMutableArray should produce `AnyObject` values
+        
+        let exp = Expression.identifier("")
+        exp.resolvedType = .typeName("NSMutableArray")
+        
+        let stmt: ForStatement =
+            .for(.identifier("i"), exp, body: [])
+        
+        startScopedTest(with: stmt)
+            .thenAssertDefined(in: stmt.body, name: "i", type: .anyObject)
+    }
+    
+    func testForLoopArrayTypeResolving_NonArray() {
+        // Iterating over non-array types should produce error types
+        
+        let exp = Expression.identifier("")
+        exp.resolvedType = .typeName("ANonArrayType")
+        
+        let stmt: ForStatement =
+            .for(.identifier("i"), exp, body: [])
+        
+        startScopedTest(with: stmt)
+            .thenAssertDefined(in: stmt.body, name: "i", type: .errorType)
+    }
 }
 
 // MARK: - Test Building Helpers

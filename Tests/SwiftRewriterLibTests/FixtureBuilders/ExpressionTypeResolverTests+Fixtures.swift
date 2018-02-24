@@ -74,16 +74,39 @@ extension ExpressionTypeResolverTests {
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
         func thenAssertDefined(name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
-            thenAssertDefined(name: name,
-                              storage: ValueStorage(type: type, ownership: .strong, isConstant: false),
-                              file: file,
-                              line: line)
-            return self
+            let storage =
+                ValueStorage(type: type, ownership: .strong, isConstant: false)
+            
+            return
+                thenAssertDefined(name: name,
+                                  storage: storage,
+                                  file: file,
+                                  line: line)
+        }
+        
+        /// Asserts a definition was created on the given scope.
+        @discardableResult
+        func thenAssertDefined(in scope: CodeScopeStatement, name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+            let storage =
+                ValueStorage(type: type, ownership: .strong, isConstant: false)
+                
+            return
+                thenAssertDefined(in: scope,
+                                  name: name,
+                                  storage: storage,
+                                  file: file,
+                                  line: line)
         }
         
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
         func thenAssertDefined(name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+            return thenAssertDefined(in: scope, name: name, storage: storage, file: file, line: line)
+        }
+        
+        /// Asserts a definition was created on the given scope.
+        @discardableResult
+        func thenAssertDefined(in scope: CodeScopeStatement, name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             // Make sure to apply definitions just before starting assertions
             if !applied {
                 let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
