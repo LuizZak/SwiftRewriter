@@ -74,6 +74,38 @@ class SyntaxNodeIteratorTests: XCTestCase {
                             Expression.identifier("c")
             ]
         )
+        
+        assertExpression(.postfix(.identifier("a"),
+                                  .optionalAccess(
+                                    .functionCall(arguments: [
+                                        .unlabeled(.identifier("b"))
+                                        ]))),
+                         iteratesAs: [
+                            Expression.postfix(.identifier("a"),
+                                               .optionalAccess(
+                                                .functionCall(arguments: [
+                                                    .unlabeled(.identifier("b"))
+                                                    ]))),
+                            Expression.identifier("a"),
+                            Expression.identifier("b")
+            ])
+        
+        assertExpression(.postfix(.identifier("a"),
+                                  .optionalAccess(
+                                    .optionalAccess(
+                                        .functionCall(arguments: [
+                                            .unlabeled(.identifier("b"))
+                                            ])))),
+                         iteratesAs: [
+                            Expression.postfix(.identifier("a"),
+                                               .optionalAccess(
+                                                .optionalAccess(
+                                                    .functionCall(arguments: [
+                                                        .unlabeled(.identifier("b"))
+                                                        ])))),
+                            Expression.identifier("a"),
+                            Expression.identifier("b")
+            ])
     }
     
     func testParens() {

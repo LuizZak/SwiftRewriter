@@ -341,7 +341,7 @@ public class PostfixExpression: Expression {
     }
     public var op: Postfix {
         didSet {
-            switch oldValue {
+            switch oldValue.unwrappedOptionalAccess {
             case .functionCall(arguments: let args):
                 args.forEach { $0.expression.parent = nil }
             case .subscript(let exp):
@@ -350,7 +350,7 @@ public class PostfixExpression: Expression {
                 break
             }
             
-            switch op {
+            switch op.unwrappedOptionalAccess {
             case .functionCall(arguments: let args):
                 args.forEach { $0.expression.parent = self }
             case .subscript(let exp):
@@ -362,7 +362,7 @@ public class PostfixExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        switch op {
+        switch op.unwrappedOptionalAccess {
         case .subscript(let s):
             return [exp, s]
         case .functionCall(let args):
@@ -389,7 +389,7 @@ public class PostfixExpression: Expression {
         
         exp.parent = self
         
-        switch op {
+        switch op.unwrappedOptionalAccess {
         case .functionCall(arguments: let args):
             args.forEach { $0.expression.parent = self }
         case .subscript(let exp):
@@ -969,6 +969,17 @@ public enum Postfix: Equatable {
     case member(String)
     case `subscript`(Expression)
     case functionCall(arguments: [FunctionArgument])
+    
+    /// Unwraps all levels of .optionalAccess until the first non-optionalAccess
+    /// postfix operator is found.
+    public var unwrappedOptionalAccess: Postfix {
+        switch self {
+        case .optionalAccess(let op):
+            return op.unwrappedOptionalAccess
+        default:
+            return self
+        }
+    }
 }
 
 /// A function argument kind

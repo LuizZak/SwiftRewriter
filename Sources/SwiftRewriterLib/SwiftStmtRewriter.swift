@@ -117,53 +117,58 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     func visitPostfix(_ exp: PostfixExpression) {
         visitExpression(exp.exp, parens: exp.exp.requiresParens)
         
-        switch exp.op {
-        case .member(let member):
-            target.outputInline(".")
-            target.outputInline(member, style: .memberName)
-        
-        case .optionalAccess:
-            target.outputInline("?")
-        
-        case .subscript(let exp):
-            target.outputInline("[")
-            visitExpression(exp)
-            target.outputInline("]")
-            
-        case .functionCall(var arguments):
-            var trailingClosure: Expression?
-            // If the last argument is a block type, close the
-            // parameters list earlier and use the block as a
-            // trailing closure.
-            if arguments.last?.expression is BlockLiteralExpression {
-                trailingClosure = arguments.last?.expression
-                arguments.removeLast()
-            }
-            
-            // No need to emit parenthesis if a trailing closure
-            // is present as the only argument of the function
-            if arguments.count > 0 || trailingClosure == nil {
-                target.outputInline("(")
+        func recursePostfix(_ op: Postfix) {
+            switch op {
+            case .member(let member):
+                target.outputInline(".")
+                target.outputInline(member, style: .memberName)
                 
-                commaSeparated(arguments) { arg in
-                    if let label = arg.label {
-                        target.outputInline(label)
-                        target.outputInline(": ")
-                    }
-                    
-                    visitExpression(arg.expression)
+            case .optionalAccess(let op):
+                target.outputInline("?")
+                recursePostfix(op)
+                
+            case .subscript(let exp):
+                target.outputInline("[")
+                visitExpression(exp)
+                target.outputInline("]")
+                
+            case .functionCall(var arguments):
+                var trailingClosure: Expression?
+                // If the last argument is a block type, close the
+                // parameters list earlier and use the block as a
+                // trailing closure.
+                if arguments.last?.expression is BlockLiteralExpression {
+                    trailingClosure = arguments.last?.expression
+                    arguments.removeLast()
                 }
                 
-                target.outputInline(")")
-            }
-            
-            // Emit trailing closure now, if present
-            if let trailingClosure = trailingClosure {
-                // Nicer spacing
-                target.outputInline(" ")
-                visitExpression(trailingClosure)
+                // No need to emit parenthesis if a trailing closure
+                // is present as the only argument of the function
+                if arguments.count > 0 || trailingClosure == nil {
+                    target.outputInline("(")
+                    
+                    commaSeparated(arguments) { arg in
+                        if let label = arg.label {
+                            target.outputInline(label)
+                            target.outputInline(": ")
+                        }
+                        
+                        visitExpression(arg.expression)
+                    }
+                    
+                    target.outputInline(")")
+                }
+                
+                // Emit trailing closure now, if present
+                if let trailingClosure = trailingClosure {
+                    // Nicer spacing
+                    target.outputInline(" ")
+                    visitExpression(trailingClosure)
+                }
             }
         }
+        
+        recursePostfix(exp.op)
     }
     
     func visitConstant(_ exp: ConstantExpression) {

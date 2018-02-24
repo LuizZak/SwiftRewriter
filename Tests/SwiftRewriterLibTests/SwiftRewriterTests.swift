@@ -794,4 +794,24 @@ class SwiftRewriterTests: XCTestCase {
             // #endif
             """)
     }
+    
+    func testPostfixAfterCastUsesOptionalPostfix() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)method {
+                [(NSString*)aValue someMethod];
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func method() {
+                    (aValue as? String)?.someMethod()
+                }
+            }
+            """)
+    }
 }
