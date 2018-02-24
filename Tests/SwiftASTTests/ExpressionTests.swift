@@ -331,6 +331,17 @@ class ExpressionTests: XCTestCase {
                        Expression.unknown(UnknownASTContext(context: "1")))
     }
     
+    func testUnwrappingParens() {
+        XCTAssertEqual(Expression.constant(1).unwrappingParens,
+                       Expression.constant(1))
+        
+        XCTAssertEqual(Expression.parens(Expression.constant(1)).unwrappingParens,
+                       Expression.constant(1))
+        
+        XCTAssertEqual(Expression.parens(Expression.parens(Expression.constant(1))).unwrappingParens,
+                       Expression.constant(1))
+    }
+    
     func anExpression(ident: String = "a") -> Expression {
         return .identifier(ident)
     }

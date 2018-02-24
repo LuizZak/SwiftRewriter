@@ -801,6 +801,8 @@ class SwiftRewriterTests: XCTestCase {
             @implementation MyClass
             - (void)method {
                 [(NSString*)aValue someMethod];
+                ((NSString*)aValue).property;
+                ((NSString*)aValue)[123];
             }
             @end
             """,
@@ -810,6 +812,8 @@ class SwiftRewriterTests: XCTestCase {
                 @objc
                 func method() {
                     (aValue as? String)?.someMethod()
+                    (aValue as? String)?.property
+                    (aValue as? String)?[123]
                 }
             }
             """)

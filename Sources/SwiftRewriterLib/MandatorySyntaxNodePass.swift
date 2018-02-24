@@ -6,7 +6,7 @@ class MandatorySyntaxNodePass: SyntaxNodeRewriterPass {
     
     override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         // Optionalize access to casted value's members
-        if exp.exp is CastExpression {
+        if exp.exp.unwrappingParens is CastExpression {
             exp.op = .optionalAccess(exp.op)
         }
         

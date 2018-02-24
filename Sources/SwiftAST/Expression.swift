@@ -528,6 +528,19 @@ public extension Expression {
     public var asParens: ParensExpression? {
         return cast()
     }
+    
+    /// Returns the first non-`ParensExpression` child expression of this syntax
+    /// node.
+    ///
+    /// If `self` is not an instance of `ParensExpression`, self is returned
+    /// instead.
+    public var unwrappingParens: Expression {
+        if let parens = self as? ParensExpression {
+            return parens.exp.unwrappingParens
+        }
+        
+        return self
+    }
 }
 
 public class IdentifierExpression: Expression {
