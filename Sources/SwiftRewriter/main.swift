@@ -24,10 +24,10 @@ do {
             
             let converter = SwiftRewriter(input: input, output: output)
             
-            converter.expressionPasses.append(AllocInitExpressionPass())
-            converter.expressionPasses.append(CoreGraphicsExpressionPass())
-            converter.expressionPasses.append(FoundationExpressionPass())
-            converter.expressionPasses.append(UIKitExpressionPass())
+            converter.syntaxNodeRewriters.append(AllocInitExpressionPass())
+            converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
+            converter.syntaxNodeRewriters.append(FoundationExpressionPass())
+            converter.syntaxNodeRewriters.append(UIKitExpressionPass())
             
             try converter.rewrite()
             

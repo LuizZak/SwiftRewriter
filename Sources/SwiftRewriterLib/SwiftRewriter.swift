@@ -23,7 +23,7 @@ public class SwiftRewriter {
     
     /// An expression pass is executed for every method expression to allow custom
     /// transformations to be applied to resulting code.
-    public var expressionPasses: [SyntaxNodeRewriterPass] = []
+    public var syntaxNodeRewriters: [SyntaxNodeRewriterPass] = []
     
     /// Custom source pre-processors that are applied to each input source code
     /// before parsing.
@@ -180,7 +180,7 @@ public class SwiftRewriter {
     private func performIntentionPasses() {
         let context = IntentionPassContext(intentions: intentionCollection, types: knownTypes)
         
-        let syntaxPasses = [MandatorySyntaxNodePass()] + expressionPasses
+        let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
         
         let applier = SyntaxNodeRewriterPassApplier(passes: syntaxPasses)
         applier.apply(on: intentionCollection)
