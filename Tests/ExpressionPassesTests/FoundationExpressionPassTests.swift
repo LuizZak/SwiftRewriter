@@ -114,6 +114,18 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         )
     }
     
+    func testNSDateDateCreator() {
+        assertTransformParsed(
+            original: "[NSDate date]",
+            expected: .postfix(.identifier("NSDate"), .functionCall(arguments: []))
+        )
+        // Test unrecognized members are left alone
+        assertTransformParsed(
+            original: "[NSDate date:thing]",
+            expected: "NSDate.date(thing)"
+        )
+    }
+    
     func testClassTypeMethod() {
         // Uppercase -> <Type>.self
         assertTransformParsed(

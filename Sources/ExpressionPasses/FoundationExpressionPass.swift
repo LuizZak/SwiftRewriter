@@ -108,7 +108,8 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
              ("NSDictionary", "dictionary"),
              ("NSMutableDictionary", "dictionary"),
              ("NSSet", "set"),
-             ("NSMutableSet", "set"):
+             ("NSMutableSet", "set"),
+             ("NSDate", "date"):
             return .postfix(.identifier(typeName), .functionCall(arguments: []))
         default:
             return nil

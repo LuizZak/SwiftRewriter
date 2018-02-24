@@ -14,13 +14,13 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         // Ternary expression
         if ctx.QUESTION() != nil {
             guard let exp = ctx.expression(0)?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             let ifTrue = ctx.trueExpression?.accept(self)
             
             guard let ifFalse = ctx.falseExpression?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             if let ifTrue = ifTrue {
@@ -32,16 +32,16 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         // Assignment expression
         if let assignmentExpression = ctx.assignmentExpression {
             guard let unaryExpr = ctx.unaryExpression()?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             guard let assignExpr = assignmentExpression.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             guard let assignOp = ctx.assignmentOperator() else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             guard let op = swiftOperator(from: assignOp.getText()) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             return
@@ -50,10 +50,10 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         // Binary expression
         if ctx.expression().count == 2 {
             guard let lhs = ctx.expression(0)?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             guard let rhs = ctx.expression(1)?.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             // << / >>
@@ -65,7 +65,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             }
             
             guard let op = ctx.op?.getText() else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             if let op = SwiftOperator(rawValue: op) {
@@ -73,7 +73,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             }
         }
         
-        return .unknown(UnknownASTContext(context: ctx))
+        return .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitRangeExpression(_ ctx: ObjectiveCParser.RangeExpressionContext) -> Expression? {
@@ -89,7 +89,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return .binary(lhs: exp1, op: .closedRange, rhs: exp2)
         }
         
-        return .unknown(UnknownASTContext(context: ctx))
+        return .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitConstantExpression(_ ctx: ObjectiveCParser.ConstantExpressionContext) -> Expression? {
@@ -100,7 +100,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return constant.accept(self)
         }
         
-        return .unknown(UnknownASTContext(context: ctx))
+        return .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitCastExpression(_ ctx: ObjectiveCParser.CastExpressionContext) -> Expression? {
@@ -115,7 +115,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return Expression.cast(cast, type: swiftType)
         }
         
-        return .unknown(UnknownASTContext(context: ctx))
+        return .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitUnaryExpression(_ ctx: ObjectiveCParser.UnaryExpressionContext) -> Expression? {
@@ -127,7 +127,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         if let op = ctx.unaryOperator(), let exp = ctx.castExpression()?.accept(self) {
             guard let swiftOp = SwiftOperator(rawValue: op.getText()) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             return Expression.unary(op: swiftOp, exp)
@@ -141,21 +141,21 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         
         if let primary = ctx.primaryExpression() {
             guard let prim = primary.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             result = prim
         } else if let postfixExpression = ctx.postfixExpression() {
             guard let postfix = postfixExpression.accept(self) else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             guard let identifier = ctx.identifier() else {
-                return .unknown(UnknownASTContext(context: ctx))
+                return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
             result = .postfix(postfix, .member(identifier.getText()))
         } else {
-            return .unknown(UnknownASTContext(context: ctx))
+            return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
         for post in ctx.postfixExpr() {
@@ -193,17 +193,17 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     
     public override func visitMessageExpression(_ ctx: ObjectiveCParser.MessageExpressionContext) -> Expression? {
         guard let receiverExpression = ctx.receiver()?.expression() else {
-            return .unknown(UnknownASTContext(context: ctx))
+            return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         guard let receiver = receiverExpression.accept(self) else {
-            return .unknown(UnknownASTContext(context: ctx))
+            return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
         if let identifier = ctx.messageSelector()?.selector()?.identifier()?.getText() {
             return Expression.postfix(Expression.postfix(receiver, .member(identifier)), .functionCall(arguments: []))
         }
         guard let keywordArguments = ctx.messageSelector()?.keywordArgument() else {
-            return .unknown(UnknownASTContext(context: ctx))
+            return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
         var name: String = ""
@@ -216,7 +216,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 // First keyword is always the method's name, Swift doesn't support
                 // 'nameless' methods!
                 if keyword.selector() == nil {
-                    return .unknown(UnknownASTContext(context: ctx))
+                    return .unknown(UnknownASTContext(context: ctx.getText()))
                 }
                 
                 name = selectorText
@@ -224,7 +224,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             
             for keywordArgumentType in keyword.keywordArgumentType() {
                 guard let expressions = keywordArgumentType.expressions() else {
-                    return .unknown(UnknownASTContext(context: ctx))
+                    return .unknown(UnknownASTContext(context: ctx.getText()))
                 }
                 
                 for (j, expression) in expressions.expression().enumerated() {
@@ -262,7 +262,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                         ctx.boxExpression(),
                         ctx.selectorExpression(),
                         ctx.blockExpression()
-                ) ?? .unknown(UnknownASTContext(context: ctx))
+                ) ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitArrayExpression(_ ctx: ObjectiveCParser.ArrayExpressionContext) -> Expression? {
@@ -344,7 +344,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         
         let compoundVisitor = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: self)
         guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
-            return .unknown(UnknownASTContext(context: ctx))
+            return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
         let swiftReturnType =
@@ -411,7 +411,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     
     public override func visitSelectorExpression(_ ctx: ObjectiveCParser.SelectorExpressionContext) -> Expression? {
         guard let selectorName = ctx.selectorName()?.getText() else {
-            return .unknown(UnknownASTContext(context: ctx))
+            return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
         return .postfix(.identifier("Selector"),
@@ -445,7 +445,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 return .unlabeled(expEnum)
             }
             
-            return .unlabeled(.unknown(UnknownASTContext(context: ctx)))
+            return .unlabeled(.unknown(UnknownASTContext(context: ctx.getText())))
         }
     }
 }

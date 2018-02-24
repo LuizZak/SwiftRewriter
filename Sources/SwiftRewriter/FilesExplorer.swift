@@ -26,7 +26,7 @@ private func presentFileSelection(in menu: MenuController, list: [Path], prompt:
             }
             
             guard let int = Int(input), int > 0 && int <= list.count else {
-                return .showMessageThenLoop("Expected an value between 1 and \(list.count)")
+                return .showMessageThenLoop("Expected an value between 1 and \(list.count)".terminalColorize(.red))
             }
             
             items = [list[int]]
@@ -69,7 +69,7 @@ public class FilesExplorerService {
             
             pages.displayPages(withProvider: filesList)
         } catch {
-            menu.console.printLine("Failed to navigate directory contents!")
+            menu.console.printLine("Failed to navigate directory contents!".terminalColorize(.red))
         }
     }
 }
@@ -110,10 +110,10 @@ fileprivate class FileFinderInterface {
                     let exists = fileManager.fileExists(atPath: pathInput, isDirectory: &isDirectory)
 
                     if !exists {
-                        return .error("Path '\(pathInput)' does not exists!")
+                        return .error("Path '\(pathInput)' does not exists!".terminalColorize(.red))
                     }
                     if !isDirectory.boolValue {
-                        return .error("Path '\(pathInput)' is not a directory!")
+                        return .error("Path '\(pathInput)' is not a directory!".terminalColorize(.red))
                     }
 
                     return .success(pathInput)
@@ -134,7 +134,7 @@ fileprivate class FileFinderInterface {
             console.clearScreen()
 
             guard let files = fileManager.enumerator(atPath: path)?.lazy else {
-                console.printLine("Failed to iterate files from path \(path)")
+                console.printLine("Failed to iterate files from path \(path)".terminalColorize(.red))
                 return
             }
 
@@ -152,7 +152,7 @@ fileprivate class FileFinderInterface {
             console.printLine("Searching...")
             
             let matchesSource = files.compactMap { $0 as? String }.filter {
-                ($0 as NSString).pathExtension == "m" && 
+                (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h") &&
                 ($0 as NSString).lastPathComponent.localizedCaseInsensitiveContains(fileName)
             }
             var matches = Array(matchesSource.prefix(300))
@@ -161,7 +161,7 @@ fileprivate class FileFinderInterface {
             }
             
             if matches.count == 0 {
-                console.printLine("Found 0 matches in directory!")
+                console.printLine("Found 0 matches in directory!".terminalColorize(.yellow))
                 _=console.readLineWith(prompt: "Press [Enter] to return")
                 continue
             }
@@ -182,7 +182,7 @@ fileprivate class FileFinderInterface {
                     try rewriterService.rewrite(files: fileUrls)
                     _=console.readLineWith(prompt: "\nPress [Enter] to convert another file")
                 } catch {
-                    console.printLine("Error while converting file: \(error)")
+                    console.printLine("Error while converting file: \(error)".terminalColorize(.red))
                     _=console.readLineWith(prompt: "Press [Enter] to return")
                     return
                 }
@@ -235,7 +235,7 @@ fileprivate class FilesExplorer: PagesCommandHandler {
     
     func navigateOption(_ input: String) -> Pages.PagesCommandResult {
         guard let fileList = fileList else {
-            return .quit("Error: No file list to explore. Returning...")
+            return .quit("Error: No file list to explore. Returning...".terminalColorize(.red))
         }
         
         let newPath: URL
@@ -264,12 +264,12 @@ fileprivate class FilesExplorer: PagesCommandHandler {
         // Check if it's an index
         else if let index = Int(input) {
             guard index > 0 && index <= fileList.count else {
-                return .loop("Invalid index \(index): Only have \(fileList.count) files to select!")
+                return .loop("Invalid index \(index): Only have \(fileList.count) files to select!".terminalColorize(.red))
             }
             
             newPath = fileList.fileList[index - 1]
         } else {
-            return .loop("Could not locate file or folder '\(input)'")
+            return .loop("Could not locate file or folder '\(input)'".terminalColorize(.red))
         }
         
         do {
@@ -280,7 +280,7 @@ fileprivate class FilesExplorer: PagesCommandHandler {
                 pages.displayPages(withProvider: newList)
             }
         } catch {
-            return .loop("Error during operation: \(error)")
+            return .loop("Error during operation: \(error)".terminalColorize(.red))
         }
     }
     
@@ -306,7 +306,7 @@ fileprivate class FilesExplorer: PagesCommandHandler {
             do {
                 try rewriterService.rewrite(files: [newPath])
             } catch {
-                console.printLine("Error during rewriting: \(error)")
+                console.printLine("Error during rewriting: \(error)".terminalColorize(.red))
                 _=console.readLineWith(prompt: "Press [Enter] to continue")
             }
             
@@ -318,12 +318,12 @@ fileprivate class FilesExplorer: PagesCommandHandler {
             
             if !FileManager.default.fileExists(atPath: searchPath.relativePath,
                                                isDirectory: &isDirectory) {
-                console.printLine("Directory \(searchPath) does not exists.")
+                console.printLine("Directory \(searchPath) does not exists.".terminalColorize(.red))
                 _=console.readLineWith(prompt: "Press [Enter] to continue")
                 return false
             }
             if !isDirectory.boolValue {
-                console.printLine("Path \(searchPath) is not a directory")
+                console.printLine("Path \(searchPath) is not a directory".terminalColorize(.red))
                 _=console.readLineWith(prompt: "Press [Enter] to continue")
                 return false
             }
@@ -360,7 +360,7 @@ fileprivate class FilesExplorer: PagesCommandHandler {
             }
             return true
         } catch {
-            console.printLine("Error while loading files: \(error)")
+            console.printLine("Error while loading files: \(error)".terminalColorize(.red))
             _=console.readLineWith(prompt: "Press [Enter] to continue")
             return false
         }
