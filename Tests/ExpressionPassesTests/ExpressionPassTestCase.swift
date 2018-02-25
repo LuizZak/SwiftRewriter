@@ -56,18 +56,6 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     func makeContext() -> ExpressionPassContext {
-        return ExpressionPassContext(knownTypes: MockKnownTypeStorage())
-    }
-    
-    class MockKnownTypeStorage: KnownTypeStorage {
-        /// Registers a new type
-        func registerType(_ type: KnownType) {
-            
-        }
-        
-        /// Recovers a type by name on this storage
-        func recoverType(named name: String) -> KnownType? {
-            return nil
-        }
+        return ExpressionPassContext(typeSystem: DefaultTypeSystem())
     }
 }

@@ -11,14 +11,11 @@ public class SwiftWriter {
     let context = TypeConstructionContext()
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
-    let knownTypes: KnownTypeStorage
     var options: ASTWriterOptions
     
-    public init(intentions: IntentionCollection, knownTypes: KnownTypeStorage,
-                options: ASTWriterOptions, diagnostics: Diagnostics,
-                output: WriterOutput) {
+    public init(intentions: IntentionCollection, options: ASTWriterOptions,
+                diagnostics: Diagnostics, output: WriterOutput) {
         self.intentions = intentions
-        self.knownTypes = knownTypes
         self.options = options
         self.diagnostics = diagnostics
         self.output = output

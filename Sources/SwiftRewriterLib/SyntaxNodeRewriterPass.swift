@@ -2,18 +2,13 @@ import SwiftAST
 
 /// Context for an `SyntaxNodeRewriterPass` execution.
 public struct ExpressionPassContext {
-    public static let empty = ExpressionPassContext(knownTypes: _Source())
+    public static let empty =
+        ExpressionPassContext(typeSystem: DefaultTypeSystem())
     
-    public let knownTypes: KnownTypeSource
+    public let typeSystem: TypeSystem
     
-    public init(knownTypes: KnownTypeSource) {
-        self.knownTypes = knownTypes
-    }
-    
-    private struct _Source: KnownTypeSource {
-        func recoverType(named name: String) -> KnownType? {
-            return nil
-        }
+    public init(typeSystem: TypeSystem) {
+        self.typeSystem = typeSystem
     }
 }
 

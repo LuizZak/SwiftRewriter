@@ -11,7 +11,6 @@ public class SwiftRewriter {
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
-    private var knownTypes: KnownTypeStorage = KnownTypeStorageImpl()
     private var typeSystem: IntentionCollectionTypeSystem
     
     /// During parsing, the index of each NS_ASSUME_NONNULL_BEGIN/END pair is
@@ -188,7 +187,9 @@ public class SwiftRewriter {
     }
     
     private func performIntentionPasses() {
-        let context = IntentionPassContext(intentions: intentionCollection, types: knownTypes)
+        let context =
+            IntentionPassContext(intentions: intentionCollection,
+                                 typeSystem: typeSystem)
         
         for pass in IntentionPasses.passes {
             pass.apply(on: intentionCollection, context: context)
@@ -200,13 +201,15 @@ public class SwiftRewriter {
             ExpressionTypeResolver(typeSystem: typeSystem,
                                    intrinsicVariables: EmptyCodeScope())
         
-        let applier = SyntaxNodeRewriterPassApplier(passes: syntaxPasses, typeResolver: typeResolver)
+        let applier =
+            SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
+                                          typeResolver: typeResolver)
+        
         applier.apply(on: intentionCollection)
     }
     
     private func outputDefinitions() {
         let writer = SwiftWriter(intentions: intentionCollection,
-                                 knownTypes: knownTypes,
                                  options: writerOptions,
                                  diagnostics: diagnostics,
                                  output: outputTarget)

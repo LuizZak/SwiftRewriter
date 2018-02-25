@@ -11,7 +11,7 @@ public protocol IntentionPass {
 /// Context for an intention pass
 public struct IntentionPassContext {
     public let intentions: IntentionCollection
-    public let types: KnownTypeStorage
+    public let typeSystem: TypeSystem
 }
 
 /// Gets an array of intention passes to apply before writing the final Swift code.
