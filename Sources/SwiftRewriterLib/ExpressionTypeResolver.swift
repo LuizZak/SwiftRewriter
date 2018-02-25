@@ -354,6 +354,11 @@ extension ExpressionTypeResolver {
         switch swiftType {
         case .typeName(let typeName):
             return findTypeNamed(typeName)
+            
+        // Meta-types recurse on themselves
+        case .metatype(for: let inner):
+            return findType(for: inner)
+            
         // Other Swift types are not supported, at the moment.
         default:
             return nil
@@ -518,7 +523,10 @@ private class MemberInvocationResolver {
             guard let knownType = typeResolver.findType(for: type) else {
                 return postfix.makeErrorTyped()
             }
-            guard let method = method(memberName: name, arguments: arguments, in: knownType) else {
+            guard let method = method(isStatic: type.isMetatype,
+                                      memberName: name,
+                                      arguments: arguments,
+                                      in: knownType) else {
                 return postfix.makeErrorTyped()
             }
             
@@ -553,16 +561,15 @@ private class MemberInvocationResolver {
         return arguments.map { $0.label ?? "_" }
     }
     
-    func method(memberName: String, arguments: [FunctionArgument], in type: KnownType) -> KnownMethod? {
+    func method(isStatic: Bool, memberName: String, arguments: [FunctionArgument], in type: KnownType) -> KnownMethod? {
         // Create function signature
         let parameters =
             labels(in: arguments).map { lbl in
                 ParameterSignature.init(label: lbl, name: "", type: .void)
             }
         
-        // TODO: Support class method lookups here
         let signature =
-            FunctionSignature(isStatic: false, name: memberName, returnType: .void,
+            FunctionSignature(isStatic: isStatic, name: memberName, returnType: .void,
                               parameters: parameters)
         
         return type.method(withObjcSelector: signature)

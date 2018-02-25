@@ -185,4 +185,38 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testMessageClassSelf() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass: NSObject
+            + (void)method1;
+            + (NSInteger)method2;
+            @end
+            
+            @implementation MyClass
+            + (void)method1 {
+                [self method2];
+            }
+            + (NSInteger)method2 {
+                return 0;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                static func method1() {
+                    // type: Int
+                    self.method2()
+                }
+                @objc
+                static func method2() -> Int {
+                    return 0
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

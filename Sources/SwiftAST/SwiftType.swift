@@ -20,6 +20,15 @@ indirect public enum SwiftType: Equatable {
         }
     }
     
+    public var isMetatype: Bool {
+        switch self {
+        case .metatype:
+            return true
+        default:
+            return false
+        }
+    }
+    
     public var isImplicitlyUnwrapped: Bool {
         switch self {
         case .implicitUnwrappedOptional:
