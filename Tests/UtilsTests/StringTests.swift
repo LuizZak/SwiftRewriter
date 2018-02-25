@@ -68,6 +68,44 @@ class StringTests: XCTestCase {
             """, result)
     }
     
+    func testMarkDifferenceBetweenEqualStrings() {
+        let str1 = """
+            Abc
+            Def
+            Ghi
+            """
+        let str2 = """
+            Abc
+            Def
+            Ghi
+            """
+        
+        let result = str1.makeDifferenceMarkString(against: str2)
+        
+        XCTAssertEqual("""
+            Abc
+            Def
+            Ghi
+             ~ Strings are equal.
+            """, result)
+    }
+    
+    func testMarkDifferenceBetweenStringsAtBeginning() {
+        let str1 = """
+            Abc
+            """
+        let str2 = """
+            Zwx
+            """
+        
+        let result = str1.makeDifferenceMarkString(against: str2)
+        
+        XCTAssertEqual("""
+            Abc
+             ~ Difference at start of string.
+            """, result)
+    }
+    
     func testRangeOfComments() {
         let input = """
         // A comment!
