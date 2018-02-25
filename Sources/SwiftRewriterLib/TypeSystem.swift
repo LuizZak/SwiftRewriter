@@ -46,7 +46,7 @@ public class DefaultTypeSystem: TypeSystem {
                 return true
             }
             
-            current = c.supertype
+            current = c.supertype?.asKnownType
         }
         
         return false

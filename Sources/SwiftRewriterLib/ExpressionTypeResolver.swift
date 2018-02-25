@@ -8,6 +8,11 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     /// already have a non-nil `resolvedType` field.
     public var ignoreResolvedExpressions: Bool = false
     
+    public override init() {
+        self.typeSystem = DefaultTypeSystem()
+        super.init()
+    }
+    
     public init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
         super.init()
@@ -54,7 +59,9 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         switch stmt.exp.resolvedType {
         case .generic("Array", let args)? where args.count == 1:
             iteratorType = args[0]
-        case .nsArray?:
+            
+        // Sub-types of array iterate as .anyObject
+        case .typeName(let typeName)? where typeSystem.isType(typeName, subtypeOf: "NSArray"):
             iteratorType = .anyObject
         default:
             iteratorType = .errorType

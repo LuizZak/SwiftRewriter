@@ -1,9 +1,9 @@
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
-public protocol KnownType {
+public protocol KnownType: KnownSupertypeConvertible {
     /// The supertype for this known type, if any.
-    var supertype: KnownType? { get }
+    var supertype: KnownSupertype? { get }
     
     /// Name for this known type
     var typeName: String { get }
@@ -24,10 +24,46 @@ public protocol KnownType {
     func constructor(withArgumentLabels labels: [String]) -> KnownConstructor?
 }
 
+/// Defines the known supertype of a `KnownType`
+///
+/// - knownType: A concrete known type reference
+/// - typeName: The supertype that is referenced by a loose type name
+public enum KnownSupertype {
+    case knownType(KnownType)
+    case typeName(String)
+    
+    public init(_ type: KnownSupertypeConvertible) {
+        self = type.asKnownSupertype
+    }
+    
+    public var asKnownType: KnownType? {
+        switch self {
+        case .knownType(let type):
+            return type
+        case .typeName:
+            return nil
+        }
+    }
+}
+
+public protocol KnownSupertypeConvertible {
+    var asKnownSupertype: KnownSupertype { get }
+}
+
+extension String: KnownSupertypeConvertible {
+    public var asKnownSupertype: KnownSupertype {
+        return .typeName(self)
+    }
+}
+
 /// Default implementations
 public extension KnownType {
-    public var supertype: KnownType? {
+    public var supertype: KnownSupertype? {
         return nil
+    }
+    
+    public var asKnownSupertype: KnownSupertype {
+        return .knownType(self)
     }
     
     /// Gets a constructor matching a given argument label set

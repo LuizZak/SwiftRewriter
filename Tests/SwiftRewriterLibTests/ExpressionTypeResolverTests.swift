@@ -144,7 +144,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testSubscriptionInArray() {
         let exp = Expression.postfix(.identifier("value"), .subscript(.constant(1)))
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .array(.string))
             .resolve()
             .thenAssertExpression(resolvedAs: .string)
@@ -153,7 +153,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testSubscriptionInArrayWithNonInteger() {
         let exp = Expression.postfix(.identifier("value"), .subscript(.constant("Not an integer!")))
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsArray)
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
@@ -162,7 +162,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testSubscriptionInNSArray() {
         let exp = Expression.postfix(.identifier("value"), .subscript(.constant(1)))
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsArray)
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.anyObject))
@@ -171,7 +171,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testSubscriptionInDictionary() {
         let exp = Expression.postfix(.identifier("value"), .subscript(.constant("abc")))
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .dictionary(key: .string, value: .string))
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.string))
@@ -180,7 +180,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testSubscriptionInNSDictionary() {
         let exp = Expression.postfix(.identifier("value"), .subscript(.constant("abc")))
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsDictionary)
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.anyObject))
@@ -189,7 +189,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testIdentifier() {
         let definition = CodeDefinition(name: "i", type: .int)
         
-        startScopedTest(with: IdentifierExpression(identifier: "i"))
+        startScopedTest(with: IdentifierExpression(identifier: "i"), sut: ExpressionTypeResolver())
             .definingLocal(definition)
             .resolve()
             .thenAssertExpression(resolvedAs: .int)
@@ -199,7 +199,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testIdentifierLackingReference() {
-        startScopedTest(with: IdentifierExpression(identifier: "i"))
+        startScopedTest(with: IdentifierExpression(identifier: "i"), sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
     }
@@ -209,7 +209,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let rhs = IdentifierExpression(identifier: "b")
         let exp = Expression.binary(lhs: lhs, op: .add, rhs: rhs)
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "a", type: .int)
             .definingLocal(name: "b", type: .int)
             .resolve()
@@ -221,7 +221,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             StatementVariableDeclaration(identifier: "a", type: .int, ownership: .strong, isConstant: false, initialization: nil)
             ])
         
-        startScopedTest(with: stmt)
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(name: "a", type: .int)
     }
     
@@ -229,7 +229,8 @@ class ExpressionTypeResolverTests: XCTestCase {
         // An expression `TypeName` should match the metatype resolution to
         // `TypeName`...
         startScopedTest(with:
-                Expression.identifier("TypeName")
+                Expression.identifier("TypeName"),
+                sut: ExpressionTypeResolver()
             )
             .definingEmptyType(named: "TypeName")
             .resolve()
@@ -237,7 +238,8 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         // ...so should be `TypeName.self`...
         startScopedTest(with:
-                Expression.postfix(.identifier("TypeName"), .member("self"))
+                Expression.postfix(.identifier("TypeName"), .member("self")),
+                sut: ExpressionTypeResolver()
             )
             .definingEmptyType(named: "TypeName")
             .resolve()
@@ -245,7 +247,8 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         // ...or `TypeName.self.self`, and so on.
         startScopedTest(with:
-            Expression.postfix(.postfix(.identifier("TypeName"), .member("self")), .member("self"))
+                Expression.postfix(.postfix(.identifier("TypeName"), .member("self")), .member("self")),
+                sut: ExpressionTypeResolver()
             )
             .definingEmptyType(named: "TypeName")
             .resolve()
@@ -267,7 +270,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         // return an instance of that type
         let exp = Expression.postfix(.identifier("TypeName"), .functionCall(arguments: []))
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "TypeName") { builder in
                 return builder.addingConstructor().build()
             }
@@ -280,7 +283,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         // return an .errorType
         let exp = Expression.postfix(.identifier("TypeName"), .functionCall(arguments: []))
         
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingEmptyType(named: "TypeName")
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
@@ -293,7 +296,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let stmt: ForStatement =
             .for(.identifier("i"), exp, body: [])
         
-        startScopedTest(with: stmt)
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(in: stmt.body, name: "i", type: .int)
     }
     
@@ -306,7 +309,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let stmt: ForStatement =
             .for(.identifier("i"), exp, body: [])
         
-        startScopedTest(with: stmt)
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(in: stmt.body, name: "i", type: .anyObject)
     }
 
@@ -319,7 +322,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let stmt: ForStatement =
             .for(.identifier("i"), exp, body: [])
         
-        startScopedTest(with: stmt)
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(in: stmt.body, name: "i", type: .anyObject)
     }
     
@@ -332,7 +335,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let stmt: ForStatement =
             .for(.identifier("i"), exp, body: [])
         
-        startScopedTest(with: stmt)
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(in: stmt.body, name: "i", type: .errorType)
     }
 }
@@ -340,26 +343,26 @@ class ExpressionTypeResolverTests: XCTestCase {
 // MARK: - Test Building Helpers
 
 private extension ExpressionTypeResolverTests {
-    func startScopedTest<T: Statement>(with stmt: T) -> StatementTypeTestBuilder<T> {
-        return StatementTypeTestBuilder(testCase: self, statement: stmt)
+    func startScopedTest<T: Statement>(with stmt: T, sut: ExpressionTypeResolver) -> StatementTypeTestBuilder<T> {
+        return StatementTypeTestBuilder(testCase: self, sut: sut, statement: stmt)
     }
     
-    func startScopedTest<T: Expression>(with exp: T) -> ExpressionTypeTestBuilder<T> {
-        return ExpressionTypeTestBuilder(testCase: self, expression: exp)
+    func startScopedTest<T: Expression>(with exp: T, sut: ExpressionTypeResolver) -> ExpressionTypeTestBuilder<T> {
+        return ExpressionTypeTestBuilder(testCase: self, sut: sut, expression: exp)
     }
     
     func makeAnOptional(_ exp: Expression) -> Expression {
         let typeSystem = DefaultTypeSystem()
-        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        let sut = ExpressionTypeResolver(typeSystem: typeSystem)
         
-        _=resolver.visitExpression(exp)
+        _=sut.visitExpression(exp)
         
         exp.resolvedType = exp.resolvedType.map { .optional($0) }
         return exp
     }
     
     func assertResolve(_ exp: Expression, expect type: SwiftType?, file: String = #file, line: Int = #line) {
-        startScopedTest(with: exp)
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(resolvedAs: type, file: file, line: line)
     }

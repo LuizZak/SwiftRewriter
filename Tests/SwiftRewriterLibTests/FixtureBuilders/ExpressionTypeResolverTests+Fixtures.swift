@@ -60,13 +60,15 @@ extension ExpressionTestResolverTestFixture {
 extension ExpressionTypeResolverTests {
     final class StatementTypeTestBuilder<T: Statement>: ExpressionTestResolverTestFixture {
         let testCase: XCTestCase
+        let sut: ExpressionTypeResolver
         let statement: T
         let typeSystem = DefaultTypeSystem()
         let scope: CodeScopeStatement
         var applied: Bool = false
         
-        init(testCase: XCTestCase, statement: T) {
+        init(testCase: XCTestCase, sut: ExpressionTypeResolver, statement: T) {
             self.testCase = testCase
+            self.sut = sut
             self.statement = statement
             scope = CompoundStatement(statements: [statement])
         }
@@ -109,10 +111,10 @@ extension ExpressionTypeResolverTests {
         func thenAssertDefined(in scope: CodeScopeStatement, name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             // Make sure to apply definitions just before starting assertions
             if !applied {
-                let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
-                resolver.ignoreResolvedExpressions = true
+                sut.typeSystem = typeSystem
+                sut.ignoreResolvedExpressions = true
                 
-                _=statement.accept(resolver)
+                _=statement.accept(sut)
                 applied = true
             }
             
@@ -141,27 +143,30 @@ extension ExpressionTypeResolverTests {
     /// resolving.
     final class ExpressionTypeTestBuilder<T: Expression>: ExpressionTestResolverTestFixture {
         let testCase: XCTestCase
+        let sut: ExpressionTypeResolver
         let expression: T
         let typeSystem = DefaultTypeSystem()
         let scope: CodeScopeStatement
         
-        init(testCase: XCTestCase, expression: T) {
+        init(testCase: XCTestCase, sut: ExpressionTypeResolver, expression: T) {
             self.testCase = testCase
+            self.sut = sut
             self.expression = expression
             scope = CompoundStatement(statements: [.expression(expression)])
         }
         
-        init(testCase: XCTestCase, expression: T, scope: CodeScopeStatement) {
+        init(testCase: XCTestCase, sut: ExpressionTypeResolver, expression: T, scope: CodeScopeStatement) {
             self.testCase = testCase
+            self.sut = sut
             self.expression = expression
             self.scope = scope
         }
         
         func resolve() -> Asserter {
-            let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
-            resolver.ignoreResolvedExpressions = true
+            sut.typeSystem = typeSystem
+            sut.ignoreResolvedExpressions = true
             
-            _=resolver.visitExpression(expression)
+            _=sut.visitExpression(expression)
             
             return Asserter(testCase: testCase, expression: expression, scope: scope)
         }

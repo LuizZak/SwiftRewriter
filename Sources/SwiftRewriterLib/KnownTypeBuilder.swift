@@ -5,7 +5,7 @@ import SwiftAST
 public class KnownTypeBuilder {
     private let type: DummyType
     
-    public init(typeName: String, supertype: KnownType? = nil) {
+    public init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
         type = DummyType(typeName: typeName, supertype: supertype)
     }
     
@@ -84,11 +84,11 @@ private class DummyType: KnownType {
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []
     var knownProtocolConformances: [KnownProtocolConformance] = []
-    var supertype: KnownType? = nil
+    var supertype: KnownSupertype?
     
-    init(typeName: String, supertype: KnownType? = nil) {
+    init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
         self.typeName = typeName
-        self.supertype = supertype
+        self.supertype = supertype?.asKnownSupertype
     }
 }
 
