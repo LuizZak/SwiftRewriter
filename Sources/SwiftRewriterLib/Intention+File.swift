@@ -176,6 +176,11 @@ public struct FunctionSignature: Equatable {
         isStatic = false
     }
     
+    /// Returns a `SwiftType.block`-equivalent type for this function signature
+    public var swiftClosureType: SwiftType {
+        return .block(returnType: returnType, parameters: parameters.map { $0.type })
+    }
+    
     public var droppingNullability: FunctionSignature {
         let parameters = self.parameters.map {
             ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)

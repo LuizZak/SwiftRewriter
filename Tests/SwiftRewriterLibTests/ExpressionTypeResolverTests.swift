@@ -413,6 +413,21 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(in: stmt.body, localNamed: "i", type: .errorType)
     }
+    
+    func testMemberLookup() {
+        let exp = Expression.postfix(.identifier("a"), .member("b"))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder
+                        .addingProperty(named: "b", type: .int)
+                        .build()
+            }
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+    }
 }
 
 // MARK: - Test Building Helpers

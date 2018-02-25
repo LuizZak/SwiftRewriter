@@ -282,104 +282,8 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         _=super.visitPostfix(exp)
         
-        // Propagate error type
-        if exp.exp.isErrorTyped {
-            return exp.makeErrorTyped()
-        }
-        
-        switch exp.op {
-        case .subscript(let sub):
-            guard let expType = exp.exp.resolvedType else {
-                return exp
-            }
-            guard let subType = sub.resolvedType else {
-                return exp
-            }
-            // Propagate error type
-            if sub.isErrorTyped {
-                return exp.makeErrorTyped()
-            }
-            
-            // Array<T> / Dictionary<T> resolving
-            switch expType {
-            case .generic("Array", let params) where params.count == 1:
-                // Can only subscript arrays with integers!
-                if subType != .int {
-                    return exp.makeErrorTyped()
-                }
-                
-                exp.resolvedType = params[0]
-                
-            case .generic("Dictionary", let params) where params.count == 2:
-                exp.resolvedType = .optional(params[1])
-                
-            // Sub-types of NSArray index as .anyObject
-            case .typeName(let typeName) where typeSystem.isType(typeName, subtypeOf: "NSArray"):
-                if subType != .int {
-                    return exp.makeErrorTyped()
-                }
-                
-                exp.resolvedType = .anyObject
-            
-            // Sub-types of NSDictionary index as .anyObject
-            case .typeName(let typeName) where typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
-                exp.resolvedType = .optional(.anyObject)
-                
-            default:
-                break
-            }
-            
-            
-        // TODO: Generalize these matchers to find methods using signatures of the
-        // call to locate the target methods and use their resulting types as the
-        // expression's result
-        // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
-        case .functionCall(let args) where exp.exp.asPostfix?.exp.asIdentifier != nil && args.count == 0:
-            guard let target = exp.exp.asPostfix?.exp.asIdentifier else {
-                break
-            }
-            guard exp.exp.asPostfix?.op == .member("init") else {
-                break
-            }
-            guard case .metatype(let innerType)? = target.resolvedType else {
-                break
-            }
-            guard let type = findType(for: innerType) else {
-                break
-            }
-            guard type.constructor(withArgumentLabels: args.map { $0.label ?? "_" }) != nil else {
-                break
-            }
-            
-            exp.resolvedType = innerType
-        // Parameterless type constructor
-        case .functionCall(let args) where args.count == 0:
-            guard let typeName = exp.exp.asIdentifier?.definition?.typeName else {
-                break
-            }
-            
-            // Search type names
-            guard let type = typeSystem.knownTypeWithName(typeName) else {
-                break
-            }
-            
-            // Verify a constructor matches a set of parameters
-            if type.constructor(withArgumentLabels: []) != nil {
-                exp.resolvedType = .typeName(typeName)
-            } else {
-                exp.resolvedType = .errorType
-            }
-            
-        // Meta-type fetching (TypeName.self, TypeName.self.self, etc.)
-        case .member("self"):
-            exp.resolvedType = exp.exp.resolvedType
-            
-        // TODO: Support general function calling and member lookup
-        default:
-            break
-        }
-        
-        return exp
+        let resolver = MemberInvocationResolver(typeResolver: self)
+        return resolver.resolve(postfix: exp)
     }
     
     // MARK: - Array and Dictionary literal resolving
@@ -477,5 +381,190 @@ extension ExpressionTypeResolver {
         }
         
         return nil
+    }
+}
+
+/// Logic for resolving member invocations in expressions
+private class MemberInvocationResolver {
+    let typeResolver: ExpressionTypeResolver
+    
+    init(typeResolver: ExpressionTypeResolver) {
+        self.typeResolver = typeResolver
+    }
+    
+    func resolve(postfix exp: PostfixExpression) -> Expression {
+        switch exp.op {
+        case .subscript(let sub):
+            // Propagate error type
+            if exp.exp.isErrorTyped {
+                return exp.makeErrorTyped()
+            }
+            
+            guard let expType = exp.exp.resolvedType else {
+                return exp
+            }
+            guard let subType = sub.resolvedType else {
+                return exp
+            }
+            // Propagate error type
+            if sub.isErrorTyped {
+                return exp.makeErrorTyped()
+            }
+            
+            // Array<T> / Dictionary<T> resolving
+            switch expType {
+            case .generic("Array", let params) where params.count == 1:
+                // Can only subscript arrays with integers!
+                if subType != .int {
+                    return exp.makeErrorTyped()
+                }
+                
+                exp.resolvedType = params[0]
+                
+            case .generic("Dictionary", let params) where params.count == 2:
+                exp.resolvedType = .optional(params[1])
+                
+            // Sub-types of NSArray index as .anyObject
+            case .typeName(let typeName) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
+                if subType != .int {
+                    return exp.makeErrorTyped()
+                }
+                
+                exp.resolvedType = .anyObject
+                
+            // Sub-types of NSDictionary index as .anyObject
+            case .typeName(let typeName) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
+                exp.resolvedType = .optional(.anyObject)
+                
+            default:
+                break
+            }
+            
+        case .functionCall(let args):
+            return handleFunctionCall(postfix: exp, arguments: args)
+            
+        // Meta-type fetching (TypeName.self, TypeName.self.self, etc.)
+        case .member("self"):
+            // Propagate error type
+            if exp.exp.isErrorTyped {
+                return exp.makeErrorTyped()
+            }
+            
+            exp.resolvedType = exp.exp.resolvedType
+            
+        case .member(let member):
+            // Propagate error type
+            if exp.exp.isErrorTyped {
+                return exp.makeErrorTyped()
+            }
+            
+            guard let innerType = exp.exp.resolvedType else {
+                return exp.makeErrorTyped()
+            }
+            guard let type = typeResolver.findType(for: innerType) else {
+                return exp.makeErrorTyped()
+            }
+            guard let prop = type.property(named: member) else {
+                return exp.makeErrorTyped()
+            }
+            
+            exp.resolvedType = prop.storage.type
+        
+        case .optionalAccess:
+            // TODO: Support .optionalAccess here
+            break
+        }
+        
+        return exp
+    }
+    
+    func handleFunctionCall(postfix: PostfixExpression, arguments: [FunctionArgument]) -> Expression {
+        // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
+        if let target = postfix.exp.asPostfix?.exp.asIdentifier,
+            postfix.exp.asPostfix?.op == .member("init") && arguments.count == 0
+        {
+            guard let metatype = extractMetatype(from: target) else {
+                return postfix.makeErrorTyped()
+            }
+            guard let knownType = typeResolver.findType(for: metatype) else {
+                return postfix.makeErrorTyped()
+            }
+            guard knownType.constructor(withArgumentLabels: labels(in: arguments)) != nil else {
+                return postfix.makeErrorTyped()
+            }
+            
+            postfix.resolvedType = metatype
+            
+            return postfix
+        }
+        // Direct type constuctor `MyClass([params])`
+        if let target = postfix.exp.asIdentifier, let metatype = extractMetatype(from: target) {
+            guard let knownType = typeResolver.findType(for: metatype) else {
+                return postfix.makeErrorTyped()
+            }
+            guard knownType.constructor(withArgumentLabels: labels(in: arguments)) != nil else {
+                return postfix.makeErrorTyped()
+            }
+            
+            postfix.resolvedType = metatype
+            
+            return postfix
+        }
+        // Selector invocation
+        if let target = postfix.exp.asPostfix?.exp, case .member(let name)? = postfix.exp.asPostfix?.op {
+            guard let type = target.resolvedType else {
+                return postfix.makeErrorTyped()
+            }
+            guard let knownType = typeResolver.findType(for: type) else {
+                return postfix.makeErrorTyped()
+            }
+            guard let method = method(memberName: name, arguments: arguments, in: knownType) else {
+                return postfix.makeErrorTyped()
+            }
+            
+            postfix.exp.resolvedType = method.signature.swiftClosureType
+            postfix.resolvedType = method.signature.returnType
+            
+            return postfix
+        }
+        
+        return postfix
+    }
+    
+    func extractMetatype(from exp: Expression) -> SwiftType? {
+        if case .metatype(let type)? = exp.resolvedType {
+            return type
+        }
+        
+        guard let target = exp.asPostfix?.exp.asIdentifier else {
+            return nil
+        }
+        guard exp.asPostfix?.op == .member("init") else {
+            return nil
+        }
+        guard case .metatype(let innerType)? = target.resolvedType else {
+            return nil
+        }
+        
+        return innerType
+    }
+    
+    func labels(in arguments: [FunctionArgument]) -> [String] {
+        return arguments.map { $0.label ?? "_" }
+    }
+    
+    func method(memberName: String, arguments: [FunctionArgument], in type: KnownType) -> KnownMethod? {
+        // Create function signature
+        let parameters =
+            labels(in: arguments).map { lbl in
+                ParameterSignature.init(label: lbl, name: "", type: .void)
+            }
+        
+        // TODO: Support class method lookups here
+        let signature =
+            FunctionSignature(isStatic: false, name: memberName, returnType: .void,
+                              parameters: parameters)
+        
+        return type.method(withObjcSelector: signature)
     }
 }
