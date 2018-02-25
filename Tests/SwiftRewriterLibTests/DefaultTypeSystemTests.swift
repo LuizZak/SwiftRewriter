@@ -56,4 +56,26 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertNotNil(type.constructor(withArgumentLabels: []),
                         "Missing NSMutableArray's default parameterless constructor")
     }
+    
+    func testNSDictionaryDefinition() {
+        guard let type = sut.knownTypeWithName("NSDictionary") else {
+            XCTFail("Expected NSDictionary to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
+        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+                        "Missing NSDictionary's default parameterless constructor")
+    }
+    
+    func testNSMutableDictionaryDefinition() {
+        guard let type = sut.knownTypeWithName("NSMutableDictionary") else {
+            XCTFail("Expected NSMutableDictionary to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSDictionary")
+        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+                        "Missing NSMutableDictionary's default parameterless constructor")
+    }
 }

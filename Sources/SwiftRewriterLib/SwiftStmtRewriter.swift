@@ -410,6 +410,8 @@ fileprivate class StatementWriter: StatementVisitor {
             target.outputLineFeed()
             
             target.idented {
+                // TODO: Abstract these omit-break/fallthrough-inserting behaviors
+                // to an external SyntaxNodeRewriterPass
                 for (i, stmt) in cs.statements.enumerated() {
                     // No need to emit the last break statement
                     if i > 0 && i == cs.statements.count - 1 && stmt == .break {
@@ -433,6 +435,8 @@ fileprivate class StatementWriter: StatementVisitor {
             target.outputLineFeed()
             
             target.idented {
+                // TODO: Abstract this omit-break behavior to an external
+                // SyntaxNodeRewriterPass
                 for (i, stmt) in def.enumerated() {
                     // No need to emit the last break statement
                     if i > 0 && i == def.count - 1 && stmt == .break {

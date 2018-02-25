@@ -56,6 +56,9 @@ public class SyntaxNodeRewriterPassApplier {
     }
     
     private func applyOnMethodBody(_ methodBody: MethodBodyIntention) {
+        // Resolve types before feeding into passes
+        typeResolver.resolveTypes(in: methodBody.body)
+        
         passes.forEach {
             _=methodBody.body.accept($0)
             

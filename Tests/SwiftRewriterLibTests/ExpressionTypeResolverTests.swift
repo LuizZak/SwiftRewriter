@@ -3,6 +3,20 @@ import SwiftRewriterLib
 import SwiftAST
 
 class ExpressionTypeResolverTests: XCTestCase {
+    func testStatementResolve() {
+        let sut = ExpressionTypeResolver()
+        
+        let stmt = Statement.expression(.constant(1))
+        
+        sut.resolveTypes(in: stmt)
+        
+        XCTAssertEqual(stmt.asExpressions?.expressions[0].resolvedType, .int)
+    }
+    
+    func testParens() {
+        assertResolve(.parens(.constant(1)), expect: .int)
+    }
+    
     func testConstant() {
         assertResolve(.constant(1), expect: .int)
         assertResolve(.constant(1.1), expect: .float)
@@ -93,6 +107,20 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: nil) // Bitwise not is a unary operator
     }
     
+    func testTernary() {
+        // Same-type on left and right result to that type
+        assertResolve(.ternary(.constant(false),
+                               true: .constant(1),
+                               false: .constant(1)),
+                      expect: .int)
+        
+        // Different types on left and right result on an error type
+        assertResolve(.ternary(.constant(false),
+                               true: .constant(1),
+                               false: .constant(false)),
+                      expect: .errorType)
+    }
+    
     func testNullCoallesce() {
         // Null-coallesce with non-null right-handside
         assertResolve(.binary(lhs: makeAnOptional(.constant(1)),
@@ -165,7 +193,26 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsArray)
             .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.anyObject))
+            .thenAssertExpression(resolvedAs: .anyObject)
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .typeName("NSMutableArray"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .anyObject)
+    }
+    
+    func testSubscriptionInNSArrayWithNonInteger() {
+        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("Not an integer!")))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .nsArray)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .errorType)
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .typeName("NSMutableArray"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .errorType)
     }
     
     func testSubscriptionInDictionary() {
@@ -182,6 +229,11 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsDictionary)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .optional(.anyObject))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .typeName("NSMutableDictionary"))
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.anyObject))
     }

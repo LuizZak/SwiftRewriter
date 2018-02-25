@@ -736,13 +736,15 @@ public enum Pattern: Equatable {
     /// An expression pattern
     case expression(Expression)
     
-    /// A tupple pattern
+    /// A tuple pattern
     indirect case tuple([Pattern])
     
+    /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by unwrapping
+    /// the inner patterns.
     public var simplified: Pattern {
         switch self {
         case .tuple(let pt) where pt.count == 1:
-            return pt[0]
+            return pt[0].simplified
         default:
             return self
         }

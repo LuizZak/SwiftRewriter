@@ -29,6 +29,9 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
                 ident.definition = nil
             }
         }
+        
+        // Now visit the nodes
+        _=visitStatement(statement)
     }
     
     /// Invocates the resolution of a given expression's type.
@@ -88,6 +91,16 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         return super.visitExpression(exp)
+    }
+    
+    public override func visitParens(_ exp: ParensExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitParens(exp)
+        
+        exp.resolvedType = exp.exp.resolvedType
+        
+        return exp
     }
     
     public override func visitConstant(_ exp: ConstantExpression) -> Expression {
@@ -229,6 +242,25 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         return exp
     }
+    
+    public override func visitTernary(_ exp: TernaryExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitTernary(exp)
+        
+        // Propagate error type
+        if exp.ifTrue.isErrorTyped || exp.ifFalse.isErrorTyped {
+            return exp.makeErrorTyped()
+        }
+        
+        if exp.ifTrue.resolvedType == exp.ifFalse.resolvedType {
+            exp.resolvedType = exp.ifTrue.resolvedType
+        } else {
+            return exp.makeErrorTyped()
+        }
+        
+        return exp
+    }
 
     // MARK: - Postfix type resolving
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
@@ -267,15 +299,18 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
             case .generic("Dictionary", let params) where params.count == 2:
                 exp.resolvedType = .optional(params[1])
                 
-            case .nsArray:
+            // Sub-types of NSArray index as .anyObject
+            case .typeName(let typeName) where typeSystem.isType(typeName, subtypeOf: "NSArray"):
                 if subType != .int {
                     return exp.makeErrorTyped()
                 }
                 
+                exp.resolvedType = .anyObject
+            
+            // Sub-types of NSDictionary index as .anyObject
+            case .typeName(let typeName) where typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
                 exp.resolvedType = .optional(.anyObject)
                 
-            case .nsDictionary:
-                exp.resolvedType = .optional(.anyObject)
             default:
                 break
             }

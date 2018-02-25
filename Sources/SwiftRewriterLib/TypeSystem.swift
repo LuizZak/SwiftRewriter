@@ -91,7 +91,6 @@ extension DefaultTypeSystem {
         
         let nsArray =
             KnownTypeBuilder(typeName: "NSArray", supertype: nsObject)
-                .addingConstructor()
                 .build()
         
         let nsMutableArray =
@@ -104,8 +103,25 @@ extension DefaultTypeSystem {
                         ]))
                 .build()
         
+        let nsDictionary =
+            KnownTypeBuilder(typeName: "NSDictionary", supertype: nsObject)
+                .build()
+        
+        let nsMutableDictionary =
+            KnownTypeBuilder(typeName: "NSMutableDictionary", supertype: nsDictionary)
+                .addingMethod(withSignature:
+                    FunctionSignature(isStatic: false, name: "setObject",
+                                      returnType: .void,
+                                      parameters: [
+                                        ParameterSignature(label: "_", name: "anObject", type: .anyObject),
+                                        ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)
+                        ]))
+                .build()
+        
         addType(nsObject)
         addType(nsArray)
         addType(nsMutableArray)
+        addType(nsDictionary)
+        addType(nsMutableDictionary)
     }
 }
