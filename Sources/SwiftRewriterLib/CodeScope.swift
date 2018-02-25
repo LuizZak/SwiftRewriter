@@ -106,16 +106,25 @@ class DefaultCodeScopeStack: CodeScope {
     }
 }
 
+/// An object that can provide definitions for a type resolver
+public protocol DefinitionsSource {
+    func definition(named name: String) -> CodeDefinition?
+}
+
 /// A code scope that stores definitions gathered during function body analysis.
 /// Is used only during statement rewriting phase.
-public protocol CodeScope {
-    func definition(named name: String) -> CodeDefinition?
+public protocol CodeScope: DefinitionsSource {
     func recordDefinition(_ definition: CodeDefinition)
     func removeAllDefinitions()
 }
 
-class DefaultCodeScope: CodeScope {
-    internal var definitions: [CodeDefinition] = []
+/// A default implementation of a code scope
+public class DefaultCodeScope: CodeScope {
+    internal var definitions: [CodeDefinition]
+    
+    public init(definitions: [CodeDefinition] = []) {
+        self.definitions = definitions
+    }
     
     public func definition(named name: String) -> CodeDefinition? {
         return definitions.first { $0.name == name }
@@ -125,7 +134,7 @@ class DefaultCodeScope: CodeScope {
         definitions.append(definition)
     }
     
-    func removeAllDefinitions() {
+    public func removeAllDefinitions() {
         definitions.removeAll()
     }
 }

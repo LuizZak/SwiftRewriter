@@ -28,6 +28,21 @@ public class SyntaxNodeRewriterPassApplier {
     }
     
     private func applyOnClass(_ cls: BaseClassIntention) {
+        let intrinsics = DefaultCodeScope()
+        
+        // Push `self` intrinsic member variable
+        intrinsics.recordDefinition(
+            CodeDefinition(name: "self",
+                           type: .typeName(cls.typeName))
+        )
+        
+        typeResolver.intrinsicVariables = intrinsics
+        
+        defer {
+            // Don't forget to remove intrinsics later!
+            typeResolver.intrinsicVariables = EmptyCodeScope()
+        }
+        
         for prop in cls.properties {
             applyOnProperty(prop)
         }

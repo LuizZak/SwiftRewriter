@@ -6,11 +6,13 @@ import ExpressionPasses
 class SingleFileTestBuilder {
     var test: XCTestCase
     var objc: String
+    var options: ASTWriterOptions
     var diagnosticsStream: String = ""
     
-    init(test: XCTestCase, objc: String) {
+    init(test: XCTestCase, objc: String, options: ASTWriterOptions) {
         self.test = test
         self.objc = objc
+        self.options = options
     }
     
     func assertObjcParse(swift expectedSwift: String, expectsErrors: Bool = false, file: String = #file, line: Int = #line) throws {
@@ -18,6 +20,8 @@ class SingleFileTestBuilder {
         let input = TestSingleInputProvider(code: objc)
         
         let sut = SwiftRewriter(input: input, output: output)
+        
+        sut.writerOptions = options
         
         sut.syntaxNodeRewriters.append(AllocInitExpressionPass())
         sut.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
@@ -117,9 +121,10 @@ extension XCTestCase {
     
     @discardableResult
     func assertObjcParse(objc: String, swift expectedSwift: String,
+                         options: ASTWriterOptions = .default,
                          expectsErrors: Bool = false, file: String = #file,
                          line: Int = #line) throws -> SingleFileTestBuilder  {
-        let test = SingleFileTestBuilder(test: self, objc: objc)
+        let test = SingleFileTestBuilder(test: self, objc: objc, options: options)
         try test.assertObjcParse(swift: expectedSwift, expectsErrors: expectsErrors,
                                  file: file, line: line)
         

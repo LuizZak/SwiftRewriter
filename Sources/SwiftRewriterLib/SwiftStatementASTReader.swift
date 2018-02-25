@@ -5,7 +5,11 @@ import Antlr4
 import SwiftAST
 
 public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
-    var expressionReader = SwiftExprASTReader()
+    var expressionReader: SwiftExprASTReader
+    
+    public init(expressionReader: SwiftExprASTReader = SwiftExprASTReader()) {
+        self.expressionReader = expressionReader
+    }
     
     public override func visitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext) -> Statement? {
         if let varDecl = ctx.varDeclaration()?.accept(self) {
@@ -31,7 +35,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         }
         
         return
-            Statement.expression(
+            .expression(
                 .postfix(.identifier(ident.getText()),
                          .functionCall(arguments: [.unlabeled(.identifier(param))]
                     ))
@@ -111,7 +115,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         
         doBody.statements.append(contentsOf: compoundStatement.statements)
         
-        return Statement.do(doBody)
+        return .do(doBody)
     }
     
     public override func visitAutoreleaseStatement(_ ctx: ObjectiveCParser.AutoreleaseStatementContext) -> Statement? {
@@ -133,13 +137,13 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     // MARK: - return / continue / break
     public override func visitJumpStatement(_ ctx: ObjectiveCParser.JumpStatementContext) -> Statement? {
         if ctx.RETURN() != nil {
-            return Statement.return(ctx.expression()?.accept(expressionReader))
+            return .return(ctx.expression()?.accept(expressionReader))
         }
         if ctx.CONTINUE() != nil {
-            return Statement.continue
+            return .continue
         }
         if ctx.BREAK() != nil {
-            return Statement.break
+            return .break
         }
         
         return .unknown(UnknownASTContext(context: ctx.getText()))
@@ -209,7 +213,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             def = [.break]
         }
         
-        return Statement.switch(exp, cases: cases, default: def)
+        return .switch(exp, cases: cases, default: def)
     }
     
     // MARK: - while / do-while / for / for-in
@@ -286,7 +290,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             guard let exps = iteration.asExpressions?.expressions, exps.count == 1 else {
                 break simplifyFor
             }
-            guard exps[0].asAssignment == AssignmentExpression(lhs: IdentifierExpression(identifier: loopVar.identifier), op: .addAssign, rhs: 1 as ConstantExpression) else {
+            guard exps[0].asAssignment == .assignment(lhs: .identifier(loopVar.identifier), op: .addAssign, rhs: .constant(1)) else {
                 break simplifyFor
             }
             
@@ -301,9 +305,11 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             // All good! Simplify now.
             let rangeOp: SwiftOperator = op == .lessThan ? .openRange : .closedRange
             
-            return Statement.for(.identifier(loopVar.identifier),
-                                 .binary(lhs: .constant(loopStart), op: rangeOp, rhs: .constant(loopEnd)),
-                                 body: compoundStatement)
+            return .for(.identifier(loopVar.identifier),
+                        .binary(lhs: .constant(loopStart),
+                                op: rangeOp,
+                                rhs: .constant(loopEnd)),
+                        body: compoundStatement)
         }
         
         // Come up with a while loop, now
@@ -312,9 +318,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         let body = CompoundStatement()
         if let iteration = iteration {
             body.statements.append(
-                .defer([
-                    iteration
-                    ]
+                .defer([iteration]
                 )
             )
         }
@@ -350,7 +354,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
-        return Statement.for(.identifier(identifier), expression, body: body)
+        return .for(.identifier(identifier), expression, body: body)
     }
     
     // MARK: - Helper methods
@@ -384,9 +388,9 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     // MARK: - Compound statement visitor
     class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
-        var expressionReader = SwiftExprASTReader()
+        var expressionReader: SwiftExprASTReader
         
-        init(expressionReader: SwiftExprASTReader) {
+        init(expressionReader: SwiftExprASTReader = SwiftExprASTReader()) {
             self.expressionReader = expressionReader
         }
         
@@ -468,13 +472,15 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 let isConstant = SwiftWriter._isConstant(fromType: type)
                 
                 let declaration =
-                    StatementVariableDeclaration(identifier: identifier, type: swiftType,
-                                                 ownership: ownership, isConstant: isConstant,
+                    StatementVariableDeclaration(identifier: identifier,
+                                                 type: swiftType,
+                                                 ownership: ownership,
+                                                 isConstant: isConstant,
                                                  initialization: expr)
                 declarations.append(declaration)
             }
             
-            return Statement.variableDeclarations(declarations)
+            return .variableDeclarations(declarations)
         }
         
         override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> Statement? {
@@ -505,13 +511,15 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 let isConstant = SwiftWriter._isConstant(fromType: type)
                 
                 let declaration =
-                    StatementVariableDeclaration(identifier: identifier, type: swiftType,
-                                                 ownership: ownership, isConstant: isConstant,
+                    StatementVariableDeclaration(identifier: identifier,
+                                                 type: swiftType,
+                                                 ownership: ownership,
+                                                 isConstant: isConstant,
                                                  initialization: expr)
                 declarations.append(declaration)
             }
             
-            return Statement.variableDeclarations(declarations)
+            return .variableDeclarations(declarations)
         }
     }
 }

@@ -190,7 +190,9 @@ public class SwiftRewriter {
         
         let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
         
-        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        let typeResolver =
+            ExpressionTypeResolver(typeSystem: typeSystem,
+                                   intrinsicVariables: EmptyCodeScope())
         
         let applier = SyntaxNodeRewriterPassApplier(passes: syntaxPasses, typeResolver: typeResolver)
         applier.apply(on: intentionCollection)

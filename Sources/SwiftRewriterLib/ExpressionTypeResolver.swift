@@ -4,17 +4,28 @@ import ObjcParser
 public class ExpressionTypeResolver: SyntaxNodeRewriter {
     public var typeSystem: TypeSystem
     
+    /// Intrinsic variables provided by the type system
+    public var intrinsicVariables: DefinitionsSource
+    
     /// If `true`, the expression type resolver ignores resolving expressions that
     /// already have a non-nil `resolvedType` field.
     public var ignoreResolvedExpressions: Bool = false
     
     public override init() {
         self.typeSystem = DefaultTypeSystem()
+        self.intrinsicVariables = EmptyCodeScope()
         super.init()
     }
     
     public init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
+        self.intrinsicVariables = EmptyCodeScope()
+        super.init()
+    }
+    
+    public init(typeSystem: TypeSystem, intrinsicVariables: DefinitionsSource) {
+        self.typeSystem = typeSystem
+        self.intrinsicVariables = intrinsicVariables
         super.init()
     }
     
@@ -229,12 +240,15 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         _=super.visitIdentifier(exp)
         
         // Visit identifier's type from current context
-        if let definition = exp.nearestScope.definition(named: exp.identifier) {
-            exp.definition = .local(definition)
-            exp.resolvedType = definition.type
-        } else if let type = typeSystem.knownTypeWithName(exp.identifier) {
-            exp.definition = .type(named: type.typeName)
-            exp.resolvedType = .metatype(for: .typeName(type.typeName))
+        if let definition = searchIdentifierDefinition(exp) {
+            exp.definition = definition
+            
+            switch definition {
+            case .local(let def):
+                exp.resolvedType = def.type
+            case .type(let typeName):
+                exp.resolvedType = .metatype(for: .typeName(typeName))
+            }
         } else {
             exp.definition = nil
             exp.resolvedType = .errorType
@@ -405,5 +419,26 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         exp.resolvedType = .dictionary(key: firstKey, value: firstValue)
         
         return exp
+    }
+}
+
+extension ExpressionTypeResolver {
+    func searchIdentifierDefinition(_ exp: IdentifierExpression) -> IdentifierExpression.Definition? {
+        // Look into intrinsics first, since they always take precedence
+        if let intrinsic = intrinsicVariables.definition(named: exp.identifier) {
+            return .local(intrinsic)
+        }
+        
+        // Visit identifier's type from current context
+        if let definition = exp.nearestScope.definition(named: exp.identifier) {
+            return .local(definition)
+        }
+        
+        // Check type system for a metatype with the identifier name
+        if let type = typeSystem.knownTypeWithName(exp.identifier) {
+            return .type(named: type.typeName)
+        }
+        
+        return nil
     }
 }

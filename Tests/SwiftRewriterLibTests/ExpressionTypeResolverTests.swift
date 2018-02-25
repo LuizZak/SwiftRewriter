@@ -13,6 +13,29 @@ class ExpressionTypeResolverTests: XCTestCase {
         XCTAssertEqual(stmt.asExpressions?.expressions[0].resolvedType, .int)
     }
     
+    func testIntrinsicVariable() {
+        startScopedTest(with: .identifier("self"), sut: ExpressionTypeResolver())
+            .definingIntrinsic(name: "self", type: .typeName("MyType"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .typeName("MyType"))
+    }
+    
+    func testIntrinsicVariableTakesPrecedenceOverLocal() {
+        startScopedTest(with: .identifier("self"), sut: ExpressionTypeResolver())
+            .definingLocal(name: "sef", type: .errorType)
+            .definingIntrinsic(name: "self", type: .typeName("MyType"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .typeName("MyType"))
+    }
+    
+    func testIntrinsicVariableTakesPrecedenceOverTypeName() {
+        startScopedTest(with: .identifier("self"), sut: ExpressionTypeResolver())
+            .definingEmptyType(named: "self")
+            .definingIntrinsic(name: "self", type: .typeName("MyType"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .typeName("MyType"))
+    }
+    
     func testParens() {
         assertResolve(.parens(.constant(1)), expect: .int)
     }

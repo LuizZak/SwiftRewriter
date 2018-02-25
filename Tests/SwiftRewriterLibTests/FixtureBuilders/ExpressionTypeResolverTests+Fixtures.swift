@@ -4,6 +4,7 @@ import SwiftAST
 
 protocol ExpressionTestResolverTestFixture {
     var scope: CodeScopeStatement { get }
+    var intrinsics: CodeScope { get }
     var typeSystem: DefaultTypeSystem { get }
     
     /// Defines a variable on the test fixture's context
@@ -11,6 +12,11 @@ protocol ExpressionTestResolverTestFixture {
     
     /// Defines a given local variable on the test fixture's context
     func definingLocal(_ definition: CodeDefinition) -> Self
+    
+    /// Defines an intrinsic variable for the context of the type resolver.
+    /// Intrinsic variables should take precedence over any type/local during type
+    /// resolving.
+    func definingIntrinsic(_ definition: CodeDefinition) -> Self
     
     /// Defines a given type to the test fixture's mock type system
     func definingType(_ type: KnownType) -> Self
@@ -27,13 +33,24 @@ protocol ExpressionTestResolverTestFixture {
 extension ExpressionTestResolverTestFixture {
     func definingLocal(name: String, type: SwiftType) -> Self {
         let definition = CodeDefinition(name: name, type: type)
+        
+        return definingLocal(definition)
+    }
+    
+    func definingLocal(_ definition: CodeDefinition) -> Self {
         scope.definitions.recordDefinition(definition)
         
         return self
     }
     
-    func definingLocal(_ definition: CodeDefinition) -> Self {
-        scope.definitions.recordDefinition(definition)
+    func definingIntrinsic(name: String, type: SwiftType) -> Self {
+        let definition = CodeDefinition(name: name, type: type)
+        
+        return definingIntrinsic(definition)
+    }
+    
+    func definingIntrinsic(_ definition: CodeDefinition) -> Self {
+        intrinsics.recordDefinition(definition)
         
         return self
     }
@@ -64,6 +81,7 @@ extension ExpressionTypeResolverTests {
         let statement: T
         let typeSystem = DefaultTypeSystem()
         let scope: CodeScopeStatement
+        let intrinsics: CodeScope = DefaultCodeScope()
         var applied: Bool = false
         
         init(testCase: XCTestCase, sut: ExpressionTypeResolver, statement: T) {
@@ -112,6 +130,7 @@ extension ExpressionTypeResolverTests {
             // Make sure to apply definitions just before starting assertions
             if !applied {
                 sut.typeSystem = typeSystem
+                sut.intrinsicVariables = intrinsics
                 sut.ignoreResolvedExpressions = true
                 
                 _=statement.accept(sut)
@@ -146,6 +165,7 @@ extension ExpressionTypeResolverTests {
         let sut: ExpressionTypeResolver
         let expression: T
         let typeSystem = DefaultTypeSystem()
+        let intrinsics: CodeScope = DefaultCodeScope()
         let scope: CodeScopeStatement
         
         init(testCase: XCTestCase, sut: ExpressionTypeResolver, expression: T) {
@@ -164,6 +184,7 @@ extension ExpressionTypeResolverTests {
         
         func resolve() -> Asserter {
             sut.typeSystem = typeSystem
+            sut.intrinsicVariables = intrinsics
             sut.ignoreResolvedExpressions = true
             
             _=sut.visitExpression(expression)

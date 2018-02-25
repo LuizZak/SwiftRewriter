@@ -7,9 +7,15 @@ import ObjcParser
 /// Options for an AST writer invocation
 public struct ASTWriterOptions {
     /// Default settings instance
-    static let `default` = ASTWriterOptions(printExpressionTypes: false)
+    public static let `default` = ASTWriterOptions(outputExpressionTypes: false)
     
-    public var printExpressionTypes: Bool
+    /// If `true`, when outputting expression statements, print the resulting type
+    /// of the expression before the expression statement as a comment for inspection.
+    public var outputExpressionTypes: Bool
+    
+    public init(outputExpressionTypes: Bool) {
+        self.outputExpressionTypes = outputExpressionTypes
+    }
 }
 
 /// Reader that reads Objective-C AST and outputs equivalent a Swift AST
@@ -43,23 +49,27 @@ class SwiftASTWriter {
     }
     
     public func write(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
-        let rewriter = StatementWriter(target: target)
+        let rewriter = StatementWriter(options: options, target: target)
         rewriter.visitStatement(compoundStatement)
     }
     
     public func write(expression: Expression, into target: RewriterOutputTarget) {
-        let rewriter = ExpressionWriter(target: target)
+        let rewriter = ExpressionWriter(options: options, target: target)
         rewriter.rewrite(expression)
     }
     
-    public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
+    public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext,
+                        into target: RewriterOutputTarget) {
+        
         let reader = SwiftASTReader()
         
         let result = reader.parseStatements(compoundStatement: compoundStatement)
         write(compoundStatement: result, into: target)
     }
     
-    public func rewrite(expression: ObjectiveCParser.ExpressionContext, into target: RewriterOutputTarget) {
+    public func rewrite(expression: ObjectiveCParser.ExpressionContext,
+                        into target: RewriterOutputTarget) {
+        
         let reader = SwiftASTReader()
         
         let result = reader.parseExpression(expression: expression)
@@ -71,9 +81,11 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     
     typealias ExprResult = Void
     
-    var target: RewriterOutputTarget
+    let options: ASTWriterOptions
+    let target: RewriterOutputTarget
     
-    init(target: RewriterOutputTarget) {
+    init(options: ASTWriterOptions, target: RewriterOutputTarget) {
+        self.options = options
         self.target = target
     }
     
@@ -275,7 +287,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
         let returnType = exp.returnType
         let body = exp.body
         
-        let visitor = StatementWriter(target: target)
+        let visitor = StatementWriter(options: options, target: target)
         let typeMapper = TypeMapper(context: TypeConstructionContext())
         
         // Print signature
@@ -338,9 +350,11 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
 fileprivate class StatementWriter: StatementVisitor {
     public typealias StmtResult = Void
     
-    var target: RewriterOutputTarget
+    let options: ASTWriterOptions
+    let target: RewriterOutputTarget
     
-    init(target: RewriterOutputTarget) {
+    init(options: ASTWriterOptions, target: RewriterOutputTarget) {
+        self.options = options
         self.target = target
     }
     
@@ -523,6 +537,10 @@ fileprivate class StatementWriter: StatementVisitor {
     
     func visitExpressions(_ stmt: ExpressionsStatement) {
         for exp in stmt.expressions {
+            if options.outputExpressionTypes {
+                emitExprType(exp)
+            }
+            
             target.outputIdentation()
             emitExpr(exp)
             target.outputLineFeed()
@@ -598,9 +616,13 @@ fileprivate class StatementWriter: StatementVisitor {
         }
     }
     
-    private func emitExpr(_ expr: Expression) {
-        let rewriter = ExpressionWriter(target: target)
-        rewriter.rewrite(expr)
+    private func emitExprType(_ exp: Expression) {
+        target.output(line: "// type: \(exp.resolvedType?.description ?? "<nil>")")
+    }
+    
+    private func emitExpr(_ exp: Expression) {
+        let rewriter = ExpressionWriter(options: options, target: target)
+        rewriter.rewrite(exp)
     }
     
     private func shouldEmitTypeSignature(forInitVal exp: Expression) -> Bool {
