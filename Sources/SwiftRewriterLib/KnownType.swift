@@ -20,15 +20,26 @@ public protocol KnownType: KnownSupertypeConvertible {
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
     
+    // MARK: Member searching methods
+    
     /// Gets a constructor matching a given argument label set
     func constructor(withArgumentLabels labels: [String]) -> KnownConstructor?
+    
+    /// Searches for a method with a given Objective-C equivalent selector
+    func method(withObjcSelector selector: FunctionSignature) -> KnownMethod?
+    
+    /// Gets a protocol conformance to a given protocol name
+    func conformance(toProtocolName name: String) -> KnownProtocolConformance?
+    
+    /// Gets a property with a given name
+    func property(named name: String) -> KnownProperty?
 }
 
 /// Defines the known supertype of a `KnownType`
 ///
 /// - knownType: A concrete known type reference
 /// - typeName: The supertype that is referenced by a loose type name
-public enum KnownSupertype {
+public enum KnownSupertype: KnownSupertypeConvertible {
     case knownType(KnownType)
     case typeName(String)
     
@@ -44,6 +55,10 @@ public enum KnownSupertype {
             return nil
         }
     }
+    
+    public var asKnownSupertype: KnownSupertype {
+        return self
+    }
 }
 
 public protocol KnownSupertypeConvertible {
@@ -58,26 +73,61 @@ extension String: KnownSupertypeConvertible {
 
 /// Default implementations
 public extension KnownType {
-    public var supertype: KnownSupertype? {
-        return nil
-    }
-    
+//    public var supertype: KnownSupertype? {
+//        return nil
+//    }
+//    
     public var asKnownSupertype: KnownSupertype {
         return .knownType(self)
     }
     
-    /// Gets a constructor matching a given argument label set
     public func constructor(withArgumentLabels labels: [String]) -> KnownConstructor? {
-        let constructor = knownConstructors.first {
-            $0.parameters.map { $0.label }.elementsEqual(labels)
+        return
+            firstInInheritanceChain { type in
+                return type.knownConstructors.first { ctor in
+                    ctor.parameters.map { $0.label }.elementsEqual(labels)
+                }
+            }
+    }
+    
+    public func method(withObjcSelector selector: FunctionSignature) -> KnownMethod? {
+        return
+            firstInInheritanceChain { type in
+                return
+                    type.knownMethods.first { method in
+                        method.signature.matchesAsSelector(selector)
+                    }
+            }
+    }
+    
+    public func conformance(toProtocolName name: String) -> KnownProtocolConformance? {
+        return
+            firstInInheritanceChain { type in
+                return knownProtocolConformances.first { $0.protocolName == name }
+            }
+    }
+    
+    public func property(named name: String) -> KnownProperty? {
+        return
+            firstInInheritanceChain { type in
+                return
+                    knownProperties.first { property in
+                        property.name == name
+                    }
+            }
+    }
+    
+    /// Looks through the inheritance chain of this known type, returning the first
+    /// known type that returns a non-nil result to a block query.
+    ///
+    /// Returns nil, if all types returned nil.
+    private func firstInInheritanceChain<T>(where block: (KnownType) -> T?) -> T? {
+        let result = block(self)
+        if let result = result {
+            return result
         }
         
-        if let constructor = constructor {
-            return constructor
-        }
-        
-        // Search through supertype chain, if available.
-        return supertype?.asKnownType?.constructor(withArgumentLabels: [])
+        return supertype?.asKnownType?.firstInInheritanceChain(where: block)
     }
 }
 

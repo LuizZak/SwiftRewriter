@@ -108,7 +108,6 @@ class SwiftRewriter_SelfTests: XCTestCase {
             @implementation MyClass
             + (void)method {
                 [[self alloc] init];
-                [[self alloc] initWithThing:1];
             }
             @end
             """,
@@ -117,10 +116,11 @@ class SwiftRewriter_SelfTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 static func method() {
+                    // type: MyClass
                     self.init()
-                    self.init(thing: 1)
                 }
             }
-            """)
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
     }
 }

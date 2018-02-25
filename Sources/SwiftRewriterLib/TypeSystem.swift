@@ -125,3 +125,67 @@ extension DefaultTypeSystem {
         addType(nsMutableDictionary)
     }
 }
+
+/// An extension over the default type system that enables using an intention
+/// collection to search for types
+class IntentionCollectionTypeSystem: DefaultTypeSystem {
+    var intentions: IntentionCollection
+    
+    init(intentions: IntentionCollection) {
+        self.intentions = intentions
+        super.init()
+    }
+    
+    override func knownTypeWithName(_ name: String) -> KnownType? {
+        // TODO: Create a lazy KnownType implementer that searches for requested
+        // members on-demand every time the respective KnownType members are requested.
+        
+        if let type = super.knownTypeWithName(name) {
+            return type
+        }
+        
+        // Search in type intentions
+        let types = intentions.typeIntentions().map { $0 as KnownType }.filter { $0.typeName == name }
+        guard types.count > 0 else {
+            return nil
+        }
+        
+        var typeBuilder = KnownTypeBuilder(typeName: name)
+        
+        for type in types {
+            // Search supertypes known here
+            switch type.supertype {
+            case .typeName(let supertypeName)?:
+                typeBuilder =
+                    typeBuilder.settingSupertype(super.knownTypeWithName(supertypeName))
+            case .knownType(let supertype)?:
+                typeBuilder =
+                    typeBuilder.settingSupertype(supertype)
+            default:
+                break
+            }
+            
+            for prot in type.knownProtocolConformances {
+                typeBuilder =
+                    typeBuilder.addingProtocolConformance(protocolName: prot.protocolName)
+            }
+            
+            for prop in type.knownProperties {
+                typeBuilder =
+                    typeBuilder.addingProperty(named: prop.name, storage: prop.storage)
+            }
+            
+            for ctor in type.knownConstructors {
+                typeBuilder =
+                    typeBuilder.addingConstructor(withParameters: ctor.parameters)
+            }
+            
+            for method in type.knownMethods {
+                typeBuilder =
+                    typeBuilder.addingMethod(withSignature: method.signature)
+            }
+        }
+        
+        return typeBuilder.build()
+    }
+}

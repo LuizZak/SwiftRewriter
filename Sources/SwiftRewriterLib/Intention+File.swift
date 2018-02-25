@@ -15,21 +15,29 @@ public class FileGenerationIntention: Intention {
     /// All preprocessor directives found on this file.
     public var preprocessorDirectives: [String] = []
     
-    /// Gets the extension intentions to create on this file.
+    /// Gets the class extensions (but not main class declarations) to create
+    /// on this file.
     public var extensionIntentions: [ClassExtensionGenerationIntention] {
         return typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
     }
     
-    /// Gets the classes to create on this file.
+    /// Gets the classes (but not class extensions) to create on this file.
     public var classIntentions: [ClassGenerationIntention] {
         return typeIntentions.compactMap { $0 as? ClassGenerationIntention }
     }
     
-    /// Gets the typealias intentions to create on this file.
-    private(set) var typealiasIntentions: [TypealiasIntention] = []
+    /// Gets the classes and class extensions to create on this file.
+    public var classTypeIntentions: [BaseClassIntention] {
+        return typeIntentions.compactMap { $0 as? BaseClassIntention }
+    }
     
     /// Gets the protocols to create on this file.
-    private(set) var protocolIntentions: [ProtocolGenerationIntention] = []
+    var protocolIntentions: [ProtocolGenerationIntention] {
+        return typeIntentions.compactMap { $0 as? ProtocolGenerationIntention }
+    }
+    
+    /// Gets the typealias intentions to create on this file.
+    private(set) var typealiasIntentions: [TypealiasIntention] = []
     
     /// Gets the global functions to create on this file.
     private(set) var globalFunctionIntentions: [GlobalFunctionGenerationIntention] = []
@@ -65,8 +73,17 @@ public class FileGenerationIntention: Intention {
         }
     }
     
+    public func removeClassTypes(where predicate: (BaseClassIntention) -> Bool) {
+        for (i, type) in typeIntentions.enumerated().reversed() {
+            if let classType = type as? BaseClassIntention, predicate(classType) {
+                type.parent = nil
+                typeIntentions.remove(at: i)
+            }
+        }
+    }
+    
     public func addProtocol(_ intention: ProtocolGenerationIntention) {
-        protocolIntentions.append(intention)
+        typeIntentions.append(intention)
         intention.parent = self
     }
     

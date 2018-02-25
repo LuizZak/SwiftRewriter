@@ -33,6 +33,14 @@ public class BaseClassIntention: TypeGenerationIntention {
 public class ClassGenerationIntention: BaseClassIntention {
     public var superclassName: String?
     
+    public override var supertype: KnownSupertype? {
+        if let superclassName = superclassName {
+            return KnownSupertype.typeName(superclassName)
+        }
+        
+        return nil
+    }
+    
     public func setSuperclassIntention(_ superclassName: String) {
         self.superclassName = superclassName
     }

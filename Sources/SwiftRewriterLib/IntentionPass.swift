@@ -36,7 +36,7 @@ public class RemoveDuplicatedTypeIntentIntentionPass: IntentionPass {
         for file in intentionCollection.fileIntentions() {
             // Remove from file implementation any class generation intent that came
             // from an @interface
-            file.removeTypes(where: { type in
+            file.removeClassTypes(where: { type in
                 if !(type.source is ObjcClassInterface || type.source is ObjcClassCategoryInterface) {
                     return false
                 }
@@ -58,7 +58,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         // Collect protocols
         let protocols = intentionCollection.protocolIntentions()
-        let classes = intentionCollection.typeIntentions()
+        let classes = intentionCollection.classIntentions()
         
         if protocols.count == 0 || classes.count == 0 {
             return
@@ -146,7 +146,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
     fileprivate static func mergeTypeIntentions(typeIntentions: [TypeGenerationIntention],
                                                 into implementation: FileGenerationIntention,
                                                 intentionCollection: IntentionCollection) {
-        var newIntentions: [TypeGenerationIntention] = []
+        var newIntentions: [BaseClassIntention] = []
         
         let classes = typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         let extensions = typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
@@ -181,7 +181,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         }
         
         // Replace all types
-        implementation.removeTypes(where: { _ in true })
+        implementation.removeClassTypes(where: { _ in true })
         for type in newIntentions {
             implementation.addType(type)
         }

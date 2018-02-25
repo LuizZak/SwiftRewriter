@@ -22,7 +22,7 @@ public class IntentionCollection {
         return _intentions.flatMap { $0.extensionIntentions }
     }
     
-    /// Performs a full search of all protocols intended to be created on all files.
+    /// Gets all protocols intended to be created on all files.
     public func protocolIntentions() -> [ProtocolGenerationIntention] {
         return _intentions.flatMap { $0.protocolIntentions }
     }

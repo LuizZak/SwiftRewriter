@@ -9,6 +9,12 @@ public class KnownTypeBuilder {
         type = DummyType(typeName: typeName, supertype: supertype)
     }
     
+    /// Sets the supertype of the type being constructed on this known type builder
+    public func settingSupertype(_ supertype: KnownSupertypeConvertible?) -> KnownTypeBuilder {
+        type.supertype = supertype?.asKnownSupertype
+        return self
+    }
+    
     /// Adds a parameter-less constructor to this type
     public func addingConstructor() -> KnownTypeBuilder {
         assert(!type.knownConstructors.contains { $0.parameters.count == 0 },
@@ -46,6 +52,15 @@ public class KnownTypeBuilder {
     
     /// Adds a method with a given signature
     public func addingMethod(withSignature signature: FunctionSignature) -> KnownTypeBuilder {
+        // TODO: Verify whether we should match with Swift or Objective-C selector
+        // rules here (Swift allows for overloads over parameter/return types).
+        // Probably with a flag on the KnownTypeBuilder instance.
+        
+        // Check duplicates
+        guard type.method(withObjcSelector: signature) == nil else {
+            return self
+        }
+        
         let method = DummyMethod(body: nil, signature: signature)
         
         type.knownMethods.append(method)
@@ -56,14 +71,30 @@ public class KnownTypeBuilder {
     /// Adds a strong property with no attributes with a given name and type
     public func addingProperty(named name: String, type: SwiftType) -> KnownTypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        
+        return addingProperty(named: name, storage: storage)
+    }
+    
+    /// Adds a strong property with no attributes with a given name and storage
+    public func addingProperty(named name: String, storage: ValueStorage) -> KnownTypeBuilder {
+        // Check duplicates
+        guard type.property(named: name) == nil else {
+            return self
+        }
+        
         let property = DummyProperty(name: name, storage: storage, attributes: [])
         
-        self.type.knownProperties.append(property)
+        type.knownProperties.append(property)
         
         return self
     }
     
     public func addingProtocolConformance(protocolName: String) -> KnownTypeBuilder {
+        // Check duplicates
+        guard type.conformance(toProtocolName: protocolName) == nil else {
+            return self
+        }
+        
         let conformance = DummyProtocolConformance(protocolName: protocolName)
         
         type.knownProtocolConformances.append(conformance)

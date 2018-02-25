@@ -328,7 +328,30 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
             default:
                 break
             }
-        
+            
+            
+        // TODO: Generalize these matchers to find methods using signatures of the
+        // call to locate the target methods and use their resulting types as the
+        // expression's result
+        // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
+        case .functionCall(let args) where exp.exp.asPostfix?.exp.asIdentifier != nil && args.count == 0:
+            guard let target = exp.exp.asPostfix?.exp.asIdentifier else {
+                break
+            }
+            guard exp.exp.asPostfix?.op == .member("init") else {
+                break
+            }
+            guard case .metatype(let innerType)? = target.resolvedType else {
+                break
+            }
+            guard let type = findType(for: innerType) else {
+                break
+            }
+            guard let constructor = type.constructor(withArgumentLabels: args.map { $0.label ?? "_" }) else {
+                break
+            }
+            
+            exp.resolvedType = innerType
         // Parameterless type constructor
         case .functionCall(let args) where args.count == 0:
             guard let typeName = exp.exp.asIdentifier?.definition?.typeName else {
@@ -423,6 +446,20 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
 }
 
 extension ExpressionTypeResolver {
+    func findType(for swiftType: SwiftType) -> KnownType? {
+        switch swiftType {
+        case .typeName(let typeName):
+            return findTypeNamed(typeName)
+        // Other Swift types are not supported, at the moment.
+        default:
+            return nil
+        }
+    }
+    
+    func findTypeNamed(_ typeName: String) -> KnownType? {
+        return typeSystem.knownTypeWithName(typeName)
+    }
+    
     func searchIdentifierDefinition(_ exp: IdentifierExpression) -> IdentifierExpression.Definition? {
         // Look into intrinsics first, since they always take precedence
         if let intrinsic = intrinsicVariables.definition(named: exp.identifier) {

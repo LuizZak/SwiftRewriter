@@ -26,6 +26,10 @@ public class FromSourceIntention: NonNullScopedIntention {
 public class TypeGenerationIntention: FromSourceIntention {
     public var typeName: String
     
+    public var supertype: KnownSupertype? {
+        return nil
+    }
+    
     private(set) public var protocols: [ProtocolInheritanceIntention] = []
     private(set) public var properties: [PropertyGenerationIntention] = []
     private(set) public var methods: [MethodGenerationIntention] = []

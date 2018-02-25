@@ -12,7 +12,7 @@ public class SwiftRewriter {
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
     private var knownTypes: KnownTypeStorage = KnownTypeStorageImpl()
-    private var typeSystem: TypeSystem = DefaultTypeSystem()
+    private var typeSystem: IntentionCollectionTypeSystem
     
     /// During parsing, the index of each NS_ASSUME_NONNULL_BEGIN/END pair is
     /// collected so during source analysis by SwiftRewriter we can verify whether
@@ -44,6 +44,8 @@ public class SwiftRewriter {
         self.context = TypeConstructionContext()
         self.typeMapper = TypeMapper(context: context)
         self.intentionCollection = IntentionCollection()
+        
+        typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
     }
     
     public func rewrite() throws {
