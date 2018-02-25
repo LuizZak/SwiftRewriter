@@ -12,7 +12,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
     
     public var functionBody: FunctionBodyIntention?
     
-    public var isStatic: Bool {
+    public override var isStatic: Bool {
         return signature.isStatic
     }
     public var name: String {

@@ -19,7 +19,8 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
         return super.visitPostfix(exp)
     }
     
-    /// Converts plain [[Class alloc] init] -> Class()
+    /// Converts plain `[[Class alloc] init]` -> `Class()` and
+    /// `[[self alloc] init]` -> `self.init()`
     func convertAllocInit(exp: PostfixExpression) -> Expression? {
         guard let initInvocation = exp.asPostfix, initInvocation.op == .functionCall(arguments: []) else {
             return nil
@@ -34,10 +35,16 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
             return nil
         }
         
-        return Expression.postfix(alloc.exp, .functionCall(arguments: []))
+        // self.alloc.init() -> self.init()
+        if alloc.exp.asIdentifier?.identifier == "self", case .metatype? = alloc.exp.resolvedType {
+            return .postfix(.postfix(alloc.exp, .member("init")), .functionCall(arguments: []))
+        }
+        
+        return .postfix(alloc.exp, .functionCall(arguments: []))
     }
     
-    /// Converts [[Class alloc] initWithThing:[...]] -> Class(thing: [...])
+    /// Converts `[[Class alloc] initWithThing:[...]]` -> `Class(thing: [...])`
+    /// and `[[self alloc] initWithThing:[...]]` -> `self.init(thing: [...])`
     func convertAllocInitWithParameters(exp: PostfixExpression) -> Expression? {
         guard let initInvocation = exp.asPostfix, case .functionCall(let args) = initInvocation.op, args.count > 0 else {
             return nil
@@ -54,7 +61,12 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
         
         let newArgs = clangify(methodName: initName, arguments: args)
         
-        return Expression.postfix(.identifier(typeName), .functionCall(arguments: newArgs))
+        // self.alloc.init() -> self.init()
+        if alloc.exp.asIdentifier?.identifier == "self", case .metatype? = alloc.exp.resolvedType {
+            return .postfix(.postfix(alloc.exp, .member("init")), .functionCall(arguments: newArgs))
+        }
+        
+        return .postfix(.identifier(typeName), .functionCall(arguments: newArgs))
     }
     
     /// Convert [super initWithThing:[...]] -> super.init(thing: [...])

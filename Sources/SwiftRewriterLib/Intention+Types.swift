@@ -199,6 +199,10 @@ extension TypeGenerationIntention: KnownType {
 public class MemberGenerationIntention: FromSourceIntention {
     /// Type this member generation intention belongs to
     public internal(set) var type: TypeGenerationIntention?
+    
+    /// Returns whether this member is static (i.e. class member).
+    /// Defaults to `false`, unless overriden by a subclass.
+    public var isStatic: Bool { return false }
 }
 
 /// An intention to generate a property, either static/instance, computed/stored

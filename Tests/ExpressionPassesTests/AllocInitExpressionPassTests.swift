@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import SwiftAST
 import ExpressionPasses
 
 class AllocInitExpressionPassTests: ExpressionPassTestCase {
@@ -52,6 +53,45 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
             original: "[super init]",
             expected: .postfix(.postfix(.identifier("super"), .member("init")),
                                .functionCall(arguments: []))
+        )
+    }
+    
+    /// Tests `[[self alloc] init]` where `self` is a metatype results in a
+    /// `Type.init()` call
+    func testInitSelfClassType() {
+        let typeNameExp = Expression.identifier("self")
+        typeNameExp.resolvedType = .metatype(for: .typeName("ClassName"))
+        
+        assertTransform(
+            original: .postfix(.postfix(.postfix(.postfix(typeNameExp,
+                                                          .member("alloc")),
+                                                 .functionCall(arguments: [])),
+                                        .member("init")),
+                               .functionCall(arguments: [])),
+            expected: .postfix(.postfix(typeNameExp,
+                                        .member("init")),
+                               .functionCall(arguments: []))
+        )
+    }
+    
+    /// Tests `[[[self alloc] initWithThing:[...]]` where `self` is a metatype
+    /// results in a `Type.init(thing: [...])` call
+    func testInitWithThingSelfClassType() {
+        let typeNameExp = Expression.identifier("self")
+        typeNameExp.resolvedType = .metatype(for: .typeName("ClassName"))
+        
+        let exp: Expression =
+            .postfix(.postfix(.postfix(.postfix(typeNameExp,
+                                                .member("alloc")),
+                                       .functionCall(arguments: [])),
+                              .member("initWithThing")),
+                     .functionCall(arguments: [.unlabeled(.constant(1))]))
+        
+        assertTransform(
+            original: exp,
+            expected: .postfix(.postfix(typeNameExp,
+                                        .member("init")),
+                               .functionCall(arguments: [.labeled("thing", .constant(1))]))
         )
     }
 }

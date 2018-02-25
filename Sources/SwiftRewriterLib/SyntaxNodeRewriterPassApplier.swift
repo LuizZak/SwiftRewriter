@@ -1,3 +1,5 @@
+import SwiftAST
+
 /// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
 /// all function bodies found in one go.
 public class SyntaxNodeRewriterPassApplier {
@@ -27,59 +29,87 @@ public class SyntaxNodeRewriterPassApplier {
         }
     }
     
-    private func applyOnClass(_ cls: BaseClassIntention) {
-        let intrinsics = DefaultCodeScope()
-        
-        // Push `self` intrinsic member variable
-        intrinsics.recordDefinition(
-            CodeDefinition(name: "self",
-                           type: .typeName(cls.typeName))
-        )
-        
-        typeResolver.intrinsicVariables = intrinsics
-        
-        defer {
-            // Don't forget to remove intrinsics later!
-            typeResolver.intrinsicVariables = EmptyCodeScope()
+    private func applyOnFunction(_ f: FunctionIntention) {
+        if let method = f.functionBody {
+            applyOnFunctionBody(method)
         }
+    }
+    
+    private func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
+        // Resolve types before feeding into passes
+        typeResolver.resolveTypes(in: functionBody.body)
         
+        passes.forEach {
+            _=functionBody.body.accept($0)
+            
+            // After each apply to the body, we must re-type check the result
+            // before handing it off to the next pass.
+            typeResolver.resolveTypes(in: functionBody.body)
+        }
+    }
+    
+    private func applyOnClass(_ cls: BaseClassIntention) {
         for prop in cls.properties {
             applyOnProperty(prop)
         }
         
         for method in cls.methods {
-            applyOnFunction(method)
+            applyOnMethod(method)
         }
     }
     
-    private func applyOnFunction(_ f: FunctionIntention) {
-        if let method = f.functionBody {
-            applyOnMethodBody(method)
+    private func applyOnMethod(_ method: MethodGenerationIntention) {
+        setupIntrinsics(forMember: method)
+        defer {
+            tearDownIntrinsics()
         }
+        
+        applyOnFunction(method)
     }
     
     private func applyOnProperty(_ property: PropertyGenerationIntention) {
+        setupIntrinsics(forMember: property)
+        defer {
+            tearDownIntrinsics()
+        }
+        
         switch property.mode {
         case .computed(let intent):
-            applyOnMethodBody(intent)
+            applyOnFunctionBody(intent)
         case let .property(get, set):
-            applyOnMethodBody(get)
-            applyOnMethodBody(set.body)
+            applyOnFunctionBody(get)
+            applyOnFunctionBody(set.body)
         case .asField:
             break
         }
     }
     
-    private func applyOnMethodBody(_ methodBody: FunctionBodyIntention) {
-        // Resolve types before feeding into passes
-        typeResolver.resolveTypes(in: methodBody.body)
+    private func setupIntrinsics(forMember member: MemberGenerationIntention) {
+        let intrinsics = DefaultCodeScope()
         
-        passes.forEach {
-            _=methodBody.body.accept($0)
+        // Push `self` intrinsic member variable
+        if let type = member.type {
+            let selfType = SwiftType.typeName(type.typeName)
             
-            // After each apply to the body, we must re-type check the result
-            // before handing it off to the next pass.
-            typeResolver.resolveTypes(in: methodBody.body)
+            if member.isStatic {
+                // Class `self` points to metatype of the class
+                intrinsics.recordDefinition(
+                    CodeDefinition(name: "self", type: .metatype(for: selfType))
+                )
+            } else {
+                // Instance `self` points to the actual instance
+                intrinsics.recordDefinition(
+                    CodeDefinition(name: "self", type: selfType)
+                )
+            }
         }
+        
+        typeResolver.intrinsicVariables = intrinsics
+    }
+    
+    /// Always call this before returning from a method that calls
+    /// `setupIntrinsics(forMember:)`
+    private func tearDownIntrinsics() {
+        typeResolver.intrinsicVariables = EmptyCodeScope()
     }
 }
