@@ -68,9 +68,16 @@ public extension KnownType {
     
     /// Gets a constructor matching a given argument label set
     public func constructor(withArgumentLabels labels: [String]) -> KnownConstructor? {
-        return knownConstructors.first {
+        let constructor = knownConstructors.first {
             $0.parameters.map { $0.label }.elementsEqual(labels)
         }
+        
+        if let constructor = constructor {
+            return constructor
+        }
+        
+        // Search through supertype chain, if available.
+        return supertype?.asKnownType?.constructor(withArgumentLabels: [])
     }
 }
 

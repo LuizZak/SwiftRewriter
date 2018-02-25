@@ -53,7 +53,7 @@ class DefaultTypeSystemTests: XCTestCase {
         }
         
         XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSArray")
-//        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
-//                        "Missing NSMutableArray's default parameterless constructor")
+        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+                        "Missing NSMutableArray's default parameterless constructor")
     }
 }
