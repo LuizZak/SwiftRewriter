@@ -347,7 +347,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
             guard let type = findType(for: innerType) else {
                 break
             }
-            guard let constructor = type.constructor(withArgumentLabels: args.map { $0.label ?? "_" }) else {
+            guard type.constructor(withArgumentLabels: args.map { $0.label ?? "_" }) != nil else {
                 break
             }
             
