@@ -11,7 +11,7 @@ public class FromSourceIntention: NonNullScopedIntention {
     
     // NOTE: This is a hack- shouldn't be recorded on the intention but passed to
     // it in a more abstract way.
-    // For now we leave as it makes things work!
+    // For now we leave it as it is since it works!
     /// Whether this intention was collected between NS_ASSUME_NONNULL_BEGIN/END
     /// macros.
     public var inNonnullContext: Bool = false
