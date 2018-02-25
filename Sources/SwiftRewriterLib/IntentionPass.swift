@@ -524,31 +524,82 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
     }
     
     private func apply(on method: MethodGenerationIntention) {
+        if method.signature.name.contains("With") && method.signature.parameters.count > 0 {
+            applyWithNameConversion(to: method)
+        }
+    }
+    
+    private func applyWithNameConversion(to method: MethodGenerationIntention) {
         let signature = method.signature
+        
+        let splitOnWith = signature.name.components(separatedBy: "With")
+        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count < 2 }) {
+            return
+        }
+        
+        // If the prefix of a static method begins with the suffix of its type
+        // name, and has a `-WithThing:[...]` suffix, create an initializer.
+        staticHandler:
+        if method.isStatic, let type = method.type {
+            guard let rangeOfName = type.typeName.range(of: splitOnWith[0], options: .caseInsensitive) else {
+                break staticHandler
+            }
+            
+            // Check if the type's suffix is equal to the method's prefix up to
+            // 'with':
+            //
+            // MyClass.classWithThing(<...>)
+            //
+            // matches the rule since 'class' is the common suffix/prefix:
+            //
+            // My | Class |
+            //    | class | WithThing
+            //
+            // Camel casing is ignored (text is always compared lower-cased)
+            guard rangeOfName.upperBound == type.typeName.endIndex else {
+                break staticHandler
+            }
+            
+            // `Thing` must match the selector
+            guard splitOnWith[1].lowercasedFirstLetter == method.signature.parameters[0].name else {
+                break staticHandler
+            }
+            
+            // Method's return type must match its containing type, or be an
+            // .anyObject type (originally `instancetype`).
+            let returnType = method.signature.returnType.deepUnwrapped
+            if case .typeName(type.typeName) = returnType {
+                // All good!
+            } else if returnType == .anyObject {
+                // All good as well!
+            } else {
+                break staticHandler // Invalid return type :(
+            }
+            
+            method.signature.isStatic = false
+            method.signature.name = "init"
+            method.signature.parameters[0].label = splitOnWith[1].lowercasedFirstLetter
+            
+            return
+        }
         
         // Do a little Clang-like-magic here: If the method selector is in the
         // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
         // noun is followed by a parameter that has the same name, we collapse
         // such selector in Swift as `lorem(with:)`.
-        if signature.name.contains("With") && signature.parameters.count > 0 {
-            let split = signature.name.components(separatedBy: "With")
-            if split.count != 2 || split.contains(where: { $0.count < 2 }) {
-                return
-            }
-            if split[1].lowercased() != signature.parameters[0].name.lowercased() {
-                return
-            }
-            
-            // All good! Collapse the identifier into a more 'swifty' construct
-            method.signature.name = split[0]
-            
-            // Init works slightly different: We leave the first label as the
-            // noun found after "With"
-            if split[0] == "init" {
-                method.signature.parameters[0].label = split[1].lowercased()
-            } else {
-                method.signature.parameters[0].label = "with"
-            }
+        if splitOnWith[1].lowercased() != signature.parameters[0].name.lowercased() {
+            return
+        }
+        
+        // All good! Collapse the identifier into a more 'swifty' construct
+        method.signature.name = splitOnWith[0]
+        
+        // Init works slightly different: We leave the first label as the
+        // noun found after "With"
+        if splitOnWith[0] == "init" {
+            method.signature.parameters[0].label = splitOnWith[1].lowercased()
+        } else {
+            method.signature.parameters[0].label = "with"
         }
     }
 }

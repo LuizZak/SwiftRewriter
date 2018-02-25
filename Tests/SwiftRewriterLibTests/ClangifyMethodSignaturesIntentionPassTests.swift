@@ -6,6 +6,10 @@
 //
 
 import XCTest
+import GrammarModels
+import ObjcParser
+import ObjcParserAntlr
+import SwiftAST
 @testable import SwiftRewriterLib
 
 class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
@@ -95,11 +99,39 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
                 ParameterSignature(label: "int", name: "int", type: .int)
                 ])
     }
+    
+    /// Tests automatic clangification of `[NSTypeName typeNameWithThing:<x>]`-style
+    /// initializers.
+    /// This helps test mimicing of Clang's importer behavior.
+    func testClangifyStaticFactoryMethods() {
+        let sut = ClangifyMethodSignaturesIntentionPass()
+        
+        testThat(typeName: "NSNumber", sut: sut)
+            .method(withObjcSignature: "+ (NSNumber*)numberWithBool:(BOOL)bool;")
+            .converts(toInitializer: "init(bool: Bool)")
+        
+        testThat(typeName: "NSNumber", sut: sut)
+            .method(withObjcSignature: "+ (NSNumber*)numberWithInteger:(NSInteger)integer;")
+            .converts(toInitializer: "init(integer: Int)")
+        
+        testThat(typeName: "UIAlertController", sut: sut)
+            .method(withObjcSignature: """
+                + (instancetype)alertControllerWithTitle:(nullable NSString *)title
+                                                 message:(nullable NSString *)message
+                                          preferredStyle:(UIAlertControllerStyle)preferredStyle;
+                """)
+            .converts(toInitializer: "init(title: String?, message: String?, preferredStyle: UIAlertControllerStyle)")
+    }
 }
 
 private extension ClangifyMethodSignaturesIntentionPassTests {
-    func testThat(sut: ClangifyMethodSignaturesIntentionPass) -> ClangifyMethodSignaturesIntentionPassTestBuilder {
-        return ClangifyMethodSignaturesIntentionPassTestBuilder(testCase: self, sut: sut)
+    func testThat(typeName: String = "T", sut: ClangifyMethodSignaturesIntentionPass) -> ClangifyMethodSignaturesIntentionPassTestBuilder {
+        return
+            ClangifyMethodSignaturesIntentionPassTestBuilder(
+                testCase: self,
+                typeName: typeName,
+                sut: sut
+        )
     }
 }
 
@@ -109,15 +141,22 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
     let type: TypeGenerationIntention
     let sut: ClangifyMethodSignaturesIntentionPass
     
-    init(testCase: XCTestCase, sut: ClangifyMethodSignaturesIntentionPass) {
+    init(testCase: XCTestCase, typeName: String = "T", sut: ClangifyMethodSignaturesIntentionPass) {
         self.testCase = testCase
         self.sut = sut
         intentions = IntentionCollection()
         
-        type = TypeGenerationIntention(typeName: "T")
+        type = TypeGenerationIntention(typeName: typeName)
         let file = FileGenerationIntention(sourcePath: "", filePath: "")
         file.addType(type)
         intentions.addIntention(file)
+    }
+    
+    func method(withObjcSignature signature: String) -> Asserter {
+        let def = parseMethodSign(signature)
+        let sign = createSwiftMethodSignatureGen().generateDefinitionSignature(from: def)
+        
+        return method(withSignature: sign)
     }
     
     func method(withSignature signature: FunctionSignature) -> Asserter {
@@ -132,10 +171,36 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
         return Asserter(testCase: testCase, intentions: intentions, type: type)
     }
     
+    private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
+        let ctx = TypeConstructionContext()
+        let mapper = TypeMapper(context: ctx)
+        
+        return SwiftMethodSignatureGen(context: ctx, typeMapper: mapper)
+    }
+    
+    private func parseMethodSign(_ source: String) -> MethodDefinition {
+        let finalSrc = """
+        @interface myClass
+        \(source)
+        @end
+        """
+        
+        let parser = ObjcParser(string: finalSrc)
+        
+        try! parser.parse()
+        
+        let node =
+            parser.rootNode
+                .firstChild(ofType: ObjcClassInterface.self)?
+                .firstChild(ofType: MethodDefinition.self)
+        return node!
+    }
+    
     class Asserter {
         let testCase: XCTestCase
         let intentions: IntentionCollection
         let type: TypeGenerationIntention
+        let typeMapper = TypeMapper(context: TypeConstructionContext())
         
         init(testCase: XCTestCase, intentions: IntentionCollection, type: TypeGenerationIntention) {
             self.testCase = testCase
@@ -163,6 +228,29 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
                 , inFile: file, atLine: line, expected: false)
         }
         
+        func converts(toInitializer expected: String, file: String = #file, line: Int = #line) {
+            guard let ctor = type.constructors.first else {
+                testCase.recordFailure(withDescription: """
+                    Failed to generate initializer: No initializers where found \
+                    on target type.
+                    """
+                    , inFile: file, atLine: line, expected: false)
+                return
+            }
+            
+            let result = "init" + parametersToString(ctor.parameters)
+            
+            guard result != expected else {
+                return
+            }
+            
+            testCase.recordFailure(withDescription: """
+                Expected to generate constructor with parameters \(expected),
+                but converted to \(result)
+                """
+                , inFile: file, atLine: line, expected: false)
+        }
+        
         func converts(to signature: FunctionSignature, file: String = #file, line: Int = #line) {
             guard type.methods.first?.signature != signature else {
                 return
@@ -172,6 +260,71 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
                 Expected signature \(signature), but converted to \(type.methods[0].signature)
                 """
                 , inFile: file, atLine: line, expected: false)
+        }
+        
+        func converts(to signature: String, file: String = #file, line: Int = #line) {
+            guard let method = type.methods.first else {
+                testCase.recordFailure(withDescription: """
+                    Failed to generate method: No methods where found on \
+                    target type.
+                    """
+                    , inFile: file, atLine: line, expected: false)
+                return
+            }
+            
+            let converted = signatureToString(method.signature)
+            guard converted != signature else {
+                return
+            }
+            
+            testCase.recordFailure(withDescription: """
+                Expected signature \(signature), but converted to \(converted)
+                """
+                , inFile: file, atLine: line, expected: false)
+        }
+        
+        // MARK: Signature conversion
+        
+        func signatureToString(_ signature: FunctionSignature) -> String {
+            var output = ""
+            
+            if signature.isStatic {
+                output += "static "
+            }
+            
+            output += "func "
+            
+            output += signature.name
+            output += parametersToString(signature.parameters)
+            
+            if signature.returnType != .void {
+                output += " -> \(typeMapper.typeNameString(for: signature.returnType))"
+            }
+            
+            return output
+        }
+        
+        func parametersToString(_ parameters: [ParameterSignature]) -> String {
+            var output = "("
+            
+            for (i, param) in parameters.enumerated() {
+                if i > 0 {
+                    output += ", "
+                }
+                
+                if param.label != param.name {
+                    output += param.label
+                    output += " "
+                }
+                
+                output += param.name
+                output += ": "
+                output += typeMapper.typeNameString(for: param.type)
+            }
+            
+            output += ")"
+            
+            return output
         }
     }
 }
