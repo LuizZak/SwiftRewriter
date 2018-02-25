@@ -217,14 +217,17 @@ public class SwiftWriter {
                 target.output(line: "")
             }
             
+            // Output initializers
+            for ctor in cls.constructors {
+                outputInitMethod(ctor, selfType: cls, target: target)
+            }
+            
             for method in cls.methods {
                 // Init and dealloc methods are treated differently
                 // TODO: Create a separate GenerationIntention entirely for init
                 // and dealloc methods and detect them during SwiftRewriter's
                 // parsing with IntentionPass's instead of postponing to here.
-                if method.signature.name == "init" {
-                    outputInitMethod(method, selfType: cls, target: target)
-                } else if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
+                if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
                     outputDeinit(method, selfType: cls, target: target)
                 } else {
                     outputMethod(method, selfType: cls, target: target)

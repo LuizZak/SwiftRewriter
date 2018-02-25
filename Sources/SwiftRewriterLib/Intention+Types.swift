@@ -141,7 +141,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     
     // TODO: Create a separate intention class for constructors
     public func addConstructor(_ intention: MethodGenerationIntention) {
-        self.methods.append(intention)
+        self.constructors.append(intention)
         
         intention.type = self
         intention.parent = self

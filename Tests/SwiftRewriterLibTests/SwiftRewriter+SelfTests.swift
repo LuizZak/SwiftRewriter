@@ -219,4 +219,44 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testCustomInitClass() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            @end
+            
+            @interface B: NSObject
+            - (instancetype)initWithValue:(NSInteger)value;
+            @end
+            
+            @implementation A
+            - (void)method {
+                [[B alloc] initWithValue:0];
+            }
+            @end
+
+            @implementation B
+            - (instancetype)initWithValue:(NSInteger)value {
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func method() {
+                    // type: B
+                    B(value: 0)
+                }
+            }
+            @objc
+            class B: NSObject {
+                @objc
+                init(value: Int) {
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

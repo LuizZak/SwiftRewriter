@@ -190,6 +190,10 @@ public class SwiftRewriter {
     private func performIntentionPasses() {
         let context = IntentionPassContext(intentions: intentionCollection, types: knownTypes)
         
+        for pass in IntentionPasses.passes {
+            pass.apply(on: intentionCollection, context: context)
+        }
+        
         let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
         
         let typeResolver =
@@ -198,10 +202,6 @@ public class SwiftRewriter {
         
         let applier = SyntaxNodeRewriterPassApplier(passes: syntaxPasses, typeResolver: typeResolver)
         applier.apply(on: intentionCollection)
-        
-        for pass in IntentionPasses.passes {
-            pass.apply(on: intentionCollection, context: context)
-        }
     }
     
     private func outputDefinitions() {
@@ -411,6 +411,8 @@ public class SwiftRewriter {
             context.popContext() // ProtocolGenerationIntention
         }
     }
+    // MARK: -
+    
     private func visitPropertyDefinitionNode(_ node: PropertyDefinition) {
         guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
@@ -466,6 +468,7 @@ public class SwiftRewriter {
         }
     }
     
+    // MARK: - Method Declaration
     private func visitObjcClassMethodNode(_ node: MethodDefinition) {
         guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return

@@ -503,6 +503,13 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
         
         for method in methods {
             apply(on: method)
+            
+            // Check methods that where turned into initializers
+            if !method.signature.isStatic && method.signature.name == "init" &&
+                method.returnType != .void {
+                type.removeMethod(method)
+                type.addConstructor(method)
+            }
         }
     }
     
@@ -524,7 +531,14 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
             
             // All good! Collapse the identifier into a more 'swifty' construct
             method.signature.name = split[0]
-            method.signature.parameters[0].label = "with"
+            
+            // Init works slightly different: We leave the first label as the
+            // noun found after "With"
+            if split[0] == "init" {
+                method.signature.parameters[0].label = split[1].lowercased()
+            } else {
+                method.signature.parameters[0].label = "with"
+            }
         }
     }
 }

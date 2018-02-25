@@ -222,7 +222,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 @objc
-                init(with thing: AnyObject!) {
+                init(thing: AnyObject!) {
                 }
                 @objc
                 func doThing() {

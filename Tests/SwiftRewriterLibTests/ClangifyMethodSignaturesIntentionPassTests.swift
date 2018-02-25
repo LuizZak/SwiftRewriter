@@ -68,6 +68,24 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
                                     ParameterSignature(label: "_", name: "thing", type: .any)
                     ]))
     }
+    
+    func testConvertInitwithInt() {
+        let sut = ClangifyMethodSignaturesIntentionPass()
+        
+        testThat(sut: sut)
+            .method(withSignature:
+                FunctionSignature(name: "initWithInt",
+                                  parameters: [
+                                    ParameterSignature(label: "_", name: "int", type: .int)],
+                                  returnType: .anyObject,
+                                  isStatic: false))
+            .converts(toInitializer:
+                FunctionSignature(name: "init",
+                                  parameters: [
+                                    ParameterSignature(label: "int", name: "int", type: .int)],
+                                  returnType: .anyObject,
+                                  isStatic: false))
+    }
 }
 
 private extension ClangifyMethodSignaturesIntentionPassTests {
@@ -113,8 +131,28 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
             self.type = type
         }
         
+        func converts(toInitializer signature: FunctionSignature, file: String = #file, line: Int = #line) {
+            guard let ctor = type.constructors.first else {
+                testCase.recordFailure(withDescription: """
+                    Failed to generate initializer: No initializers where found \
+                    on target type.
+                    """
+                    , inFile: file, atLine: line, expected: false)
+                return
+            }
+            guard ctor.signature != signature else {
+                return
+            }
+            
+            testCase.recordFailure(withDescription: """
+                Expected to generate constructor with signature \(signature),
+                but converted to \(ctor.signature)
+                """
+                , inFile: file, atLine: line, expected: false)
+        }
+        
         func converts(to signature: FunctionSignature, file: String = #file, line: Int = #line) {
-            guard type.methods[0].signature != signature else {
+            guard type.methods.first?.signature != signature else {
                 return
             }
             

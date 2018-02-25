@@ -259,10 +259,10 @@ class SwiftRewriterTests: XCTestCase {
                 override init() {
                 }
                 @objc
-                init(with thing: AnyObject!) {
+                init(thing: AnyObject!) {
                 }
                 @objc
-                init(with number: NSNumber) {
+                init(number: NSNumber) {
                 }
             }
             """)
@@ -350,7 +350,7 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 @objc
-                init(with thing: AnyObject!) {
+                init(thing: AnyObject!) {
                     self.thing()
                 }
                 @objc
@@ -393,7 +393,7 @@ class SwiftRewriterTests: XCTestCase {
                 private var anIVar: Int
                 
                 @objc
-                init(with thing: AnyObject!) {
+                init(thing: AnyObject!) {
                     self.thing()
                 }
                 @objc
@@ -432,7 +432,7 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 @objc
-                init(with thing: AnyObject) {
+                init(thing: AnyObject) {
                     self.thing()
                 }
                 @objc
