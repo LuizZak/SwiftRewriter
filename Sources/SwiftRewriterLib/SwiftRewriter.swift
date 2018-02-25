@@ -35,6 +35,8 @@ public class SwiftRewriter {
     /// before parsing.
     public var preprocessors: [SourcePreprocessor] = []
     
+    public var writerOptions: ASTWriterOptions = .default
+    
     public init(input: InputSourcesProvider, output: WriterOutput) {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
@@ -201,6 +203,7 @@ public class SwiftRewriter {
     private func outputDefinitions() {
         let writer = SwiftWriter(intentions: intentionCollection,
                                  knownTypes: knownTypes,
+                                 options: writerOptions,
                                  diagnostics: diagnostics,
                                  output: outputTarget)
         
@@ -286,8 +289,8 @@ public class SwiftRewriter {
         
         if let initialExpression = node.initialExpression,
             let expression = initialExpression.expression?.expression?.expression {
-            let rewriter = SwiftStmtRewriter()
-            let expression = rewriter.parseExpression(expression: expression)
+            let reader = SwiftASTReader()
+            let expression = reader.parseExpression(expression: expression)
             
             intent.initialValueExpr =
                 GlobalVariableInitialValueIntention(expression: expression,
@@ -481,11 +484,11 @@ public class SwiftRewriter {
         method.inNonnullContext = isNodeInNonnullContext(node)
         
         if let body = node.body, let statements = body.statements {
-            let rewriter = SwiftStmtRewriter()
-            let compound = rewriter.parseStatements(compoundStatement: statements)
+            let reader = SwiftASTReader()
+            let compound = reader.parseStatements(compoundStatement: statements)
             
-            let methodBodyIntention = MethodBodyIntention(body: compound, source: body)
-            method.methodBody = methodBodyIntention
+            let methodBodyIntention = FunctionBodyIntention(body: compound, source: body)
+            method.functionBody = methodBodyIntention
         }
         
         ctx.addMethod(method)

@@ -295,8 +295,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
-        if let body = method1.body, method2.methodBody == nil {
-            method2.methodBody = MethodBodyIntention(body: body.body)
+        if let body = method1.body, method2.functionBody == nil {
+            method2.functionBody = FunctionBodyIntention(body: body.body)
         }
     }
     
@@ -423,7 +423,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     private func joinPropertySet(_ propertySet: PropertySet, on classIntention: ClassGenerationIntention) {
         switch (propertySet.getter, propertySet.setter) {
         case let (getter?, setter?):
-            if let getterBody = getter.methodBody, let setterBody = setter.methodBody {
+            if let getterBody = getter.functionBody, let setterBody = setter.functionBody {
                 let setter =
                     PropertyGenerationIntention
                         .Setter(valueIdentifier: setter.parameters[0].name,
@@ -438,7 +438,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             classIntention.removeMethod(setter)
             
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
-            if let body = getter.methodBody {
+            if let body = getter.functionBody {
                 propertySet.property.mode = .computed(body)
             }
             
@@ -448,7 +448,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         case let (nil, setter?):
             classIntention.removeMethod(setter)
             
-            guard let setterBody = setter.methodBody else {
+            guard let setterBody = setter.functionBody else {
                 break
             }
             
@@ -461,8 +461,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // Synthesize a simple getter that has the following statement within:
             // return self._backingField
             let getterIntention =
-                MethodBodyIntention(body: [.return(.identifier(backingFieldName))],
-                                    source: propertySet.setter?.methodBody?.source)
+                FunctionBodyIntention(body: [.return(.identifier(backingFieldName))],
+                                    source: propertySet.setter?.functionBody?.source)
             
             propertySet.property.mode = .property(get: getterIntention, set: setter)
             

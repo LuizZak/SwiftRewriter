@@ -12,10 +12,14 @@ public class SwiftWriter {
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     let knownTypes: KnownTypeStorage
+    var options: ASTWriterOptions
     
-    public init(intentions: IntentionCollection, knownTypes: KnownTypeStorage, diagnostics: Diagnostics, output: WriterOutput) {
+    public init(intentions: IntentionCollection, knownTypes: KnownTypeStorage,
+                options: ASTWriterOptions, diagnostics: Diagnostics,
+                output: WriterOutput) {
         self.intentions = intentions
         self.knownTypes = knownTypes
+        self.options = options
         self.diagnostics = diagnostics
         self.output = output
         self.typeMapper = TypeMapper(context: context)
@@ -93,9 +97,13 @@ public class SwiftWriter {
     }
     
     private func outputTypealias(_ typeali: TypealiasIntention, target: RewriterOutputTarget) {
+        let nullability =
+            SwiftWriter._typeNullability(inType: typeali.fromType)
+        
         let ctx =
-            TypeMapper.TypeMappingContext(explicitNullability: SwiftWriter._typeNullability(inType: typeali.fromType),
+            TypeMapper.TypeMappingContext(explicitNullability: nullability,
                                           inNonnull: typeali.inNonnullContext)
+        
         let typeName = typeMapper.typeNameString(for: typeali.fromType, context: ctx)
         
         target.outputIdentation()
@@ -105,7 +113,8 @@ public class SwiftWriter {
         target.outputInline(typeName, style: .keyword)
     }
     
-    private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention, target: RewriterOutputTarget) {
+    private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention,
+                                           target: RewriterOutputTarget) {
         let name = varDecl.name
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr
@@ -137,8 +146,8 @@ public class SwiftWriter {
         if let expression = initVal?.expression {
             target.outputInline(" = ")
             
-            let rewriter = SwiftStmtRewriter()
-            rewriter.rewrite(expression: expression, into: target)
+            let rewriter = SwiftASTWriter(options: options)
+            rewriter.write(expression: expression, into: target)
         }
         
         target.outputLineFeed()
@@ -201,7 +210,7 @@ public class SwiftWriter {
                 outputInstanceVar(ivar, target: target)
             }
             for prop in cls.properties {
-                outputProperty(prop, target: target)
+                outputProperty(prop, selfType: cls, target: target)
             }
             
             if (cls.instanceVariables.count > 0 || cls.properties.count > 0) && cls.methods.count > 0 {
@@ -214,11 +223,11 @@ public class SwiftWriter {
                 // and dealloc methods and detect them during SwiftRewriter's
                 // parsing with IntentionPass's instead of postponing to here.
                 if method.signature.name == "init" {
-                    outputInitMethod(method, target: target)
+                    outputInitMethod(method, selfType: cls, target: target)
                 } else if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
-                    outputDeinit(method, target: target)
+                    outputDeinit(method, selfType: cls, target: target)
                 } else {
-                    outputMethod(method, target: target)
+                    outputMethod(method, selfType: cls, target: target)
                 }
             }
         }
@@ -236,7 +245,7 @@ public class SwiftWriter {
         
         target.idented {
             for prop in prot.properties {
-                outputProperty(prop, target: target)
+                outputProperty(prop, selfType: prot, target: target)
             }
             
             if prot.properties.count > 0 && prot.methods.count > 0 {
@@ -249,11 +258,11 @@ public class SwiftWriter {
                 // methods and detect them during SwiftRewriter's parsing instead
                 // of postponing to here.
                 if method.signature.name == "init" {
-                    outputInitMethod(method, target: target)
+                    outputInitMethod(method, selfType: prot, target: target)
                 } else if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
-                    outputDeinit(method, target: target)
+                    outputDeinit(method, selfType: prot, target: target)
                 } else {
-                    outputMethod(method, target: target)
+                    outputMethod(method, selfType: prot, target: target)
                 }
             }
         }
@@ -292,7 +301,8 @@ public class SwiftWriter {
         target.outputLineFeed()
     }
     
-    private func outputProperty(_ prop: PropertyGenerationIntention, target: RewriterOutputTarget) {
+    private func outputProperty(_ prop: PropertyGenerationIntention, selfType: KnownType,
+                                target: RewriterOutputTarget) {
         target.outputIdentation()
         
         target.outputInlineWithSpace("@objc", style: .keyword)
@@ -326,7 +336,7 @@ public class SwiftWriter {
             target.outputLineFeed()
             break
         case .computed(let body):
-            outputMethodBody(body, target: target)
+            outputMethodBody(body, options: options, target: target)
         case let .property(getter, setter):
             target.outputInline(" ")
             target.outputInline("{")
@@ -335,7 +345,8 @@ public class SwiftWriter {
             target.idented {
                 target.outputIdentation()
                 target.outputInline("get", style: .keyword)
-                outputMethodBody(getter, target: target)
+                outputMethodBody(getter, options: options,
+                                 target: target)
                 
                 target.outputIdentation()
                 target.outputInline("set", style: .keyword)
@@ -345,14 +356,17 @@ public class SwiftWriter {
                     target.outputInline("(\(setter.valueIdentifier))")
                 }
                 
-                outputMethodBody(setter.body, target: target)
+                outputMethodBody(setter.body, options: options,
+                                 target: target)
             }
             
             target.output(line: "}")
         }
     }
     
-    private func outputInitMethod(_ initMethod: MethodGenerationIntention, target: RewriterOutputTarget) {
+    private func outputInitMethod(_ initMethod: MethodGenerationIntention,
+                                  selfType: KnownType,
+                                  target: RewriterOutputTarget) {
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
@@ -378,8 +392,8 @@ public class SwiftWriter {
                            into: target,
                            inNonnullContext: initMethod.inNonnullContext)
         
-        if let body = initMethod.methodBody {
-            outputMethodBody(body, target: target)
+        if let body = initMethod.functionBody {
+            outputMethodBody(body, options: options, target: target)
         } else if initMethod.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
@@ -390,7 +404,8 @@ public class SwiftWriter {
         }
     }
     
-    private func outputDeinit(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+    private func outputDeinit(_ method: MethodGenerationIntention, selfType: KnownType,
+                              target: RewriterOutputTarget) {
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
@@ -402,8 +417,8 @@ public class SwiftWriter {
         
         target.outputInline("deinit", style: .keyword)
         
-        if let body = method.methodBody {
-            outputMethodBody(body, target: target)
+        if let body = method.functionBody {
+            outputMethodBody(body, options: options, target: target)
         } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
@@ -414,7 +429,8 @@ public class SwiftWriter {
         }
     }
     
-    private func outputMethod(_ method: MethodGenerationIntention, target: RewriterOutputTarget) {
+    private func outputMethod(_ method: MethodGenerationIntention, selfType: KnownType,
+                              target: RewriterOutputTarget) {
         target.output(line: "@objc", style: .keyword)
         
         target.outputIdentation()
@@ -453,8 +469,8 @@ public class SwiftWriter {
             target.outputInline(typeName, style: .typeName)
         }
         
-        if let body = method.methodBody {
-            outputMethodBody(body, target: target)
+        if let body = method.functionBody {
+            outputMethodBody(body, options: options, target: target)
         } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
@@ -465,9 +481,10 @@ public class SwiftWriter {
         }
     }
     
-    private func outputMethodBody(_ body: MethodBodyIntention, target: RewriterOutputTarget) {
-        let rewriter = SwiftStmtRewriter()
-        rewriter.rewrite(compoundStatement: body.body, into: target)
+    private func outputMethodBody(_ body: FunctionBodyIntention, options: ASTWriterOptions,
+                                  target: RewriterOutputTarget) {
+        let rewriter = SwiftASTWriter(options: options)
+        rewriter.write(compoundStatement: body.body, into: target)
     }
     
     private func generateParameters(for signature: FunctionSignature,

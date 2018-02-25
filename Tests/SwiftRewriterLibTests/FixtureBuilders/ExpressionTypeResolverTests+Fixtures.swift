@@ -75,12 +75,12 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
-        func thenAssertDefined(name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(localNamed name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: .strong, isConstant: false)
             
             return
-                thenAssertDefined(name: name,
+                thenAssertDefined(localNamed: name,
                                   storage: storage,
                                   file: file,
                                   line: line)
@@ -88,13 +88,13 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the given scope.
         @discardableResult
-        func thenAssertDefined(in scope: CodeScopeStatement, name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(in scope: CodeScopeStatement, localNamed name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: .strong, isConstant: false)
                 
             return
                 thenAssertDefined(in: scope,
-                                  name: name,
+                                  localNamed: name,
                                   storage: storage,
                                   file: file,
                                   line: line)
@@ -102,13 +102,13 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
-        func thenAssertDefined(name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
-            return thenAssertDefined(in: scope, name: name, storage: storage, file: file, line: line)
+        func thenAssertDefined(localNamed name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+            return thenAssertDefined(in: scope, localNamed: name, storage: storage, file: file, line: line)
         }
         
         /// Asserts a definition was created on the given scope.
         @discardableResult
-        func thenAssertDefined(in scope: CodeScopeStatement, name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(in scope: CodeScopeStatement, localNamed name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             // Make sure to apply definitions just before starting assertions
             if !applied {
                 sut.typeSystem = typeSystem

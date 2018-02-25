@@ -274,7 +274,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             ])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(name: "a", type: .int)
+            .thenAssertDefined(localNamed: "a", type: .int)
     }
     
     func testMetatypeFetching() {
@@ -349,7 +349,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, name: "i", type: .int)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int)
     }
     
     func testForLoopArrayTypeResolving_NSArray() {
@@ -362,7 +362,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, name: "i", type: .anyObject)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .anyObject)
     }
 
     func testForLoopArrayTypeResolving_NSMutableArray() {
@@ -375,7 +375,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, name: "i", type: .anyObject)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .anyObject)
     }
     
     func testForLoopArrayTypeResolving_NonArray() {
@@ -388,7 +388,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, name: "i", type: .errorType)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .errorType)
     }
 }
 

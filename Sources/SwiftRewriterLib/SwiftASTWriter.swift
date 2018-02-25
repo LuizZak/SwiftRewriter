@@ -4,13 +4,16 @@ import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
 
-/// Main frontend class for performing Swift-conversion of Objective-C statements
-/// and expressions.
-class SwiftStmtRewriter {
-    public init() {
-        
-    }
+/// Options for an AST writer invocation
+public struct ASTWriterOptions {
+    /// Default settings instance
+    static let `default` = ASTWriterOptions(printExpressionTypes: false)
     
+    public var printExpressionTypes: Bool
+}
+
+/// Reader that reads Objective-C AST and outputs equivalent a Swift AST
+class SwiftASTReader {
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement {
         let parser = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: SwiftExprASTReader())
         guard let result = compoundStatement.accept(parser) else {
@@ -28,25 +31,39 @@ class SwiftStmtRewriter {
         
         return result
     }
+}
+
+/// Main frontend class for converting Objective-C into Swift AST and printing
+/// Swift AST as well
+class SwiftASTWriter {
+    let options: ASTWriterOptions
     
-    public func rewrite(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
+    init(options: ASTWriterOptions) {
+        self.options = options
+    }
+    
+    public func write(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
         let rewriter = StatementWriter(target: target)
         rewriter.visitStatement(compoundStatement)
     }
     
-    public func rewrite(expression: Expression, into target: RewriterOutputTarget) {
+    public func write(expression: Expression, into target: RewriterOutputTarget) {
         let rewriter = ExpressionWriter(target: target)
         rewriter.rewrite(expression)
     }
     
     public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext, into target: RewriterOutputTarget) {
-        let result = parseStatements(compoundStatement: compoundStatement)
-        rewrite(compoundStatement: result, into: target)
+        let reader = SwiftASTReader()
+        
+        let result = reader.parseStatements(compoundStatement: compoundStatement)
+        write(compoundStatement: result, into: target)
     }
     
     public func rewrite(expression: ObjectiveCParser.ExpressionContext, into target: RewriterOutputTarget) {
-        let result = parseExpression(expression: expression)
-        rewrite(expression: result, into: target)
+        let reader = SwiftASTReader()
+        
+        let result = reader.parseExpression(expression: expression)
+        write(expression: result, into: target)
     }
 }
 

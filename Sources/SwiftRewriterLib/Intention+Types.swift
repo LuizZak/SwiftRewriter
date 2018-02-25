@@ -88,11 +88,13 @@ public class TypeGenerationIntention: FromSourceIntention {
             self.properties.append(intention)
         }
         
+        intention.type = self
         intention.parent = self
     }
     public func removeProperty(_ intention: PropertyGenerationIntention) {
         if let index = properties.index(where: { $0 === intention }) {
             intention.parent = nil
+            intention.type = nil
             properties.remove(at: index)
         }
     }
@@ -107,7 +109,7 @@ public class TypeGenerationIntention: FromSourceIntention {
                                       accessLevel: .internal, source: source)
         
         if let body = knownMethod.body {
-            method.methodBody = MethodBodyIntention(body: body.body)
+            method.functionBody = FunctionBodyIntention(body: body.body)
         }
         
         addMethod(method)
@@ -122,11 +124,13 @@ public class TypeGenerationIntention: FromSourceIntention {
             self.methods.append(intention)
         }
         
+        intention.type = self
         intention.parent = self
     }
     public func removeMethod(_ intention: MethodGenerationIntention) {
         if let index = methods.index(where: { $0 === intention }) {
             intention.parent = nil
+            intention.type = nil
             methods.remove(at: index)
         }
     }
@@ -135,6 +139,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     public func addConstructor(_ intention: MethodGenerationIntention) {
         self.methods.append(intention)
         
+        intention.type = self
         intention.parent = self
     }
     
@@ -192,7 +197,8 @@ extension TypeGenerationIntention: KnownType {
 
 /// An intention to generate a property or method on a type
 public class MemberGenerationIntention: FromSourceIntention {
-    
+    /// Type this member generation intention belongs to
+    public internal(set) var type: TypeGenerationIntention?
 }
 
 /// An intention to generate a property, either static/instance, computed/stored
@@ -225,15 +231,15 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     
     public enum Mode {
         case asField
-        case computed(MethodBodyIntention)
-        case property(get: MethodBodyIntention, set: Setter)
+        case computed(FunctionBodyIntention)
+        case property(get: FunctionBodyIntention, set: Setter)
     }
     
     public struct Setter {
         /// Identifier for the setter's received value
         var valueIdentifier: String
         /// The body for the setter
-        var body: MethodBodyIntention
+        var body: FunctionBodyIntention
     }
 }
 
@@ -257,7 +263,7 @@ public enum PropertyAttribute {
 
 /// An intention to generate a body of Swift code from an equivalent Objective-C
 /// source.
-public class MethodBodyIntention: FromSourceIntention, KnownMethodBody {
+public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
     /// Original source code body to generate
     public var body: CompoundStatement
     
@@ -270,50 +276,6 @@ public class MethodBodyIntention: FromSourceIntention, KnownMethodBody {
     /// Returns an iterator for all expressions within this method body.
     public func expressionsIterator(inspectBlocks: Bool) -> ExpressionSequence {
         return ExpressionSequence(statement: body, inspectBlocks: inspectBlocks)
-    }
-}
-
-/// An intention to generate a static/instance function for a type.
-public class MethodGenerationIntention: MemberGenerationIntention, FunctionIntention {
-    public var typedSource: MethodDefinition? {
-        return source as? MethodDefinition
-    }
-    
-    public var signature: FunctionSignature
-    
-    public var methodBody: MethodBodyIntention?
-    
-    public var isStatic: Bool {
-        return signature.isStatic
-    }
-    public var name: String {
-        return signature.name
-    }
-    public var returnType: SwiftType {
-        return signature.returnType
-    }
-    public var parameters: [ParameterSignature] {
-        return signature.parameters
-    }
-    
-    public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature],
-                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
-        self.signature =
-            FunctionSignature(isStatic: isStatic, name: name, returnType: returnType,
-                      parameters: parameters)
-        super.init(accessLevel: accessLevel, source: source)
-    }
-    
-    public init(signature: FunctionSignature, accessLevel: AccessLevel = .internal,
-                source: ASTNode? = nil) {
-        self.signature = signature
-        super.init(accessLevel: accessLevel, source: source)
-    }
-}
-
-extension MethodGenerationIntention: KnownMethod, KnownConstructor {
-    public var body: KnownMethodBody? {
-        return methodBody
     }
 }
 

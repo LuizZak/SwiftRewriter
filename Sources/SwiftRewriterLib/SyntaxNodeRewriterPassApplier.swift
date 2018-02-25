@@ -38,7 +38,7 @@ public class SyntaxNodeRewriterPassApplier {
     }
     
     private func applyOnFunction(_ f: FunctionIntention) {
-        if let method = f.methodBody {
+        if let method = f.functionBody {
             applyOnMethodBody(method)
         }
     }
@@ -55,7 +55,7 @@ public class SyntaxNodeRewriterPassApplier {
         }
     }
     
-    private func applyOnMethodBody(_ methodBody: MethodBodyIntention) {
+    private func applyOnMethodBody(_ methodBody: FunctionBodyIntention) {
         // Resolve types before feeding into passes
         typeResolver.resolveTypes(in: methodBody.body)
         

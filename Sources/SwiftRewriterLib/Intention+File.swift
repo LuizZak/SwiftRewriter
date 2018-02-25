@@ -85,7 +85,7 @@ public class FileGenerationIntention: Intention {
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FunctionIntention {
     public var signature: FunctionSignature
     
-    public var methodBody: MethodBodyIntention?
+    public var functionBody: FunctionBodyIntention?
     
     public init(signature: FunctionSignature, accessLevel: AccessLevel, source: ASTNode?) {
         self.signature = signature
@@ -134,7 +134,7 @@ public protocol NonNullScopedIntention: Intention {
 public protocol FunctionIntention: Intention {
     var signature: FunctionSignature { get }
     
-    var methodBody: MethodBodyIntention? { get }
+    var functionBody: FunctionBodyIntention? { get }
 }
 
 /// Signature for a function intention
