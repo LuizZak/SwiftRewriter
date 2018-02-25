@@ -28,4 +28,40 @@ class SwiftRewriter_MetaTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testSelfTypeInPropertySynthesizedGetterAndSetterBody() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass : NSObject
+            @property BOOL value;
+            @end
+            
+            @implementation MyClass
+            - (void)setValue:(BOOL)newValue {
+                (self);
+            }
+            - (BOOL)value {
+                (self);
+                return NO;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc var value: Bool {
+                    get {
+                        // type: MyClass
+                        (self)
+                        return false
+                    }
+                    set {
+                        // type: MyClass
+                        (self)
+                    }
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
