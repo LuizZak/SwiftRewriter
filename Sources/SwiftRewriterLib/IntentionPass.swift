@@ -485,6 +485,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
     }
 }
 
+// TODO: Move task of converting `init` methods to a separate intention pass.
+
 /// Performs Clang-style alterations of method signatures to attempt to match
 /// somewhat its behavior when coming up with Swift names for Objective-C methods.
 ///
@@ -508,7 +510,15 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
             if !method.signature.isStatic && method.signature.name == "init" &&
                 method.returnType != .void {
                 type.removeMethod(method)
-                type.addConstructor(method)
+                
+                let initIntention =
+                    InitGenerationIntention(parameters: method.signature.parameters,
+                                            accessLevel: method.accessLevel,
+                                            source: method.source)
+                initIntention.inNonnullContext = method.inNonnullContext
+                initIntention.functionBody = method.functionBody
+                
+                type.addConstructor(initIntention)
             }
         }
     }

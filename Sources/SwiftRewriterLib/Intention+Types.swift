@@ -33,7 +33,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     private(set) public var protocols: [ProtocolInheritanceIntention] = []
     private(set) public var properties: [PropertyGenerationIntention] = []
     private(set) public var methods: [MethodGenerationIntention] = []
-    private(set) public var constructors: [MethodGenerationIntention] = []
+    private(set) public var constructors: [InitGenerationIntention] = []
     
     public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
@@ -140,7 +140,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     }
     
     // TODO: Create a separate intention class for constructors
-    public func addConstructor(_ intention: MethodGenerationIntention) {
+    public func addConstructor(_ intention: InitGenerationIntention) {
         self.constructors.append(intention)
         
         intention.type = self

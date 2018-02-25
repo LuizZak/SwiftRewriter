@@ -149,7 +149,7 @@ public protocol NonNullScopedIntention: Intention {
 
 /// Defines a protocol for function-generating intentions
 public protocol FunctionIntention: Intention {
-    var signature: FunctionSignature { get }
+    //var signature: FunctionSignature { get }
     
     var functionBody: FunctionBodyIntention? { get }
 }

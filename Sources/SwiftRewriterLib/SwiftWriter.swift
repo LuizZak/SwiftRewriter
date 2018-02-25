@@ -223,7 +223,7 @@ public class SwiftWriter {
             }
             
             for method in cls.methods {
-                // Init and dealloc methods are treated differently
+                // Dealloc methods are treated differently
                 // TODO: Create a separate GenerationIntention entirely for init
                 // and dealloc methods and detect them during SwiftRewriter's
                 // parsing with IntentionPass's instead of postponing to here.
@@ -255,18 +255,12 @@ public class SwiftWriter {
                 target.output(line: "")
             }
             
+            for ctor in prot.constructors {
+                outputInitMethod(ctor, selfType: prot, target: target)
+            }
+            
             for method in prot.methods {
-                // Init methods are treated differently
-                // TODO: Create a separate GenerationIntention entirely for init
-                // methods and detect them during SwiftRewriter's parsing instead
-                // of postponing to here.
-                if method.signature.name == "init" {
-                    outputInitMethod(method, selfType: prot, target: target)
-                } else if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
-                    outputDeinit(method, selfType: prot, target: target)
-                } else {
-                    outputMethod(method, selfType: prot, target: target)
-                }
+                outputMethod(method, selfType: prot, target: target)
             }
         }
         
@@ -367,7 +361,7 @@ public class SwiftWriter {
         }
     }
     
-    private func outputInitMethod(_ initMethod: MethodGenerationIntention,
+    private func outputInitMethod(_ initMethod: InitGenerationIntention,
                                   selfType: KnownType,
                                   target: RewriterOutputTarget) {
         target.output(line: "@objc", style: .keyword)
@@ -380,20 +374,16 @@ public class SwiftWriter {
         }
         
         // Emit required "override" keyword
-        if initMethod.parent is ClassGenerationIntention && initMethod.signature.parameters.count == 0 {
+        if initMethod.parent is ClassGenerationIntention && initMethod.parameters.count == 0 {
             target.outputInlineWithSpace("override", style: .keyword)
         }
         
-        // Protocol 'optional' keyword
-        if let protocolMethod = initMethod as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
-            target.outputInlineWithSpace("optional", style: .keyword)
-        }
+        // TODO: Support protocol's '@optional' keyword on protocol initializers
         
         target.outputInline("init", style: .keyword)
         
-        generateParameters(for: initMethod.signature,
-                           into: target,
-                           inNonnullContext: initMethod.inNonnullContext)
+        outputParameters(initMethod.parameters, into: target,
+                         inNonnullContext: initMethod.inNonnullContext)
         
         if let body = initMethod.functionBody {
             outputMethodBody(body, options: options, target: target)
@@ -458,9 +448,8 @@ public class SwiftWriter {
         
         target.outputInline(sign.name)
         
-        generateParameters(for: method.signature,
-                           into: target,
-                           inNonnullContext: method.inNonnullContext)
+        outputParameters(method.signature.parameters, into: target,
+                         inNonnullContext: method.inNonnullContext)
         
         switch sign.returnType {
         case .void: // `-> Void` can be omitted for void functions.
@@ -490,13 +479,13 @@ public class SwiftWriter {
         rewriter.write(compoundStatement: body.body, into: target)
     }
     
-    private func generateParameters(for signature: FunctionSignature,
+    private func outputParameters(_ parameters: [ParameterSignature],
                                     into target: RewriterOutputTarget,
                                     inNonnullContext: Bool = false) {
         
         target.outputInline("(")
         
-        for (i, param) in signature.parameters.enumerated() {
+        for (i, param) in parameters.enumerated() {
             if i > 0 {
                 target.outputInline(", ")
             }

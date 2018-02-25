@@ -69,6 +69,18 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
                     ]))
     }
     
+    func testConvertInit() {
+        let sut = ClangifyMethodSignaturesIntentionPass()
+        
+        testThat(sut: sut)
+            .method(withSignature:
+                FunctionSignature(name: "init",
+                                  parameters: [],
+                                  returnType: .anyObject,
+                                  isStatic: false))
+            .converts(toInitializer: [])
+    }
+    
     func testConvertInitwithInt() {
         let sut = ClangifyMethodSignaturesIntentionPass()
         
@@ -79,12 +91,9 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
                                     ParameterSignature(label: "_", name: "int", type: .int)],
                                   returnType: .anyObject,
                                   isStatic: false))
-            .converts(toInitializer:
-                FunctionSignature(name: "init",
-                                  parameters: [
-                                    ParameterSignature(label: "int", name: "int", type: .int)],
-                                  returnType: .anyObject,
-                                  isStatic: false))
+            .converts(toInitializer: [
+                ParameterSignature(label: "int", name: "int", type: .int)
+                ])
     }
 }
 
@@ -131,7 +140,7 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
             self.type = type
         }
         
-        func converts(toInitializer signature: FunctionSignature, file: String = #file, line: Int = #line) {
+        func converts(toInitializer parameters: [ParameterSignature], file: String = #file, line: Int = #line) {
             guard let ctor = type.constructors.first else {
                 testCase.recordFailure(withDescription: """
                     Failed to generate initializer: No initializers where found \
@@ -140,13 +149,13 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
                     , inFile: file, atLine: line, expected: false)
                 return
             }
-            guard ctor.signature != signature else {
+            guard ctor.parameters != parameters else {
                 return
             }
             
             testCase.recordFailure(withDescription: """
-                Expected to generate constructor with signature \(signature),
-                but converted to \(ctor.signature)
+                Expected to generate constructor with parameters \(parameters),
+                but converted to \(ctor.parameters)
                 """
                 , inFile: file, atLine: line, expected: false)
         }
