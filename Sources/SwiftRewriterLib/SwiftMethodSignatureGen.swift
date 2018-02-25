@@ -16,10 +16,10 @@ public class SwiftMethodSignatureGen {
     /// a class-type function definition.
     public func generateDefinitionSignature(from objcMethod: MethodDefinition) -> FunctionSignature {
         var sign =
-            FunctionSignature(isStatic: objcMethod.isClassMethod,
-                              name: "__",
+            FunctionSignature(name: "__",
+                              parameters: [],
                               returnType: SwiftType.anyObject.asImplicitUnwrapped,
-                              parameters: [])
+                              isStatic: objcMethod.isClassMethod)
         
         if let sel = objcMethod.methodSelector?.selector {
             switch sel {

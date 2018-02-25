@@ -35,8 +35,7 @@ public class KnownTypeBuilder {
     /// Adds a void-returning, parameter-less instance method
     public func addingVoidMethod(named name: String) -> KnownTypeBuilder {
         let signature =
-            FunctionSignature(isStatic: false, name: name, returnType: .void,
-                              parameters: [])
+            FunctionSignature(name: name, parameters: [])
         
         return addingMethod(withSignature: signature)
     }
@@ -44,8 +43,7 @@ public class KnownTypeBuilder {
     /// Adds a parameter-less instance method with a given return type
     public func addingMethod(named name: String, returning returnType: SwiftType) -> KnownTypeBuilder {
         let signature =
-            FunctionSignature(isStatic: false, name: name, returnType: returnType,
-                              parameters: [])
+            FunctionSignature(name: name, parameters: [], returnType: returnType)
         
         return addingMethod(withSignature: signature)
     }

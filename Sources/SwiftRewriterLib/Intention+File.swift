@@ -161,19 +161,11 @@ public struct FunctionSignature: Equatable {
     public var returnType: SwiftType
     public var parameters: [ParameterSignature]
     
-    public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature]) {
+    public init(name: String, parameters: [ParameterSignature], returnType: SwiftType = .void, isStatic: Bool = false) {
         self.isStatic = isStatic
         self.name = name
         self.returnType = returnType
         self.parameters = parameters
-    }
-    
-    /// Initializes a void-returning instance method with a given signature
-    public init(name: String, parameters: [ParameterSignature]) {
-        self.name = name
-        self.parameters = parameters
-        returnType = .void
-        isStatic = false
     }
     
     /// Returns a `SwiftType.block`-equivalent type for this function signature
@@ -186,9 +178,10 @@ public struct FunctionSignature: Equatable {
             ParameterSignature(label: $0.label, name: $0.name, type: $0.type.deepUnwrapped)
         }
         
-        return FunctionSignature(isStatic: isStatic, name: name,
+        return FunctionSignature(name: name,
+                                 parameters: parameters,
                                  returnType: returnType.deepUnwrapped,
-                                 parameters: parameters)
+                                 isStatic: isStatic)
     }
     
     /// Returns `true` iff `self` and `other` match using Objective-C signature
@@ -218,6 +211,12 @@ public struct ParameterSignature: Equatable {
     public var label: String
     public var name: String
     public var type: SwiftType
+    
+    public init(label: String, name: String, type: SwiftType) {
+        self.label = label
+        self.name = name
+        self.type = type
+    }
 }
 
 /// Defines a protocol for a value storage intention.

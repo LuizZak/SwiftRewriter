@@ -96,11 +96,13 @@ extension DefaultTypeSystem {
         let nsMutableArray =
             KnownTypeBuilder(typeName: "NSMutableArray", supertype: nsArray)
                 .addingMethod(withSignature:
-                    FunctionSignature(isStatic: false, name: "addObject",
-                                      returnType: .void,
+                    FunctionSignature(name: "addObject",
                                       parameters: [
-                                        ParameterSignature(label: "_", name: "object", type: .anyObject)
-                        ]))
+                                        ParameterSignature(label: "_", name: "object", type: .anyObject)],
+                                      returnType: .void,
+                                      isStatic: false
+                    )
+                )
                 .build()
         
         let nsDictionary =
@@ -110,12 +112,14 @@ extension DefaultTypeSystem {
         let nsMutableDictionary =
             KnownTypeBuilder(typeName: "NSMutableDictionary", supertype: nsDictionary)
                 .addingMethod(withSignature:
-                    FunctionSignature(isStatic: false, name: "setObject",
-                                      returnType: .void,
+                    FunctionSignature(name: "setObject",
                                       parameters: [
                                         ParameterSignature(label: "_", name: "anObject", type: .anyObject),
-                                        ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)
-                        ]))
+                                        ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)],
+                                      returnType: .void,
+                                      isStatic: false
+                    )
+                )
                 .build()
         
         addType(nsObject)

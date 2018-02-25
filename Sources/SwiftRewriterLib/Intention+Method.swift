@@ -28,8 +28,10 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
     public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.signature =
-            FunctionSignature(isStatic: isStatic, name: name, returnType: returnType,
-                              parameters: parameters)
+            FunctionSignature(name: name,
+                              parameters: parameters,
+                              returnType: returnType,
+                              isStatic: isStatic)
         super.init(accessLevel: accessLevel, source: source)
     }
     

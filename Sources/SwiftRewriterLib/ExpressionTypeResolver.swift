@@ -569,8 +569,10 @@ private class MemberInvocationResolver {
             }
         
         let signature =
-            FunctionSignature(isStatic: isStatic, name: memberName, returnType: .void,
-                              parameters: parameters)
+            FunctionSignature(name: memberName,
+                              parameters: parameters,
+                              returnType: .void,
+                              isStatic: isStatic)
         
         return type.method(withObjcSelector: signature)
     }

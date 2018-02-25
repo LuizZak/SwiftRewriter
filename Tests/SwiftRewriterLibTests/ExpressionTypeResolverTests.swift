@@ -428,6 +428,31 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .int)
     }
+    
+    func testMethodLookup() {
+        let exp = Expression.postfix(.postfix(.identifier("a"),
+                                              .member("aMethod")),
+                                     .functionCall(arguments: [
+                                        .unlabeled(.constant(1)),
+                                        .labeled("secondParam", .constant(1))
+                                        ]))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder.addingMethod(withSignature:
+                        FunctionSignature(name: "aMethod",
+                                          parameters: [
+                                            ParameterSignature(label: "_", name: "arg0", type: .int),
+                                            ParameterSignature(label: "secondParam", name: "arg1", type: .int)],
+                                          returnType: .int
+                        )
+                    ).build()
+            }
+            .definingLocal(name: "a", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+    }
 }
 
 // MARK: - Test Building Helpers
