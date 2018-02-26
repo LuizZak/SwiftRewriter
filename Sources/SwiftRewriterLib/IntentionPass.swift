@@ -12,6 +12,10 @@ public protocol IntentionPass {
 public struct IntentionPassContext {
     public let intentions: IntentionCollection
     public let typeSystem: TypeSystem
+    
+    /// Frontend point to request type-resolution of expressions, statements and
+    /// entire intention collections.
+    public let typeResolverInvoker: TypeResolverInvoker
 }
 
 /// Gets an array of intention passes to apply before writing the final Swift code.

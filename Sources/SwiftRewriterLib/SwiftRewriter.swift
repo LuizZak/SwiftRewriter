@@ -67,23 +67,24 @@ public class SwiftRewriter {
     }
     
     private func performIntentionPasses() {
-        let context =
-            IntentionPassContext(intentions: intentionCollection,
-                                 typeSystem: typeSystem)
-        
-        for pass in IntentionPasses.passes {
-            pass.apply(on: intentionCollection, context: context)
-        }
-        
-        let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
-        
         let typeResolver =
             ExpressionTypeResolver(typeSystem: typeSystem,
                                    intrinsicVariables: EmptyCodeScope())
         
+        let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
+        
         let applier =
             SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
                                           typeResolver: typeResolver)
+        
+        let context =
+            IntentionPassContext(intentions: intentionCollection,
+                                 typeSystem: typeSystem,
+                                 typeResolverInvoker: applier)
+        
+        for pass in IntentionPasses.passes {
+            pass.apply(on: intentionCollection, context: context)
+        }
         
         applier.apply(on: intentionCollection)
     }
