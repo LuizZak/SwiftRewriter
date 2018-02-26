@@ -48,11 +48,11 @@ class TypeMapperTests: XCTestCase {
                toConvertTo: "AnyObject")
         
         expect(.instancetype,
-               toConvertTo: "AnyObject")
+               toConvertTo: "__instancetype")
         
         expect(.instancetype,
                withExplicitNullability: .nullable,
-               toConvertTo: "AnyObject?")
+               toConvertTo: "__instancetype?")
         
         expect(.id(protocols: ["UITableViewDelegate"]),
                withExplicitNullability: .nullable,
@@ -61,9 +61,6 @@ class TypeMapperTests: XCTestCase {
         expect(.id(protocols: ["UITableViewDelegate", "UITableViewDataSource"]),
                withExplicitNullability: .nullable,
                toConvertTo: "(UITableViewDelegate & UITableViewDataSource)?")
-        
-        expect(.struct("instancetype"),
-               toConvertTo: "AnyObject")
         
         expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
                withExplicitNullability: nil,

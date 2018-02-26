@@ -565,12 +565,12 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
                 break staticHandler
             }
             
-            // Method's return type must match its containing type, or be an
-            // .anyObject type (originally `instancetype`).
+            // Method's return type must match its containing type, or an
+            // `instancetype`
             let returnType = method.signature.returnType.deepUnwrapped
             if case .typeName(type.typeName) = returnType {
                 // All good!
-            } else if returnType == .anyObject {
+            } else if returnType == .instancetype {
                 // All good as well!
             } else {
                 break staticHandler // Invalid return type :(

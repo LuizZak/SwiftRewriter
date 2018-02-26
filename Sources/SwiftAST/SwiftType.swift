@@ -69,22 +69,25 @@ indirect public enum SwiftType: Equatable {
     case block(returnType: SwiftType, parameters: [SwiftType])
     case metatype(for: SwiftType)
     
-    public static var void = SwiftType.typeName("Void")
-    public static var int = SwiftType.typeName("Int")
-    public static var uint = SwiftType.typeName("UInt")
-    public static var string = SwiftType.typeName("String")
-    public static var bool = SwiftType.typeName("Bool")
-    public static var float = SwiftType.typeName("Float")
-    public static var double = SwiftType.typeName("Double")
-    public static var cgFloat = SwiftType.typeName("CGFloat")
-    public static var any = SwiftType.typeName("Any")
-    public static var anyObject = SwiftType.typeName("AnyObject")
+    public static let void = SwiftType.typeName("Void")
+    public static let int = SwiftType.typeName("Int")
+    public static let uint = SwiftType.typeName("UInt")
+    public static let string = SwiftType.typeName("String")
+    public static let bool = SwiftType.typeName("Bool")
+    public static let float = SwiftType.typeName("Float")
+    public static let double = SwiftType.typeName("Double")
+    public static let cgFloat = SwiftType.typeName("CGFloat")
+    public static let any = SwiftType.typeName("Any")
+    public static let anyObject = SwiftType.typeName("AnyObject")
     
-    public static var nsArray = SwiftType.typeName("NSArray")
-    public static var nsDictionary = SwiftType.typeName("NSDictionary")
+    public static let nsArray = SwiftType.typeName("NSArray")
+    public static let nsDictionary = SwiftType.typeName("NSDictionary")
+    
+    /// A special type name to use to represent instancetype's from Objective-C.
+    public static let instancetype = SwiftType.typeName("__instancetype")
     
     /// A special type used in place of definitions with improper typing
-    public static var errorType = SwiftType.typeName("<<error type>>")
+    public static let errorType = SwiftType.typeName("<<error type>>")
     
     public static func array(_ type: SwiftType) -> SwiftType {
         return .generic("Array", parameters: [type])

@@ -69,7 +69,7 @@ public class TypeMapper {
             return .void
             
         case .instancetype:
-            return swiftType(type: .anyObject, withNullability: context.nullability())
+            return swiftType(type: .instancetype, withNullability: context.nullability())
             
         case .struct(let str):
             return swiftType(forObjcStructType: str, context: context)
@@ -254,7 +254,7 @@ public class TypeMapper {
         // TODO: Create a special SwiftType case for `instancetype` types, as it
         // is its own thing in Objective-C and better means the dynamic instance
         // type of the class it is situated in.
-        "instancetype": .anyObject
+        "instancetype": .instancetype
     ]
     
     /// For mapping pointer-reference structs (could be Objc-C classes) into

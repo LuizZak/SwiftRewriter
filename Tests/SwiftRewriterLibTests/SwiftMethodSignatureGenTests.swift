@@ -10,7 +10,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
             """)
         
         XCTAssertEqual(sign.name, "initWithValue")
-        XCTAssertEqual(sign.returnType, .implicitUnwrappedOptional(.anyObject))
+        XCTAssertEqual(sign.returnType, .implicitUnwrappedOptional(.instancetype))
         XCTAssertEqual(sign.parameters.count, 1)
         XCTAssertEqual(sign.parameters[0].label, "_")
         XCTAssertEqual(sign.parameters[0].name, "value")
