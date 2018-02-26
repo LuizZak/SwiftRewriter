@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import IntentionPasses
 
 class SwiftRewriter_IntentionPassTests: XCTestCase {
     func testIntentionPassHasExpressionTypesPreResolved() throws {
@@ -37,7 +38,8 @@ class SwiftRewriter_IntentionPassTests: XCTestCase {
         let pass = Pass()
         
         let rewriter = SwiftRewriter(input: testInput, output: testOutput)
-        rewriter.intentionPasses = [pass]
+        rewriter.intentionPassesSource =
+            DefaultIntentionPassSource(intentionPasses: [pass])
         
         try rewriter.rewrite()
         

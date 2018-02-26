@@ -3,6 +3,10 @@
 public class IntentionCollection {
     private var _intentions: [FileGenerationIntention] = []
     
+    public init() {
+        
+    }
+    
     public func fileIntentions() -> [FileGenerationIntention] {
         return _intentions
     }

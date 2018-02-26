@@ -245,9 +245,14 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     
     public struct Setter {
         /// Identifier for the setter's received value
-        var valueIdentifier: String
+        public var valueIdentifier: String
         /// The body for the setter
-        var body: FunctionBodyIntention
+        public var body: FunctionBodyIntention
+        
+        public init(valueIdentifier: String, body: FunctionBodyIntention) {
+            self.valueIdentifier = valueIdentifier
+            self.body = body
+        }
     }
 }
 

@@ -46,6 +46,9 @@ let package = Package(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser", "Utils"]),
         .target(
+            name: "IntentionPasses",
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "ExpressionPasses", "Utils"]),
+        .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils"]),
         .target(
@@ -56,7 +59,7 @@ let package = Package(
             dependencies: [
                 "SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility",
                 "ExpressionPasses", "Utils", "Console", "SourcePreprocessors",
-                "SwiftAST"
+                "SwiftAST", "IntentionPasses"
             ])
         
     ] + /* Tests */ [
@@ -74,12 +77,19 @@ let package = Package(
             dependencies: ["SwiftAST"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
-            dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels", "ObjcParser", "ExpressionPasses"]),
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",
+                           "ObjcParser", "ExpressionPasses", "IntentionPasses"]),
         .testTarget(
             name: "ExpressionPassesTests",
-            dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib", "Antlr4", "ObjcParser", "ObjcParserAntlr"]),
+            dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",
+                           "Antlr4", "ObjcParser", "ObjcParserAntlr",
+                           "IntentionPasses", "IntentionPasses"]),
         .testTarget(
             name: "SourcePreprocessorsTests",
-            dependencies: ["SourcePreprocessors", "Utils", "SwiftRewriterLib"])
+            dependencies: ["SourcePreprocessors", "Utils", "SwiftRewriterLib",
+                           "IntentionPasses"]),
+        .testTarget(
+            name: "IntentionPassesTests",
+            dependencies: ["SwiftRewriterLib", "IntentionPasses"])
     ]
 )

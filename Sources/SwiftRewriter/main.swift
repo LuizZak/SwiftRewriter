@@ -1,8 +1,9 @@
-import SwiftRewriterLib
-import Utility
 import Foundation
-import ExpressionPasses
+import Utility
 import Console
+import SwiftRewriterLib
+import ExpressionPasses
+import IntentionPasses
 
 let arguments = Array(ProcessInfo.processInfo.arguments.dropFirst())
 
@@ -28,6 +29,8 @@ do {
             converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
             converter.syntaxNodeRewriters.append(FoundationExpressionPass())
             converter.syntaxNodeRewriters.append(UIKitExpressionPass())
+            
+            converter.intentionPassesSource = DefaultIntentionPasses()
             
             try converter.rewrite()
             

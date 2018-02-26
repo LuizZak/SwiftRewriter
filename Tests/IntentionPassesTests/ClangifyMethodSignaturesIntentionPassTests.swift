@@ -10,7 +10,8 @@ import GrammarModels
 import ObjcParser
 import ObjcParserAntlr
 import SwiftAST
-@testable import SwiftRewriterLib
+import IntentionPasses
+import SwiftRewriterLib
 
 class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
     func testConvertWith() {

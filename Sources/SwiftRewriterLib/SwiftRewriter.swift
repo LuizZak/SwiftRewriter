@@ -34,18 +34,26 @@ public class SwiftRewriter {
     /// before parsing.
     public var preprocessors: [SourcePreprocessor] = []
     
-    /// Intention passes to apply before passing the constructs to the output
-    public var intentionPasses: [IntentionPass] = IntentionPasses.passes
+    /// Provider for intention passes to apply before passing the constructs to
+    /// the output
+    public var intentionPassesSource: IntentionPassSource
     
     public var writerOptions: ASTWriterOptions = .default
     
-    public init(input: InputSourcesProvider, output: WriterOutput) {
+    public convenience init(input: InputSourcesProvider, output: WriterOutput) {
+        self.init(input: input, output: output,
+                  intentionPassesSource: DefaultIntentionPassSource(intentionPasses: []))
+    }
+    
+    public init(input: InputSourcesProvider, output: WriterOutput,
+                intentionPassesSource: IntentionPassSource) {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
         self.outputTarget = output
         self.context = TypeConstructionContext()
         self.typeMapper = TypeMapper(context: context)
         self.intentionCollection = IntentionCollection()
+        self.intentionPassesSource = intentionPassesSource
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
     }
@@ -89,7 +97,7 @@ public class SwiftRewriter {
         // Make a pre-type resolve before applying passes
         typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection)
         
-        for pass in intentionPasses {
+        for pass in intentionPassesSource.intentionPasses {
             pass.apply(on: intentionCollection, context: context)
         }
         

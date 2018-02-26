@@ -2,6 +2,7 @@ import XCTest
 import SwiftRewriterLib
 import ObjcParser
 import ExpressionPasses
+import IntentionPasses
 
 class SingleFileTestBuilder {
     var test: XCTestCase
@@ -27,6 +28,8 @@ class SingleFileTestBuilder {
         sut.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
         sut.syntaxNodeRewriters.append(FoundationExpressionPass())
         sut.syntaxNodeRewriters.append(UIKitExpressionPass())
+        
+        sut.intentionPassesSource = DefaultIntentionPasses()
         
         do {
             try sut.rewrite()

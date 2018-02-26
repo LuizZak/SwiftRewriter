@@ -1,5 +1,6 @@
 // Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/ObjectiveCParser.g4 by ANTLR 4.7
 import Antlr4
+import Foundation
 
 open class ObjectiveCParser: Parser {
 

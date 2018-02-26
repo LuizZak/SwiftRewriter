@@ -10,7 +10,7 @@ public class FileGenerationIntention: Intention {
     public var filePath: String
     
     /// Gets the types to create on this file.
-    private(set) var typeIntentions: [TypeGenerationIntention] = []
+    public private(set) var typeIntentions: [TypeGenerationIntention] = []
     
     /// All preprocessor directives found on this file.
     public var preprocessorDirectives: [String] = []
