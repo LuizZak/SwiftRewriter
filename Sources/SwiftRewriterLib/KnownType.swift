@@ -25,14 +25,14 @@ public protocol KnownType: KnownSupertypeConvertible {
     /// Gets a constructor matching a given argument label set
     func constructor(withArgumentLabels labels: [String]) -> KnownConstructor?
     
-    /// Searches for a method with a given Objective-C equivalent selector
-    func method(withObjcSelector selector: FunctionSignature) -> KnownMethod?
-    
     /// Gets a protocol conformance to a given protocol name
     func conformance(toProtocolName name: String) -> KnownProtocolConformance?
     
+    /// Searches for a method with a given Objective-C equivalent selector
+    func method(withObjcSelector selector: FunctionSignature, static: Bool) -> KnownMethod?
+    
     /// Gets a property with a given name
-    func property(named name: String) -> KnownProperty?
+    func property(named name: String, static: Bool) -> KnownProperty?
 }
 
 /// Defines the known supertype of a `KnownType`
@@ -86,29 +86,29 @@ public extension KnownType {
             }
     }
     
-    public func method(withObjcSelector selector: FunctionSignature) -> KnownMethod? {
+    public func conformance(toProtocolName name: String) -> KnownProtocolConformance? {
+        return
+            firstInInheritanceChain { type in
+                return type.knownProtocolConformances.first { $0.protocolName == name }
+        }
+    }
+    
+    public func method(withObjcSelector selector: FunctionSignature, static stat: Bool) -> KnownMethod? {
         return
             firstInInheritanceChain { type in
                 return
                     type.knownMethods.first { method in
-                        method.signature.matchesAsSelector(selector)
+                        stat == method.isStatic && method.signature.matchesAsSelector(selector)
                     }
             }
     }
     
-    public func conformance(toProtocolName name: String) -> KnownProtocolConformance? {
-        return
-            firstInInheritanceChain { type in
-                return knownProtocolConformances.first { $0.protocolName == name }
-            }
-    }
-    
-    public func property(named name: String) -> KnownProperty? {
+    public func property(named name: String, static stat: Bool) -> KnownProperty? {
         return
             firstInInheritanceChain { type in
                 return
-                    knownProperties.first { property in
-                        property.name == name
+                    type.knownProperties.first { property in
+                        stat == property.isStatic && property.name == name
                     }
             }
     }
@@ -137,6 +137,9 @@ public protocol KnownConstructor {
 public protocol KnownMember {
     /// The owner type for this known member
     var ownerType: KnownType? { get }
+    
+    /// Whether this member is a static (class) member
+    var isStatic: Bool { get }
 }
 
 /// Describes a known method to the transpiler
@@ -169,4 +172,10 @@ public protocol KnownProperty: KnownMember {
 public protocol KnownProtocolConformance {
     /// Gets the name of the protocol conformance
     var protocolName: String { get }
+}
+
+public extension KnownMethod {
+    public var isStatic: Bool {
+        return signature.isStatic
+    }
 }

@@ -453,6 +453,36 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .int)
     }
+    
+    func testStaticMemberLookup() {
+        let asClass = Expression.postfix(.identifier("A"), .member("a"))
+        
+        let Atype =
+            KnownTypeBuilder(typeName: "A")
+                .addingConstructor()
+                .addingProperty(named: "a",
+                                storage: ValueStorage(type: .int,
+                                                      ownership: .strong,
+                                                      isConstant: false),
+                                isStatic: true)
+                .build()
+        
+        startScopedTest(with: asClass, sut: ExpressionTypeResolver())
+            .definingType(Atype)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+        
+        // Test that instance accessing doesn't work
+        let asInstance =
+            Expression.postfix(.postfix(.identifier("A"),
+                                        .functionCall(arguments: [])),
+                               .member("a"))
+        
+        startScopedTest(with: asInstance, sut: ExpressionTypeResolver())
+            .definingType(Atype)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .errorType)
+    }
 }
 
 // MARK: - Test Building Helpers

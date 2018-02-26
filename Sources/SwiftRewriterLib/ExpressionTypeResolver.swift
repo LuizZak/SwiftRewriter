@@ -359,11 +359,20 @@ extension ExpressionTypeResolver {
             
         // Meta-types recurse on themselves
         case .metatype(for: let inner):
-            return findType(for: inner)
+            return findMetatype(forType: inner)
             
         // Other Swift types are not supported, at the moment.
         default:
             return nil
+        }
+    }
+    
+    func findMetatype(forType type: SwiftType) -> KnownType? {
+        switch type {
+        case .typeName(let name):
+            return typeSystem.knownTypeWithName(name)
+        default:
+            return findType(for: type)
         }
     }
     
@@ -471,7 +480,7 @@ private class MemberInvocationResolver {
             guard let type = typeResolver.findType(for: innerType) else {
                 return exp.makeErrorTyped()
             }
-            guard let property = type.property(named: member.name) else {
+            guard let property = type.property(named: member.name, static: innerType.isMetatype) else {
                 return exp.makeErrorTyped()
             }
             
@@ -584,6 +593,6 @@ private class MemberInvocationResolver {
                               returnType: .void,
                               isStatic: isStatic)
         
-        return type.method(withObjcSelector: signature)
+        return type.method(withObjcSelector: signature, static: isStatic)
     }
 }

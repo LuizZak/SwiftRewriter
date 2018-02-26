@@ -19,9 +19,17 @@ public class EnumGenerationIntention: TypeGenerationIntention {
     }
 }
 
-public class EnumCaseGenerationIntention: FromSourceIntention {
+public class EnumCaseGenerationIntention: FromSourceIntention, KnownMember {
     public var name: String
     public var expression: Expression?
+    
+    public var isStatic: Bool {
+        return true // Enum cases are always static
+    }
+    
+    public var ownerType: KnownType? {
+        return parent as? KnownType
+    }
     
     public init(name: String, expression: Expression?,
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
