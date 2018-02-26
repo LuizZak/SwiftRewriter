@@ -44,6 +44,15 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         
         let usages = sut.findUsages(of: property)
         
+        XCTAssertEqual(usages[0].expression,
+                        .postfix(
+                            .postfix(
+                                .identifier("B"),
+                                .functionCall(arguments: [])
+                            ),
+                            .member("b")
+                        ))
+        
         XCTAssertEqual(usages.count, 1)
     }
     

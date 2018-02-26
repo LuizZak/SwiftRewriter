@@ -78,7 +78,7 @@ open class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomRef
     }
     
     public static func ==(lhs: Expression, rhs: Expression) -> Bool {
-        return lhs.resolvedType == rhs.resolvedType && lhs.isEqual(to: rhs)
+        return lhs.isEqual(to: rhs)
     }
     
     fileprivate func cast<T>() -> T? {
