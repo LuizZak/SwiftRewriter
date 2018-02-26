@@ -37,6 +37,16 @@ class ObjcParserTests: XCTestCase {
         let source = """
             #import "abc.h"
             NS_ASSUME_NONNULL_BEGIN
+
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                MyEnumValue1 = 0,
+                MyEnumValue1
+            };
+            
+            @protocol P
+            @property BOOL p;
+            - (void)m;
+            @end
             
             @interface MyClass : Superclass <Prot1, Prot2>
             {

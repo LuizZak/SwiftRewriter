@@ -473,6 +473,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         let enumCase = ObjcEnumCase()
+        enumCase.sourceRuleContext = ctx
         
         let identifierNode = Identifier(name: identifier)
         identifierNode.sourceRuleContext = ctx.enumeratorIdentifier()
