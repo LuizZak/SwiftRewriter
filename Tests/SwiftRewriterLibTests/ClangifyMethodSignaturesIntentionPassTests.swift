@@ -125,6 +125,20 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
         testThat(typeName: "UIButton", sut: sut)
             .method(withObjcSignature: "+ (instancetype)buttonWithType:(UIButtonType)buttonType;")
             .converts(toInitializer: "init(type buttonType: UIButtonType)")
+        
+        testThat(typeName: "UIColor", sut: sut)
+            .method(withObjcSignature: "+ (UIColor *)colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha;")
+            .converts(toInitializer: "init(white: CGFloat, alpha: CGFloat)")
+        
+        testThat(typeName: "UIColor", sut: sut)
+            .method(withObjcSignature: "+ (UIColor *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;")
+            .converts(toInitializer: "init(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat)")
+        
+        /* TODO: Make this pass
+        testThat(typeName: "UIImage", sut: sut)
+            .method(withObjcSignature: "+ (nullable UIImage *)imageNamed:(NSString *)name;")
+            .converts(toInitializer: "init(named name: String!)")
+        */
     }
 }
 
