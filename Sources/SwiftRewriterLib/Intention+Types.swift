@@ -209,6 +209,12 @@ public class MemberGenerationIntention: FromSourceIntention {
     public var isStatic: Bool { return false }
 }
 
+extension MemberGenerationIntention: KnownMember {
+    public var ownerType: KnownType? {
+        return type
+    }
+}
+
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorageIntention {

@@ -162,20 +162,22 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
         
         func recursePostfix(_ op: Postfix) {
             switch op {
-            case .member(let member):
+            case let member as MemberPostfix:
                 target.outputInline(".")
-                target.outputInline(member, style: .memberName)
+                target.outputInline(member.name, style: .memberName)
                 
-            case .optionalAccess(let op):
+            case let optional as OptionalAccessPostfix:
                 target.outputInline("?")
-                recursePostfix(op)
+                recursePostfix(optional.postfix)
                 
-            case .subscript(let exp):
+            case let subscription as SubscriptPostfix:
                 target.outputInline("[")
-                visitExpression(exp)
+                visitExpression(subscription.expression)
                 target.outputInline("]")
                 
-            case .functionCall(var arguments):
+            case let functionCall as FunctionCallPostfix:
+                var arguments = functionCall.arguments
+                
                 var trailingClosure: Expression?
                 // If the last argument is a block type, close the
                 // parameters list earlier and use the block as a
@@ -208,6 +210,10 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
                     target.outputInline(" ")
                     visitExpression(trailingClosure)
                 }
+                
+            default:
+                target.outputInline("/* Unsupported postfix operation type \(type(of: op)) */")
+                break
             }
         }
         

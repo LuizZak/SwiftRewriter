@@ -77,15 +77,22 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         
         func recurseOperator(_ op: Postfix) -> Postfix {
             switch op {
-            case .functionCall(arguments: let args):
-                return .functionCall(arguments: args.map {
+            case let fc as FunctionCallPostfix:
+                return .functionCall(arguments: fc.arguments.map {
                     return FunctionArgument(label: $0.label, expression: $0.expression.accept(self))
                 })
-            case .subscript(let innerExp):
-                return .subscript(innerExp.accept(self))
-            case .optionalAccess(let op):
-                return .optionalAccess(recurseOperator(op))
-            case .member:
+                
+            case let sub as SubscriptPostfix:
+                sub.expression = sub.expression.accept(self)
+                return sub
+                
+            case let opt as OptionalAccessPostfix:
+                return .optionalAccess(recurseOperator(opt.postfix))
+                
+            case let member as MemberPostfix:
+                return member
+                
+            default:
                 return op
             }
         }

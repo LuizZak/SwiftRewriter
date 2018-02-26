@@ -73,10 +73,6 @@ extension String: KnownSupertypeConvertible {
 
 /// Default implementations
 public extension KnownType {
-//    public var supertype: KnownSupertype? {
-//        return nil
-//    }
-//    
     public var asKnownSupertype: KnownSupertype {
         return .knownType(self)
     }
@@ -137,8 +133,14 @@ public protocol KnownConstructor {
     var parameters: [ParameterSignature] { get }
 }
 
+/// Describes a known member of a type
+public protocol KnownMember {
+    /// The owner type for this known member
+    var ownerType: KnownType? { get }
+}
+
 /// Describes a known method to the transpiler
-public protocol KnownMethod {
+public protocol KnownMethod: KnownMember {
     /// Gets the function signature for this method
     var signature: FunctionSignature { get }
     
@@ -152,7 +154,7 @@ public protocol KnownMethodBody {
 }
 
 /// A known property from a type
-public protocol KnownProperty {
+public protocol KnownProperty: KnownMember {
     /// Property's name
     var name: String { get }
     

@@ -248,6 +248,8 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
                 exp.resolvedType = def.type
             case .type(let typeName):
                 exp.resolvedType = .metatype(for: .typeName(typeName))
+            case .member:
+                break
             }
         } else {
             exp.definition = nil
@@ -399,7 +401,7 @@ private class MemberInvocationResolver {
     
     func resolve(postfix exp: PostfixExpression) -> Expression {
         switch exp.op {
-        case .subscript(let sub):
+        case let sub as SubscriptPostfix:
             // Propagate error type
             if exp.exp.isErrorTyped {
                 return exp.makeErrorTyped()
@@ -408,11 +410,11 @@ private class MemberInvocationResolver {
             guard let expType = exp.exp.resolvedType else {
                 return exp
             }
-            guard let subType = sub.resolvedType else {
+            guard let subType = sub.expression.resolvedType else {
                 return exp
             }
             // Propagate error type
-            if sub.isErrorTyped {
+            if sub.expression.isErrorTyped {
                 return exp.makeErrorTyped()
             }
             
@@ -445,11 +447,11 @@ private class MemberInvocationResolver {
                 break
             }
             
-        case .functionCall(let args):
-            return handleFunctionCall(postfix: exp, arguments: args)
+        case let fc as FunctionCallPostfix:
+            return handleFunctionCall(postfix: exp, functionCall: fc)
             
         // Meta-type fetching (TypeName.self, TypeName.self.self, etc.)
-        case .member("self"):
+        case let member as MemberPostfix where member.name == "self":
             // Propagate error type
             if exp.exp.isErrorTyped {
                 return exp.makeErrorTyped()
@@ -457,7 +459,7 @@ private class MemberInvocationResolver {
             
             exp.resolvedType = exp.exp.resolvedType
             
-        case .member(let member):
+        case let member as MemberPostfix:
             // Propagate error type
             if exp.exp.isErrorTyped {
                 return exp.makeErrorTyped()
@@ -469,21 +471,26 @@ private class MemberInvocationResolver {
             guard let type = typeResolver.findType(for: innerType) else {
                 return exp.makeErrorTyped()
             }
-            guard let prop = type.property(named: member) else {
+            guard let prop = type.property(named: member.name) else {
                 return exp.makeErrorTyped()
             }
             
             exp.resolvedType = prop.storage.type
         
-        case .optionalAccess:
+        case _ as OptionalAccessPostfix:
             // TODO: Support .optionalAccess here
+            break
+            
+        default:
             break
         }
         
         return exp
     }
     
-    func handleFunctionCall(postfix: PostfixExpression, arguments: [FunctionArgument]) -> Expression {
+    func handleFunctionCall(postfix: PostfixExpression, functionCall: FunctionCallPostfix) -> Expression {
+        let arguments = functionCall.arguments
+        
         // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
         if let target = postfix.exp.asPostfix?.exp.asIdentifier,
             postfix.exp.asPostfix?.op == .member("init") && arguments.count == 0
@@ -516,7 +523,7 @@ private class MemberInvocationResolver {
             return postfix
         }
         // Selector invocation
-        if let target = postfix.exp.asPostfix?.exp, case .member(let name)? = postfix.exp.asPostfix?.op {
+        if let target = postfix.exp.asPostfix?.exp, let name = postfix.exp.asPostfix?.op.asMember?.name {
             guard let type = target.resolvedType else {
                 return postfix.makeErrorTyped()
             }

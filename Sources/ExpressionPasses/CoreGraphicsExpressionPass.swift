@@ -8,8 +8,10 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         switch (exp.exp, exp.op) {
         // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
-        case (.identifier("CGRectMake"), .functionCall(let args)) where args.count == 4 && !args.hasLabeledArguments():
-            let newArgs = args.enumerated().map { (i, arg) -> FunctionArgument in
+        case (.identifier("CGRectMake"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 4 && !functionCall.arguments.hasLabeledArguments():
+            
+            let newArgs = functionCall.arguments.enumerated().map { (i, arg) -> FunctionArgument in
                 let lbl: String
                 switch i {
                 case 0:
@@ -31,8 +33,10 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             exp.op = .functionCall(arguments: newArgs)
             
         // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>) -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
-        case (.identifier("UIEdgeInsetsMake"), .functionCall(let args)) where args.count == 4 && !args.hasLabeledArguments():
-            let newArgs = args.enumerated().map { (i, arg) -> FunctionArgument in
+        case (.identifier("UIEdgeInsetsMake"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 4 && !functionCall.arguments.hasLabeledArguments():
+            
+            let newArgs = functionCall.arguments.enumerated().map { (i, arg) -> FunctionArgument in
                 let lbl: String
                 switch i {
                 case 0:
@@ -80,7 +84,10 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             convertMethodToField(field: "isNull", ifArgCountIs: 1, exp)
             
         // CGPointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
-        case (.identifier("CGPointMake"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+        case (.identifier("CGPointMake"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
+            let args = functionCall.arguments
+            
             exp.exp = .identifier("CGPoint")
             exp.op = .functionCall(arguments: [
                 .labeled("x", args[0].expression),
@@ -88,7 +95,10 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 ])
             
         // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
-        case (.identifier("CGSizeMake"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+        case (.identifier("CGSizeMake"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
+            let args = functionCall.arguments
+            
             exp.exp = .identifier("CGSize")
             exp.op = .functionCall(arguments: [
                 .labeled("width", args[0].expression),
@@ -96,28 +106,40 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 ])
             
         // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
-        case (.identifier("CGRectIntersection"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+        case (.identifier("CGRectIntersection"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
+            let args = functionCall.arguments
+            
             exp.exp = .postfix(args[0].expression, .member("intersection"))
             exp.op = .functionCall(arguments: [
                 .unlabeled(args[1].expression)
                 ])
             
         // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
-        case (.identifier("CGRectIntersectsRect"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+        case (.identifier("CGRectIntersectsRect"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
+            let args = functionCall.arguments
+            
             exp.exp = .postfix(args[0].expression, .member("intersects"))
             exp.op = .functionCall(arguments: [
                 .unlabeled(args[1].expression)
                 ])
             
         // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
-        case (.identifier("CGRectContainsRect"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+        case (.identifier("CGRectContainsRect"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
+            let args = functionCall.arguments
+            
             exp.exp = .postfix(args[0].expression, .member("contains"))
             exp.op = .functionCall(arguments: [
                 .unlabeled(args[1].expression)
                 ])
             
         // CGRectContainsPoint(<r1>, <r2>) -> <r1>.contains(<r2>)
-        case (.identifier("CGRectContainsPoint"), .functionCall(let args)) where args.count == 2 && !args.hasLabeledArguments():
+        case (.identifier("CGRectContainsPoint"), let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
+            let args = functionCall.arguments
+            
             exp.exp = .postfix(args[0].expression, .member("contains"))
             exp.op = .functionCall(arguments: [
                 .unlabeled(args[1].expression)
@@ -133,8 +155,10 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     /// Converts a method to a field access, e.g.: `CGRectGetWidth(<exp>)` -> `<exp>.width`.
     private func convertMethodToField(field: String, ifArgCountIs argCount: Int, _ exp: PostfixExpression) {
         switch (exp.exp, exp.op) {
-        case (_ as IdentifierExpression, .functionCall(let args)) where args.count == argCount && !args.hasLabeledArguments():
-            exp.exp = args[0].expression.accept(self)
+        case (_ as IdentifierExpression, let functionCall as FunctionCallPostfix)
+            where functionCall.arguments.count == argCount && !functionCall.arguments.hasLabeledArguments():
+            
+            exp.exp = functionCall.arguments[0].expression.accept(self)
             exp.op = .member(field)
         default:
             exp.exp = exp.exp.accept(self)

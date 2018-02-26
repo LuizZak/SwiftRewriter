@@ -132,15 +132,15 @@ extension DefaultTypeSystem {
 
 /// An extension over the default type system that enables using an intention
 /// collection to search for types
-class IntentionCollectionTypeSystem: DefaultTypeSystem {
-    var intentions: IntentionCollection
+public class IntentionCollectionTypeSystem: DefaultTypeSystem {
+    public var intentions: IntentionCollection
     
-    init(intentions: IntentionCollection) {
+    public init(intentions: IntentionCollection) {
         self.intentions = intentions
         super.init()
     }
     
-    override func knownTypeWithName(_ name: String) -> KnownType? {
+    public override func knownTypeWithName(_ name: String) -> KnownType? {
         // TODO: Create a lazy KnownType implementer that searches for requested
         // members on-demand every time the respective KnownType members are requested.
         

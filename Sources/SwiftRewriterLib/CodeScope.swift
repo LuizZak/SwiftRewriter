@@ -182,23 +182,33 @@ public extension IdentifierExpression {
     
     public enum Definition {
         case local(CodeDefinition)
+        case member(type: KnownType, member: KnownMember)
         case type(named: String)
         
         public var local: CodeDefinition? {
             switch self {
             case .local(let def):
                 return def
-            case .type:
+            case .type, .member:
                 return nil
             }
         }
         
         public var typeName: String? {
             switch self {
-            case .local:
+            case .local, .member:
                 return nil
             case .type(let name):
                 return name
+            }
+        }
+        
+        public var member: (type: KnownType, member: KnownMember)? {
+            switch self {
+            case .local, .type:
+                return nil
+            case let .member(type, member):
+                return (type, member)
             }
         }
     }

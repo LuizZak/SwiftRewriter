@@ -15,7 +15,6 @@ public protocol TypeResolverInvoker {
     func resolveExpressionTypes(in property: PropertyGenerationIntention)
 }
 
-// TODO: Move TypeResolverInvoker's implementation to a separate type.
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public var typeResolver: ExpressionTypeResolver
     

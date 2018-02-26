@@ -59,7 +59,7 @@ public class KnownTypeBuilder {
             return self
         }
         
-        let method = DummyMethod(body: nil, signature: signature)
+        let method = DummyMethod(ownerType: type, body: nil, signature: signature)
         
         type.knownMethods.append(method)
         
@@ -80,7 +80,7 @@ public class KnownTypeBuilder {
             return self
         }
         
-        let property = DummyProperty(name: name, storage: storage, attributes: [])
+        let property = DummyProperty(ownerType: type, name: name, storage: storage, attributes: [])
         
         type.knownProperties.append(property)
         
@@ -126,11 +126,13 @@ private struct DummyConstructor: KnownConstructor {
 }
 
 private struct DummyMethod: KnownMethod {
+    var ownerType: KnownType?
     var body: KnownMethodBody?
     var signature: FunctionSignature
 }
 
 private struct DummyProperty: KnownProperty {
+    var ownerType: KnownType?
     var name: String
     var storage: ValueStorage
     var attributes: [PropertyAttribute]

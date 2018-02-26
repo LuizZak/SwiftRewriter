@@ -401,35 +401,13 @@ public class PostfixExpression: Expression {
     }
     public var op: Postfix {
         didSet {
-            switch oldValue.unwrappedOptionalAccess {
-            case .functionCall(arguments: let args):
-                args.forEach { $0.expression.parent = nil }
-            case .subscript(let exp):
-                exp.parent = nil
-            default:
-                break
-            }
-            
-            switch op.unwrappedOptionalAccess {
-            case .functionCall(arguments: let args):
-                args.forEach { $0.expression.parent = self }
-            case .subscript(let exp):
-                exp.parent = self
-            default:
-                break
-            }
+            oldValue.subExpressions.forEach { $0.parent = nil }
+            op.subExpressions.forEach { $0.parent = nil }
         }
     }
     
     public override var subExpressions: [Expression] {
-        switch op.unwrappedOptionalAccess {
-        case .subscript(let s):
-            return [exp, s]
-        case .functionCall(let args):
-            return [exp] + args.map { $0.expression }
-        default:
-            return [exp]
-        }
+        return [exp] + op.subExpressions
     }
     
     public override var description: String {
@@ -449,14 +427,7 @@ public class PostfixExpression: Expression {
         
         exp.parent = self
         
-        switch op.unwrappedOptionalAccess {
-        case .functionCall(arguments: let args):
-            args.forEach { $0.expression.parent = self }
-        case .subscript(let exp):
-            exp.parent = self
-        default:
-            break
-        }
+        op.subExpressions.forEach { $0.parent = self }
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -1044,22 +1015,188 @@ public struct ExpressionDictionaryPair: Equatable {
     }
 }
 
-/// A postfix expression type
-public enum Postfix: Equatable {
-    indirect case optionalAccess(Postfix)
-    case member(String)
-    case `subscript`(Expression)
-    case functionCall(arguments: [FunctionArgument])
+/// A postfix operation of a PostfixExpression
+public class Postfix: Equatable, CustomStringConvertible {
+    /// Custom metadata that can be associated with this expression node
+    public var metadata: [String: Any] = [:]
+    
+    public var description: String {
+        return ""
+    }
+    
+    public var subExpressions: [Expression] {
+        return []
+    }
+    
+    fileprivate init() {
+        
+    }
     
     /// Unwraps all levels of .optionalAccess until the first non-optionalAccess
     /// postfix operator is found.
     public var unwrappedOptionalAccess: Postfix {
         switch self {
-        case .optionalAccess(let op):
+        case let op as OptionalAccessPostfix:
             return op.unwrappedOptionalAccess
         default:
             return self
         }
+    }
+    
+    public static func optionalAccess(_ op: Postfix) -> OptionalAccessPostfix {
+        return OptionalAccessPostfix(postfix: op)
+    }
+    
+    public static func member(_ name: String) -> MemberPostfix {
+        return MemberPostfix(name: name)
+    }
+    
+    public static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
+        return SubscriptPostfix(expression: exp)
+    }
+    
+    public static func functionCall(arguments: [FunctionArgument]) -> FunctionCallPostfix {
+        return FunctionCallPostfix(arguments: arguments)
+    }
+    
+    public func isEqual(to other: Postfix) -> Bool {
+        return false
+    }
+    
+    public static func ==(lhs: Postfix, rhs: Postfix) -> Bool {
+        return lhs.isEqual(to: rhs)
+    }
+}
+
+public final class OptionalAccessPostfix: Postfix {
+    public let postfix: Postfix
+    
+    public override var description: String {
+        return "?" + postfix.description
+    }
+    
+    public override var subExpressions: [Expression] {
+        return postfix.subExpressions
+    }
+    
+    public init(postfix: Postfix) {
+        self.postfix = postfix
+    }
+    
+    public override func isEqual(to other: Postfix) -> Bool {
+        switch other {
+        case let rhs as OptionalAccessPostfix:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
+    public static func ==(lhs: OptionalAccessPostfix, rhs: OptionalAccessPostfix) -> Bool {
+        return lhs.postfix.isEqual(to: rhs.postfix)
+    }
+}
+public extension Postfix {
+    public var asOptionalAccess: OptionalAccessPostfix? {
+        return self as? OptionalAccessPostfix
+    }
+}
+
+public final class MemberPostfix: Postfix {
+    public var name: String
+    
+    public override var description: String {
+        return "." + name
+    }
+    
+    public init(name: String) {
+        self.name = name
+    }
+    
+    public override func isEqual(to other: Postfix) -> Bool {
+        switch other {
+        case let rhs as MemberPostfix:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
+    public static func ==(lhs: MemberPostfix, rhs: MemberPostfix) -> Bool {
+        return lhs.name == rhs.name
+    }
+}
+public extension Postfix {
+    public var asMember: MemberPostfix? {
+        return self as? MemberPostfix
+    }
+}
+
+public final class SubscriptPostfix: Postfix {
+    public var expression: Expression
+    
+    public override var description: String {
+        return "[" + expression.description + "]"
+    }
+    
+    public override var subExpressions: [Expression] {
+        return [expression]
+    }
+    
+    public init(expression: Expression) {
+        self.expression = expression
+    }
+    
+    public override func isEqual(to other: Postfix) -> Bool {
+        switch other {
+        case let rhs as SubscriptPostfix:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
+    public static func ==(lhs: SubscriptPostfix, rhs: SubscriptPostfix) -> Bool {
+        return lhs.expression == rhs.expression
+    }
+}
+public extension Postfix {
+    public var asSubscription: SubscriptPostfix? {
+        return self as? SubscriptPostfix
+    }
+}
+
+public final class FunctionCallPostfix: Postfix {
+    public var arguments: [FunctionArgument]
+    
+    public override var description: String {
+        return "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
+    }
+    
+    public override var subExpressions: [Expression] {
+        return arguments.map { $0.expression }
+    }
+    
+    public init(arguments: [FunctionArgument]) {
+        self.arguments = arguments
+    }
+    
+    public override func isEqual(to other: Postfix) -> Bool {
+        switch other {
+        case let rhs as FunctionCallPostfix:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
+    public static func ==(lhs: FunctionCallPostfix, rhs: FunctionCallPostfix) -> Bool {
+        return lhs.arguments == rhs.arguments
+    }
+}
+public extension Postfix {
+    public var asFuntionCall: FunctionCallPostfix? {
+        return self as? FunctionCallPostfix
     }
 }
 
@@ -1230,21 +1367,6 @@ public enum SwiftOperatorCategory: Equatable {
 extension ExpressionDictionaryPair: CustomStringConvertible {
     public var description: String {
         return key.description + ": " + value.description
-    }
-}
-
-extension Postfix: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .optionalAccess(let op):
-            return "?" + op.description
-        case .member(let mbm):
-            return "." + mbm
-        case .subscript(let subs):
-            return "[" + subs.description + "]"
-        case .functionCall(let arguments):
-            return "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
-        }
     }
 }
 
