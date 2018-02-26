@@ -31,7 +31,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             }
             
             for prot in knownProtocols {
-                FileTypeMergingIntentionPass.mergeMethodSignatures(from: prot, into: cls)
+                mergeMethodSignatures(from: prot, into: cls)
             }
         }
     }
