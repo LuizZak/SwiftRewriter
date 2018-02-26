@@ -48,11 +48,13 @@ public class SwiftRewriter {
     }
     
     public func rewrite() throws {
-        parsers.removeAll()
-        
-        try loadInputSources()
-        performIntentionPasses()
-        outputDefinitions()
+        try autoreleasepool {
+            parsers.removeAll()
+            
+            try loadInputSources()
+            performIntentionPasses()
+            outputDefinitions()
+        }
     }
     
     private func loadInputSources() throws {
@@ -62,6 +64,37 @@ public class SwiftRewriter {
         for src in sources {
             try loadObjcSource(from: src)
         }
+    }
+    
+    private func performIntentionPasses() {
+        let context =
+            IntentionPassContext(intentions: intentionCollection,
+                                 typeSystem: typeSystem)
+        
+        for pass in IntentionPasses.passes {
+            pass.apply(on: intentionCollection, context: context)
+        }
+        
+        let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
+        
+        let typeResolver =
+            ExpressionTypeResolver(typeSystem: typeSystem,
+                                   intrinsicVariables: EmptyCodeScope())
+        
+        let applier =
+            SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
+                                          typeResolver: typeResolver)
+        
+        applier.apply(on: intentionCollection)
+    }
+    
+    private func outputDefinitions() {
+        let writer = SwiftWriter(intentions: intentionCollection,
+                                 options: writerOptions,
+                                 diagnostics: diagnostics,
+                                 output: outputTarget)
+        
+        writer.execute()
     }
     
     private func applyPreprocessors(source: CodeSource) -> String {
@@ -191,37 +224,6 @@ public class SwiftRewriter {
         }
         
         traverser.traverse()
-    }
-    
-    private func performIntentionPasses() {
-        let context =
-            IntentionPassContext(intentions: intentionCollection,
-                                 typeSystem: typeSystem)
-        
-        for pass in IntentionPasses.passes {
-            pass.apply(on: intentionCollection, context: context)
-        }
-        
-        let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
-        
-        let typeResolver =
-            ExpressionTypeResolver(typeSystem: typeSystem,
-                                   intrinsicVariables: EmptyCodeScope())
-        
-        let applier =
-            SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
-                                          typeResolver: typeResolver)
-        
-        applier.apply(on: intentionCollection)
-    }
-    
-    private func outputDefinitions() {
-        let writer = SwiftWriter(intentions: intentionCollection,
-                                 options: writerOptions,
-                                 diagnostics: diagnostics,
-                                 output: outputTarget)
-        
-        writer.execute()
     }
     
     private func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
