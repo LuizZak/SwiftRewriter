@@ -138,8 +138,9 @@ public class SwiftRewriter {
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
         visitor.onEnterClosure = { node in
-            self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn =
-                self.isNodeInNonnullContext(node)
+            if let ctx = self.context.findContext(ofType: AssumeNonnullContext.self) {
+                ctx.isNonnullOn = self.isNodeInNonnullContext(node)
+            }
             
             switch node {
             case let n as ObjcClassInterface:
