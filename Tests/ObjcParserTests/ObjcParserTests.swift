@@ -63,7 +63,7 @@ class ObjcParserTests: XCTestCase {
         
         let node = parserTest(source)
         
-        let visitor = AnonymousASTVisitor(visit: { node in
+        let visitor = AnyASTVisitor(visit: { node in
             if node is InvalidNode {
                 return
             }

@@ -101,7 +101,7 @@ public class SwiftRewriter {
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
         
         let node = parser.rootNode
-        let visitor = AnonymousASTVisitor()
+        let visitor = AnyASTVisitor()
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
         visitor.onEnterClosure = { node in

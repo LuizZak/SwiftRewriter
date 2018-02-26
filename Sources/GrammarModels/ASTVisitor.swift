@@ -1,45 +1,78 @@
 /// Visitor for recursive depth-first `ASTNode`s traversing.
 public protocol ASTVisitor {
+    associatedtype Result
+    
     func onEnter(_ node: ASTNode)
-    func visit(_ node: ASTNode)
+    func visit(_ node: ASTNode) -> Result
     func onExit(_ node: ASTNode)
+    
+    func merge(_ r1: Result, r2: Result) -> Result
+}
+
+public extension ASTVisitor {
+    // Default implementation of merge simply returns the right-hand side
+    public func merge(_ r1: Result, r2: Result) -> Result {
+        return r2
+    }
 }
 
 /// Traverses an `ASTNode`, passing in visiting commands to a target visitor object.
-public class ASTTraverser {
+public class ASTTraverser<Visitor> where Visitor: ASTVisitor {
     var node: ASTNode
-    var visitor: ASTVisitor
+    var visitor: Visitor
+    var initialValue: Visitor.Result
     
-    public init(node: ASTNode, visitor: ASTVisitor) {
+    public init(node: ASTNode, initialValue: Visitor.Result, visitor: Visitor) {
         self.node = node
+        self.initialValue = initialValue
         self.visitor = visitor
     }
     
-    public func traverse() {
-        _traverseRecursive(node, visitor)
+    public func traverse() -> Visitor.Result {
+        let result = _traverseRecursive(node, visitor)
+        
+        return visitor.merge(initialValue, r2: result)
     }
     
-    private func _traverseRecursive(_ node: ASTNode, _ visitor: ASTVisitor) {
+    private func _traverseRecursive(_ node: ASTNode, _ visitor: Visitor) -> Visitor.Result {
         visitor.onEnter(node)
         
-        for child in node.children {
-            _traverseRecursive(child, visitor)
+        var partial: Visitor.Result
+        
+        if let first = node.children.first {
+            partial = _traverseRecursive(first, visitor)
+            
+            for child in node.children.dropFirst() {
+                partial = visitor.merge(partial, r2: _traverseRecursive(child, visitor))
+            }
+            
+            partial = visitor.merge(partial, r2: visitor.visit(node))
+        } else {
+            partial = visitor.visit(node)
         }
         
-        visitor.visit(node)
-        
         visitor.onExit(node)
+        
+        return partial
+    }
+}
+
+public extension ASTTraverser where Visitor.Result == Void {
+    public convenience init(node: ASTNode, visitor: Visitor) {
+        self.init(node: node, initialValue: (), visitor: visitor)
     }
 }
 
 /// A pre-implementation of `ASTVisitor` that takes in closures for visiting the
 /// nodes
-public class AnonymousASTVisitor: ASTVisitor {
+public class AnyASTVisitor<T>: ASTVisitor {
+    public typealias Result = T
+    
     public var onEnterClosure: (ASTNode) -> ()
-    public var visitClosure: (ASTNode) -> ()
+    public var visitClosure: (ASTNode) -> (T)
     public var onExitClosure: (ASTNode) -> ()
     
-    public init(onEnter: @escaping (ASTNode) -> () = { _ in }, visit: @escaping (ASTNode) -> () = { _ in }, onExit: @escaping (ASTNode) -> () = { _ in }) {
+    public init(onEnter: @escaping (ASTNode) -> () = { _ in }, visit: @escaping (ASTNode) -> (T), onExit: @escaping (ASTNode) -> () = { _ in }) {
         self.onEnterClosure = onEnter
         self.visitClosure = visit
         self.onExitClosure = onExit
@@ -49,11 +82,17 @@ public class AnonymousASTVisitor: ASTVisitor {
         onEnterClosure(node)
     }
     
-    public func visit(_ node: ASTNode) {
-        visitClosure(node)
+    public func visit(_ node: ASTNode) -> T {
+        return visitClosure(node)
     }
     
     public func onExit(_ node: ASTNode) {
         onExitClosure(node)
+    }
+}
+
+public extension AnyASTVisitor where T == Void {
+    public convenience init() {
+        self.init(onEnter: { _ in }, visit: { _ in }, onExit: { _ in })
     }
 }
