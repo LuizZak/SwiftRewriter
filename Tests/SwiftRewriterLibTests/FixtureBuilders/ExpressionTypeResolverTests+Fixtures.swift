@@ -72,6 +72,14 @@ extension ExpressionTestResolverTestFixture {
         
         return definingType(type)
     }
+    
+    func definingEnum(named name: String, rawValueType: SwiftType, with block: (EnumTypeBuilder) -> KnownType) -> Self {
+        let en = EnumGenerationIntention(typeName: name, rawValueType: rawValueType)
+        let builder = EnumTypeBuilder(targetEnum: en)
+        let type = block(builder)
+        
+        return definingType(type)
+    }
 }
 
 extension ExpressionTypeResolverTests {

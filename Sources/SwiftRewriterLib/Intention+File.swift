@@ -37,7 +37,9 @@ public class FileGenerationIntention: Intention {
     }
     
     /// Gets the enums to create on this file.
-    public private(set) var enumIntentions: [EnumGenerationIntention] = []
+    public var enumIntentions: [EnumGenerationIntention] {
+        return typeIntentions.compactMap { $0 as? EnumGenerationIntention }
+    }
     
     /// Gets the typealias intentions to create on this file.
     public private(set) var typealiasIntentions: [TypealiasIntention] = []
@@ -64,11 +66,6 @@ public class FileGenerationIntention: Intention {
     
     public func addTypealias(_ intention: TypealiasIntention) {
         typealiasIntentions.append(intention)
-        intention.parent = self
-    }
-    
-    public func addEnum(_ intention: EnumGenerationIntention) {
-        enumIntentions.append(intention)
         intention.parent = self
     }
     

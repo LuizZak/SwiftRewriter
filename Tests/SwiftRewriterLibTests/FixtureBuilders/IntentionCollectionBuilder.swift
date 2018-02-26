@@ -45,9 +45,7 @@ class FileIntentionBuilder {
         
         initializer(builder)
         
-        let result = builder.build()
-        
-        intention.addType(result)
+        intention.addType(builder.build())
         
         return self
     }
@@ -59,9 +57,7 @@ class FileIntentionBuilder {
         
         initializer(builder)
         
-        let result = builder.build()
-        
-        intention.addType(result)
+        intention.addType(builder.build())
         
         return self
     }

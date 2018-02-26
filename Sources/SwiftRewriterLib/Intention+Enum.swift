@@ -5,7 +5,9 @@ import SwiftAST
 public class EnumGenerationIntention: TypeGenerationIntention {
     public var rawValueType: SwiftType
     
-    private(set) public var cases: [EnumCaseGenerationIntention] = []
+    public var cases: [EnumCaseGenerationIntention] {
+        return properties.compactMap { $0 as? EnumCaseGenerationIntention }
+    }
     
     public init(typeName: String, rawValueType: SwiftType,
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
@@ -14,28 +16,25 @@ public class EnumGenerationIntention: TypeGenerationIntention {
     }
     
     public func addCase(_ enumCase: EnumCaseGenerationIntention) {
-        cases.append(enumCase)
+        addProperty(enumCase)
+        enumCase.storage.type = .typeName(typeName)
         enumCase.parent = self
     }
 }
 
-public class EnumCaseGenerationIntention: FromSourceIntention, KnownMember {
-    public var name: String
+public class EnumCaseGenerationIntention: PropertyGenerationIntention {
     public var expression: Expression?
     
-    public var isStatic: Bool {
+    public override var isStatic: Bool {
         return true // Enum cases are always static
-    }
-    
-    public var ownerType: KnownType? {
-        return parent as? KnownType
     }
     
     public init(name: String, expression: Expression?,
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
-        self.name = name
         self.expression = expression
         
-        super.init(accessLevel: accessLevel, source: source)
+        let storage = ValueStorage(type: .any, ownership: .strong, isConstant: true)
+        
+        super.init(name: name, storage: storage, attributes: [], accessLevel: accessLevel, source: source)
     }
 }

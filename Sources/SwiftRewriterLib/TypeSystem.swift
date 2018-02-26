@@ -144,7 +144,13 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         // TODO: Create a lazy KnownType implementer that searches for requested
         // members on-demand every time the respective KnownType members are requested.
         
-        if let type = super.knownTypeWithName(name) {
+        // Only return types that have a valid super-type
+        // TODO: This is a hack to get around proper supertype by-name lookup
+        // when looking into members!
+        // We could solve this by moving the member-searching methods (`property(named:)`/
+        // `method(withObjcSelector:)` etc.) into an external object (TypeSystem
+        // might be good!) that will perform this type lookup properly.
+        if let type = super.knownTypeWithName(name), type.supertype?.asKnownType != nil {
             return type
         }
         
@@ -155,7 +161,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         // Single type found: Avoid complex merge operations and return it as is.
-        if types.count == 0 {
+        if types.count == 1 && types[0].supertype?.asKnownType != nil {
             return types[0]
         }
         
@@ -181,7 +187,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             
             for prop in type.knownProperties {
                 typeBuilder =
-                    typeBuilder.addingProperty(named: prop.name, storage: prop.storage)
+                    typeBuilder.addingProperty(named: prop.name, storage: prop.storage, isStatic: prop.isStatic)
             }
             
             for ctor in type.knownConstructors {

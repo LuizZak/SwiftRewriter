@@ -483,6 +483,20 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .errorType)
     }
+    
+    func testEnumCaseLookup() {
+        let exp = Expression.postfix(.identifier("A"), .member("a"))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingEnum(named: "A", rawValueType: .int) { builder in
+                return
+                    builder
+                        .createCase(name: "a")
+                        .build()
+            }
+            .resolve()
+            .thenAssertExpression(resolvedAs: .typeName("A"))
+    }
 }
 
 // MARK: - Test Building Helpers

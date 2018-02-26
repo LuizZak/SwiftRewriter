@@ -620,7 +620,7 @@ public class SwiftRewriter {
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
-            .addEnum(enumIntention)
+            .addType(enumIntention)
         
         context.pushContext(enumIntention)
     }

@@ -3,7 +3,10 @@ import SwiftAST
 /// Simplified API interface to find usages of symbols across intentions
 public protocol UsageAnalyzer {
     /// Finds all usages of a known method
-    func findUsages(of method: KnownMethod) -> [MemberUsage]
+    func findUsagesOf(method: KnownMethod) -> [MemberUsage]
+    
+    /// Finds all usages of a known property
+    func findUsagesOf(property: KnownProperty) -> [MemberUsage]
 }
 
 /// Default implementation of UsageAnalyzer
@@ -14,7 +17,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
         self.intentions = intentions
     }
     
-    public func findUsages(of method: KnownMethod) -> [MemberUsage] {
+    public func findUsagesOf(method: KnownMethod) -> [MemberUsage] {
         let types = intentions.typeIntentions()
         
         // Get all existing method bodies, from all types
@@ -48,7 +51,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
         return usages
     }
     
-    public func findUsages(of property: KnownProperty) -> [MemberUsage] {
+    public func findUsagesOf(property: KnownProperty) -> [MemberUsage] {
         let types = intentions.typeIntentions()
         
         // Get all existing method bodies, from all types

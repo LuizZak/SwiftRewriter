@@ -5,7 +5,6 @@ import SwiftAST
 class DefaultUsageAnalyzerTests: XCTestCase {
     func testFindMethodUsages() {
         let builder = IntentionCollectionBuilder()
-        
         let body: CompoundStatement = [
             // B().b()
             .expression(
@@ -36,13 +35,11 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                             .createVoidMethod(named: "b")
                     }
             }
-        
         let intentions = builder.build(typeChecked: true)
-        
         let sut = DefaultUsageAnalyzer(intentions: intentions)
-        let property = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
+        let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
-        let usages = sut.findUsages(of: property)
+        let usages = sut.findUsagesOf(method: method)
         
         XCTAssertEqual(usages[0].expression,
                         .postfix(
@@ -100,19 +97,15 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                         )
                 }
         }
-        
         let intentions = builder.build(typeChecked: true)
-        
         let sut = DefaultUsageAnalyzer(intentions: intentions)
-        let property = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
+        let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
-        let usages = sut.findUsages(of: property)
+        let usages = sut.findUsagesOf(method: method)
         
         XCTAssertEqual(usages.count, 2)
     }
     
-    /*
-     TODO: Make type resolving look into enums' staitc cases
     func testFindPropertyUsages() {
         let builder = IntentionCollectionBuilder()
         
@@ -143,13 +136,11 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                             .createProperty(named: "b", type: .int)
                 }
         }
-        
         let intentions = builder.build(typeChecked: true)
-        
         let sut = DefaultUsageAnalyzer(intentions: intentions)
         let property = intentions.fileIntentions()[0].typeIntentions[1].properties[0]
         
-        let usages = sut.findUsages(of: property)
+        let usages = sut.findUsagesOf(property: property)
         
         XCTAssertEqual(usages.count, 1)
     }
@@ -181,13 +172,11 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        
         let sut = DefaultUsageAnalyzer(intentions: intentions)
-        let property = intentions.fileIntentions()[0].enumIntentions[0]
+        let property = intentions.fileIntentions()[0].enumIntentions[0].cases[0]
         
-        let usages = sut.findUsages(of: property)
+        let usages = sut.findUsagesOf(property: property)
         
         XCTAssertEqual(usages.count, 1)
     }
-    */
 }
