@@ -1,25 +1,48 @@
 import SwiftAST
 
-/// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
-/// all function bodies found in one go.
-public class SyntaxNodeRewriterPassApplier {
-    public var passes: [SyntaxNodeRewriterPass]
+/// A basic protocol with two front-end methods for requesting resolving of types
+/// of expression and statements on intention collections.
+public protocol TypeResolverInvoker {
+    /// Invocates the resolution of types for all expressions from all method bodies
+    /// contained within an intention collection.
+    func resolveAllExpressionTypes(in intentions: IntentionCollection)
+    
+    /// Resolves all types within a given method intention.
+    func resolveExpressionTypes(in method: MethodGenerationIntention)
+    
+    /// Resolves all types from all expressions that may be contained within
+    /// computed accessors of a given property
+    func resolveExpressionTypes(in property: PropertyGenerationIntention)
+}
+
+// TODO: Move TypeResolverInvoker's implementation to a separate type.
+public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public var typeResolver: ExpressionTypeResolver
     
-    public init(passes: [SyntaxNodeRewriterPass], typeResolver: ExpressionTypeResolver) {
-        self.passes = passes
+    public init(typeResolver: ExpressionTypeResolver) {
         self.typeResolver = typeResolver
     }
     
-    public func apply(on intentions: IntentionCollection) {
+    public func resolveAllExpressionTypes(in intentions: IntentionCollection) {
+        apply(on: intentions)
+    }
+    
+    public func resolveExpressionTypes(in method: MethodGenerationIntention) {
+        applyOnMethod(method)
+    }
+    
+    public func resolveExpressionTypes(in property: PropertyGenerationIntention) {
+        applyOnProperty(property)
+    }
+    
+    // MARK: - Private method
+    private func apply(on intentions: IntentionCollection) {
         let files = intentions.fileIntentions()
         
         for file in files {
             applyOnFile(file)
         }
     }
-    
-    // MARK: - Private members
     
     private func applyOnFile(_ file: FileGenerationIntention) {
         for cls in file.classIntentions {
@@ -39,6 +62,17 @@ public class SyntaxNodeRewriterPassApplier {
         for method in cls.methods {
             applyOnMethod(method)
         }
+    }
+    
+    private func applyOnFunction(_ f: FunctionIntention) {
+        if let method = f.functionBody {
+            applyOnFunctionBody(method)
+        }
+    }
+    
+    private func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
+        // Resolve types before feeding into passes
+        typeResolver.resolveTypes(in: functionBody.body)
     }
     
     private func applyOnMethod(_ method: MethodGenerationIntention) {
@@ -64,25 +98,6 @@ public class SyntaxNodeRewriterPassApplier {
             applyOnFunctionBody(set.body)
         case .asField:
             break
-        }
-    }
-    
-    private func applyOnFunction(_ f: FunctionIntention) {
-        if let method = f.functionBody {
-            applyOnFunctionBody(method)
-        }
-    }
-    
-    private func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
-        // Resolve types before feeding into passes
-        typeResolver.resolveTypes(in: functionBody.body)
-        
-        passes.forEach {
-            _=functionBody.body.accept($0)
-            
-            // After each apply to the body, we must re-type check the result
-            // before handing it off to the next pass.
-            typeResolver.resolveTypes(in: functionBody.body)
         }
     }
     

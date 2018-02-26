@@ -34,6 +34,9 @@ public class SwiftRewriter {
     /// before parsing.
     public var preprocessors: [SourcePreprocessor] = []
     
+    /// Intention passes to apply before passing the constructs to the output
+    public var intentionPasses: [IntentionPass] = IntentionPasses.passes
+    
     public var writerOptions: ASTWriterOptions = .default
     
     public init(input: InputSourcesProvider, output: WriterOutput) {
@@ -77,12 +80,16 @@ public class SwiftRewriter {
             SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
                                           typeResolver: typeResolver)
         
+        let typeResolverInvoker = DefaultTypeResolverInvoker(typeResolver: typeResolver)
         let context =
             IntentionPassContext(intentions: intentionCollection,
                                  typeSystem: typeSystem,
-                                 typeResolverInvoker: applier)
+                                 typeResolverInvoker: typeResolverInvoker)
         
-        for pass in IntentionPasses.passes {
+        // Make a pre-type resolve before applying passes
+        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection)
+        
+        for pass in intentionPasses {
             pass.apply(on: intentionCollection, context: context)
         }
         

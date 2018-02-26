@@ -180,9 +180,12 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
     func method(withSignature signature: FunctionSignature) -> Asserter {
         type.addMethod(MethodGenerationIntention(signature: signature))
         
+        let resolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        let invoker = DefaultTypeResolverInvoker(typeResolver: resolver)
         let context =
             IntentionPassContext(intentions: intentions,
-                                 typeSystem: DefaultTypeSystem())
+                                 typeSystem: DefaultTypeSystem(),
+                                 typeResolverInvoker: invoker)
         
         sut.apply(on: intentions, context: context)
         
