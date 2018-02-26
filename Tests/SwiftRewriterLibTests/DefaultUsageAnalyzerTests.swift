@@ -31,16 +31,18 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                         }
                     }
                     .createClass(withName: "B") { builder in
-                        builder.createProperty(named: "b", type: .int)
+                        builder
+                            .createConstructor()
+                            .createProperty(named: "b", type: .int)
                     }
             }
         
         let intentions = builder.build(typeChecked: true)
         
         let sut = DefaultUsageAnalyzer(intentions: intentions)
-        let method = intentions.fileIntentions()[0].typeIntentions[0].methods[0]
+        let property = intentions.fileIntentions()[0].typeIntentions[1].properties[0]
         
-        let usages = sut.findUsages(of: method)
+        let usages = sut.findUsages(of: property)
         
         XCTAssertEqual(usages.count, 1)
     }

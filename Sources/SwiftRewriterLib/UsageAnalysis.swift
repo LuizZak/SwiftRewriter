@@ -18,11 +18,68 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
         let types = intentions.typeIntentions()
         
         // Get all existing method bodies, from all types
-        let bodies = types.flatMap { $0.methods.compactMap { $0.functionBody?.body } }
+        let typeMethods = types.flatMap { $0.methods }
         
-        //bodies.
+        var usages: [MemberUsage] = []
         
-        return []
+        for typeMethod in typeMethods {
+            guard let body = typeMethod.functionBody?.body else {
+                continue
+            }
+            
+            let iterator = SyntaxNodeSequence(statement: body, inspectBlocks: true)
+            
+            for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
+                guard let expMethod = exp.op.asMember?.memberDefinition as? KnownMethod else {
+                    continue
+                }
+                guard expMethod.signature == method.signature else {
+                    continue
+                }
+                
+                if expMethod.ownerType?.typeName == method.ownerType?.typeName {
+                    let usage = MemberUsage(function: typeMethod, expression: exp)
+                    
+                    usages.append(usage)
+                }
+            }
+        }
+        
+        return usages
+    }
+    
+    public func findUsages(of property: KnownProperty) -> [MemberUsage] {
+        let types = intentions.typeIntentions()
+        
+        // Get all existing method bodies, from all types
+        let typeMethods = types.flatMap { $0.methods }
+        
+        var usages: [MemberUsage] = []
+        
+        for typeMethod in typeMethods {
+            guard let body = typeMethod.functionBody?.body else {
+                continue
+            }
+            
+            let iterator = SyntaxNodeSequence(statement: body, inspectBlocks: true)
+            
+            for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
+                guard let expProperty = exp.op.asMember?.memberDefinition as? KnownProperty else {
+                    continue
+                }
+                guard expProperty.name == property.name else {
+                    continue
+                }
+                
+                if expProperty.ownerType?.typeName == property.ownerType?.typeName {
+                    let usage = MemberUsage(function: typeMethod, expression: exp)
+                    
+                    usages.append(usage)
+                }
+            }
+        }
+        
+        return usages
     }
 }
 

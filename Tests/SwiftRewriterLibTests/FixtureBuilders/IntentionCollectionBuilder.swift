@@ -77,6 +77,15 @@ class TypeBuilder {
     }
     
     @discardableResult
+    func createConstructor(withParameters parameters: [ParameterSignature] = []) -> TypeBuilder {
+        let ctor = InitGenerationIntention(parameters: parameters)
+        
+        targetType.addConstructor(ctor)
+        
+        return self
+    }
+    
+    @discardableResult
     func createVoidMethod(named name: String, bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
         let signature = FunctionSignature(name: name, parameters: [])
         

@@ -213,3 +213,15 @@ public extension IdentifierExpression {
         }
     }
 }
+
+public extension MemberPostfix {
+    /// Gets the member this member postfix operation references
+    public var memberDefinition: KnownMember? {
+        get {
+            return metadata[_identifierDefinitionKey] as? KnownMember
+        }
+        set {
+            metadata[_identifierDefinitionKey] = newValue
+        }
+    }
+}

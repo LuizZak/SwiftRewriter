@@ -471,11 +471,12 @@ private class MemberInvocationResolver {
             guard let type = typeResolver.findType(for: innerType) else {
                 return exp.makeErrorTyped()
             }
-            guard let prop = type.property(named: member.name) else {
+            guard let property = type.property(named: member.name) else {
                 return exp.makeErrorTyped()
             }
             
-            exp.resolvedType = prop.storage.type
+            exp.op.asMember?.memberDefinition = property
+            exp.resolvedType = property.storage.type
         
         case _ as OptionalAccessPostfix:
             // TODO: Support .optionalAccess here
@@ -536,6 +537,8 @@ private class MemberInvocationResolver {
                                       in: knownType) else {
                 return postfix.makeErrorTyped()
             }
+            
+            postfix.exp.asPostfix?.op.asMember?.memberDefinition = method
             
             postfix.exp.resolvedType = method.signature.swiftClosureType
             postfix.resolvedType = method.signature.returnType
