@@ -225,13 +225,17 @@ public class SwiftRewriter {
     }
     
     private func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+        // Requires original ANTLR's rule context
         guard let ruleContext = node.sourceRuleContext else {
             return false
         }
+        // Fetch the token indices of the node's start and end
         guard let startToken = ruleContext.getStart(), let stopToken = ruleContext.getStop() else {
             return false
         }
         
+        // Check if it the token start/end indices are completely contained
+        // within NS_ASSUME_NONNULL_BEGIN/END intervals
         for n in nonnullTokenRanges {
             if n.start <= startToken.getTokenIndex() && n.end >= stopToken.getTokenIndex() {
                 return true
@@ -432,7 +436,8 @@ public class SwiftRewriter {
         var ownership: Ownership = .strong
         if let type = node.type?.type {
             let context = TypeMapper
-                .TypeMappingContext(modifiers: node.attributesList, inNonnull: isNodeInNonnullContext(node))
+                .TypeMappingContext(modifiers: node.attributesList,
+                                    inNonnull: isNodeInNonnullContext(node))
             
             swiftType = typeMapper.swiftType(forObjcType: type, context: context)
             ownership = evaluateOwnershipPrefix(inType: type, property: node)
@@ -458,7 +463,8 @@ public class SwiftRewriter {
         if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
             let prop =
                 ProtocolPropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                                    storage: storage, attributes: attributes,
+                                                    storage: storage,
+                                                    attributes: attributes,
                                                     source: node)
             
             prop.isOptional = node.isOptionalProperty
@@ -469,7 +475,8 @@ public class SwiftRewriter {
         } else {
             let prop =
                 PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                            storage: storage, attributes: attributes,
+                                            storage: storage,
+                                            attributes: attributes,
                                             source: node)
             
             prop.inNonnullContext = isNodeInNonnullContext(node)
@@ -490,7 +497,10 @@ public class SwiftRewriter {
         let method: MethodGenerationIntention
         
         if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
-            let protMethod = ProtocolMethodGenerationIntention(signature: sign, source: node)
+            let protMethod =
+                ProtocolMethodGenerationIntention(signature: sign,
+                                                  source: node)
+            
             protMethod.isOptional = node.isOptionalMethod
             
             method = protMethod
@@ -525,7 +535,9 @@ public class SwiftRewriter {
         }
         
         for protNode in node.protocols {
-            let intent = ProtocolInheritanceIntention(protocolName: protNode.name, source: protNode)
+            let intent =
+                ProtocolInheritanceIntention(protocolName: protNode.name,
+                                             source: protNode)
             
             ctx.addProtocol(intent)
         }
@@ -558,7 +570,8 @@ public class SwiftRewriter {
         let storage = ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
         let ivar =
             InstanceVariableGenerationIntention(name: node.identifier?.name ?? "",
-                                                storage: storage, accessLevel: access,
+                                                storage: storage,
+                                                accessLevel: access,
                                                 source: node)
         
         ivar.inNonnullContext = isNodeInNonnullContext(node)
@@ -572,15 +585,56 @@ public class SwiftRewriter {
     
     // MARK: - Enum Declaration
     private func enterObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
+        guard let identifier = node.identifier else {
+            return
+        }
+        guard let type = node.type else {
+            return
+        }
         
+        let swiftType = typeMapper.swiftType(forObjcType: type.type)
+        
+        let enumIntention =
+            EnumGenerationIntention(typeName: identifier.name,
+                                    rawValueType: swiftType,
+                                    source: node)
+        
+        context
+            .findContext(ofType: FileGenerationIntention.self)?
+            .addEnum(enumIntention)
+        
+        context.pushContext(enumIntention)
     }
     
     private func visitObjcEnumCaseNode(_ node: ObjcEnumCase) {
+        guard let ctx = context.currentContext(as: EnumGenerationIntention.self) else {
+            return
+        }
+        guard let identifier = node.identifier?.name else {
+            return
+        }
         
+        let enumCase =
+            EnumCaseGenerationIntention(name: identifier, expression: nil,
+                                        accessLevel: .internal, source: node)
+        
+        
+        if let expression = node.expression?.expression {
+            let reader = SwiftASTReader()
+            let exp = reader.parseExpression(expression: expression)
+            
+            enumCase.expression = exp
+        }
+        
+        ctx.addCase(enumCase)
     }
     
     private func exitObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
+        guard node.identifier != nil && node.type != nil else {
+            return
+        }
         
+        context.popContext() // EnumGenerationIntention
     }
     
     // MARK: -

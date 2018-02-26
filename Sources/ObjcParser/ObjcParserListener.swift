@@ -60,7 +60,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.TypedefDeclarationContext.self, nodeType: TypedefNode.self)
         mapper.addRuleMap(rule: ObjectiveCParser.BlockParametersContext.self, nodeType: BlockParametersNode.self)
         mapper.addRuleMap(rule: ObjectiveCParser.ProtocolDeclarationContext.self, nodeType: ProtocolDeclaration.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.EnumSpecifierContext.self, nodeType: ObjcEnumDeclaration.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.EnumDeclarationContext.self, nodeType: ObjcEnumDeclaration.self)
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -456,18 +456,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
+        let isObjcEnum = enumSpecifier.NS_ENUM() != nil || enumSpecifier.NS_OPTIONS() != nil
+        
         enumNode.isOptionSet = enumSpecifier.NS_OPTIONS() != nil
         
-        if let identifier = enumSpecifier.identifier(0) {
+        if let identifier = enumSpecifier.identifier(isObjcEnum ? 0 : 1) {
             let identifierNode = Identifier(name: identifier.getText())
             identifierNode.sourceRuleContext = identifier
             enumNode.addChild(identifierNode)
-        }
-        
-        if let typeName = enumSpecifier.typeName(), let type = ObjcParserListener.parseObjcType(fromTypeName: typeName) {
-            let typeNameNode = TypeNameNode(type: type)
-            typeNameNode.sourceRuleContext = typeName
-            enumNode.addChild(typeNameNode)
         }
     }
     
@@ -485,6 +481,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         if let expression = ctx.expression() {
             let expressionNode = ExpressionNode()
             expressionNode.sourceRuleContext = expression
+            expressionNode.expression = expression
             enumCase.addChild(expressionNode)
         }
         

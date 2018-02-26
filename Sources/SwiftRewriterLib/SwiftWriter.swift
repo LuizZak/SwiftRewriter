@@ -12,6 +12,7 @@ public class SwiftWriter {
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     var options: ASTWriterOptions
+    let astWriter: SwiftASTWriter
     
     public init(intentions: IntentionCollection, options: ASTWriterOptions,
                 diagnostics: Diagnostics, output: WriterOutput) {
@@ -20,6 +21,7 @@ public class SwiftWriter {
         self.diagnostics = diagnostics
         self.output = output
         self.typeMapper = TypeMapper(context: context)
+        astWriter = SwiftASTWriter(options: options)
     }
     
     public func execute() {
@@ -42,6 +44,11 @@ public class SwiftWriter {
         
         for typeali in fileIntent.typealiasIntentions {
             outputTypealias(typeali, target: out)
+            addSeparator = true
+        }
+        
+        for en in fileIntent.enumIntentions {
+            outputEnum(en, target: out)
             addSeparator = true
         }
         
@@ -103,11 +110,42 @@ public class SwiftWriter {
         
         let typeName = typeMapper.typeNameString(for: typeali.fromType, context: ctx)
         
+        // typealias <Type1> = <Type2>
         target.outputIdentation()
         target.outputInlineWithSpace("typealias", style: .keyword)
         target.outputInline(typeali.named, style: .keyword)
         target.outputInline(" = ")
         target.outputInline(typeName, style: .keyword)
+    }
+    
+    private func outputEnum(_ intention: EnumGenerationIntention, target: RewriterOutputTarget) {
+        let rawTypeName = typeMapper.typeNameString(for: intention.rawValueType)
+        
+        // enum <Name>: <RawValue> {
+        target.outputIdentation()
+        target.outputInlineWithSpace("enum", style: .keyword)
+        target.outputInline(intention.typeName, style: .typeName)
+        target.outputInline(": ")
+        target.outputInlineWithSpace(rawTypeName, style: .typeName)
+        target.outputInline("{")
+        target.outputLineFeed()
+        
+        target.idented {
+            for cs in intention.cases {
+                // case <case> [= <value>]
+                target.outputIdentation()
+                target.outputInlineWithSpace("case", style: .keyword)
+                target.outputInline(cs.name)
+                
+                if let exp = cs.expression {
+                    target.outputInline(" = ")
+                    astWriter.write(expression: exp, into: target)
+                }
+                target.outputLineFeed()
+            }
+        }
+        
+        target.output(line: "}")
     }
     
     private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention,
@@ -330,7 +368,7 @@ public class SwiftWriter {
             target.outputLineFeed()
             break
         case .computed(let body):
-            outputMethodBody(body, options: options, target: target)
+            outputMethodBody(body, target: target)
         case let .property(getter, setter):
             target.outputInline(" ")
             target.outputInline("{")
@@ -339,8 +377,7 @@ public class SwiftWriter {
             target.idented {
                 target.outputIdentation()
                 target.outputInline("get", style: .keyword)
-                outputMethodBody(getter, options: options,
-                                 target: target)
+                outputMethodBody(getter, target: target)
                 
                 target.outputIdentation()
                 target.outputInline("set", style: .keyword)
@@ -350,8 +387,7 @@ public class SwiftWriter {
                     target.outputInline("(\(setter.valueIdentifier))")
                 }
                 
-                outputMethodBody(setter.body, options: options,
-                                 target: target)
+                outputMethodBody(setter.body, target: target)
             }
             
             target.output(line: "}")
@@ -383,7 +419,7 @@ public class SwiftWriter {
                          inNonnullContext: initMethod.inNonnullContext)
         
         if let body = initMethod.functionBody {
-            outputMethodBody(body, options: options, target: target)
+            outputMethodBody(body, target: target)
         } else if initMethod.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
@@ -408,7 +444,7 @@ public class SwiftWriter {
         target.outputInline("deinit", style: .keyword)
         
         if let body = method.functionBody {
-            outputMethodBody(body, options: options, target: target)
+            outputMethodBody(body, target: target)
         } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
@@ -459,7 +495,7 @@ public class SwiftWriter {
         }
         
         if let body = method.functionBody {
-            outputMethodBody(body, options: options, target: target)
+            outputMethodBody(body, target: target)
         } else if method.parent is BaseClassIntention {
             // Class definitions _must_ have a method body, even if empty.
             target.outputInline(" {")
@@ -470,10 +506,8 @@ public class SwiftWriter {
         }
     }
     
-    private func outputMethodBody(_ body: FunctionBodyIntention, options: ASTWriterOptions,
-                                  target: RewriterOutputTarget) {
-        let rewriter = SwiftASTWriter(options: options)
-        rewriter.write(compoundStatement: body.body, into: target)
+    private func outputMethodBody(_ body: FunctionBodyIntention, target: RewriterOutputTarget) {
+        astWriter.write(compoundStatement: body.body, into: target)
     }
     
     private func outputParameters(_ parameters: [ParameterSignature],

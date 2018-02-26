@@ -7,7 +7,7 @@ public class FromSourceIntention: NonNullScopedIntention {
     public var source: ASTNode?
     public var accessLevel: AccessLevel
     
-    weak public var parent: Intention?
+    weak internal(set) public var parent: Intention?
     
     // NOTE: This is a hack- shouldn't be recorded on the intention but passed to
     // it in a more abstract way.

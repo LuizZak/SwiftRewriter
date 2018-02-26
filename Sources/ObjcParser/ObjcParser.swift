@@ -1,6 +1,9 @@
 import Foundation
 import MiniLexer
 import GrammarModels
+import class Antlr4.BaseErrorListener
+import class Antlr4.Recognizer
+import class Antlr4.ATNSimulator
 import class Antlr4.ANTLRInputStream
 import class Antlr4.CommonTokenStream
 import class Antlr4.ParseTreeWalker
@@ -98,6 +101,10 @@ public class ObjcParser {
         let tokens = CommonTokenStream(lxr)
         
         let parser = try ObjectiveCPreprocessorParser(tokens)
+        parser.addErrorListener(
+            DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
+        )
+        
         let root = try parser.objectiveCDocument()
         
         let preprocessors = ObjcPreprocessorListener.walk(root)
@@ -136,6 +143,10 @@ public class ObjcParser {
         let src = source.fetchSource()
         
         let parser = try ObjectiveCParser(initMainTokenStream(input: input))
+        parser.addErrorListener(
+            DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
+        )
+        
         let root = try parser.translationUnit()
         
         let listener = ObjcParserListener(sourceString: src, source: source)
@@ -358,5 +369,25 @@ public class ObjcParser {
         }
         
         return items
+    }
+}
+
+private class DiagnosticsErrorListener: BaseErrorListener {
+    let source: Source
+    let diagnostics: Diagnostics
+    
+    init(source: Source, diagnostics: Diagnostics) {
+        self.source = source
+        self.diagnostics = diagnostics
+        super.init()
+    }
+    
+    override func syntaxError<T>(_ recognizer: Recognizer<T>,
+                                 _ offendingSymbol: AnyObject?,
+                                 _ line: Int,
+                                 _ charPositionInLine: Int,
+                                 _ msg: String,
+                                 _ e: AnyObject?) where T : ATNSimulator {
+        diagnostics.error(msg, location: .invalid)
     }
 }

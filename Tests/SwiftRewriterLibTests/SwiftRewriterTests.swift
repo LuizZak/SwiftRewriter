@@ -85,13 +85,14 @@ class SwiftRewriterTests: XCTestCase {
         try assertObjcParse(
             objc: """
             typedef NS_ENUM(NSInteger, MyEnum) {
-                MyEnumCase1
+                MyEnumCase1,
                 MyEnumCase2
             };
             """,
             swift: """
             enum MyEnum: Int {
-                case case1
+                case MyEnumCase1
+                case MyEnumCase2
             }
             """)
     }
