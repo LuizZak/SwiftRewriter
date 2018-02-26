@@ -8,14 +8,3 @@ public class TypeNameNode: ASTNode {
         super.init(location: location)
     }
 }
-
-public extension ASTNodeRef where Node == TypeNameNode {
-    public var type: ObjcType? {
-        switch self {
-        case .valid(let node):
-            return node.type
-        case .invalid:
-            return nil
-        }
-    }
-}

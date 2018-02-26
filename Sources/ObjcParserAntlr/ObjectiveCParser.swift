@@ -268,7 +268,7 @@ open class ObjectiveCParser: Parser {
 		}
 		return tokenNames
 	}()
-	
+    
 	open func getTokenNames() -> [String?]? {
 		return tokenNames
 	}
@@ -8771,6 +8771,8 @@ open class ObjectiveCParser: Parser {
 		}
 		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
 		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
+		open func NS_OPTIONS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_OPTIONS.rawValue, 0) }
+		open func NS_ENUM() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.NS_ENUM.rawValue, 0) }
 		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_enumSpecifier }
 		override
 		open func enterRule(_ listener: ParseTreeListener) {

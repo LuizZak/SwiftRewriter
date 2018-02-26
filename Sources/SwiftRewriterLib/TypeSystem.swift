@@ -154,6 +154,11 @@ class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return nil
         }
         
+        // Single type found: Avoid complex merge operations and return it as is.
+        if types.count == 0 {
+            return types[0]
+        }
+        
         var typeBuilder = KnownTypeBuilder(typeName: name)
         
         for type in types {

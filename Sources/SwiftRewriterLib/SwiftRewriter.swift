@@ -121,6 +121,8 @@ public class SwiftRewriter {
                 self.enterProtocolDeclarationNode(n)
             case let n as IVarsList:
                 self.enterObjcClassIVarsListNode(n)
+            case let n as ObjcEnumDeclaration:
+                self.enterObjcEnumDeclarationNode(n)
             default:
                 return
             }
@@ -152,6 +154,9 @@ public class SwiftRewriter {
             case let n as VariableDeclaration:
                 self.visitVariableDeclarationNode(n)
                 
+            case let n as ObjcEnumCase:
+                self.visitObjcEnumCaseNode(n)
+                
             case let n as Identifier
                 where n.name == "NS_ASSUME_NONNULL_BEGIN":
                 self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn = true
@@ -178,6 +183,8 @@ public class SwiftRewriter {
                 self.exitProtocolDeclarationNode(n)
             case let n as IVarsList:
                 self.exitObjcClassIVarsListNode(n)
+            case let n as ObjcEnumDeclaration:
+                self.exitObjcEnumDeclarationNode(n)
             default:
                 return
             }
@@ -309,7 +316,7 @@ public class SwiftRewriter {
     
     // MARK: - ObjcClassInterface
     private func enterObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        guard let name = node.identifier.name else {
+        guard let name = node.identifier?.name else {
             return
         }
         
@@ -324,7 +331,7 @@ public class SwiftRewriter {
     }
     
     private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        if node.identifier.name != nil {
+        if node.identifier?.name != nil {
             context.popContext() // ClassGenerationIntention
         }
     }
@@ -562,6 +569,20 @@ public class SwiftRewriter {
     private func exitObjcClassIVarsListNode(_ node: IVarsList) {
         context.popContext() // InstanceVarContext
     }
+    
+    // MARK: - Enum Declaration
+    private func enterObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
+        
+    }
+    
+    private func visitObjcEnumCaseNode(_ node: ObjcEnumCase) {
+        
+    }
+    
+    private func exitObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
+        
+    }
+    
     // MARK: -
     
     private class IVarListContext: Context {

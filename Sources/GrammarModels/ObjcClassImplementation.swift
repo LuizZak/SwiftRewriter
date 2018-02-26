@@ -39,7 +39,9 @@ public class PropertyImplementation: ASTNode, InitializableNode {
         }
     }
     
-    public var list: ASTNodeRef<PropertySynthesizeList> = .placeholder
+    public var list: PropertySynthesizeList? {
+        return firstChild()
+    }
     
     public required init() {
         super.init()
@@ -47,10 +49,6 @@ public class PropertyImplementation: ASTNode, InitializableNode {
     
     public override func addChild(_ node: ASTNode) {
         super.addChild(node)
-        
-        if let list = node as? PropertySynthesizeList {
-            self.list = .valid(list)
-        }
     }
 }
 
@@ -80,15 +78,4 @@ public class PropertySynthesizeItem: ASTNode {
 public enum PropertyImplementationKind {
     case synthesize
     case dynamic
-}
-
-public extension ASTNodeRef where Node == PropertySynthesizeList {
-    public var items: [PropertySynthesizeItem]? {
-        switch self {
-        case .valid(let n):
-            return n.items
-        case .invalid:
-            return nil
-        }
-    }
 }

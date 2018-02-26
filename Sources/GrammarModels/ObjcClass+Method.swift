@@ -84,7 +84,7 @@ public class KeywordDeclarator: ASTNode, InitializableNode {
         return firstChild()
     }
     public var identifier: Identifier? {
-        return childrenMatching(type: Identifier.self).last
+        return childrenMatching().last
     }
     
     public required init() {

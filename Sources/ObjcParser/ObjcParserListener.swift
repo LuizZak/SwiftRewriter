@@ -27,6 +27,484 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         configureMappers()
     }
     
+    
+    
+    private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
+        guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
+            return .invalid
+        }
+        
+        let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
+        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
+        
+        return SourceLocation(source: source, range: .range(sourceStartIndex..<sourceEndIndex))
+    }
+    
+    /// Configures mappers in `self.mapper` so they are automatically pushed and
+    /// popped whenever the rules are entered and exited during visit.
+    ///
+    /// Used as a convenience over manually pushing and popping contexts every time
+    /// a node of significance is entered.
+    private func configureMappers() {
+        mapper.addRuleMap(rule: ObjectiveCParser.TranslationUnitContext.self, node: rootNode)
+        mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategoryInterface.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.CategoryImplementationContext.self, nodeType: ObjcClassCategoryImplementation.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.MethodDefinitionContext.self, nodeType: MethodDefinition.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.KeywordDeclaratorContext.self, nodeType: KeywordDeclarator.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.MethodSelectorContext.self, nodeType: MethodSelector.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.MethodTypeContext.self, nodeType: MethodType.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.InstanceVariablesContext.self, nodeType: IVarsList.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.TypedefDeclarationContext.self, nodeType: TypedefNode.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.BlockParametersContext.self, nodeType: BlockParametersNode.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.ProtocolDeclarationContext.self, nodeType: ProtocolDeclaration.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.EnumSpecifierContext.self, nodeType: ObjcEnumDeclaration.self)
+    }
+    
+    override func enterEveryRule(_ ctx: ParserRuleContext) {
+        mapper.matchEnter(rule: ctx, context: context)
+    }
+    
+    override func exitEveryRule(_ ctx: ParserRuleContext) {
+        mapper.matchExit(rule: ctx, context: context)
+    }
+    
+    // MARK: - Global Context
+    override func enterTranslationUnit(_ ctx: ObjectiveCParser.TranslationUnitContext) {
+        // Collect global variables
+        let globalVariableListener = GlobalVariableListener()
+        let walker = ParseTreeWalker()
+        try? walker.walk(globalVariableListener, ctx)
+        
+        for global in globalVariableListener.variables {
+            context.addChildNode(global)
+        }
+    }
+    
+    // MARK: - Class Interface
+    override func enterClassInterface(_ ctx: ObjectiveCParser.ClassInterfaceContext) {
+        guard let classNode = context.currentContextNode(as: ObjcClassInterface.self) else {
+            return
+        }
+        
+        // Class name
+        if let identifier = ctx.className?.identifier() {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            classNode.addChild(identifierNode)
+        }
+        
+        // Super class name
+        if let sup = ctx.superclassName?.getText() {
+            let supName = SuperclassName(name: sup)
+            supName.sourceRuleContext = ctx.superclassName
+            context.addChildNode(supName)
+        }
+        
+        // Protocol list
+        if let protocolList = ctx.protocolList() {
+            let protocolListNode = ProtocolReferenceList()
+            protocolListNode.sourceRuleContext = protocolList
+            
+            for prot in protocolList.protocolName() {
+                guard let identifier = prot.identifier() else {
+                    continue
+                }
+                
+                let protNameNode = ProtocolName(name: identifier.getText())
+                protNameNode.sourceRuleContext = identifier
+                protocolListNode.addChild(protNameNode)
+            }
+            
+            context.addChildNode(protocolListNode)
+        }
+    }
+    
+    // MARK: - Class Category
+    override func enterCategoryInterface(_ ctx: ObjectiveCParser.CategoryInterfaceContext) {
+        guard let classNode = context.currentContextNode(as: ObjcClassCategoryInterface.self) else {
+            return
+        }
+        
+        // Note: In the original Antlr's grammar, 'className' and 'categoryName'
+        // seem to be switched around. We undo that here while parsing.
+        
+        if let className = ctx.categoryName?.identifier() {
+            let identifierNode = Identifier(name: className.getText())
+            identifierNode.sourceRuleContext = ctx.className
+            classNode.addChild(identifierNode)
+        }
+        
+        // Class category name
+        if let identifier = ctx.className {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            classNode.addChild(identifierNode)
+        }
+        
+        // Protocol list
+        if let protocolList = ctx.protocolList() {
+            let protocolListNode = ProtocolReferenceList()
+            protocolListNode.sourceRuleContext = protocolList
+            
+            for prot in protocolList.protocolName() {
+                guard let identifier = prot.identifier() else {
+                    continue
+                }
+                
+                let protNameNode = ProtocolName(name: identifier.getText())
+                protNameNode.sourceRuleContext = identifier
+                protocolListNode.addChild(protNameNode)
+            }
+            
+            context.addChildNode(protocolListNode)
+        }
+    }
+    
+    // MARK: - Class Implementation
+    override func enterClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) {
+        guard let classNode = context.currentContextNode(as: ObjcClassImplementation.self) else {
+            return
+        }
+        
+        // Class name
+        if let identifier = ctx.className?.identifier() {
+            let identNode = Identifier(name: identifier.getText())
+            identNode.sourceRuleContext = identifier
+            classNode.addChild(identNode)
+        }
+        
+        // Super class name
+        if let sup = ctx.superclassName?.getText() {
+            let supName = SuperclassName(name: sup)
+            supName.sourceRuleContext = ctx.superclassName
+            context.addChildNode(supName)
+        }
+    }
+    
+    override func enterCategoryImplementation(_ ctx: ObjectiveCParser.CategoryImplementationContext) {
+        guard let classNode = context.currentContextNode(as: ObjcClassCategoryImplementation.self) else {
+            return
+        }
+        
+        // Class name
+        if let identifier = ctx.categoryName?.identifier() {
+            let identNode = Identifier(name: identifier.getText())
+            identNode.sourceRuleContext = identifier
+            classNode.addChild(identNode)
+        }
+        
+        // Category name
+        if let identifier = ctx.className {
+            let identNode = Identifier(name: identifier.getText())
+            identNode.sourceRuleContext = identifier
+            classNode.addChild(identNode)
+        }
+    }
+    
+    // MARK: - Instance Variables
+    override func enterVisibilitySection(_ ctx: ObjectiveCParser.VisibilitySectionContext) {
+        if let accessModifier = ctx.accessModifier() {
+            var accessNode: KeywordNode?
+            
+            if accessModifier.PRIVATE() != nil {
+                accessNode = KeywordNode(keyword: .atPrivate)
+            } else if accessModifier.PACKAGE() != nil {
+                accessNode = KeywordNode(keyword: .atPackage)
+            } else if accessModifier.PROTECTED() != nil {
+                accessNode = KeywordNode(keyword: .atProtected)
+            } else if accessModifier.PUBLIC() != nil {
+                accessNode = KeywordNode(keyword: .atPublic)
+            }
+            
+            if let accessNode = accessNode {
+                accessNode.sourceRuleContext = accessModifier
+                context.addChildNode(accessNode)
+            }
+        }
+        
+        let declarations = ctx.fieldDeclaration()
+        
+        for decl in declarations {
+            guard let specifierQualifierList = decl.specifierQualifierList() else {
+                continue
+            }
+            guard let fieldDeclarators = decl.fieldDeclaratorList()?.fieldDeclarator() else {
+                continue
+            }
+            
+            for fieldDeclarator in fieldDeclarators {
+                guard let declarator = fieldDeclarator.declarator() else {
+                    continue
+                }
+                guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
+                    continue
+                }
+                guard let type = ObjcParserListener.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
+                    continue
+                }
+                
+                let typeNode = TypeNameNode(type: type)
+                typeNode.sourceRuleContext = decl
+                let ident = Identifier(name: identifier)
+                ident.sourceRuleContext = declarator.directDeclarator()?.identifier()
+                
+                let ivar = IVarDeclaration()
+                ivar.addChild(typeNode)
+                ivar.addChild(ident)
+                ivar.sourceRuleContext = declarator
+                
+                context.addChildNode(ivar)
+            }
+        }
+    }
+    
+    // MARK: - Protocol Declaration
+    override func enterProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
+        guard context.currentContextNode(as: ProtocolDeclaration.self) != nil else {
+            return
+        }
+        
+        if let identifier = ctx.protocolName()?.identifier() {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            context.addChildNode(identifierNode)
+        }
+    }
+    
+    override func enterProtocolDeclarationSection(_ ctx: ObjectiveCParser.ProtocolDeclarationSectionContext) {
+        inOptionalContext = ctx.OPTIONAL() != nil
+    }
+    
+    override func exitProtocolDeclarationSection(_ ctx: ObjectiveCParser.ProtocolDeclarationSectionContext) {
+        inOptionalContext = false
+    }
+    
+    override func exitProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
+        inOptionalContext = false
+    }
+    
+    // MARK: - Property Declaration
+    override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
+        let listener = PropertyListener()
+        let walker = ParseTreeWalker()
+        try? walker.walk(listener, ctx)
+        
+        listener.property.isOptionalProperty = inOptionalContext
+        
+        context.pushContext(node: listener.property)
+    }
+    
+    override func exitPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
+        context.popContext()
+    }
+    
+    override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
+        guard let type = ObjcParserListener.parseObjcType(fromTypeName: ctx) else {
+            return
+        }
+        
+        let node = TypeNameNode(type: type)
+        node.sourceRuleContext = ctx
+        context.addChildNode(node)
+    }
+    
+    override func enterGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) {
+        mapper.pushTemporaryException(forRuleType: ObjectiveCParser.ProtocolListContext.self)
+    }
+    
+    override func exitGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) {
+        mapper.popTemporaryException()
+    }
+    
+    override func enterNullabilitySpecifier(_ ctx: ObjectiveCParser.NullabilitySpecifierContext) {
+        let spec = NullabilitySpecifier(name: ctx.getText())
+        spec.sourceRuleContext = ctx
+        context.addChildNode(spec)
+    }
+    
+    override func enterKeywordDeclarator(_ ctx: ObjectiveCParser.KeywordDeclaratorContext) {
+        guard let node = context.currentContextNode(as: KeywordDeclarator.self) else {
+            return
+        }
+        
+        let selectorIdent =
+            (ctx.selector()?.identifier()).map { ctx -> Identifier in
+                let node = Identifier(name: ctx.getText())
+                node.sourceRuleContext = ctx
+                return node
+            }
+        
+        let ident =
+            ctx.identifier().map { ctx -> Identifier in
+                let node = Identifier(name: ctx.getText())
+                node.sourceRuleContext = ctx
+                return node
+            }
+        
+        if let ident = selectorIdent {
+            node.addChild(ident)
+        }
+        if let ident = ident {
+            node.addChild(ident)
+        }
+    }
+    
+    // MARK: - Method Declaration
+    override func enterMethodDeclaration(_ ctx: ObjectiveCParser.MethodDeclarationContext) {
+        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
+            return
+        }
+        
+        node.isOptionalMethod = inOptionalContext
+        node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDeclarationContext
+    }
+    
+    override func enterMethodDefinition(_ ctx: ObjectiveCParser.MethodDefinitionContext) {
+        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
+            return
+        }
+        
+        node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDefinitionContext
+        
+        let methodBody = MethodBody()
+        
+        methodBody.sourceRuleContext = ctx
+        methodBody.statements = ctx.compoundStatement()
+        
+        node.body = methodBody
+    }
+    
+    override func enterMethodSelector(_ ctx: ObjectiveCParser.MethodSelectorContext) {
+        if let selIdentifier = ctx.selector()?.identifier() {
+            let node = Identifier(name: selIdentifier.getText())
+            node.sourceRuleContext = ctx
+            context.addChildNode(node)
+        }
+    }
+    
+    override func enterTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
+        guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
+            return
+        }
+        
+        guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
+            return
+        }
+        
+        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
+            guard let directDeclarator = typeDeclarator.directDeclarator() else {
+                continue
+            }
+            guard let identifier = directDeclarator.identifier() else {
+                continue
+            }
+            
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            typedefNode.addChild(identifierNode)
+        }
+    }
+    
+    // MARK: - Typedef
+    
+    override func exitTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
+        guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
+            return
+        }
+        
+        guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
+            return
+        }
+        guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
+            return
+        }
+        
+        // Detect block types
+        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
+            guard let directDeclarator = typeDeclarator.directDeclarator() else {
+                continue
+            }
+            guard let identifier = directDeclarator.identifier() else {
+                continue
+            }
+            
+            guard let type = ObjcParserListener.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+                                                              typeDeclarator: typeDeclarator) else
+            {
+                continue
+            }
+            
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            typedefNode.addChild(identifierNode)
+            
+            let typeNameNode = TypeNameNode(type: type)
+            typeNameNode.sourceRuleContext = typeDeclarator
+            typedefNode.addChild(typeNameNode)
+        }
+    }
+    
+    override func enterEnumDeclaration(_ ctx: ObjectiveCParser.EnumDeclarationContext) {
+        guard let enumSpecifier = ctx.enumSpecifier() else {
+            return
+        }
+        
+        guard let enumNode = context.currentContextNode(as: ObjcEnumDeclaration.self) else {
+            return
+        }
+        
+        enumNode.isOptionSet = enumSpecifier.NS_OPTIONS() != nil
+        
+        if let identifier = enumSpecifier.identifier(0) {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            enumNode.addChild(identifierNode)
+        }
+        
+        if let typeName = enumSpecifier.typeName(), let type = ObjcParserListener.parseObjcType(fromTypeName: typeName) {
+            let typeNameNode = TypeNameNode(type: type)
+            typeNameNode.sourceRuleContext = typeName
+            enumNode.addChild(typeNameNode)
+        }
+    }
+    
+    override func enterEnumerator(_ ctx: ObjectiveCParser.EnumeratorContext) {
+        guard let identifier = ctx.enumeratorIdentifier()?.getText() else {
+            return
+        }
+        
+        let enumCase = ObjcEnumCase()
+        
+        let identifierNode = Identifier(name: identifier)
+        identifierNode.sourceRuleContext = ctx.enumeratorIdentifier()
+        enumCase.addChild(identifierNode)
+        
+        if let expression = ctx.expression() {
+            let expressionNode = ExpressionNode()
+            expressionNode.sourceRuleContext = expression
+            enumCase.addChild(expressionNode)
+        }
+        
+        context.addChildNode(enumCase)
+    }
+    
+    override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
+        for typeVariableDeclaratorOrName in ctx.typeVariableDeclaratorOrName() {
+            guard let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
+                continue
+            }
+            
+            let typeNameNode = TypeNameNode(type: type)
+            typeNameNode.sourceRuleContext = typeVariableDeclaratorOrName
+            context.addChildNode(typeNameNode)
+        }
+    }
+}
+
+extension ObjcParserListener {
     // TODO: Abstract all of this away into a specialized class.
     
     // Helper for mapping Objective-C types from raw strings into a structured types
@@ -56,7 +534,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             let arcSpecifiers =
                 specQualifier.arcBehaviourSpecifier().map {
                     $0.getText()
-                }
+            }
             
             typeName = "\(arcSpecifiers.joined(separator: " ")) \(typeName)"
         }
@@ -258,479 +736,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         return type
-    }
-    
-    private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
-        guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
-            return .invalid
-        }
-        
-        let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
-        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
-        
-        return SourceLocation(source: source, range: .range(sourceStartIndex..<sourceEndIndex))
-    }
-    
-    /// Configures mappers in `self.mapper` so they are automatically pushed and
-    /// popped whenever the rules are entered and exited during visit.
-    ///
-    /// Used as a convenience over manually pushing and popping contexts every time
-    /// a node of significance is entered.
-    private func configureMappers() {
-        mapper.addRuleMap(rule: ObjectiveCParser.TranslationUnitContext.self, node: rootNode)
-        mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategoryInterface.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.CategoryImplementationContext.self, nodeType: ObjcClassCategoryImplementation.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodDefinitionContext.self, nodeType: MethodDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.KeywordDeclaratorContext.self, nodeType: KeywordDeclarator.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodSelectorContext.self, nodeType: MethodSelector.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.MethodTypeContext.self, nodeType: MethodType.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.InstanceVariablesContext.self, nodeType: IVarsList.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.TypedefDeclarationContext.self, nodeType: TypedefNode.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.BlockParametersContext.self, nodeType: BlockParametersNode.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.ProtocolDeclarationContext.self, nodeType: ProtocolDeclaration.self)
-    }
-    
-    override func enterEveryRule(_ ctx: ParserRuleContext) {
-        mapper.matchEnter(rule: ctx, context: context)
-    }
-    
-    override func exitEveryRule(_ ctx: ParserRuleContext) {
-        mapper.matchExit(rule: ctx, context: context)
-    }
-    
-    // MARK: - Global Context
-    override func enterTranslationUnit(_ ctx: ObjectiveCParser.TranslationUnitContext) {
-        // Collect global variables
-        let globalVariableListener = GlobalVariableListener()
-        let walker = ParseTreeWalker()
-        try? walker.walk(globalVariableListener, ctx)
-        
-        for global in globalVariableListener.variables {
-            context.addChildNode(global)
-        }
-    }
-    
-    // MARK: - Class Interface
-    override func enterClassInterface(_ ctx: ObjectiveCParser.ClassInterfaceContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassInterface.self) else {
-            return
-        }
-        
-        // Class name
-        if let identifier = ctx.className?.identifier() {
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            classNode.identifier = .valid(identifierNode)
-        }
-        
-        // Super class name
-        if let sup = ctx.superclassName?.getText() {
-            let supName = SuperclassName(name: sup)
-            supName.sourceRuleContext = ctx.superclassName
-            context.addChildNode(supName)
-        }
-        
-        // Protocol list
-        if let protocolList = ctx.protocolList() {
-            let protocolListNode = ProtocolReferenceList()
-            protocolListNode.sourceRuleContext = protocolList
-            
-            for prot in protocolList.protocolName() {
-                guard let identifier = prot.identifier() else {
-                    continue
-                }
-                
-                let protNameNode = ProtocolName(name: identifier.getText())
-                protNameNode.sourceRuleContext = identifier
-                protocolListNode.addChild(protNameNode)
-            }
-            
-            context.addChildNode(protocolListNode)
-        }
-    }
-    
-    // MARK: - Class Category
-    override func enterCategoryInterface(_ ctx: ObjectiveCParser.CategoryInterfaceContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassCategoryInterface.self) else {
-            return
-        }
-        
-        // Note: In the original Antlr's grammar, 'className' and 'categoryName'
-        // seem to be switched around. We undo that here while parsing.
-        
-        if let className = ctx.categoryName?.identifier() {
-            let identifierNode = Identifier(name: className.getText())
-            identifierNode.sourceRuleContext = ctx.className
-            classNode.addChild(identifierNode)
-        }
-        
-        // Class category name
-        if let identifier = ctx.className {
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            classNode.addChild(identifierNode)
-        }
-        
-        // Protocol list
-        if let protocolList = ctx.protocolList() {
-            let protocolListNode = ProtocolReferenceList()
-            protocolListNode.sourceRuleContext = protocolList
-            
-            for prot in protocolList.protocolName() {
-                guard let identifier = prot.identifier() else {
-                    continue
-                }
-                
-                let protNameNode = ProtocolName(name: identifier.getText())
-                protNameNode.sourceRuleContext = identifier
-                protocolListNode.addChild(protNameNode)
-            }
-            
-            context.addChildNode(protocolListNode)
-        }
-    }
-    
-    // MARK: - Class Implementation
-    override func enterClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassImplementation.self) else {
-            return
-        }
-        
-        // Class name
-        if let identifier = ctx.className?.identifier() {
-            let identNode = Identifier(name: identifier.getText())
-            identNode.sourceRuleContext = identifier
-            classNode.addChild(identNode)
-        }
-        
-        // Super class name
-        if let sup = ctx.superclassName?.getText() {
-            let supName = SuperclassName(name: sup)
-            supName.sourceRuleContext = ctx.superclassName
-            context.addChildNode(supName)
-        }
-    }
-    
-    override func enterCategoryImplementation(_ ctx: ObjectiveCParser.CategoryImplementationContext) {
-        guard let classNode = context.currentContextNode(as: ObjcClassCategoryImplementation.self) else {
-            return
-        }
-        
-        // Class name
-        if let identifier = ctx.categoryName?.identifier() {
-            let identNode = Identifier(name: identifier.getText())
-            identNode.sourceRuleContext = identifier
-            classNode.addChild(identNode)
-        }
-        
-        // Category name
-        if let identifier = ctx.className {
-            let identNode = Identifier(name: identifier.getText())
-            identNode.sourceRuleContext = identifier
-            classNode.addChild(identNode)
-        }
-    }
-    
-    // MARK: - Instance Variables
-    override func enterVisibilitySection(_ ctx: ObjectiveCParser.VisibilitySectionContext) {
-        if let accessModifier = ctx.accessModifier() {
-            var accessNode: KeywordNode?
-            
-            if accessModifier.PRIVATE() != nil {
-                accessNode = KeywordNode(keyword: .atPrivate)
-            } else if accessModifier.PACKAGE() != nil {
-                accessNode = KeywordNode(keyword: .atPackage)
-            } else if accessModifier.PROTECTED() != nil {
-                accessNode = KeywordNode(keyword: .atProtected)
-            } else if accessModifier.PUBLIC() != nil {
-                accessNode = KeywordNode(keyword: .atPublic)
-            }
-            
-            if let accessNode = accessNode {
-                accessNode.sourceRuleContext = accessModifier
-                context.addChildNode(accessNode)
-            }
-        }
-        
-        let declarations = ctx.fieldDeclaration()
-        
-        for decl in declarations {
-            guard let specifierQualifierList = decl.specifierQualifierList() else {
-                continue
-            }
-            guard let fieldDeclarators = decl.fieldDeclaratorList()?.fieldDeclarator() else {
-                continue
-            }
-            
-            for fieldDeclarator in fieldDeclarators {
-                guard let declarator = fieldDeclarator.declarator() else {
-                    continue
-                }
-                guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
-                    continue
-                }
-                guard let type = ObjcParserListener.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
-                    continue
-                }
-                
-                let typeNode = TypeNameNode(type: type)
-                typeNode.sourceRuleContext = decl
-                let ident = Identifier(name: identifier)
-                ident.sourceRuleContext = declarator.directDeclarator()?.identifier()
-                
-                let ivar = IVarDeclaration()
-                ivar.addChild(typeNode)
-                ivar.addChild(ident)
-                ivar.sourceRuleContext = declarator
-                
-                context.addChildNode(ivar)
-            }
-            
-            /*
-            for (i, (typeName, identifier)) in zip(types, identifiers).enumerated() {
-                guard let type = ObjcParserListener.parseObjcType(typeName) else {
-                    continue
-                }
-                
-                let typeNode = TypeNameNode(type: type)
-                typeNode.sourceRuleContext = decl
-                let ident = Identifier(name: identifier)
-                ident.sourceRuleContext = fieldDeclarators[i].declarator()?.directDeclarator()?.identifier()
-                
-                let ivar = IVarDeclaration()
-                ivar.addChild(typeNode)
-                ivar.addChild(ident)
-                ivar.sourceRuleContext = fieldDeclarators[i].declarator()
-                
-                context.addChildNode(ivar)
-            }
-            */
-            
-            /*
-            guard let declarator = decl.fieldDeclaratorList()?.fieldDeclarator(0)?.declarator() else {
-                continue
-            }
-            guard let identifier = declarator.directDeclarator()?.identifier() else {
-                continue
-            }
-            guard let type = ObjcParserListener.parseObjcType(inDeclaration: decl) else {
-                continue
-            }
-            
-            let identString = identifier.getText()
-            
-            let typeNode = TypeNameNode(type: type)
-            typeNode.sourceRuleContext = decl
-            let ident = Identifier(name: identString)
-            ident.sourceRuleContext = identifier
-            
-            let ivar = IVarDeclaration()
-            ivar.addChild(typeNode)
-            ivar.addChild(ident)
-            ivar.sourceRuleContext = declarator
-            
-            context.addChildNode(ivar)
-            */
-        }
-    }
-    
-    // MARK: - Protocol Declaration
-    override func enterProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
-        guard context.currentContextNode(as: ProtocolDeclaration.self) != nil else {
-            return
-        }
-        
-        if let identifier = ctx.protocolName()?.identifier() {
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            context.addChildNode(identifierNode)
-        }
-    }
-    
-    override func enterProtocolDeclarationSection(_ ctx: ObjectiveCParser.ProtocolDeclarationSectionContext) {
-        inOptionalContext = ctx.OPTIONAL() != nil
-    }
-    
-    override func exitProtocolDeclarationSection(_ ctx: ObjectiveCParser.ProtocolDeclarationSectionContext) {
-        inOptionalContext = false
-    }
-    
-    override func exitProtocolDeclaration(_ ctx: ObjectiveCParser.ProtocolDeclarationContext) {
-        inOptionalContext = false
-    }
-    
-    // MARK: - Property Declaration
-    override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
-        let listener = PropertyListener()
-        let walker = ParseTreeWalker()
-        try? walker.walk(listener, ctx)
-        
-        listener.property.isOptionalProperty = inOptionalContext
-        
-        context.pushContext(node: listener.property)
-    }
-    
-    override func exitPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
-        context.popContext()
-    }
-    
-    override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
-        guard let type = ObjcParserListener.parseObjcType(fromTypeName: ctx) else {
-            return
-        }
-        
-        let node = TypeNameNode(type: type)
-        node.sourceRuleContext = ctx
-        context.addChildNode(node)
-    }
-    
-    override func enterGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) {
-        mapper.pushTemporaryException(forRuleType: ObjectiveCParser.ProtocolListContext.self)
-    }
-    
-    override func exitGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) {
-        mapper.popTemporaryException()
-    }
-    
-    override func enterNullabilitySpecifier(_ ctx: ObjectiveCParser.NullabilitySpecifierContext) {
-        let spec = NullabilitySpecifier(name: ctx.getText())
-        spec.sourceRuleContext = ctx
-        context.addChildNode(spec)
-    }
-    
-    override func enterKeywordDeclarator(_ ctx: ObjectiveCParser.KeywordDeclaratorContext) {
-        guard let node = context.currentContextNode(as: KeywordDeclarator.self) else {
-            return
-        }
-        
-        let selectorIdent =
-            (ctx.selector()?.identifier()).map { ctx -> Identifier in
-                let node = Identifier(name: ctx.getText())
-                node.sourceRuleContext = ctx
-                return node
-            }
-        
-        let ident =
-            ctx.identifier().map { ctx -> Identifier in
-                let node = Identifier(name: ctx.getText())
-                node.sourceRuleContext = ctx
-                return node
-            }
-        
-        if let ident = selectorIdent {
-            node.addChild(ident)
-        }
-        if let ident = ident {
-            node.addChild(ident)
-        }
-    }
-    
-    // MARK: - Method Declaration
-    override func enterMethodDeclaration(_ ctx: ObjectiveCParser.MethodDeclarationContext) {
-        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
-            return
-        }
-        
-        node.isOptionalMethod = inOptionalContext
-        node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDeclarationContext
-    }
-    
-    override func enterMethodDefinition(_ ctx: ObjectiveCParser.MethodDefinitionContext) {
-        guard let node = context.currentContextNode(as: MethodDefinition.self) else {
-            return
-        }
-        
-        node.isClassMethod = ctx.parent is ObjectiveCParser.ClassMethodDefinitionContext
-        
-        let methodBody = MethodBody()
-        
-        methodBody.sourceRuleContext = ctx
-        methodBody.statements = ctx.compoundStatement()
-        
-        node.body = methodBody
-    }
-    
-    override func enterMethodSelector(_ ctx: ObjectiveCParser.MethodSelectorContext) {
-        if let selIdentifier = ctx.selector()?.identifier() {
-            let node = Identifier(name: selIdentifier.getText())
-            node.sourceRuleContext = ctx
-            context.addChildNode(node)
-        }
-    }
-    
-    override func enterTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
-        guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
-            return
-        }
-        
-        guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
-            return
-        }
-        
-        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
-            guard let directDeclarator = typeDeclarator.directDeclarator() else {
-                continue
-            }
-            guard let identifier = directDeclarator.identifier() else {
-                continue
-            }
-            
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            typedefNode.addChild(identifierNode)
-        }
-    }
-    
-    override func exitTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
-        guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
-            return
-        }
-        
-        guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
-            return
-        }
-        guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
-            return
-        }
-        
-        // Detect block types
-        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
-            guard let directDeclarator = typeDeclarator.directDeclarator() else {
-                continue
-            }
-            guard let identifier = directDeclarator.identifier() else {
-                continue
-            }
-            
-            guard let type = ObjcParserListener.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
-                                                              typeDeclarator: typeDeclarator) else
-            {
-                continue
-            }
-            
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            typedefNode.addChild(identifierNode)
-            
-            let typeNameNode = TypeNameNode(type: type)
-            typeNameNode.sourceRuleContext = typeDeclarator
-            typedefNode.addChild(typeNameNode)
-        }
-    }
-    
-    override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
-        for typeVariableDeclaratorOrName in ctx.typeVariableDeclaratorOrName() {
-            guard let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
-                continue
-            }
-            
-            let typeNameNode = TypeNameNode(type: type)
-            typeNameNode.sourceRuleContext = typeVariableDeclaratorOrName
-            context.addChildNode(typeNameNode)
-        }
     }
 }
 

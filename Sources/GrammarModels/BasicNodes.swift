@@ -34,17 +34,6 @@ public class Identifier: ASTNode {
     }
 }
 
-public extension ASTNodeRef where Node == Identifier {
-    public var name: String? {
-        switch self {
-        case .valid(let node):
-            return node.name
-        case .invalid:
-            return nil
-        }
-    }
-}
-
 /// A node that represents a special keyword-type token
 public class KeywordNode: ASTNode {
     public var keyword: Keyword
@@ -53,16 +42,5 @@ public class KeywordNode: ASTNode {
         self.keyword = keyword
         
         super.init(location: location)
-    }
-}
-
-public extension ASTNodeRef where Node == KeywordNode {
-    public var name: String? {
-        switch self {
-        case .valid(let node):
-            return node.keyword.rawValue
-        case .invalid:
-            return nil
-        }
     }
 }
