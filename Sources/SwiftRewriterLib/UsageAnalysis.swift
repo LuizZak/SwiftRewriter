@@ -94,12 +94,3 @@ public struct MemberUsage {
     /// points to the actual member name.
     public var expression: PostfixExpression
 }
-
-/*
- let analyzer = UsageAnalysis(in: intentions)
- let usages = analyzer.findUsages(of: methodIntention)
- 
- usages[0].method
- usages[0].expression
- 
- */
