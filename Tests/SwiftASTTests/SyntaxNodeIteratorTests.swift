@@ -31,6 +31,15 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
     
+    func testSizeOf() {
+        assertExpression(.sizeof(.identifier("a")),
+                         iteratesAs: [
+                            Expression.sizeof(.identifier("a")),
+                            Expression.identifier("a")
+            ]
+        )
+    }
+    
     func testPrefix() {
         assertExpression(.prefix(op: .negate, .identifier("a")),
                          iteratesAs: [

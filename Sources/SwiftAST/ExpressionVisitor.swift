@@ -36,6 +36,12 @@ public protocol ExpressionVisitor {
     /// - Returns: Result of visiting this unary operation node
     func visitUnary(_ exp: UnaryExpression) -> ExprResult
     
+    /// Visits a sizeof expression
+    ///
+    /// - Parameter exp: Expression to visit
+    /// - Returns: Result of visiting the size of expression
+    func visitSizeOf(_ exp: SizeOfExpression) -> ExprResult
+    
     /// Visits a prefix operation node
     ///
     /// - Parameters:

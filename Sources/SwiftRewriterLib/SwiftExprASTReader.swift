@@ -131,6 +131,25 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             
             return .unary(op: swiftOp, exp)
         }
+        // sizeof(<expr>) / sizeof(<type>)
+        if ctx.SIZEOF() != nil {
+            if let type = ctx.typeSpecifier() {
+                guard let typeString = VarDeclarationTypeExtractor.extract(from: type) else {
+                    return .unknown(UnknownASTContext(context: ctx.getText()))
+                }
+                guard let type = try? ObjcParser(string: typeString).parseObjcType() else {
+                    return .unknown(UnknownASTContext(context: ctx.getText()))
+                }
+                
+                let swiftType =
+                    TypeMapper(context: TypeConstructionContext())
+                        .swiftType(forObjcType: type)
+                
+                return .sizeof(type: swiftType)
+            } else if let unary = ctx.unaryExpression()?.accept(self) {
+                return .sizeof(unary)
+            }
+        }
         
         return acceptFirst(from: ctx.postfixExpression())
     }
@@ -229,7 +248,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 }
                 
                 for (j, expression) in expressions.expression().enumerated() {
-                    let exp = expression.accept(self) ?? .unknown(UnknownASTContext(context: expression))
+                    let exp = expression.accept(self) ?? .unknown(UnknownASTContext(context: expression.getText()))
                     
                     // Every argument after the first one is unlabeled
                     if j == 0 && i > 0 {
@@ -288,8 +307,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                     return nil
                 }
                 
-                let key = castExpression.accept(self) ?? .unknown(UnknownASTContext(context: castExpression))
-                let value = expression.accept(self) ?? .unknown(UnknownASTContext(context: expression))
+                let key = castExpression.accept(self) ?? .unknown(UnknownASTContext(context: castExpression.getText()))
+                let value = expression.accept(self) ?? .unknown(UnknownASTContext(context: expression.getText()))
                 
                 return ExpressionDictionaryPair(key: key, value: value)
             }
@@ -335,7 +354,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                         }
                         
                         let swiftType =
-                            TypeMapper(context: TypeConstructionContext()).swiftType(forObjcType: type)
+                            TypeMapper(context: TypeConstructionContext())
+                                .swiftType(forObjcType: type)
                         
                         return BlockParameter(name: name, type: swiftType)
                     }
@@ -349,7 +369,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         
         let swiftReturnType =
-            TypeMapper(context: TypeConstructionContext()).swiftType(forObjcType: returnType)
+            TypeMapper(context: TypeConstructionContext())
+                .swiftType(forObjcType: returnType)
         
         return .block(parameters: parameters, return: swiftReturnType, body: body)
     }
@@ -442,7 +463,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             if let exp = ctx.expression() {
                 let astReader = SwiftExprASTReader()
                 guard let expEnum = exp.accept(astReader) else {
-                    return .unlabeled(.unknown(UnknownASTContext(context: exp)))
+                    return .unlabeled(.unknown(UnknownASTContext(context: exp.getText())))
                 }
                 
                 return .unlabeled(expEnum)

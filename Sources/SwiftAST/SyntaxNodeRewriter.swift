@@ -44,6 +44,20 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         return exp
     }
     
+    /// Visits a sizeof expression
+    ///
+    /// - Parameter exp: A SizeOfExpression to visit
+    /// - Returns: Result of visiting the sizeof expression node
+    public func visitSizeOf(_ exp: SizeOfExpression) -> Expression {
+        switch exp.value {
+        case .expression(let innerExp):
+            exp.value = .expression(innerExp.accept(self))
+        case .type: break
+        }
+        
+        return exp
+    }
+    
     /// Visits a prefix operation node
     ///
     /// - Parameter exp: A PrefixExpression to visit

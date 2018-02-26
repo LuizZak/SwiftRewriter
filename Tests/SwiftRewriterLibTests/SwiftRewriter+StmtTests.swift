@@ -277,6 +277,17 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testEmitSizeOf() throws {
+        try assertSingleStatement(
+            objc: "sizeof(int)",
+            swift: "MemoryLayout<Int>.size"
+        )
+        try assertSingleStatement(
+            objc: "sizeof(abc)",
+            swift: "MemoryLayout.size(ofValue: abc)"
+        )
+    }
+    
     func testSingleBlockArgument() throws {
         try assertObjcParse(
             objc: """

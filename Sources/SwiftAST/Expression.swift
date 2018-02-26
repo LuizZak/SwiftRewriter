@@ -274,6 +274,66 @@ extension Expression {
     }
 }
 
+public class SizeOfExpression: Expression {
+    public var value: Value {
+        didSet {
+            switch oldValue {
+            case .expression(let exp):
+                exp.parent = nil
+            case .type: break
+            }
+            
+            switch value {
+            case .expression(let exp):
+                exp.parent = self
+            case .type: break
+            }
+        }
+    }
+    
+    public override var subExpressions: [Expression] {
+        switch value {
+        case .expression(let exp):
+            return [exp]
+        case .type:
+            return []
+        }
+    }
+    
+    public init(value: Value) {
+        self.value = value
+        super.init()
+    }
+    
+    public override func accept<V>(_ visitor: V) -> V.ExprResult where V : ExpressionVisitor {
+        return visitor.visitSizeOf(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as SizeOfExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
+    public static func ==(lhs: SizeOfExpression, rhs: SizeOfExpression) -> Bool {
+        return lhs.value == rhs.value
+    }
+    
+    /// Inner expression value for this SizeOfExpression
+    public enum Value: Equatable {
+        case type(SwiftType)
+        case expression(Expression)
+    }
+}
+extension Expression {
+    public var asSizeOf: SizeOfExpression? {
+        return cast()
+    }
+}
+
 public class PrefixExpression: Expression {
     public var op: SwiftOperator
     public var exp: Expression {
@@ -905,6 +965,14 @@ public extension Expression {
     
     public static func unary(op: SwiftOperator, _ exp: Expression) -> UnaryExpression {
         return UnaryExpression(op: op, exp: exp)
+    }
+    
+    public static func sizeof(_ exp: Expression) -> SizeOfExpression {
+        return SizeOfExpression(value: .expression(exp))
+    }
+    
+    public static func sizeof(type: SwiftType) -> SizeOfExpression {
+        return SizeOfExpression(value: .type(type))
     }
     
     public static func prefix(op: SwiftOperator, _ exp: Expression) -> PrefixExpression {
