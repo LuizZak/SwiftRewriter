@@ -121,6 +121,10 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
                                           preferredStyle:(UIAlertControllerStyle)preferredStyle;
                 """)
             .converts(toInitializer: "init(title: String?, message: String?, preferredStyle: UIAlertControllerStyle)")
+        
+        testThat(typeName: "UIButton", sut: sut)
+            .method(withObjcSignature: "+ (instancetype)buttonWithType:(UIButtonType)buttonType;")
+            .converts(toInitializer: "init(type buttonType: UIButtonType)")
     }
 }
 
@@ -213,6 +217,7 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
                 testCase.recordFailure(withDescription: """
                     Failed to generate initializer: No initializers where found \
                     on target type.
+                    Resulting type: \(dumpType())
                     """
                     , inFile: file, atLine: line, expected: false)
                 return
@@ -233,6 +238,7 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
                 testCase.recordFailure(withDescription: """
                     Failed to generate initializer: No initializers where found \
                     on target type.
+                    Resulting type: \(dumpType())
                     """
                     , inFile: file, atLine: line, expected: false)
                 return
@@ -267,6 +273,7 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
                 testCase.recordFailure(withDescription: """
                     Failed to generate method: No methods where found on \
                     target type.
+                    Resulting type: \(dumpType())
                     """
                     , inFile: file, atLine: line, expected: false)
                 return
@@ -325,6 +332,13 @@ private class ClangifyMethodSignaturesIntentionPassTestBuilder {
             output += ")"
             
             return output
+        }
+        
+        func dumpType() -> String {
+            return
+                type.methods
+                    .map { "Method: \($0.signature)" }
+                    .joined(separator: "\n")
         }
     }
 }

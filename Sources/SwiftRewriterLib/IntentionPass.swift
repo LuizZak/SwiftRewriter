@@ -560,11 +560,6 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
                 break staticHandler
             }
             
-            // `Thing` must match the selector
-            guard splitOnWith[1].lowercasedFirstLetter == method.signature.parameters[0].name else {
-                break staticHandler
-            }
-            
             // Method's return type must match its containing type, or an
             // `instancetype`
             let returnType = method.signature.returnType.deepUnwrapped
