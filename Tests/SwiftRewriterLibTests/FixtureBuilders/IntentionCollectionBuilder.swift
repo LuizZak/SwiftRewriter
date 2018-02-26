@@ -40,9 +40,22 @@ class FileIntentionBuilder {
     
     @discardableResult
     func createClass(withName name: String, initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
-        let cls = ClassGenerationIntention(typeName: name)
+        let classIntention = ClassGenerationIntention(typeName: name)
+        let builder = TypeBuilder(targetType: classIntention)
         
-        let builder = TypeBuilder(targetType: cls)
+        initializer(builder)
+        
+        let result = builder.build()
+        
+        intention.addType(result)
+        
+        return self
+    }
+    
+    @discardableResult
+    func createEnum(withName name: String, rawValue: SwiftType, initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+        let enumIntention = EnumGenerationIntention(typeName: name, rawValueType: rawValue)
+        let builder = EnumTypeBuilder(targetEnum: enumIntention)
         
         initializer(builder)
         
@@ -109,3 +122,23 @@ class TypeBuilder {
     }
 }
 
+class EnumTypeBuilder {
+    var targetEnum: EnumGenerationIntention
+    
+    init(targetEnum: EnumGenerationIntention) {
+        self.targetEnum = targetEnum
+    }
+    
+    @discardableResult
+    func createCase(name: String, expression: Expression? = nil) -> EnumTypeBuilder {
+        let caseIntention = EnumCaseGenerationIntention(name: name, expression: expression)
+        
+        targetEnum.addCase(caseIntention)
+        
+        return self
+    }
+    
+    func build() -> EnumGenerationIntention {
+        return targetEnum
+    }
+}

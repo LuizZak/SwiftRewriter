@@ -111,6 +111,8 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         XCTAssertEqual(usages.count, 2)
     }
     
+    /*
+     TODO: Make type resolving look into enums' staitc cases
     func testFindPropertyUsages() {
         let builder = IntentionCollectionBuilder()
         
@@ -151,4 +153,41 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         
         XCTAssertEqual(usages.count, 1)
     }
+    
+    func testFindEnumMemberUsage() {
+        let builder = IntentionCollectionBuilder()
+        
+        let body: CompoundStatement = [
+            // B.B_a
+            .expression(
+                .postfix(
+                    .identifier("B"),
+                    .member("B_a")
+                )
+            )
+        ]
+        
+        builder
+            .createFile(named: "A.m") { file in
+                file
+                    .createClass(withName: "A") { builder in
+                        builder.createVoidMethod(named: "f1") {
+                            return body
+                        }
+                    }
+                    .createEnum(withName: "B", rawValue: .int) { builder in
+                        builder.createCase(name: "B_a")
+                }
+            }
+        
+        let intentions = builder.build(typeChecked: true)
+        
+        let sut = DefaultUsageAnalyzer(intentions: intentions)
+        let property = intentions.fileIntentions()[0].enumIntentions[0]
+        
+        let usages = sut.findUsages(of: property)
+        
+        XCTAssertEqual(usages.count, 1)
+    }
+    */
 }

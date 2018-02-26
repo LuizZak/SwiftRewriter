@@ -32,21 +32,21 @@ public class FileGenerationIntention: Intention {
     }
     
     /// Gets the protocols to create on this file.
-    var protocolIntentions: [ProtocolGenerationIntention] {
+    public var protocolIntentions: [ProtocolGenerationIntention] {
         return typeIntentions.compactMap { $0 as? ProtocolGenerationIntention }
     }
     
     /// Gets the enums to create on this file.
-    private(set) var enumIntentions: [EnumGenerationIntention] = []
+    public private(set) var enumIntentions: [EnumGenerationIntention] = []
     
     /// Gets the typealias intentions to create on this file.
-    private(set) var typealiasIntentions: [TypealiasIntention] = []
+    public private(set) var typealiasIntentions: [TypealiasIntention] = []
     
     /// Gets the global functions to create on this file.
-    private(set) var globalFunctionIntentions: [GlobalFunctionGenerationIntention] = []
+    public private(set) var globalFunctionIntentions: [GlobalFunctionGenerationIntention] = []
     
     /// Gets the global variables to create on this file.
-    private(set) var globalVariableIntentions: [GlobalVariableGenerationIntention] = []
+    public private(set) var globalVariableIntentions: [GlobalVariableGenerationIntention] = []
     
     public var source: ASTNode?
     
