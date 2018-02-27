@@ -107,8 +107,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             method.history
                 .recordChange(tag: historyTag,
                               description: """
-                    Swiftified signature from \(TypeFormatter.asString(signature: signature)) \
-                    to \(TypeFormatter.asString(signature: method.signature))
+                    Swiftified signature from \(TypeFormatter.asString(signature: signature, includeName: true)) \
+                    to \(TypeFormatter.asString(signature: method.signature, includeName: true))
                     """, relatedIntentions: [])
             
             return
@@ -136,8 +136,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         method.history
             .recordChange(tag: historyTag,
                           description: """
-            Swiftified signature from \(TypeFormatter.asString(signature: signature)) \
-            to \(TypeFormatter.asString(signature: method.signature))
+            Swiftified signature from \(TypeFormatter.asString(signature: signature, includeName: true)) \
+            to \(TypeFormatter.asString(signature: method.signature, includeName: true))
             """, relatedIntentions: [])
     }
 }

@@ -96,7 +96,11 @@ func mergeTypes(from first: KnownType,
     // Properties
     for prop in first.knownProperties {
         if !second.hasProperty(named: prop.name) {
-            second.generateProperty(from: prop)
+            let generated = second.generateProperty(from: prop)
+            
+            if let historic = prop as? Historic {
+                generated.history.mergeHistories(historic.history)
+            }
         }
     }
     
@@ -119,9 +123,13 @@ func mergeMethodSignatures(from first: KnownType,
         if let existing = second.method(matchingSelector: knownMethod.signature) {
             mergeMethods(knownMethod, into: existing)
         } else {
-            second
-                .generateMethod(from: knownMethod)
-                .history.recordCreation(description: "Merged existing method of separate declaration [\(first.origin)]")
+            let generated =
+                second
+                    .generateMethod(from: knownMethod)
+            
+            if let historic = knownMethod as? Historic {
+                generated.history.mergeHistories(historic.history)
+            }
         }
     }
 }

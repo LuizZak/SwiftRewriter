@@ -35,8 +35,8 @@ public class ObjcParser {
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [String] = []
     
-    public convenience init(string: String) {
-        self.init(source: StringCodeSource(source: string))
+    public convenience init(string: String, fileName: String = "") {
+        self.init(source: StringCodeSource(source: string, fileName: fileName))
     }
     
     public init(source: CodeSource) {

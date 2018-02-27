@@ -140,7 +140,7 @@ public class SwiftRewriter {
         
         let processedSrc = applyPreprocessors(source: src)
         
-        let parser = ObjcParser(string: processedSrc)
+        let parser = ObjcParser(string: processedSrc, fileName: src.fileName)
         parsers.append(parser)
         parser.diagnostics = diagnostics
         
@@ -391,6 +391,8 @@ public class SwiftRewriter {
         let intent =
             ClassGenerationIntention(typeName: name, source: node)
         
+        recordSourceHistory(intention: intent, node: node)
+        
         context
             .findContext(ofType: FileGenerationIntention.self)?
             .addType(intent)
@@ -412,6 +414,8 @@ public class SwiftRewriter {
             ClassExtensionGenerationIntention(typeName: name, source: node)
         intent.categoryName = node.categoryName?.name
         
+        recordSourceHistory(intention: intent, node: node)
+        
         context
             .findContext(ofType: FileGenerationIntention.self)?
             .addType(intent)
@@ -431,6 +435,8 @@ public class SwiftRewriter {
         
         let intent =
             ProtocolGenerationIntention(typeName: name, source: node)
+        
+        recordSourceHistory(intention: intent, node: node)
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
@@ -486,6 +492,8 @@ public class SwiftRewriter {
                                                     attributes: attributes,
                                                     source: node)
             
+            recordSourceHistory(intention: prop, node: node)
+            
             prop.isOptional = node.isOptionalProperty
             
             prop.inNonnullContext = isNodeInNonnullContext(node)
@@ -497,6 +505,8 @@ public class SwiftRewriter {
                                             storage: storage,
                                             attributes: attributes,
                                             source: node)
+            
+            recordSourceHistory(intention: prop, node: node)
             
             prop.inNonnullContext = isNodeInNonnullContext(node)
             
@@ -528,6 +538,8 @@ public class SwiftRewriter {
         }
         
         method.inNonnullContext = isNodeInNonnullContext(node)
+        
+        recordSourceHistory(intention: method, node: node)
         
         if let body = node.body, let statements = body.statements {
             let reader = SwiftASTReader()
@@ -595,6 +607,8 @@ public class SwiftRewriter {
         
         ivar.inNonnullContext = isNodeInNonnullContext(node)
         
+        recordSourceHistory(intention: ivar, node: node)
+        
         classCtx.addInstanceVariable(ivar)
     }
     
@@ -622,6 +636,8 @@ public class SwiftRewriter {
             .findContext(ofType: FileGenerationIntention.self)?
             .addType(enumIntention)
         
+        recordSourceHistory(intention: enumIntention, node: node)
+        
         context.pushContext(enumIntention)
     }
     
@@ -645,6 +661,8 @@ public class SwiftRewriter {
             enumCase.expression = exp
         }
         
+        recordSourceHistory(intention: enumCase, node: node)
+        
         ctx.addCase(enumCase)
     }
     
@@ -654,6 +672,15 @@ public class SwiftRewriter {
         }
         
         context.popContext() // EnumGenerationIntention
+    }
+    
+    private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
+        guard let file = node.originalSource?.fileName, let rule = node.sourceRuleContext?.start else {
+            return
+        }
+        
+        intention.history
+            .recordCreation(description: "\(file) line \(rule.getLine()) column \(rule.getCharPositionInLine())")
     }
     
     // MARK: -

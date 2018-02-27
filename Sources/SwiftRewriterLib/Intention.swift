@@ -1,18 +1,21 @@
 import GrammarModels
 import SwiftAST
 
+/// Defines an object that features a history tracker instance
+public protocol Historic {
+    /// Gets the history tracker for this intention
+    var history: IntentionHistory { get }
+}
+
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
-public protocol Intention: class, Context {
+public protocol Intention: class, Context, Historic {
     /// Reference to an AST node that originated this source-code generation
     /// intention
     var source: ASTNode? { get }
     
     /// Parent for this intention
     var parent: Intention? { get }
-    
-    /// Gets the history tracker for this intention
-    var history: IntentionHistory { get }
 }
 
 /// Tracks changes made to an intention as it is read by AST readers and modified
