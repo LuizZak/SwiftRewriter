@@ -42,7 +42,7 @@ public class SwiftRewriter {
     
     public convenience init(input: InputSourcesProvider, output: WriterOutput) {
         self.init(input: input, output: output,
-                  intentionPassesSource: DefaultIntentionPassSource(intentionPasses: []))
+                  intentionPassesSource: ArrayIntentionPassSource(intentionPasses: []))
     }
     
     public init(input: InputSourcesProvider, output: WriterOutput,
@@ -91,8 +91,7 @@ public class SwiftRewriter {
         
         let typeResolverInvoker = DefaultTypeResolverInvoker(typeResolver: typeResolver)
         let context =
-            IntentionPassContext(intentions: intentionCollection,
-                                 typeSystem: typeSystem,
+            IntentionPassContext(typeSystem: typeSystem,
                                  typeResolverInvoker: typeResolverInvoker)
         
         // Make a pre-type resolve before applying passes

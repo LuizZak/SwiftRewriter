@@ -184,8 +184,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         let resolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
         let invoker = DefaultTypeResolverInvoker(typeResolver: resolver)
         let context =
-            IntentionPassContext(intentions: intentions,
-                                 typeSystem: DefaultTypeSystem(),
+            IntentionPassContext(typeSystem: DefaultTypeSystem(),
                                  typeResolverInvoker: invoker)
         
         sut.apply(on: intentions, context: context)

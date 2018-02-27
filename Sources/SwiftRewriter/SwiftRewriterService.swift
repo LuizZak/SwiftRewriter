@@ -2,6 +2,7 @@ import Foundation
 import SwiftRewriterLib
 import ExpressionPasses
 import SourcePreprocessors
+import IntentionPasses
 
 /// Protocol for enabling Swift rewriting service from CLI
 public protocol SwiftRewriterService {
@@ -27,6 +28,8 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
         converter.syntaxNodeRewriters.append(FoundationExpressionPass())
         converter.syntaxNodeRewriters.append(UIKitExpressionPass())
+        
+        converter.intentionPassesSource = DefaultIntentionPasses()
         
         try converter.rewrite()
         

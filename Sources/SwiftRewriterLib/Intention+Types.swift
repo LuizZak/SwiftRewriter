@@ -234,6 +234,13 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     public var mode: Mode = .asField
     public var attributes: [PropertyAttribute]
     
+    public convenience init(name: String, type: SwiftType, attributes: [PropertyAttribute],
+                            accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        self.init(name: name, storage: storage, attributes: attributes,
+                  accessLevel: accessLevel, source: source)
+    }
+    
     public init(name: String, storage: ValueStorage, attributes: [PropertyAttribute],
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.name = name

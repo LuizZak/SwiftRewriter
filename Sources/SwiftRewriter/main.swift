@@ -2,8 +2,6 @@ import Foundation
 import Utility
 import Console
 import SwiftRewriterLib
-import ExpressionPasses
-import IntentionPasses
 
 let arguments = Array(ProcessInfo.processInfo.arguments.dropFirst())
 
@@ -20,31 +18,10 @@ let colorArg: OptionArgument<Bool> =
 do {
     if let result = try? parser.parse(arguments) {
         if let files = result.get(filesArg) {
-            let input = FileInputProvider(files: files)
             let output = StdoutWriterOutput(colorize: result.get(colorArg) ?? false)
             
-            let converter = SwiftRewriter(input: input, output: output)
-            
-            converter.syntaxNodeRewriters.append(AllocInitExpressionPass())
-            converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
-            converter.syntaxNodeRewriters.append(FoundationExpressionPass())
-            converter.syntaxNodeRewriters.append(UIKitExpressionPass())
-            
-            converter.intentionPassesSource = DefaultIntentionPasses()
-            
-            try converter.rewrite()
-            
-            // Print diagnostics
-            for diag in converter.diagnostics.diagnostics {
-                switch diag {
-                case .note:
-                    print("// Note: \(diag)")
-                case .warning:
-                    print("// Warning: \(diag)")
-                case .error:
-                    print("// Error: \(diag)")
-                }
-            }
+            let rewriter: SwiftRewriterService = SwiftRewriterServiceImpl(output: output)
+            try rewriter.rewrite(files: files.map { URL(fileURLWithPath: $0) })
         } else {
             throw Utility.ArgumentParserError.expectedValue(option: "<files>")
         }

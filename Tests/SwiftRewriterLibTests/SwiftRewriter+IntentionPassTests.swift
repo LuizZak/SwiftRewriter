@@ -39,7 +39,7 @@ class SwiftRewriter_IntentionPassTests: XCTestCase {
         
         let rewriter = SwiftRewriter(input: testInput, output: testOutput)
         rewriter.intentionPassesSource =
-            DefaultIntentionPassSource(intentionPasses: [pass])
+            ArrayIntentionPassSource(intentionPasses: [pass])
         
         try rewriter.rewrite()
         

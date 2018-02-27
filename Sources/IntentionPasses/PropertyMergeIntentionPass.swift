@@ -10,20 +10,20 @@ public class PropertyMergeIntentionPass: IntentionPass {
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         for file in intentionCollection.fileIntentions() {
             
-            for cls in file.typeIntentions.compactMap({ $0 as? ClassGenerationIntention }) {
+            for cls in file.typeIntentions.compactMap({ $0 as? BaseClassIntention }) {
                 apply(on: cls)
             }
         }
     }
     
-    func apply(on classIntention: ClassGenerationIntention) {
+    func apply(on classIntention: BaseClassIntention) {
         let properties = collectProperties(fromClass: classIntention)
         let methods = collectMethods(fromClass: classIntention)
         
         // Match property intentions with the appropriately named methods
         var matches: [PropertySet] = []
         
-        for property in properties where property.name.count > 1 {
+        for property in properties {
             let expectedName = "set" + property.name.uppercasedFirstLetter
             
             // Getters
@@ -59,11 +59,11 @@ public class PropertyMergeIntentionPass: IntentionPass {
         }
     }
     
-    func collectProperties(fromClass classIntention: ClassGenerationIntention) -> [PropertyGenerationIntention] {
+    func collectProperties(fromClass classIntention: BaseClassIntention) -> [PropertyGenerationIntention] {
         return classIntention.properties
     }
     
-    func collectMethods(fromClass classIntention: ClassGenerationIntention) -> [MethodGenerationIntention] {
+    func collectMethods(fromClass classIntention: BaseClassIntention) -> [MethodGenerationIntention] {
         return classIntention.methods
     }
     
@@ -71,7 +71,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     /// getter/setter definitions, reworks the intented signatures on the class
     /// definition such that properties are correctly flattened with their non-synthesized
     /// getter/setters into `var myVar { get set }` Swift computed properties.
-    private func joinPropertySet(_ propertySet: PropertySet, on classIntention: ClassGenerationIntention) {
+    private func joinPropertySet(_ propertySet: PropertySet, on classIntention: BaseClassIntention) {
         switch (propertySet.getter, propertySet.setter) {
         case let (getter?, setter?):
             if let getterBody = getter.functionBody, let setterBody = setter.functionBody {
@@ -82,6 +82,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 
                 propertySet.property.mode =
                     .property(get: getterBody, set: setter)
+            } else {
+                propertySet.property.mode =
+                    .property(get: FunctionBodyIntention(body: []),
+                              set: PropertyGenerationIntention.Setter(valueIdentifier: "value",
+                                                                      body: FunctionBodyIntention(body: []))
+                    )
             }
             
             // Remove the original method intentions
@@ -91,6 +97,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
             if let body = getter.functionBody {
                 propertySet.property.mode = .computed(body)
+            } else {
+                propertySet.property.mode = .computed(FunctionBodyIntention(body: []))
             }
             
             // Remove the original method intention

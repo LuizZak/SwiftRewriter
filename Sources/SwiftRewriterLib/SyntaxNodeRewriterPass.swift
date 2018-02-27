@@ -6,9 +6,16 @@ public struct SyntaxNodeRewriterPassContext {
         SyntaxNodeRewriterPassContext(typeSystem: DefaultTypeSystem())
     
     public let typeSystem: TypeSystem
+    public let typeResolver: ExpressionTypeResolver
     
     public init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
+        self.typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+    }
+    
+    public init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver) {
+        self.typeSystem = typeSystem
+        self.typeResolver = typeResolver
     }
 }
 

@@ -13,6 +13,7 @@ class StringTests: XCTestCase {
     }
     
     func testLowercasedFirstLetter() {
+        XCTAssertEqual("a", "A".lowercasedFirstLetter)
         XCTAssertEqual("abc", "Abc".lowercasedFirstLetter)
         XCTAssertEqual("abc", "abc".lowercasedFirstLetter)
         XCTAssertEqual("ábc", "Ábc".lowercasedFirstLetter)
@@ -22,6 +23,7 @@ class StringTests: XCTestCase {
     }
     
     func testUppercasedFirstLetter() {
+        XCTAssertEqual("A", "a".uppercasedFirstLetter)
         XCTAssertEqual("Abc", "abc".uppercasedFirstLetter)
         XCTAssertEqual("Abc", "Abc".uppercasedFirstLetter)
         XCTAssertEqual("Ábc", "ábc".uppercasedFirstLetter)
