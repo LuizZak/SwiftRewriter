@@ -259,9 +259,9 @@ public class SwiftWriter {
             
             for method in cls.methods {
                 // Dealloc methods are treated differently
-                // TODO: Create a separate GenerationIntention entirely for init
-                // and dealloc methods and detect them during SwiftRewriter's
-                // parsing with IntentionPass's instead of postponing to here.
+                // TODO: Create a separate GenerationIntention entirely for dealloc
+                // methods and detect them during SwiftRewriter's parsing with
+                // IntentionPass's instead of postponing to here.
                 if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
                     outputDeinit(method, selfType: cls, target: target)
                 } else {
