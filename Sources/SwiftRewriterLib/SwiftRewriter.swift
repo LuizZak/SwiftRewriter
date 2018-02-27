@@ -128,7 +128,7 @@ public class SwiftRewriter {
         var path = source.sourceName()
         path = (path as NSString).deletingPathExtension + ".swift"
         
-        let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), filePath: path)
+        let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         intentionCollection.addIntention(fileIntent)
         context.pushContext(fileIntent)
         context.pushContext(AssumeNonnullContext(isNonnullOn: false))

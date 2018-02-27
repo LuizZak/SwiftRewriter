@@ -16,6 +16,8 @@ public class FromSourceIntention: NonNullScopedIntention {
     /// macros.
     public var inNonnullContext: Bool = false
     
+    public let history: IntentionHistory = IntentionHistoryTracker()
+    
     public init(accessLevel: AccessLevel, source: ASTNode?) {
         self.accessLevel = accessLevel
         self.source = source

@@ -5,7 +5,7 @@ import IntentionPasses
 class PropertyMergeIntentionPassTests: XCTestCase {
     func testMerge() {
         let intentions = IntentionCollection()
-        let file = FileGenerationIntention(sourcePath: "a", filePath: "a")
+        let file = FileGenerationIntention(sourcePath: "a", targetPath: "a")
         intentions.addIntention(file)
         let cls = ClassGenerationIntention(typeName: "A")
         cls.addProperty(PropertyGenerationIntention(name: "a", type: .int, attributes: []))
@@ -31,7 +31,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     
     func testMergeReadonlyWithGetter() {
         let intentions = IntentionCollection()
-        let file = FileGenerationIntention(sourcePath: "a", filePath: "a")
+        let file = FileGenerationIntention(sourcePath: "a", targetPath: "a")
         intentions.addIntention(file)
         let cls = ClassGenerationIntention(typeName: "A")
         cls.addProperty(PropertyGenerationIntention(name: "a", type: .int, attributes: [.attribute("readonly")]))
@@ -55,7 +55,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     
     func testMergeCategories() {
         let intentions = IntentionCollection()
-        let file = FileGenerationIntention(sourcePath: "a", filePath: "a")
+        let file = FileGenerationIntention(sourcePath: "a", targetPath: "a")
         intentions.addIntention(file)
         let cls = ClassExtensionGenerationIntention(typeName: "A")
         cls.addProperty(PropertyGenerationIntention(name: "a", type: .int, attributes: [.attribute("readonly")]))
@@ -75,6 +75,32 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         default:
             XCTFail("Unexpected property mode \(cls.properties[0].mode)")
         }
+    }
+    
+    // Checks if PropertyMergeIntentionPass properly records history entries on
+    // the merged properties and the types the properties are contained within.
+    func testHistoryTracking() {
+        let intentions = IntentionCollection()
+        let file = FileGenerationIntention(sourcePath: "a", targetPath: "a")
+        intentions.addIntention(file)
+        let cls = ClassGenerationIntention(typeName: "A")
+        cls.addProperty(PropertyGenerationIntention(name: "a", type: .int, attributes: []))
+        cls.addMethod(MethodGenerationIntention(isStatic: false, name: "a", returnType: .int, parameters: []))
+        cls.addMethod(MethodGenerationIntention(isStatic: false, name: "setA", returnType: .void,
+                                                parameters: [ParameterSignature(label: "_", name: "a", type: .int)]))
+        file.addType(cls)
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(
+            cls.history.summary,
+            "[PropertyMergeIntentionPass] Merging getter method A.a() -> Int and setter method A.setA(_ a: Int) into a computed property A.a: Int"
+        )
+        XCTAssertEqual(
+            cls.properties[0].history.summary,
+            "[PropertyMergeIntentionPass] Merging getter method A.a() -> Int and setter method A.setA(_ a: Int) into a computed property A.a: Int"
+        )
     }
 }
 

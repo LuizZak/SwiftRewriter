@@ -17,14 +17,3 @@ public struct DefaultIntentionPasses: IntentionPassSource {
         
     }
 }
-
-internal extension RangeReplaceableCollection where Index == Int {
-    mutating func remove(where predicate: (Element) -> Bool) {
-        for (i, item) in enumerated() {
-            if predicate(item) {
-                remove(at: i)
-                return
-            }
-        }
-    }
-}

@@ -35,7 +35,7 @@ class FileIntentionBuilder {
     var intention: FileGenerationIntention
     
     init(fileNamed name: String) {
-        intention = FileGenerationIntention(sourcePath: name, filePath: name)
+        intention = FileGenerationIntention(sourcePath: name, targetPath: name)
     }
     
     @discardableResult

@@ -7,7 +7,7 @@ public class FileGenerationIntention: Intention {
     public var sourcePath: String
     
     /// The intended output file path
-    public var filePath: String
+    public var targetPath: String
     
     /// Gets the types to create on this file.
     public private(set) var typeIntentions: [TypeGenerationIntention] = []
@@ -50,13 +50,17 @@ public class FileGenerationIntention: Intention {
     /// Gets the global variables to create on this file.
     public private(set) var globalVariableIntentions: [GlobalVariableGenerationIntention] = []
     
+    public let history: IntentionHistory = IntentionHistoryTracker()
+    
     public var source: ASTNode?
     
     weak public var parent: Intention?
     
-    public init(sourcePath: String, filePath: String) {
+    public init(sourcePath: String, targetPath: String) {
         self.sourcePath = sourcePath
-        self.filePath = filePath
+        self.targetPath = targetPath
+        
+        self.history.recordCreation(description: "Created from file \(sourcePath) to file \(targetPath)")
     }
     
     public func addType(_ intention: TypeGenerationIntention) {

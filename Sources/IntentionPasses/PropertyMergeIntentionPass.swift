@@ -1,8 +1,10 @@
 import SwiftRewriterLib
 import SwiftAST
 
-
 public class PropertyMergeIntentionPass: IntentionPass {
+    /// Textual tag this intention pass applies to history tracking entries.
+    public var historyTag: String = "\(PropertyMergeIntentionPass.self)"
+    
     public init() {
         
     }
@@ -93,6 +95,16 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // Remove the original method intentions
             classIntention.removeMethod(getter)
             classIntention.removeMethod(setter)
+            
+            classIntention
+                .history
+                .recordChange(tag: historyTag,
+                              description: """
+                              Merging getter method \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
+                              and setter method \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
+                              into a computed property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                              """, relatedIntentions: [])
+                .echoRecord(to: propertySet.property.history)
             
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
             if let body = getter.functionBody {

@@ -33,7 +33,7 @@ public class SwiftWriter {
     }
     
     private func outputFile(_ fileIntent: FileGenerationIntention) {
-        let file = output.createFile(path: fileIntent.filePath)
+        let file = output.createFile(path: fileIntent.targetPath)
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         let classExtensions = fileIntent.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }

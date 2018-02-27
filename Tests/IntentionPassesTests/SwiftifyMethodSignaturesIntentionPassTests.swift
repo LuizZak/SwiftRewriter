@@ -166,7 +166,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         intentions = IntentionCollection()
         
         type = TypeGenerationIntention(typeName: typeName)
-        let file = FileGenerationIntention(sourcePath: "", filePath: "")
+        let file = FileGenerationIntention(sourcePath: "", targetPath: "")
         file.addType(type)
         intentions.addIntention(file)
     }

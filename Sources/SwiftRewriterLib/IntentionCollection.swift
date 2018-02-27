@@ -32,7 +32,7 @@ public class IntentionCollection {
     }
     
     public func intentionFor(fileNamed name: String) -> FileGenerationIntention? {
-        return fileIntentions().first { $0.filePath == name }
+        return fileIntentions().first { $0.targetPath == name }
     }
     
     public func addIntention(_ intention: FileGenerationIntention) {
