@@ -16,10 +16,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         ])
                         .createMethod(named: "a", returnType: .int)
                 }.build()
-        
-        let sut = PropertyMergeIntentionPass()
-        
         let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -47,10 +45,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ParameterSignature(label: "_", name: "a", type: .int)
                             ])
                 }.build()
-        
-        let sut = PropertyMergeIntentionPass()
-        
         let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
@@ -69,14 +65,15 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     }
     
     func testMergeReadonlyWithGetter() {
-        let intentions = IntentionCollection()
-        let file = FileGenerationIntention(sourcePath: "a", targetPath: "a")
-        intentions.addIntention(file)
-        let cls = ClassGenerationIntention(typeName: "A")
-        cls.addProperty(PropertyGenerationIntention(name: "a", type: .int, attributes: [.attribute("readonly")]))
-        cls.addMethod(MethodGenerationIntention(isStatic: false, name: "a", returnType: .int, parameters: []))
-        file.addType(cls)
-        
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int,
+                                        attributes: [.attribute("readonly")])
+                        .createMethod(named: "a", returnType: .int)
+                }.build()
+        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))

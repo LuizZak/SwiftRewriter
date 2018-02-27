@@ -89,10 +89,10 @@ public class TypeBuilder {
     }
     
     @discardableResult
-    public func createProperty(named name: String, type: SwiftType) -> TypeBuilder {
+    public func createProperty(named name: String, type: SwiftType, attributes: [PropertyAttribute] = []) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
-        let prop = PropertyGenerationIntention(name: name, storage: storage, attributes: [])
+        let prop = PropertyGenerationIntention(name: name, storage: storage, attributes: attributes)
         
         targetType.addProperty(prop)
         
