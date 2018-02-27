@@ -58,4 +58,19 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual("extension A", TypeFormatter.asString(extension: extA))
         XCTAssertEqual("extension B (Category)", TypeFormatter.asString(extension: extB))
     }
+    
+    func testAsStringFunctionSignature() {
+        let sig1 = FunctionSignature(name: "abc", parameters: [], returnType: .int, isStatic: false)
+        let sig2 = FunctionSignature(name: "abc", parameters: [ParameterSignature(label: "a", name: "b", type: .float)], returnType: .void, isStatic: false)
+        
+        XCTAssertEqual("abc() -> Int", TypeFormatter.asString(signature: sig1, includeName: true))
+        XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1, includeName: false))
+        
+        XCTAssertEqual("abc(a b: Float)", TypeFormatter.asString(signature: sig2, includeName: true))
+        XCTAssertEqual("(a b: Float)", TypeFormatter.asString(signature: sig2, includeName: false))
+        
+        // Test default values for `includeName`
+        XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1))
+        XCTAssertEqual("(a b: Float)", TypeFormatter.asString(signature: sig2))
+    }
 }

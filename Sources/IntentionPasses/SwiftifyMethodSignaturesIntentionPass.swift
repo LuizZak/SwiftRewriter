@@ -9,6 +9,8 @@ import SwiftAST
 ///
 /// Examples include [[Class alloc] initWithThing:thing] -> Class(thing: thing)
 public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
+    let historyTag = "\(SwiftifyMethodSignaturesIntentionPass.self)"
+    
     public init() {
         
     }
@@ -38,6 +40,12 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                                             source: method.source)
                 initIntention.inNonnullContext = method.inNonnullContext
                 initIntention.functionBody = method.functionBody
+                
+                initIntention.history
+                    .recordCreation(description: """
+                        Converted from original init-like method \(TypeFormatter.asString(signature: method.signature, includeName: true)) \
+                        to init\(TypeFormatter.asString(parameters: initIntention.parameters))
+                        """)
                 
                 type.addConstructor(initIntention)
             }
@@ -96,6 +104,13 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             method.signature.name = "init"
             method.signature.parameters[0].label = splitOnWith[1].lowercasedFirstLetter
             
+            method.history
+                .recordChange(tag: historyTag,
+                              description: """
+                    Swiftified signature from \(TypeFormatter.asString(signature: signature)) \
+                    to \(TypeFormatter.asString(signature: method.signature))
+                    """, relatedIntentions: [])
+            
             return
         }
         
@@ -117,6 +132,13 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         } else {
             method.signature.parameters[0].label = "with"
         }
+        
+        method.history
+            .recordChange(tag: historyTag,
+                          description: """
+            Swiftified signature from \(TypeFormatter.asString(signature: signature)) \
+            to \(TypeFormatter.asString(signature: method.signature))
+            """, relatedIntentions: [])
     }
 }
 

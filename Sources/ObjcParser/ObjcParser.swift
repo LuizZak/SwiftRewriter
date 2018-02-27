@@ -90,6 +90,11 @@ public class ObjcParser {
         let input = try parsePreprocessor()
         try parseMainChannel(input: input)
         try parseNSAssumeNonnullChannel()
+        
+        // Go around the tree setting the source for the nodes
+        let visitor = AnyASTVisitor(visit: { $0.originalSource = self.source })
+        let traverser = ASTTraverser(node: rootNode, visitor: visitor)
+        traverser.traverse()
     }
     
     /// Main source parsing pass which takes in preprocessors while parsing

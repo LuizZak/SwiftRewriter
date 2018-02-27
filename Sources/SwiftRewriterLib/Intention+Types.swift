@@ -186,6 +186,19 @@ public class TypeGenerationIntention: FromSourceIntention {
 }
 
 extension TypeGenerationIntention: KnownType {
+    public var origin: String {
+        guard let sourceNode = source else {
+            return "Code-generated type"
+        }
+        guard let start = sourceNode.sourceRuleContext?.getStart() else {
+            return "Code-generated type"
+        }
+        guard let filename = sourceNode.originalSource?.fileName else {
+            return "Code-generated type"
+        }
+        
+        return "File '\(filename)' line \(start.getLine()) column \(start.getCharPositionInLine())"
+    }
     public var knownMethods: [KnownMethod] {
         return methods
     }

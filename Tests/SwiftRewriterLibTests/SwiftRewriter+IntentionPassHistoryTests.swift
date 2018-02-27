@@ -15,13 +15,18 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             objc: """
             @interface MyClass
             @property BOOL value;
+
+            - (nonnull NSString*)aMethod;
             @end
+            
             @implementation MyClass
             - (void)setValue:(BOOL)value {
                 
             }
             - (BOOL)value {
                 return NO;
+            }
+            - (NSString*)aMethod {
             }
             @end
             """,
@@ -37,6 +42,13 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                     }
                     set(value) {
                     }
+                }
+                
+                // [Creation] Merged existing method of separate declaration [File '' line 1 column 0]
+                // [TypeMerge] Updated nullability signature () -> String! -> () -> String
+                // [TypeMerge] Inserted body from method MyClass.aMethod() -> String!
+                @objc
+                func aMethod() -> String {
                 }
             }
             """,

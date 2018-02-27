@@ -2,6 +2,13 @@ import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
 public protocol KnownType: KnownSupertypeConvertible {
+    /// A string that specifies the origin of this known type.
+    /// This should be implemented by conformes by returning an as precise as
+    /// possible set of informations that can help pinpoint the origin of this
+    /// type, such as a file name/line number, if the type originated from a file,
+    /// etc.
+    var origin: String { get }
+    
     /// The supertype for this known type, if any.
     var supertype: KnownSupertype? { get }
     

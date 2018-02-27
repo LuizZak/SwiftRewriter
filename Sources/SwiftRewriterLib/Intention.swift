@@ -23,8 +23,9 @@ public protocol IntentionHistory {
     /// Gets a textual summary of this intention history's contents.
     var summary: String { get }
     
-    /// Performs a history merge with another history tracker.
-    func mergeHistories(_ other: IntentionHistory) -> IntentionHistory
+    /// Merges the history of another history tracker into this history tracker
+    /// instance.
+    func mergeHistories(_ other: IntentionHistory)
     
     /// Adds a record for this entry
     @discardableResult
@@ -151,8 +152,8 @@ class IntentionHistoryTracker: IntentionHistory {
         self.entries = entries
     }
     
-    func mergeHistories(_ other: IntentionHistory) -> IntentionHistory {
-        return IntentionHistoryTracker(entries: entries + other.entries)
+    func mergeHistories(_ other: IntentionHistory) {
+        entries.append(contentsOf: other.entries)
     }
     
     @discardableResult
@@ -207,6 +208,24 @@ public enum TypeFormatter {
         return
             "extension \(ext.typeName)"
                 + (ext.categoryName.map { " (\($0))" } ?? "")
+    }
+    
+    /// Generates a string representation of a given function signature.
+    /// The signature's name can be optionally include during conversion.
+    public static func asString(signature: FunctionSignature, includeName: Bool = false) -> String {
+        var result = ""
+        
+        if includeName {
+            result += signature.name
+        }
+        
+        result += asString(parameters: signature.parameters)
+        
+        if signature.returnType != .void {
+            result += " -> \(signature.returnType)"
+        }
+        
+        return result
     }
     
     /// Generates a string representation of a given set of function parameters,

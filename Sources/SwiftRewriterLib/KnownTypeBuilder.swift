@@ -5,8 +5,10 @@ import SwiftAST
 public class KnownTypeBuilder {
     private let type: DummyType
     
-    public init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
+    public init(typeName: String, supertype: KnownSupertypeConvertible? = nil, file: String = #file, line: Int = #line) {
         type = DummyType(typeName: typeName, supertype: supertype)
+        
+        type.origin = "Synthesized with \(KnownTypeBuilder.self) at \(file) line \(line)"
     }
     
     /// Sets the supertype of the type being constructed on this known type builder
@@ -112,6 +114,7 @@ public class KnownTypeBuilder {
 }
 
 private class DummyType: KnownType {
+    var origin: String
     var typeName: String
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
@@ -120,6 +123,7 @@ private class DummyType: KnownType {
     var supertype: KnownSupertype?
     
     init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
+        self.origin = "Synthesized type"
         self.typeName = typeName
         self.supertype = supertype?.asKnownSupertype
     }

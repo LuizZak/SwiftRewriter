@@ -22,6 +22,9 @@ open class ASTNode: ASTNodeValue {
     /// Location for this node
     public var location: SourceLocation
     
+    /// Original source for this node.
+    public var originalSource: Source?
+    
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
     
