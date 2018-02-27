@@ -48,6 +48,7 @@ public protocol IntentionHistory {
     func recordSplit(from intention: Intention, tag: String, description: String) -> IntentionHistoryEntryEcho
 }
 
+
 /// Allows 'echoing' the recording of a history entry into other history trackers.
 ///
 /// e.g.:
@@ -66,6 +67,11 @@ public struct IntentionHistoryEntryEcho {
     @discardableResult
     public func echoRecord(to history: IntentionHistory) -> IntentionHistoryEntryEcho {
         return history.record(entry)
+    }
+    
+    @discardableResult
+    public func echoRecord(to intention: Intention) -> IntentionHistoryEntryEcho {
+        return intention.history.record(entry)
     }
 }
 
@@ -171,6 +177,18 @@ public enum TypeFormatter {
         result += property.isStatic ? "static " : ""
         result += property.storage.ownership == .strong ? "" : "\(property.storage.ownership.rawValue) "
         result += type.typeName + "." + property.name + ": " + stringify(property.storage.type)
+        
+        return result
+    }
+    
+    /// Generates a string representation of a given instance field's signature,
+    /// with type name, property name and property type.
+    public static func asString(field: InstanceVariableGenerationIntention, ofType type: KnownType) -> String {
+        var result = ""
+        
+        result += field.isStatic ? "static " : ""
+        result += field.storage.ownership == .strong ? "" : "\(field.storage.ownership.rawValue) "
+        result += type.typeName + "." + field.name + ": " + stringify(field.storage.type)
         
         return result
     }

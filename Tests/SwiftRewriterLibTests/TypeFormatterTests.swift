@@ -30,4 +30,23 @@ class TypeFormatterTests: XCTestCase {
             TypeFormatter.asString(property: type.knownProperties[0], ofType: type)
         )
     }
+    
+    func testAsStringFieldFromType() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .build()
+        
+        let field =
+            InstanceVariableGenerationIntention(
+                name: "a",
+                storage: ValueStorage(type: .int,
+                                      ownership: .strong,
+                                      isConstant: false)
+        )
+        
+        XCTAssertEqual(
+            "A.a: Int",
+            TypeFormatter.asString(field: field, ofType: type)
+        )
+    }
 }

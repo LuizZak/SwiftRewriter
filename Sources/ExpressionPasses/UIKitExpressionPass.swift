@@ -66,9 +66,7 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
             return nil
         }
         
-        exp.op = .functionCall(arguments: [args[0],
-                                           args[1],
-                                           .labeled("for", args[2].expression)])
+        exp.op = .functionCall(arguments: [args[0], args[1], .labeled("for", args[2].expression)])
         
         return exp
     }
