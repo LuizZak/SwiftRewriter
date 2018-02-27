@@ -2,7 +2,7 @@ import SwiftRewriterLib
 import SwiftAST
 
 // TODO: This could be generalized into merging signatures from types such that
-// a receiving class inherits nullability from the source type, in case the receiver
+// a child class inherits nullability from the base class, in case the child
 // lacks nullability annotations.
 
 /// Propagates known protocol nullability signautres from protocol intentions into
