@@ -83,8 +83,12 @@ public extension IntentionHistory {
         
         var result = ""
         
-        for entry in entries {
-            result += "[\(entry.tag)] \(entry.description)"
+        for (i, entry) in entries.enumerated() {
+            if i > 0 {
+                result += "\n"
+            }
+            
+            result += entry.summary
         }
         
         return result
@@ -127,6 +131,11 @@ public struct IntentionHistoryEntry: CustomStringConvertible {
     /// Any one or more intentions that are related to this history entry.
     /// May be empty, in case this entry is e.g. an initial creation entry.
     public var relatedIntentions: [Intention]
+    
+    /// Returns a brief formatted summary string.
+    public var summary: String {
+        return "[\(tag)] \(description)"
+    }
     
     public init(tag: String, description: String, relatedIntentions: [Intention] = []) {
         self.tag = tag
@@ -191,6 +200,13 @@ public enum TypeFormatter {
         result += type.typeName + "." + field.name + ": " + stringify(field.storage.type)
         
         return result
+    }
+    
+    /// Generates a string representation of a given extension's typename
+    public static func asString(extension ext: ClassExtensionGenerationIntention) -> String {
+        return
+            "extension \(ext.typeName)"
+                + (ext.categoryName.map { " (\($0))" } ?? "")
     }
     
     /// Generates a string representation of a given set of function parameters,

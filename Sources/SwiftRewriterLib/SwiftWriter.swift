@@ -189,6 +189,8 @@ public class SwiftWriter {
     }
     
     private func outputClassExtension(_ cls: ClassExtensionGenerationIntention, target: RewriterOutputTarget) {
+        outputHistory(for: cls, target: target)
+        
         if let categoryName = cls.categoryName, !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             target.output(line: "// MARK: - \(categoryName)", style: .comment)
         } else {
@@ -203,6 +205,8 @@ public class SwiftWriter {
     }
     
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
+        outputHistory(cls.history, target: target)
+        
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         target.outputInlineWithSpace("class", style: .keyword)
@@ -304,6 +308,8 @@ public class SwiftWriter {
     
     // TODO: See if we can reuse outputVariableDeclaration
     private func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
+        outputHistory(for: ivar, target: target)
+        
         target.outputIdentation()
         
         let accessModifier = SwiftWriter._accessModifierFor(accessLevel: ivar.accessLevel)
@@ -335,6 +341,8 @@ public class SwiftWriter {
     
     private func outputProperty(_ prop: PropertyGenerationIntention, selfType: KnownType,
                                 target: RewriterOutputTarget) {
+        outputHistory(for: prop, target: target)
+        
         target.outputIdentation()
         
         target.outputInlineWithSpace("@objc", style: .keyword)
@@ -397,6 +405,8 @@ public class SwiftWriter {
     private func outputInitMethod(_ initMethod: InitGenerationIntention,
                                   selfType: KnownType,
                                   target: RewriterOutputTarget) {
+        outputHistory(for: initMethod, target: target)
+        
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
@@ -432,6 +442,8 @@ public class SwiftWriter {
     
     private func outputDeinit(_ method: MethodGenerationIntention, selfType: KnownType,
                               target: RewriterOutputTarget) {
+        outputHistory(for: method, target: target)
+        
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
@@ -457,6 +469,8 @@ public class SwiftWriter {
     
     private func outputMethod(_ method: MethodGenerationIntention, selfType: KnownType,
                               target: RewriterOutputTarget) {
+        outputHistory(for: method, target: target)
+        
         target.output(line: "@objc", style: .keyword)
         
         target.outputIdentation()
@@ -533,6 +547,24 @@ public class SwiftWriter {
         }
         
         target.outputInline(")")
+    }
+    
+    private func outputHistory(for intention: Intention, target: RewriterOutputTarget) {
+        outputHistory(intention.history, target: target)
+    }
+    
+    private func outputHistory(_ history: IntentionHistory, target: RewriterOutputTarget) {
+        if !options.printIntentionHistory {
+            return
+        }
+        
+        if history.entries.isEmpty {
+            return
+        }
+        
+        for entry in history.entries {
+            target.output(line: "// \(entry.summary)")
+        }
     }
     
     internal static func _isConstant(fromType type: ObjcType) -> Bool {

@@ -49,4 +49,13 @@ class TypeFormatterTests: XCTestCase {
             TypeFormatter.asString(field: field, ofType: type)
         )
     }
+    
+    func testAsStringExtension() {
+        let extA = ClassExtensionGenerationIntention(typeName: "A")
+        let extB = ClassExtensionGenerationIntention(typeName: "B")
+        extB.categoryName = "Category"
+        
+        XCTAssertEqual("extension A", TypeFormatter.asString(extension: extA))
+        XCTAssertEqual("extension B (Category)", TypeFormatter.asString(extension: extB))
+    }
 }

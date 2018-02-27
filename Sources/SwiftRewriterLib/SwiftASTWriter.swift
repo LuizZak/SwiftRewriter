@@ -7,14 +7,20 @@ import ObjcParser
 /// Options for an AST writer invocation
 public struct ASTWriterOptions {
     /// Default settings instance
-    public static let `default` = ASTWriterOptions(outputExpressionTypes: false)
+    public static let `default` = ASTWriterOptions()
     
     /// If `true`, when outputting expression statements, print the resulting type
     /// of the expression before the expression statement as a comment for inspection.
     public var outputExpressionTypes: Bool
     
-    public init(outputExpressionTypes: Bool) {
+    /// If `true`, when outputting final intentions, print any history information
+    /// tracked on its `IntentionHistory` property before the intention's declaration
+    /// as a comment for inspection.
+    public var printIntentionHistory: Bool
+    
+    public init(outputExpressionTypes: Bool = false, printIntentionHistory: Bool = false) {
         self.outputExpressionTypes = outputExpressionTypes
+        self.printIntentionHistory = printIntentionHistory
     }
 }
 

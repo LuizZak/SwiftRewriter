@@ -107,17 +107,28 @@ public class PropertyMergeIntentionPass: IntentionPass {
             classIntention.removeMethod(getter)
             classIntention.removeMethod(setter)
             
-            classIntention
+            propertySet.property
                 .history
                 .recordChange(tag: historyTag,
                               description: """
-                              Merging getter method \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
-                              and setter method \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
-                              into a computed property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
-                              """, relatedIntentions: [getter, setter, propertySet.property])
-                .echoRecord(to: propertySet.property)
-                .echoRecord(to: finalGetter)
-                .echoRecord(to: finalSetter.body)
+                    Merged \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
+                    and \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
+                    into property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    """, relatedIntentions: [getter, setter, propertySet.property])
+            
+            classIntention.history
+                .recordChange(tag: historyTag,
+                              description: """
+                    Removed method \(TypeFormatter.asString(method: getter, ofType: classIntention)) since deduced it \
+                    is a getter for property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    """)
+            
+            classIntention.history
+                .recordChange(tag: historyTag,
+                              description: """
+                    Removed method \(TypeFormatter.asString(method: setter, ofType: classIntention)) since deduced it \
+                    is a setter for property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    """)
             
         // Getter-only on readonly property: Create computed property.
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
@@ -132,7 +143,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .history
                 .recordChange(tag: historyTag,
                               description: """
-                    Merging getter method \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
+                    Merged getter method \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
                     into the  getter-only property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
                     """, relatedIntentions: [propertySet.property, getterBody])
                 .echoRecord(to: propertySet.property)
@@ -173,7 +184,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .history
                 .recordChange(tag: historyTag,
                               description: """
-                    Merging found setter method \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
+                    Merged found setter method \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
                     into property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention)) \
                     and creating a getter body + synthesized backing field \(TypeFormatter.asString(field: field, ofType: classIntention))
                     """, relatedIntentions: [field, setter, propertySet.property])

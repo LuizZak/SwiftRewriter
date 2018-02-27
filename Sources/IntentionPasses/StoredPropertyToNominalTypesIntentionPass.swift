@@ -7,6 +7,8 @@ import SwiftAST
 /// Extensions in Swift cannot declare stored variables, so they must be moved to
 /// the proper nominal instances.
 public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
+    public static let historyTag: String = "\(StoredPropertyToNominalTypesIntentionPass.self)"
+    
     public init() {
         
     }
@@ -31,24 +33,53 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
         }
     }
     
-    static func moveInstanceVariables(from first: BaseClassIntention,
+    static func moveInstanceVariables(from first: ClassExtensionGenerationIntention,
                                       into second: BaseClassIntention) {
         for ivar in first.instanceVariables {
             if !second.hasInstanceVariable(named: ivar.name) {
                 second.addInstanceVariable(ivar)
+                
+                ivar.history
+                    .recordChange(tag: historyTag,
+                                  description: """
+                        Moving field from \(TypeFormatter.asString(extension: first)) \
+                        to type declaration \(second.typeName)
+                        """, relatedIntentions: [first])
             } else {
                 first.removeInstanceVariable(named: ivar.name)
+                
+                first.history
+                     .recordChange(tag: historyTag,
+                                   description: """
+                         Removing field \(ivar.name) from \(TypeFormatter.asString(extension: first)) \
+                         since matching field name was found on original declaration
+                         """, relatedIntentions: [first])
             }
         }
     }
     
-    static func moveStoredProperties(from first: BaseClassIntention,
+    static func moveStoredProperties(from first: ClassExtensionGenerationIntention,
                                      into second: BaseClassIntention) {
         for prop in first.properties {
             first.removeProperty(prop)
             
             if !second.hasProperty(named: prop.name) {
+                prop.history
+                    .recordChange(tag: historyTag,
+                                  description: """
+                        Moving stored property from \(TypeFormatter.asString(extension: first)) \
+                        to type declaration \(second.typeName)
+                        """, relatedIntentions: [first])
+                
                 second.addProperty(prop)
+            } else {
+                first.history
+                     .recordChange(tag: historyTag,
+                                   description: """
+                         Removing stored property \(prop.name) from \(TypeFormatter.asString(extension: first)) \
+                         since matching property name was found on original declaration
+                         """, relatedIntentions: [first])
+                
             }
         }
     }
