@@ -251,9 +251,6 @@ public class TypeMapper {
         "float": .float,
         "double": .double,
         "CGFloat": .cgFloat,
-        // TODO: Create a special SwiftType case for `instancetype` types, as it
-        // is its own thing in Objective-C and better means the dynamic instance
-        // type of the class it is situated in.
         "instancetype": .instancetype
     ]
     
