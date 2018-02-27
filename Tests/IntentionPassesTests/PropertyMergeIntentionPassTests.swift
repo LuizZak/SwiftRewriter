@@ -90,14 +90,16 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     }
     
     func testMergeCategories() {
-        let intentions = IntentionCollection()
-        let file = FileGenerationIntention(sourcePath: "a", targetPath: "a")
-        intentions.addIntention(file)
-        let cls = ClassExtensionGenerationIntention(typeName: "A")
-        cls.addProperty(PropertyGenerationIntention(name: "a", type: .int, attributes: [.attribute("readonly")]))
-        cls.addMethod(MethodGenerationIntention(isStatic: false, name: "a", returnType: .int, parameters: []))
-        file.addType(cls)
-        
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A") { file in
+                    file.createExtension(forClassNamed: "A") { builder in
+                        builder
+                            .createProperty(named: "a", type: .int, attributes: [.attribute("readonly")])
+                            .createMethod(named: "a", returnType: .int)
+                    }
+                }.build()
+        let cls = intentions.extensionIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
@@ -116,15 +118,17 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     // Checks if PropertyMergeIntentionPass properly records history entries on
     // the merged properties and the types the properties are contained within.
     func testHistoryTrackingMergingGetterSetterMethods() {
-        let intentions = IntentionCollection()
-        let file = FileGenerationIntention(sourcePath: "a", targetPath: "a")
-        intentions.addIntention(file)
-        let cls = ClassGenerationIntention(typeName: "A")
-        cls.addProperty(PropertyGenerationIntention(name: "a", type: .int, attributes: []))
-        cls.addMethod(MethodGenerationIntention(isStatic: false, name: "a", returnType: .int, parameters: []))
-        cls.addMethod(MethodGenerationIntention(isStatic: false, name: "setA", returnType: .void,
-                                                parameters: [ParameterSignature(label: "_", name: "a", type: .int)]))
-        file.addType(cls)
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a", type: .int)
+                        .createMethod(named: "a", returnType: .int)
+                        .createMethod(named: "setA", parameters: [
+                            ParameterSignature(label: "_", name: "a", type: .int)
+                            ])
+                }.build()
+        let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))

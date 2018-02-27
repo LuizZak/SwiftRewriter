@@ -65,6 +65,18 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func createExtension(forClassNamed name: String, categoryName: String = "", initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+        let classIntention = ClassExtensionGenerationIntention(typeName: name)
+        let builder = TypeBuilder(targetType: classIntention)
+        
+        initializer(builder)
+        
+        intention.addType(builder.build())
+        
+        return self
+    }
+    
+    @discardableResult
     public func createEnum(withName name: String, rawValue: SwiftType, initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
         let enumIntention = EnumGenerationIntention(typeName: name, rawValueType: rawValue)
         let builder = EnumTypeBuilder(targetEnum: enumIntention)
