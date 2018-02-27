@@ -83,8 +83,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
                 })
                 
             case let sub as SubscriptPostfix:
-                sub.expression = sub.expression.accept(self)
-                return sub
+                return .subscript(sub.expression.accept(self))
                 
             case let opt as OptionalAccessPostfix:
                 return .optionalAccess(recurseOperator(opt.postfix))

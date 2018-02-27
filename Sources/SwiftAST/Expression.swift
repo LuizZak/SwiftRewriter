@@ -428,6 +428,8 @@ public class PostfixExpression: Expression {
     }
     public var op: Postfix {
         didSet {
+            guard oldValue !== op else { return }
+            
             oldValue.subExpressions.forEach { $0.parent = nil }
             op.subExpressions.forEach { $0.parent = nil }
         }
@@ -1149,7 +1151,7 @@ public extension PostfixExpression {
 
 
 public final class MemberPostfix: Postfix {
-    public var name: String
+    public let name: String
     
     public override var description: String {
         return "." + name
@@ -1186,7 +1188,7 @@ public extension PostfixExpression {
 
 
 public final class SubscriptPostfix: Postfix {
-    public var expression: Expression
+    public let expression: Expression
     
     public override var description: String {
         return "[" + expression.description + "]"
@@ -1227,7 +1229,7 @@ public extension PostfixExpression {
 
 
 public final class FunctionCallPostfix: Postfix {
-    public var arguments: [FunctionArgument]
+    public let arguments: [FunctionArgument]
     
     public override var description: String {
         return "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
