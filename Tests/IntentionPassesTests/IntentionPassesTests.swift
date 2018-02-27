@@ -12,6 +12,6 @@ class IntentionPassesTests: XCTestCase {
         XCTAssert(intents[2] is StoredPropertyToNominalTypesIntentionPass)
         XCTAssert(intents[3] is ProtocolNullabilityPropagationToConformersIntentionPass)
         XCTAssert(intents[4] is PropertyMergeIntentionPass)
-        XCTAssert(intents[5] is ClangifyMethodSignaturesIntentionPass)
+        XCTAssert(intents[5] is SwiftifyMethodSignaturesIntentionPass)
     }
 }

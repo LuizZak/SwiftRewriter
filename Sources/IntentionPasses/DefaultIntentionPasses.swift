@@ -10,7 +10,7 @@ public struct DefaultIntentionPasses: IntentionPassSource {
         StoredPropertyToNominalTypesIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),
         PropertyMergeIntentionPass(),
-        ClangifyMethodSignaturesIntentionPass()
+        SwiftifyMethodSignaturesIntentionPass()
     ]
     
     public init() {

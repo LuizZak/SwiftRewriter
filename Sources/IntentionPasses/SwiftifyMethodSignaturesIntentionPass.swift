@@ -3,11 +3,12 @@ import SwiftAST
 
 // TODO: Move task of converting `init` methods to a separate intention pass.
 
-/// Performs Clang-style alterations of method signatures to attempt to match
-/// somewhat its behavior when coming up with Swift names for Objective-C methods.
+/// Performs Swift-importer-style alterations of method signatures to attempt to
+/// match somewhat its behavior when coming up with Swift names for Objective-C
+/// methods.
 ///
 /// Examples include [[Class alloc] initWithThing:thing] -> Class(thing: thing)
-public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
+public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
     public init() {
         
     }
@@ -98,9 +99,9 @@ public class ClangifyMethodSignaturesIntentionPass: IntentionPass {
             return
         }
         
-        // Do a little Clang-like-magic here: If the method selector is in the
-        // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
-        // noun is followed by a parameter that has the same name, we collapse
+        // Do a little Swift-importer-like-magic here: If the method selector is
+        // in the form `loremWithThing:thing...`, where after a `[...]With` prefix,
+        // a noun is followed by a parameter that has the same name, we collapse
         // such selector in Swift as `lorem(with:)`.
         if splitOnWith[1].lowercased() != signature.parameters[0].name.lowercased() {
             return

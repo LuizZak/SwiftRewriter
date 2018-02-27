@@ -59,7 +59,7 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
             return nil
         }
         
-        let newArgs = clangify(methodName: initName, arguments: args)
+        let newArgs = swiftify(methodName: initName, arguments: args)
         
         // self.alloc.init() -> self.init()
         if alloc.exp.asIdentifier?.identifier == "self", case .metatype? = alloc.exp.resolvedType {
@@ -81,16 +81,16 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
             return nil
         }
         
-        let newArgs = clangify(methodName: initName, arguments: args)
+        let newArgs = swiftify(methodName: initName, arguments: args)
         
         return .postfix(.postfix(.identifier("super"), .member("init")), .functionCall(arguments: newArgs))
     }
     
-    func clangify(methodName: String, arguments: [FunctionArgument]) -> [FunctionArgument] {
-        // Do a little Clang-like-magic here: If the method selector is in the
-        // form `loremWithThing:thing...`, where after a `[...]With` prefix, a
-        // noun is followed by a parameter that has the same name, we collapse
-        // such selector in Swift as `lorem(with:)`.
+    func swiftify(methodName: String, arguments: [FunctionArgument]) -> [FunctionArgument] {
+        // Do a little Swift-importer-like-magic here: If the method selector is
+        // in the form `loremWithThing:thing...`, where after a `[...]With`
+        // prefix, a noun is followed by a parameter that has the same name, we
+        // collapse such selector in Swift as `lorem(with:)`.
         let split = methodName.components(separatedBy: "With")
         if split.count != 2 || split.contains(where: { $0.count < 2 }) {
             return arguments

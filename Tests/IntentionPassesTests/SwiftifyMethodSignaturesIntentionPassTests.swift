@@ -1,5 +1,5 @@
 //
-//  ClangifyMethodSignaturesIntentionPassTests.swift
+//  SwiftifyMethodSignaturesIntentionPassTests.swift
 //  SwiftRewriterLibTests
 //
 //  Created by Luiz Fernando Silva on 24/02/2018.
@@ -13,9 +13,9 @@ import SwiftAST
 import IntentionPasses
 import SwiftRewriterLib
 
-class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
+class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
     func testConvertWith() {
-        let sut = ClangifyMethodSignaturesIntentionPass()
+        let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(sut: sut)
             .method(withSignature:
@@ -31,7 +31,7 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
     }
     
     func testConvertWithAtSuffix() {
-        let sut = ClangifyMethodSignaturesIntentionPass()
+        let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(sut: sut)
             .method(withSignature:
@@ -47,7 +47,7 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
     }
     
     func testConvertWithin() {
-        let sut = ClangifyMethodSignaturesIntentionPass()
+        let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(sut: sut)
             .method(withSignature:
@@ -59,7 +59,7 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
     }
     
     func testConvertWithinWithParameter() {
-        let sut = ClangifyMethodSignaturesIntentionPass()
+        let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(sut: sut)
             .method(withSignature:
@@ -75,7 +75,7 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
     }
     
     func testConvertInit() {
-        let sut = ClangifyMethodSignaturesIntentionPass()
+        let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(sut: sut)
             .method(withSignature:
@@ -87,7 +87,7 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
     }
     
     func testConvertInitwithInt() {
-        let sut = ClangifyMethodSignaturesIntentionPass()
+        let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(sut: sut)
             .method(withSignature:
@@ -101,11 +101,11 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
                 ])
     }
     
-    /// Tests automatic clangification of `[NSTypeName typeNameWithThing:<x>]`-style
+    /// Tests automatic swiftification of `[NSTypeName typeNameWithThing:<x>]`-style
     /// initializers.
-    /// This helps test mimicing of Clang's importer behavior.
-    func testClangifyStaticFactoryMethods() {
-        let sut = ClangifyMethodSignaturesIntentionPass()
+    /// This helps test mimicing of Swift's importer behavior.
+    func testSwiftifyStaticFactoryMethods() {
+        let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(typeName: "NSNumber", sut: sut)
             .method(withObjcSignature: "+ (NSNumber*)numberWithBool:(BOOL)bool;")
@@ -143,10 +143,10 @@ class ClangifyMethodSignaturesIntentionPassTests: XCTestCase {
     }
 }
 
-private extension ClangifyMethodSignaturesIntentionPassTests {
-    func testThat(typeName: String = "T", sut: ClangifyMethodSignaturesIntentionPass) -> ClangifyMethodSignaturesIntentionPassTestBuilder {
+private extension SwiftifyMethodSignaturesIntentionPassTests {
+    func testThat(typeName: String = "T", sut: SwiftifyMethodSignaturesIntentionPass) -> SwiftifyMethodSignaturesIntentionPassTestBuilder {
         return
-            ClangifyMethodSignaturesIntentionPassTestBuilder(
+            SwiftifyMethodSignaturesIntentionPassTestBuilder(
                 testCase: self,
                 typeName: typeName,
                 sut: sut
@@ -154,13 +154,13 @@ private extension ClangifyMethodSignaturesIntentionPassTests {
     }
 }
 
-private class ClangifyMethodSignaturesIntentionPassTestBuilder {
+private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
     let testCase: XCTestCase
     let intentions: IntentionCollection
     let type: TypeGenerationIntention
-    let sut: ClangifyMethodSignaturesIntentionPass
+    let sut: SwiftifyMethodSignaturesIntentionPass
     
-    init(testCase: XCTestCase, typeName: String = "T", sut: ClangifyMethodSignaturesIntentionPass) {
+    init(testCase: XCTestCase, typeName: String = "T", sut: SwiftifyMethodSignaturesIntentionPass) {
         self.testCase = testCase
         self.sut = sut
         intentions = IntentionCollection()

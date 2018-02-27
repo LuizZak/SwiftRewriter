@@ -429,6 +429,9 @@ private class MemberInvocationResolver {
                 return exp.makeErrorTyped()
             }
             
+            // TODO: Resolving of subscriptions of Array/Dictionary types should
+            // happen by inspecting `subscript`-able members on the KnownType.
+            
             // Array<T> / Dictionary<T> resolving
             switch expType {
             case .generic("Array", let params) where params.count == 1:
