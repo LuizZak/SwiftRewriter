@@ -89,6 +89,8 @@ open class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomRef
 public class AssignmentExpression: Expression {
     public var lhs: Expression {
         didSet {
+            guard oldValue !== lhs else { return }
+            
             oldValue.parent = nil
             lhs.parent = self
         }
@@ -96,6 +98,8 @@ public class AssignmentExpression: Expression {
     public var op: SwiftOperator
     public var rhs: Expression {
         didSet {
+            guard oldValue !== rhs else { return }
+            
             oldValue.parent = nil
             rhs.parent = self
         }
@@ -152,6 +156,8 @@ public extension Expression {
 public class BinaryExpression: Expression {
     public var lhs: Expression {
         didSet {
+            guard oldValue !== lhs else { return }
+            
             oldValue.parent = nil
             lhs.parent = self
         }
@@ -159,6 +165,8 @@ public class BinaryExpression: Expression {
     public var op: SwiftOperator
     public var rhs: Expression {
         didSet {
+            guard oldValue !== rhs else { return }
+            
             oldValue.parent = nil
             rhs.parent = self
         }
@@ -220,6 +228,8 @@ public class UnaryExpression: Expression {
     public var op: SwiftOperator
     public var exp: Expression {
         didSet {
+            guard oldValue !== exp else { return }
+            
             oldValue.parent = nil
             exp.parent = self
         }
@@ -338,6 +348,8 @@ public class PrefixExpression: Expression {
     public var op: SwiftOperator
     public var exp: Expression {
         didSet {
+            guard oldValue !== exp else { return }
+            
             oldValue.parent = nil
             exp.parent = self
         }
@@ -395,6 +407,8 @@ extension Expression {
 public class PostfixExpression: Expression {
     public var exp: Expression {
         didSet {
+            guard oldValue !== exp else { return }
+            
             oldValue.parent = nil
             exp.parent = self
         }
@@ -511,8 +525,10 @@ public extension Expression {
 }
 
 public class ParensExpression: Expression {
-    public var exp: Expression{
+    public var exp: Expression {
         didSet {
+            guard oldValue !== exp else { return }
+            
             oldValue.parent = nil
             exp.parent = self
         }
@@ -609,8 +625,10 @@ public extension Expression {
 }
 
 public class CastExpression: Expression {
-    public var exp: Expression{
+    public var exp: Expression {
         didSet {
+            guard oldValue !== exp else { return }
+            
             oldValue.parent = nil
             exp.parent = self
         }
@@ -662,7 +680,7 @@ public extension Expression {
 }
 
 public class ArrayLiteralExpression: Expression {
-    public var items: [Expression]{
+    public var items: [Expression] {
         didSet {
             oldValue.forEach { $0.parent = nil }
             items.forEach { $0.parent = self }
@@ -762,18 +780,24 @@ public extension Expression {
 public class TernaryExpression: Expression {
     public var exp: Expression {
         didSet {
+            guard oldValue !== exp else { return }
+            
             oldValue.parent = nil
             exp.parent = self
         }
     }
     public var ifTrue: Expression {
         didSet {
+            guard oldValue !== ifTrue else { return }
+            
             oldValue.parent = nil
             ifTrue.parent = self
         }
     }
     public var ifFalse: Expression {
         didSet {
+            guard oldValue !== ifFalse else { return }
+            
             oldValue.parent = nil
             ifTrue.parent = self
         }
@@ -835,6 +859,8 @@ public class BlockLiteralExpression: Expression {
     public var returnType: SwiftType
     public var body: CompoundStatement {
         didSet {
+            guard oldValue !== body else { return }
+            
             oldValue.parent = nil
             body.parent = self
         }

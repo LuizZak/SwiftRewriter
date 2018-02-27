@@ -10,3 +10,9 @@ public protocol Intention: class, Context {
     /// Parent for this intention
     var parent: Intention? { get }
 }
+
+/// Tracks changes made to an intention as it is read by AST readers and modified
+/// by intention passes so it can be sourced
+public protocol IntentionHistory {
+    
+}
