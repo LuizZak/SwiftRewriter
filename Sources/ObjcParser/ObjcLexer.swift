@@ -388,17 +388,6 @@ public class ObjcLexer {
         return _Backtrack(lexer: self)
     }
     
-    func rewindOnFailure<T>(_ block: () throws -> T) rethrows -> T {
-        let bt = backtracker()
-        
-        do {
-            return try block()
-        } catch {
-            bt.backtrack()
-            throw error
-        }
-    }
-    
     private struct _RangeMarker: RangeMarker {
         let objcLexer: ObjcLexer
         let index: Lexer.Index
