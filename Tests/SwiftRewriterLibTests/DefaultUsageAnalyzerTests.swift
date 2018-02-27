@@ -1,6 +1,7 @@
 import XCTest
 import SwiftRewriterLib
 import SwiftAST
+import TestCommons
 
 class DefaultUsageAnalyzerTests: XCTestCase {
     func testFindMethodUsages() {
@@ -89,14 +90,10 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     .createClass(withName: "B") { builder in
                         builder
                             .createConstructor()
-                            .createMethod(withSignature:
-                                FunctionSignature(name: "b",
-                                                  parameters: [],
-                                                  returnType: .typeName("B")
-                                )
-                        )
-                }
-        }
+                            .createMethod(named: "b", returnType: .typeName("B"),
+                                          parameters: [])
+                    }
+            }
         let intentions = builder.build(typeChecked: true)
         let sut = DefaultUsageAnalyzer(intentions: intentions)
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]

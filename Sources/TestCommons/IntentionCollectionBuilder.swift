@@ -1,11 +1,25 @@
+import Foundation
 import SwiftRewriterLib
 import SwiftAST
 
-class IntentionCollectionBuilder {
+public class IntentionCollectionBuilder {
     var intentions = IntentionCollection()
     
+    public init() {
+        
+    }
+    
     @discardableResult
-    func createFile(named name: String, initializer: (FileIntentionBuilder) -> Void) -> IntentionCollectionBuilder {
+    public func createFileWithClass(named name: String, initializer: (TypeBuilder) -> Void = { _ in }) -> IntentionCollectionBuilder {
+        createFile(named: "\(name).swift") { builder in
+            builder.createClass(withName: name, initializer: initializer)
+        }
+        
+        return self
+    }
+    
+    @discardableResult
+    public func createFile(named name: String, initializer: (FileIntentionBuilder) -> Void) -> IntentionCollectionBuilder {
         let builder = FileIntentionBuilder(fileNamed: name)
         
         initializer(builder)
@@ -17,7 +31,7 @@ class IntentionCollectionBuilder {
         return self
     }
     
-    func build(typeChecked: Bool = false) -> IntentionCollection {
+    public func build(typeChecked: Bool = false) -> IntentionCollection {
         if typeChecked {
             let system = IntentionCollectionTypeSystem(intentions: intentions)
             let resolver = ExpressionTypeResolver(typeSystem: system)
@@ -31,15 +45,15 @@ class IntentionCollectionBuilder {
     }
 }
 
-class FileIntentionBuilder {
+public class FileIntentionBuilder {
     var intention: FileGenerationIntention
     
-    init(fileNamed name: String) {
+    public init(fileNamed name: String) {
         intention = FileGenerationIntention(sourcePath: name, targetPath: name)
     }
     
     @discardableResult
-    func createClass(withName name: String, initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+    public func createClass(withName name: String, initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassGenerationIntention(typeName: name)
         let builder = TypeBuilder(targetType: classIntention)
         
@@ -51,7 +65,7 @@ class FileIntentionBuilder {
     }
     
     @discardableResult
-    func createEnum(withName name: String, rawValue: SwiftType, initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+    public func createEnum(withName name: String, rawValue: SwiftType, initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
         let enumIntention = EnumGenerationIntention(typeName: name, rawValueType: rawValue)
         let builder = EnumTypeBuilder(targetEnum: enumIntention)
         
@@ -62,20 +76,20 @@ class FileIntentionBuilder {
         return self
     }
     
-    func build() -> FileGenerationIntention {
+    public func build() -> FileGenerationIntention {
         return intention
     }
 }
 
-class TypeBuilder {
+public class TypeBuilder {
     var targetType: TypeGenerationIntention
     
-    init(targetType: TypeGenerationIntention) {
+    public init(targetType: TypeGenerationIntention) {
         self.targetType = targetType
     }
     
     @discardableResult
-    func createProperty(named name: String, type: SwiftType) -> TypeBuilder {
+    public func createProperty(named name: String, type: SwiftType) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
         let prop = PropertyGenerationIntention(name: name, storage: storage, attributes: [])
@@ -86,7 +100,7 @@ class TypeBuilder {
     }
     
     @discardableResult
-    func createConstructor(withParameters parameters: [ParameterSignature] = []) -> TypeBuilder {
+    public func createConstructor(withParameters parameters: [ParameterSignature] = []) -> TypeBuilder {
         let ctor = InitGenerationIntention(parameters: parameters)
         
         targetType.addConstructor(ctor)
@@ -95,14 +109,25 @@ class TypeBuilder {
     }
     
     @discardableResult
-    func createVoidMethod(named name: String, bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
+    public func createVoidMethod(named name: String, bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
         let signature = FunctionSignature(name: name, parameters: [])
         
-        return createMethod(withSignature: signature, bodyBuilder: bodyBuilder)
+        return createMethod(signature, bodyBuilder: bodyBuilder)
     }
     
     @discardableResult
-    func createMethod(withSignature signature: FunctionSignature, bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
+    public func createMethod(named name: String,
+                             returnType: SwiftType = .void,
+                             parameters: [ParameterSignature] = [],
+                             isStatic: Bool = false,
+                             bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
+        let signature = FunctionSignature(name: name, parameters: parameters, returnType: returnType, isStatic: isStatic)
+        
+        return createMethod(signature, bodyBuilder: bodyBuilder)
+    }
+    
+    @discardableResult
+    public func createMethod(_ signature: FunctionSignature, bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
         let body = bodyBuilder()
         
         let method = MethodGenerationIntention(signature: signature)
@@ -113,20 +138,20 @@ class TypeBuilder {
         return self
     }
     
-    func build() -> TypeGenerationIntention {
+    public func build() -> TypeGenerationIntention {
         return targetType
     }
 }
 
-class EnumTypeBuilder {
+public class EnumTypeBuilder {
     var targetEnum: EnumGenerationIntention
     
-    init(targetEnum: EnumGenerationIntention) {
+    public init(targetEnum: EnumGenerationIntention) {
         self.targetEnum = targetEnum
     }
     
     @discardableResult
-    func createCase(name: String, expression: Expression? = nil) -> EnumTypeBuilder {
+    public func createCase(name: String, expression: Expression? = nil) -> EnumTypeBuilder {
         let caseIntention = EnumCaseGenerationIntention(name: name, expression: expression)
         
         targetEnum.addCase(caseIntention)
@@ -134,7 +159,7 @@ class EnumTypeBuilder {
         return self
     }
     
-    func build() -> EnumGenerationIntention {
+    public func build() -> EnumGenerationIntention {
         return targetEnum
     }
 }

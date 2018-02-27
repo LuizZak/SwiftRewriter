@@ -1,6 +1,7 @@
 import XCTest
 import SwiftRewriterLib
 import SwiftAST
+import TestCommons
 
 protocol ExpressionTestResolverTestFixture {
     var scope: CodeScopeStatement { get }
