@@ -27,11 +27,11 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts UIColor.orangeColor() -> UIColor.orange, etc.
     func convertUIColorStaticColorMethodCall(_ exp: PostfixExpression) -> Expression? {
-        guard let args = exp.op.asFuntionCall?.arguments, args.count == 0 else {
+        guard let args = exp.functionCall?.arguments, args.count == 0 else {
             return nil
         }
         guard let colorMember = exp.exp.asPostfix, colorMember.exp == .identifier("UIColor"),
-            let colorName = colorMember.op.asMember?.name else {
+            let colorName = colorMember.member?.name else {
             return nil
         }
         guard colorName.hasSuffix("Color") && !colorName.replacingOccurrences(of: "Color", with: "").isEmpty else {
@@ -46,7 +46,7 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>] -> <exp>.addTarget(<a1>, action: <a2>, for: <a3>)
     func convertAddTargetForControlEvents(_ exp: PostfixExpression) -> Expression? {
-        guard let args = exp.op.asFuntionCall?.arguments, args.count == 3 else {
+        guard let args = exp.functionCall?.arguments, args.count == 3 else {
             return nil
         }
         guard let memberExp = exp.exp.asPostfix, memberExp.op == .member("addTarget") else {

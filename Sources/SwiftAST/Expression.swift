@@ -1,6 +1,19 @@
 import Foundation
 
-open class Expression: SyntaxNode, Equatable, CustomStringConvertible, CustomReflectable {
+/// An expression component is understood to be any component of an expression,
+/// or an expression itself, which can be contained within another expression,
+/// and can contain sub-expressions itself.
+///
+/// `Expression`-subtypes are always expression components themselves, and constructs
+/// such as postfix operators, which themselves can contain expressions, should
+/// be marked as expression components as well.
+public protocol ExpressionComponent {
+    /// Returns an array of sub-expressions contained within this expression fragment,
+    /// in case it is an expression formed of other expressions.
+    var subExpressions: [Expression] { get }
+}
+
+open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringConvertible, CustomReflectable {
     /// Custom metadata that can be associated with this expression node
     public var metadata: [String: Any] = [:]
     
@@ -1042,7 +1055,7 @@ public struct ExpressionDictionaryPair: Equatable {
 }
 
 /// A postfix operation of a PostfixExpression
-public class Postfix: Equatable, CustomStringConvertible {
+public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
     /// Custom metadata that can be associated with this expression node
     public var metadata: [String: Any] = [:]
     
@@ -1127,6 +1140,13 @@ public extension Postfix {
         return self as? OptionalAccessPostfix
     }
 }
+// Helper casting getter extensions to postfix expression
+public extension PostfixExpression {
+    var optionalAccess: OptionalAccessPostfix? {
+        return op as? OptionalAccessPostfix
+    }
+}
+
 
 public final class MemberPostfix: Postfix {
     public var name: String
@@ -1157,6 +1177,13 @@ public extension Postfix {
         return self as? MemberPostfix
     }
 }
+// Helper casting getter extensions to postfix expression
+public extension PostfixExpression {
+    var member: MemberPostfix? {
+        return op as? MemberPostfix
+    }
+}
+
 
 public final class SubscriptPostfix: Postfix {
     public var expression: Expression
@@ -1191,6 +1218,13 @@ public extension Postfix {
         return self as? SubscriptPostfix
     }
 }
+// Helper casting getter extensions to postfix expression
+public extension PostfixExpression {
+    var subscription: SubscriptPostfix? {
+        return op as? SubscriptPostfix
+    }
+}
+
 
 public final class FunctionCallPostfix: Postfix {
     public var arguments: [FunctionArgument]
@@ -1225,6 +1259,13 @@ public extension Postfix {
         return self as? FunctionCallPostfix
     }
 }
+// Helper casting getter extensions to postfix expression
+public extension PostfixExpression {
+    var functionCall: FunctionCallPostfix? {
+        return op as? FunctionCallPostfix
+    }
+}
+
 
 /// A function argument kind
 public struct FunctionArgument: Equatable {

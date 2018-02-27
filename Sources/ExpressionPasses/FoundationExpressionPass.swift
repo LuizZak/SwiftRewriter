@@ -29,7 +29,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     func convertIsEqualToString(_ exp: PostfixExpression) -> Expression? {
         guard let postfix = exp.exp.asPostfix,
             postfix.op == .member("isEqualToString"),
-            let args = exp.op.asFuntionCall?.arguments, args.count == 1 && !args.hasLabeledArguments() else {
+            let args = exp.functionCall?.arguments, args.count == 1 && !args.hasLabeledArguments() else {
                 return nil
         }
         
@@ -39,7 +39,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     /// Converts [NSString stringWithFormat:@"format", <...>] -> String(format: "format", <...>)
     func convertStringWithFormat(_ exp: PostfixExpression) -> Expression? {
         guard exp.exp == .postfix(.identifier("NSString"), .member("stringWithFormat")),
-            let args = exp.op.asFuntionCall?.arguments, args.count > 0 else {
+            let args = exp.functionCall?.arguments, args.count > 0 else {
                 return nil
         }
         
@@ -56,7 +56,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     /// Converts [<array> addObjectsFromArray:<exp>] -> <array>.addObjects(from: <exp>)
     func convertAddObjectsFromArray(_ exp: PostfixExpression) -> Expression? {
         guard let memberPostfix = exp.exp.asPostfix, memberPostfix.op == .member("addObjectsFromArray"),
-            let args = exp.op.asFuntionCall?.arguments, args.count == 1 else {
+            let args = exp.functionCall?.arguments, args.count == 1 else {
                 return nil
         }
         
@@ -72,7 +72,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts [Type class] and [expression class] expressions
     func convertClassCall(_ exp: PostfixExpression) -> Expression? {
-        guard let args = exp.op.asFuntionCall?.arguments, args.count == 0 else {
+        guard let args = exp.functionCall?.arguments, args.count == 0 else {
             return nil
         }
         guard let classMember = exp.exp.asPostfix, classMember.op == .member("class") else {
@@ -103,13 +103,13 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts [NSArray array], [NSDictionary dictionary], etc. constructs
     func convertDataStructureInit(_ exp: PostfixExpression) -> Expression? {
-        guard let args = exp.op.asFuntionCall?.arguments, args.count == 0 else {
+        guard let args = exp.functionCall?.arguments, args.count == 0 else {
             return nil
         }
         guard let initMember = exp.exp.asPostfix, let typeName = initMember.exp.asIdentifier?.identifier else {
             return nil
         }
-        guard let initName = initMember.op.asMember?.name else {
+        guard let initName = initMember.member?.name else {
             return nil
         }
         

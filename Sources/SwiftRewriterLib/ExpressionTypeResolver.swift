@@ -489,7 +489,7 @@ private class MemberInvocationResolver {
                 return exp.makeErrorTyped()
             }
             
-            exp.op.asMember?.memberDefinition = property
+            member.memberDefinition = property
             exp.resolvedType = property.storage.type
         
         case _ as OptionalAccessPostfix:
@@ -538,7 +538,7 @@ private class MemberInvocationResolver {
             return postfix
         }
         // Selector invocation
-        if let target = postfix.exp.asPostfix?.exp, let name = postfix.exp.asPostfix?.op.asMember?.name {
+        if let target = postfix.exp.asPostfix?.exp, let member = postfix.exp.asPostfix?.member {
             guard let type = target.resolvedType else {
                 return postfix.makeErrorTyped()
             }
@@ -546,13 +546,13 @@ private class MemberInvocationResolver {
                 return postfix.makeErrorTyped()
             }
             guard let method = method(isStatic: type.isMetatype,
-                                      memberName: name,
+                                      memberName: member.name,
                                       arguments: arguments,
                                       in: knownType) else {
                 return postfix.makeErrorTyped()
             }
             
-            postfix.exp.asPostfix?.op.asMember?.memberDefinition = method
+            member.memberDefinition = method
             
             postfix.exp.resolvedType = method.signature.swiftClosureType
             postfix.resolvedType = method.signature.returnType

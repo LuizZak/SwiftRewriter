@@ -33,7 +33,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
             let iterator = SyntaxNodeSequence(statement: body, inspectBlocks: true)
             
             for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
-                guard let expMethod = exp.op.asMember?.memberDefinition as? KnownMethod else {
+                guard let expMethod = exp.member?.memberDefinition as? KnownMethod else {
                     continue
                 }
                 guard expMethod.signature == method.signature else {
@@ -67,7 +67,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
             let iterator = SyntaxNodeSequence(statement: body, inspectBlocks: true)
             
             for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
-                guard let expProperty = exp.op.asMember?.memberDefinition as? KnownProperty else {
+                guard let expProperty = exp.member?.memberDefinition as? KnownProperty else {
                     continue
                 }
                 guard expProperty.name == property.name else {
