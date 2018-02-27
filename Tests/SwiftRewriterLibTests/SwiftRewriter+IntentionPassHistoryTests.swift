@@ -31,10 +31,12 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             @end
             """,
             swift: """
+            // [Creation]  line 7 column 0
             // [PropertyMergeIntentionPass] Removed method MyClass.value() -> Bool since deduced it is a getter for property MyClass.value: Bool
             // [PropertyMergeIntentionPass] Removed method MyClass.setValue(_ value: Bool) since deduced it is a setter for property MyClass.value: Bool
             @objc
             class MyClass: NSObject {
+                // [Creation]  line 2 column 0
                 // [PropertyMergeIntentionPass] Merged MyClass.value() -> Bool and MyClass.setValue(_ value: Bool) into property MyClass.value: Bool
                 @objc var value: Bool {
                     get {
@@ -44,7 +46,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                     }
                 }
                 
-                // [Creation] Merged existing method of separate declaration [File '' line 1 column 0]
+                // [Creation]  line 4 column 2
                 // [TypeMerge] Updated nullability signature () -> String! -> () -> String
                 // [TypeMerge] Inserted body from method MyClass.aMethod() -> String!
                 @objc
