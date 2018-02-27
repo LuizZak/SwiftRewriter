@@ -190,7 +190,8 @@ class TypeMapperTests: XCTestCase {
         }
     }
     
-    private func expectSwift(_ type: SwiftType, toConvertTo expected: String, file: String = #file, line: Int = #line) {
+    private func expectSwift(_ type: SwiftType, toConvertTo expected: String,
+                             file: String = #file, line: Int = #line) {
         let converted = typeMapperConvert(type)
         
         if converted != expected {

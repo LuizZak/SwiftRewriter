@@ -14,193 +14,24 @@ public protocol TypeSystem {
     /// Returns `true` if a type represented by a given type name is a subtype of
     /// another type
     func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool
-}
-
-/// Standard type system implementation
-public class DefaultTypeSystem: TypeSystem {
-    var types: [KnownType] = []
     
-    public init() {
-        registerInitialKnownTypes()
-    }
+    /// Gets the supertype of a given type on this type system.
+    ///
+    /// - Parameter type: A known type with available supertype information.
+    /// - Returns: The supertype of the given type.
+    func supertype(of type: KnownType) -> KnownType?
     
-    public func addType(_ type: KnownType) {
-        types.append(type)
-    }
+    // MARK: Member searching methods
     
-    public func knownTypeWithName(_ name: String) -> KnownType? {
-        return types.first { $0.typeName == name }
-    }
+    /// Gets a constructor matching a given argument label set
+    func constructor(withArgumentLabels labels: [String], in type: KnownType) -> KnownConstructor?
     
-    public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
-        guard let type = knownTypeWithName(typeName) else {
-            return false
-        }
-        guard let supertype = knownTypeWithName(supertypeName) else {
-            return false
-        }
-        
-        var current: KnownType? = type
-        while let c = current {
-            if c.typeName == supertype.typeName {
-                return true
-            }
-            
-            current = c.supertype?.asKnownType
-        }
-        
-        return false
-    }
+    /// Gets a protocol conformance to a given protocol name
+    func conformance(toProtocolName name: String, in type: KnownType) -> KnownProtocolConformance?
     
-    public func isNumeric(_ type: SwiftType) -> Bool {
-        if isInteger(type) {
-            return true
-        }
-        
-        switch type {
-        case .float, .double, .cgFloat:
-            return true
-        case .typeName("Float80"):
-            return true
-        default:
-            return false
-        }
-    }
+    /// Searches for a method with a given Objective-C equivalent selector
+    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool, in type: KnownType) -> KnownMethod?
     
-    public func isInteger(_ type: SwiftType) -> Bool {
-        switch type {
-        case .int, .uint:
-            return true
-        case .typeName("Int64"), .typeName("Int32"), .typeName("Int16"), .typeName("Int8"):
-            return true
-        case .typeName("UInt64"), .typeName("UInt32"), .typeName("UInt16"), .typeName("UInt8"):
-            return true
-        default:
-            return false
-        }
-    }
-}
-
-extension DefaultTypeSystem {
-    /// Initializes the default known types
-    func registerInitialKnownTypes() {
-        let nsObject =
-            KnownTypeBuilder(typeName: "NSObject")
-                .addingConstructor()
-                .build()
-        
-        let nsArray =
-            KnownTypeBuilder(typeName: "NSArray", supertype: nsObject)
-                .build()
-        
-        let nsMutableArray =
-            KnownTypeBuilder(typeName: "NSMutableArray", supertype: nsArray)
-                .addingMethod(withSignature:
-                    FunctionSignature(name: "addObject",
-                                      parameters: [
-                                        ParameterSignature(label: "_", name: "object", type: .anyObject)],
-                                      returnType: .void,
-                                      isStatic: false
-                    )
-                )
-                .build()
-        
-        let nsDictionary =
-            KnownTypeBuilder(typeName: "NSDictionary", supertype: nsObject)
-                .build()
-        
-        let nsMutableDictionary =
-            KnownTypeBuilder(typeName: "NSMutableDictionary", supertype: nsDictionary)
-                .addingMethod(withSignature:
-                    FunctionSignature(name: "setObject",
-                                      parameters: [
-                                        ParameterSignature(label: "_", name: "anObject", type: .anyObject),
-                                        ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)],
-                                      returnType: .void,
-                                      isStatic: false
-                    )
-                )
-                .build()
-        
-        addType(nsObject)
-        addType(nsArray)
-        addType(nsMutableArray)
-        addType(nsDictionary)
-        addType(nsMutableDictionary)
-    }
-}
-
-/// An extension over the default type system that enables using an intention
-/// collection to search for types
-public class IntentionCollectionTypeSystem: DefaultTypeSystem {
-    public var intentions: IntentionCollection
-    
-    public init(intentions: IntentionCollection) {
-        self.intentions = intentions
-        super.init()
-    }
-    
-    public override func knownTypeWithName(_ name: String) -> KnownType? {
-        // TODO: Create a lazy KnownType implementer that searches for requested
-        // members on-demand every time the respective KnownType members are requested.
-        
-        // Only return types that have a valid super-type
-        // TODO: This is a hack to get around proper supertype by-name lookup
-        // when looking into members!
-        // We could solve this by moving the member-searching methods (`property(named:)`/
-        // `method(withObjcSelector:)` etc.) into an external object (TypeSystem
-        // might be good!) that will perform this type lookup properly.
-        if let type = super.knownTypeWithName(name), type.supertype?.asKnownType != nil {
-            return type
-        }
-        
-        // Search in type intentions
-        let types = intentions.typeIntentions().map { $0 as KnownType }.filter { $0.typeName == name }
-        guard types.count > 0 else {
-            return nil
-        }
-        
-        // Single type found: Avoid complex merge operations and return it as is.
-        if types.count == 1 && types[0].supertype?.asKnownType != nil {
-            return types[0]
-        }
-        
-        var typeBuilder = KnownTypeBuilder(typeName: name)
-        
-        for type in types {
-            // Search supertypes known here
-            switch type.supertype {
-            case .typeName(let supertypeName)?:
-                typeBuilder =
-                    typeBuilder.settingSupertype(super.knownTypeWithName(supertypeName))
-            case .knownType(let supertype)?:
-                typeBuilder =
-                    typeBuilder.settingSupertype(supertype)
-            default:
-                break
-            }
-            
-            for prot in type.knownProtocolConformances {
-                typeBuilder =
-                    typeBuilder.addingProtocolConformance(protocolName: prot.protocolName)
-            }
-            
-            for prop in type.knownProperties {
-                typeBuilder =
-                    typeBuilder.addingProperty(named: prop.name, storage: prop.storage, isStatic: prop.isStatic)
-            }
-            
-            for ctor in type.knownConstructors {
-                typeBuilder =
-                    typeBuilder.addingConstructor(withParameters: ctor.parameters)
-            }
-            
-            for method in type.knownMethods {
-                typeBuilder =
-                    typeBuilder.addingMethod(withSignature: method.signature)
-            }
-        }
-        
-        return typeBuilder.build()
-    }
+    /// Gets a property with a given name
+    func property(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty?
 }

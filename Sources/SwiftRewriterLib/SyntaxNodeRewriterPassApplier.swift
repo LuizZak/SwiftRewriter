@@ -4,10 +4,12 @@ import SwiftAST
 /// all function bodies found in one go.
 public class SyntaxNodeRewriterPassApplier {
     public var passes: [SyntaxNodeRewriterPass]
+    public var typeSystem: TypeSystem
     public var typeResolver: ExpressionTypeResolver
     
-    public init(passes: [SyntaxNodeRewriterPass], typeResolver: ExpressionTypeResolver) {
+    public init(passes: [SyntaxNodeRewriterPass], typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver) {
         self.passes = passes
+        self.typeSystem = typeSystem
         self.typeResolver = typeResolver
     }
     
@@ -36,18 +38,13 @@ public class SyntaxNodeRewriterPassApplier {
             applyOnProperty(prop)
         }
         
+        for initializer in cls.constructors {
+            applyOnInitializer(initializer)
+        }
+        
         for method in cls.methods {
             applyOnMethod(method)
         }
-    }
-    
-    private func applyOnMethod(_ method: MethodGenerationIntention) {
-        setupIntrinsics(forMember: method)
-        defer {
-            tearDownIntrinsics()
-        }
-        
-        applyOnFunction(method)
     }
     
     private func applyOnProperty(_ property: PropertyGenerationIntention) {
@@ -67,6 +64,24 @@ public class SyntaxNodeRewriterPassApplier {
         }
     }
     
+    private func applyOnInitializer(_ ctor: InitGenerationIntention) {
+        setupIntrinsics(forMember: ctor)
+        defer {
+            tearDownIntrinsics()
+        }
+        
+        applyOnFunction(ctor)
+    }
+    
+    private func applyOnMethod(_ method: MethodGenerationIntention) {
+        setupIntrinsics(forMember: method)
+        defer {
+            tearDownIntrinsics()
+        }
+        
+        applyOnFunction(method)
+    }
+    
     private func applyOnFunction(_ f: FunctionIntention) {
         if let method = f.functionBody {
             applyOnFunctionBody(method)
@@ -77,8 +92,10 @@ public class SyntaxNodeRewriterPassApplier {
         // Resolve types before feeding into passes
         typeResolver.resolveTypes(in: functionBody.body)
         
+        let expContext = SyntaxNodeRewriterPassContext(typeSystem: typeSystem)
+        
         passes.forEach {
-            _=functionBody.body.accept($0)
+            $0.apply(on: functionBody.body, context: expContext)
             
             // After each apply to the body, we must re-type check the result
             // before handing it off to the next pass.

@@ -86,6 +86,7 @@ public class SwiftRewriter {
         
         let applier =
             SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
+                                          typeSystem: typeSystem,
                                           typeResolver: typeResolver)
         
         let typeResolverInvoker = DefaultTypeResolverInvoker(typeResolver: typeResolver)

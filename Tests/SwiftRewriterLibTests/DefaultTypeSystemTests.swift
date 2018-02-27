@@ -31,7 +31,7 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSObject's default parameterless constructor")
     }
     
@@ -42,7 +42,7 @@ class DefaultTypeSystemTests: XCTestCase {
         }
         
         XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
-        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSArray's default parameterless constructor")
     }
     
@@ -53,7 +53,7 @@ class DefaultTypeSystemTests: XCTestCase {
         }
         
         XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSArray")
-        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSMutableArray's default parameterless constructor")
     }
     
@@ -64,7 +64,7 @@ class DefaultTypeSystemTests: XCTestCase {
         }
         
         XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
-        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSDictionary's default parameterless constructor")
     }
     
@@ -75,7 +75,35 @@ class DefaultTypeSystemTests: XCTestCase {
         }
         
         XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSDictionary")
-        XCTAssertNotNil(type.constructor(withArgumentLabels: []),
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSMutableDictionary's default parameterless constructor")
+    }
+    
+    func testConstructorSearchesThroughSupertypes() {
+        let type1 = KnownTypeBuilder(typeName: "A").addingConstructor().build()
+        let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()
+        let type3 = KnownTypeBuilder(typeName: "C", supertype: type2).build()
+        
+        sut.addType(type1)
+        sut.addType(type2)
+        sut.addType(type3)
+        
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type1))
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type2))
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type3))
+    }
+    
+    func testConstructorSearchesTypeNamedSupertypes() {
+        let type1 = KnownTypeBuilder(typeName: "A").addingConstructor().build()
+        let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()
+        let type3 = KnownTypeBuilder(typeName: "C", supertype: "B").build()
+        
+        sut.addType(type1)
+        sut.addType(type2)
+        sut.addType(type3)
+        
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type1))
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type2))
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type3))
     }
 }

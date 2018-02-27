@@ -711,7 +711,9 @@ class SyntaxNodeIteratorTests: XCTestCase {
                             Expression.identifier("c")
             ])
     }
-    
+}
+
+extension SyntaxNodeIteratorTests {
     /// Creates a test block which contains only a single statement containing an
     /// `Expression.identifier()` case with a given input value as the identifier.
     ///

@@ -19,20 +19,6 @@ public protocol KnownType: KnownSupertypeConvertible {
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
-    
-    // MARK: Member searching methods
-    
-    /// Gets a constructor matching a given argument label set
-    func constructor(withArgumentLabels labels: [String]) -> KnownConstructor?
-    
-    /// Gets a protocol conformance to a given protocol name
-    func conformance(toProtocolName name: String) -> KnownProtocolConformance?
-    
-    /// Searches for a method with a given Objective-C equivalent selector
-    func method(withObjcSelector selector: FunctionSignature, static: Bool) -> KnownMethod?
-    
-    /// Gets a property with a given name
-    func property(named name: String, static: Bool) -> KnownProperty?
 }
 
 /// Defines the known supertype of a `KnownType`
@@ -75,55 +61,6 @@ extension String: KnownSupertypeConvertible {
 public extension KnownType {
     public var asKnownSupertype: KnownSupertype {
         return .knownType(self)
-    }
-    
-    public func constructor(withArgumentLabels labels: [String]) -> KnownConstructor? {
-        return
-            firstInInheritanceChain { type in
-                return type.knownConstructors.first { ctor in
-                    ctor.parameters.map { $0.label }.elementsEqual(labels)
-                }
-            }
-    }
-    
-    public func conformance(toProtocolName name: String) -> KnownProtocolConformance? {
-        return
-            firstInInheritanceChain { type in
-                return type.knownProtocolConformances.first { $0.protocolName == name }
-        }
-    }
-    
-    public func method(withObjcSelector selector: FunctionSignature, static stat: Bool) -> KnownMethod? {
-        return
-            firstInInheritanceChain { type in
-                return
-                    type.knownMethods.first { method in
-                        stat == method.isStatic && method.signature.matchesAsSelector(selector)
-                    }
-            }
-    }
-    
-    public func property(named name: String, static stat: Bool) -> KnownProperty? {
-        return
-            firstInInheritanceChain { type in
-                return
-                    type.knownProperties.first { property in
-                        stat == property.isStatic && property.name == name
-                    }
-            }
-    }
-    
-    /// Looks through the inheritance chain of this known type, returning the first
-    /// known type that returns a non-nil result to a block query.
-    ///
-    /// Returns nil, if all types returned nil.
-    private func firstInInheritanceChain<T>(where block: (KnownType) -> T?) -> T? {
-        let result = block(self)
-        if let result = result {
-            return result
-        }
-        
-        return supertype?.asKnownType?.firstInInheritanceChain(where: block)
     }
 }
 

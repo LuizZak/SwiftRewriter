@@ -284,7 +284,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         _=super.visitPostfix(exp)
         
-        let resolver = MemberInvocationResolver(typeResolver: self)
+        let resolver = MemberInvocationResolver(typeSystem: typeSystem, typeResolver: self)
         return resolver.resolve(postfix: exp)
     }
     
@@ -402,9 +402,11 @@ extension ExpressionTypeResolver {
 
 /// Logic for resolving member invocations in expressions
 private class MemberInvocationResolver {
+    let typeSystem: TypeSystem
     let typeResolver: ExpressionTypeResolver
     
-    init(typeResolver: ExpressionTypeResolver) {
+    init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver) {
+        self.typeSystem = typeSystem
         self.typeResolver = typeResolver
     }
     
@@ -480,7 +482,7 @@ private class MemberInvocationResolver {
             guard let type = typeResolver.findType(for: innerType) else {
                 return exp.makeErrorTyped()
             }
-            guard let property = type.property(named: member.name, static: innerType.isMetatype) else {
+            guard let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: type) else {
                 return exp.makeErrorTyped()
             }
             
@@ -511,7 +513,7 @@ private class MemberInvocationResolver {
             guard let knownType = typeResolver.findType(for: metatype) else {
                 return postfix.makeErrorTyped()
             }
-            guard knownType.constructor(withArgumentLabels: labels(in: arguments)) != nil else {
+            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: knownType) != nil else {
                 return postfix.makeErrorTyped()
             }
             
@@ -524,7 +526,7 @@ private class MemberInvocationResolver {
             guard let knownType = typeResolver.findType(for: metatype) else {
                 return postfix.makeErrorTyped()
             }
-            guard knownType.constructor(withArgumentLabels: labels(in: arguments)) != nil else {
+            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: knownType) != nil else {
                 return postfix.makeErrorTyped()
             }
             
@@ -593,6 +595,6 @@ private class MemberInvocationResolver {
                               returnType: .void,
                               isStatic: isStatic)
         
-        return type.method(withObjcSelector: signature, static: isStatic)
+        return typeSystem.method(withObjcSelector: signature, static: isStatic, in: type)
     }
 }

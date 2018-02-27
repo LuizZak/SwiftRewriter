@@ -55,7 +55,7 @@ class ExpressionPassTestCase: XCTestCase {
         return (tokens, parser)
     }
     
-    func makeContext() -> ExpressionPassContext {
-        return ExpressionPassContext(typeSystem: DefaultTypeSystem())
+    func makeContext() -> SyntaxNodeRewriterPassContext {
+        return SyntaxNodeRewriterPassContext(typeSystem: DefaultTypeSystem())
     }
 }

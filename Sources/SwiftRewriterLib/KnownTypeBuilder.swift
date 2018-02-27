@@ -55,7 +55,7 @@ public class KnownTypeBuilder {
         // Probably with a flag on the KnownTypeBuilder instance.
         
         // Check duplicates
-        guard type.method(withObjcSelector: signature, static: signature.isStatic) == nil else {
+        guard !type.knownMethods.contains(where: { $0.signature.matchesAsSelector(signature) }) else {
             return self
         }
         
@@ -76,7 +76,7 @@ public class KnownTypeBuilder {
     /// Adds a strong property with no attributes with a given name and storage
     public func addingProperty(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
         // Check duplicates
-        guard type.property(named: name, static: isStatic) == nil else {
+        guard !type.knownProperties.contains(where: { $0.name == name && $0.storage == storage && $0.isStatic == isStatic }) else {
             return self
         }
         
@@ -93,7 +93,7 @@ public class KnownTypeBuilder {
     
     public func addingProtocolConformance(protocolName: String) -> KnownTypeBuilder {
         // Check duplicates
-        guard type.conformance(toProtocolName: protocolName) == nil else {
+        guard !type.knownProtocolConformances.contains(where: { $0.protocolName == protocolName }) else {
             return self
         }
         
