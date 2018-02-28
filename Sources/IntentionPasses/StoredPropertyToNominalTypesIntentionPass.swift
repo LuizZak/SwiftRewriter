@@ -7,7 +7,16 @@ import SwiftAST
 /// Extensions in Swift cannot declare stored variables, so they must be moved to
 /// the proper nominal instances.
 public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
-    public static let historyTag: String = "\(StoredPropertyToNominalTypesIntentionPass.self)"
+    /// A number representing the unique index of an operation to aid in history
+    /// checking by tag.
+    /// Represents the number of operations applied by this intention pass while
+    /// instantiated, +1.
+    private var operationsNumber: Int = 1
+    
+    /// Textual tag this intention pass applies to history tracking entries.
+    private var historyTag: String {
+        return "\(StoredPropertyToNominalTypesIntentionPass.self):\(operationsNumber)"
+    }
     
     public init() {
         
@@ -28,13 +37,12 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
                                       into nominalClass: ClassGenerationIntention) {
         for ext in extensions {
             // IVar
-            StoredPropertyToNominalTypesIntentionPass
-                .moveInstanceVariables(from: ext, into: nominalClass)
+            moveInstanceVariables(from: ext, into: nominalClass)
         }
     }
     
-    static func moveInstanceVariables(from first: ClassExtensionGenerationIntention,
-                                      into second: BaseClassIntention) {
+    func moveInstanceVariables(from first: ClassExtensionGenerationIntention,
+                               into second: BaseClassIntention) {
         for ivar in first.instanceVariables {
             if !second.hasInstanceVariable(named: ivar.name) {
                 second.addInstanceVariable(ivar)
@@ -55,11 +63,13 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
                          since matching field name was found on original declaration
                          """, relatedIntentions: [first])
             }
+            
+            operationsNumber += 1
         }
     }
     
-    static func moveStoredProperties(from first: ClassExtensionGenerationIntention,
-                                     into second: BaseClassIntention) {
+    func moveStoredProperties(from first: ClassExtensionGenerationIntention,
+                              into second: BaseClassIntention) {
         for prop in first.properties {
             first.removeProperty(prop)
             
@@ -79,8 +89,9 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
                          Removing stored property \(prop.name) from \(TypeFormatter.asString(extension: first)) \
                          since matching property name was found on original declaration
                          """, relatedIntentions: [first])
-                
             }
+            
+            operationsNumber += 1
         }
     }
 }

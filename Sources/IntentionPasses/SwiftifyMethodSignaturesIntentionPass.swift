@@ -9,7 +9,16 @@ import SwiftAST
 ///
 /// Examples include [[Class alloc] initWithThing:thing] -> Class(thing: thing)
 public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
-    let historyTag = "\(SwiftifyMethodSignaturesIntentionPass.self)"
+    /// A number representing the unique index of an operation to aid in history
+    /// checking by tag.
+    /// Represents the number of operations applied by this intention pass while
+    /// instantiated, +1.
+    private var operationsNumber: Int = 1
+    
+    /// Textual tag this intention pass applies to history tracking entries.
+    private var historyTag: String {
+        return "\(SwiftifyMethodSignaturesIntentionPass.self):\(operationsNumber)"
+    }
     
     public init() {
         
@@ -46,6 +55,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                         Converted from original init-like method \(TypeFormatter.asString(signature: method.signature, includeName: true)) \
                         to init\(TypeFormatter.asString(parameters: initIntention.parameters))
                         """)
+                
+                operationsNumber += 1
                 
                 type.addConstructor(initIntention)
             }
@@ -111,6 +122,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                     to \(TypeFormatter.asString(signature: method.signature, includeName: true))
                     """, relatedIntentions: [])
             
+            operationsNumber += 1
+            
             return
         }
         
@@ -139,6 +152,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             Swiftified signature from \(TypeFormatter.asString(signature: signature, includeName: true)) \
             to \(TypeFormatter.asString(signature: method.signature, includeName: true))
             """, relatedIntentions: [])
+        
+        operationsNumber += 1
     }
 }
 

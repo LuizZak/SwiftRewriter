@@ -32,12 +32,12 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             """,
             swift: """
             // [Creation]  line 7 column 0
-            // [PropertyMergeIntentionPass] Removed method MyClass.value() -> Bool since deduced it is a getter for property MyClass.value: Bool
-            // [PropertyMergeIntentionPass] Removed method MyClass.setValue(_ value: Bool) since deduced it is a setter for property MyClass.value: Bool
+            // [PropertyMergeIntentionPass:1] Removed method MyClass.value() -> Bool since deduced it is a getter for property MyClass.value: Bool
+            // [PropertyMergeIntentionPass:1] Removed method MyClass.setValue(_ value: Bool) since deduced it is a setter for property MyClass.value: Bool
             @objc
             class MyClass: NSObject {
                 // [Creation]  line 2 column 0
-                // [PropertyMergeIntentionPass] Merged MyClass.value() -> Bool and MyClass.setValue(_ value: Bool) into property MyClass.value: Bool
+                // [PropertyMergeIntentionPass:1] Merged MyClass.value() -> Bool and MyClass.setValue(_ value: Bool) into property MyClass.value: Bool
                 @objc var value: Bool {
                     get {
                         return false

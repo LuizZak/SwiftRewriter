@@ -136,13 +136,13 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(
             cls.history.summary,
             """
-            [PropertyMergeIntentionPass] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
-            [PropertyMergeIntentionPass] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
+            [PropertyMergeIntentionPass:1] Removed method A.a() -> Int since deduced it is a getter for property A.a: Int
+            [PropertyMergeIntentionPass:1] Removed method A.setA(_ a: Int) since deduced it is a setter for property A.a: Int
             """
         )
         XCTAssertEqual(
             cls.properties[0].history.summary,
-            "[PropertyMergeIntentionPass] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
+            "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
         )
     }
 }

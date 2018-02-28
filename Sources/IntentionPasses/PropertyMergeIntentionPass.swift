@@ -2,8 +2,16 @@ import SwiftRewriterLib
 import SwiftAST
 
 public class PropertyMergeIntentionPass: IntentionPass {
+    /// A number representing the unique index of an operation to aid in history
+    /// checking by tag.
+    /// Represents the number of operations applied by this intention pass while
+    /// instantiated, +1.
+    private var operationsNumber: Int = 1
+    
     /// Textual tag this intention pass applies to history tracking entries.
-    public var historyTag: String = "\(PropertyMergeIntentionPass.self)"
+    private var historyTag: String {
+        return "\(PropertyMergeIntentionPass.self):\(operationsNumber)"
+    }
     
     public init() {
         
@@ -130,6 +138,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     is a setter for property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
                     """)
             
+            operationsNumber += 1
+            
         // Getter-only on readonly property: Create computed property.
         case let (getter?, nil) where propertySet.property.isSourceReadOnly:
             let getterBody = getter.functionBody ?? FunctionBodyIntention(body: [])
@@ -148,6 +158,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     """, relatedIntentions: [propertySet.property, getterBody])
                 .echoRecord(to: propertySet.property)
                 .echoRecord(to: getterBody)
+            
+            operationsNumber += 1
             
         // Setter-only: Synthesize the backing field of the property and expose
         // a default getter `return _field` and the found setter.
@@ -191,6 +203,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .echoRecord(to: field)
                 .echoRecord(to: setter)
                 .echoRecord(to: propertySet.property)
+            
+            operationsNumber += 1
         default:
             break
         }
