@@ -4,6 +4,8 @@ import ExpressionPasses
 import SourcePreprocessors
 import IntentionPasses
 
+var options = ASTWriterOptions()
+
 /// Protocol for enabling Swift rewriting service from CLI
 public protocol SwiftRewriterService {
     /// Performs a rewrite of the given files
@@ -28,6 +30,8 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
         converter.syntaxNodeRewriters.append(FoundationExpressionPass())
         converter.syntaxNodeRewriters.append(UIKitExpressionPass())
+        
+        converter.writerOptions = options
         
         converter.intentionPassesSource = DefaultIntentionPasses()
         

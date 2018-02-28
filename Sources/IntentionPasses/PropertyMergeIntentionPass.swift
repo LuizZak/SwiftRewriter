@@ -144,7 +144,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .recordChange(tag: historyTag,
                               description: """
                     Merged getter method \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
-                    into the  getter-only property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    into the getter-only property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
                     """, relatedIntentions: [propertySet.property, getterBody])
                 .echoRecord(to: propertySet.property)
                 .echoRecord(to: getterBody)

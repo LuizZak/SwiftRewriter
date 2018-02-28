@@ -563,7 +563,7 @@ public class SwiftWriter {
         }
         
         for entry in history.entries {
-            target.output(line: "// \(entry.summary)")
+            target.output(line: "// \(entry.summary)", style: .comment)
         }
     }
     

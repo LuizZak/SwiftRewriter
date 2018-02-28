@@ -238,7 +238,11 @@ public enum TypeFormatter {
     public static func asString(parameters: [ParameterSignature]) -> String {
         var result = "("
         
-        for param in parameters {
+        for (i, param) in parameters.enumerated() {
+            if i > 0 {
+                result += ", "
+            }
+            
             if param.label != param.name {
                 result += "\(param.label) "
             }
