@@ -38,6 +38,18 @@ indirect public enum SwiftType: Equatable {
         }
     }
     
+    /// Returns `true` if this type represents a nominal type.
+    /// Blocks and meta-types are not considered nominal types, whereas any other
+    /// type is considered nominal.
+    public var isNominal: Bool {
+        switch self {
+        case .block, .metatype:
+            return false
+        default:
+            return true
+        }
+    }
+    
     /// If this type is an `.optional` or `.implicitUnwrappedOptional` type, returns
     /// an unwrapped version of self.
     /// The return is then recursively unwrapped again until a non-optional base

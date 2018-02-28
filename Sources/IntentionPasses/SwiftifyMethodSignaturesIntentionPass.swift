@@ -127,24 +127,34 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             return
         }
         
+        let lowercaseNoun = splitOnWith[1].lowercased()
+        
         // Do a little Swift-importer-like-magic here: If the method selector is
         // in the form `loremWithThing:thing...`, where after a `[...]With` prefix,
         // a noun is followed by a parameter that has the same name, we collapse
         // such selector in Swift as `lorem(with:)`.
-        if splitOnWith[1].lowercased() != signature.parameters[0].name.lowercased() {
+        if lowercaseNoun != signature.parameters[0].name.lowercased() {
             return
         }
         
         // All good! Collapse the identifier into a more 'swifty' construct
-        method.signature.name = splitOnWith[0]
-        
         // Init works slightly different: We leave the first label as the
         // noun found after "With"
         if splitOnWith[0] == "init" {
             method.signature.parameters[0].label = splitOnWith[1].lowercased()
         } else {
+            let mapper = TypeMapper(context: TypeConstructionContext())
+            
+            // Only match if the suffix also matches at least partially the typename
+            let type = signature.parameters[0].type
+            if !type.isNominal || !mapper.typeNameString(for: type).lowercased().hasSuffix(lowercaseNoun) {
+                return
+            }
+            
             method.signature.parameters[0].label = "with"
         }
+        
+        method.signature.name = splitOnWith[0]
         
         method.history
             .recordChange(tag: historyTag,

@@ -21,12 +21,28 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "doThingWithColor",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "color", type: .any)
+                                    ParameterSignature(label: "_", name: "color", type: .typeName("CGColor"))
                     ]))
             .converts(to:
                 FunctionSignature(name: "doThing",
                                   parameters: [
-                                    ParameterSignature(label: "with", name: "color", type: .any)
+                                    ParameterSignature(label: "with", name: "color", type: .typeName("CGColor"))
+                    ]))
+    }
+    
+    func testConvertWithOnlyConvertsIfSelectorSuffixMatchesTypeNameAsWell() {
+        let sut = SwiftifyMethodSignaturesIntentionPass()
+        
+        testThat(sut: sut)
+            .method(withSignature:
+                FunctionSignature(name: "doThingWithColor",
+                                  parameters: [
+                                    ParameterSignature(label: "_", name: "color", type: .int)
+                    ]))
+            .converts(to:
+                FunctionSignature(name: "doThingWithColor",
+                                  parameters: [
+                                    ParameterSignature(label: "_", name: "color", type: .int)
                     ]))
     }
     
@@ -261,7 +277,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 return
             }
             
-            let result = "init" + parametersToString(ctor.parameters)
+            let result = "init" + TypeFormatter.asString(parameters: ctor.parameters)
             
             guard result != expected else {
                 return
@@ -280,7 +296,8 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
             }
             
             testCase.recordFailure(withDescription: """
-                Expected signature \(signature), but converted to \(type.methods[0].signature)
+                Expected signature \(TypeFormatter.asString(signature: signature, includeName: true)), \
+                but converted to \(TypeFormatter.asString(signature: type.methods[0].signature, includeName: true))
                 """
                 , inFile: file, atLine: line, expected: false)
         }
@@ -296,7 +313,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 return
             }
             
-            let converted = signatureToString(method.signature)
+            let converted = TypeFormatter.asString(signature: method.signature, includeName: true)
             guard converted != signature else {
                 return
             }
@@ -307,54 +324,10 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 , inFile: file, atLine: line, expected: false)
         }
         
-        // MARK: Signature conversion
-        
-        func signatureToString(_ signature: FunctionSignature) -> String {
-            var output = ""
-            
-            if signature.isStatic {
-                output += "static "
-            }
-            
-            output += "func "
-            
-            output += signature.name
-            output += parametersToString(signature.parameters)
-            
-            if signature.returnType != .void {
-                output += " -> \(typeMapper.typeNameString(for: signature.returnType))"
-            }
-            
-            return output
-        }
-        
-        func parametersToString(_ parameters: [ParameterSignature]) -> String {
-            var output = "("
-            
-            for (i, param) in parameters.enumerated() {
-                if i > 0 {
-                    output += ", "
-                }
-                
-                if param.label != param.name {
-                    output += param.label
-                    output += " "
-                }
-                
-                output += param.name
-                output += ": "
-                output += typeMapper.typeNameString(for: param.type)
-            }
-            
-            output += ")"
-            
-            return output
-        }
-        
         func dumpType() -> String {
             return
                 type.methods
-                    .map { "Method: \($0.signature)" }
+                    .map { "Method: \(TypeFormatter.asString(signature: $0.signature, includeName: true))" }
                     .joined(separator: "\n")
         }
     }
