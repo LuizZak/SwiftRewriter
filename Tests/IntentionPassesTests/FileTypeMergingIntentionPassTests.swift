@@ -151,4 +151,33 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let files = intentions.fileIntentions()
         XCTAssertEqual(files.count, 1)
     }
+    
+    func testHistoryTracking() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { builder in
+                        builder
+                            .createVoidMethod(named: "fromHeader")
+                            .setAsInterfaceSource()
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") { builder in
+                        builder.createVoidMethod(named: "fromImplementation") {
+                            return [.expression(.postfix(.identifier("stmt"), .functionCall()))]
+                        }
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(
+            files[0].classIntentions[0].history.summary,
+            """
+            [TypeMerge] Creating definition for newly found method A.fromHeader()
+            """
+            )
+    }
 }

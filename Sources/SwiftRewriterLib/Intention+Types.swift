@@ -9,6 +9,21 @@ public class FromSourceIntention: NonNullScopedIntention {
     
     weak internal(set) public var parent: Intention?
     
+    /// Gets the file intention this intention is associated with, if available.
+    public var file: FileGenerationIntention? {
+        var parent = self.parent
+        
+        while let p = parent {
+            parent = parent?.parent
+            
+            if let file = parent as? FileGenerationIntention {
+                return file
+            }
+        }
+        
+        return nil
+    }
+    
     // NOTE: This is a hack- shouldn't be recorded on the intention but passed to
     // it in a more abstract way.
     // For now we leave it as it is since it works!

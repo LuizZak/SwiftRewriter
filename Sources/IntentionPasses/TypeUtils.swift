@@ -33,13 +33,6 @@ func mergeTypesToMatchingImplementations(from source: FileGenerationIntention,
         
         // Remove all interface types after merge
         source.removeTypes { type in remaining.contains { $0 === type } }
-        
-//        for cls in classes where cls !== target {
-//            mergeTypes(from: cls, into: target)
-//
-//            // Remove original type from header
-//            source.removeTypes(where: { $0 === cls })
-//        }
     }
     
     for (_, extensions) in allExtensionsByName {
@@ -57,15 +50,6 @@ func mergeTypesToMatchingImplementations(from source: FileGenerationIntention,
             
             // Remove all interface types after merge
             source.removeTypes { type in remaining.contains { $0 === type } }
-            
-            /*
-            for cls in cat where cls !== target {
-                mergeTypes(from: cls, into: target)
-                
-                // Remove original type from header
-                source.removeTypes(where: { $0 === cls })
-            }
-            */
         }
     }
 }
@@ -84,12 +68,12 @@ func mergeDuplicatedTypesInFile(_ file: FileGenerationIntention) {
             continue
         }
         
-        for cls in classes where cls !== target {
-            mergeTypes(from: cls, into: target)
-            
-            // Remove duplicated class
-            file.removeTypes(where: { $0 === cls })
-        }
+        let remaining = classes.filter { $0.isInterfaceSource }
+        
+        mergeAllTypeDefinitions(in: remaining, on: target)
+        
+        // Remove all interface types after merge
+        file.removeTypes { type in remaining.contains { $0 === type } }
     }
     
     for (_, extensions) in extensionsByName {
@@ -101,60 +85,13 @@ func mergeDuplicatedTypesInFile(_ file: FileGenerationIntention) {
                 continue
             }
             
-            for cls in cat where cls !== target {
-                mergeTypes(from: cls, into: target)
-                
-                // Remove duplicated extension
-                file.removeTypes(where: { $0 === cls })
-            }
-        }
-    }
-}
-
-/// Merges all provided type intentions that are contained within the given file
-/// generation intention such that all types that match by name are merged into
-/// a single type with all signatures.
-func mergeTypeIntentions(typeIntentions: [TypeGenerationIntention],
-                         into implementation: FileGenerationIntention,
-                         intentionCollection: IntentionCollection) {
-    var newIntentions: [BaseClassIntention] = []
-    
-    let classes = typeIntentions.compactMap { $0 as? ClassGenerationIntention }
-    let extensions = typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
-    
-    let classesByName = Dictionary(grouping: classes, by: { $0.typeName })
-    let extensionsByName = Dictionary(grouping: extensions, by: { $0.typeName })
-    
-    for (name, classes) in classesByName.sorted(by: { (k1, k2) in k1.key < k2.key }) {
-        let intention =
-            ClassGenerationIntention(typeName: name)
-        
-        mergeAllTypeDefinitions(in: classes, on: intention)
-        
-        newIntentions.append(intention)
-    }
-    
-    for (className, allExtensions) in extensionsByName {
-        let allExtensions =
-            allExtensions.sorted { ($0.categoryName ?? "") < ($1.categoryName ?? "") }
-        
-        // Merge extensions by pairing them up by original category name
-        let extensionsByCategory = Dictionary(grouping: allExtensions, by: { $0.categoryName ?? "" })
-        
-        for (categoryName, extensions) in extensionsByCategory.sorted(by: { (k1, k2) in k1.key < k2.key }) {
-            let category = ClassExtensionGenerationIntention(typeName: className)
-            category.categoryName = categoryName
+            let remaining = cat.filter { $0.isInterfaceSource }
             
-            mergeAllTypeDefinitions(in: extensions, on: category)
+            mergeAllTypeDefinitions(in: remaining, on: target)
             
-            newIntentions.append(category)
+            // Remove all interface types after merge
+            file.removeTypes { type in remaining.contains { $0 === type } }
         }
-    }
-    
-    // Replace all types
-    implementation.removeClassTypes(where: { _ in true })
-    for type in newIntentions {
-        implementation.addType(type)
     }
 }
 
@@ -179,15 +116,27 @@ func mergeTypes(from first: KnownType,
     // Protocols
     for prot in first.knownProtocolConformances {
         if !second.hasProtocol(named: prot.protocolName) {
-            second.generateProtocolConformance(from: prot)
+            let generated = second.generateProtocolConformance(from: prot)
+            
+            second.history
+                .recordChange(tag: "TypeMerge",
+                              description: "Generating protocol conformance \(prot.protocolName) due to \(first.origin)")
+            
+            if let historic = prot as? Historic {
+                generated.history.mergeHistories(historic.history)
+            }
         }
     }
     
     if let first = first as? ClassGenerationIntention,
         let second = second as? ClassGenerationIntention {
         // Inheritance
-        if second.superclassName == nil {
-            second.superclassName = first.superclassName
+        if let superclass = first.superclassName, second.superclassName == nil {
+            second.superclassName = superclass
+            
+            second.history
+                .recordChange(tag: "TypeMerge",
+                              description: "Setting superclass of \(second.typeName) to \(superclass) due to superclass definition found at \(second.origin)")
         }
     }
     
@@ -197,6 +146,10 @@ func mergeTypes(from first: KnownType,
         for ivar in first.instanceVariables {
             if !second.hasInstanceVariable(named: ivar.name) {
                 second.addInstanceVariable(ivar)
+                
+                second.history
+                    .recordChange(tag: "TypeMerge",
+                                  description: "Moved ivar \(ivar.name) from \(first.origin) to \(second.file?.sourcePath ?? "")")
             }
         }
     }
@@ -231,9 +184,11 @@ func mergeMethodSignatures(from first: KnownType,
         if let existing = second.method(matchingSelector: knownMethod.signature) {
             mergeMethods(knownMethod, into: existing)
         } else {
-            let generated =
-                second
-                    .generateMethod(from: knownMethod)
+            let generated = second.generateMethod(from: knownMethod)
+            
+            second.history
+                .recordChange(tag: "TypeMerge",
+                              description: "Creating definition for newly found method \(TypeFormatter.asString(method: knownMethod, ofType: first))")
             
             if let historic = knownMethod as? Historic {
                 generated.history.mergeHistories(historic.history)
