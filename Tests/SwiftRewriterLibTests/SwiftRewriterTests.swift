@@ -255,6 +255,9 @@ class SwiftRewriterTests: XCTestCase {
                 @objc
                 func __(_ a: AnyObject!) {
                 }
+                @objc
+                func __(_ a: AnyObject!) -> AnyObject! {
+                }
             }
             """)
     }
@@ -502,7 +505,7 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 @objc
-                func myMethod(_ aParam: Bool) {
+                func myMethod(_ aParamy: Bool) {
                     thing()
                 }
             }

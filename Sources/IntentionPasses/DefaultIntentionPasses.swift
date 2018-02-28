@@ -6,7 +6,6 @@ import SwiftRewriterLib
 public struct DefaultIntentionPasses: IntentionPassSource {
     public var intentionPasses: [IntentionPass] = [
         FileTypeMergingIntentionPass(),
-        RemoveDuplicatedTypeIntentIntentionPass(),
         StoredPropertyToNominalTypesIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),
         PropertyMergeIntentionPass(),

@@ -15,6 +15,16 @@ public class FileGenerationIntention: Intention {
     /// All preprocessor directives found on this file.
     public var preprocessorDirectives: [String] = []
     
+    /// Returns `true` if there are no intentions registered for this file.
+    public var isEmpty: Bool {
+        return
+            typeIntentions.isEmpty &&
+                preprocessorDirectives.isEmpty &&
+                typealiasIntentions.isEmpty &&
+                globalFunctionIntentions.isEmpty &&
+                globalVariableIntentions.isEmpty
+    }
+    
     /// Gets the class extensions (but not main class declarations) to create
     /// on this file.
     public var extensionIntentions: [ClassExtensionGenerationIntention] {

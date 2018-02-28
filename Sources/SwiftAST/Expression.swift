@@ -1084,22 +1084,6 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         }
     }
     
-    public static func optionalAccess(_ op: Postfix) -> OptionalAccessPostfix {
-        return OptionalAccessPostfix(postfix: op)
-    }
-    
-    public static func member(_ name: String) -> MemberPostfix {
-        return MemberPostfix(name: name)
-    }
-    
-    public static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
-        return SubscriptPostfix(expression: exp)
-    }
-    
-    public static func functionCall(arguments: [FunctionArgument]) -> FunctionCallPostfix {
-        return FunctionCallPostfix(arguments: arguments)
-    }
-    
     public func isEqual(to other: Postfix) -> Bool {
         return false
     }
@@ -1138,6 +1122,10 @@ public final class OptionalAccessPostfix: Postfix {
     }
 }
 public extension Postfix {
+    public static func optionalAccess(_ op: Postfix) -> OptionalAccessPostfix {
+        return OptionalAccessPostfix(postfix: op)
+    }
+    
     public var asOptionalAccess: OptionalAccessPostfix? {
         return self as? OptionalAccessPostfix
     }
@@ -1148,7 +1136,6 @@ public extension PostfixExpression {
         return op as? OptionalAccessPostfix
     }
 }
-
 
 public final class MemberPostfix: Postfix {
     public let name: String
@@ -1175,6 +1162,10 @@ public final class MemberPostfix: Postfix {
     }
 }
 public extension Postfix {
+    public static func member(_ name: String) -> MemberPostfix {
+        return MemberPostfix(name: name)
+    }
+    
     public var asMember: MemberPostfix? {
         return self as? MemberPostfix
     }
@@ -1185,7 +1176,6 @@ public extension PostfixExpression {
         return op as? MemberPostfix
     }
 }
-
 
 public final class SubscriptPostfix: Postfix {
     public let expression: Expression
@@ -1216,6 +1206,10 @@ public final class SubscriptPostfix: Postfix {
     }
 }
 public extension Postfix {
+    public static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
+        return SubscriptPostfix(expression: exp)
+    }
+    
     public var asSubscription: SubscriptPostfix? {
         return self as? SubscriptPostfix
     }
@@ -1257,6 +1251,10 @@ public final class FunctionCallPostfix: Postfix {
     }
 }
 public extension Postfix {
+    public static func functionCall(arguments: [FunctionArgument] = []) -> FunctionCallPostfix {
+        return FunctionCallPostfix(arguments: arguments)
+    }
+    
     public var asFuntionCall: FunctionCallPostfix? {
         return self as? FunctionCallPostfix
     }

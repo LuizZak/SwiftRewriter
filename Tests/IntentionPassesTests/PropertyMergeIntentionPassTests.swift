@@ -146,13 +146,3 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         )
     }
 }
-
-extension PropertyMergeIntentionPassTests {
-    func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
-        let system = IntentionCollectionTypeSystem(intentions: intentions)
-        let resolver = ExpressionTypeResolver(typeSystem: system)
-        let invoker = DefaultTypeResolverInvoker(typeResolver: resolver)
-        
-        return IntentionPassContext(typeSystem: system, typeResolverInvoker: invoker)
-    }
-}

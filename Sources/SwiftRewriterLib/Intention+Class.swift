@@ -2,6 +2,8 @@ import GrammarModels
 
 /// Base intention for Class and Class Category intentions
 public class BaseClassIntention: TypeGenerationIntention {
+    /// Returns `true` if this class intention originated from an `@interface`
+    /// declaration.
     public var isInterfaceSource: Bool {
         return source is ObjcClassInterface || source is ObjcClassCategoryInterface
     }

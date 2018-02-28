@@ -96,6 +96,7 @@ let package = Package(
                            "IntentionPasses"]),
         .testTarget(
             name: "IntentionPassesTests",
-            dependencies: ["SwiftRewriterLib", "IntentionPasses", "TestCommons"])
+            dependencies: ["GrammarModels", "SwiftRewriterLib", "IntentionPasses",
+                           "TestCommons"])
     ]
 )

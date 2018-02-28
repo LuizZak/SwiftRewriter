@@ -3,6 +3,114 @@ import SwiftAST
 
 private let historyTag = "TypeMerge"
 
+func mergeTypesToMatchingImplementations(from source: FileGenerationIntention,
+                                         into target: FileGenerationIntention) {
+    
+    // Group class and extensions by name
+    // ClassName -> [Intention1, Intention2, ...]
+    // ClassName -> [ExtIntention1, ExtIntention2, ...]
+    
+    let sourceClasses = source.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+    let targetClasses = target.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+    
+    let sourceExtensions = source.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
+    let targetExtensions = target.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
+    
+    let allClasses = sourceClasses + targetClasses
+    let allExtensions = sourceExtensions + targetExtensions
+    
+    let allClassesByName = Dictionary(grouping: allClasses, by: { $0.typeName })
+    let allExtensionsByName = Dictionary(grouping: allExtensions, by: { $0.typeName })
+    
+    for (_, classes) in allClassesByName {
+        guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
+            continue
+        }
+        
+        let remaining = classes.filter { $0.isInterfaceSource }
+        
+        mergeAllTypeDefinitions(in: remaining, on: target)
+        
+        // Remove all interface types after merge
+        source.removeTypes { type in remaining.contains { $0 === type } }
+        
+//        for cls in classes where cls !== target {
+//            mergeTypes(from: cls, into: target)
+//
+//            // Remove original type from header
+//            source.removeTypes(where: { $0 === cls })
+//        }
+    }
+    
+    for (_, extensions) in allExtensionsByName {
+        // Work on extensions by category name, if available.
+        let categories = Dictionary(grouping: extensions, by: { $0.categoryName ?? "" })
+        
+        for (_, cat) in categories {
+            guard let target = cat.first(where: { !$0.isInterfaceSource }) else {
+                continue
+            }
+            
+            let remaining = cat.filter { $0.isInterfaceSource }
+            
+            mergeAllTypeDefinitions(in: remaining, on: target)
+            
+            // Remove all interface types after merge
+            source.removeTypes { type in remaining.contains { $0 === type } }
+            
+            /*
+            for cls in cat where cls !== target {
+                mergeTypes(from: cls, into: target)
+                
+                // Remove original type from header
+                source.removeTypes(where: { $0 === cls })
+            }
+            */
+        }
+    }
+}
+
+/// Merges in duplicated types from @interface and @implementation's that match
+/// on a given file
+func mergeDuplicatedTypesInFile(_ file: FileGenerationIntention) {
+    let classes = file.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+    let extensions = file.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
+    
+    let classesByName = Dictionary(grouping: classes, by: { $0.typeName })
+    let extensionsByName = Dictionary(grouping: extensions, by: { $0.typeName })
+    
+    for (_, classes) in classesByName {
+        guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
+            continue
+        }
+        
+        for cls in classes where cls !== target {
+            mergeTypes(from: cls, into: target)
+            
+            // Remove duplicated class
+            file.removeTypes(where: { $0 === cls })
+        }
+    }
+    
+    for (_, extensions) in extensionsByName {
+        // Work on extensions by category name, if available.
+        let categories = Dictionary(grouping: extensions, by: { $0.categoryName ?? "" })
+        
+        for (_, cat) in categories {
+            guard let target = cat.first(where: { !$0.isInterfaceSource }) else {
+                continue
+            }
+            
+            for cls in cat where cls !== target {
+                mergeTypes(from: cls, into: target)
+                
+                // Remove duplicated extension
+                file.removeTypes(where: { $0 === cls })
+            }
+        }
+    }
+}
+
 /// Merges all provided type intentions that are contained within the given file
 /// generation intention such that all types that match by name are merged into
 /// a single type with all signatures.

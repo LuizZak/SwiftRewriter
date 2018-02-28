@@ -1,6 +1,7 @@
 import Foundation
 import SwiftRewriterLib
 import SwiftAST
+import GrammarModels
 
 public class IntentionCollectionBuilder {
     var intentions = IntentionCollection()
@@ -19,7 +20,7 @@ public class IntentionCollectionBuilder {
     }
     
     @discardableResult
-    public func createFile(named name: String, initializer: (FileIntentionBuilder) -> Void) -> IntentionCollectionBuilder {
+    public func createFile(named name: String, initializer: (FileIntentionBuilder) -> Void = { _ in }) -> IntentionCollectionBuilder {
         let builder = FileIntentionBuilder(fileNamed: name)
         
         initializer(builder)
@@ -55,11 +56,8 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createClass(withName name: String, initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassGenerationIntention(typeName: name)
-        let builder = TypeBuilder(targetType: classIntention)
         
-        initializer(builder)
-        
-        intention.addType(builder.build())
+        innerBuildTypeWithClosure(type: classIntention, initializer: initializer)
         
         return self
     }
@@ -67,11 +65,8 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createExtension(forClassNamed name: String, categoryName: String = "", initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassExtensionGenerationIntention(typeName: name)
-        let builder = TypeBuilder(targetType: classIntention)
         
-        initializer(builder)
-        
-        intention.addType(builder.build())
+        innerBuildTypeWithClosure(type: classIntention, initializer: initializer)
         
         return self
     }
@@ -88,6 +83,12 @@ public class FileIntentionBuilder {
         return self
     }
     
+    private func innerBuildTypeWithClosure(type: TypeGenerationIntention, initializer: (TypeBuilder) -> Void) {
+        let builder = TypeBuilder(targetType: type)
+        initializer(builder)
+        intention.addType(builder.build())
+    }
+    
     public func build() -> FileGenerationIntention {
         return intention
     }
@@ -98,6 +99,28 @@ public class TypeBuilder {
     
     public init(targetType: TypeGenerationIntention) {
         self.targetType = targetType
+    }
+    
+    /// Marks the target type for this type builder as coming from an interface
+    /// declaration, if it supports such annotations.
+    @discardableResult
+    public func setAsInterfaceSource() -> TypeBuilder {
+        if let cls = targetType as? BaseClassIntention {
+            cls.source = ObjcClassInterface()
+        }
+        
+        return self
+    }
+    
+    /// Marks the target type for this type builder as coming from a category
+    /// extension interface declaration, if it supports such annotations.
+    @discardableResult
+    public func setAsCategoryInterfaceSource() -> TypeBuilder {
+        if let cls = targetType as? BaseClassIntention {
+            cls.source = ObjcClassCategoryInterface()
+        }
+        
+        return self
     }
     
     @discardableResult
