@@ -254,11 +254,21 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         return source as? PropertySynthesizeItem
     }
     
-    public var isSourceReadOnly: Bool {
-        return attributes.contains { $0.rawString == "readonly" }
+    /// Returns `true` if this property requires a backing field to be created.
+    /// Backing fields must be created for fully-synthesized properties, as well
+    /// as properties that define a getter but are not read-only.
+    public var requiresField: Bool {
+        switch mode {
+        case .computed where !isReadOnly, .asField:
+            return true
+        default:
+            return false
+        }
     }
     
-    public var isReadOnly: Bool = false
+    public var isReadOnly: Bool  {
+        return attributes.contains { $0.rawString == "readonly" }
+    }
     public var name: String
     public var storage: ValueStorage
     public var mode: Mode = .asField
@@ -283,6 +293,15 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         case asField
         case computed(FunctionBodyIntention)
         case property(get: FunctionBodyIntention, set: Setter)
+        
+        public var isField: Bool {
+            switch self {
+            case .asField:
+                return true
+            case .computed, .property:
+                return false
+            }
+        }
     }
     
     public struct Setter {

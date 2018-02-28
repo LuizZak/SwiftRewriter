@@ -11,7 +11,7 @@ public class IntentionCollectionBuilder {
     }
     
     @discardableResult
-    public func createFileWithClass(named name: String, initializer: (TypeBuilder) -> Void = { _ in }) -> IntentionCollectionBuilder {
+    public func createFileWithClass(named name: String, initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = { _ in }) -> IntentionCollectionBuilder {
         createFile(named: "\(name).swift") { builder in
             builder.createClass(withName: name, initializer: initializer)
         }
@@ -54,7 +54,7 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createClass(withName name: String, initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+    public func createClass(withName name: String, initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassGenerationIntention(typeName: name)
         
         innerBuildTypeWithClosure(type: classIntention, initializer: initializer)
@@ -63,7 +63,7 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createExtension(forClassNamed name: String, categoryName: String = "", initializer: (TypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+    public func createExtension(forClassNamed name: String, categoryName: String = "", initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassExtensionGenerationIntention(typeName: name)
         
         innerBuildTypeWithClosure(type: classIntention, initializer: initializer)
@@ -83,7 +83,7 @@ public class FileIntentionBuilder {
         return self
     }
     
-    private func innerBuildTypeWithClosure(type: TypeGenerationIntention, initializer: (TypeBuilder) -> Void) {
+    private func innerBuildTypeWithClosure<T: TypeGenerationIntention>(type: T, initializer: (TypeBuilder<T>) -> Void) {
         let builder = TypeBuilder(targetType: type)
         initializer(builder)
         intention.addType(builder.build())
@@ -94,10 +94,10 @@ public class FileIntentionBuilder {
     }
 }
 
-public class TypeBuilder {
-    var targetType: TypeGenerationIntention
+public class TypeBuilder<T: TypeGenerationIntention> {
+    var targetType: T
     
-    public init(targetType: TypeGenerationIntention) {
+    public init(targetType: T) {
         self.targetType = targetType
     }
     
@@ -125,9 +125,15 @@ public class TypeBuilder {
     
     @discardableResult
     public func createProperty(named name: String, type: SwiftType, attributes: [PropertyAttribute] = []) -> TypeBuilder {
+        return createProperty(named: name, type: type, mode: .asField, attributes: attributes)
+    }
+    
+    @discardableResult
+    public func createProperty(named name: String, type: SwiftType, mode: PropertyGenerationIntention.Mode, attributes: [PropertyAttribute] = []) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
         let prop = PropertyGenerationIntention(name: name, storage: storage, attributes: attributes)
+        prop.mode = mode
         
         targetType.addProperty(prop)
         
@@ -173,8 +179,20 @@ public class TypeBuilder {
         return self
     }
     
-    public func build() -> TypeGenerationIntention {
+    public func build() -> T {
         return targetType
+    }
+}
+
+public extension TypeBuilder where T: BaseClassIntention {
+    @discardableResult
+    public func createInstanceVariable(named name: String, type: SwiftType) -> TypeBuilder {
+        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        
+        let ivar = InstanceVariableGenerationIntention(name: name, storage: storage)
+        targetType.addInstanceVariable(ivar)
+        
+        return self
     }
 }
 

@@ -136,7 +136,7 @@ func mergeTypes(from first: KnownType,
             
             second.history
                 .recordChange(tag: "TypeMerge",
-                              description: "Setting superclass of \(second.typeName) to \(superclass) due to superclass definition found at \(second.origin)")
+                              description: "Setting superclass of \(second.typeName) to \(superclass) due to superclass definition found at \(first.origin)")
         }
     }
     

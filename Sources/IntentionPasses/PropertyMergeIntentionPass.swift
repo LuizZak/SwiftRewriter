@@ -141,7 +141,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             operationsNumber += 1
             
         // Getter-only on readonly property: Create computed property.
-        case let (getter?, nil) where propertySet.property.isSourceReadOnly:
+        case let (getter?, nil) where propertySet.property.isReadOnly:
             let getterBody = getter.functionBody ?? FunctionBodyIntention(body: [])
             
             propertySet.property.mode = .computed(getterBody)
