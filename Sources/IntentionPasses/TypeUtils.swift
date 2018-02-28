@@ -165,7 +165,7 @@ func mergeMethodSignatures(from first: KnownType,
 /// nullability pairing.
 func mergeMethods(_ source: KnownMethod,
                   into target: MethodGenerationIntention) {
-    let originalSignature = source.signature
+    let originalSignature = target.signature
     
     if !source.signature.returnType.isImplicitlyUnwrapped && target.signature.returnType.isImplicitlyUnwrapped {
         if source.signature.returnType.deepUnwrapped == target.signature.returnType.deepUnwrapped {

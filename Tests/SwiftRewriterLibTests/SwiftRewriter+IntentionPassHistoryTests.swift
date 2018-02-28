@@ -13,12 +13,6 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
     func testPrintIntentionHistory() throws {
         try assertObjcParse(
             objc: """
-            @interface MyClass
-            @property BOOL value;
-
-            - (nonnull NSString*)aMethod;
-            @end
-            
             @implementation MyClass
             - (void)setValue:(BOOL)value {
                 
@@ -29,14 +23,20 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             - (NSString*)aMethod {
             }
             @end
+            
+            @interface MyClass
+            @property BOOL value;
+
+            - (nonnull NSString*)aMethod;
+            @end
             """,
             swift: """
-            // [Creation]  line 7 column 0
+            // [Creation]  line 1 column 0
             // [PropertyMergeIntentionPass:1] Removed method MyClass.value() -> Bool since deduced it is a getter for property MyClass.value: Bool
             // [PropertyMergeIntentionPass:1] Removed method MyClass.setValue(_ value: Bool) since deduced it is a setter for property MyClass.value: Bool
             @objc
             class MyClass: NSObject {
-                // [Creation]  line 2 column 0
+                // [Creation]  line 13 column 0
                 // [PropertyMergeIntentionPass:1] Merged MyClass.value() -> Bool and MyClass.setValue(_ value: Bool) into property MyClass.value: Bool
                 @objc var value: Bool {
                     get {
@@ -46,9 +46,8 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                     }
                 }
                 
-                // [Creation]  line 4 column 2
+                // [Creation]  line 8 column 2
                 // [TypeMerge] Updated nullability signature () -> String! -> () -> String
-                // [TypeMerge] Inserted body from method MyClass.aMethod() -> String!
                 @objc
                 func aMethod() -> String {
                 }
