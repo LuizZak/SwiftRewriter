@@ -14,7 +14,7 @@ public class FromSourceIntention: NonNullScopedIntention {
         var parent = self.parent
         
         while let p = parent {
-            parent = parent?.parent
+            parent = p.parent
             
             if let file = parent as? FileGenerationIntention {
                 return file
