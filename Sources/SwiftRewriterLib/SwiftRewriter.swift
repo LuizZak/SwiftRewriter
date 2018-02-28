@@ -276,6 +276,7 @@ public class SwiftRewriter {
         }
         
         let intent = TypealiasIntention(fromType: type.type, named: name)
+        recordSourceHistory(intention: intent, node: node)
         intent.inNonnullContext = isNodeInNonnullContext(node)
         
         ctx.addTypealias(intent)
@@ -318,11 +319,9 @@ public class SwiftRewriter {
         let storage =
             ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
         
-        let intent =
-            GlobalVariableGenerationIntention(name: name.name, storage: storage,
-                                              source: node)
-        
+        let intent = GlobalVariableGenerationIntention(name: name.name, storage: storage, source: node)
         intent.inNonnullContext = isNodeInNonnullContext(node)
+        recordSourceHistory(intention: intent, node: node)
         
         if let initialExpression = node.initialExpression,
             let expression = initialExpression.expression?.expression?.expression {
@@ -343,8 +342,8 @@ public class SwiftRewriter {
             return
         }
         
-        let intent =
-            ClassGenerationIntention(typeName: name, source: node)
+        let intent = ClassGenerationIntention(typeName: name, source: node)
+        recordSourceHistory(intention: intent, node: node)
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
@@ -365,9 +364,9 @@ public class SwiftRewriter {
             return
         }
         
-        let intent =
-            ClassExtensionGenerationIntention(typeName: name, source: node)
+        let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
         intent.categoryName = node.categoryName?.name
+        recordSourceHistory(intention: intent, node: node)
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
@@ -388,9 +387,7 @@ public class SwiftRewriter {
             return
         }
         
-        let intent =
-            ClassGenerationIntention(typeName: name, source: node)
-        
+        let intent = ClassGenerationIntention(typeName: name, source: node)
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -410,10 +407,8 @@ public class SwiftRewriter {
             return
         }
         
-        let intent =
-            ClassExtensionGenerationIntention(typeName: name, source: node)
+        let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
         intent.categoryName = node.categoryName?.name
-        
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -433,9 +428,7 @@ public class SwiftRewriter {
             return
         }
         
-        let intent =
-            ProtocolGenerationIntention(typeName: name, source: node)
-        
+        let intent = ProtocolGenerationIntention(typeName: name, source: node)
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -491,24 +484,18 @@ public class SwiftRewriter {
                                                     storage: storage,
                                                     attributes: attributes,
                                                     source: node)
-            
-            recordSourceHistory(intention: prop, node: node)
-            
             prop.isOptional = node.isOptionalProperty
-            
             prop.inNonnullContext = isNodeInNonnullContext(node)
+            recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
         } else {
-            let prop =
-                PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                            storage: storage,
-                                            attributes: attributes,
-                                            source: node)
-            
-            recordSourceHistory(intention: prop, node: node)
-            
+            let prop = PropertyGenerationIntention(name: node.identifier?.name ?? "",
+                                                   storage: storage,
+                                                   attributes: attributes,
+                                                   source: node)
             prop.inNonnullContext = isNodeInNonnullContext(node)
+            recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
         }
@@ -526,11 +513,9 @@ public class SwiftRewriter {
         let method: MethodGenerationIntention
         
         if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
-            let protMethod =
-                ProtocolMethodGenerationIntention(signature: sign,
-                                                  source: node)
-            
+            let protMethod = ProtocolMethodGenerationIntention(signature: sign, source: node)
             protMethod.isOptional = node.isOptionalMethod
+            recordSourceHistory(intention: protMethod, node: node)
             
             method = protMethod
         } else {
@@ -546,6 +531,7 @@ public class SwiftRewriter {
             let compound = reader.parseStatements(compoundStatement: statements)
             
             let methodBodyIntention = FunctionBodyIntention(body: compound, source: body)
+            recordSourceHistory(intention: methodBodyIntention, node: body)
             method.functionBody = methodBodyIntention
         }
         
@@ -566,9 +552,8 @@ public class SwiftRewriter {
         }
         
         for protNode in node.protocols {
-            let intent =
-                ProtocolInheritanceIntention(protocolName: protNode.name,
-                                             source: protNode)
+            let intent = ProtocolInheritanceIntention(protocolName: protNode.name, source: protNode)
+            recordSourceHistory(intention: intent, node: node)
             
             ctx.addProtocol(intent)
         }
@@ -604,9 +589,7 @@ public class SwiftRewriter {
                                                 storage: storage,
                                                 accessLevel: access,
                                                 source: node)
-        
         ivar.inNonnullContext = isNodeInNonnullContext(node)
-        
         recordSourceHistory(intention: ivar, node: node)
         
         classCtx.addInstanceVariable(ivar)
@@ -631,12 +614,11 @@ public class SwiftRewriter {
             EnumGenerationIntention(typeName: identifier.name,
                                     rawValueType: swiftType,
                                     source: node)
+        recordSourceHistory(intention: enumIntention, node: node)
         
         context
             .findContext(ofType: FileGenerationIntention.self)?
             .addType(enumIntention)
-        
-        recordSourceHistory(intention: enumIntention, node: node)
         
         context.pushContext(enumIntention)
     }
@@ -652,7 +634,7 @@ public class SwiftRewriter {
         let enumCase =
             EnumCaseGenerationIntention(name: identifier, expression: nil,
                                         accessLevel: .internal, source: node)
-        
+        recordSourceHistory(intention: enumCase, node: node)
         
         if let expression = node.expression?.expression {
             let reader = SwiftASTReader()
@@ -660,8 +642,6 @@ public class SwiftRewriter {
             
             enumCase.expression = exp
         }
-        
-        recordSourceHistory(intention: enumCase, node: node)
         
         ctx.addCase(enumCase)
     }

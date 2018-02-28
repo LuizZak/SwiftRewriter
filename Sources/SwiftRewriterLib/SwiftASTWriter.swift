@@ -639,7 +639,7 @@ fileprivate class StatementWriter: StatementVisitor {
     }
     
     private func emitExprType(_ exp: Expression) {
-        target.output(line: "// type: \(exp.resolvedType?.description ?? "<nil>")")
+        target.output(line: "// type: \(exp.resolvedType?.description ?? "<nil>")", style: .comment)
     }
     
     private func emitExpr(_ exp: Expression) {
