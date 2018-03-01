@@ -180,4 +180,25 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
             """
             )
     }
+    
+    func testMergeDirectivesIntoImplementationFile() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h")
+                .createFile(named: "A.m") { file in
+                    file.createClass(withName: "A")
+                }
+                .build()
+        intentions.fileIntentions()[0].preprocessorDirectives = ["#directive1"]
+        intentions.fileIntentions()[1].preprocessorDirectives = ["#directive2"]
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files[0].sourcePath, "A.m")
+        XCTAssertEqual(files[0].preprocessorDirectives, ["#directive1", "#directive2"])
+        XCTAssertEqual(files[0].classIntentions.count, 1)
+    }
 }

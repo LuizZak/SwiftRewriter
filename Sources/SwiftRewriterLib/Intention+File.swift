@@ -18,11 +18,17 @@ public class FileGenerationIntention: Intention {
     /// Gets the intention collection that contains this file generation intention
     public internal(set) var intentionCollection: IntentionCollection?
     
-    /// Returns `true` if there are no intentions registered for this file.
+    /// Returns `true` if there are no intentions and no preprocessor directives
+    /// registered for this file.
     public var isEmpty: Bool {
+        return isEmptyExceptDirectives && preprocessorDirectives.isEmpty
+    }
+    
+    /// Returns `true` if there are no intentions registered for this file, not
+    /// counting any recorded preprocessor directive.
+    public var isEmptyExceptDirectives: Bool {
         return
             typeIntentions.isEmpty &&
-                preprocessorDirectives.isEmpty &&
                 typealiasIntentions.isEmpty &&
                 globalFunctionIntentions.isEmpty &&
                 globalVariableIntentions.isEmpty

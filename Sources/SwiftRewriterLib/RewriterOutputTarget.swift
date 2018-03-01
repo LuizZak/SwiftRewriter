@@ -19,8 +19,6 @@ public struct RewriterOutputSettings {
 
 /// Protocol for output targets of `SwiftRewritter` instances.
 public protocol RewriterOutputTarget: class {
-    init(settings: RewriterOutputSettings)
-    
     /// Outputs the given string with a `.plain` text style and outputs a line
     /// feed at the end, with padding for identation at the begginning.
     func output(line: String)
@@ -107,7 +105,7 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     /// Called everytime the buffer changes due to an output request
     public var onChangeBuffer: ((String) -> Void)?
     
-    required public init(settings: RewriterOutputSettings = .defaults) {
+    public init(settings: RewriterOutputSettings = .defaults) {
         self.settings = settings
     }
     

@@ -20,6 +20,7 @@ public class Menu: MenuController {
             
             makeFindFilesMenu(in: menu)
             makeExploreFilesMenu(in: menu)
+            makeSuggestConversionsMenu(in: menu)
         }
     }
 
@@ -36,6 +37,13 @@ public class Menu: MenuController {
             
             let service = FilesExplorerService(rewriterService: rewriterService)
             service.runFileExploreMenu(in: menu, url: path)
+        }
+    }
+    
+    func makeSuggestConversionsMenu(in menu: MenuController) {
+        menu.addAction(name: "Suggest conversion at path") { [rewriterService] (menu) in
+            let service = FilesExplorerService(rewriterService: rewriterService)
+            service.runSuggestConversionMenu(in: menu)
         }
     }
 }

@@ -2,6 +2,47 @@ import Foundation
 import Console
 import Utils
 
+func showSearchPathUi(in menu: MenuController) -> String? {
+    let console = menu.console
+    let fileManager = FileManager.default
+    
+    console.clearScreen()
+    
+    let _path =
+        console.parseLineWith(
+            prompt: """
+                    Please input a path to search .h/.m files at (e.g.: /Users/Me/projects/my-objc-project/Sources)
+                    Input an empty line to abort.
+                    >
+                    """,
+            allowEmpty: true,
+            parse: { input -> ValueReadResult<String> in
+                if input == "" {
+                    return .abort
+                }
+                
+                let pathInput = (input as NSString).expandingTildeInPath
+                
+                var isDirectory = ObjCBool(false)
+                let exists = fileManager.fileExists(atPath: pathInput, isDirectory: &isDirectory)
+                
+                if !exists {
+                    return .error("Path '\(pathInput)' does not exists!".terminalColorize(.red))
+                }
+                if !isDirectory.boolValue {
+                    return .error("Path '\(pathInput)' is not a directory!".terminalColorize(.red))
+                }
+                
+                return .success(pathInput)
+        })
+    
+    guard let path = _path else {
+        return nil
+    }
+    
+    return path
+}
+
 /// Helper for presenting selection of file names on a list
 private func presentFileSelection(in menu: MenuController, list: [Path], prompt: String) -> [Path] {
     let prompt = prompt + """
@@ -54,8 +95,7 @@ public class FilesExplorerService {
         interface.run(in: menu)
     }
 
-    func runFileExploreMenu(in menu: MenuController, url: URL) {
-        let path = URL(fileURLWithPath: NSHomeDirectory())
+    func runFileExploreMenu(in menu: MenuController, url path: URL) {
         let filesExplorer =
             FilesExplorer(console: menu.console,
                           rewriterService: rewriterService,
@@ -72,6 +112,60 @@ public class FilesExplorerService {
             menu.console.printLine("Failed to navigate directory contents!".terminalColorize(.red))
         }
     }
+    
+    func runSuggestConversionMenu(in menu: MenuController) {
+        let interface = SuggestConversionInterface(rewriterService: rewriterService)
+        
+        interface.run(in: menu)
+    }
+}
+
+fileprivate class SuggestConversionInterface {
+    var rewriterService: SwiftRewriterService
+    
+    init(rewriterService: SwiftRewriterService) {
+        self.rewriterService = rewriterService
+    }
+    
+    func run(in menu: MenuController) {
+        let console = menu.console
+        let fileManager = FileManager.default
+        
+        guard let path = showSearchPathUi(in: menu) else {
+            return
+        }
+        
+        // Search all files there
+        guard let files = fileManager.enumerator(atPath: path) else {
+            console.printLine("Failed to iterate files from path \(path)".terminalColorize(.red))
+            return
+        }
+        
+        let objcFiles =
+            files.compactMap { // Type the array properly
+                $0 as? String
+            }.filter { // Filter down to .h/.m files
+                (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h")
+            }.map { // Unfold full paths
+                (path as NSString).appendingPathComponent($0)
+            }.map { // Convert back to the URL
+                URL(fileURLWithPath: $0)
+            }.filter { // Check a matching .swift file doesn't already exist for the paths
+                !fileManager.fileExists(atPath: (($0.path as NSString).deletingPathExtension as NSString).appendingPathExtension("swift")!)
+            }
+        
+        let convert = console.readLineWith(prompt: "Found \(objcFiles.count) file(s) to convert. Convert now? y/m")?.lowercased() == "y"
+        guard convert else {
+            return
+        }
+        
+        do {
+            try rewriterService.rewrite(files: objcFiles)
+        } catch {
+            console.printLine("Error converting files: \(error)")
+            _=console.readLineWith(prompt: "Press [Enter] to continue.")
+        }
+    }
 }
 
 fileprivate class FileFinderInterface {
@@ -82,50 +176,13 @@ fileprivate class FileFinderInterface {
     }
 
     func run(in menu: MenuController) {
-        searchPathUi(menu: menu)
-    }
-
-    func searchPathUi(menu: MenuController) {
-        let console = menu.console
-        let fileManager = FileManager.default
-
-        console.clearScreen()
-
-        let _path = 
-            console.parseLineWith(
-                prompt: """
-                    Please input a path to search .h/.m files at (e.g.: /Users/Me/projects/my-objc-project/Sources)
-                    Input an empty line to abort.
-                    > 
-                    """,
-                allowEmpty: true,
-                parse: { input -> ValueReadResult<String> in
-                    if input == "" {
-                        return .abort
-                    }
-
-                    let pathInput = (input as NSString).expandingTildeInPath
-
-                    var isDirectory = ObjCBool(false)
-                    let exists = fileManager.fileExists(atPath: pathInput, isDirectory: &isDirectory)
-
-                    if !exists {
-                        return .error("Path '\(pathInput)' does not exists!".terminalColorize(.red))
-                    }
-                    if !isDirectory.boolValue {
-                        return .error("Path '\(pathInput)' is not a directory!".terminalColorize(.red))
-                    }
-
-                    return .success(pathInput)
-                })
-        
-        guard let path = _path else {
+        guard let path = showSearchPathUi(in: menu) else {
             return
         }
         
         exploreFilesUi(path: path, menu: menu)
     }
-
+    
     func exploreFilesUi(path: String, menu: MenuController) {
         let console = menu.console
         let fileManager = FileManager.default

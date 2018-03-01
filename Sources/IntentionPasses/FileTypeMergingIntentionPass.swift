@@ -33,6 +33,18 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
+        // Move all directives from .h to matching .m files
+        for header in headers where header.isEmptyExceptDirectives {
+            let path = (header.sourcePath as NSString).deletingPathExtension
+            guard let impl = implementations.first(where: { ($0.sourcePath as NSString).deletingPathExtension == path }) else {
+                continue
+            }
+            
+            // Move all directives into implementation file
+            impl.preprocessorDirectives.insert(contentsOf: header.preprocessorDirectives, at: 0)
+            header.preprocessorDirectives.removeAll()
+        }
+        
         // Remove all empty header files
         intentionCollection.removeIntentions { intent -> Bool in
             if !intent.sourcePath.hasSuffix(".h") {
