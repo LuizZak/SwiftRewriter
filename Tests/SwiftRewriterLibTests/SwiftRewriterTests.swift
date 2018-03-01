@@ -564,6 +564,18 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteManyTypeAliasSequentially() throws {
+        try assertObjcParse(
+            objc: """
+            typedef NSInteger MyInteger;
+            typedef NSInteger OtherInt;
+            """,
+            swift: """
+            typealias MyInteger = Int
+            typealias OtherInt = Int
+            """)
+    }
+    
     func testRewriteBlockParameters() throws {
         try assertObjcParse(
             objc: """

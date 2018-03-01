@@ -116,6 +116,7 @@ public class SwiftWriter {
         target.outputInline(typeali.named, style: .keyword)
         target.outputInline(" = ")
         target.outputInline(typeName, style: .keyword)
+        target.outputLineFeed()
     }
     
     private func outputEnum(_ intention: EnumGenerationIntention, target: RewriterOutputTarget) {
