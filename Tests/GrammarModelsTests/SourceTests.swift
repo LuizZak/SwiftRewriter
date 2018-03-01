@@ -12,7 +12,7 @@ class SourceTests: XCTestCase {
     
     func testInvalidSourceIsNotEquatableToOtherSources() {
         struct TestSource: Source {
-            let fileName: String = ""
+            var filePath: String = ""
             
             func stringIndex(forCharOffset offset: Int) -> String.Index {
                 return "".startIndex
