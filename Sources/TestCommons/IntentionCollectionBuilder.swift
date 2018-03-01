@@ -54,6 +54,32 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func createGlobalVariable(withName name: String,
+                                     type: SwiftType,
+                                     ownership: Ownership = .strong,
+                                     isConstant: Bool = false,
+                                     accessLevel: AccessLevel = .internal) -> FileIntentionBuilder {
+        let storage =
+            ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
+        
+        return createGlobalVariable(withName: name, storage: storage, accessLevel: accessLevel)
+    }
+    
+    @discardableResult
+    public func createGlobalVariable(withName name: String,
+                                     storage: ValueStorage,
+                                     accessLevel: AccessLevel = .internal) -> FileIntentionBuilder {
+        let varIntention =
+            GlobalVariableGenerationIntention(name: name,
+                                              storage: storage,
+                                              accessLevel: accessLevel)
+        
+        intention.addGlobalVariable(varIntention)
+        
+        return self
+    }
+    
+    @discardableResult
     public func createClass(withName name: String, initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassGenerationIntention(typeName: name)
         
@@ -94,6 +120,41 @@ public class FileIntentionBuilder {
     }
 }
 
+public class MemberBuilder<T: MemberGenerationIntention> {
+    var targetMember: T
+    
+    public init(targetMember: T) {
+        self.targetMember = targetMember
+    }
+    
+    public func setAccessLevel(_ accessLevel: AccessLevel) {
+        targetMember.accessLevel = accessLevel
+    }
+    
+    public func build() -> T {
+        return targetMember
+    }
+}
+
+public extension MemberBuilder where T: MethodGenerationIntention {
+    @discardableResult
+    public func setBody(_ body: CompoundStatement) -> MemberBuilder<T> {
+        targetMember.functionBody = FunctionBodyIntention(body: body)
+        
+        return self
+    }
+}
+
+public extension MemberBuilder where T: InitGenerationIntention {
+    @discardableResult
+    public func setBody(_ body: CompoundStatement) -> MemberBuilder<T> {
+        targetMember.functionBody = FunctionBodyIntention(body: body)
+        
+        return self
+    }
+}
+
+
 public class TypeBuilder<T: TypeGenerationIntention> {
     var targetType: T
     
@@ -129,31 +190,43 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     }
     
     @discardableResult
-    public func createProperty(named name: String, type: SwiftType, mode: PropertyGenerationIntention.Mode, attributes: [PropertyAttribute] = []) -> TypeBuilder {
+    public func createProperty(named name: String,
+                               type: SwiftType,
+                               mode: PropertyGenerationIntention.Mode,
+                               attributes: [PropertyAttribute] = [],
+                               builder: (MemberBuilder<PropertyGenerationIntention>) -> () = { _ in }) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
         let prop = PropertyGenerationIntention(name: name, storage: storage, attributes: attributes)
         prop.mode = mode
         
-        targetType.addProperty(prop)
+        let mbuilder = MemberBuilder(targetMember: prop)
+        
+        builder(mbuilder)
+        
+        targetType.addProperty(mbuilder.build())
         
         return self
     }
     
     @discardableResult
-    public func createConstructor(withParameters parameters: [ParameterSignature] = []) -> TypeBuilder {
+    public func createConstructor(withParameters parameters: [ParameterSignature] = [],
+                                  builder: (MemberBuilder<InitGenerationIntention>) -> () = { _ in }) -> TypeBuilder {
         let ctor = InitGenerationIntention(parameters: parameters)
+        let mbuilder = MemberBuilder(targetMember: ctor)
         
-        targetType.addConstructor(ctor)
+        builder(mbuilder)
+        
+        targetType.addConstructor(mbuilder.build())
         
         return self
     }
     
     @discardableResult
-    public func createVoidMethod(named name: String, bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
+    public func createVoidMethod(named name: String, builder: (MemberBuilder<MethodGenerationIntention>) -> () = { _ in }) -> TypeBuilder {
         let signature = FunctionSignature(name: name, parameters: [])
         
-        return createMethod(signature, bodyBuilder: bodyBuilder)
+        return createMethod(signature, builder: builder)
     }
     
     @discardableResult
@@ -161,20 +234,21 @@ public class TypeBuilder<T: TypeGenerationIntention> {
                              returnType: SwiftType = .void,
                              parameters: [ParameterSignature] = [],
                              isStatic: Bool = false,
-                             bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
+                             builder: (MemberBuilder<MethodGenerationIntention>) -> () = { _ in }) -> TypeBuilder {
         let signature = FunctionSignature(name: name, parameters: parameters, returnType: returnType, isStatic: isStatic)
         
-        return createMethod(signature, bodyBuilder: bodyBuilder)
+        return createMethod(signature, builder: builder)
     }
     
     @discardableResult
-    public func createMethod(_ signature: FunctionSignature, bodyBuilder: () -> CompoundStatement = { () in [] }) -> TypeBuilder {
-        let body = bodyBuilder()
-        
+    public func createMethod(_ signature: FunctionSignature, builder: (MemberBuilder<MethodGenerationIntention>) -> () = { _ in }) -> TypeBuilder {
         let method = MethodGenerationIntention(signature: signature)
-        method.functionBody = FunctionBodyIntention(body: body)
+        method.functionBody = FunctionBodyIntention(body: [])
         
-        targetType.addMethod(method)
+        let mbuilder = MemberBuilder(targetMember: method)
+        builder(mbuilder)
+        
+        targetType.addMethod(mbuilder.build())
         
         return self
     }

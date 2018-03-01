@@ -35,7 +35,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     }
     
     // MARK: - Private method
-    private func apply(on intentions: IntentionCollection) {
+    internal func apply(on intentions: IntentionCollection) {
         let files = intentions.fileIntentions()
         
         for file in files {
@@ -43,7 +43,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         }
     }
     
-    private func applyOnFile(_ file: FileGenerationIntention) {
+    internal func applyOnFile(_ file: FileGenerationIntention) {
         for cls in file.classIntentions {
             applyOnClass(cls)
         }
@@ -53,7 +53,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         }
     }
     
-    private func applyOnClass(_ cls: BaseClassIntention) {
+    internal func applyOnClass(_ cls: BaseClassIntention) {
         for prop in cls.properties {
             applyOnProperty(prop)
         }
@@ -63,18 +63,18 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         }
     }
     
-    private func applyOnFunction(_ f: FunctionIntention) {
+    internal func applyOnFunction(_ f: FunctionIntention) {
         if let method = f.functionBody {
             applyOnFunctionBody(method)
         }
     }
     
-    private func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
+    internal func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
         // Resolve types before feeding into passes
         typeResolver.resolveTypes(in: functionBody.body)
     }
     
-    private func applyOnMethod(_ method: MethodGenerationIntention) {
+    internal func applyOnMethod(_ method: MethodGenerationIntention) {
         setupIntrinsics(forMember: method)
         defer {
             tearDownIntrinsics()
@@ -83,7 +83,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         applyOnFunction(method)
     }
     
-    private func applyOnProperty(_ property: PropertyGenerationIntention) {
+    internal func applyOnProperty(_ property: PropertyGenerationIntention) {
         setupIntrinsics(forMember: property)
         defer {
             tearDownIntrinsics()
@@ -100,7 +100,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         }
     }
     
-    private func setupIntrinsics(forMember member: MemberGenerationIntention) {
+    internal func setupIntrinsics(forMember member: MemberGenerationIntention) {
         let intrinsics = DefaultCodeScope()
         
         // Push `self` intrinsic member variable
@@ -120,12 +120,15 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
             }
         }
         
+        // Push file-level global variables
+        
+        
         typeResolver.intrinsicVariables = intrinsics
     }
     
     /// Always call this before returning from a method that calls
     /// `setupIntrinsics(forMember:)`
-    private func tearDownIntrinsics() {
+    internal func tearDownIntrinsics() {
         typeResolver.intrinsicVariables = EmptyCodeScope()
     }
 }

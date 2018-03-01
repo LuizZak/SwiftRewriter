@@ -117,8 +117,15 @@ public class FileGenerationIntention: Intention {
     }
 }
 
+/// An intention that is to be declared at the file-level, not contained within any
+/// types.
+public protocol FileLevelIntention: Intention {
+    /// The file this intention is contained within
+    var file: FileGenerationIntention? { get }
+}
+
 /// An intention to generate a global function.
-public class GlobalFunctionGenerationIntention: FromSourceIntention, FunctionIntention {
+public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, FunctionIntention {
     public var signature: FunctionSignature
     
     public var parameters: [ParameterSignature] {
@@ -134,7 +141,7 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FunctionInt
 }
 
 /// An intention to generate a global variable.
-public class GlobalVariableGenerationIntention: FromSourceIntention, ValueStorageIntention {
+public class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIntention, ValueStorageIntention {
     public var variableSource: VariableDeclaration? {
         return source as? VariableDeclaration
     }

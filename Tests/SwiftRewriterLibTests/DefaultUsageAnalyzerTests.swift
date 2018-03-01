@@ -26,8 +26,8 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             .createFile(named: "A.m") { file in
                 file
                     .createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "f1") {
-                            return body
+                        builder.createVoidMethod(named: "f1") { method in
+                            method.setBody(body)
                         }
                     }
                     .createClass(withName: "B") { builder in
@@ -83,8 +83,8 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             .createFile(named: "A.m") { file in
                 file
                     .createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "f1") {
-                            return body
+                        builder.createVoidMethod(named: "f1") {method in
+                            method.setBody(body)
                         }
                     }
                     .createClass(withName: "B") { builder in
@@ -123,16 +123,16 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             .createFile(named: "A.m") { file in
                 file
                     .createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "f1") {
-                            return body
+                        builder.createVoidMethod(named: "f1") {method in
+                            method.setBody(body)
                         }
                     }
                     .createClass(withName: "B") { builder in
                         builder
                             .createConstructor()
                             .createProperty(named: "b", type: .int)
-                }
-        }
+                    }
+            }
         let intentions = builder.build(typeChecked: true)
         let sut = DefaultUsageAnalyzer(intentions: intentions)
         let property = intentions.fileIntentions()[0].typeIntentions[1].properties[0]
@@ -159,13 +159,13 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             .createFile(named: "A.m") { file in
                 file
                     .createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "f1") {
-                            return body
+                        builder.createVoidMethod(named: "f1") {method in
+                            method.setBody(body)
                         }
                     }
                     .createEnum(withName: "B", rawValue: .int) { builder in
                         builder.createCase(name: "B_a")
-                }
+                    }
             }
         
         let intentions = builder.build(typeChecked: true)

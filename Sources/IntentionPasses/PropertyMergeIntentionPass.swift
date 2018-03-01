@@ -108,7 +108,6 @@ public class PropertyMergeIntentionPass: IntentionPass {
                                 body: FunctionBodyIntention(body: []))
             }
             
-            
             propertySet.property.mode = .property(get: finalGetter, set: finalSetter)
             
             // Remove the original method intentions

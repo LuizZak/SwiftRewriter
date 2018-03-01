@@ -23,8 +23,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "fromImplementation") {
-                            return [.expression(.postfix(.identifier("stmt"), .functionCall()))]
+                        builder.createVoidMethod(named: "fromImplementation") { method in
+                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
                         }
                     }
                 }.build()
@@ -50,8 +50,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "fromImplementation") {
-                            return [.expression(.postfix(.identifier("stmt"), .functionCall()))]
+                        builder.createVoidMethod(named: "fromImplementation") { method in
+                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
                         }
                     }
                 }.build()
@@ -94,8 +94,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     }
                 }.createFile(named: "B.m") { file in
                     file.createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "fromImplementation") {
-                            return [.expression(.postfix(.identifier("stmt"), .functionCall()))]
+                        builder.createVoidMethod(named: "fromImplementation") { method in
+                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
                         }
                     }
                 }.build()
@@ -123,8 +123,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     }
                     
                     file.createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "amImplementation") {
-                            return [.expression(.postfix(.identifier("stmt"), .functionCall()))]
+                        builder.createVoidMethod(named: "amImplementation") { method in
+                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
                         }
                     }
                 }.build()
@@ -163,8 +163,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
-                        builder.createVoidMethod(named: "fromImplementation") {
-                            return [.expression(.postfix(.identifier("stmt"), .functionCall()))]
+                        builder.createVoidMethod(named: "fromImplementation") { method in
+                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
                         }
                     }
                 }.build()

@@ -2,6 +2,9 @@ import SwiftAST
 
 /// Standard type system implementation
 public class DefaultTypeSystem: TypeSystem {
+    /// A singleton instance to a default type system.
+    public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
+
     var types: [KnownType] = []
     
     public init() {
