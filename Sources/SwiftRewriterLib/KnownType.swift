@@ -43,6 +43,15 @@ public enum KnownSupertype: KnownSupertypeConvertible {
         self = type.asKnownSupertype
     }
     
+    public var asTypeName: String {
+        switch self {
+        case .knownType(let type):
+            return type.typeName
+        case .typeName(let name):
+            return name
+        }
+    }
+    
     public var asKnownType: KnownType? {
         switch self {
         case .knownType(let type):

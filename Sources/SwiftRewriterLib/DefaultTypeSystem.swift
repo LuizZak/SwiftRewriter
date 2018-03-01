@@ -19,6 +19,14 @@ public class DefaultTypeSystem: TypeSystem {
         return types.first { $0.typeName == name }
     }
     
+    public func isClassInstanceType(_ typeName: String) -> Bool {
+        if types.contains(where: { $0.typeName == typeName }) {
+            return true
+        }
+        
+        return false
+    }
+    
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
         guard let type = knownTypeWithName(typeName) else {
             return false
@@ -194,6 +202,24 @@ extension DefaultTypeSystem {
         addType(nsMutableArray)
         addType(nsDictionary)
         addType(nsMutableDictionary)
+        
+        // Foundation types
+        registerFoundation(nsObject: nsObject)
+    }
+    
+    private func registerFoundation(nsObject: KnownType) {
+        let nsDate = KnownTypeBuilder(typeName: "NSDate", supertype: nsObject).build()
+        let nsData = KnownTypeBuilder(typeName: "NSData", supertype: nsObject).build()
+        let nsMutableData = KnownTypeBuilder(typeName: "NSMutableData", supertype: nsData).build()
+        let nsMutableString =
+            KnownTypeBuilder(typeName: "NSMutableString", supertype: KnownSupertype.typeName("NSString"))
+                .addingConstructor()
+                .build()
+        
+        addType(nsDate)
+        addType(nsData)
+        addType(nsMutableData)
+        addType(nsMutableString)
     }
 }
 
@@ -205,6 +231,14 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     public init(intentions: IntentionCollection) {
         self.intentions = intentions
         super.init()
+    }
+    
+    public override func isClassInstanceType(_ typeName: String) -> Bool {
+        if intentions.typeIntentions().contains(where: { $0.typeName == typeName }) {
+            return true
+        }
+        
+        return super.isClassInstanceType(typeName)
     }
     
     public override func knownTypeWithName(_ name: String) -> KnownType? {

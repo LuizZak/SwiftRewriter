@@ -39,22 +39,22 @@ class SwiftStatementASTReaderTests: XCTestCase {
     }
     
     func testFor() {
-        assert(objcExpr: "for(int i = 0; i < 10; i++) { }",
+        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++) { }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .openRange, rhs: .constant(10)),
                              body: [])
         )
-        assert(objcExpr: "for(int i = 0; i <= 10; i++) { }",
+        assert(objcExpr: "for(NSInteger i = 0; i <= 10; i++) { }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .closedRange, rhs: .constant(10)),
                              body: [])
         )
         
-        assert(objcExpr: "for(int i = 16; i <= 59; i += 1) { }",
+        assert(objcExpr: "for(NSInteger i = 16; i <= 59; i += 1) { }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(16), op: .closedRange, rhs: .constant(59)),
                              body: [])
         )
         
         // Loop variable is being accessed, but not modified, within loop
-        assert(objcExpr: "for(int i = 0; i < 10; i++) { print(i); }",
+        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++) { print(i); }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .openRange, rhs: .constant(10)),
                              body: [
                                 .expression(.postfix(.identifier("print"),
@@ -71,7 +71,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         // This test method tests for such behavior.
         
         // Loop iterator is being modified within the loop's body
-        assert(objcExpr: "for(int i = 0; i < 10; i++) { i++; }",
+        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++) { i++; }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -87,7 +87,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Loop iterator is not incrementing the loop variable.
-        assert(objcExpr: "for(int i = 0; i < 10; i--) { }",
+        assert(objcExpr: "for(NSInteger i = 0; i < 10; i--) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -102,7 +102,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Loop iterator is assigning to different variable than loop variable
-        assert(objcExpr: "for(int i = 0; i < 10; j++) { }",
+        assert(objcExpr: "for(NSInteger i = 0; i < 10; j++) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -117,7 +117,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Loop iterator is complex (changing two values)
-        assert(objcExpr: "for(int i = 0; i < 10; i++, j--) { }",
+        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++, j--) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -144,7 +144,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Missing loop condition
-        assert(objcExpr: "for(int i = 0;; i++) { }",
+        assert(objcExpr: "for(NSInteger i = 0;; i++) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.constant(true),
@@ -157,7 +157,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Missing loop iterator
-        assert(objcExpr: "for(int i = 0; i < 10;) { }",
+        assert(objcExpr: "for(NSInteger i = 0; i < 10;) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),

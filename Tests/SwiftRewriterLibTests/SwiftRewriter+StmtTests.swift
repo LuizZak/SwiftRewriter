@@ -193,7 +193,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
         try assertSingleStatement(
             objc: "double x = 10;",
-            swift: "var x: Double = 10"
+            swift: "var x: CDouble = 10"
         )
         // Should avoid omitting types for nil values, as well
         try assertSingleStatement(
@@ -216,7 +216,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
         try assertSingleStatement(
             objc: "double x = 10 + 5.0;",
-            swift: "var x: Double = 10 + 5.0"
+            swift: "var x: CDouble = 10 + 5.0"
         )
         
         // Type expressions from non-literal sources are not needed as they can
@@ -271,16 +271,12 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: "(NSDictionary*)aThing;",
             swift: "aThing as? NSDictionary"
         )
-        try assertSingleStatement(
-            objc: "(MyObject*)aThing;",
-            swift: "aThing as? MyObject"
-        )
     }
     
     func testEmitSizeOf() throws {
         try assertSingleStatement(
             objc: "sizeof(int)",
-            swift: "MemoryLayout<Int>.size"
+            swift: "MemoryLayout<CInt>.size"
         )
         try assertSingleStatement(
             objc: "sizeof(abc)",
@@ -743,7 +739,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: """
             @implementation MyClass
             - (void)myMethod {
-                for(int i = 0; i < 10; i++) {
+                for(NSInteger i = 0; i < 10; i++) {
                 }
             }
             @end

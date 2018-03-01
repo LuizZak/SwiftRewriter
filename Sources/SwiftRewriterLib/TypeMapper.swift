@@ -163,9 +163,17 @@ public class TypeMapper {
         if case .struct(let inner) = type {
             if let ptr = TypeMapper._pointerMappings[inner] {
                 final = ptr
-            } else {
+            } else if let scalar = TypeMapper._scalarMappings[inner] {
+                // Pointers of scalar types are converted to 'UnsafeMutablePointer<TypeName>'
+                final = .generic("UnsafeMutablePointer", parameters: [scalar])
+            } else if self.context.typeSystem.isClassInstanceType(inner) {
                 // Assume it's a class type here
                 final = .typeName(inner)
+            } else {
+                // Pointers of value types are converted to 'UnsafeMutablePointer<TypeName>'
+                let pointeeType = swiftType(forObjcType: .struct(inner), context: .alwaysNonnull)
+                
+                final = .generic("UnsafeMutablePointer", parameters: [pointeeType])
             }
             
             return swiftType(type: final, withNullability: context.nullability())
@@ -244,14 +252,31 @@ public class TypeMapper {
     }
     
     private static let _scalarMappings: [String: SwiftType] = [
+        // Objective-C-specific types
         "BOOL": .bool,
         "NSInteger": .int,
         "NSUInteger": .uint,
-        "int": .int,
-        "float": .float,
-        "double": .double,
         "CGFloat": .cgFloat,
-        "instancetype": .instancetype
+        "instancetype": .instancetype,
+        
+        // C scalar types
+        "char": .typeName("CChar"),
+        "unsigned char": .typeName("CUnsignedChar"),
+        "unsigned short": .typeName("CUnsignedShort"),
+        "unsigned int": .typeName("CUnsignedInt"),
+        "unsigned long": .typeName("CUnsignedLong"),
+        "unsigned long long": .typeName("CUnsignedLongLong"),
+        "signed char": .typeName("CSignedChar"),
+        "short": .typeName("CShort"),
+        "int": .typeName("CInt"),
+        "long": .typeName("CLong"),
+        "long long": .typeName("CLongLong"),
+        "float": .typeName("CFloat"),
+        "double": .typeName("CDouble"),
+        "wchar_t": .typeName("CWideChar"),
+        "char16_t": .typeName("CChar16"),
+        "char32_t": .typeName("CChar32"),
+        "Bool": .typeName("CBool")
     ]
     
     /// For mapping pointer-reference structs (could be Objc-C classes) into

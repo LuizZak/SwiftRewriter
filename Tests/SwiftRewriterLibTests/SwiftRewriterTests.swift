@@ -150,6 +150,9 @@ class SwiftRewriterTests: XCTestCase {
     func testRewriteNSArray() throws {
         try assertObjcParse(
             objc: """
+            @interface SomeType : NSObject
+            @end
+            
             @interface MyClass
             @property (nonnull) NSArray* nontypedArray;
             @property (nullable) NSArray* nontypedArrayNull;
@@ -160,6 +163,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
+            class SomeType: NSObject {
+            }
             @objc
             class MyClass: NSObject {
                 @objc var nontypedArray: NSArray
@@ -771,6 +777,8 @@ class SwiftRewriterTests: XCTestCase {
     func testConvertAssignProperty() throws {
         try assertObjcParse(
             objc: """
+            @interface AClass : NSObject
+            @end
             __weak NSObject *aWeakGlobal;
             __weak NSInteger anIntGlobal;
             @interface MyClass
@@ -782,7 +790,10 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             weak var aWeakGlobal: NSObject?
             var anIntGlobal: Int
-
+            
+            @objc
+            class AClass: NSObject {
+            }
             @objc
             class MyClass: NSObject {
                 @objc unowned(unsafe) var aClass: AClass!
@@ -854,6 +865,8 @@ class SwiftRewriterTests: XCTestCase {
     func testParsingIssueWithGenericsWithinGenerics() throws {
         try assertObjcParse(
             objc: """
+            @interface B: NSObject
+            @end
             @interface A: NSObject
             {
                 RACSubject<NSArray<B*>*> *_u; // Nested generic produces error here!
@@ -861,6 +874,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
+            @objc
+            class B: NSObject {
+            }
             @objc
             class A: NSObject {
                 private var _u: RACSubject<[B]>!

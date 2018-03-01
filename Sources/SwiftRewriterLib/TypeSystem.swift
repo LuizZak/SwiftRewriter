@@ -11,6 +11,11 @@ public protocol TypeSystem {
     /// Gets a known type with a given name from this type system
     func knownTypeWithName(_ name: String) -> KnownType?
     
+    /// Returns `true` if a given type is considered a class instance type.
+    /// Class instance types are considered to be any type that is either a Swift
+    /// or Objective-C class/protocol, or a subclass implementer of one of them.
+    func isClassInstanceType(_ typeName: String) -> Bool
+    
     /// Returns `true` if a type represented by a given type name is a subtype of
     /// another type
     func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool

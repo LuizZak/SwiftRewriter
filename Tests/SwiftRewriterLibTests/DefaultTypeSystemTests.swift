@@ -79,6 +79,50 @@ class DefaultTypeSystemTests: XCTestCase {
                         "Missing NSMutableDictionary's default parameterless constructor")
     }
     
+    func testNSDateDefinition() {
+        guard let type = sut.knownTypeWithName("NSDate") else {
+            XCTFail("Expected NSDate to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
+                        "Missing NSDate's default parameterless constructor")
+    }
+    
+    func testNSDataDefinition() {
+        guard let type = sut.knownTypeWithName("NSData") else {
+            XCTFail("Expected NSData to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
+                        "Missing NSData's default parameterless constructor")
+    }
+    
+    func testNSMutableDataDefinition() {
+        guard let type = sut.knownTypeWithName("NSMutableData") else {
+            XCTFail("Expected NSMutableData to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSData")
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
+                        "Missing NSMutableData's default parameterless constructor")
+    }
+    
+    func testNSMutableStringDefinition() {
+        guard let type = sut.knownTypeWithName("NSMutableString") else {
+            XCTFail("Expected NSMutableString to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asTypeName, "NSString")
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
+                        "Missing NSMutableString's default parameterless constructor")
+    }
+    
     func testConstructorSearchesThroughSupertypes() {
         let type1 = KnownTypeBuilder(typeName: "A").addingConstructor().build()
         let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()
