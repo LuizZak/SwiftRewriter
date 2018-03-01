@@ -61,12 +61,13 @@ public class SwiftRewriter {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
         self.outputTarget = output
-        self.context = TypeConstructionContext()
-        self.typeMapper = TypeMapper(context: context)
         self.intentionCollection = IntentionCollection()
         self.intentionPassesSource = intentionPassesSource
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
+        
+        self.context = TypeConstructionContext(typeSystem: typeSystem)
+        self.typeMapper = TypeMapper(context: context)
     }
     
     public func rewrite() throws {
@@ -103,6 +104,7 @@ public class SwiftRewriter {
         let typeResolverInvoker = DefaultTypeResolverInvoker(typeResolver: typeResolver)
         let context =
             IntentionPassContext(typeSystem: typeSystem,
+                                 typeMapper: typeMapper,
                                  typeResolverInvoker: typeResolverInvoker)
         
         if verbose {
@@ -127,7 +129,8 @@ public class SwiftRewriter {
         let writer = SwiftWriter(intentions: intentionCollection,
                                  options: writerOptions,
                                  diagnostics: diagnostics,
-                                 output: outputTarget)
+                                 output: outputTarget,
+                                 typeMapper: typeMapper)
         
         writer.execute()
     }
@@ -384,7 +387,7 @@ public class SwiftRewriter {
         if let initialExpression = node.initialExpression,
             let expression = initialExpression.expression?.expression?.expression {
             let reader = SwiftASTReader()
-            let expression = reader.parseExpression(expression: expression)
+            let expression = reader.parseExpression(expression: expression, typeMapper: typeMapper)
             
             intent.initialValueExpr =
                 GlobalVariableInitialValueIntention(expression: expression,
@@ -586,7 +589,7 @@ public class SwiftRewriter {
         
         if let body = node.body, let statements = body.statements {
             let reader = SwiftASTReader()
-            let compound = reader.parseStatements(compoundStatement: statements)
+            let compound = reader.parseStatements(compoundStatement: statements, typeMapper: typeMapper)
             
             let methodBodyIntention = FunctionBodyIntention(body: compound, source: body)
             recordSourceHistory(intention: methodBodyIntention, node: body)
@@ -696,7 +699,7 @@ public class SwiftRewriter {
         
         if let expression = node.expression?.expression {
             let reader = SwiftASTReader()
-            let exp = reader.parseExpression(expression: expression)
+            let exp = reader.parseExpression(expression: expression, typeMapper: typeMapper)
             
             enumCase.expression = exp
         }

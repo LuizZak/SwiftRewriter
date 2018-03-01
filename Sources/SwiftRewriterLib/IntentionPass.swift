@@ -12,12 +12,15 @@ public protocol IntentionPass {
 public struct IntentionPassContext {
     public let typeSystem: TypeSystem
     
+    public let typeMapper: TypeMapper
+    
     /// Frontend point to request type-resolution of expressions, statements and
     /// entire intention collections.
     public let typeResolverInvoker: TypeResolverInvoker
     
-    public init(typeSystem: TypeSystem, typeResolverInvoker: TypeResolverInvoker) {
+    public init(typeSystem: TypeSystem, typeMapper: TypeMapper, typeResolverInvoker: TypeResolverInvoker) {
         self.typeSystem = typeSystem
+        self.typeMapper = typeMapper
         self.typeResolverInvoker = typeResolverInvoker
     }
 }

@@ -7,6 +7,12 @@ import SwiftAST
 /// A visitor that reads simple Objective-C expressions and emits as Expression
 /// enum cases.
 public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
+    public var typeMapper: TypeMapper
+    
+    public init(typeMapper: TypeMapper) {
+        self.typeMapper = typeMapper
+    }
+    
     public override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression? {
         if let cast = ctx.castExpression() {
             return cast.accept(self)
@@ -108,7 +114,6 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         if let typeName = ctx.typeName(), let typeNameString = VarDeclarationTypeExtractor.extract(from: typeName),
             let cast = ctx.castExpression()?.accept(self), let type = try? ObjcParser(string: typeNameString).parseObjcType() {
-            let typeMapper = TypeMapper(context: TypeConstructionContext())
             
             let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
             return .cast(cast, type: swiftType)
@@ -141,9 +146,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                     return .unknown(UnknownASTContext(context: ctx.getText()))
                 }
                 
-                let swiftType =
-                    TypeMapper(context: TypeConstructionContext())
-                        .swiftType(forObjcType: type)
+                let swiftType = typeMapper.swiftType(forObjcType: type)
                 
                 return .sizeof(type: swiftType)
             } else if let unary = ctx.unaryExpression()?.accept(self) {
@@ -182,7 +185,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 var arguments: [FunctionArgument] = []
                 
                 if let args = post.argumentExpressionList() {
-                    let funcArgVisitor = FunctionArgumentVisitor()
+                    let funcArgVisitor = FunctionArgumentVisitor(expressionReader: self)
                     
                     for arg in args.argumentExpression() {
                         if let funcArg = arg.accept(funcArgVisitor) {
@@ -353,9 +356,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                             return BlockParameter(name: name, type: .void)
                         }
                         
-                        let swiftType =
-                            TypeMapper(context: TypeConstructionContext())
-                                .swiftType(forObjcType: type)
+                        let swiftType = typeMapper.swiftType(forObjcType: type)
                         
                         return BlockParameter(name: name, type: swiftType)
                     }
@@ -368,9 +369,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
-        let swiftReturnType =
-            TypeMapper(context: TypeConstructionContext())
-                .swiftType(forObjcType: returnType)
+        let swiftReturnType = typeMapper.swiftType(forObjcType: returnType)
         
         return .block(parameters: parameters, return: swiftReturnType, body: body)
     }
@@ -459,10 +458,15 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {
+        var expressionReader: SwiftExprASTReader
+        
+        init(expressionReader: SwiftExprASTReader) {
+            self.expressionReader = expressionReader
+        }
+        
         override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> FunctionArgument? {
             if let exp = ctx.expression() {
-                let astReader = SwiftExprASTReader()
-                guard let expEnum = exp.accept(astReader) else {
+                guard let expEnum = exp.accept(expressionReader) else {
                     return .unlabeled(.unknown(UnknownASTContext(context: exp.getText())))
                 }
                 

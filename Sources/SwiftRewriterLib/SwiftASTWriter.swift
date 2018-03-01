@@ -26,8 +26,8 @@ public struct ASTWriterOptions {
 
 /// Reader that reads Objective-C AST and outputs equivalent a Swift AST
 class SwiftASTReader {
-    public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement {
-        let parser = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: SwiftExprASTReader())
+    public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext, typeMapper: TypeMapper) -> CompoundStatement {
+        let parser = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: SwiftExprASTReader(typeMapper: typeMapper))
         guard let result = compoundStatement.accept(parser) else {
             return [.unknown(UnknownASTContext(context: compoundStatement))]
         }
@@ -35,8 +35,8 @@ class SwiftASTReader {
         return result
     }
     
-    public func parseExpression(expression: ObjectiveCParser.ExpressionContext) -> Expression {
-        let parser = SwiftExprASTReader()
+    public func parseExpression(expression: ObjectiveCParser.ExpressionContext, typeMapper: TypeMapper) -> Expression {
+        let parser = SwiftExprASTReader(typeMapper: typeMapper)
         guard let result = expression.accept(parser) else {
             return .unknown(UnknownASTContext(context: expression))
         }
@@ -49,18 +49,20 @@ class SwiftASTReader {
 /// Swift AST as well
 class SwiftASTWriter {
     let options: ASTWriterOptions
+    let typeMapper: TypeMapper
     
-    init(options: ASTWriterOptions) {
+    init(options: ASTWriterOptions, typeMapper: TypeMapper) {
         self.options = options
+        self.typeMapper = typeMapper
     }
     
     public func write(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
-        let rewriter = StatementWriter(options: options, target: target)
+        let rewriter = StatementWriter(options: options, target: target, typeMapper: typeMapper)
         rewriter.visitStatement(compoundStatement)
     }
     
     public func write(expression: Expression, into target: RewriterOutputTarget) {
-        let rewriter = ExpressionWriter(options: options, target: target)
+        let rewriter = ExpressionWriter(options: options, target: target, typeMapper: typeMapper)
         rewriter.rewrite(expression)
     }
     
@@ -69,7 +71,7 @@ class SwiftASTWriter {
         
         let reader = SwiftASTReader()
         
-        let result = reader.parseStatements(compoundStatement: compoundStatement)
+        let result = reader.parseStatements(compoundStatement: compoundStatement, typeMapper: typeMapper)
         write(compoundStatement: result, into: target)
     }
     
@@ -78,7 +80,7 @@ class SwiftASTWriter {
         
         let reader = SwiftASTReader()
         
-        let result = reader.parseExpression(expression: expression)
+        let result = reader.parseExpression(expression: expression, typeMapper: typeMapper)
         write(expression: result, into: target)
     }
 }
@@ -89,11 +91,12 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     
     let options: ASTWriterOptions
     let target: RewriterOutputTarget
-    let typeMapper = TypeMapper(context: TypeConstructionContext())
+    let typeMapper: TypeMapper
     
-    init(options: ASTWriterOptions, target: RewriterOutputTarget) {
+    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper) {
         self.options = options
         self.target = target
+        self.typeMapper = typeMapper
     }
     
     func rewrite(_ expression: Expression) {
@@ -311,7 +314,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
         let returnType = exp.returnType
         let body = exp.body
         
-        let visitor = StatementWriter(options: options, target: target)
+        let visitor = StatementWriter(options: options, target: target, typeMapper: typeMapper)
         
         // Print signature
         target.outputInline("{ ")
@@ -375,11 +378,12 @@ fileprivate class StatementWriter: StatementVisitor {
     
     let options: ASTWriterOptions
     let target: RewriterOutputTarget
-    let typeMapper = TypeMapper(context: TypeConstructionContext())
+    let typeMapper: TypeMapper
     
-    init(options: ASTWriterOptions, target: RewriterOutputTarget) {
+    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper) {
         self.options = options
         self.target = target
+        self.typeMapper = typeMapper
     }
     
     func visitStatement(_ statement: Statement) -> Void {
@@ -643,7 +647,7 @@ fileprivate class StatementWriter: StatementVisitor {
     }
     
     private func emitExpr(_ exp: Expression) {
-        let rewriter = ExpressionWriter(options: options, target: target)
+        let rewriter = ExpressionWriter(options: options, target: target, typeMapper: typeMapper)
         rewriter.rewrite(exp)
     }
     

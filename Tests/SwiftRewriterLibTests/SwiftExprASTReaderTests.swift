@@ -207,7 +207,7 @@ class SwiftExprASTReaderTests: XCTestCase {
         let lxr = ObjectiveCLexer(input)
         tokens = CommonTokenStream(lxr)
         
-        let sut = SwiftExprASTReader()
+        let sut = SwiftExprASTReader(typeMapper: TypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
         
         do {
             let parser = try ObjectiveCParser(tokens)

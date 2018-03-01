@@ -15,6 +15,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
     /// instantiated, +1.
     private var operationsNumber: Int = 1
     
+    var context: IntentionPassContext!
+    
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
         return "\(SwiftifyMethodSignaturesIntentionPass.self):\(operationsNumber)"
@@ -25,6 +27,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        self.context = context
+        
         let types = intentionCollection.typeIntentions()
         
         for type in types {
@@ -143,7 +147,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         if splitOnWith[0] == "init" {
             method.signature.parameters[0].label = splitOnWith[1].lowercased()
         } else {
-            let mapper = TypeMapper(context: TypeConstructionContext())
+            let mapper = context.typeMapper
             
             // Only match if the suffix also matches at least partially the typename
             let type = signature.parameters[0].type

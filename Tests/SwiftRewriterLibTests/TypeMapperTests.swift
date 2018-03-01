@@ -204,14 +204,14 @@ class TypeMapperTests: XCTestCase {
     }
     
     private func typeMapperConvert(_ type: SwiftType) -> String {
-        let context = TypeConstructionContext()
+        let context = TypeConstructionContext(typeSystem: DefaultTypeSystem())
         let mapper = TypeMapper(context: context)
         
         return mapper.typeNameString(for: type)
     }
     
     private func typeMapperConvert(_ type: ObjcType, nullability: TypeNullability?) -> String {
-        let context = TypeConstructionContext()
+        let context = TypeConstructionContext(typeSystem: DefaultTypeSystem())
         let mapper = TypeMapper(context: context)
         
         var ctx: TypeMapper.TypeMappingContext = .empty

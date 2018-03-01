@@ -21,6 +21,7 @@ func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
     let system = IntentionCollectionTypeSystem(intentions: intentions)
     let resolver = ExpressionTypeResolver(typeSystem: system)
     let invoker = DefaultTypeResolverInvoker(typeResolver: resolver)
+    let typeMapper = TypeMapper(context: TypeConstructionContext(typeSystem: system))
     
-    return IntentionPassContext(typeSystem: system, typeResolverInvoker: invoker)
+    return IntentionPassContext(typeSystem: system, typeMapper: typeMapper, typeResolverInvoker: invoker)
 }

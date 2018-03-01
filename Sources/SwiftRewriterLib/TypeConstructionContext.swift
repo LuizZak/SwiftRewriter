@@ -1,9 +1,10 @@
 /// Represents a local context for constructing types with.
 public class TypeConstructionContext {
     var contexts: [Context] = []
+    var typeSystem: TypeSystem
     
-    public init() {
-        
+    public init(typeSystem: TypeSystem) {
+        self.typeSystem = typeSystem
     }
     
     public func pushContext(_ context: Context) {

@@ -7,7 +7,7 @@ import SwiftAST
 public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     var expressionReader: SwiftExprASTReader
     
-    public init(expressionReader: SwiftExprASTReader = SwiftExprASTReader()) {
+    public init(expressionReader: SwiftExprASTReader) {
         self.expressionReader = expressionReader
     }
     
@@ -390,7 +390,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     class CompoundStatementVisitor: ObjectiveCParserBaseVisitor<CompoundStatement> {
         var expressionReader: SwiftExprASTReader
         
-        init(expressionReader: SwiftExprASTReader = SwiftExprASTReader()) {
+        init(expressionReader: SwiftExprASTReader) {
             self.expressionReader = expressionReader
         }
         
@@ -399,7 +399,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 return compoundStatement.accept(self)
             }
             
-            let reader = SwiftStatementASTReader()
+            let reader = SwiftStatementASTReader(expressionReader: expressionReader)
             reader.expressionReader = expressionReader
             
             if let stmt = reader.visitStatement(ctx) {
@@ -410,7 +410,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         }
         
         override func visitCompoundStatement(_ ctx: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement? {
-            let reader = SwiftStatementASTReader()
+            let reader = SwiftStatementASTReader(expressionReader: expressionReader)
             reader.expressionReader = expressionReader
             
             let rules: [ParserRuleContext] =
@@ -437,8 +437,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     // MARK: - Variable declaration extractor visitor
     private class VarDeclarationExtractor: ObjectiveCParserBaseVisitor<Statement> {
-        let typeMapper = TypeMapper(context: TypeConstructionContext())
-        var expressionReader = SwiftExprASTReader()
+        var expressionReader: SwiftExprASTReader
         
         init(expressionReader: SwiftExprASTReader) {
             self.expressionReader = expressionReader
@@ -466,7 +465,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 
                 let expr = initDeclarator.initializer()?.expression()?.accept(expressionReader)
                 
-                let swiftType = typeMapper.swiftType(forObjcType: type)
+                let swiftType = expressionReader.typeMapper.swiftType(forObjcType: type)
                 
                 let ownership = evaluateOwnershipPrefix(inType: type)
                 let isConstant = SwiftWriter._isConstant(fromType: type)
@@ -505,7 +504,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 
                 let expr = initDeclarator.initializer()?.expression()?.accept(expressionReader)
                 
-                let swiftType = typeMapper.swiftType(forObjcType: type)
+                let swiftType = expressionReader.typeMapper.swiftType(forObjcType: type)
                 
                 let ownership = evaluateOwnershipPrefix(inType: type)
                 let isConstant = SwiftWriter._isConstant(fromType: type)

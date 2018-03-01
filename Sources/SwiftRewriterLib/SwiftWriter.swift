@@ -8,20 +8,20 @@ import SwiftAST
 public class SwiftWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
-    let context = TypeConstructionContext()
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     var options: ASTWriterOptions
     let astWriter: SwiftASTWriter
     
     public init(intentions: IntentionCollection, options: ASTWriterOptions,
-                diagnostics: Diagnostics, output: WriterOutput) {
+                diagnostics: Diagnostics, output: WriterOutput,
+                typeMapper: TypeMapper) {
         self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
         self.output = output
-        self.typeMapper = TypeMapper(context: context)
-        astWriter = SwiftASTWriter(options: options)
+        self.typeMapper = typeMapper
+        astWriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
     }
     
     public func execute() {
@@ -182,7 +182,7 @@ public class SwiftWriter {
         if let expression = initVal?.expression {
             target.outputInline(" = ")
             
-            let rewriter = SwiftASTWriter(options: options)
+            let rewriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
             rewriter.write(expression: expression, into: target)
         }
         
