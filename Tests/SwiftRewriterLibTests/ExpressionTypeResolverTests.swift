@@ -74,6 +74,17 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .errorType) // Propagate error types
     }
     
+    func testAssignment() {
+        // From C11 Standard, section 6.5.16:
+        // An assignment expression has the value of the left operand after the assignment
+        let exp = Expression.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(1))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "a", type: .int)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .int)
+    }
+    
     func testBinary() {
         // Arithmetic
         assertResolve(.binary(lhs: .constant(1), op: .add, rhs: .constant(1)),

@@ -52,6 +52,12 @@ public class TypeGenerationIntention: FromSourceIntention {
     private(set) public var methods: [MethodGenerationIntention] = []
     private(set) public var constructors: [InitGenerationIntention] = []
     
+    // Cannot be in extension with others because Swift doesn't allow overriding
+    // members defined in extensions
+    public var knownFields: [KnownProperty] {
+        return []
+    }
+    
     public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
         

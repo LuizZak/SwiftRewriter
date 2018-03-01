@@ -75,7 +75,7 @@ public class KnownTypeBuilder {
         return addingProperty(named: name, storage: storage)
     }
     
-    /// Adds a strong property with no attributes with a given name and storage
+    /// Adds a property with no attributes with a given name and storage
     public func addingProperty(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
         // Check duplicates
         guard !type.knownProperties.contains(where: { $0.name == name && $0.storage == storage && $0.isStatic == isStatic }) else {
@@ -89,6 +89,31 @@ public class KnownTypeBuilder {
                                      isStatic: isStatic)
         
         type.knownProperties.append(property)
+        
+        return self
+    }
+    
+    /// Adds a strong field with no attributes with a given name and type
+    public func addingField(named name: String, type: SwiftType) -> KnownTypeBuilder {
+        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        
+        return addingField(named: name, storage: storage)
+    }
+    
+    /// Adds a property with no attributes with a given name and storage
+    public func addingField(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
+        // Check duplicates
+        guard !type.knownFields.contains(where: { $0.name == name && $0.storage == storage && $0.isStatic == isStatic }) else {
+            return self
+        }
+        
+        let property = DummyProperty(ownerType: type,
+                                     name: name,
+                                     storage: storage,
+                                     attributes: [],
+                                     isStatic: isStatic)
+        
+        type.knownFields.append(property)
         
         return self
     }
@@ -119,6 +144,7 @@ private class DummyType: KnownType {
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []
+    var knownFields: [KnownProperty] = []
     var knownProtocolConformances: [KnownProtocolConformance] = []
     var supertype: KnownSupertype?
     

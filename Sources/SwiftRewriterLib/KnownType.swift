@@ -24,6 +24,9 @@ public protocol KnownType: KnownSupertypeConvertible {
     /// Gets an array of all known properties for this type
     var knownProperties: [KnownProperty] { get }
     
+    /// Gets an array of all known instance variable fields for this type
+    var knownFields: [KnownProperty] { get }
+    
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
 }

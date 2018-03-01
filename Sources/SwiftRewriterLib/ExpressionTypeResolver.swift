@@ -186,13 +186,28 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
         return exp
     }
     
+    public override func visitAssignment(_ exp: AssignmentExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitAssignment(exp)
+        
+        // Propagte error type
+        if exp.lhs.isErrorTyped || exp.rhs.isErrorTyped {
+            return exp.makeErrorTyped()
+        }
+        
+        exp.resolvedType = exp.lhs.resolvedType
+        
+        return exp
+    }
+    
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         _=super.visitBinary(exp)
         
         // Propagte error type
-        if exp.lhs.isErrorTyped || exp.lhs.isErrorTyped {
+        if exp.lhs.isErrorTyped || exp.rhs.isErrorTyped {
             return exp.makeErrorTyped()
         }
         
@@ -485,13 +500,16 @@ private class MemberInvocationResolver {
             guard let type = typeResolver.findType(for: innerType) else {
                 return exp.makeErrorTyped()
             }
-            guard let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: type) else {
+            
+            if let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: type) {
+                member.memberDefinition = property
+                exp.resolvedType = property.storage.type
+            } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype, in: type) {
+                member.memberDefinition = field
+                exp.resolvedType = field.storage.type
+            } else {
                 return exp.makeErrorTyped()
             }
-            
-            member.memberDefinition = property
-            exp.resolvedType = property.storage.type
-        
         case _ as OptionalAccessPostfix:
             // TODO: Support .optionalAccess here
             break

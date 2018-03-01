@@ -34,4 +34,7 @@ public protocol TypeSystem {
     
     /// Gets a property with a given name
     func property(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty?
+    
+    /// Gets an instance field with a given name
+    func field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty?
 }

@@ -10,6 +10,10 @@ public class BaseClassIntention: TypeGenerationIntention {
     
     private(set) public var instanceVariables: [InstanceVariableGenerationIntention] = []
     
+    public override var knownFields: [KnownProperty] {
+        return instanceVariables
+    }
+    
     public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
         if let parent = intention.parent as? BaseClassIntention {
             parent.removeInstanceVariable(named: intention.name)
@@ -79,5 +83,11 @@ public class InstanceVariableGenerationIntention: MemberGenerationIntention, Val
         self.name = name
         self.storage = storage
         super.init(accessLevel: accessLevel, source: source)
+    }
+}
+
+extension InstanceVariableGenerationIntention: KnownProperty {
+    public var attributes: [PropertyAttribute] {
+        return []
     }
 }

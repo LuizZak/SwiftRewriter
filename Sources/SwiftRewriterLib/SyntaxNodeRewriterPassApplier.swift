@@ -113,20 +113,40 @@ public class SyntaxNodeRewriterPassApplier {
     private func setupIntrinsics(forMember member: MemberGenerationIntention) -> DefaultCodeScope {
         let intrinsics = DefaultCodeScope()
         
-        // Push `self` intrinsic member variable
+        // Push `self` intrinsic member variable, as well as all properties visible
         if let type = member.type {
             let selfType = SwiftType.typeName(type.typeName)
+            let selfStorage: ValueStorage
             
             if member.isStatic {
                 // Class `self` points to metatype of the class
-                intrinsics.recordDefinition(
-                    CodeDefinition(name: "self", type: .metatype(for: selfType))
-                )
+                selfStorage =
+                    ValueStorage(type: .metatype(for: selfType),
+                                 ownership: .strong,
+                                 isConstant: true)
             } else {
                 // Instance `self` points to the actual instance
-                intrinsics.recordDefinition(
-                    CodeDefinition(name: "self", type: selfType)
-                )
+                selfStorage =
+                    ValueStorage(type: selfType,
+                                 ownership: .strong,
+                                 isConstant: true)
+            }
+            
+            intrinsics.recordDefinition(CodeDefinition(name: "self", storage: selfStorage))
+            
+            // Record all known static properties visible
+            if let knownType = typeSystem.knownTypeWithName(type.typeName) {
+                for prop in knownType.knownProperties where prop.isStatic == member.isStatic {
+                    intrinsics.recordDefinition(
+                        CodeDefinition(name: prop.name, storage: prop.storage)
+                    )
+                }
+                
+                for field in knownType.knownFields where field.isStatic == member.isStatic {
+                    intrinsics.recordDefinition(
+                        CodeDefinition(name: field.name, storage: field.storage)
+                    )
+                }
             }
         }
         

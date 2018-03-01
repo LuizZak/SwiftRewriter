@@ -128,6 +128,19 @@ public class DefaultTypeSystem: TypeSystem {
             property(named: name, static: isStatic, in: $0)
         }
     }
+    
+    public func field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty? {
+        if let field =
+            type.knownFields
+                .first(where: { $0.name == name && $0.isStatic == isStatic }) {
+            return field
+        }
+        
+        // Search on supertypes
+        return supertype(of: type).flatMap {
+            field(named: name, static: isStatic, in: $0)
+        }
+    }
 }
 
 extension DefaultTypeSystem {
@@ -233,6 +246,11 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             for prop in type.knownProperties {
                 typeBuilder =
                     typeBuilder.addingProperty(named: prop.name, storage: prop.storage, isStatic: prop.isStatic)
+            }
+            
+            for field in type.knownFields {
+                typeBuilder =
+                    typeBuilder.addingField(named: field.name, storage: field.storage, isStatic: field.isStatic)
             }
             
             for ctor in type.knownConstructors {

@@ -328,4 +328,39 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testIntrinsicsExposeClassInstanceProperties() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            {
+                NSInteger field;
+            }
+            @property BOOL value;
+            @end
+            
+            @implementation A
+            - (void)f1 {
+                (self.value);
+                (self->field);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var field: Int
+                @objc var value: Bool
+                
+                @objc
+                func f1() {
+                    // type: Bool
+                    (self.value)
+                    // type: Int
+                    (self.field)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
