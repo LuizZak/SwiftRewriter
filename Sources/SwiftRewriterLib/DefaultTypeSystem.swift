@@ -1,4 +1,5 @@
 import SwiftAST
+import TypeDefinitions
 
 /// Standard type system implementation
 public class DefaultTypeSystem: TypeSystem {
@@ -20,6 +21,10 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
+        if TypeDefinitions.classesList.classes.contains(where: { $0.typeName == typeName }) {
+            return true
+        }
+        
         if types.contains(where: { $0.typeName == typeName }) {
             return true
         }
