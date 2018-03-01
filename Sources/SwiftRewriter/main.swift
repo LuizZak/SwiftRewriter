@@ -23,12 +23,16 @@ let colorArg: OptionArgument<Bool> =
 let outputExpressionTypesArg: OptionArgument<Bool> =
     parser.add(option: "--print-expression-types",
                kind: Bool.self,
-               usage: "Pass this parameter as true to enable terminal colorization during output.")
+               usage: "Prints the type of each top-level resolved expression statement found in function bodies.")
 
 let outputIntentionHistoryArg: OptionArgument<Bool> =
     parser.add(option: "--print-tracing-history",
                kind: Bool.self,
-               usage: "Pass this parameter as true to enable terminal colorization during output.")
+               usage: """
+        Prints extra information before each declaration and member about the \
+        inner logical decisions of intention passes as they change the structure \
+        of declarations.
+        """)
 
 let verboseArg: OptionArgument<Bool> =
     parser.add(option: "--verbose",
