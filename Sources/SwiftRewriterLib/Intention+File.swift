@@ -15,6 +15,9 @@ public class FileGenerationIntention: Intention {
     /// All preprocessor directives found on this file.
     public var preprocessorDirectives: [String] = []
     
+    /// Gets the intention collection that contains this file generation intention
+    public internal(set) var intentionCollection: IntentionCollection?
+    
     /// Returns `true` if there are no intentions registered for this file.
     public var isEmpty: Bool {
         return

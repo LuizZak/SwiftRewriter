@@ -273,7 +273,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testIdentifier() {
-        let definition = CodeDefinition(name: "i", type: .int)
+        let definition = CodeDefinition(name: "i", type: .int, intention: nil)
         
         startScopedTest(with: IdentifierExpression(identifier: "i"), sut: ExpressionTypeResolver())
             .definingLocal(definition)

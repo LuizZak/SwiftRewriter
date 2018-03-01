@@ -11,6 +11,16 @@ public class IntentionCollection {
         return _intentions
     }
     
+    /// Gets all global variable intentions across all files
+    public func globalVariables() -> [GlobalVariableGenerationIntention] {
+        return _intentions.flatMap { $0.globalVariableIntentions }
+    }
+    
+    /// Gets all global functions intentions across all files
+    public func globalFunctions() -> [GlobalFunctionGenerationIntention] {
+        return _intentions.flatMap { $0.globalFunctionIntentions }
+    }
+    
     /// Performs a full search of all types intended to be created on all files.
     public func typeIntentions() -> [TypeGenerationIntention] {
         return _intentions.flatMap { $0.typeIntentions }
@@ -37,12 +47,14 @@ public class IntentionCollection {
     
     public func addIntention(_ intention: FileGenerationIntention) {
         _intentions.append(intention)
+        intention.intentionCollection = self
     }
     
     public func removeIntention(where predicate: (FileGenerationIntention) -> Bool) {
         for (i, item) in _intentions.enumerated() {
             if predicate(item) {
                 _intentions.remove(at: i)
+                item.intentionCollection = nil
                 return
             }
         }
@@ -52,6 +64,7 @@ public class IntentionCollection {
         for (i, item) in _intentions.enumerated().reversed() {
             if predicate(item) {
                 _intentions.remove(at: i)
+                item.intentionCollection = nil
             }
         }
     }

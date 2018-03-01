@@ -110,18 +110,28 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
             if member.isStatic {
                 // Class `self` points to metatype of the class
                 intrinsics.recordDefinition(
-                    CodeDefinition(name: "self", type: .metatype(for: selfType))
+                    CodeDefinition(name: "self", type: .metatype(for: selfType), intention: member)
                 )
             } else {
                 // Instance `self` points to the actual instance
                 intrinsics.recordDefinition(
-                    CodeDefinition(name: "self", type: selfType)
+                    CodeDefinition(name: "self", type: selfType, intention: member)
                 )
             }
         }
         
         // Push file-level global variables
-        
+        if let intentionCollection = member.file?.intentionCollection {
+            for global in intentionCollection.globalVariables() {
+                if global.isVisible(for: member) {
+                    intrinsics.recordDefinition(
+                        CodeDefinition(name: global.name,
+                                       storage: global.storage,
+                                       intention: global)
+                    )
+                }
+            }
+        }
         
         typeResolver.intrinsicVariables = intrinsics
     }

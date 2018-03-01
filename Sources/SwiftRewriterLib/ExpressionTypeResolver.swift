@@ -53,7 +53,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     // MARK: - Definition Collection
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         for decl in stmt.decl {
-            let definition = CodeDefinition(name: decl.identifier, type: decl.type)
+            let definition = CodeDefinition(name: decl.identifier, type: decl.type, intention: nil)
             stmt.nearestScope.recordDefinition(definition)
         }
         
@@ -89,7 +89,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
     func collectInPattern(_ pattern: Pattern, type: SwiftType, to scope: CodeScope) {
         switch pattern {
         case .identifier(let ident):
-            scope.recordDefinition(CodeDefinition(name: ident, type: type))
+            scope.recordDefinition(CodeDefinition(name: ident, type: type, intention: nil))
             break
         default:
             // Other (more complex) patterns are not (yet) supported!
@@ -259,7 +259,7 @@ public class ExpressionTypeResolver: SyntaxNodeRewriter {
             exp.definition = definition
             
             switch definition {
-            case .local(let def):
+            case .local(let def), .global(let def):
                 exp.resolvedType = def.type
             case .type(let typeName):
                 exp.resolvedType = .metatype(for: .typeName(typeName))

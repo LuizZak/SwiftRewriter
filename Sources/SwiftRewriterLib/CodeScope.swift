@@ -144,6 +144,9 @@ public class CodeDefinition {
     public var name: String
     public var storage: ValueStorage
     
+    /// An optionally associated intention value
+    public var intention: Intention?
+    
     public var type: SwiftType {
         return storage.type
     }
@@ -156,14 +159,16 @@ public class CodeDefinition {
         return storage.ownership
     }
     
-    public init(name: String, type: SwiftType) {
+    public init(name: String, type: SwiftType, intention: Intention?) {
         self.name = name
         self.storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        self.intention = intention
     }
     
-    public init(name: String, storage: ValueStorage) {
+    public init(name: String, storage: ValueStorage, intention: Intention?) {
         self.name = name
         self.storage = storage
+        self.intention = intention
     }
 }
 
@@ -181,34 +186,44 @@ public extension IdentifierExpression {
     }
     
     public enum Definition {
+        case global(CodeDefinition)
         case local(CodeDefinition)
         case member(type: KnownType, member: KnownMember)
         case type(named: String)
+        
+        public var global: CodeDefinition? {
+            switch self {
+            case .global(let def):
+                return def
+            case .local, .type, .member:
+                return nil
+            }
+        }
         
         public var local: CodeDefinition? {
             switch self {
             case .local(let def):
                 return def
-            case .type, .member:
+            case .type, .member, .global:
                 return nil
             }
         }
         
         public var typeName: String? {
             switch self {
-            case .local, .member:
-                return nil
             case .type(let name):
                 return name
+            case .local, .member, .global:
+                return nil
             }
         }
         
         public var member: (type: KnownType, member: KnownMember)? {
             switch self {
-            case .local, .type:
-                return nil
             case let .member(type, member):
                 return (type, member)
+            case .local, .type, .global:
+                return nil
             }
         }
     }

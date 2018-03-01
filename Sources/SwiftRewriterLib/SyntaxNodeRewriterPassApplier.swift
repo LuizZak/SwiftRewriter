@@ -61,7 +61,7 @@ public class SyntaxNodeRewriterPassApplier {
             
             // For setter, push intrinsic for the setter value
             intrinsics.recordDefinition(
-                CodeDefinition(name: set.valueIdentifier, type: property.type)
+                CodeDefinition(name: set.valueIdentifier, type: property.type, intention: nil)
             )
             
             applyOnFunctionBody(set.body)
@@ -132,19 +132,19 @@ public class SyntaxNodeRewriterPassApplier {
                                  isConstant: true)
             }
             
-            intrinsics.recordDefinition(CodeDefinition(name: "self", storage: selfStorage))
+            intrinsics.recordDefinition(CodeDefinition(name: "self", storage: selfStorage, intention: type))
             
             // Record all known static properties visible
             if let knownType = typeSystem.knownTypeWithName(type.typeName) {
                 for prop in knownType.knownProperties where prop.isStatic == member.isStatic {
                     intrinsics.recordDefinition(
-                        CodeDefinition(name: prop.name, storage: prop.storage)
+                        CodeDefinition(name: prop.name, storage: prop.storage, intention: prop as? Intention)
                     )
                 }
                 
                 for field in knownType.knownFields where field.isStatic == member.isStatic {
                     intrinsics.recordDefinition(
-                        CodeDefinition(name: field.name, storage: field.storage)
+                        CodeDefinition(name: field.name, storage: field.storage, intention: field as? Intention)
                     )
                 }
             }
@@ -154,7 +154,7 @@ public class SyntaxNodeRewriterPassApplier {
         if let function = member as? FunctionIntention {
             for param in function.parameters {
                 intrinsics.recordDefinition(
-                    CodeDefinition(name: param.name, type: param.type)
+                    CodeDefinition(name: param.name, type: param.type, intention: function)
                 )
             }
         }
