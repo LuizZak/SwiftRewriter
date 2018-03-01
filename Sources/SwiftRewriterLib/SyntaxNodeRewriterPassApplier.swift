@@ -48,7 +48,7 @@ public class SyntaxNodeRewriterPassApplier {
     }
     
     private func applyOnProperty(_ property: PropertyGenerationIntention) {
-        setupIntrinsics(forMember: property)
+        let intrinsics = setupIntrinsics(forMember: property)
         defer {
             tearDownIntrinsics()
         }
@@ -58,6 +58,12 @@ public class SyntaxNodeRewriterPassApplier {
             applyOnFunctionBody(intent)
         case let .property(get, set):
             applyOnFunctionBody(get)
+            
+            // For setter, push intrinsic for the setter value
+            intrinsics.recordDefinition(
+                CodeDefinition(name: set.valueIdentifier, type: property.type)
+            )
+            
             applyOnFunctionBody(set.body)
         case .asField:
             break
@@ -103,7 +109,8 @@ public class SyntaxNodeRewriterPassApplier {
         }
     }
     
-    private func setupIntrinsics(forMember member: MemberGenerationIntention) {
+    @discardableResult
+    private func setupIntrinsics(forMember member: MemberGenerationIntention) -> DefaultCodeScope {
         let intrinsics = DefaultCodeScope()
         
         // Push `self` intrinsic member variable
@@ -123,7 +130,18 @@ public class SyntaxNodeRewriterPassApplier {
             }
         }
         
+        // Push function parameters as intrinsics, if member is a method type
+        if let function = member as? FunctionIntention {
+            for param in function.parameters {
+                intrinsics.recordDefinition(
+                    CodeDefinition(name: param.name, type: param.type)
+                )
+            }
+        }
+        
         typeResolver.intrinsicVariables = intrinsics
+        
+        return intrinsics
     }
     
     /// Always call this before returning from a method that calls

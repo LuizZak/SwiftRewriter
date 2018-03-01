@@ -238,6 +238,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
 
             @implementation B
             - (instancetype)initWithValue:(NSInteger)value {
+                (value);
             }
             @end
             """,
@@ -254,6 +255,74 @@ class SwiftRewriter_SelfTests: XCTestCase {
             class B: NSObject {
                 @objc
                 init(value: Int) {
+                    // type: Int
+                    (value)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testIntrinsicsForSetterCustomNewValueName() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            @property BOOL value;
+            @end
+            
+            @implementation A
+            - (BOOL)value {
+                return NO;
+            }
+            - (void)setValue:(BOOL)value {
+                (value);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var value: Bool {
+                    get {
+                        return false
+                    }
+                    set(value) {
+                        // type: Bool
+                        (value)
+                    }
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testIntrinsicsForSetterWithDefaultNewValueName() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            @property BOOL value;
+            @end
+            
+            @implementation A
+            - (BOOL)value {
+                return NO;
+            }
+            - (void)setValue:(BOOL)newValue {
+                (newValue);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var value: Bool {
+                    get {
+                        return false
+                    }
+                    set {
+                        // type: Bool
+                        (newValue)
+                    }
                 }
             }
             """,

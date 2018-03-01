@@ -121,6 +121,10 @@ public class FileGenerationIntention: Intention {
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FunctionIntention {
     public var signature: FunctionSignature
     
+    public var parameters: [ParameterSignature] {
+        return signature.parameters
+    }
+    
     public var functionBody: FunctionBodyIntention?
     
     public init(signature: FunctionSignature, accessLevel: AccessLevel, source: ASTNode?) {
@@ -168,6 +172,8 @@ public protocol NonNullScopedIntention: Intention {
 
 /// Defines a protocol for function-generating intentions
 public protocol FunctionIntention: Intention {
+    var parameters: [ParameterSignature] { get }
+    
     var functionBody: FunctionBodyIntention? { get }
 }
 
