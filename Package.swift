@@ -62,7 +62,7 @@ let package = Package(
             dependencies: [
                 "SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility",
                 "ExpressionPasses", "Utils", "Console", "SourcePreprocessors",
-                "SwiftAST", "IntentionPasses"
+                "SwiftAST", "IntentionPasses", "MiniLexer"
             ]),
         .target(
             name: "TestCommons",

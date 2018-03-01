@@ -357,6 +357,7 @@ fileprivate class FilesExplorer: PagesCommandHandler {
             let result = console.readLineWith(prompt: "Continue with conversion? y/n")
             if result?.lowercased() == "y" {
                 try rewriterService.rewrite(files: matches)
+                _=console.readLineWith(prompt: "Press [Enter] to convert another file")
             }
             return true
         } catch {
