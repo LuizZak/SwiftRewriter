@@ -74,38 +74,6 @@ class EmptyCodeScope: CodeScope {
     }
 }
 
-class DefaultCodeScopeStack: CodeScope {
-    var scopes: [DefaultCodeScope] = []
-    
-    func pushScope(_ context: Context) {
-        scopes.append(DefaultCodeScope())
-    }
-    
-    func popScope() {
-        _=scopes.popLast()
-    }
-    
-    func definition(named name: String) -> CodeDefinition? {
-        for scope in scopes.reversed() {
-            if let def = scope.definition(named: name) {
-                return def
-            }
-        }
-        
-        return nil
-    }
-    
-    func recordDefinition(_ definition: CodeDefinition) {
-        scopes.last?.recordDefinition(definition)
-    }
-    
-    func removeAllDefinitions() {
-        for scope in scopes {
-            scope.removeAllDefinitions()
-        }
-    }
-}
-
 /// An object that can provide definitions for a type resolver
 public protocol DefinitionsSource {
     func definition(named name: String) -> CodeDefinition?

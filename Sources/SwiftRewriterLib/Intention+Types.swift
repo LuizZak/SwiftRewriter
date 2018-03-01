@@ -225,24 +225,12 @@ public class TypeGenerationIntention: FromSourceIntention {
         intention.parent = self
     }
     
-    public func hasProtocol(named name: String) -> Bool {
-        return protocols.contains(where: { $0.protocolName == name })
-    }
-    
     public func hasProperty(named name: String) -> Bool {
         return properties.contains(where: { $0.name == name })
     }
     
-    public func hasMethod(named name: String) -> Bool {
-        return methods.contains(where: { $0.name == name })
-    }
-    
-    public func hasMethod(withSignature signature: FunctionSignature) -> Bool {
-        return method(withSignature: signature) != nil
-    }
-    
-    public func hasMethod(withSelector signature: FunctionSignature) -> Bool {
-        return method(matchingSelector: signature) != nil
+    public func hasProtocol(named name: String) -> Bool {
+        return protocols.contains(where: { $0.protocolName == name })
     }
     
     public func method(withSignature signature: FunctionSignature) -> MethodGenerationIntention? {
