@@ -30,6 +30,11 @@ let outputIntentionHistoryArg: OptionArgument<Bool> =
                kind: Bool.self,
                usage: "Pass this parameter as true to enable terminal colorization during output.")
 
+let verboseArg: OptionArgument<Bool> =
+    parser.add(option: "--verbose",
+               kind: Bool.self,
+               usage: "Prints more information to the console while performing translation work.")
+
 do {
     let arguments = Array(ProcessInfo.processInfo.arguments.dropFirst())
     
@@ -39,6 +44,8 @@ do {
     
     options.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false
     options.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
+    
+    verbose = result.get(verboseArg) ?? false
     
     if result.subparser(parser) == "files" {
         if let files = result.get(filesArg) {

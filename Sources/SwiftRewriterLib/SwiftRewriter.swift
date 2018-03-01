@@ -13,6 +13,9 @@ public class SwiftRewriter {
     private let sourcesProvider: InputSourcesProvider
     private var typeSystem: IntentionCollectionTypeSystem
     
+    /// Full path of files from followed includes, when `followIncludes` is on.
+    private var includesFollowed: [String] = []
+    
     /// During parsing, the index of each NS_ASSUME_NONNULL_BEGIN/END pair is
     /// collected so during source analysis by SwiftRewriter we can verify whether
     /// or not a declaration is under the effects of NS_ASSUME_NONNULL by checking
@@ -37,6 +40,14 @@ public class SwiftRewriter {
     /// Provider for intention passes to apply before passing the constructs to
     /// the output
     public var intentionPassesSource: IntentionPassSource
+    
+    /// If true, `#include "file.h"` directives are resolved and the new unique
+    /// files found during importing are included into the transpilation step.
+    public var followIncludes: Bool = false
+    
+    /// If true, a little more information is printed during the translation process
+    /// to the standard output.
+    public var verbose: Bool = false
     
     public var writerOptions: ASTWriterOptions = .default
     
@@ -94,11 +105,19 @@ public class SwiftRewriter {
             IntentionPassContext(typeSystem: typeSystem,
                                  typeResolverInvoker: typeResolverInvoker)
         
+        if verbose {
+            print("Running intention passes...")
+        }
+        
         // Make a pre-type resolve before applying passes
         typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection)
         
         for pass in intentionPassesSource.intentionPasses {
             pass.apply(on: intentionCollection, context: context)
+        }
+        
+        if verbose {
+            print("Running syntax passes...")
         }
         
         applier.apply(on: intentionCollection)
@@ -116,16 +135,52 @@ public class SwiftRewriter {
     private func applyPreprocessors(source: CodeSource) -> String {
         let src = source.fetchSource()
         
-        let context = _PreprocessingContext(filePath: source.fileName)
+        let context = _PreprocessingContext(filePath: source.filePath)
         
         return preprocessors.reduce(src) {
             $1.preprocess(source: $0, context: context)
         }
     }
     
+    private func resolveIncludes(in directives: [String], basePath: String) {
+        if !followIncludes {
+            return
+        }
+        
+        var includeFiles: [String] = []
+        
+        for line in directives {
+            guard line.starts(with: "#include \"") else {
+                continue
+            }
+            
+            let split = line.split(separator: "\"", maxSplits: 2, omittingEmptySubsequences: true)
+            
+            if split.count > 1 {
+                includeFiles.append(String(split[1]))
+            }
+        }
+        
+        for file in includeFiles {
+            let fullPath = (basePath as NSString).appendingPathComponent(file)
+            
+            guard !includesFollowed.contains(fullPath) else {
+                continue
+            }
+            
+            // TODO: Do meaningful work here to open the files and parse their
+            // declarations
+        }
+    }
+    
     private func loadObjcSource(from source: InputSource) throws {
         // Generate intention for this source
         var path = source.sourceName()
+        
+        if verbose {
+            print("Parsing \((path as NSString).lastPathComponent)...")
+        }
+        
         path = (path as NSString).deletingPathExtension + ".swift"
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
@@ -140,7 +195,7 @@ public class SwiftRewriter {
         
         let processedSrc = applyPreprocessors(source: src)
         
-        let parser = ObjcParser(string: processedSrc, fileName: src.fileName)
+        let parser = ObjcParser(string: processedSrc, fileName: src.filePath)
         parsers.append(parser)
         parser.diagnostics = diagnostics
         
@@ -148,6 +203,9 @@ public class SwiftRewriter {
         
         nonnullTokenRanges = parser.nonnullMacroRegionsTokenRange
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
+        
+        resolveIncludes(in: fileIntent.preprocessorDirectives,
+                        basePath: (src.filePath as NSString).deletingLastPathComponent)
         
         let node = parser.rootNode
         let visitor = AnyASTVisitor()
@@ -655,7 +713,7 @@ public class SwiftRewriter {
     }
     
     private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
-        guard let file = node.originalSource?.fileName, let rule = node.sourceRuleContext?.start else {
+        guard let file = node.originalSource?.filePath, let rule = node.sourceRuleContext?.start else {
             return
         }
         

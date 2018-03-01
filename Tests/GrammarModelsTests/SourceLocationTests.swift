@@ -13,7 +13,7 @@ class SourceLocationTests: XCTestCase {
     }
     
     private final class TestSource: Source {
-        public let fileName: String = ""
+        public let filePath: String = ""
         
         var string: String
         

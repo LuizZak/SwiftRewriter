@@ -5,6 +5,7 @@ import SourcePreprocessors
 import IntentionPasses
 
 var options = ASTWriterOptions()
+var verbose = false
 
 /// Protocol for enabling Swift rewriting service from CLI
 public protocol SwiftRewriterService {
@@ -32,6 +33,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         converter.syntaxNodeRewriters.append(UIKitExpressionPass())
         
         converter.writerOptions = options
+        converter.verbose = verbose
         
         converter.intentionPassesSource = DefaultIntentionPasses()
         

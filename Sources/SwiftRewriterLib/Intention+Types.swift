@@ -214,7 +214,7 @@ extension TypeGenerationIntention: KnownType {
         guard let start = sourceNode.sourceRuleContext?.getStart() else {
             return "Code-generated type"
         }
-        guard let filename = sourceNode.originalSource?.fileName else {
+        guard let filename = sourceNode.originalSource?.filePath else {
             return "Code-generated type"
         }
         

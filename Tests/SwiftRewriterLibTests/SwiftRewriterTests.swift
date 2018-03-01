@@ -837,4 +837,23 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    // TODO: Fix this issue
+    func testParsingIssueWithGenericsWithinGenerics() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            {
+                RACSubject<NSArray<B*>*> *_u; // Nested generic produces error here!
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var _u: RACSubject<[B]>!
+            }
+            """,
+            expectsErrors: true)
+    }
 }

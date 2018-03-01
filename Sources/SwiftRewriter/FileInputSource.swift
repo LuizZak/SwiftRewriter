@@ -40,12 +40,8 @@ public class FileInputSource: InputSource {
 }
 
 public class FileCodeSource: CodeSource {
-    private var filePath: String
+    public var filePath: String
     public var fileContents: String
-    
-    public var fileName: String {
-        return filePath
-    }
     
     public init(filePath: String, fileContents: String) {
         self.filePath = filePath

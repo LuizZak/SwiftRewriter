@@ -3,7 +3,7 @@
 /// across compilation unit/file boundaries.
 public protocol Source {
     /// Gets the full file name for this source file.
-    var fileName: String { get }
+    var filePath: String { get }
     
     func isEqual(to other: Source) -> Bool
     
@@ -20,7 +20,7 @@ public struct InvalidSource: Source {
     /// Gets the default invalid source instance singleton.
     public static let invalid = InvalidSource()
     
-    public let fileName: String = "<invalid>"
+    public let filePath: String = "<invalid>"
     
     private init() {
         

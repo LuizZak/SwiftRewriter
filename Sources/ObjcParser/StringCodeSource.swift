@@ -1,12 +1,12 @@
 import GrammarModels
 
 public struct StringCodeSource: CodeSource {
-    public var fileName: String = ""
+    public var filePath: String = ""
     public var source: String
     
     public init(source: String, fileName: String = "") {
         self.source = source
-        self.fileName = fileName
+        self.filePath = fileName
     }
     
     public func fetchSource() -> String {
