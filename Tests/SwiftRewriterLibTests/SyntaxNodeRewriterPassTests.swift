@@ -47,6 +47,118 @@ class SyntaxNodeRewriterPassTests: XCTestCase {
         XCTAssertEqual(result, .compound([.continue, .continue]))
     }
     
+    func testTraverseDeepNestedBlockStatement() {
+        let equivalent = """
+        describe("A thing") {
+            context("A context") {
+                it("must do X") {
+                    statement()
+                }
+                it("must also do Y") {
+                    otherStatement()
+                }
+            }
+            context("Another context") {
+                beforeEach {
+                    function()
+                }
+            }
+        }
+        """
+        _=equivalent
+        
+        let stmt: Statement =
+            .compound([
+                .expression(
+                    .postfix(
+                        .identifier("describe"),
+                        .functionCall(arguments: [
+                            .unlabeled(.constant("A thing")),
+                            .unlabeled(
+                                .block(parameters: [],
+                                       return: .void,
+                                       body: [
+                                        .expression(
+                                            .postfix(
+                                                .identifier("context"),
+                                                .functionCall(arguments: [
+                                                    .unlabeled(.constant("A context")),
+                                                    .unlabeled(
+                                                        .block(parameters: [],
+                                                               return: .void,
+                                                               body: [
+                                                                .expression(
+                                                                    .postfix(
+                                                                        .identifier("it"),
+                                                                        .functionCall(arguments: [
+                                                                            .unlabeled(.constant("must do X")),
+                                                                            .unlabeled(
+                                                                                .block(parameters: [],
+                                                                                       return: .void,
+                                                                                       body: [
+                                                                                        .expression(.postfix(.identifier("statement"), .functionCall()))
+                                                                                    ]))
+                                                                            ]))
+                                                                ),
+                                                                .expression(
+                                                                    .postfix(
+                                                                        .identifier("it"),
+                                                                        .functionCall(arguments: [
+                                                                            .unlabeled(.constant("must also do Y")),
+                                                                            .unlabeled(
+                                                                                .block(parameters: [],
+                                                                                       return: .void,
+                                                                                       body: [
+                                                                                        .expression(.postfix(.identifier("otherStatement"), .functionCall()))
+                                                                                    ]
+                                                                                )
+                                                                            )
+                                                                            ]
+                                                                        )
+                                                                    )
+                                                                )
+                                                            ]
+                                                        )
+                                                    )
+                                                    ]
+                                                )
+                                            )
+                                        ),
+                                        .expression(
+                                            .postfix(
+                                                .identifier("context"),
+                                                .functionCall(arguments: [
+                                                    .unlabeled(.constant("Another context")),
+                                                    .unlabeled(
+                                                        .block(parameters: [],
+                                                               return: .void,
+                                                               body: [
+                                                                .expression(
+                                                                    .postfix(
+                                                                        .identifier("beforeEach"),
+                                                                        .functionCall(arguments: [
+                                                                            .unlabeled(
+                                                                                .block(parameters: [],
+                                                                                       return: .void,
+                                                                                       body: [
+                                                                                        .expression(.postfix(.identifier("function"), .functionCall()))
+                                                                                    ]))
+                                                                            ]))
+                                                                )
+                                                            ]))
+                                                    ])
+                                            )
+                                        )
+                                    ]))
+                            ])))
+                ])
+        
+        let sut = TestExpressionPass()
+        _=stmt.accept(sut)
+        
+        XCTAssert(sut.foundNeedle)
+    }
+    
     class TestExpressionPass: SyntaxNodeRewriterPass {
         var foundNeedle = false
         
