@@ -8,6 +8,10 @@ public class BaseClassIntention: TypeGenerationIntention {
         return source is ObjcClassInterface || source is ObjcClassCategoryInterface
     }
     
+    public override var isEmptyType: Bool {
+        return super.isEmptyType && instanceVariables.isEmpty
+    }
+    
     private(set) public var instanceVariables: [InstanceVariableGenerationIntention] = []
     
     public override var knownFields: [KnownProperty] {
@@ -38,6 +42,10 @@ public class BaseClassIntention: TypeGenerationIntention {
 /// An intention to generate a Swift class type
 public class ClassGenerationIntention: BaseClassIntention {
     public var superclassName: String?
+    
+    public override var isEmptyType: Bool {
+        return super.isEmptyType
+    }
     
     public override var supertype: KnownSupertype? {
         if let superclassName = superclassName {

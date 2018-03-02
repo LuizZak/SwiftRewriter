@@ -148,6 +148,8 @@ fileprivate class SuggestConversionInterface {
                 (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h")
             }.map { // Unfold full paths
                 (path as NSString).appendingPathComponent($0)
+            }.sorted { (s1: String, s2: String) -> Bool in
+                s1.compare(s2, options: .numeric) == .orderedAscending
             }.map { // Convert back to the URL
                 URL(fileURLWithPath: $0)
             }.filter { // Check a matching .swift file doesn't already exist for the paths
@@ -160,7 +162,14 @@ fileprivate class SuggestConversionInterface {
         }
         
         do {
-            try rewriterService.rewrite(files: objcFiles)
+            try autoreleasepool {
+                let rewriter = SwiftRewriterServiceImpl.fileDiskService
+                
+                try rewriter.rewrite(files: objcFiles)
+            }
+            
+            console.printLine("Finishing converting \(objcFiles.count) files.")
+            _=console.readLineWith(prompt: "Press [Enter] to continue.")
         } catch {
             console.printLine("Error converting files: \(error)")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")

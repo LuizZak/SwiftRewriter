@@ -14,6 +14,8 @@ public protocol SwiftRewriterService {
 }
 
 public class SwiftRewriterServiceImpl: SwiftRewriterService {
+    public static var fileDiskService = SwiftRewriterServiceImpl(output: FileDiskWriterOutput())
+    
     var output: WriterOutput
     
     public init(output: WriterOutput) {

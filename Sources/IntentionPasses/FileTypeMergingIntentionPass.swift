@@ -33,6 +33,13 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
+        // Remove empty extension/categories from files
+        for ext in intentionCollection.extensionIntentions() {
+            if ext.isEmptyType && (ext.categoryName == nil || ext.categoryName?.isEmpty == true) {
+                ext.file?.removeTypes { $0 === ext }
+            }
+        }
+        
         // Move all directives from .h to matching .m files
         for header in headers where header.isEmptyExceptDirectives {
             let path = (header.sourcePath as NSString).deletingPathExtension

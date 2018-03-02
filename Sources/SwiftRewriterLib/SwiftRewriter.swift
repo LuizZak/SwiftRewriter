@@ -85,7 +85,9 @@ public class SwiftRewriter {
         let sources = sourcesProvider.sources()
         
         for src in sources {
-            try loadObjcSource(from: src)
+            try autoreleasepool {
+                try loadObjcSource(from: src)
+            }
         }
     }
     
@@ -115,7 +117,9 @@ public class SwiftRewriter {
         typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection)
         
         for pass in intentionPassesSource.intentionPasses {
-            pass.apply(on: intentionCollection, context: context)
+            autoreleasepool {
+                pass.apply(on: intentionCollection, context: context)
+            }
         }
         
         if verbose {

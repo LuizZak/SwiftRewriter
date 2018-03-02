@@ -201,4 +201,73 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files[0].preprocessorDirectives, ["#directive1", "#directive2"])
         XCTAssertEqual(files[0].classIntentions.count, 1)
     }
+    
+    func testRemovesEmptyExtensions() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.m") { file in
+                    file.createClass(withName: "A")
+                        .createExtension(forClassNamed: "A")
+                        .createExtension(forClassNamed: "A", categoryName: "")
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files[0].classIntentions.count, 1)
+        XCTAssertEqual(files[0].extensionIntentions.count, 0)
+    }
+    
+    func testDoesNotRemovesExtensionsWithMembers() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.m") { file in
+                    file.createClass(withName: "A")
+                        .createExtension(forClassNamed: "A") { builder in
+                            builder.createVoidMethod(named: "a")
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files[0].classIntentions.count, 1)
+        XCTAssertEqual(files[0].extensionIntentions.count, 1)
+    }
+    
+    func testDoesNotRemovesExtensionsWithCategoryName() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.m") { file in
+                    file.createClass(withName: "A")
+                        .createExtension(forClassNamed: "A", categoryName: "Abc")
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files[0].classIntentions.count, 1)
+        XCTAssertEqual(files[0].extensionIntentions.count, 1)
+    }
+    
+    func testDoesNotRemovesExtensionsWithInheritances() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.m") { file in
+                    file.createClass(withName: "A")
+                        .createExtension(forClassNamed: "A") { builder in
+                            builder.createConformance(protocolName: "B")
+                        }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files[0].classIntentions.count, 1)
+        XCTAssertEqual(files[0].extensionIntentions.count, 1)
+    }
 }

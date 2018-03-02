@@ -1,3 +1,4 @@
+import Foundation
 import SwiftAST
 
 /// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
@@ -95,17 +96,19 @@ public class SyntaxNodeRewriterPassApplier {
     }
     
     private func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
-        // Resolve types before feeding into passes
-        typeResolver.resolveTypes(in: functionBody.body)
-        
-        let expContext = SyntaxNodeRewriterPassContext(typeSystem: typeSystem)
-        
-        passes.forEach {
-            $0.apply(on: functionBody.body, context: expContext)
-            
-            // After each apply to the body, we must re-type check the result
-            // before handing it off to the next pass.
+        autoreleasepool {
+            // Resolve types before feeding into passes
             typeResolver.resolveTypes(in: functionBody.body)
+            
+            let expContext = SyntaxNodeRewriterPassContext(typeSystem: typeSystem)
+            
+            passes.forEach {
+                $0.apply(on: functionBody.body, context: expContext)
+                
+                // After each apply to the body, we must re-type check the result
+                // before handing it off to the next pass.
+                typeResolver.resolveTypes(in: functionBody.body)
+            }
         }
     }
     

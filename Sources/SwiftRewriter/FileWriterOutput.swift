@@ -12,6 +12,10 @@ class FileOutputImpl: FileOutput {
     let file: FileOutputTarget
     
     init(path: String) {
+        if !FileManager.default.fileExists(atPath: path) {
+            FileManager.default.createFile(atPath: path, contents: nil)
+        }
+        
         // Open output stream
         let handle = /* TODO: Deal with this force unwrap! */ FileHandle(forWritingAtPath: path)!
         

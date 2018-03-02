@@ -89,8 +89,9 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createExtension(forClassNamed name: String, categoryName: String = "", initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
+    public func createExtension(forClassNamed name: String, categoryName: String? = nil, initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassExtensionGenerationIntention(typeName: name)
+        classIntention.categoryName = categoryName
         
         innerBuildTypeWithClosure(type: classIntention, initializer: initializer)
         
@@ -153,7 +154,6 @@ public extension MemberBuilder where T: InitGenerationIntention {
         return self
     }
 }
-
 
 public class TypeBuilder<T: TypeGenerationIntention> {
     var targetType: T
@@ -265,6 +265,14 @@ public extension TypeBuilder where T: BaseClassIntention {
         
         let ivar = InstanceVariableGenerationIntention(name: name, storage: storage)
         targetType.addInstanceVariable(ivar)
+        
+        return self
+    }
+    
+    @discardableResult
+    public func createConformance(protocolName: String) -> TypeBuilder {
+        let prot = ProtocolInheritanceIntention(protocolName: protocolName)
+        targetType.addProtocol(prot)
         
         return self
     }

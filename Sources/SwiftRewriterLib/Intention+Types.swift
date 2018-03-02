@@ -108,6 +108,11 @@ public class TypeGenerationIntention: FromSourceIntention {
     private(set) public var methods: [MethodGenerationIntention] = []
     private(set) public var constructors: [InitGenerationIntention] = []
     
+    /// Returns `true` if this type has no inner members, or any protocol conformance.
+    public var isEmptyType: Bool {
+        return protocols.isEmpty && properties.isEmpty && methods.isEmpty && constructors.isEmpty
+    }
+    
     // Cannot be in extension with others because Swift doesn't allow overriding
     // members defined in extensions
     public var knownFields: [KnownProperty] {
