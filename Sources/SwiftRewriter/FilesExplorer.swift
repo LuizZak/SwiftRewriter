@@ -145,7 +145,7 @@ class SuggestConversionInterface {
             return
         }
         
-        let objcFiles =
+        var objcFiles =
             files.compactMap { // Type the array properly
                     $0 as? String
                 }.filter { // Filter down to .h/.m files
@@ -159,6 +159,25 @@ class SuggestConversionInterface {
                 }.filter { // Check a matching .swift file doesn't already exist for the paths
                     !fileManager.fileExists(atPath: (($0.path as NSString).deletingPathExtension as NSString).appendingPathExtension("swift")!)
                 }
+        
+        if let excludePattern = excludePattern {
+            do {
+                let pattern = try NSRegularExpression(pattern: excludePattern, options: .caseInsensitive)
+                
+                objcFiles = objcFiles.filter { url in
+                    let path = url.path
+                    
+                    let range = NSMakeRange(0, (path as NSString).length)
+                    return pattern.firstMatch(in: url.path, range: range) == nil
+                }
+                
+            } catch {
+                console.printLine("Error processing regular expression for file exclusion: \(error)")
+                if !skipConfirm {
+                    _=console.readLineWith(prompt: "Press [Enter] to continue.")
+                }
+            }
+        }
         
         if !skipConfirm {
             let convert = console.readLineWith(prompt: "Found \(objcFiles.count) file(s) to convert. Convert now? y/m")?.lowercased() == "y"
