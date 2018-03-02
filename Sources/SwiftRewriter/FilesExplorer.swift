@@ -180,7 +180,7 @@ class SuggestConversionInterface {
         }
         
         if !skipConfirm {
-            let convert = console.readLineWith(prompt: "Found \(objcFiles.count) file(s) to convert. Convert now? y/m")?.lowercased() == "y"
+            let convert = console.readLineWith(prompt: "Found \(objcFiles.count) file(s) to convert. Convert now? y/n")?.lowercased() == "y"
             guard convert else {
                 return
             }
