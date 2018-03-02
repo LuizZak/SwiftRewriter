@@ -120,7 +120,7 @@ public class FilesExplorerService {
     }
 }
 
-fileprivate class SuggestConversionInterface {
+class SuggestConversionInterface {
     var rewriterService: SwiftRewriterService
     
     init(rewriterService: SwiftRewriterService) {
@@ -128,12 +128,16 @@ fileprivate class SuggestConversionInterface {
     }
     
     func run(in menu: MenuController) {
-        let console = menu.console
-        let fileManager = FileManager.default
-        
         guard let path = showSearchPathUi(in: menu) else {
             return
         }
+        
+        searchAndShowConfirm(in: menu, path: path)
+    }
+    
+    func searchAndShowConfirm(in menu: MenuController, path: String, skipConfirm: Bool = false, excludePattern: String? = nil) {
+        let console = menu.console
+        let fileManager = FileManager.default
         
         // Search all files there
         guard let files = fileManager.enumerator(atPath: path) else {
@@ -143,22 +147,24 @@ fileprivate class SuggestConversionInterface {
         
         let objcFiles =
             files.compactMap { // Type the array properly
-                $0 as? String
-            }.filter { // Filter down to .h/.m files
-                (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h")
-            }.map { // Unfold full paths
-                (path as NSString).appendingPathComponent($0)
-            }.sorted { (s1: String, s2: String) -> Bool in
-                s1.compare(s2, options: .numeric) == .orderedAscending
-            }.map { // Convert back to the URL
-                URL(fileURLWithPath: $0)
-            }.filter { // Check a matching .swift file doesn't already exist for the paths
-                !fileManager.fileExists(atPath: (($0.path as NSString).deletingPathExtension as NSString).appendingPathExtension("swift")!)
-            }
+                    $0 as? String
+                }.filter { // Filter down to .h/.m files
+                    (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h")
+                }.map { // Unfold full paths
+                    (path as NSString).appendingPathComponent($0)
+                }.sorted { (s1: String, s2: String) -> Bool in
+                    s1.compare(s2, options: .numeric) == .orderedAscending
+                }.map { // Convert back to the URL
+                    URL(fileURLWithPath: $0)
+                }.filter { // Check a matching .swift file doesn't already exist for the paths
+                    !fileManager.fileExists(atPath: (($0.path as NSString).deletingPathExtension as NSString).appendingPathExtension("swift")!)
+                }
         
-        let convert = console.readLineWith(prompt: "Found \(objcFiles.count) file(s) to convert. Convert now? y/m")?.lowercased() == "y"
-        guard convert else {
-            return
+        if !skipConfirm {
+            let convert = console.readLineWith(prompt: "Found \(objcFiles.count) file(s) to convert. Convert now? y/m")?.lowercased() == "y"
+            guard convert else {
+                return
+            }
         }
         
         do {
