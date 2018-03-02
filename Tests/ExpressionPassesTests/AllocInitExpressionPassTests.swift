@@ -10,29 +10,29 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
     
     func testPlainInit() {
         assertTransformParsed(
-            original: "[[ClassName alloc] init]",
-            expected: .postfix(.identifier("ClassName"), .functionCall(arguments: []))
+            expression: "[[ClassName alloc] init]",
+            into: .postfix(.identifier("ClassName"), .functionCall(arguments: []))
         )
     }
     
     func testInitWith() {
         assertTransformParsed(
-            original: "[[ClassName alloc] initWithName:@\"abc\"]",
-            expected: .postfix(.identifier("ClassName"), .functionCall(arguments: [.labeled("name", .constant("abc"))]))
+            expression: "[[ClassName alloc] initWithName:@\"abc\"]",
+            into: .postfix(.identifier("ClassName"), .functionCall(arguments: [.labeled("name", .constant("abc"))]))
         )
     }
     
     func testInitWithCompoundName() {
         assertTransformParsed(
-            original: "[[ClassName alloc] initWithFirstName:@\"John\" secondName:@\"Doe\"]",
-            expected: .postfix(.identifier("ClassName"),
+            expression: "[[ClassName alloc] initWithFirstName:@\"John\" secondName:@\"Doe\"]",
+            into: .postfix(.identifier("ClassName"),
                                .functionCall(arguments: [.labeled("firstName", .constant("John")),
                                                          .labeled("secondName", .constant("Doe"))]))
         )
         
         assertTransformParsed(
-            original: "[[ClassName alloc] initWith:@\"John\" secondName:@\"Doe\"]",
-            expected: .postfix(.identifier("ClassName"),
+            expression: "[[ClassName alloc] initWith:@\"John\" secondName:@\"Doe\"]",
+            into: .postfix(.identifier("ClassName"),
                                .functionCall(arguments: [.unlabeled(.constant("John")),
                                                          .labeled("secondName", .constant("Doe"))]))
         )
@@ -40,8 +40,8 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
     
     func testSuperInitWith() {
         assertTransformParsed(
-            original: "[super initWithFrame:frame]",
-            expected: .postfix(.postfix(.identifier("super"),
+            expression: "[super initWithFrame:frame]",
+            into: .postfix(.postfix(.identifier("super"),
                                         .member("init")),
                                .functionCall(arguments: [
                                 .labeled("frame", .identifier("frame"))
@@ -50,8 +50,8 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
         
         // Test we leave simple super.init() calls alone
         assertTransformParsed(
-            original: "[super init]",
-            expected: .postfix(.postfix(.identifier("super"), .member("init")),
+            expression: "[super init]",
+            into: .postfix(.postfix(.identifier("super"), .member("init")),
                                .functionCall(arguments: []))
         )
     }
@@ -63,12 +63,12 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
         typeNameExp.resolvedType = .metatype(for: .typeName("ClassName"))
         
         assertTransform(
-            original: .postfix(.postfix(.postfix(.postfix(typeNameExp,
+            expression: .postfix(.postfix(.postfix(.postfix(typeNameExp,
                                                           .member("alloc")),
                                                  .functionCall(arguments: [])),
                                         .member("init")),
                                .functionCall(arguments: [])),
-            expected: .postfix(.postfix(typeNameExp,
+            into: .postfix(.postfix(typeNameExp,
                                         .member("init")),
                                .functionCall(arguments: []))
         )
@@ -88,8 +88,8 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                      .functionCall(arguments: [.unlabeled(.constant(1))]))
         
         assertTransform(
-            original: exp,
-            expected: .postfix(.postfix(typeNameExp,
+            expression: exp,
+            into: .postfix(.postfix(typeNameExp,
                                         .member("init")),
                                .functionCall(arguments: [.labeled("thing", .constant(1))]))
         )

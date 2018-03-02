@@ -27,6 +27,10 @@ public extension CodeScopeStatement where Self: Statement {
         return nearestScope.definition(named: name)
     }
     
+    public func allDefinitions() -> [CodeDefinition] {
+        return definitions.allDefinitions()
+    }
+    
     public func recordDefinition(_ definition: CodeDefinition) {
         definitions.recordDefinition(definition)
     }
@@ -66,6 +70,9 @@ class EmptyCodeScope: CodeScope {
     func definition(named name: String) -> CodeDefinition? {
         return nil
     }
+    func allDefinitions() -> [CodeDefinition] {
+        return []
+    }
     func recordDefinition(_ definition: CodeDefinition) {
         
     }
@@ -77,6 +84,9 @@ class EmptyCodeScope: CodeScope {
 /// An object that can provide definitions for a type resolver
 public protocol DefinitionsSource {
     func definition(named name: String) -> CodeDefinition?
+    
+    /// Returns all definitions from this local scope only
+    func allDefinitions() -> [CodeDefinition]
 }
 
 /// A code scope that stores definitions gathered during function body analysis.
@@ -96,6 +106,10 @@ public class DefaultCodeScope: CodeScope {
     
     public func definition(named name: String) -> CodeDefinition? {
         return definitions.first { $0.name == name }
+    }
+    
+    public func allDefinitions() -> [CodeDefinition] {
+        return definitions
     }
     
     public func recordDefinition(_ definition: CodeDefinition) {

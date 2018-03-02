@@ -10,24 +10,24 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     
     func testIsEqualToString() {
         assertTransformParsed(
-            original: "[self.aString isEqualToString:@\"abc\"]",
-            expected: .binary(lhs: .postfix(.identifier("self"), .member("aString")),
+            expression: "[self.aString isEqualToString:@\"abc\"]",
+            into: .binary(lhs: .postfix(.identifier("self"), .member("aString")),
                               op: .equals,
                               rhs: .constant("abc")))
     }
     
     func testNSStringWithFormat() {
         assertTransformParsed(
-            original: "[NSString stringWithFormat:@\"%@\", self]",
-            expected: .postfix(.identifier("String"),
+            expression: "[NSString stringWithFormat:@\"%@\", self]",
+            into: .postfix(.identifier("String"),
                                .functionCall(arguments: [
                                 .labeled("format", .constant("%@")),
                                 .unlabeled(.identifier("self"))
                                 ]))
         )
         assertTransformParsed(
-            original: "[NSString stringWithFormat:@\"%@\"]",
-            expected: .postfix(.identifier("String"),
+            expression: "[NSString stringWithFormat:@\"%@\"]",
+            into: .postfix(.identifier("String"),
                                .functionCall(arguments: [
                                 .labeled("format", .constant("%@"))
                                 ]))
@@ -36,8 +36,8 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     
     func testAddObjectsFromArray() {
         assertTransformParsed(
-            original: "[array addObjectsFromArray:@[]]",
-            expected: .postfix(.postfix(.identifier("array"), .member("addObjects")),
+            expression: "[array addObjectsFromArray:@[]]",
+            into: .postfix(.postfix(.identifier("array"), .member("addObjects")),
                                .functionCall(arguments: [
                                 .labeled("from", .arrayLiteral([]))
                                 ]))
@@ -46,104 +46,104 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     
     func testNSArrayArrayCreator() {
         assertTransformParsed(
-            original: "[NSArray array]",
-            expected: .postfix(.identifier("NSArray"), .functionCall(arguments: []))
+            expression: "[NSArray array]",
+            into: .postfix(.identifier("NSArray"), .functionCall(arguments: []))
         )
         // Test unrecognized members are left alone
         assertTransformParsed(
-            original: "[NSArray array:thing]",
-            expected: "NSArray.array(thing)"
+            expression: "[NSArray array:thing]",
+            into: "NSArray.array(thing)"
         )
     }
     
     func testNSMutableArrayArrayCreator() {
         assertTransformParsed(
-            original: "[NSMutableArray array]",
-            expected: .postfix(.identifier("NSMutableArray"), .functionCall(arguments: []))
+            expression: "[NSMutableArray array]",
+            into: .postfix(.identifier("NSMutableArray"), .functionCall(arguments: []))
         )
         // Test unrecognized members are left alone
         assertTransformParsed(
-            original: "[NSMutableArray array:thing]",
-            expected: "NSMutableArray.array(thing)"
+            expression: "[NSMutableArray array:thing]",
+            into: "NSMutableArray.array(thing)"
         )
     }
     
     func testNSDictionaryDictionaryCreator() {
         assertTransformParsed(
-            original: "[NSDictionary dictionary]",
-            expected: .postfix(.identifier("NSDictionary"), .functionCall(arguments: []))
+            expression: "[NSDictionary dictionary]",
+            into: .postfix(.identifier("NSDictionary"), .functionCall(arguments: []))
         )
         // Test unrecognized members are left alone
         assertTransformParsed(
-            original: "[NSDictionary dictionary:thing]",
-            expected: "NSDictionary.dictionary(thing)"
+            expression: "[NSDictionary dictionary:thing]",
+            into: "NSDictionary.dictionary(thing)"
         )
     }
     
     func testNSMutableDictionaryDictionaryCreator() {
         assertTransformParsed(
-            original: "[NSMutableDictionary dictionary]",
-            expected: .postfix(.identifier("NSMutableDictionary"), .functionCall(arguments: []))
+            expression: "[NSMutableDictionary dictionary]",
+            into: .postfix(.identifier("NSMutableDictionary"), .functionCall(arguments: []))
         )
         assertTransformParsed(
-            original: "[NSMutableDictionary dictionary:thing]",
-            expected: "NSMutableDictionary.dictionary(thing)"
+            expression: "[NSMutableDictionary dictionary:thing]",
+            into: "NSMutableDictionary.dictionary(thing)"
         )
     }
     
     func testNSSetSetCreator() {
         assertTransformParsed(
-            original: "[NSSet set]",
-            expected: .postfix(.identifier("NSSet"), .functionCall(arguments: []))
+            expression: "[NSSet set]",
+            into: .postfix(.identifier("NSSet"), .functionCall(arguments: []))
         )
         // Test unrecognized members are left alone
         assertTransformParsed(
-            original: "[NSSet set:thing]",
-            expected: "NSSet.set(thing)"
+            expression: "[NSSet set:thing]",
+            into: "NSSet.set(thing)"
         )
     }
     
     func testNSMutableSetSetCreator() {
         assertTransformParsed(
-            original: "[NSMutableSet set]",
-            expected: .postfix(.identifier("NSMutableSet"), .functionCall(arguments: []))
+            expression: "[NSMutableSet set]",
+            into: .postfix(.identifier("NSMutableSet"), .functionCall(arguments: []))
         )
         // Test unrecognized members are left alone
         assertTransformParsed(
-            original: "[NSMutableSet set:thing]",
-            expected: "NSMutableSet.set(thing)"
+            expression: "[NSMutableSet set:thing]",
+            into: "NSMutableSet.set(thing)"
         )
     }
     
     func testNSDateDateCreator() {
         assertTransformParsed(
-            original: "[NSDate date]",
-            expected: .postfix(.identifier("NSDate"), .functionCall(arguments: []))
+            expression: "[NSDate date]",
+            into: .postfix(.identifier("NSDate"), .functionCall(arguments: []))
         )
         // Test unrecognized members are left alone
         assertTransformParsed(
-            original: "[NSDate date:thing]",
-            expected: "NSDate.date(thing)"
+            expression: "[NSDate date:thing]",
+            into: "NSDate.date(thing)"
         )
     }
     
     func testClassTypeMethod() {
         // Uppercase -> <Type>.self
         assertTransformParsed(
-            original: "[NSObject class]",
-            expected: .postfix(.identifier("NSObject"), .member("self"))
+            expression: "[NSObject class]",
+            into: .postfix(.identifier("NSObject"), .member("self"))
         )
         // lowercase -> type(of: <object>)
         assertTransformParsed(
-            original: "[object class]",
-            expected: .postfix(.identifier("type"),
+            expression: "[object class]",
+            into: .postfix(.identifier("type"),
                                .functionCall(arguments: [
                                 .labeled("of", .identifier("object"))
                                 ]))
         )
         assertTransformParsed(
-            original: "[[an expression] class]",
-            expected: .postfix(.identifier("type"),
+            expression: "[[an expression] class]",
+            into: .postfix(.identifier("type"),
                                .functionCall(arguments: [
                                 .labeled("of", .postfix(.postfix(.identifier("an"), .member("expression")), .functionCall(arguments: [])))
                                 ]))
@@ -152,14 +152,14 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         // Test we don't accidentally convert things that do not match [<exp> class]
         // by mistake.
         assertTransformParsed(
-            original: "[NSObject class:aThing]",
-            expected: .postfix(.postfix(.identifier("NSObject"), .member("class")),
+            expression: "[NSObject class:aThing]",
+            into: .postfix(.postfix(.identifier("NSObject"), .member("class")),
                                .functionCall(arguments: [.unlabeled(.identifier("aThing"))]))
         )
         
         assertTransformParsed(
-            original: "[object class:aThing]",
-            expected: .postfix(.postfix(.identifier("object"), .member("class")),
+            expression: "[object class:aThing]",
+            into: .postfix(.postfix(.identifier("object"), .member("class")),
                                .functionCall(arguments: [.unlabeled(.identifier("aThing"))]))
         )
     }
@@ -177,13 +177,13 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         valueExp.resolvedType = .int
         
         assertTransform(
-            original: .postfix(.postfix(typeNameExp, .member("class")), .functionCall(arguments: [])),
-            expected: .postfix(typeNameExp, .member("self"))
+            expression: .postfix(.postfix(typeNameExp, .member("class")), .functionCall(arguments: [])),
+            into: .postfix(typeNameExp, .member("self"))
         )
         
         assertTransform(
-            original: .postfix(.postfix(valueExp, .member("class")), .functionCall(arguments: [])),
-            expected: .postfix(.identifier("type"),
+            expression: .postfix(.postfix(valueExp, .member("class")), .functionCall(arguments: [])),
+            into: .postfix(.identifier("type"),
                                .functionCall(arguments: [
                                 .labeled("of", valueExp)
                                 ]))

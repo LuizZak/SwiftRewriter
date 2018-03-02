@@ -8,7 +8,7 @@ import SwiftAST
 class ExpressionPassTestCase: XCTestCase {
     var sut: SyntaxNodeRewriterPass!
     
-    func assertTransformParsed(original: String, expected: String, file: String = #file, line: Int = #line) {
+    func assertTransformParsed(expression original: String, into expected: String, file: String = #file, line: Int = #line) {
         let result = parse(original).accept(sut)
         
         if expected != result.description {
@@ -16,11 +16,11 @@ class ExpressionPassTestCase: XCTestCase {
         }
     }
     
-    func assertTransformParsed(original: String, expected: Expression, file: String = #file, line: Int = #line) {
-        assertTransform(original: parse(original), expected: expected, file: file, line: line)
+    func assertTransformParsed(expression original: String, into expected: Expression, file: String = #file, line: Int = #line) {
+        assertTransform(expression: parse(original), into: expected, file: file, line: line)
     }
     
-    func assertTransform(original: Expression, expected: Expression, file: String = #file, line: Int = #line) {
+    func assertTransform(expression original: Expression, into expected: Expression, file: String = #file, line: Int = #line) {
         let result = original.accept(sut)
         
         if expected != result {
@@ -31,6 +31,20 @@ class ExpressionPassTestCase: XCTestCase {
             dump(result, to: &resString)
             
             recordFailure(withDescription: "Failed to convert: Expected to convert expression into\n\(expString)\nbut received\n\(resString)", inFile: file, atLine: line, expected: false)
+        }
+    }
+    
+    func assertTransform(statement: Statement, into expected: Statement, file: String = #file, line: Int = #line) {
+        let result = statement.accept(sut)
+        
+        if expected != result {
+            var expString = ""
+            var resString = ""
+            
+            dump(expected, to: &expString)
+            dump(result, to: &resString)
+            
+            recordFailure(withDescription: "Failed to convert: Expected to convert statement into\n\(expString)\nbut received\n\(resString)", inFile: file, atLine: line, expected: false)
         }
     }
     

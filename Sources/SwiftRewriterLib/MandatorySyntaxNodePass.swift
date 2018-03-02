@@ -1,7 +1,7 @@
 import SwiftAST
 
 /// A mandatory syntax node pass that tidies up typecast operations and other
-/// constructs that are not valid Swift syntax.
+/// constructs that are not valid Swift syntax yet.
 class MandatorySyntaxNodePass: SyntaxNodeRewriterPass {
     
     override func visitPostfix(_ exp: PostfixExpression) -> Expression {

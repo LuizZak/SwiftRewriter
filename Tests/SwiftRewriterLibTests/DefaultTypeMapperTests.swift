@@ -286,7 +286,7 @@ class DefaultTypeMapperTests: XCTestCase {
     }
 }
 
-extension TypeMapperTests {
+extension DefaultTypeMapperTests {
     private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull,
                         context: TypeConstructionContext = TypeConstructionContext(typeSystem: DefaultTypeSystem()),
                         toConvertTo expected: String, file: String = #file, line: Int = #line) {
