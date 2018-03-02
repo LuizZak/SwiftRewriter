@@ -49,8 +49,12 @@ public class AssumeNonnullContext: Context {
 
 // MARK: - AssumeNonnullContext-specific TypeConstructionContext extension
 public extension TypeConstructionContext {
+    public var assumeNonnulContext: AssumeNonnullContext? {
+        return findContext(ofType: AssumeNonnullContext.self)
+    }
+    
     /// Returns a value specifying whether assume nonnull is on for pointer types.
     public var isAssumeNonnullOn: Bool {
-        return findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn ?? false
+        return assumeNonnulContext?.isNonnullOn ?? false
     }
 }

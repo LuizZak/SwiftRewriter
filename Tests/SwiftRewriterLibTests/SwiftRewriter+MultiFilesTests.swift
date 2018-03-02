@@ -232,6 +232,56 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
+    func testTypeLookupsHappenAfterAllSourceCodeIsParsed() throws {
+        assertThat()
+            .file(name: "A.h",
+            """
+            typedef NS_ENUM(NSString*, AnEnum) {
+                AnEnumCase1
+            };
+            
+            B *globalB;
+            @interface A: NSObject
+            {
+                B* ivarB;
+            }
+            @property (nonnull) B *b; // Should translate to 'B', and not 'UnsafeMutablePointer<B>!'
+            - (B*)takesB:(B*)b;
+            - (instancetype)initWithB:(B*)b;
+            @end
+            """)
+            .file(name: "B.h",
+            """
+            @interface B: NSObject
+            @end
+            """)
+            .translatesToSwift("""
+            enum AnEnum: String! {
+                case AnEnumCase1
+            }
+            
+            var globalB: B!
+            
+            @objc
+            class A: NSObject {
+                private var ivarB: B!
+                @objc var b: B
+                
+                @objc
+                init(b: B!) {
+                }
+                @objc
+                func takesB(_ b: B!) -> B! {
+                }
+            }
+            // End of file A.swift
+            @objc
+            class B: NSObject {
+            }
+            // End of file B.swift
+            """)
+    }
+    
     private func assertThat() -> MultiFileTestBuilder {
         return MultiFileTestBuilder(test: self)
     }

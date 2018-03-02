@@ -3,6 +3,10 @@ import SwiftAST
 
 /// An intention to generate a Swift enumeration type
 public class EnumGenerationIntention: TypeGenerationIntention {
+    public var typedSource: ObjcEnumDeclaration? {
+        return source as? ObjcEnumDeclaration
+    }
+    
     public var rawValueType: SwiftType
     
     public var cases: [EnumCaseGenerationIntention] {

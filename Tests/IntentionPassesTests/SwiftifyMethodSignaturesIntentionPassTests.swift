@@ -102,7 +102,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .converts(toInitializer: [])
     }
     
-    func testConvertInitwithInt() {
+    func testConvertInitWithInt() {
         let sut = SwiftifyMethodSignaturesIntentionPass()
         
         testThat(sut: sut)
@@ -114,6 +114,21 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
                                   isStatic: false))
             .converts(toInitializer: [
                 ParameterSignature(label: "int", name: "int", type: .int)
+                ])
+    }
+    
+    func testConvertVeryShortTypeName() {
+        let sut = SwiftifyMethodSignaturesIntentionPass()
+        
+        testThat(sut: sut)
+            .method(withSignature:
+                FunctionSignature(name: "initWithB",
+                                  parameters: [
+                                    ParameterSignature(label: "_", name: "b", type: .typeName("B"))],
+                                  returnType: .instancetype,
+                                  isStatic: false))
+            .converts(toInitializer: [
+                ParameterSignature(label: "b", name: "b", type: .typeName("B"))
                 ])
     }
     

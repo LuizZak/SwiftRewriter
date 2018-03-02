@@ -77,7 +77,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         let signature = method.signature
         
         let splitOnWith = signature.name.components(separatedBy: "With")
-        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count < 2 }) {
+        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count == 0 }) {
             return
         }
         

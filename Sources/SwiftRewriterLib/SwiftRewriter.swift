@@ -3,6 +3,8 @@ import GrammarModels
 import ObjcParser
 import SwiftAST
 
+private typealias NonnullTokenRange = (start: Int, end: Int)
+
 /// Allows re-writing Objective-C constructs into Swift equivalents.
 public class SwiftRewriter {
     
@@ -13,6 +15,10 @@ public class SwiftRewriter {
     private let sourcesProvider: InputSourcesProvider
     private var typeSystem: IntentionCollectionTypeSystem
     
+    /// Items to type-resolve after parsing is complete, and all types have been
+    /// gathered.
+    private var lazyResolve: [LazyTypeResolveItem] = []
+    
     /// Full path of files from followed includes, when `followIncludes` is on.
     private var includesFollowed: [String] = []
     
@@ -20,7 +26,7 @@ public class SwiftRewriter {
     /// collected so during source analysis by SwiftRewriter we can verify whether
     /// or not a declaration is under the effects of NS_ASSUME_NONNULL by checking
     /// whether it is contained within one of these ranges.
-    private var nonnullTokenRanges: [(start: Int, end: Int)] = []
+    private var nonnullTokenRanges: [NonnullTokenRange] = []
     
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
@@ -71,10 +77,15 @@ public class SwiftRewriter {
     }
     
     public func rewrite() throws {
+        defer {
+            lazyResolve = []
+        }
+        
         try autoreleasepool {
             parsers.removeAll()
             
             try loadInputSources()
+            evaluateTypes()
             performIntentionPasses()
             outputDefinitions()
         }
@@ -87,6 +98,61 @@ public class SwiftRewriter {
         for src in sources {
             try autoreleasepool {
                 try loadObjcSource(from: src)
+            }
+        }
+    }
+    
+    /// Evaluate all type signatures, now with the knowledge of all types present
+    /// in the program.
+    private func evaluateTypes() {
+        context.pushContext(AssumeNonnullContext(isNonnullOn: false))
+        defer {
+            context.popContext()
+        }
+        
+        for item in lazyResolve {
+            switch item {
+            case let .property(prop, ctx):
+                guard let node = prop.propertySource else { continue }
+                guard let type = node.type?.type else { continue }
+                
+                let context = TypeMapper
+                    .TypeMappingContext(modifiers: node.attributesList,
+                                        inNonnull: isNodeInNonnullContext(node, context: ctx))
+                
+                prop.storage.type = typeMapper.swiftType(forObjcType: type, context: context)
+                
+            case let .method(method, ctx):
+                guard let node = method.typedSource else { continue }
+                
+                context.assumeNonnulContext?.isNonnullOn = isNodeInNonnullContext(node, context: ctx)
+                
+                let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+                method.signature = signGen.generateDefinitionSignature(from: node)
+                
+            case let .ivar(ivar, ctx):
+                guard let node = ivar.typedSource else { continue }
+                guard let type = node.type?.type else { continue }
+                
+                ivar.storage.type =
+                    typeMapper.swiftType(forObjcType: type,
+                                         context: .init(inNonnull: isNodeInNonnullContext(node, context: ctx)))
+                
+            case let .globalVar(gvar, ctx):
+                guard let node = gvar.variableSource else { continue }
+                guard let type = node.type?.type else { continue }
+                
+                gvar.storage.type =
+                    typeMapper.swiftType(forObjcType: type,
+                                         context: .init(inNonnull: isNodeInNonnullContext(node, context: ctx)))
+                
+            case let .enumDecl(en, _):
+                guard let type = en.typedSource?.type else { return }
+                
+                en.rawValueType = typeMapper.swiftType(forObjcType: type.type)
+                
+            case .globalFunc: // TODO: Support rewriting this once global function parsing is through
+                break
             }
         }
     }
@@ -308,7 +374,9 @@ public class SwiftRewriter {
         traverser.traverse()
     }
     
-    private func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+    private func isNodeInNonnullContext(_ node: ASTNode, context: LazyTypeResolveContext? = nil) -> Bool {
+        let ranges = context?.nonnulls ?? nonnullTokenRanges
+        
         // Requires original ANTLR's rule context
         guard let ruleContext = node.sourceRuleContext else {
             return false
@@ -320,7 +388,7 @@ public class SwiftRewriter {
         
         // Check if it the token start/end indices are completely contained
         // within NS_ASSUME_NONNULL_BEGIN/END intervals
-        for n in nonnullTokenRanges {
+        for n in ranges {
             if n.start <= startToken.getTokenIndex() && n.end >= stopToken.getTokenIndex() {
                 return true
             }
@@ -376,10 +444,7 @@ public class SwiftRewriter {
             return
         }
         
-        let typeContext =
-            TypeMapper.TypeMappingContext(inNonnull: isNodeInNonnullContext(node))
-        
-        let swiftType = typeMapper.swiftType(forObjcType: type.type, context: typeContext)
+        let swiftType = SwiftType.anyObject
         let ownership = evaluateOwnershipPrefix(inType: type.type)
         let isConstant = SwiftWriter._isConstant(fromType: type.type)
         
@@ -401,6 +466,8 @@ public class SwiftRewriter {
         }
         
         ctx.addGlobalVariable(intent)
+        
+        lazyResolve.append(.globalVar(intent, context: lazyTypeResolveContext()))
     }
     
     // MARK: - ObjcClassInterface
@@ -517,14 +584,10 @@ public class SwiftRewriter {
             return
         }
         
-        var swiftType: SwiftType = .anyObject
+        let swiftType: SwiftType = .anyObject
+        
         var ownership: Ownership = .strong
         if let type = node.type?.type {
-            let context = TypeMapper
-                .TypeMappingContext(modifiers: node.attributesList,
-                                    inNonnull: isNodeInNonnullContext(node))
-            
-            swiftType = typeMapper.swiftType(forObjcType: type, context: context)
             ownership = evaluateOwnershipPrefix(inType: type, property: node)
         }
         
@@ -556,6 +619,8 @@ public class SwiftRewriter {
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
+            
+            lazyResolve.append(.property(prop, context: lazyTypeResolveContext()))
         } else {
             let prop = PropertyGenerationIntention(name: node.identifier?.name ?? "",
                                                    storage: storage,
@@ -565,6 +630,8 @@ public class SwiftRewriter {
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
+            
+            lazyResolve.append(.property(prop, context: lazyTypeResolveContext()))
         }
     }
     
@@ -574,7 +641,14 @@ public class SwiftRewriter {
             return
         }
         
-        let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+        let localMapper =
+            TypeMapper(context:
+                TypeConstructionContext(typeSystem:
+                    DefaultTypeSystem.defaultTypeSystem
+                )
+            )
+        
+        let signGen = SwiftMethodSignatureGen(context: context, typeMapper: localMapper)
         let sign = signGen.generateDefinitionSignature(from: node)
         
         let method: MethodGenerationIntention
@@ -603,6 +677,8 @@ public class SwiftRewriter {
         }
         
         ctx.addMethod(method)
+        
+        lazyResolve.append(.method(method, context: lazyTypeResolveContext()))
     }
     
     private func visitObjcClassSuperclassName(_ node: SuperclassName) {
@@ -640,12 +716,10 @@ public class SwiftRewriter {
         
         let access = ivarCtx?.accessLevel ?? .private
         
-        var swiftType: SwiftType = .anyObject
+        let swiftType: SwiftType = .anyObject
         var ownership = Ownership.strong
         var isConstant = false
         if let type = node.type?.type {
-            swiftType = typeMapper.swiftType(forObjcType: type,
-                                             context: .init(inNonnull: isNodeInNonnullContext(node)))
             ownership = evaluateOwnershipPrefix(inType: type)
             isConstant = SwiftWriter._isConstant(fromType: type)
         }
@@ -660,6 +734,8 @@ public class SwiftRewriter {
         recordSourceHistory(intention: ivar, node: node)
         
         classCtx.addInstanceVariable(ivar)
+        
+        lazyResolve.append(.ivar(ivar, context: lazyTypeResolveContext()))
     }
     
     private func exitObjcClassIVarsListNode(_ node: IVarsList) {
@@ -671,15 +747,10 @@ public class SwiftRewriter {
         guard let identifier = node.identifier else {
             return
         }
-        guard let type = node.type else {
-            return
-        }
-        
-        let swiftType = typeMapper.swiftType(forObjcType: type.type)
         
         let enumIntention =
             EnumGenerationIntention(typeName: identifier.name,
-                                    rawValueType: swiftType,
+                                    rawValueType: .anyObject,
                                     source: node)
         recordSourceHistory(intention: enumIntention, node: node)
         
@@ -688,6 +759,8 @@ public class SwiftRewriter {
             .addType(enumIntention)
         
         context.pushContext(enumIntention)
+        
+        lazyResolve.append(.enumDecl(enumIntention, context: lazyTypeResolveContext()))
     }
     
     private func visitObjcEnumCaseNode(_ node: ObjcEnumCase) {
@@ -730,6 +803,10 @@ public class SwiftRewriter {
             .recordCreation(description: "\(file) line \(rule.getLine()) column \(rule.getCharPositionInLine())")
     }
     
+    private func lazyTypeResolveContext() -> LazyTypeResolveContext {
+        return LazyTypeResolveContext(nonnulls: nonnullTokenRanges)
+    }
+    
     // MARK: -
     
     private class IVarListContext: Context {
@@ -739,4 +816,17 @@ public class SwiftRewriter {
             self.accessLevel = accessLevel
         }
     }
+}
+
+private enum LazyTypeResolveItem {
+    case property(PropertyGenerationIntention, context: LazyTypeResolveContext)
+    case ivar(InstanceVariableGenerationIntention, context: LazyTypeResolveContext)
+    case method(MethodGenerationIntention, context: LazyTypeResolveContext)
+    case globalVar(GlobalVariableGenerationIntention, context: LazyTypeResolveContext)
+    case globalFunc(GlobalFunctionGenerationIntention, context: LazyTypeResolveContext)
+    case enumDecl(EnumGenerationIntention, context: LazyTypeResolveContext)
+}
+
+private struct LazyTypeResolveContext {
+    var nonnulls: [NonnullTokenRange]
 }
