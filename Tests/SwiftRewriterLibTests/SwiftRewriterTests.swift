@@ -584,6 +584,22 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteStructTypedefs() throws {
+        try assertObjcParse(
+            objc: """
+            typedef struct {
+                vector_float3 position;
+                packed_float4 color;
+            } VertexObject;
+            """
+            , swift: """
+            struct VertexObject {
+                var position: vector_float3
+                var color: packed_float4
+            }
+            """)
+    }
+    
     func testRewriteBlockParameters() throws {
         try assertObjcParse(
             objc: """
