@@ -24,6 +24,7 @@ class SingleFileTestBuilder {
         
         sut.writerOptions = options
         
+        sut.syntaxNodeRewriters.append(ASTSimplifier())
         sut.syntaxNodeRewriters.append(AllocInitExpressionPass())
         sut.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
         sut.syntaxNodeRewriters.append(FoundationExpressionPass())

@@ -7,6 +7,7 @@ public class DefaultTypeSystem: TypeSystem {
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
 
     var types: [KnownType] = []
+    var typesByName: [String: KnownType] = [:]
     
     public init() {
         registerInitialKnownTypes()
@@ -14,10 +15,11 @@ public class DefaultTypeSystem: TypeSystem {
     
     public func addType(_ type: KnownType) {
         types.append(type)
+        typesByName[type.typeName] = type
     }
     
     public func knownTypeWithName(_ name: String) -> KnownType? {
-        return types.first { $0.typeName == name }
+        return typesByName[name]
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
@@ -25,7 +27,7 @@ public class DefaultTypeSystem: TypeSystem {
             return true
         }
         
-        if types.contains(where: { $0.typeName == typeName }) {
+        if knownTypeWithName(typeName) != nil {
             return true
         }
         
@@ -265,6 +267,22 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return types[0]
         }
         
+        var supertype: KnownSupertype?
+        for type in types {
+            // Search supertypes known here
+            switch type.supertype {
+            case .typeName(let supertypeName)?:
+                supertype = super.knownTypeWithName(supertypeName).map { .knownType($0) }
+            case .knownType?:
+                supertype = type.supertype
+            default:
+                break
+            }
+        }
+        
+        return LazyKnownType(typeName: name, supertype: supertype, types: types)
+        
+        /*
         var typeBuilder = KnownTypeBuilder(typeName: name)
         
         for type in types {
@@ -307,5 +325,64 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         return typeBuilder.build()
+        // */
+    }
+    
+    private class LazyKnownType: KnownType {
+        private var types: [KnownType]
+        
+        var typeName: String
+        
+        lazy var origin: String = {
+            return types[0].origin
+        }()
+        
+        var supertype: KnownSupertype?
+        
+        lazy var knownConstructors: [KnownConstructor] = {
+            var data: [KnownConstructor] = []
+            for type in types {
+                data.append(contentsOf: type.knownConstructors)
+            }
+            return data
+        }()
+        
+        lazy var knownMethods: [KnownMethod] = {
+            var data: [KnownMethod] = []
+            for type in types {
+                data.append(contentsOf: type.knownMethods)
+            }
+            return data
+        }()
+        
+        lazy var knownProperties: [KnownProperty] = {
+            var data: [KnownProperty] = []
+            for type in types {
+                data.append(contentsOf: type.knownProperties)
+            }
+            return data
+        }()
+        
+        lazy var knownFields: [KnownProperty] = {
+            var data: [KnownProperty] = []
+            for type in types {
+                data.append(contentsOf: type.knownFields)
+            }
+            return data
+        }()
+        
+        lazy var knownProtocolConformances: [KnownProtocolConformance] = {
+            var data: [KnownProtocolConformance] = []
+            for type in types {
+                data.append(contentsOf: type.knownProtocolConformances)
+            }
+            return data
+        }()
+        
+        init(typeName: String, supertype: KnownSupertype?, types: [KnownType]) {
+            self.typeName = typeName
+            self.supertype = supertype
+            self.types = types
+        }
     }
 }

@@ -13,16 +13,18 @@ public struct SyntaxNodeRewriterPassContext {
     ///
     /// Not calling this method may result in stale syntax structure metadata,
     /// like expression types, being fed to subsequent expression passes.
-    public let notifyChangedTree: () -> Void = { }
+    public let notifyChangedTree: () -> Void
     
     public init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
         self.typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        self.notifyChangedTree = { }
     }
     
-    public init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver, notifyChangedTree: () -> Void = { }) {
+    public init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver, notifyChangedTree: @escaping () -> Void = { }) {
         self.typeSystem = typeSystem
         self.typeResolver = typeResolver
+        self.notifyChangedTree = notifyChangedTree
     }
 }
 

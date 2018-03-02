@@ -773,14 +773,12 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    do {
-                        let _lockTarget = self
-                        objc_sync_enter(_lockTarget)
-                        defer {
-                            objc_sync_exit(_lockTarget)
-                        }
-                        stuff()
+                    let _lockTarget = self
+                    objc_sync_enter(_lockTarget)
+                    defer {
+                        objc_sync_exit(_lockTarget)
                     }
+                    stuff()
                 }
             }
             """)
