@@ -176,6 +176,8 @@ class SuggestConversionInterface {
                 if !skipConfirm {
                     _=console.readLineWith(prompt: "Press [Enter] to continue.")
                 }
+                
+                return
             }
         }
         
