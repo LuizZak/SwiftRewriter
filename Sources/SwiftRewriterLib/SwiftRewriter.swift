@@ -365,6 +365,8 @@ public class SwiftRewriter {
         }
     }
     
+    // MARK: - Global Variable
+    
     private func visitVariableDeclarationNode(_ node: VariableDeclaration) {
         guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
             return

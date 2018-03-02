@@ -202,7 +202,7 @@ public class TypeMapper {
         
         switch type {
         case .struct, .void:
-            return final;
+            return final; // <- Semicolon needed to avoid a parse error
             
         case .qualified:
             return swiftType(forObjcType: type, context: locSpecifiers)
@@ -217,8 +217,16 @@ public class TypeMapper {
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
-        return
-            swiftType(type: final, withNullability: locQualifiers.nullability())
+        switch type {
+        case .struct, .void:
+            return final; // <- Semicolon needed to avoid a parse error
+            
+        case .specified:
+            return swiftType(forObjcType: type, context: locQualifiers)
+            
+        default:
+            return swiftType(type: final, withNullability: locQualifiers.nullability())
+        }
     }
     
     private func swiftBlockType(forReturnType returnType: ObjcType, parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {

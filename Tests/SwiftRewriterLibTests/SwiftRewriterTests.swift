@@ -541,10 +541,12 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             const NSInteger myGlobal;
             NSInteger myOtherGlobal;
+            NSInteger const myThirdGlobal;
             """,
             swift: """
             let myGlobal: Int
             var myOtherGlobal: Int
+            let myThirdGlobal: Int
             """)
     }
     
