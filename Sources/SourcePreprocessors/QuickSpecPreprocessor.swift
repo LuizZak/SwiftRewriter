@@ -20,8 +20,14 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
     }
     
     public func preprocess(source: String, context: PreprocessingContext) -> String {
+        let firstPass = preprocessSpecPair(source, specBeginName: "QuickSpecBegin", specEndName: "QuickSpecEnd")
+        
+        return preprocessSpecPair(firstPass, specBeginName: "SpecBegin", specEndName: "SpecEnd")
+    }
+    
+    fileprivate func preprocessSpecPair(_ source: String, specBeginName: String, specEndName: String) -> String {
         // Find QuickSpecBegin/QuickSpecEnd pairs to preprocess
-        if !source.contains("QuickSpecBegin") || !source.contains("QuickSpecEnd") {
+        if !source.contains(specBeginName) || !source.contains(specEndName) {
             return source
         }
         
@@ -42,12 +48,12 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
         
         repeat {
             do {
-                if let quickSpecBeginRange = processed.range(of: "QuickSpecBegin"), !overlapsComments(quickSpecBeginRange) {
+                if let specBeginRange = processed.range(of: specBeginName), !overlapsComments(specBeginRange) {
                     // Walk back to the start of the line, making sure we're not
                     // in a comment section
                     
                     // Read name of type
-                    let lexer = Lexer(input: source, index: quickSpecBeginRange.upperBound)
+                    let lexer = Lexer(input: source, index: specBeginRange.upperBound)
                     
                     try lexer.skipToNext("(")
                     try lexer.advance()
@@ -68,14 +74,14 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
                     - (void)spec {
                     """
                     
-                    processed = processed.replacingCharacters(in: quickSpecBeginRange.lowerBound..<lexer.inputIndex, with: replace)
-                } else if let quickSpecEndRange = processed.range(of: "QuickSpecEnd"), !overlapsComments(quickSpecEndRange) {
+                    processed = processed.replacingCharacters(in: specBeginRange.lowerBound..<lexer.inputIndex, with: replace)
+                } else if let specEndRange = processed.range(of: specEndName), !overlapsComments(specEndRange) {
                     let replace = """
                     }
                     @end
                     """
                     
-                    processed = processed.replacingCharacters(in: quickSpecEndRange, with: replace)
+                    processed = processed.replacingCharacters(in: specEndRange, with: replace)
                 } else {
                     break
                 }

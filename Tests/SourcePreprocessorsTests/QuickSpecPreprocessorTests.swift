@@ -221,6 +221,29 @@ class QuickSpecPreprocessorTests: XCTestCase {
             """)
     }
     
+    /// Tests the preprocessor understands 'SpecBegin'/'SpecEnd' preprocessors
+    /// as well as the 'QuickSpecBegin'/'QuickSpecEnd' ones
+    func testAcceptsSpecBegin() {
+        let sut = QuickSpecPreprocessor()
+        
+        XCTAssertEqual(
+            sut.preprocess(
+            source:
+            """
+            SpecBegin  (  Abc  )
+            SpecEnd
+            """,
+            context: EmptyContext()),
+            """
+            @interface Abc : QuickSpec
+            @end
+            @implementation Abc
+            - (void)spec {
+            }
+            @end
+            """)
+    }
+    
     private class EmptyContext: PreprocessingContext {
         var filePath: String = ""
     }
