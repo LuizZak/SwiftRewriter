@@ -316,17 +316,17 @@ extension TypeMapperTests {
     }
     
     private func typeMapperConvert(_ type: SwiftType, context: TypeConstructionContext) -> String {
-        let mapper = TypeMapper(context: context)
+        let mapper = DefaultTypeMapper(context: context)
         
         return mapper.typeNameString(for: type)
     }
     
     private func typeMapperConvert(_ type: ObjcType, nullability: TypeNullability?, context: TypeConstructionContext) -> String {
-        let mapper = TypeMapper(context: context)
+        let mapper = DefaultTypeMapper(context: context)
         
-        var ctx: TypeMapper.TypeMappingContext = .empty
+        var ctx: TypeMappingContext = .empty
         if let nul = nullability {
-            ctx = TypeMapper.TypeMappingContext(explicitNullability: nul)
+            ctx = TypeMappingContext(explicitNullability: nul)
         }
         
         return mapper.typeNameString(for: type, context: ctx)

@@ -243,7 +243,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         let lxr = ObjectiveCLexer(input)
         tokens = CommonTokenStream(lxr)
         
-        let typeMapper = TypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
         
         let sut = SwiftStatementASTReader(expressionReader: SwiftExprASTReader(typeMapper: typeMapper))
         

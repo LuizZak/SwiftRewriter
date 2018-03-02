@@ -215,7 +215,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         let resolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
         let invoker = DefaultTypeResolverInvoker(typeResolver: resolver)
         let ctx = TypeConstructionContext(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
-        let mapper = TypeMapper(context: ctx)
+        let mapper = DefaultTypeMapper(context: ctx)
         let context =
             IntentionPassContext(typeSystem: DefaultTypeSystem(),
                                  typeMapper: mapper,
@@ -228,7 +228,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
     
     private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
         let ctx = TypeConstructionContext(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
-        let mapper = TypeMapper(context: ctx)
+        let mapper = DefaultTypeMapper(context: ctx)
         
         return SwiftMethodSignatureGen(context: ctx, typeMapper: mapper)
     }
@@ -261,7 +261,12 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
             self.testCase = testCase
             self.intentions = intentions
             self.type = type
-            self.typeMapper = TypeMapper(context: TypeConstructionContext(typeSystem: IntentionCollectionTypeSystem(intentions: intentions)))
+            self.typeMapper =
+                DefaultTypeMapper(context:
+                    TypeConstructionContext(typeSystem:
+                        IntentionCollectionTypeSystem(intentions: intentions)
+                    )
+                )
         }
         
         func converts(toInitializer parameters: [ParameterSignature], file: String = #file, line: Int = #line) {

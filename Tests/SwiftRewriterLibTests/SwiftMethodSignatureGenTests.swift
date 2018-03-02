@@ -180,7 +180,7 @@ class SwiftMethodSignatureGenTests: XCTestCase {
     
     private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
         let ctx = TypeConstructionContext(typeSystem: DefaultTypeSystem())
-        let mapper = TypeMapper(context: ctx)
+        let mapper = DefaultTypeMapper(context: ctx)
         
         return SwiftMethodSignatureGen(context: ctx, typeMapper: mapper)
     }

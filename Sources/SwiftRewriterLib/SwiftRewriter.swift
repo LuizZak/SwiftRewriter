@@ -73,7 +73,7 @@ public class SwiftRewriter {
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         
         self.context = TypeConstructionContext(typeSystem: typeSystem)
-        self.typeMapper = TypeMapper(context: context)
+        self.typeMapper = DefaultTypeMapper(context: context)
     }
     
     public func rewrite() throws {
@@ -116,9 +116,9 @@ public class SwiftRewriter {
                 guard let node = prop.propertySource else { continue }
                 guard let type = node.type?.type else { continue }
                 
-                let context = TypeMapper
-                    .TypeMappingContext(modifiers: node.attributesList,
-                                        inNonnull: isNodeInNonnullContext(node, context: ctx))
+                let context =
+                    TypeMappingContext(modifiers: node.attributesList,
+                                       inNonnull: isNodeInNonnullContext(node, context: ctx))
                 
                 prop.storage.type = typeMapper.swiftType(forObjcType: type, context: context)
                 
@@ -642,7 +642,7 @@ public class SwiftRewriter {
         }
         
         let localMapper =
-            TypeMapper(context:
+            DefaultTypeMapper(context:
                 TypeConstructionContext(typeSystem:
                     DefaultTypeSystem.defaultTypeSystem
                 )

@@ -105,8 +105,8 @@ public class SwiftWriter {
             SwiftWriter._typeNullability(inType: typeali.fromType)
         
         let ctx =
-            TypeMapper.TypeMappingContext(explicitNullability: nullability,
-                                          inNonnull: typeali.inNonnullContext)
+            TypeMappingContext(explicitNullability: nullability,
+                               inNonnull: typeali.inNonnullContext)
         
         let typeName = typeMapper.typeNameString(for: typeali.fromType, context: ctx)
         

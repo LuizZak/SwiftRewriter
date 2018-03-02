@@ -41,7 +41,7 @@ class ExpressionPassTestCase: XCTestCase {
         }
         let expression = try! parser.expression()
         
-        let reader = SwiftExprASTReader(typeMapper: TypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
+        let reader = SwiftExprASTReader(typeMapper: DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
         return expression.accept(reader)!
     }
     
