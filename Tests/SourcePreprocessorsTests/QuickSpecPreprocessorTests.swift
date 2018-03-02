@@ -166,6 +166,61 @@ class QuickSpecPreprocessorTests: XCTestCase {
             """)
     }
     
+    func testIsWhitespaceTolerant() {
+        let sut = QuickSpecPreprocessor()
+        
+        XCTAssertEqual(
+            sut.preprocess(
+            source:
+            """
+            QuickSpecBegin ( Abc)
+            QuickSpecEnd
+            """,
+            context: EmptyContext()),
+            """
+            @interface Abc : QuickSpec
+            @end
+            @implementation Abc
+            - (void)spec {
+            }
+            @end
+            """)
+        
+        XCTAssertEqual(
+            sut.preprocess(
+            source:
+            """
+            QuickSpecBegin (Abc )
+            QuickSpecEnd
+            """,
+            context: EmptyContext()),
+            """
+            @interface Abc : QuickSpec
+            @end
+            @implementation Abc
+            - (void)spec {
+            }
+            @end
+            """)
+        
+        XCTAssertEqual(
+            sut.preprocess(
+            source:
+            """
+            QuickSpecBegin  (  Abc  )
+            QuickSpecEnd
+            """,
+            context: EmptyContext()),
+            """
+            @interface Abc : QuickSpec
+            @end
+            @implementation Abc
+            - (void)spec {
+            }
+            @end
+            """)
+    }
+    
     private class EmptyContext: PreprocessingContext {
         var filePath: String = ""
     }

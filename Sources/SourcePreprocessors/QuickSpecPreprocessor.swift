@@ -5,6 +5,14 @@ import MiniLexer
 
 /// Performs pre-processing of QuickSpec test files
 public class QuickSpecPreprocessor: SourcePreprocessor {
+    /// Lexer rule that matches class identifiers.
+    ///
+    /// Reads as a formal grammar that is roughly like the one bellow:
+    ///
+    /// ```
+    /// identifierLexer:
+    ///     [a-zA-Z_] [a-zA-Z0-9_]*
+    /// ```
     private let identifierLexer: GrammarRule = (.letter | "_") .. (.letter | .digit | "_")*
     
     public init() {
@@ -13,7 +21,7 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
     
     public func preprocess(source: String, context: PreprocessingContext) -> String {
         // Find QuickSpecBegin/QuickSpecEnd pairs to preprocess
-        if !source.contains("QuickSpecBegin(") || !source.contains("QuickSpecEnd") {
+        if !source.contains("QuickSpecBegin") || !source.contains("QuickSpecEnd") {
             return source
         }
         
@@ -34,18 +42,23 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
         
         repeat {
             do {
-                if let quickSpecBeginRange = processed.range(of: "QuickSpecBegin("), !overlapsComments(quickSpecBeginRange) {
+                if let quickSpecBeginRange = processed.range(of: "QuickSpecBegin"), !overlapsComments(quickSpecBeginRange) {
                     // Walk back to the start of the line, making sure we're not
                     // in a comment section
                     
                     // Read name of type
                     let lexer = Lexer(input: source, index: quickSpecBeginRange.upperBound)
                     
+                    try lexer.skipToNext("(")
+                    try lexer.advance()
+                    
+                    lexer.skipWhitespace()
+                    
                     let className = try identifierLexer.consume(from: lexer)
                     
                     // Consume closing parens
-                    lexer.skipWhitespace()
-                    try lexer.advance(expectingCurrent: ")")
+                    try lexer.skipToNext(")")
+                    try lexer.advance()
                     
                     // Replace with proper @interface class name
                     let replace = """
