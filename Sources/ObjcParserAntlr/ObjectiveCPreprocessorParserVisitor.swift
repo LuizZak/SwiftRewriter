@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
+// Generated from /Users/luizsilva/Desktop/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
 import Antlr4
 
 /**
@@ -91,6 +91,17 @@ open class ObjectiveCPreprocessorParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitPreprocessorError(_ ctx: ObjectiveCPreprocessorParser.PreprocessorErrorContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by the {@code preprocessorWarning}
+	 * labeled alternative in {@link ObjectiveCPreprocessorParser#directive}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> T{
 	 	fatalError(#function + " must be overridden")
 	}
 

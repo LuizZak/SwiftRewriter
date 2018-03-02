@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
+// Generated from /Users/luizsilva/Desktop/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
 
 import Antlr4
 
@@ -113,6 +113,19 @@ open class ObjectiveCPreprocessorParserBaseListener: ObjectiveCPreprocessorParse
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitPreprocessorError(_ ctx: ObjectiveCPreprocessorParser.PreprocessorErrorContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) { }
 
 	/**
 	 * {@inheritDoc}

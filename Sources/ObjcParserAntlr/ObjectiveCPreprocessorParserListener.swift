@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
+// Generated from /Users/luizsilva/Desktop/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
 import Antlr4
 
 /**
@@ -112,6 +112,20 @@ public protocol ObjectiveCPreprocessorParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitPreprocessorError(_ ctx: ObjectiveCPreprocessorParser.PreprocessorErrorContext)
+	/**
+	 * Enter a parse tree produced by the {@code preprocessorWarning}
+	 * labeled alternative in {@link ObjectiveCPreprocessorParser#directive}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext)
+	/**
+	 * Exit a parse tree produced by the {@code preprocessorWarning}
+	 * labeled alternative in {@link ObjectiveCPreprocessorParser#directive}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext)
 	/**
 	 * Enter a parse tree produced by the {@code preprocessorDefine}
 	 * labeled alternative in {@link ObjectiveCPreprocessorParser#directive}.

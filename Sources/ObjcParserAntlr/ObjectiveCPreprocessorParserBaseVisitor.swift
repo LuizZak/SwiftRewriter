@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
+// Generated from /Users/luizsilva/Desktop/grammars-v4-master/objc/two-step-processing/ObjectiveCPreprocessorParser.g4 by ANTLR 4.7
 import Antlr4
 
 /**
@@ -66,6 +66,13 @@ open class ObjectiveCPreprocessorParserBaseVisitor<T>: AbstractParseTreeVisitor<
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	open func visitPreprocessorError(_ ctx: ObjectiveCPreprocessorParser.PreprocessorErrorContext) -> T? { return visitChildren(ctx) }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	open func visitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> T? { return visitChildren(ctx) }
 	/**
 	 * {@inheritDoc}
 	 *

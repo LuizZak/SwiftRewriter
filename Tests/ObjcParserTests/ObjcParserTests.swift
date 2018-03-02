@@ -33,6 +33,14 @@ class ObjcParserTests: XCTestCase {
         _=parserTest(source)
     }
     
+    func testParseDirectives() {
+        let source = """
+        #error An error!
+        #warning A warning!
+        """
+        _=parserTest(source)
+    }
+    
     func testParserMaintainsOriginalRuleContext() {
         let source = """
             #import "abc.h"
@@ -94,6 +102,14 @@ class ObjcParserTests: XCTestCase {
     private func _parseTestGlobalContextNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> GlobalContextNode {
         do {
             try parser.parse()
+            
+            if !parser.diagnostics.diagnostics.isEmpty {
+                var diag = ""
+                parser.diagnostics.printDiagnostics(to: &diag)
+                
+                recordFailure(withDescription: "Unexpected diagnostics while parsing:\n\(diag)", inFile: file, atLine: line, expected: false)
+            }
+            
             return parser.rootNode
         } catch {
             recordFailure(withDescription: "Failed to parse test '\(source)': \(error)", inFile: #file, atLine: line, expected: false)
