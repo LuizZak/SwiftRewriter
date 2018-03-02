@@ -4,7 +4,7 @@ import ObjcParser
 import GrammarModels
 import SwiftAST
 
-class TypeMapperTests: XCTestCase {
+class DefaultTypeMapperTests: XCTestCase {
     func testTypeNameString() {
         expectSwift(.typeName("MyType"), toConvertTo: "MyType")
         expectSwift(.optional(.typeName("MyType")), toConvertTo: "MyType?")
