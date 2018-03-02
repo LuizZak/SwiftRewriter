@@ -29,6 +29,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         
         converter.preprocessors.append(QuickSpecPreprocessor())
         
+        converter.syntaxNodeRewriters.append(ASTSimplifier())
         converter.syntaxNodeRewriters.append(AllocInitExpressionPass())
         converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
         converter.syntaxNodeRewriters.append(FoundationExpressionPass())

@@ -14,6 +14,8 @@ public class ASTSimplifier: SyntaxNodeRewriterPass {
             stmt.definitions.recordDefinition(def)
         }
         
+        context.notifyChangedTree()
+        
         return stmt
     }
 }

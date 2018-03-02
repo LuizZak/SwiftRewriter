@@ -100,14 +100,26 @@ public class SyntaxNodeRewriterPassApplier {
             // Resolve types before feeding into passes
             typeResolver.resolveTypes(in: functionBody.body)
             
-            let expContext = SyntaxNodeRewriterPassContext(typeSystem: typeSystem)
+            var didChangeTree = false
+            let notifyChangedTree: () -> Void = {
+                didChangeTree = true
+            }
+            
+            let expContext =
+                SyntaxNodeRewriterPassContext(typeSystem: typeSystem,
+                                              typeResolver: typeResolver,
+                                              notifyChangedTree: notifyChangedTree)
             
             passes.forEach {
+                didChangeTree = false
+                
                 $0.apply(on: functionBody.body, context: expContext)
                 
-                // After each apply to the body, we must re-type check the result
-                // before handing it off to the next pass.
-                typeResolver.resolveTypes(in: functionBody.body)
+                if didChangeTree {
+                    // After each apply to the body, we must re-type check the result
+                    // before handing it off to the next pass.
+                    typeResolver.resolveTypes(in: functionBody.body)
+                }
             }
         }
     }

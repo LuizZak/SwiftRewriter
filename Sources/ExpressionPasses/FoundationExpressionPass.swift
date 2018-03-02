@@ -7,18 +7,28 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let new = convertIsEqualToString(exp) {
+            context.notifyChangedTree()
+            
             return super.visitExpression(new)
         }
         if let new = convertStringWithFormat(exp) {
+            context.notifyChangedTree()
+            
             return super.visitExpression(new)
         }
         if let new = convertAddObjectsFromArray(exp) {
+            context.notifyChangedTree()
+            
             return super.visitExpression(new)
         }
         if let new = convertClassCall(exp) {
+            context.notifyChangedTree()
+            
             return super.visitExpression(new)
         }
         if let new = convertDataStructureInit(exp) {
+            context.notifyChangedTree()
+            
             return super.visitExpression(new)
         }
         
