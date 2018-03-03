@@ -61,6 +61,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.BlockParametersContext.self, nodeType: BlockParametersNode.self)
         mapper.addRuleMap(rule: ObjectiveCParser.ProtocolDeclarationContext.self, nodeType: ProtocolDeclaration.self)
         mapper.addRuleMap(rule: ObjectiveCParser.EnumDeclarationContext.self, nodeType: ObjcEnumDeclaration.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.FunctionDeclarationContext.self, nodeType: FunctionDefinition.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.FunctionDefinitionContext.self, nodeType: FunctionDefinition.self)
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -90,7 +92,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let identifier = ctx.className?.identifier() {
+        if let identifier = ctx.className()?.identifier() {
             let identifierNode = Identifier(name: identifier.getText())
             identifierNode.sourceRuleContext = identifier
             classNode.addChild(identifierNode)
@@ -133,12 +135,12 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         if let className = ctx.categoryName?.identifier() {
             let identifierNode = Identifier(name: className.getText())
-            identifierNode.sourceRuleContext = ctx.className
+            identifierNode.sourceRuleContext = ctx.className()
             classNode.addChild(identifierNode)
         }
         
         // Class category name
-        if let identifier = ctx.className {
+        if let identifier = ctx.identifier() {
             let identifierNode = Identifier(name: identifier.getText())
             identifierNode.sourceRuleContext = identifier
             classNode.addChild(identifierNode)
@@ -170,7 +172,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let identifier = ctx.className?.identifier() {
+        if let identifier = ctx.className()?.identifier() {
             let identNode = Identifier(name: identifier.getText())
             identNode.sourceRuleContext = identifier
             classNode.addChild(identNode)
@@ -190,14 +192,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Class name
-        if let identifier = ctx.categoryName?.identifier() {
+        if let identifier = ctx.className()?.identifier() {
             let identNode = Identifier(name: identifier.getText())
             identNode.sourceRuleContext = identifier
             classNode.addChild(identNode)
         }
         
         // Category name
-        if let identifier = ctx.className {
+        if let identifier = ctx.identifier() {
             let identNode = Identifier(name: identifier.getText())
             identNode.sourceRuleContext = identifier
             classNode.addChild(identNode)
@@ -242,7 +244,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
                     continue
                 }
-                guard let type = ObjcParserListener.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
+                guard let type = TypeParsing.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
                     continue
                 }
                 
@@ -302,7 +304,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
-        guard let type = ObjcParserListener.parseObjcType(fromTypeName: ctx) else {
+        guard let type = TypeParsing.parseObjcType(fromTypeName: ctx) else {
             return
         }
         
@@ -431,7 +433,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 continue
             }
             
-            guard let type = ObjcParserListener.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+            guard let type = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
                                                               typeDeclarator: typeDeclarator) else
             {
                 continue
@@ -491,7 +493,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
         for typeVariableDeclaratorOrName in ctx.typeVariableDeclaratorOrName() {
-            guard let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
+            guard let type = TypeParsing.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
                 continue
             }
             
@@ -500,11 +502,96 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             context.addChildNode(typeNameNode)
         }
     }
+    
+    // MARK: - Function Declaration/Definition
+    override func enterFunctionDefinition(_ ctx: ObjectiveCParser.FunctionDefinitionContext) {
+        guard let function = context.currentContextNode(as: FunctionDefinition.self) else {
+            return
+        }
+        guard let compoundStatement = ctx.compoundStatement() else {
+            return
+        }
+        
+        let body = MethodBody()
+        body.sourceRuleContext = compoundStatement
+        body.statements = compoundStatement
+        
+        function.addChild(body)
+    }
+    
+    override func enterFunctionSignature(_ ctx: ObjectiveCParser.FunctionSignatureContext) {
+        guard let function = context.currentContextNode(as: FunctionDefinition.self) else {
+            return
+        }
+        
+        var returnType: ObjcType?
+        if let declarationSpecifiers = ctx.declarationSpecifiers() {
+            returnType = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers)
+        }
+        
+        if let returnType = returnType {
+            let typeNameNode = TypeNameNode(type: returnType)
+            typeNameNode.sourceRuleContext = ctx.declarationSpecifiers()
+            function.addChild(typeNameNode)
+        }
+        
+        if let identifier = ctx.identifier() {
+            let identifierNode = Identifier(name: identifier.getText())
+            identifierNode.sourceRuleContext = identifier
+            function.addChild(identifierNode)
+        }
+        
+        // Parameter list
+        let parameterListNode = context.pushContext(nodeType: ParameterList.self)
+        defer {
+            context.popContext()
+        }
+        
+        parameterListNode.sourceRuleContext = ctx.parameterList()
+        
+        if let params = ctx.parameterList(), let paramDecl = params.parameterDeclarationList() {
+            for param in paramDecl.parameterDeclaration() {
+                let node = context.pushContext(nodeType: FunctionParameter.self)
+                defer {
+                    context.popContext()
+                }
+                
+                node.sourceRuleContext = param
+                
+                guard let declarationSpecifiers = param.declarationSpecifiers() else {
+                    continue
+                }
+                guard let declarator = param.declarator() else {
+                    continue
+                }
+                guard let name = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
+                    continue
+                }
+                guard let type = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers, declarator: declarator) else {
+                    continue
+                }
+                
+                let identifier = Identifier(name: name)
+                identifier.sourceRuleContext = declarator.directDeclarator()?.identifier()
+                context.addChildNode(identifier)
+                
+                let typeNode = TypeNameNode(type: type)
+                typeNode.sourceRuleContext = param
+                context.addChildNode(typeNode)
+            }
+            
+            if params.ELIPSIS() != nil {
+                let variadicParameter = VariadicParameter()
+                variadicParameter.sourceRuleContext = params
+                context.addChildNode(variadicParameter)
+            }
+        }
+    }
 }
 
 // MARK: -
 
-extension ObjcParserListener {
+enum TypeParsing {
     // TODO: Abstract all of this away into a specialized class.
     
     // Helper for mapping Objective-C types from raw strings into a structured types
@@ -539,7 +626,7 @@ extension ObjcParserListener {
             typeName = "\(arcSpecifiers.joined(separator: " ")) \(typeName)"
         }
         
-        guard let type = ObjcParserListener.parseObjcType(typeName) else {
+        guard let type = TypeParsing.parseObjcType(typeName) else {
             return nil
         }
         
@@ -567,7 +654,7 @@ extension ObjcParserListener {
         
         let typeString = "\(specifiersString) \(pointer ?? "")"
         
-        guard var type = ObjcParserListener.parseObjcType(typeString) else {
+        guard var type = TypeParsing.parseObjcType(typeString) else {
             return nil
         }
         
@@ -588,6 +675,14 @@ extension ObjcParserListener {
         return type
     }
     
+    fileprivate static func parseObjcType(inDeclarationSpecifiers declarationSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext) -> ObjcType? {
+        guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
+            return nil
+        }
+        
+        return parseObjcType(specifiersString)
+    }
+    
     fileprivate static func parseObjcType(inDeclarationSpecifiers declarationSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext,
                                           typeDeclarator: ObjectiveCParser.TypeDeclaratorContext) -> ObjcType? {
         guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
@@ -598,7 +693,7 @@ extension ObjcParserListener {
         
         let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
         
-        guard var type = ObjcParserListener.parseObjcType(typeString) else {
+        guard var type = TypeParsing.parseObjcType(typeString) else {
             return nil
         }
         
@@ -614,8 +709,33 @@ extension ObjcParserListener {
         
         return type
     }
-    
-    private static func parseObjcTypes(fromBlockParameters blockParameters: ObjectiveCParser.BlockParametersContext) -> [ObjcType] {
+    fileprivate static func parseObjcType(inDeclarationSpecifiers declarationSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext,
+                                          declarator: ObjectiveCParser.DeclaratorContext) -> ObjcType? {
+        guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
+            return nil
+        }
+        
+        let pointer = declarator.pointer()
+        
+        let typeString = "\(specifiersString) \(pointer?.getText() ?? "")"
+        
+        guard var type = TypeParsing.parseObjcType(typeString) else {
+            return nil
+        }
+        
+        // Block type
+        if let blockIdentifier = declarator.directDeclarator()?.identifier(),
+            let blockParameters = declarator.directDeclarator()?.blockParameters() {
+            let blockParameterTypes = parseObjcTypes(fromBlockParameters: blockParameters)
+            
+            type = .blockType(name: blockIdentifier.getText(),
+                              returnType: type,
+                              parameters: blockParameterTypes)
+        }
+        
+        return type
+    }
+    fileprivate static func parseObjcTypes(fromBlockParameters blockParameters: ObjectiveCParser.BlockParametersContext) -> [ObjcType] {
         let typeVariableDeclaratorOrNames = blockParameters.typeVariableDeclaratorOrName()
         
         var paramTypes: [ObjcType] = []
@@ -631,16 +751,16 @@ extension ObjcParserListener {
         return paramTypes
     }
     
-    private static func parseObjcType(fromTypeVariableDeclaratorOrTypeName typeContext: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
+    fileprivate static func parseObjcType(fromTypeVariableDeclaratorOrTypeName typeContext: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
         if let typeName = typeContext.typeName(),
-            let type = ObjcParserListener.parseObjcType(fromTypeName: typeName) {
+            let type = TypeParsing.parseObjcType(fromTypeName: typeName) {
             return type
         } else if let typeVariableDecl = typeContext.typeVariableDeclarator() {
             if typeVariableDecl.declarator()?.directDeclarator()?.blockParameters() != nil {
                 return parseObjcType(fromTypeVariableDeclarator: typeVariableDecl)
             }
             
-            if let type = ObjcParserListener.parseObjcType(fromTypeVariableDeclarator: typeVariableDecl) {
+            if let type = TypeParsing.parseObjcType(fromTypeVariableDeclarator: typeVariableDecl) {
                 return type
             } else {
                 return nil
@@ -651,10 +771,10 @@ extension ObjcParserListener {
             return nil
         }
         
-        return ObjcParserListener.parseObjcType(typeString)
+        return TypeParsing.parseObjcType(typeString)
     }
     
-    private static func parseObjcType(fromTypeVariableDeclarator typeVariableDecl: ObjectiveCParser.TypeVariableDeclaratorContext) -> ObjcType? {
+    fileprivate static func parseObjcType(fromTypeVariableDeclarator typeVariableDecl: ObjectiveCParser.TypeVariableDeclaratorContext) -> ObjcType? {
         if let blockParameters = typeVariableDecl.declarator()?.directDeclarator()?.blockParameters() {
             guard let declarationSpecifiers = typeVariableDecl.declarationSpecifiers() else {
                 return nil
@@ -663,7 +783,7 @@ extension ObjcParserListener {
             let parameters = parseObjcTypes(fromBlockParameters: blockParameters)
             
             guard let returnTypeName = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else { return nil }
-            guard let returnType = ObjcParserListener.parseObjcType(returnTypeName) else { return nil }
+            guard let returnType = TypeParsing.parseObjcType(returnTypeName) else { return nil }
             
             let identifier = VarDeclarationIdentifierNameExtractor.extract(from: typeVariableDecl)
             
@@ -681,25 +801,25 @@ extension ObjcParserListener {
         guard let typeString = VarDeclarationTypeExtractor.extract(from: typeVariableDecl) else {
             return nil
         }
-        guard let type = ObjcParserListener.parseObjcType(typeString) else {
+        guard let type = TypeParsing.parseObjcType(typeString) else {
             return nil
         }
         
         return type
     }
     
-    private static func parseObjcType(fromTypeSpecifier typeSpecifier: ObjectiveCParser.TypeSpecifierContext) -> ObjcType? {
+    fileprivate static func parseObjcType(fromTypeSpecifier typeSpecifier: ObjectiveCParser.TypeSpecifierContext) -> ObjcType? {
         guard let typeString = VarDeclarationTypeExtractor.extract(from: typeSpecifier) else {
             return nil
         }
-        guard let type = ObjcParserListener.parseObjcType(typeString) else {
+        guard let type = TypeParsing.parseObjcType(typeString) else {
             return nil
         }
         
         return type
     }
     
-    private static func parseObjcType(fromBlockType blockType: ObjectiveCParser.BlockTypeContext) -> ObjcType? {
+    fileprivate static func parseObjcType(fromBlockType blockType: ObjectiveCParser.BlockTypeContext) -> ObjcType? {
         guard let returnTypeSpecifier = blockType.typeSpecifier(0) else {
             return nil
         }
@@ -722,7 +842,7 @@ extension ObjcParserListener {
         return ObjcType.blockType(name: "", returnType: returnType, parameters: parameterTypes)
     }
     
-    private static func parseObjcType(fromTypeName typeName: ObjectiveCParser.TypeNameContext) -> ObjcType? {
+    fileprivate static func parseObjcType(fromTypeName typeName: ObjectiveCParser.TypeNameContext) -> ObjcType? {
         // Block type
         if let blockType = typeName.blockType() {
             return parseObjcType(fromBlockType: blockType)
@@ -731,7 +851,7 @@ extension ObjcParserListener {
         guard let typeString = VarDeclarationTypeExtractor.extract(from: typeName) else {
             return nil
         }
-        guard let type = ObjcParserListener.parseObjcType(typeString) else {
+        guard let type = TypeParsing.parseObjcType(typeString) else {
             return nil
         }
         
@@ -783,7 +903,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }
                 
                 // Get a type string to convert into a proper type
-                guard let type = ObjcParserListener.parseObjcType(typeString) else { continue }
+                guard let type = TypeParsing.parseObjcType(typeString) else { continue }
                 
                 let varDecl = VariableDeclaration()
                 varDecl.sourceRuleContext = ctx
@@ -833,7 +953,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         }
         
         if let fieldDeclaration = ctx.fieldDeclaration() {
-            if let type = ObjcParserListener.parseObjcType(inDeclaration: fieldDeclaration) {
+            if let type = TypeParsing.parseObjcType(inDeclaration: fieldDeclaration) {
                 let typeNode = TypeNameNode(type: type)
                 typeNode.sourceRuleContext = ctx
                 property.addChild(typeNode)

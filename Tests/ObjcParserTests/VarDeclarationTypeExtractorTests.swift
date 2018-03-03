@@ -11,10 +11,10 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
     func testReadVarDeclaration() {
         assertTypeVisit(objc: "NSString* abc;",
                         { try $0.varDeclaration() },
-                        expected: "NSString *")
+                        expected: "NSString*")
         assertTypeVisit(objc: "static const NSString*_Nonnull abc;",
                         { try $0.varDeclaration() },
-                        expected: "static const NSString *_Nonnull")
+                        expected: "static const NSString*_Nonnull")
     }
     
     func assertTypeVisit(objc: String, _ parseBlock: (ObjectiveCParser) throws -> ParserRuleContext, expected: String, file: String = #file, line: Int = #line) {

@@ -143,11 +143,16 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         
         // Get a type string to convert into a proper type
         guard let declarationSpecifiers = ctx.declarationSpecifiers() else { return nil }
-        let pointer = initDeclarator.declarator()?.pointer()?.accept(self) ?? ""
+        let pointer = initDeclarator.declarator()?.pointer()?.accept(self)
         
         let specifiersString = declarationSpecifiers.accept(self) ?? ""
         
-        let typeString = "\(specifiersString) \(pointer)"
+        let typeString: String
+        if let pointer = pointer {
+            typeString = "\(specifiersString) \(pointer)"
+        } else {
+            typeString = specifiersString
+        }
         
         return typeString
     }
@@ -157,10 +162,15 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         
         // Get a type string to convert into a proper type
         guard let declarationSpecifiers = ctx.declarationSpecifiers() else { return nil }
-        let pointer = initDeclarator.declarator()?.pointer()?.accept(self) ?? ""
+        let pointer = initDeclarator.declarator()?.pointer()?.accept(self)
         let specifiersString = declarationSpecifiers.accept(self) ?? ""
         
-        let typeString = "\(specifiersString) \(pointer)"
+        let typeString: String
+        if let pointer = pointer {
+            typeString = "\(specifiersString) \(pointer)"
+        } else {
+            typeString = specifiersString
+        }
         
         return typeString
     }

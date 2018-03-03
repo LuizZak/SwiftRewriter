@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/ObjectiveCParser.g4 by ANTLR 4.7
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.7
 import Antlr4
 
 /**
@@ -76,6 +76,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitCategoryImplementation(_ ctx: ObjectiveCParser.CategoryImplementationContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#className}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitClassName(_ ctx: ObjectiveCParser.ClassNameContext) -> T{
 	 	fatalError(#function + " must be overridden")
 	}
 

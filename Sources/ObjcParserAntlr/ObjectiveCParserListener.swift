@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/git/grammars-v4-master/objc/ObjectiveCParser.g4 by ANTLR 4.7
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.7
 import Antlr4
 
 /**
@@ -90,6 +90,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitCategoryImplementation(_ ctx: ObjectiveCParser.CategoryImplementationContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#className}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterClassName(_ ctx: ObjectiveCParser.ClassNameContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#className}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitClassName(_ ctx: ObjectiveCParser.ClassNameContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#superclassName}.
 	 - Parameters:

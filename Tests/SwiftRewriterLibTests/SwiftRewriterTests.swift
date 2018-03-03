@@ -584,22 +584,6 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteStructTypedefs() throws {
-        try assertObjcParse(
-            objc: """
-            typedef struct {
-                vector_float3 position;
-                packed_float4 color;
-            } VertexObject;
-            """
-            , swift: """
-            struct VertexObject {
-                var position: vector_float3
-                var color: packed_float4
-            }
-            """)
-    }
-    
     func testRewriteBlockParameters() throws {
         try assertObjcParse(
             objc: """
@@ -879,15 +863,14 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    // TODO: Fix this issue
-    func testParsingIssueWithGenericsWithinGenerics() throws {
+    func testParseGenericsWithinGenerics() throws {
         try assertObjcParse(
             objc: """
             @interface B: NSObject
             @end
             @interface A: NSObject
             {
-                RACSubject<NSArray<B*>*> *_u; // Nested generic produces error here!
+                RACSubject<NSArray<B*>*> *_u;
             }
             @end
             """,
@@ -898,6 +881,33 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class A: NSObject {
                 private var _u: RACSubject<[B]>!
+            }
+            """)
+    }
+    
+    func testRewriteStructTypedefs() throws {
+        try assertObjcParse(
+            objc: """
+            typedef struct {
+                vector_float3 position;
+                packed_float4 color;
+            } VertexObject;
+            """
+            , swift: """
+            struct VertexObject {
+                var position: vector_float3
+                var color: packed_float4
+            }
+            """)
+    }
+    
+    func testRewriteFuncDeclaration() throws {
+        try assertObjcParse(
+            objc: """
+            void global();
+            """,
+            swift: """
+            func global() {
             }
             """)
     }

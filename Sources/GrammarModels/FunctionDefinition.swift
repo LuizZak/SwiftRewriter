@@ -1,6 +1,20 @@
 /// Represents a global function definition
 public class FunctionDefinition: ASTNode, InitializableNode {
-    public var methodBody: MethodBody?
+    public var returnType: TypeNameNode? {
+        return firstChild()
+    }
+    
+    public var identifier: Identifier? {
+        return firstChild()
+    }
+    
+    public var parameterList: ParameterList? {
+        return firstChild()
+    }
+    
+    public var methodBody: MethodBody? {
+        return firstChild()
+    }
     
     public required init() {
         
@@ -24,11 +38,11 @@ public class ParameterList: ASTNode, InitializableNode {
 
 /// Represents a parameter for a parameters list for a function definition
 public class FunctionParameter: ASTNode, InitializableNode {
-    public var type: TypeNameNode? {
+    public var identifier: Identifier? {
         return firstChild()
     }
     
-    public var identifier: Identifier? {
+    public var type: TypeNameNode? {
         return firstChild()
     }
     

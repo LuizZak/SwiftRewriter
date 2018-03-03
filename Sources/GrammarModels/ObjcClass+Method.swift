@@ -1,10 +1,10 @@
 import ObjcParserAntlr
 
-public class ExpressionNode: ASTNode {
+public final class ExpressionNode: ASTNode {
     public var expression: ObjectiveCParser.ExpressionContext?
 }
 
-public class MethodBody: ASTNode {
+public final class MethodBody: ASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
 }
 
@@ -71,7 +71,7 @@ public class MethodSelector: ASTNode, InitializableNode {
     }
 }
 
-public class KeywordDeclarator: ASTNode, InitializableNode {
+public final class KeywordDeclarator: ASTNode, InitializableNode {
     public var selector: Identifier? {
         let children = childrenMatching(type: Identifier.self)
         if children.count == 1 {
@@ -92,7 +92,7 @@ public class KeywordDeclarator: ASTNode, InitializableNode {
     }
 }
 
-public class MethodType: ASTNode, InitializableNode {
+public final class MethodType: ASTNode, InitializableNode {
     public var nullabilitySpecifiers: [NullabilitySpecifier] {
         return childrenMatching()
     }
@@ -105,6 +105,6 @@ public class MethodType: ASTNode, InitializableNode {
     }
 }
 
-public class NullabilitySpecifier: Identifier {
+public final class NullabilitySpecifier: Identifier {
     
 }
