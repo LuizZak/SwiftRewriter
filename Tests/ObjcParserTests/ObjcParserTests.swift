@@ -41,6 +41,21 @@ class ObjcParserTests: XCTestCase {
         _=parserTest(source)
     }
     
+    func testParseReturnTypeAnnotationInBlock() {
+        let source = """
+        @implementation A
+        - (void)method {
+            [self block:^__kindof NSArray*{
+                return 0;
+            }];
+            [self block:^__kindof NSArray<NSString*>* {
+            }];
+        }
+        @end
+        """
+        _=parserTest(source)
+    }
+    
     func testParserMaintainsOriginalRuleContext() {
         let source = """
             #import "abc.h"
