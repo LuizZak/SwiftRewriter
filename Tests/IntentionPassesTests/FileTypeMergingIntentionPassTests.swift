@@ -7,6 +7,7 @@
 
 import XCTest
 import IntentionPasses
+import SwiftRewriterLib
 import SwiftAST
 import TestCommons
 
@@ -269,5 +270,85 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let files = intentions.fileIntentions()
         XCTAssertEqual(files[0].classIntentions.count, 1)
         XCTAssertEqual(files[0].extensionIntentions.count, 1)
+    }
+    
+    func testMergeFunctionDefinitionsToDeclarations() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createGlobalFunction(withName: "a", returnType: .typeName("A"))
+                }
+                .createFile(named: "A.m") { file in
+                    file.createGlobalFunction(withName: "a",
+                                              returnType: .implicitUnwrappedOptional(.typeName("A")),
+                                              body: [
+                                                .expression(
+                                                    .postfix(
+                                                        .identifier("a"),
+                                                        .functionCall()
+                                                    )
+                                                )])
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files[0].sourcePath, "A.m")
+        XCTAssertEqual(files[0].globalFunctionIntentions.count, 1)
+        XCTAssertEqual(files[0].globalFunctionIntentions.first?.signature,
+                       FunctionSignature(name: "a", parameters: [],
+                                         returnType: .typeName("A"),
+                                         isStatic: true)
+                       )
+        XCTAssertEqual(files[0].globalFunctionIntentions.first?.functionBody?.body,
+                       [.expression(
+                        .postfix(
+                            .identifier("a"),
+                            .functionCall()
+                        )
+                        )])
+    }
+    
+    func testDontMergeSimilarButNotActuallyMatchingGlobalFunctions() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createGlobalFunction(withName: "a",
+                                              parameters: [
+                                                ParameterSignature(label: "_", name: "a", type: .int)
+                                              ])
+                }
+                .createFile(named: "A.m") { file in
+                    file.createGlobalFunction(withName: "a",
+                                              body: [
+                                                .expression(
+                                                    .postfix(
+                                                        .identifier("a"),
+                                                        .functionCall()
+                                                    )
+                                                )])
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 2)
+        // a(int)
+        XCTAssertEqual(files[0].sourcePath, "A.h")
+        XCTAssertEqual(files[0].globalFunctionIntentions.count, 1)
+        XCTAssertNil(files[0].globalFunctionIntentions.first?.functionBody?.body)
+        // a()
+        XCTAssertEqual(files[1].sourcePath, "A.m")
+        XCTAssertEqual(files[1].globalFunctionIntentions.count, 1)
+        XCTAssertEqual(files[1].globalFunctionIntentions.first?.functionBody?.body,
+                       [.expression(
+                        .postfix(
+                            .identifier("a"),
+                            .functionCall()
+                        )
+                        )])
     }
 }

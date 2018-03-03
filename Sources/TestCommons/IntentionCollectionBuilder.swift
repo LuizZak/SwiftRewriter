@@ -80,6 +80,31 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func createGlobalFunction(withName name: String,
+                                     returnType: SwiftType = .void,
+                                     parameters: [ParameterSignature] = [],
+                                     body: CompoundStatement? = nil) -> FileIntentionBuilder {
+        let signature =
+            FunctionSignature(name: name, parameters: parameters,
+                              returnType: returnType, isStatic: true)
+        
+        return createGlobalFunction(withSignature: signature, body: body)
+    }
+    
+    public func createGlobalFunction(withSignature signature: FunctionSignature,
+                                     body: CompoundStatement? = nil) -> FileIntentionBuilder {
+        let funcIntent =
+            GlobalFunctionGenerationIntention(signature: signature)
+        if let body = body {
+            funcIntent.functionBody = FunctionBodyIntention(body: body)
+        }
+        
+        intention.addGlobalFunction(funcIntent)
+        
+        return self
+    }
+    
+    @discardableResult
     public func createClass(withName name: String, initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassGenerationIntention(typeName: name)
         

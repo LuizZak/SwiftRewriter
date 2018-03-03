@@ -101,6 +101,15 @@ public class FileGenerationIntention: Intention {
         }
     }
     
+    public func removeFunctions(where predicate: (GlobalFunctionGenerationIntention) -> Bool) {
+        for (i, function) in globalFunctionIntentions.enumerated().reversed() {
+            if predicate(function) {
+                function.parent = nil
+                globalFunctionIntentions.remove(at: i)
+            }
+        }
+    }
+    
     public func removeClassTypes(where predicate: (BaseClassIntention) -> Bool) {
         for (i, type) in typeIntentions.enumerated().reversed() {
             if let classType = type as? BaseClassIntention, predicate(classType) {
@@ -149,6 +158,12 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
     
     public var parameters: [ParameterSignature] {
         return signature.parameters
+    }
+    
+    /// Returns `true` if this global function intention is a declaration, but not
+    /// an implementation, of a global function signature.
+    public var isDeclaration: Bool {
+        return functionBody == nil
     }
     
     public var functionBody: FunctionBodyIntention?
@@ -253,6 +268,15 @@ public struct FunctionSignature: Equatable {
         }
         
         return true
+    }
+    
+    /// Returns `true` iff `self` and `other` match using C signature matching
+    /// rules.
+    ///
+    /// In C, function signatures match if they have the same name, and the same
+    /// number of parameters.
+    public func matchesAsCFunction(_ other: FunctionSignature) -> Bool {
+        return name == other.name && parameters.count == other.parameters.count
     }
 }
 

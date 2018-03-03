@@ -52,6 +52,10 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             header.preprocessorDirectives.removeAll()
         }
         
+        // Find all global function declarations and match them to their matching
+        // implementation
+        mergeGlobalFunctionDefinitions(in: intentionCollection)
+        
         // Remove all empty header files
         intentionCollection.removeIntentions { intent -> Bool in
             if !intent.sourcePath.hasSuffix(".h") {

@@ -109,6 +109,45 @@ func mergeAllTypeDefinitions(in types: [TypeGenerationIntention],
     }
 }
 
+/// Merges all global function definitions such that global definitions
+///
+/// When a global function matches the signature of another, and is visible from
+/// that declaration's point, the two are merged such that they result into a single
+/// function with proper nullability annotations merged from both, and the original
+/// header declaration is removed.
+func mergeGlobalFunctionDefinitions(in intentions: IntentionCollection) {
+    var declarations: [GlobalFunctionGenerationIntention] = []
+    var implementations: [GlobalFunctionGenerationIntention] = []
+    
+    // Search all declarations
+    for function in intentions.globalFunctions() {
+        if function.isDeclaration {
+            declarations.append(function)
+        } else {
+            implementations.append(function)
+        }
+    }
+    
+    for impl in implementations {
+        let visibleMatches =
+            declarations.filter {
+                $0.signature.matchesAsCFunction(impl.signature) && $0.isVisible(for: impl)
+            }
+        
+        // Pick the first match and use it
+        guard let match = visibleMatches.first else {
+            continue
+        }
+        
+        mergeFunction(match, into: impl)
+        
+        // Remove declarations
+        for match in visibleMatches {
+            match.file?.removeFunctions(where: { $0 === match })
+        }
+    }
+}
+
 /// Merges a source KnownType into a second, such that property/method signatures
 /// are flattened to properly nullability-annotated methods.
 func mergeTypes(from first: KnownType,
@@ -230,22 +269,7 @@ func mergeMethods(_ source: KnownMethod,
                   into target: MethodGenerationIntention) {
     let originalSignature = target.signature
     
-    if !source.signature.returnType.isImplicitlyUnwrapped && target.signature.returnType.isImplicitlyUnwrapped {
-        if source.signature.returnType.deepUnwrapped == target.signature.returnType.deepUnwrapped {
-            target.signature.returnType = source.signature.returnType
-        }
-    }
-    
-    for (i, p1) in source.signature.parameters.enumerated() {
-        if i >= target.signature.parameters.count {
-            break
-        }
-        
-        let p2 = target.signature.parameters[i]
-        if !p1.type.isImplicitlyUnwrapped && p2.type.isImplicitlyUnwrapped && p1.type.deepUnwrapped == p2.type.deepUnwrapped {
-            target.signature.parameters[i].type = p1.type
-        }
-    }
+    target.signature = mergeSignatures(source.signature, target.signature)
     
     // Track change
     if originalSignature != target.signature {
@@ -273,4 +297,60 @@ func mergeMethods(_ source: KnownMethod,
                               description: "Inserted body from function \(TypeFormatter.asString(signature: source.signature, includeName: false))")
         }
     }
+}
+
+/// Merges two global functions such that the target one retains all proper nullability
+/// annotations and the implementation body.
+func mergeFunction(_ source: GlobalFunctionGenerationIntention,
+                    into target: GlobalFunctionGenerationIntention) {
+    let originalSignature = target.signature
+    
+    target.signature = mergeSignatures(source.signature, target.signature)
+    
+    // Track change
+    if originalSignature != target.signature {
+        target.history
+            .recordChange(tag: historyTag,
+                          description: """
+                Updated nullability signature \(TypeFormatter.asString(signature: originalSignature)) \
+                -> \(TypeFormatter.asString(signature: target.signature))
+                """)
+    }
+    
+    if let body = source.functionBody, target.functionBody == nil {
+        target.functionBody =
+            FunctionBodyIntention(body: body.body)
+        
+        target.functionBody?.history.recordCreation(description: "Merged from existing type body")
+        
+        target.history
+            .recordChange(tag: historyTag,
+                          description: "Inserted body from function \(TypeFormatter.asString(signature: source.signature, includeName: false))")
+    }
+}
+
+/// Merges two function signatures, collapsing nullability specifiers that are
+/// defined on the first signature, but undefined on the second.
+func mergeSignatures(_ sign1: FunctionSignature,
+                     _ sign2: FunctionSignature) -> FunctionSignature {
+    var result = sign2
+    
+    if !sign1.returnType.isImplicitlyUnwrapped && sign2.returnType.isImplicitlyUnwrapped {
+        if sign1.returnType.deepUnwrapped == sign2.returnType.deepUnwrapped {
+            result.returnType = sign1.returnType
+        }
+    }
+    
+    for (i, p1) in sign1.parameters.enumerated() {
+        if i >= sign2.parameters.count {
+            break
+        }
+        
+        let p2 = sign2.parameters[i]
+        if !p1.type.isImplicitlyUnwrapped && p2.type.isImplicitlyUnwrapped && p1.type.deepUnwrapped == p2.type.deepUnwrapped {
+            result.parameters[i].type = p1.type
+        }
+    }
+    
+    return result
 }
