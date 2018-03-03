@@ -151,8 +151,13 @@ public class SwiftRewriter {
                 
                 en.rawValueType = typeMapper.swiftType(forObjcType: type.type, context: .alwaysNonnull)
                 
-            case .globalFunc: // TODO: Support rewriting this once global function parsing is through
-                break
+            case .globalFunc(let fn):
+                guard let node = fn.typedSource else { continue }
+                
+                context.assumeNonnulContext?.isNonnullOn = fn.inNonnullContext
+                
+                let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+                fn.signature = signGen.generateDefinitionSignature(from: node)
             }
         }
     }

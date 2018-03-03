@@ -911,4 +911,22 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testLazyTypeResolveFuncDeclaration() throws {
+        try assertObjcParse(
+            objc: """
+            A* global();
+            
+            @interface A
+            @end
+            """,
+            swift: """
+            func global() -> A! {
+            }
+            
+            @objc
+            class A: NSObject {
+            }
+            """)
+    }
 }

@@ -221,7 +221,7 @@ public final class SwiftWriter {
             let returnTypeName =
                 typeMapper.typeNameString(for: funcDef.signature.returnType)
             target.outputInline(" -> ")
-            target.outputInlineWithSpace(returnTypeName, style: .typeName)
+            target.outputInline(returnTypeName, style: .typeName)
         }
         
         // ... '{ <function body> }'

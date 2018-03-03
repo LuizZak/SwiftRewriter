@@ -544,6 +544,8 @@ public class IntentionCollector {
             .addGlobalFunction(globalFunc)
         
         typeCtx.pushContext(globalFunc)
+        
+        delegate.reportForLazyResolving(intention: globalFunc)
     }
     
     private func exitFunctionDefinitionNode(_ node: FunctionDefinition) {

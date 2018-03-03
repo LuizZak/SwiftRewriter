@@ -135,6 +135,10 @@ public protocol FileLevelIntention: Intention {
 
 /// An intention to generate a global function.
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, FunctionIntention {
+    public var typedSource: FunctionDefinition? {
+        return source as? FunctionDefinition
+    }
+    
     public var signature: FunctionSignature
     
     /// Gets the name of this global function definition by looking into its'
