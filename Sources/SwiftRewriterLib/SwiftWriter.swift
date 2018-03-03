@@ -5,7 +5,7 @@ import SwiftAST
 
 /// Gets as inputs a series of intentions and outputs actual files and script
 /// contents.
-public class SwiftWriter {
+public final class SwiftWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
     let typeMapper: TypeMapper
@@ -58,6 +58,16 @@ public class SwiftWriter {
         
         for varDef in fileIntent.globalVariableIntentions {
             outputVariableDeclaration(varDef, target: out)
+            addSeparator = true
+        }
+        
+        if addSeparator {
+            out.output(line: "")
+            addSeparator = false
+        }
+        
+        for funcDef in fileIntent.globalFunctionIntentions {
+            outputFunctionDeclaration(funcDef, target: out)
             addSeparator = true
         }
         
@@ -187,6 +197,42 @@ public class SwiftWriter {
         }
         
         target.outputLineFeed()
+    }
+    
+    private func outputFunctionDeclaration(_ funcDef: GlobalFunctionGenerationIntention, target: RewriterOutputTarget) {
+        let accessModifier =
+            SwiftWriter._accessModifierFor(accessLevel: funcDef.accessLevel)
+        
+        // '<access modifier> func' ...
+        target.outputIdentation()
+        if !accessModifier.isEmpty {
+            target.outputInlineWithSpace(accessModifier, style: .keyword)
+        }
+        target.outputInlineWithSpace("func", style: .keyword)
+        
+        // ... '<name>(<params>)' ...
+        target.outputInline(funcDef.name)
+        
+        outputParameters(funcDef.signature.parameters, into: target,
+                         inNonnullContext: funcDef.inNonnullContext)
+        
+        // ... ' -> <return type>' (only if not void) ...
+        if funcDef.signature.returnType != .void {
+            let returnTypeName =
+                typeMapper.typeNameString(for: funcDef.signature.returnType)
+            target.outputInline(" -> ")
+            target.outputInlineWithSpace(returnTypeName, style: .typeName)
+        }
+        
+        // ... '{ <function body> }'
+        if let body = funcDef.functionBody {
+            outputMethodBody(body, target: target)
+        } else {
+            // Global functions _must_ have a body.
+            target.outputInline(" {")
+            target.outputLineFeed()
+            target.output(line: "}")
+        }
     }
     
     private func outputClassExtension(_ cls: ClassExtensionGenerationIntention, target: RewriterOutputTarget) {

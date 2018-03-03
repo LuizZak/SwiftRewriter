@@ -137,6 +137,12 @@ public protocol FileLevelIntention: Intention {
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, FunctionIntention {
     public var signature: FunctionSignature
     
+    /// Gets the name of this global function definition by looking into its'
+    /// signatures' name
+    public var name: String {
+        return signature.name
+    }
+    
     public var parameters: [ParameterSignature] {
         return signature.parameters
     }
