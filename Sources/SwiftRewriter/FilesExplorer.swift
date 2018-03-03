@@ -135,31 +135,43 @@ class SuggestConversionInterface {
         searchAndShowConfirm(in: menu, path: path)
     }
     
-    func searchAndShowConfirm(in menu: MenuController, path: String, skipConfirm: Bool = false, excludePattern: String? = nil) {
+    func searchAndShowConfirm(in menu: MenuController, path directoryPath: String, skipConfirm: Bool = false, excludePattern: String? = nil) {
         let console = menu.console
         let fileManager = FileManager.default
         
-        console.printLine("Inspecting path \(path)...")
+        console.printLine("Inspecting path \(directoryPath)...")
         
         // Search all files there
-        guard let files = fileManager.enumerator(atPath: path) else {
-            console.printLine("Failed to iterate files from path \(path)".terminalColorize(.red))
+        guard let files = fileManager.enumerator(atPath: directoryPath) else {
+            console.printLine("Failed to iterate files from path \(directoryPath)".terminalColorize(.red))
             return
         }
         
-        var objcFiles =
-            files.compactMap { // Type the array properly
-                    $0 as? String
-                }.filter { // Filter down to .h/.m files
-                    (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h")
-                }.map { // Unfold full paths
-                    (path as NSString).appendingPathComponent($0)
-                }.sorted { (s1: String, s2: String) -> Bool in
+        var objcFiles: [URL] =
+            files
+                // Type the array properly
+                .compactMap { value -> String? in
+                    value as? String
+                }
+                // Filter down to .h/.m files
+                .filter { (path: String) -> Bool in
+                    ((path as NSString).pathExtension == "m" || (path as NSString).pathExtension == "h")
+                }
+                // Unfold full paths
+                .map { (path: String) -> String in
+                    (directoryPath as NSString).appendingPathComponent(path)
+                }
+                // Sort files, for convenience of better conveying progress to use
+                .sorted { (s1: String, s2: String) -> Bool in
                     s1.compare(s2, options: .numeric) == .orderedAscending
-                }.map { // Convert back to the URL
-                    URL(fileURLWithPath: $0)
-                }.filter { // Check a matching .swift file doesn't already exist for the paths
-                    !fileManager.fileExists(atPath: (($0.path as NSString).deletingPathExtension as NSString).appendingPathExtension("swift")!)
+                }
+                // Convert back to the URL
+                .map { (path: String) -> URL in
+                    URL(fileURLWithPath: path)
+                }
+                // Check a matching .swift file doesn't already exist for the paths
+                .filter { (url: URL) -> Bool in
+                    !fileManager.fileExists(atPath: ((url.path as NSString).deletingPathExtension as NSString).appendingPathExtension("swift")!)
                 }
         
         if let excludePattern = excludePattern {

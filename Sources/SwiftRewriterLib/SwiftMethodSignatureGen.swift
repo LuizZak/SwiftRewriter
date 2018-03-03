@@ -48,6 +48,41 @@ public class SwiftMethodSignatureGen {
         return sign
     }
     
+    /// Generates a function definition from a C signature to use as a global
+    /// function signature.
+    public func generateDefinitionSignature(from function: FunctionDefinition) -> FunctionSignature {
+        var sign =
+            FunctionSignature(name: function.identifier?.name ?? "__",
+                              parameters: [],
+                              returnType: .void,
+                              isStatic: false)
+        
+        if let returnType = function.returnType?.type {
+            let swiftType = typeMapper.swiftType(forObjcType: returnType, context: .empty)
+            sign.returnType = swiftType
+        }
+        
+        if let parameterList = function.parameterList {
+            for param in parameterList.parameters {
+                guard let name = param.identifier?.name else {
+                    continue
+                }
+                guard let type = param.type?.type else {
+                    continue
+                }
+                
+                let swiftType = typeMapper.swiftType(forObjcType: type, context: .empty)
+                
+                let p = ParameterSignature(label: "_", name: name, type: swiftType)
+                sign.parameters.append(p)
+            }
+        }
+        
+        return sign
+    }
+    
+    // MARK: - Private Members
+    
     private func processKeywords(_ keywords: [KeywordDeclarator],
                                  _ target: inout FunctionSignature) {
         guard keywords.count > 0 else {

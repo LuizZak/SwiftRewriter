@@ -5,7 +5,7 @@ import SwiftAST
 
 private typealias NonnullTokenRange = (start: Int, end: Int)
 
-/// Allows re-writing Objective-C constructs into Swift equivalents.
+/// Main front-end for Swift Rewriter
 public class SwiftRewriter {
     
     private var outputTarget: WriterOutput
@@ -112,44 +112,44 @@ public class SwiftRewriter {
         
         for item in lazyResolve {
             switch item {
-            case let .property(prop, ctx):
+            case let .property(prop):
                 guard let node = prop.propertySource else { continue }
                 guard let type = node.type?.type else { continue }
                 
                 let context =
                     TypeMappingContext(modifiers: node.attributesList,
-                                       inNonnull: isNodeInNonnullContext(node, context: ctx))
+                                       inNonnull: prop.inNonnullContext)
                 
                 prop.storage.type = typeMapper.swiftType(forObjcType: type, context: context)
                 
-            case let .method(method, ctx):
+            case let .method(method):
                 guard let node = method.typedSource else { continue }
                 
-                context.assumeNonnulContext?.isNonnullOn = isNodeInNonnullContext(node, context: ctx)
+                context.assumeNonnulContext?.isNonnullOn = method.inNonnullContext
                 
                 let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
                 method.signature = signGen.generateDefinitionSignature(from: node)
                 
-            case let .ivar(ivar, ctx):
+            case let .ivar(ivar):
                 guard let node = ivar.typedSource else { continue }
                 guard let type = node.type?.type else { continue }
                 
                 ivar.storage.type =
                     typeMapper.swiftType(forObjcType: type,
-                                         context: .init(inNonnull: isNodeInNonnullContext(node, context: ctx)))
+                                         context: .init(inNonnull: ivar.inNonnullContext))
                 
-            case let .globalVar(gvar, ctx):
+            case let .globalVar(gvar):
                 guard let node = gvar.variableSource else { continue }
                 guard let type = node.type?.type else { continue }
                 
                 gvar.storage.type =
                     typeMapper.swiftType(forObjcType: type,
-                                         context: .init(inNonnull: isNodeInNonnullContext(node, context: ctx)))
+                                         context: .init(inNonnull: gvar.inNonnullContext))
                 
-            case let .enumDecl(en, _):
+            case let .enumDecl(en):
                 guard let type = en.typedSource?.type else { return }
                 
-                en.rawValueType = typeMapper.swiftType(forObjcType: type.type)
+                en.rawValueType = typeMapper.swiftType(forObjcType: type.type, context: .alwaysNonnull)
                 
             case .globalFunc: // TODO: Support rewriting this once global function parsing is through
                 break
@@ -256,14 +256,6 @@ public class SwiftRewriter {
         
         path = (path as NSString).deletingPathExtension + ".swift"
         
-        let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
-        intentionCollection.addIntention(fileIntent)
-        context.pushContext(fileIntent)
-        context.pushContext(AssumeNonnullContext(isNonnullOn: false))
-        defer {
-            context.popContext()
-        }
-        
         let src = try source.loadSource()
         
         let processedSrc = applyPreprocessors(source: src)
@@ -275,107 +267,26 @@ public class SwiftRewriter {
         try parser.parse()
         
         nonnullTokenRanges = parser.nonnullMacroRegionsTokenRange
+        
+        let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
+        intentionCollection.addIntention(fileIntent)
+        context.pushContext(fileIntent)
         
         resolveIncludes(in: fileIntent.preprocessorDirectives,
                         basePath: (src.filePath as NSString).deletingLastPathComponent)
         
-        let node = parser.rootNode
-        let visitor = AnyASTVisitor()
-        let traverser = ASTTraverser(node: node, visitor: visitor)
+        let intentionCollector = IntentionCollector(delegate: self)
+        intentionCollector.collectIntentions(parser.rootNode)
         
-        visitor.onEnterClosure = { node in
-            if let ctx = self.context.findContext(ofType: AssumeNonnullContext.self) {
-                ctx.isNonnullOn = self.isNodeInNonnullContext(node)
-            }
-            
-            switch node {
-            case let n as ObjcClassInterface:
-                self.enterObjcClassInterfaceNode(n)
-            case let n as ObjcClassCategoryInterface:
-                self.enterObjcClassCategoryNode(n)
-            case let n as ObjcClassImplementation:
-                self.enterObjcClassImplementationNode(n)
-            case let n as ObjcClassCategoryImplementation:
-                self.enterObjcClassCategoryImplementationNode(n)
-            case let n as ProtocolDeclaration:
-                self.enterProtocolDeclarationNode(n)
-            case let n as IVarsList:
-                self.enterObjcClassIVarsListNode(n)
-            case let n as ObjcEnumDeclaration:
-                self.enterObjcEnumDeclarationNode(n)
-            default:
-                return
-            }
-        }
-        
-        visitor.visitClosure = { node in
-            switch node {
-            case let n as TypedefNode:
-                self.visitTypedefNode(n)
-                
-            case let n as KeywordNode:
-                self.visitKeywordNode(n)
-            
-            case let n as MethodDefinition:
-                self.visitObjcClassMethodNode(n)
-            
-            case let n as PropertyDefinition:
-                self.visitPropertyDefinitionNode(n)
-                
-            case let n as ProtocolReferenceList:
-                self.visitObjcClassProtocolReferenceListNode(n)
-                
-            case let n as SuperclassName:
-                self.visitObjcClassSuperclassName(n)
-                
-            case let n as IVarDeclaration:
-                self.visitObjcClassIVarDeclarationNode(n)
-                
-            case let n as VariableDeclaration:
-                self.visitVariableDeclarationNode(n)
-                
-            case let n as ObjcEnumCase:
-                self.visitObjcEnumCaseNode(n)
-                
-            case let n as Identifier
-                where n.name == "NS_ASSUME_NONNULL_BEGIN":
-                self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn = true
-                
-            case let n as Identifier
-                where n.name == "NS_ASSUME_NONNULL_END":
-                self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn = false
-            default:
-                return
-            }
-        }
-        
-        visitor.onExitClosure = { node in
-            switch node {
-            case let n as ObjcClassInterface:
-                self.exitObjcClassInterfaceNode(n)
-            case let n as ObjcClassCategoryInterface:
-                self.exitObjcClassCategoryNode(n)
-            case let n as ObjcClassImplementation:
-                self.exitObjcClassImplementationNode(n)
-            case let n as ObjcClassCategoryImplementation:
-                self.exitObjcClassCategoryImplementationNode(n)
-            case let n as ProtocolDeclaration:
-                self.exitProtocolDeclarationNode(n)
-            case let n as IVarsList:
-                self.exitObjcClassIVarsListNode(n)
-            case let n as ObjcEnumDeclaration:
-                self.exitObjcEnumDeclarationNode(n)
-            default:
-                return
-            }
-        }
-        
-        traverser.traverse()
+        context.popContext() // FileGenerationIntention
     }
-    
-    private func isNodeInNonnullContext(_ node: ASTNode, context: LazyTypeResolveContext? = nil) -> Bool {
-        let ranges = context?.nonnulls ?? nonnullTokenRanges
+}
+
+// MARK: - IntentionCollectorDelegate
+extension SwiftRewriter: IntentionCollectorDelegate {
+    public func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+        let ranges = nonnullTokenRanges
         
         // Requires original ANTLR's rule context
         guard let ruleContext = node.sourceRuleContext else {
@@ -397,436 +308,64 @@ public class SwiftRewriter {
         return false
     }
     
-    private func visitTypedefNode(_ node: TypedefNode) {
-        guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
-            return
-        }
-        guard let type = node.type else {
-            return
-        }
-        guard let name = node.identifier?.name else {
-            return
-        }
-        
-        let intent = TypealiasIntention(fromType: type.type, named: name)
-        recordSourceHistory(intention: intent, node: node)
-        intent.inNonnullContext = isNodeInNonnullContext(node)
-        
-        ctx.addTypealias(intent)
-    }
-    
-    private func visitKeywordNode(_ node: KeywordNode) {
-        // ivar list accessibility specification
-        if let ctx = context.findContext(ofType: IVarListContext.self) {
-            switch node.keyword {
-            case .atPrivate:
-                ctx.accessLevel = .private
-            case .atPublic:
-                ctx.accessLevel = .public
-            case .atPackage:
-                ctx.accessLevel = .internal
-            case .atProtected:
-                ctx.accessLevel = .internal
-            default:
-                break
-            }
-        }
-    }
-    
-    // MARK: - Global Variable
-    
-    private func visitVariableDeclarationNode(_ node: VariableDeclaration) {
-        guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
-            return
-        }
-        
-        guard let name = node.identifier, let type = node.type else {
-            return
-        }
-        
-        let swiftType = SwiftType.anyObject
-        let ownership = evaluateOwnershipPrefix(inType: type.type)
-        let isConstant = SwiftWriter._isConstant(fromType: type.type)
-        
-        let storage =
-            ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
-        
-        let intent = GlobalVariableGenerationIntention(name: name.name, storage: storage, source: node)
-        intent.inNonnullContext = isNodeInNonnullContext(node)
-        recordSourceHistory(intention: intent, node: node)
-        
-        if let initialExpression = node.initialExpression,
-            let expression = initialExpression.expression?.expression?.expression {
-            let reader = SwiftASTReader()
-            let expression = reader.parseExpression(expression: expression, typeMapper: typeMapper)
+    public func reportForLazyResolving(intention: Intention) {
+        switch intention {
+        case let intention as GlobalVariableGenerationIntention:
+            lazyResolve.append(.globalVar(intention))
             
-            intent.initialValueExpr =
-                GlobalVariableInitialValueIntention(expression: expression,
-                                                    source: initialExpression)
-        }
-        
-        ctx.addGlobalVariable(intent)
-        
-        lazyResolve.append(.globalVar(intent, context: lazyTypeResolveContext()))
-    }
-    
-    // MARK: - ObjcClassInterface
-    private func enterObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        guard let name = node.identifier?.name else {
-            return
-        }
-        
-        let intent = ClassGenerationIntention(typeName: name, source: node)
-        recordSourceHistory(intention: intent, node: node)
-        
-        context
-            .findContext(ofType: FileGenerationIntention.self)?
-            .addType(intent)
-        
-        context.pushContext(intent)
-    }
-    
-    private func exitObjcClassInterfaceNode(_ node: ObjcClassInterface) {
-        if node.identifier?.name != nil {
-            context.popContext() // ClassGenerationIntention
-        }
-    }
-    
-    // MARK: - ObjcClassCategory
-    private func enterObjcClassCategoryNode(_ node: ObjcClassCategoryInterface) {
-        guard let name = node.identifier?.name else {
-            return
-        }
-        
-        let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
-        intent.categoryName = node.categoryName?.name
-        recordSourceHistory(intention: intent, node: node)
-        
-        context
-            .findContext(ofType: FileGenerationIntention.self)?
-            .addType(intent)
-        
-        context.pushContext(intent)
-    }
-    
-    private func exitObjcClassCategoryNode(_ node: ObjcClassCategoryInterface) {
-        if node.identifier?.name != nil {
-            context.popContext() // ClassExtensionGenerationIntention
-        }
-    }
-    
-    // MARK: - ObjcClassImplementation
-    private func enterObjcClassImplementationNode(_ node: ObjcClassImplementation) {
-        guard let name = node.identifier?.name else {
-            return
-        }
-        
-        let intent = ClassGenerationIntention(typeName: name, source: node)
-        recordSourceHistory(intention: intent, node: node)
-        
-        context
-            .findContext(ofType: FileGenerationIntention.self)?
-            .addType(intent)
-        
-        context.pushContext(intent)
-    }
-    
-    private func exitObjcClassImplementationNode(_ node: ObjcClassImplementation) {
-        context.popContext() // ClassGenerationIntention
-    }
-    
-    // MARK: - ObjcClassCategoryImplementation
-    private func enterObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementation) {
-        guard let name = node.identifier?.name else {
-            return
-        }
-        
-        let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
-        intent.categoryName = node.categoryName?.name
-        recordSourceHistory(intention: intent, node: node)
-        
-        context
-            .findContext(ofType: FileGenerationIntention.self)?
-            .addType(intent)
-        
-        context.pushContext(intent)
-    }
-    
-    private func exitObjcClassCategoryImplementationNode(_ node: ObjcClassCategoryImplementation) {
-        context.popContext() // ClassExtensionGenerationIntention
-    }
-    
-    // MARK: - ProtocolDeclaration
-    private func enterProtocolDeclarationNode(_ node: ProtocolDeclaration) {
-        guard let name = node.identifier?.name else {
-            return
-        }
-        
-        let intent = ProtocolGenerationIntention(typeName: name, source: node)
-        recordSourceHistory(intention: intent, node: node)
-        
-        context
-            .findContext(ofType: FileGenerationIntention.self)?
-            .addProtocol(intent)
-        
-        context.pushContext(intent)
-    }
-    
-    private func exitProtocolDeclarationNode(_ node: ProtocolDeclaration) {
-        if node.identifier?.name != nil {
-            context.popContext() // ProtocolGenerationIntention
-        }
-    }
-    // MARK: -
-    
-    private func visitPropertyDefinitionNode(_ node: PropertyDefinition) {
-        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
-            return
-        }
-        
-        let swiftType: SwiftType = .anyObject
-        
-        var ownership: Ownership = .strong
-        if let type = node.type?.type {
-            ownership = evaluateOwnershipPrefix(inType: type, property: node)
-        }
-        
-        let attributes =
-            node.attributesList?
-                .attributes.map { attr -> PropertyAttribute in
-                    switch attr.attribute {
-                    case .getter(let getter):
-                        return PropertyAttribute.getterName(getter)
-                    case .setter(let setter):
-                        return PropertyAttribute.setterName(setter)
-                    case .keyword(let keyword):
-                        return PropertyAttribute.attribute(keyword)
-                    }
-                } ?? []
-        
-        let storage =
-            ValueStorage(type: swiftType, ownership: ownership, isConstant: false)
-        
-        // Protocol property
-        if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
-            let prop =
-                ProtocolPropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                                    storage: storage,
-                                                    attributes: attributes,
-                                                    source: node)
-            prop.isOptional = node.isOptionalProperty
-            prop.inNonnullContext = isNodeInNonnullContext(node)
-            recordSourceHistory(intention: prop, node: node)
+        case let intention as GlobalFunctionGenerationIntention:
+            lazyResolve.append(.globalFunc(intention))
             
-            ctx.addProperty(prop)
+        case let intention as PropertyGenerationIntention:
+            lazyResolve.append(.property(intention))
             
-            lazyResolve.append(.property(prop, context: lazyTypeResolveContext()))
-        } else {
-            let prop = PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                                   storage: storage,
-                                                   attributes: attributes,
-                                                   source: node)
-            prop.inNonnullContext = isNodeInNonnullContext(node)
-            recordSourceHistory(intention: prop, node: node)
+        case let intention as MethodGenerationIntention:
+            lazyResolve.append(.method(intention))
             
-            ctx.addProperty(prop)
+        case let intention as EnumGenerationIntention:
+            lazyResolve.append(.enumDecl(intention))
             
-            lazyResolve.append(.property(prop, context: lazyTypeResolveContext()))
-        }
-    }
-    
-    // MARK: - Method Declaration
-    private func visitObjcClassMethodNode(_ node: MethodDefinition) {
-        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
-            return
-        }
-        
-        let localMapper =
-            DefaultTypeMapper(context:
-                TypeConstructionContext(typeSystem:
-                    DefaultTypeSystem.defaultTypeSystem
-                )
-            )
-        
-        let signGen = SwiftMethodSignatureGen(context: context, typeMapper: localMapper)
-        let sign = signGen.generateDefinitionSignature(from: node)
-        
-        let method: MethodGenerationIntention
-        
-        if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
-            let protMethod = ProtocolMethodGenerationIntention(signature: sign, source: node)
-            protMethod.isOptional = node.isOptionalMethod
-            recordSourceHistory(intention: protMethod, node: node)
+        case let intention as InstanceVariableGenerationIntention:
+            lazyResolve.append(.ivar(intention))
             
-            method = protMethod
-        } else {
-            method = MethodGenerationIntention(signature: sign, source: node)
-        }
-        
-        method.inNonnullContext = isNodeInNonnullContext(node)
-        
-        recordSourceHistory(intention: method, node: node)
-        
-        if let body = node.body, let statements = body.statements {
-            let reader = SwiftASTReader()
-            let compound = reader.parseStatements(compoundStatement: statements, typeMapper: typeMapper)
-            
-            let methodBodyIntention = FunctionBodyIntention(body: compound, source: body)
-            recordSourceHistory(intention: methodBodyIntention, node: body)
-            method.functionBody = methodBodyIntention
-        }
-        
-        ctx.addMethod(method)
-        
-        lazyResolve.append(.method(method, context: lazyTypeResolveContext()))
-    }
-    
-    private func visitObjcClassSuperclassName(_ node: SuperclassName) {
-        guard let ctx = context.findContext(ofType: ClassGenerationIntention.self) else {
-            return
-        }
-        
-        ctx.superclassName = node.name
-    }
-    
-    private func visitObjcClassProtocolReferenceListNode(_ node: ProtocolReferenceList) {
-        guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
-            return
-        }
-        
-        for protNode in node.protocols {
-            let intent = ProtocolInheritanceIntention(protocolName: protNode.name, source: protNode)
-            recordSourceHistory(intention: intent, node: node)
-            
-            ctx.addProtocol(intent)
+        default:
+            break
         }
     }
     
-    // MARK: - IVar Section
-    private func enterObjcClassIVarsListNode(_ node: IVarsList) {
-        let ctx = IVarListContext(accessLevel: .private)
-        context.pushContext(ctx)
+    public func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
+        return typeMapper
     }
     
-    private func visitObjcClassIVarDeclarationNode(_ node: IVarDeclaration) {
-        guard let classCtx = context.findContext(ofType: BaseClassIntention.self) else {
-            return
-        }
-        let ivarCtx = context.findContext(ofType: IVarListContext.self)
-        
-        let access = ivarCtx?.accessLevel ?? .private
-        
-        let swiftType: SwiftType = .anyObject
-        var ownership = Ownership.strong
-        var isConstant = false
-        if let type = node.type?.type {
-            ownership = evaluateOwnershipPrefix(inType: type)
-            isConstant = SwiftWriter._isConstant(fromType: type)
-        }
-        
-        let storage = ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
-        let ivar =
-            InstanceVariableGenerationIntention(name: node.identifier?.name ?? "",
-                                                storage: storage,
-                                                accessLevel: access,
-                                                source: node)
-        ivar.inNonnullContext = isNodeInNonnullContext(node)
-        recordSourceHistory(intention: ivar, node: node)
-        
-        classCtx.addInstanceVariable(ivar)
-        
-        lazyResolve.append(.ivar(ivar, context: lazyTypeResolveContext()))
-    }
-    
-    private func exitObjcClassIVarsListNode(_ node: IVarsList) {
-        context.popContext() // InstanceVarContext
-    }
-    
-    // MARK: - Enum Declaration
-    private func enterObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
-        guard let identifier = node.identifier else {
-            return
-        }
-        
-        let enumIntention =
-            EnumGenerationIntention(typeName: identifier.name,
-                                    rawValueType: .anyObject,
-                                    source: node)
-        recordSourceHistory(intention: enumIntention, node: node)
-        
-        context
-            .findContext(ofType: FileGenerationIntention.self)?
-            .addType(enumIntention)
-        
-        context.pushContext(enumIntention)
-        
-        lazyResolve.append(.enumDecl(enumIntention, context: lazyTypeResolveContext()))
-    }
-    
-    private func visitObjcEnumCaseNode(_ node: ObjcEnumCase) {
-        guard let ctx = context.currentContext(as: EnumGenerationIntention.self) else {
-            return
-        }
-        guard let identifier = node.identifier?.name else {
-            return
-        }
-        
-        let enumCase =
-            EnumCaseGenerationIntention(name: identifier, expression: nil,
-                                        accessLevel: .internal, source: node)
-        recordSourceHistory(intention: enumCase, node: node)
-        
-        if let expression = node.expression?.expression {
-            let reader = SwiftASTReader()
-            let exp = reader.parseExpression(expression: expression, typeMapper: typeMapper)
-            
-            enumCase.expression = exp
-        }
-        
-        ctx.addCase(enumCase)
-    }
-    
-    private func exitObjcEnumDeclarationNode(_ node: ObjcEnumDeclaration) {
-        guard node.identifier != nil && node.type != nil else {
-            return
-        }
-        
-        context.popContext() // EnumGenerationIntention
-    }
-    
-    private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
-        guard let file = node.originalSource?.filePath, let rule = node.sourceRuleContext?.start else {
-            return
-        }
-        
-        intention.history
-            .recordCreation(description: "\(file) line \(rule.getLine()) column \(rule.getCharPositionInLine())")
-    }
-    
-    private func lazyTypeResolveContext() -> LazyTypeResolveContext {
-        return LazyTypeResolveContext(nonnulls: nonnullTokenRanges)
-    }
-    
-    // MARK: -
-    
-    private class IVarListContext: Context {
-        var accessLevel: AccessLevel
-        
-        init(accessLevel: AccessLevel = .private) {
-            self.accessLevel = accessLevel
-        }
+    public func typeConstructionContext(for intentionCollector: IntentionCollector) -> TypeConstructionContext {
+        return context
     }
 }
 
 private enum LazyTypeResolveItem {
-    case property(PropertyGenerationIntention, context: LazyTypeResolveContext)
-    case ivar(InstanceVariableGenerationIntention, context: LazyTypeResolveContext)
-    case method(MethodGenerationIntention, context: LazyTypeResolveContext)
-    case globalVar(GlobalVariableGenerationIntention, context: LazyTypeResolveContext)
-    case globalFunc(GlobalFunctionGenerationIntention, context: LazyTypeResolveContext)
-    case enumDecl(EnumGenerationIntention, context: LazyTypeResolveContext)
-}
-
-private struct LazyTypeResolveContext {
-    var nonnulls: [NonnullTokenRange]
+    case property(PropertyGenerationIntention)
+    case ivar(InstanceVariableGenerationIntention)
+    case method(MethodGenerationIntention)
+    case globalVar(GlobalVariableGenerationIntention)
+    case globalFunc(GlobalFunctionGenerationIntention)
+    case enumDecl(EnumGenerationIntention)
+    
+    /// Returns the base `FromSourceIntention`-typed value, which is the intention
+    /// associated with evert case.
+    var fromSourceIntention: FromSourceIntention {
+        switch self {
+        case .property(let i):
+            return i
+        case .ivar(let i):
+            return i
+        case .method(let i):
+            return i
+        case .globalVar(let i):
+            return i
+        case .globalFunc(let i):
+            return i
+        case .enumDecl(let i):
+            return i
+        }
+    }
 }
