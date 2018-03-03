@@ -82,7 +82,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitRangeExpression(_ ctx: ObjectiveCParser.RangeExpressionContext) -> Expression? {
-        let constantExpressions = ctx.constantExpression()
+        let constantExpressions = ctx.expression()
         
         if constantExpressions.count == 1 {
             return constantExpressions[0].accept(self)

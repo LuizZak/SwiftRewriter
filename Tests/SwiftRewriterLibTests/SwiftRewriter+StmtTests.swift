@@ -275,11 +275,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
     
     func testEmitSizeOf() throws {
         try assertSingleStatement(
-            objc: "sizeof(int)",
+            objc: "sizeof(int);",
             swift: "MemoryLayout<CInt>.size"
         )
         try assertSingleStatement(
-            objc: "sizeof(abc)",
+            objc: "sizeof(abc);",
             swift: "MemoryLayout.size(ofValue: abc)"
         )
     }
@@ -574,7 +574,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 switch(value) {
                 case 0:
                     stmt();
-                    break
+                    break;
                 case 1:
                     break;
                 }

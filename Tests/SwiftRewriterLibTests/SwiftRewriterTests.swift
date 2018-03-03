@@ -298,7 +298,7 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @implementation MyClass
             - (void)dealloc {
-                thing()
+                thing();
             }
             @end
             """,
