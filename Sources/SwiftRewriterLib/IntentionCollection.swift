@@ -22,8 +22,8 @@ public class IntentionCollection {
     }
     
     /// Performs a full search of all types intended to be created on all files.
-    public func typeIntentions() -> AnySequence<TypeGenerationIntention> {
-        return AnySequence(_intentions.lazy.flatMap { $0.typeIntentions.lazy })
+    public func typeIntentions() -> [TypeGenerationIntention] {
+        return _intentions.flatMap { $0.typeIntentions }
     }
     
     /// Gets all nominal class generation intentions across all files

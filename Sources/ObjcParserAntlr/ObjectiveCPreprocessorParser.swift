@@ -66,7 +66,7 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 		return tokenNames
 	}()
-    
+
 	open func getTokenNames() -> [String?]? {
 		return tokenNames
 	}

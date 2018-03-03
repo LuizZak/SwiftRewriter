@@ -249,98 +249,64 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     }
     
     public override func knownTypeWithName(_ name: String) -> KnownType? {
-        // TODO: Create a lazy KnownType implementer that searches for requested
-        // members on-demand every time the respective KnownType members are requested.
-        
         if let type = super.knownTypeWithName(name) {
             return type
         }
         
         // Search in type intentions
-        let types = intentions.typeIntentions().map { $0 as KnownType }.filter { $0.typeName == name }
+        var types: [KnownType] = []
+        outer: for file in intentions.fileIntentions() {
+            for type in file.typeIntentions {
+                if type.typeName == name {
+                    types.append(type)
+                }
+            }
+        }
+        
         guard types.count > 0 else {
             return nil
         }
         
         // Single type found: Avoid complex merge operations and return it as is.
         if types.count == 1 {
-            return types[0]
+            return types.first
         }
         
-        var supertype: KnownSupertype?
-        for type in types {
-            // Search supertypes known here
-            switch type.supertype {
-            case .typeName(let supertypeName)?:
-                supertype = super.knownTypeWithName(supertypeName).map { .knownType($0) }
-            case .knownType?:
-                supertype = type.supertype
-            default:
-                break
-            }
-        }
-        
-        return LazyKnownType(typeName: name, supertype: supertype, types: types)
-        
-        /*
-        var typeBuilder = KnownTypeBuilder(typeName: name)
-        
-        for type in types {
-            // Search supertypes known here
-            switch type.supertype {
-            case .typeName(let supertypeName)?:
-                typeBuilder =
-                    typeBuilder.settingSupertype(super.knownTypeWithName(supertypeName))
-            case .knownType(let supertype)?:
-                typeBuilder =
-                    typeBuilder.settingSupertype(supertype)
-            default:
-                break
-            }
-            
-            for prot in type.knownProtocolConformances {
-                typeBuilder =
-                    typeBuilder.addingProtocolConformance(protocolName: prot.protocolName)
-            }
-            
-            for prop in type.knownProperties {
-                typeBuilder =
-                    typeBuilder.addingProperty(named: prop.name, storage: prop.storage, isStatic: prop.isStatic)
-            }
-            
-            for field in type.knownFields {
-                typeBuilder =
-                    typeBuilder.addingField(named: field.name, storage: field.storage, isStatic: field.isStatic)
-            }
-            
-            for ctor in type.knownConstructors {
-                typeBuilder =
-                    typeBuilder.addingConstructor(withParameters: ctor.parameters)
-            }
-            
-            for method in type.knownMethods {
-                typeBuilder =
-                    typeBuilder.addingMethod(withSignature: method.signature)
-            }
-        }
-        
-        return typeBuilder.build()
-        // */
+        return LazyKnownType(typeName: name, typeSystem: self, types: Array(types))
     }
     
+    /// A lazily-resolved compound known type that computes the value of each
+    /// its properties on demand.
     private class LazyKnownType: KnownType {
         private var types: [KnownType]
         
         var typeName: String
+        var typeSystem: TypeSystem
         
         lazy var origin: String = {
             return types[0].origin
         }()
         
-        var supertype: KnownSupertype?
+        lazy var supertype: KnownSupertype? = {
+            var supertype: KnownSupertype?
+            for type in types {
+                // Search supertypes known here
+                switch type.supertype {
+                case .typeName(let supertypeName)?:
+                    supertype = typeSystem.knownTypeWithName(supertypeName).map { .knownType($0) }
+                case .knownType?:
+                    supertype = type.supertype
+                default:
+                    break
+                }
+            }
+            
+            return supertype
+        }()
         
         lazy var knownConstructors: [KnownConstructor] = {
             var data: [KnownConstructor] = []
+            data.reserveCapacity(types.count)
             for type in types {
                 data.append(contentsOf: type.knownConstructors)
             }
@@ -349,6 +315,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         
         lazy var knownMethods: [KnownMethod] = {
             var data: [KnownMethod] = []
+            data.reserveCapacity(types.count)
             for type in types {
                 data.append(contentsOf: type.knownMethods)
             }
@@ -357,6 +324,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         
         lazy var knownProperties: [KnownProperty] = {
             var data: [KnownProperty] = []
+            data.reserveCapacity(types.count)
             for type in types {
                 data.append(contentsOf: type.knownProperties)
             }
@@ -365,6 +333,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         
         lazy var knownFields: [KnownProperty] = {
             var data: [KnownProperty] = []
+            data.reserveCapacity(types.count)
             for type in types {
                 data.append(contentsOf: type.knownFields)
             }
@@ -373,15 +342,16 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         
         lazy var knownProtocolConformances: [KnownProtocolConformance] = {
             var data: [KnownProtocolConformance] = []
+            data.reserveCapacity(types.count)
             for type in types {
                 data.append(contentsOf: type.knownProtocolConformances)
             }
             return data
         }()
         
-        init(typeName: String, supertype: KnownSupertype?, types: [KnownType]) {
+        init(typeName: String, typeSystem: TypeSystem, types: [KnownType]) {
             self.typeName = typeName
-            self.supertype = supertype
+            self.typeSystem = typeSystem
             self.types = types
         }
     }

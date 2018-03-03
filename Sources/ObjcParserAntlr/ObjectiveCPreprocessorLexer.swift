@@ -82,7 +82,7 @@ open class ObjectiveCPreprocessorLexer: Lexer {
 		}
 		return tokenNames
 	}()
-    
+
 	open func getTokenNames() -> [String?]? {
 		return tokenNames
 	}

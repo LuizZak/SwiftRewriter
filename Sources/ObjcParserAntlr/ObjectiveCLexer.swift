@@ -214,7 +214,7 @@ open class ObjectiveCLexer: Lexer {
 		}
 		return tokenNames
 	}()
-    
+
 	open func getTokenNames() -> [String?]? {
 		return tokenNames
 	}

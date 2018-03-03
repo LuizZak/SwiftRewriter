@@ -502,6 +502,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
 }
 
+// MARK: -
+
 extension ObjcParserListener {
     // TODO: Abstract all of this away into a specialized class.
     
