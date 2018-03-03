@@ -30,6 +30,10 @@ public struct TypeMappingContext {
     /// Nullability specifiers from a method definition's type decl
     public var nullabilitySpecifiers: [NullabilitySpecifier] = []
     
+    /// If true, every struct pointer found is considered to be an Objective-C
+    /// class instance.
+    public var alwaysClass: Bool = false
+    
     /// If true, always infers `nonnull` for otherwise unspecified nullability
     /// cases.
     public var inNonnullContext: Bool = false
@@ -78,6 +82,12 @@ public struct TypeMappingContext {
     
     public init(inNonnull: Bool = false) {
         self.inNonnullContext = inNonnull
+    }
+    
+    public func asAlwaysClass() -> TypeMappingContext {
+        var copy = self
+        copy.alwaysClass = true
+        return copy
     }
     
     public func asAlwaysNonNull() -> TypeMappingContext {
@@ -308,7 +318,7 @@ public class DefaultTypeMapper: TypeMapper {
                 swiftType(forObjcType: parameters[0],
                           // We pass a non-null context because it's not appliable
                           // to generic types in Objective-C (they always map to non-null).
-                          context: context.asAlwaysNonNull())
+                          context: context.asAlwaysNonNull().asAlwaysClass())
             
             return .array(inner)
         }
@@ -318,10 +328,10 @@ public class DefaultTypeMapper: TypeMapper {
             let inner0 =
                 swiftType(forObjcType: parameters[0],
                           // See above
-                          context: context.asAlwaysNonNull())
+                          context: context.asAlwaysNonNull().asAlwaysClass())
             let inner1 =
                 swiftType(forObjcType: parameters[1],
-                          context: context.asAlwaysNonNull())
+                          context: context.asAlwaysNonNull().asAlwaysClass())
             
             return .dictionary(key: inner0, value: inner1)
         }
@@ -329,7 +339,7 @@ public class DefaultTypeMapper: TypeMapper {
         let types =
             parameters.map {
                 swiftType(forObjcType: $0,
-                          context: context.asAlwaysNonNull())
+                          context: context.asAlwaysNonNull().asAlwaysClass())
             }
         
         if isPointerOnly(types: parameters) {
@@ -348,7 +358,7 @@ public class DefaultTypeMapper: TypeMapper {
             } else if let scalar = DefaultTypeMapper._scalarMappings[inner] {
                 // Pointers of scalar types are converted to 'UnsafeMutablePointer<TypeName>'
                 final = .generic("UnsafeMutablePointer", parameters: [scalar])
-            } else if self.context.typeSystem.isClassInstanceType(inner) {
+            } else if self.context.typeSystem.isClassInstanceType(inner) || context.alwaysClass {
                 // Assume it's a class type here
                 final = .typeName(inner)
             } else {

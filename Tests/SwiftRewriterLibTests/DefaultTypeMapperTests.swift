@@ -224,6 +224,13 @@ class DefaultTypeMapperTests: XCTestCase {
                toConvertTo: "NSMutableDictionary")
     }
     
+    func testNestedTypeInGenericIsAlwaysReadAsObjectType() {
+        expect(ObjcType.generic("A", parameters: [.pointer(.struct("B"))]),
+               toConvertTo: "A<B>")
+        expect(ObjcType.generic("A", parameters: [.pointer(.struct("B")), .pointer(.struct("C"))]),
+               toConvertTo: "A<B, C>")
+    }
+    
     func testConcreteTypesWithProtocol() {
         expect(.pointer(.generic("UIView", parameters: [.struct("UIDelegate")])),
                toConvertTo: "UIView & UIDelegate")
