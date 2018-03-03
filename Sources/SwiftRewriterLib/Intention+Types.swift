@@ -324,6 +324,29 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     public var isReadOnly: Bool  {
         return attributes.contains { $0.rawString == "readonly" }
     }
+    
+    /// If this property features a synthesized getter, returns the body intention
+    /// for the getter.
+    public var getter: FunctionBodyIntention? {
+        switch mode {
+        case .computed(let body), .property(let body, _):
+            return body
+        default:
+            return nil
+        }
+    }
+    
+    /// If this property features a synthesized setter, returns the settings for
+    /// the setter.
+    public var setter: Setter? {
+        switch mode {
+        case .property(_, let set):
+            return set
+        default:
+            return nil
+        }
+    }
+    
     public var name: String
     public var storage: ValueStorage
     public var mode: Mode = .asField

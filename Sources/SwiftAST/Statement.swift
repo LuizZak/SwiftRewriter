@@ -80,6 +80,10 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     
     public required init(arrayLiteral elements: Statement...) {
         self.statements = elements
+        
+        super.init()
+        
+        statements.forEach { $0.parent = self }
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -789,7 +793,8 @@ public struct StatementVariableDeclaration: Equatable {
     public var isConstant: Bool
     public var initialization: Expression?
     
-    public init(identifier: String, type: SwiftType, ownership: Ownership, isConstant: Bool, initialization: Expression?) {
+    public init(identifier: String, type: SwiftType, ownership: Ownership = .strong,
+                isConstant: Bool = false, initialization: Expression? = nil) {
         self.identifier = identifier
         self.type = type
         self.ownership = ownership

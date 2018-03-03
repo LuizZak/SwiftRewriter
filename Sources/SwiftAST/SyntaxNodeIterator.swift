@@ -144,4 +144,3 @@ public final class SyntaxNodeSequence: Sequence {
         case statement(Statement)
     }
 }
-

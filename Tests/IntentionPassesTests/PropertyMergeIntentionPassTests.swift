@@ -145,4 +145,87 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             "[PropertyMergeIntentionPass:1] Merged A.a() -> Int and A.setA(_ a: Int) into property A.a: Int"
         )
     }
+    
+    func testSynthesizeBackingFieldWhenUsageOfBackingFieldIsDetected() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a", type: .int)
+                        .createVoidMethod(named: "b") { method in
+                            method.setBody([
+                                .expression(.assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1)))
+                                ])
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 1)
+        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
+        XCTAssertEqual(cls.properties.count, 1)
+        
+        switch cls.properties[0].mode {
+        case let .property(get, set):
+            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
+            XCTAssertEqual(set.valueIdentifier, "newValue")
+            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: .postfix(.identifier("self"), .member("_a")),
+                                                                   op: .assign,
+                                                                   rhs: .identifier("newValue")))])
+        default:
+            XCTFail("Expected to synthesize getter/setter with backing field.")
+        }
+        
+        XCTAssertEqual(
+            cls.history.summary,
+            """
+            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            that the backing field of A.a: Int was being used inside the class.
+            """
+        )
+        XCTAssertEqual(
+            cls.properties[0].history.summary,
+            """
+            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            that the backing field of A.a: Int was being used inside the class.
+            """
+        )
+    }
+    
+    func testDoesntConfusesLocalVariableWithSynthesizedBackingField() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a", type: .int)
+                        .createVoidMethod(named: "b") { method in
+                            method.setBody([
+                                .variableDeclarations([
+                                    StatementVariableDeclaration(identifier: "_a", type: .int)
+                                    ]),
+                                .expression(.assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1)))
+                                ])
+                    }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        
+        switch cls.properties[0].mode {
+        case .asField:
+            // All good
+            break
+        default:
+            XCTFail("Expected to not synthesize getter/setter with backing field.")
+        }
+        
+        XCTAssertEqual(cls.history.summary, "<empty>")
+        XCTAssertEqual(cls.properties[0].history.summary, "<empty>")
+    }
 }

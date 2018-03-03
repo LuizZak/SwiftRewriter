@@ -8,6 +8,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
     /// instantiated, +1.
     private var operationsNumber: Int = 1
     
+    private var context: IntentionPassContext!
+    
     /// Textual tag this intention pass applies to history tracking entries.
     private var historyTag: String {
         return "\(PropertyMergeIntentionPass.self):\(operationsNumber)"
@@ -18,8 +20,9 @@ public class PropertyMergeIntentionPass: IntentionPass {
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        self.context = context
+        
         for file in intentionCollection.fileIntentions() {
-            
             for cls in file.typeIntentions.compactMap({ $0 as? BaseClassIntention }) {
                 apply(on: cls)
             }
@@ -61,16 +64,18 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 propSet.setter = potentialSetters[0]
             }
             
-            if propSet.getter == nil && propSet.setter == nil {
-                continue
-            }
-            
             matches.append(propSet)
         }
         
         // Flatten properties now
         for match in matches {
-            joinPropertySet(match, on: classIntention)
+            let acted = joinPropertySet(match, on: classIntention)
+            
+            // If no action was taken, look into synthesizing a backing field
+            // anyway, due to usage of backing field in any method of the type
+            if !acted {
+                synthesizeBackingFieldIfUsing(in: classIntention, for: match.property)
+            }
         }
     }
     
@@ -82,11 +87,137 @@ public class PropertyMergeIntentionPass: IntentionPass {
         return classIntention.methods
     }
     
+    private func synthesizeBackingFieldIfUsing(in intent: BaseClassIntention, for prop: PropertyGenerationIntention) {
+        enum BodyMatch {
+            case method(MethodGenerationIntention, FunctionBodyIntention)
+            case getter(PropertyGenerationIntention, FunctionBodyIntention)
+            case setter(PropertyGenerationIntention, FunctionBodyIntention)
+            
+            var property: PropertyGenerationIntention? {
+                switch self {
+                case .getter(let prop, _), .setter(let prop, _):
+                    return prop
+                default:
+                    return nil
+                }
+            }
+            
+            var method: MethodGenerationIntention? {
+                switch self {
+                case .method(let method, _):
+                    return method
+                default:
+                    return nil
+                }
+            }
+            
+            var body: CompoundStatement {
+                switch self {
+                case .getter(_, let body),
+                     .setter(_, let body),
+                     .method(_, let body):
+                    return body.body
+                }
+            }
+        }
+        
+        func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [BodyMatch] {
+            var bodies: [BodyMatch] = []
+            
+            for method in collectMethods(fromClass: classIntention) {
+                if let body = method.functionBody {
+                    bodies.append(.method(method, body))
+                }
+            }
+            
+            for prop in classIntention.properties {
+                if let getter = prop.getter {
+                    bodies.append(.getter(prop, getter))
+                }
+                if let setter = prop.setter {
+                    bodies.append(.getter(prop, setter.body))
+                }
+            }
+            
+            return bodies
+        }
+        
+        let matches = collectMethodBodies(fromClass: intent)
+        
+        let fieldName = "_" + prop.name
+        
+        for bodyMatch in matches {
+            // Type-resolve members first so we can later find references for
+            // identifier expressions
+            switch bodyMatch {
+            case .getter(let prop, _), .setter(let prop, _):
+                context.typeResolverInvoker.resolveExpressionTypes(in: prop)
+            case .method(let method, _):
+                context.typeResolverInvoker.resolveExpressionTypes(in: method)
+            }
+            
+            let matches =
+                SyntaxNodeSequence(statement: bodyMatch.body, inspectBlocks: true)
+                    .lazy
+                    .compactMap { node in node as? Expression }
+                    .contains { exp in
+                        // TODO: Support indirect field resolution
+                        // (i.e.: `notSelfButAVarWithSelfAssigned->_field`)
+                        
+                        switch exp {
+                        case let identifier as IdentifierExpression where identifier.identifier == fieldName:
+                            // Match only if identifier matched to nothing yet
+                            return identifier.definition == nil
+                            
+                        case let postfix as PostfixExpression:
+                            return postfix.exp.asIdentifier?.identifier == "self" && postfix.member?.name == fieldName
+                        default:
+                            return false
+                        }
+                    }
+            
+            if matches {
+                let field = synthesizeBackingField(for: prop, in: intent)
+                
+                let getter =
+                    FunctionBodyIntention(body: [.return(.postfix(.identifier("self"), .member(fieldName)))])
+                let setter =
+                    FunctionBodyIntention(body: [
+                        .expression(
+                            .assignment(lhs: .postfix(.identifier("self"), .member(fieldName)),
+                                        op: .assign,
+                                        rhs: .identifier("newValue"))
+                            )
+                        ])
+                
+                prop.mode = .property(get: getter, set: .init(valueIdentifier: "newValue", body: setter))
+                
+                intent.history
+                    .recordChange(tag: historyTag,
+                                  description: """
+                        Created field \(TypeFormatter.asString(field: field, ofType: intent)) \
+                        as it was detected that the backing field of \(TypeFormatter.asString(property: prop, ofType: intent)) \
+                        was being used inside the class.
+                        """)
+                    .echoRecord(to: prop)
+                    .echoRecord(to: getter)
+                    .echoRecord(to: setter)
+                    .echoRecord(to: field)
+                
+                operationsNumber += 1
+                
+                return
+            }
+        }
+    }
+    
     /// From a given found joined set of @property definition and potential
     /// getter/setter definitions, reworks the intented signatures on the class
     /// definition such that properties are correctly flattened with their non-synthesized
     /// getter/setters into `var myVar { get set }` Swift computed properties.
-    private func joinPropertySet(_ propertySet: PropertySet, on classIntention: BaseClassIntention) {
+    ///
+    /// Returns `false` if the method ended up making no changes.
+    private func joinPropertySet(_ propertySet: PropertySet, on classIntention: BaseClassIntention) -> Bool {
         switch (propertySet.getter, propertySet.setter) {
         // Getter and setter: Create a property with `{ get { [...] } set { [...] }`
         case let (getter?, setter?):
@@ -139,6 +270,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             operationsNumber += 1
             
+            return true
+            
         // Getter-only on readonly property: Create computed property.
         case let (getter?, nil) where propertySet.property.isReadOnly:
             let getterBody = getter.functionBody ?? FunctionBodyIntention(body: [])
@@ -160,13 +293,15 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             operationsNumber += 1
             
+            return true
+            
         // Setter-only: Synthesize the backing field of the property and expose
         // a default getter `return _field` and the found setter.
         case let (nil, setter?):
             classIntention.removeMethod(setter)
             
             guard let setterBody = setter.functionBody else {
-                break
+                return false
             }
             
             let backingFieldName = "_" + propertySet.property.name
@@ -183,13 +318,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             propertySet.property.mode = .property(get: getterIntention, set: newSetter)
             
-            let field =
-                InstanceVariableGenerationIntention(name: backingFieldName,
-                                                    storage: propertySet.property.storage,
-                                                    accessLevel: .private,
-                                                    source: propertySet.property.source)
-            
-            classIntention.addInstanceVariable(field)
+            let field = synthesizeBackingField(for: propertySet.property, in: classIntention)
             
             classIntention
                 .history
@@ -204,9 +333,30 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .echoRecord(to: propertySet.property)
             
             operationsNumber += 1
+            
+            return true
         default:
-            break
+            return false
         }
+    }
+    
+    private func synthesizeBackingField(for property: PropertyGenerationIntention,
+                                        in type: BaseClassIntention) -> InstanceVariableGenerationIntention {
+        let name = "_" + property.name
+        
+        if let ivar = type.instanceVariables.first(where: { $0.name == name }) {
+            return ivar
+        }
+        
+        let field =
+            InstanceVariableGenerationIntention(name: "_" + property.name,
+                                                storage: property.storage,
+                                                accessLevel: .private,
+                                                source: property.source)
+        
+        type.addInstanceVariable(field)
+        
+        return field
     }
     
     private struct PropertySet {

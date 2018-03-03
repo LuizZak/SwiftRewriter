@@ -362,18 +362,10 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         return CompoundStatementVisitor(expressionReader: expressionReader)
     }
     
-    private func expressions(in compoundStatement: CompoundStatement, inspectBlocks: Bool) -> AnyIterator<Expression> {
-        let iterator =
-            ExpressionIterator(statement: compoundStatement, inspectBlocks: inspectBlocks)
+    private func expressions(in statement: Statement, inspectBlocks: Bool) -> AnySequence<Expression> {
+        let sequence = SyntaxNodeSequence(statement: statement, inspectBlocks: inspectBlocks)
         
-        return AnyIterator(iterator)
-    }
-    
-    private func expressions(in statement: Statement, inspectBlocks: Bool) -> AnyIterator<Expression> {
-        let iterator =
-            ExpressionIterator(statement: statement, inspectBlocks: inspectBlocks)
-        
-        return AnyIterator(iterator)
+        return AnySequence(sequence.lazy.compactMap { $0 as? Expression })
     }
     
     private func acceptFirst(from rules: ParserRuleContext?...) -> Statement? {
