@@ -97,9 +97,9 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Super class name
-        if let sup = ctx.superclassName?.getText() {
+        if let sup = ctx.superclassName()?.getText() {
             let supName = SuperclassName(name: sup)
-            supName.sourceRuleContext = ctx.superclassName
+            supName.sourceRuleContext = ctx.superclassName()
             context.addChildNode(supName)
         }
         
@@ -177,9 +177,9 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Super class name
-        if let sup = ctx.superclassName?.getText() {
+        if let sup = ctx.superclassName()?.getText() {
             let supName = SuperclassName(name: sup)
-            supName.sourceRuleContext = ctx.superclassName
+            supName.sourceRuleContext = ctx.superclassName()
             context.addChildNode(supName)
         }
     }

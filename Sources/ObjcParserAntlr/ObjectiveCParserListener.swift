@@ -91,6 +91,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitCategoryImplementation(_ ctx: ObjectiveCParser.CategoryImplementationContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#superclassName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterSuperclassName(_ ctx: ObjectiveCParser.SuperclassNameContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#superclassName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitSuperclassName(_ ctx: ObjectiveCParser.SuperclassNameContext)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#genericTypeSpecifier}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -102,6 +114,30 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#genericSuperclassSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterGenericSuperclassSpecifier(_ ctx: ObjectiveCParser.GenericSuperclassSpecifierContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#genericSuperclassSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitGenericSuperclassSpecifier(_ ctx: ObjectiveCParser.GenericSuperclassSpecifierContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#superclassTypeSpecifierWithPrefixes}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterSuperclassTypeSpecifierWithPrefixes(_ ctx: ObjectiveCParser.SuperclassTypeSpecifierWithPrefixesContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#superclassTypeSpecifierWithPrefixes}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitSuperclassTypeSpecifierWithPrefixes(_ ctx: ObjectiveCParser.SuperclassTypeSpecifierWithPrefixesContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#protocolDeclaration}.
 	 - Parameters:

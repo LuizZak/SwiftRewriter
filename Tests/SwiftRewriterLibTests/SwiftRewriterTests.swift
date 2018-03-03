@@ -899,7 +899,6 @@ class SwiftRewriterTests: XCTestCase {
             class A: NSObject {
                 private var _u: RACSubject<[B]>!
             }
-            """,
-            expectsErrors: true)
+            """)
     }
 }

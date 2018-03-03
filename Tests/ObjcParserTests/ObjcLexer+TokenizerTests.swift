@@ -51,6 +51,7 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("__strong", toTokenizeAs: .typeQualifier)
         expect("__kindof", toTokenizeAs: .typeQualifier)
         expect("__block", toTokenizeAs: .typeQualifier)
+        expect("__unused", toTokenizeAs: .typeQualifier)
     }
     
     func testTokenizeKeywords() {
@@ -178,6 +179,9 @@ class ObjcLexer_TokenizerTests: XCTestCase {
             .floatLiteral, .preprocessorDirective, .identifier
             ])
     }
+}
+
+extension ObjcLexer_TokenizerTests {
     
     private func expect(sequence string: String, toTokenizeAs expectedTypes: [TokenType], file: String = #file, line: Int = #line) {
         let lexer = makeLexer(string)

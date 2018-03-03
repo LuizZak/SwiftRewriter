@@ -139,6 +139,8 @@ class SuggestConversionInterface {
         let console = menu.console
         let fileManager = FileManager.default
         
+        console.printLine("Inspecting path \(path)...")
+        
         // Search all files there
         guard let files = fileManager.enumerator(atPath: path) else {
             console.printLine("Failed to iterate files from path \(path)".terminalColorize(.red))
@@ -179,6 +181,15 @@ class SuggestConversionInterface {
                 
                 return
             }
+        }
+        
+        if objcFiles.count == 0 {
+            console.printLine("No files where found to process.")
+            if !skipConfirm {
+                _=console.readLineWith(prompt: "Press [Enter] to continue.")
+            }
+            
+            return
         }
         
         if !skipConfirm {

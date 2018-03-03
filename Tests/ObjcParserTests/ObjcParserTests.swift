@@ -93,10 +93,34 @@ class ObjcParserTests: XCTestCase {
         traverser.traverse()
     }
     
-    private func parserTest(_ source: String) -> GlobalContextNode {
+    func testConcreteSubclassOfGenericType() {
+        let source = """
+        @interface A: B<NSString*>
+        @end
+        """
+        _=parserTest(source)
+    }
+    
+    func testParseNestedGenericTypes() {
+        let source = """
+        @interface B: NSObject
+        @end
+        @interface A: NSObject
+        {
+            RACSubject<NSArray<B*>*> *_u; // Should not produce errors here!
+        }
+        @end
+        """
+        _=parserTest(source)
+    }
+}
+
+extension ObjcParserTests {
+    
+    private func parserTest(_ source: String, file: String = #file, line: Int = #line) -> GlobalContextNode {
         let sut = ObjcParser(string: source)
         
-        return _parseTestGlobalContextNode(source: source, parser: sut)
+        return _parseTestGlobalContextNode(source: source, parser: sut, file: file, line: line)
     }
     
     private func _parseTestGlobalContextNode(source: String, parser: ObjcParser, file: String = #file, line: Int = #line) -> GlobalContextNode {
@@ -107,7 +131,7 @@ class ObjcParserTests: XCTestCase {
                 var diag = ""
                 parser.diagnostics.printDiagnostics(to: &diag)
                 
-                recordFailure(withDescription: "Unexpected diagnostics while parsing:\n\(diag)", inFile: file, atLine: line, expected: false)
+                recordFailure(withDescription: "Unexpected diagnostics while parsing:\n\(diag)", inFile: file, atLine: line, expected: true)
             }
             
             return parser.rootNode

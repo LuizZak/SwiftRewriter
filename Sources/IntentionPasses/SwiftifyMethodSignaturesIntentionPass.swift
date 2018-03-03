@@ -68,17 +68,45 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
     }
     
     private func apply(on method: MethodGenerationIntention) {
-        if method.signature.name.contains("With") && method.signature.parameters.count > 0 {
-            applyWithNameConversion(to: method)
+        if !method.signature.name.contains("With") || method.signature.parameters.count == 0 {
+            return
         }
+        
+        if applyInitConversion(to: method) {
+            return
+        }
+        
+        _=applyWithNameConversion(to: method)
     }
     
-    private func applyWithNameConversion(to method: MethodGenerationIntention) {
+    private func applyInitConversion(to method: MethodGenerationIntention) -> Bool {
+        let signature = method.signature
+        
+        guard !signature.isStatic else {
+            return false
+        }
+        guard method.returnType != .void else {
+            return false
+        }
+        
+        // Check `initWith<...>` prefix
+        let splitOnWith = signature.name.components(separatedBy: "With")
+        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count == 0 }) {
+            return false
+        }
+        
+        method.signature.parameters[0].label = splitOnWith[1].lowercasedFirstLetter
+        method.signature.name = "init"
+        
+        return true
+    }
+    
+    private func applyWithNameConversion(to method: MethodGenerationIntention) -> Bool {
         let signature = method.signature
         
         let splitOnWith = signature.name.components(separatedBy: "With")
         if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count == 0 }) {
-            return
+            return false
         }
         
         // If the prefix of a static method begins with the suffix of its type
@@ -128,7 +156,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             
             operationsNumber += 1
             
-            return
+            return true
         }
         
         let lowercaseNoun = splitOnWith[1].lowercased()
@@ -138,7 +166,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         // a noun is followed by a parameter that has the same name, we collapse
         // such selector in Swift as `lorem(with:)`.
         if lowercaseNoun != signature.parameters[0].name.lowercased() {
-            return
+            return false
         }
         
         // All good! Collapse the identifier into a more 'swifty' construct
@@ -152,7 +180,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             // Only match if the suffix also matches at least partially the typename
             let type = signature.parameters[0].type
             if !type.isNominal || !mapper.typeNameString(for: type).lowercased().hasSuffix(lowercaseNoun) {
-                return
+                return false
             }
             
             method.signature.parameters[0].label = "with"
@@ -168,6 +196,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             """, relatedIntentions: [])
         
         operationsNumber += 1
+        
+        return true
     }
 }
 

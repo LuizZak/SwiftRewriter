@@ -93,7 +93,7 @@ do {
         
         let interface = SuggestConversionInterface(rewriterService: service)
         interface.searchAndShowConfirm(in: menu,
-                                       path: path,
+                                       path: (path as NSString).standardizingPath,
                                        skipConfirm: skipConfirm,
                                        excludePattern: excludePattern)
     } else {

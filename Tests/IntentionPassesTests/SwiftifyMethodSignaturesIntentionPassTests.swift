@@ -132,6 +132,20 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
                 ])
     }
     
+    func testConvertInitWithNonMatchingSelectorName() {
+        let sut = SwiftifyMethodSignaturesIntentionPass()
+        
+        testThat(sut: sut)
+            .method(withSignature:
+                FunctionSignature(name: "initWithObjectList",
+                                  parameters: [
+                                    ParameterSignature(label: "_", name: "objects", type: .array(.typeName("Object")))
+                                  ],
+                                  returnType: .instancetype,
+                                  isStatic: false))
+            .converts(toInitializer: [ParameterSignature(label: "objectList", name: "objects", type: .array(.typeName("Object")))])
+    }
+    
     /// Tests automatic swiftification of `[NSTypeName typeNameWithThing:<x>]`-style
     /// initializers.
     /// This helps test mimicing of Swift's importer behavior.
@@ -274,7 +288,8 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 testCase.recordFailure(withDescription: """
                     Failed to generate initializer: No initializers where found \
                     on target type.
-                    Resulting type: \(dumpType())
+                    Found these methods instead:
+                    \(dumpType())
                     """
                     , inFile: file, atLine: line, expected: false)
                 return
@@ -295,7 +310,8 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 testCase.recordFailure(withDescription: """
                     Failed to generate initializer: No initializers where found \
                     on target type.
-                    Resulting type: \(dumpType())
+                    Found these methods instead:
+                    \(dumpType())
                     """
                     , inFile: file, atLine: line, expected: false)
                 return
@@ -331,7 +347,8 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 testCase.recordFailure(withDescription: """
                     Failed to generate method: No methods where found on \
                     target type.
-                    Resulting type: \(dumpType())
+                    Found these methods instead:
+                    \(dumpType())
                     """
                     , inFile: file, atLine: line, expected: false)
                 return
