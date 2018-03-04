@@ -57,3 +57,18 @@ open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
         context.notifyChangedTree()
     }
 }
+
+/// A simple expression passes source that feeds from a contents array
+public struct ArraySyntaxNodeRewriterPassSource: SyntaxNodeRewriterPassSource {
+    public var syntaxNodePasses: [SyntaxNodeRewriterPass.Type]
+    
+    public init(syntaxNodePasses: [SyntaxNodeRewriterPass.Type]) {
+        self.syntaxNodePasses = syntaxNodePasses
+    }
+}
+
+/// Sources syntax rewriter passes to be used during conversion
+public protocol SyntaxNodeRewriterPassSource {
+    /// Types of syntax node rewriters to instantiate and use during transformation.
+    var syntaxNodePasses: [SyntaxNodeRewriterPass.Type] { get }
+}

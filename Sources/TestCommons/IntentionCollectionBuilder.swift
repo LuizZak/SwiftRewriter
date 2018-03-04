@@ -134,6 +134,13 @@ public class FileIntentionBuilder {
         return self
     }
     
+    @discardableResult
+    public func addPreprocessorDirective(_ directive: String) -> FileIntentionBuilder {
+        intention.preprocessorDirectives.append(directive)
+        
+        return self
+    }
+    
     private func innerBuildTypeWithClosure<T: TypeGenerationIntention>(type: T, initializer: (TypeBuilder<T>) -> Void) {
         let builder = TypeBuilder(targetType: type)
         initializer(builder)

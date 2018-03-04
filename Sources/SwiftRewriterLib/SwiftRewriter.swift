@@ -37,7 +37,7 @@ public class SwiftRewriter {
     
     /// An expression pass is executed for every method expression to allow custom
     /// transformations to be applied to resulting code.
-    public var syntaxNodeRewriters: [SyntaxNodeRewriterPass.Type] = []
+    public var syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource
     
     /// Custom source pre-processors that are applied to each input source code
     /// before parsing.
@@ -58,17 +58,22 @@ public class SwiftRewriter {
     public var writerOptions: ASTWriterOptions = .default
     
     public convenience init(input: InputSourcesProvider, output: WriterOutput) {
-        self.init(input: input, output: output,
-                  intentionPassesSource: ArrayIntentionPassSource(intentionPasses: []))
+        self.init(input: input,
+                  output: output,
+                  intentionPassesSource: ArrayIntentionPassSource(intentionPasses: []),
+                  syntaxNodeRewriterSources: ArraySyntaxNodeRewriterPassSource(syntaxNodePasses: [])
+        )
     }
     
     public init(input: InputSourcesProvider, output: WriterOutput,
-                intentionPassesSource: IntentionPassSource) {
+                intentionPassesSource: IntentionPassSource,
+                syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource) {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
         self.outputTarget = output
         self.intentionCollection = IntentionCollection()
         self.intentionPassesSource = intentionPassesSource
+        self.syntaxNodeRewriterSources = syntaxNodeRewriterSources
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         
@@ -163,7 +168,9 @@ public class SwiftRewriter {
     }
     
     private func performIntentionPasses() {
-        let syntaxPasses = [MandatorySyntaxNodePass.self] + syntaxNodeRewriters
+        let syntaxPasses =
+            [MandatorySyntaxNodePass.self]
+                + syntaxNodeRewriterSources.syntaxNodePasses
         
         let applier =
             SyntaxNodeRewriterPassApplier(passes: syntaxPasses,

@@ -9,6 +9,46 @@ class DefaultTypeSystemTests: XCTestCase {
         sut = DefaultTypeSystem()
     }
     
+    func testIsNumeric() {
+        // 64-bits
+        XCTAssert(sut.isNumeric(.typeName("Int64")))
+        XCTAssert(sut.isNumeric(.typeName("UInt64")))
+        XCTAssert(sut.isNumeric(.typeName("CLongLong")))
+        XCTAssert(sut.isNumeric(.typeName("CUnsignedLongLong")))
+        
+        // 32-bits
+        XCTAssert(sut.isNumeric(.typeName("Int")))
+        XCTAssert(sut.isNumeric(.typeName("UInt")))
+        XCTAssert(sut.isNumeric(.typeName("Int32")))
+        XCTAssert(sut.isNumeric(.typeName("UInt32")))
+        XCTAssert(sut.isNumeric(.typeName("CInt")))
+        XCTAssert(sut.isNumeric(.typeName("CUnsignedInt")))
+        XCTAssert(sut.isNumeric(.typeName("CChar32")))
+        
+        // 16-bits
+        XCTAssert(sut.isNumeric(.typeName("Int16")))
+        XCTAssert(sut.isNumeric(.typeName("UInt16")))
+        XCTAssert(sut.isNumeric(.typeName("CShort")))
+        XCTAssert(sut.isNumeric(.typeName("CUnsignedShort")))
+        XCTAssert(sut.isNumeric(.typeName("CChar16")))
+        
+        // 8-bits
+        XCTAssert(sut.isNumeric(.typeName("Int8")))
+        XCTAssert(sut.isNumeric(.typeName("UInt8")))
+        XCTAssert(sut.isNumeric(.typeName("CChar")))
+        XCTAssert(sut.isNumeric(.typeName("CUnsignedChar")))
+        
+        // Floating-point
+        XCTAssert(sut.isNumeric(.typeName("Float")))
+        XCTAssert(sut.isNumeric(.typeName("Float80")))
+        XCTAssert(sut.isNumeric(.typeName("Double")))
+        XCTAssert(sut.isNumeric(.typeName("CFloat")))
+        XCTAssert(sut.isNumeric(.typeName("CDouble")))
+        
+        // Boolean (considered numeric due to semantics of C)
+        XCTAssert(sut.isNumeric(.typeName("CBool")))
+    }
+    
     func testIsTypeSubtypeOf() {
         let typeA = KnownTypeBuilder(typeName: "A").build()
         let typeB = KnownTypeBuilder(typeName: "B", supertype: typeA).build()

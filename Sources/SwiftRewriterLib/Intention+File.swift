@@ -15,6 +15,10 @@ public class FileGenerationIntention: Intention {
     /// All preprocessor directives found on this file.
     public var preprocessorDirectives: [String] = []
     
+    /// Gets the (Swift) import directives should be printed at this file's top
+    /// header section.
+    public var importDirectives: [String] = []
+    
     /// Gets the intention collection that contains this file generation intention
     public internal(set) var intentionCollection: IntentionCollection?
     

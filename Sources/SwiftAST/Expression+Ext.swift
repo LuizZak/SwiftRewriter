@@ -1,10 +1,8 @@
-import SwiftAST
-
 public extension Expression {
     /// Creates a BiniaryExpression between this expression and a right-hand-side
     /// expression.
     public func binary(op: SwiftOperator, rhs: Expression) -> BinaryExpression {
-        return Expression.binary(lhs: self, op: op, rhs: rhs)
+        return .binary(lhs: self, op: op, rhs: rhs)
     }
     
     public func optional() -> OptionalAccessPostfixBuilder {
@@ -13,17 +11,22 @@ public extension Expression {
     
     /// Creates a function call invocation postfix expression with this expression
     public func call(arguments: [FunctionArgument] = []) -> PostfixExpression {
-        return Expression.postfix(self, .functionCall(arguments: arguments))
+        return .postfix(self, .functionCall(arguments: arguments))
     }
     
     /// Creates a member access postfix expression with this expression
     public func dot(_ member: String) -> PostfixExpression {
-        return Expression.postfix(self, .member(member))
+        return .postfix(self, .member(member))
     }
     
     /// Creates a subscript access postfix expression with this expression
     public func sub(_ exp: Expression) -> PostfixExpression {
-        return Expression.postfix(self, .subscript(exp))
+        return .postfix(self, .subscript(exp))
+    }
+    
+    /// Creates a type-cast expression with this expression
+    public func casted(to type: SwiftType) -> CastExpression {
+        return .cast(self, type: type)
     }
 }
 

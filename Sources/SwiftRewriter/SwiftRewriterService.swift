@@ -29,16 +29,10 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         
         converter.preprocessors.append(QuickSpecPreprocessor())
         
-        converter.syntaxNodeRewriters.append(ASTSimplifier.self)
-        converter.syntaxNodeRewriters.append(AllocInitExpressionPass.self)
-        converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass.self)
-        converter.syntaxNodeRewriters.append(FoundationExpressionPass.self)
-        converter.syntaxNodeRewriters.append(UIKitExpressionPass.self)
-        converter.syntaxNodeRewriters.append(NilValueTransformationsPass.self)
-        
         converter.writerOptions = options
         converter.verbose = verbose
         
+        converter.syntaxNodeRewriterSources = DefaultExpressionPasses()
         converter.intentionPassesSource = DefaultIntentionPasses()
         
         try converter.rewrite()

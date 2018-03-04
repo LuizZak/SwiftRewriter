@@ -68,6 +68,8 @@ public class DefaultTypeSystem: TypeSystem {
             return true
         case .typeName("Float80"):
             return true
+        case .typeName("CFloat"), .typeName("CDouble"):
+            return true
         default:
             return false
         }
@@ -77,10 +79,20 @@ public class DefaultTypeSystem: TypeSystem {
         switch type {
         case .int, .uint:
             return true
-        case .typeName("Int64"), .typeName("Int32"), .typeName("Int16"), .typeName("Int8"):
-            return true
-        case .typeName("UInt64"), .typeName("UInt32"), .typeName("UInt16"), .typeName("UInt8"):
-            return true
+        case .typeName(let name):
+            switch name {
+            // Swift integer types
+            case "Int", "Int64", "Int32", "Int16", "Int8", "UInt", "UInt64", "UInt32",
+                 "UInt16", "UInt8":
+                return true
+            // C integer types
+            case "CChar", "CSignedChar", "CChar16", "CChar32", "CUnsignedChar", "CInt", "CUnsignedInt",
+                 "CShort", "CUnsignedShort", "CLong", "CUnsignedLong", "CLongLong", "CUnsignedLongLong",
+                 "CWideChar", "CBool":
+                return true
+            default:
+                return false
+            }
         default:
             return false
         }

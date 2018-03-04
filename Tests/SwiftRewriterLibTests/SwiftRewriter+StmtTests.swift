@@ -271,8 +271,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
     
     func testEmitTypeCast() throws {
         try assertSingleStatement(
-            objc: "((NSInteger)aThing);",
-            swift: "(aThing as? Int)"
+            objc: "((UIButtonType)aThing);",
+            swift: "(aThing as? UIButtonType)"
         )
         
         try assertSingleStatement(

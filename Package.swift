@@ -50,7 +50,7 @@ let package = Package(
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils"]),
         .target(
             name: "IntentionPasses",
-            dependencies: ["SwiftRewriterLib", "SwiftAST", "ExpressionPasses", "Utils"]),
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "ExpressionPasses", "Utils", "MiniLexer"]),
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils"]),
@@ -92,7 +92,7 @@ let package = Package(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",
                            "Antlr4", "ObjcParser", "ObjcParserAntlr",
-                           "IntentionPasses", "IntentionPasses", "TestCommons"]),
+                           "IntentionPasses"]),
         .testTarget(
             name: "SourcePreprocessorsTests",
             dependencies: ["SourcePreprocessors", "Utils", "SwiftRewriterLib",

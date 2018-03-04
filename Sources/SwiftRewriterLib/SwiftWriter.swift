@@ -40,6 +40,9 @@ public final class SwiftWriter {
         let protocols = fileIntent.protocolIntentions
         var addSeparator = false
         
+        // Output imports
+        outputImports(fileIntent.importDirectives, target: out)
+        
         outputPreprocessorDirectives(fileIntent.preprocessorDirectives, target: out)
         
         for typeali in fileIntent.typealiasIntentions {
@@ -99,8 +102,21 @@ public final class SwiftWriter {
         file.close()
     }
     
+    public func outputImports(_ imports: [String], target: RewriterOutputTarget) {
+        if imports.isEmpty {
+            return
+        }
+        
+        for lib in imports {
+            target.outputIdentation()
+            target.outputInlineWithSpace("import", style: .keyword)
+            target.outputInline(lib)
+            target.outputLineFeed()
+        }
+    }
+    
     public func outputPreprocessorDirectives(_ preproc: [String], target: RewriterOutputTarget) {
-        if preproc.count == 0 {
+        if preproc.isEmpty {
             return
         }
         
