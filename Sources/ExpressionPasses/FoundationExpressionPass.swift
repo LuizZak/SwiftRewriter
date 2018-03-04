@@ -45,19 +45,24 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         guard let postfix = exp.exp.asPostfix, let fc = exp.functionCall else {
             return nil
         }
-        guard postfix.member?.name == "respondsToSelector" else {
+        guard postfix.op.unwrappedOptionalAccess.asMember?.name == "respondsToSelector" else {
             return nil
         }
         guard fc.arguments.count == 1 else {
             return nil
         }
         
-        postfix.op = .member("responds")
         exp.op = .functionCall(arguments: [
             FunctionArgument.labeled("to", fc.arguments[0].expression)
         ])
         
-        exp.resolvedType = .bool
+        if let optional = postfix.optionalAccess {
+            postfix.op = optional.wrappingOptionalPostfixes(over: .member("responds"))
+            exp.resolvedType = optional.wrappingOptionals(in: .bool)
+        } else {
+            postfix.op = .member("responds")
+            exp.resolvedType = .bool
+        }
         
         return exp
     }
@@ -65,9 +70,9 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     /// Converts [<lhs> isEqualToString:<rhs>] -> <lhs> == <rhs>
     func convertIsEqualToString(_ exp: PostfixExpression) -> Expression? {
         guard let postfix = exp.exp.asPostfix,
-            postfix.op == .member("isEqualToString"),
+            postfix.op.unwrappedOptionalAccess == .member("isEqualToString"),
             let args = exp.functionCall?.arguments, args.count == 1 && !args.hasLabeledArguments() else {
-                return nil
+            return nil
         }
         
         let res = postfix.exp.binary(op: .equals, rhs: args[0].expression)
@@ -81,12 +86,12 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     func convertStringWithFormat(_ exp: PostfixExpression) -> Expression? {
         guard exp.exp == .postfix(.identifier("NSString"), .member("stringWithFormat")),
             let args = exp.functionCall?.arguments, args.count > 0 else {
-                return nil
+            return nil
         }
         
         let newArgs: [FunctionArgument] = [
             .labeled("format", args[0].expression),
-            ] + args.dropFirst()
+        ] + args.dropFirst()
         
         exp.exp = .identifier("String")
         exp.op = .functionCall(arguments: newArgs)
@@ -98,19 +103,26 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts [<array> addObjectsFromArray:<exp>] -> <array>.addObjects(from: <exp>)
     func convertAddObjectsFromArray(_ exp: PostfixExpression) -> Expression? {
-        guard let memberPostfix = exp.exp.asPostfix, memberPostfix.op == .member("addObjectsFromArray"),
+        guard let postfix = exp.exp.asPostfix,
+            postfix.op.unwrappedOptionalAccess == .member("addObjectsFromArray"),
             let args = exp.functionCall?.arguments, args.count == 1 else {
-                return nil
+            return nil
         }
         
-        let newArgs: [FunctionArgument] = [
-            .labeled("from", args[0].expression),
-            ]
+        exp.op = .functionCall(arguments: [
+            .labeled("from", args[0].expression)
+        ])
         
-        exp.exp = .postfix(memberPostfix.exp, .member("addObjects"))
-        exp.op = .functionCall(arguments: newArgs)
-        
-        exp.resolvedType = .void
+        if let optional = postfix.optionalAccess {
+            exp.exp = .postfix(postfix.exp, optional.wrappingOptionalPostfixes(over: .member("addObjects")))
+            
+            exp.resolvedType = optional.wrappingOptionals(in: .void)
+            
+        } else {
+            exp.exp = .postfix(postfix.exp, .member("addObjects"))
+            
+            exp.resolvedType = .void
+        }
         
         return exp
     }

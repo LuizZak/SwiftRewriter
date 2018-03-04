@@ -1076,12 +1076,11 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
     /// Unwraps all levels of .optionalAccess until the first non-optionalAccess
     /// postfix operator is found.
     public var unwrappedOptionalAccess: Postfix {
-        switch self {
-        case let op as OptionalAccessPostfix:
-            return op.unwrappedOptionalAccess
-        default:
-            return self
+        if let asOpt = asOptionalAccess {
+            return asOpt.postfix.unwrappedOptionalAccess
         }
+        
+        return self
     }
     
     public func isEqual(to other: Postfix) -> Bool {
@@ -1108,6 +1107,30 @@ public final class OptionalAccessPostfix: Postfix {
         self.postfix = postfix
     }
     
+    /// Returns an optional version of a given type, wrapped by however many
+    /// optional accesses are chained on this optional access postfix.
+    public func wrappingOptionals(in type: SwiftType) -> SwiftType {
+        let type = SwiftType.optional(type)
+        
+        if let next = postfix.asOptionalAccess {
+            return next.wrappingOptionals(in: type)
+        }
+        
+        return type
+    }
+    
+    /// Returns an optional version of a given postfix operator, wrapped by
+    /// however many optional accesses are chained on this optional access postfix.
+    public func wrappingOptionalPostfixes(over postfix: Postfix) -> Postfix {
+        let op = Postfix.optionalAccess(postfix)
+        
+        if let next = postfix.asOptionalAccess {
+            return next.wrappingOptionalPostfixes(over: op)
+        }
+        
+        return op
+    }
+    
     public override func isEqual(to other: Postfix) -> Bool {
         switch other {
         case let rhs as OptionalAccessPostfix:
@@ -1128,6 +1151,16 @@ public extension Postfix {
     
     public var asOptionalAccess: OptionalAccessPostfix? {
         return self as? OptionalAccessPostfix
+    }
+    
+    /// Returns the first non-optional access postfix operator on this optional
+    /// postfix access chain.
+    public var unwrappingOptionalAccesses: Postfix {
+        if let opt = asOptionalAccess {
+            return opt.unwrappedOptionalAccess
+        }
+        
+        return self
     }
 }
 // Helper casting getter extensions to postfix expression

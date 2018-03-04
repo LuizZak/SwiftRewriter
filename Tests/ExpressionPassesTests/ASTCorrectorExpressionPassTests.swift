@@ -11,6 +11,64 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         sut = ASTCorrectorExpressionPass()
     }
     
+    /// On general arbitrary boolean expressions (mostly binary expressions over
+    /// logical operators, i.e. ||, &&, and unary !)
+    func testCorrectsArbitraryBooleanExpressions() {
+        let lhs = Expression.identifier("a")
+        let rhs = Expression.identifier("b")
+        lhs.resolvedType = .optional(.bool)
+        rhs.resolvedType = .bool
+        
+        let exp = lhs.binary(op: .and, rhs: rhs)
+        
+        assertTransform(
+            // a && b
+            expression: exp,
+            // (a == true) && b
+            into: Expression
+                .binary(lhs: .parens(lhs.binary(op: .equals, rhs: .constant(true))),
+                        op: .and,
+                        rhs: rhs)
+        )
+    }
+    
+    /// Also correct nil-style boolean expressions
+    func testCorrectsArbitraryBooleanExpressionsWithNilChecks() {
+        let lhs = Expression.identifier("a")
+        let rhs = Expression.identifier("b")
+        lhs.resolvedType = .optional(.typeName("a"))
+        rhs.resolvedType = .optional(.typeName("b"))
+        
+        let exp = lhs.binary(op: .and, rhs: rhs)
+        
+        assertTransform(
+            // a && b
+            expression: exp,
+            // (a != nil) && (b != nil)
+            into: Expression
+                .binary(lhs: .parens(lhs.binary(op: .unequals, rhs: .constant(.nil))),
+                        op: .and,
+                        rhs: .parens(rhs.binary(op: .unequals, rhs: .constant(.nil))))
+        )
+    }
+    
+    /// Also correct unary boolean checks
+    func testCorrectsUnaryExpressions() {
+        let lhs = Expression.identifier("a")
+        lhs.resolvedType = .optional(.typeName("a"))
+        
+        let exp = Expression.unary(op: .negate, lhs)
+        
+        assertTransform(
+            // !a
+            expression: exp,
+            // (a == nil)
+            into: .parens(lhs.binary(op: .equals, rhs: .constant(.nil)))
+        )
+    }
+    
+    // MARK: - If statement
+    
     /// On if statements, AST Corrector must try to correct the expression so that
     /// it results in a proper boolean statement.
     func testCorrectsIfStatementBooleanExpressions() {

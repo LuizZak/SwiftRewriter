@@ -6,9 +6,9 @@ import SwiftRewriterLib
 public struct DefaultIntentionPasses: IntentionPassSource {
     public var intentionPasses: [IntentionPass] = [
         FileTypeMergingIntentionPass(),
-        StoredPropertyToNominalTypesIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),
         PropertyMergeIntentionPass(),
+        StoredPropertyToNominalTypesIntentionPass(),
         SwiftifyMethodSignaturesIntentionPass(),
         ImportDirectiveIntentionPass()
     ]

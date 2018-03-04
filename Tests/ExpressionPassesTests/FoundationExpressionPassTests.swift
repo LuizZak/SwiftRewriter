@@ -19,6 +19,21 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         XCTAssertEqual(res.resolvedType, .bool)
     }
     
+    func testIsEqualToStringNullable() {
+        let exp =
+            Expression
+                .identifier("aString").optional()
+                .dot("isEqualToString")
+                .call([.constant("abc")])
+        
+        let res = assertTransform(
+            expression: exp,
+            into: Expression.identifier("aString").binary(op: .equals, rhs: .constant("abc"))
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .bool)
+    }
+    
     func testNSStringWithFormat() {
         var res = assertTransformParsed(
             expression: "[NSString stringWithFormat:@\"%@\", self]",
@@ -52,6 +67,26 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .void)
+    }
+    
+    func testAddObjectsFromArrayNullable() {
+        let exp =
+            Expression
+                .identifier("array")
+                .optional()
+                .dot("addObjectsFromArray")
+                .call([.arrayLiteral([])])
+        
+        let res = assertTransform(
+            expression: exp,
+            into: Expression
+                .identifier("array")
+                .optional()
+                .dot("addObjects")
+                .call(arguments: [.labeled("from", .arrayLiteral([]))])
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .optional(.void))
     }
     
     func testNSArrayArrayCreator() {
@@ -241,5 +276,29 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .bool)
+    }
+    
+    func testRespondsToSelectorNullable() {
+        // Tests conversion of 'respondsToSelector' methods over nullable types
+        
+        let res = assertTransform(
+            expression: Expression
+                .identifier("a")
+                .optional()
+                .dot("respondsToSelector")
+                .call([Expression.identifier("Selector").call([.constant("selector:")])]),
+            into: Expression
+                .identifier("a")
+                .optional()
+                .dot("responds")
+                .call(arguments: [
+                    .labeled("to", Expression
+                        .identifier("Selector").call([
+                            .constant("selector:")
+                            ]))
+                    ])
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .optional(.bool))
     }
 }

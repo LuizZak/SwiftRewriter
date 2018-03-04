@@ -8,12 +8,12 @@ class IntentionPassesTests: XCTestCase {
         
         XCTAssertEqual(intents.count, 6)
         
-        XCTAssert(intents[0] is FileTypeMergingIntentionPass)
-        XCTAssert(intents[1] is StoredPropertyToNominalTypesIntentionPass)
-        XCTAssert(intents[2] is ProtocolNullabilityPropagationToConformersIntentionPass)
-        XCTAssert(intents[3] is PropertyMergeIntentionPass)
-        XCTAssert(intents[4] is SwiftifyMethodSignaturesIntentionPass)
-        XCTAssert(intents[5] is ImportDirectiveIntentionPass)
+        XCTAssert(intents[0] is FileTypeMergingIntentionPass, "\(type(of: intents[0]))")
+        XCTAssert(intents[1] is ProtocolNullabilityPropagationToConformersIntentionPass, "\(type(of: intents[1]))")
+        XCTAssert(intents[2] is PropertyMergeIntentionPass, "\(type(of: intents[2]))")
+        XCTAssert(intents[3] is StoredPropertyToNominalTypesIntentionPass, "\(type(of: intents[3]))")
+        XCTAssert(intents[4] is SwiftifyMethodSignaturesIntentionPass, "\(type(of: intents[4]))")
+        XCTAssert(intents[5] is ImportDirectiveIntentionPass, "\(type(of: intents[5]))")
     }
 }
 
