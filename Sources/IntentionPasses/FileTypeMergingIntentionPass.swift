@@ -40,6 +40,24 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
+        // Move all enum/protocols from .h to .m files, when available
+        for header in headers {
+            let path = (header.sourcePath as NSString).deletingPathExtension
+            guard let impl = implementations.first(where: { ($0.sourcePath as NSString).deletingPathExtension == path }) else {
+                continue
+            }
+            
+            for en in header.enumIntentions {
+                header.removeTypes(where: { $0 === en })
+                impl.addType(en)
+            }
+            
+            for prot in header.protocolIntentions {
+                header.removeTypes(where: { $0 === prot })
+                impl.addType(prot)
+            }
+        }
+        
         // Move all directives from .h to matching .m files
         for header in headers where header.isEmptyExceptDirectives {
             let path = (header.sourcePath as NSString).deletingPathExtension

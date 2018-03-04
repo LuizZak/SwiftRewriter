@@ -123,6 +123,16 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func createProtocol(withName name: String, initializer: (TypeBuilder<ProtocolGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
+        
+        let prot = ProtocolGenerationIntention(typeName: name)
+        
+        innerBuildTypeWithClosure(type: prot, initializer: initializer)
+        
+        return self
+    }
+    
+    @discardableResult
     public func createEnum(withName name: String, rawValue: SwiftType, initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
         let enumIntention = EnumGenerationIntention(typeName: name, rawValueType: rawValue)
         let builder = EnumTypeBuilder(targetEnum: enumIntention)

@@ -403,4 +403,38 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let methods = files[0].classIntentions[0].methods
         XCTAssertEqual(methods.count, 1)
     }
+    
+    func testMovesEnumsToImplementationWhenAvailable() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createEnum(withName: "A", rawValue: .int)
+                }.createFile(named: "A.m")
+                .build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.sourcePath, "A.m")
+        XCTAssertEqual(files.first?.enumIntentions.count, 1)
+    }
+    
+    func testMovesProtocolsToImplementationWhenAvailable() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createProtocol(withName: "A")
+                }.createFile(named: "A.m")
+                .build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.sourcePath, "A.m")
+        XCTAssertEqual(files.first?.protocolIntentions.count, 1)
+    }
 }
