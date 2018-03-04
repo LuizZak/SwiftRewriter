@@ -540,6 +540,18 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .typeName("A"))
     }
+    
+    func testLocalLookupOnDeepNestedStatement() {
+        // { { A.a } }
+        let a = Expression.identifier("a")
+        let stmt = Statement.compound([.compound([.expression(a)])])
+        
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
+            .definingLocal(name: "a", type: .int)
+            .thenAssertDefined(localNamed: "a", type: .int)
+        
+        XCTAssertEqual(a.resolvedType, .int)
+    }
 }
 
 // MARK: - Test Building Helpers
