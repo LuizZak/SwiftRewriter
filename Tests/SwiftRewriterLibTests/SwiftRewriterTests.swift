@@ -480,7 +480,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """, swift: """
             @objc
-            protocol MyProtocol {
+            protocol MyProtocol: NSObjectProtocol {
                 @objc
                 func myMethod(_ object: NSObject?) -> String
             }
@@ -745,7 +745,7 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             @objc
-            protocol MyProtocol {
+            protocol MyProtocol: NSObjectProtocol {
                 @objc
                 func myMethod()
             }
@@ -765,7 +765,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """, swift: """
             @objc
-            protocol MyProtocol {
+            protocol MyProtocol: NSObjectProtocol {
                 @objc
                 func f1()
                 @objc

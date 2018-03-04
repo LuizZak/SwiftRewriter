@@ -33,7 +33,8 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// the unary operator and plug in an inequality to true
     func testCorrectsIfStatementNegatedBooleanExpressions() {
         let exp = Expression.unary(op: .negate, Expression.identifier("a").dot("b"))
-        exp.resolvedType = .optional(.bool)
+        exp.exp.resolvedType = .optional(.bool)
+        exp.resolvedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -68,8 +69,8 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// Negated numeric expressions simply compare as equals to zero.
     func testCorrectsIfStatementWithNegatedNumericExpression() {
         let exp = Expression.unary(op: .negate, .identifier("num"))
-        exp.resolvedType = .bool
         exp.exp.resolvedType = .int
+        exp.resolvedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -77,7 +78,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (!num) { }
             statement: stmt,
             // if (num == 0) { }
-            into: Statement.if(exp.binary(op: .equals, rhs: .constant(0)),
+            into: Statement.if(Expression.identifier("num").binary(op: .equals, rhs: .constant(0)),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()

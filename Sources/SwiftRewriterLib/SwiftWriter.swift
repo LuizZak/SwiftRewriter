@@ -341,10 +341,33 @@ public final class SwiftWriter {
     }
     
     private func outputProtocol(_ prot: ProtocolGenerationIntention, target: RewriterOutputTarget) {
+        // Figure out inheritance clauses
+        var inheritances: [String] = []
+        inheritances.append(contentsOf: prot.protocols.map { p in p.protocolName })
+        
+        // Always inherit form NSObjectProtocol
+        if !inheritances.contains("NSObjectProtocol") {
+            inheritances.insert("NSObjectProtocol", at: 0)
+        }
+        
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         target.outputInlineWithSpace("protocol", style: .keyword)
-        target.outputInlineWithSpace(prot.typeName, style: .typeName)
+        target.outputInline(prot.typeName, style: .typeName)
+        
+        if inheritances.count > 0 {
+            target.outputInline(": ")
+            
+            for (i, inheritance) in inheritances.enumerated() {
+                if i > 0 {
+                    target.outputInline(", ")
+                }
+                
+                target.outputInline(inheritance, style: .typeName)
+            }
+        }
+        
+        target.outputInline(" ")
         target.outputInline("{")
         target.outputLineFeed()
         
