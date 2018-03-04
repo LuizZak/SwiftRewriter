@@ -53,7 +53,53 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testConditionalMemberAccess() {
+        // a.b
+        let exp = Expression.identifier("a").dot("b")
+        
+        exp.asPostfix?.exp.resolvedType = .optional(.typeName("A"))
+        exp.resolvedType = .optional(.typeName("Int"))
+        
+        assertTransform(
+            // { a.b }
+            statement: .expression(exp),
+            // { a?.b }
+            into: .expression(Expression.identifier("a").optional().dot("b"))
+        ); assertNotifiedChange()
+    }
+    
+    func testConditionalMemberAccessNested() {
+        // a.b.c
+        let exp = Expression.identifier("a").dot("b").dot("c")
+        
+        exp.asPostfix?.exp.asPostfix?.exp.resolvedType = .optional(.typeName("B"))
+        exp.asPostfix?.exp.resolvedType = .optional(.typeName("A"))
+        exp.resolvedType = .optional(.typeName("Int"))
+        
+        assertTransform(
+            // { a.b.c }
+            statement: .expression(exp),
+            // { a?.b.c }
+            into: .expression(Expression.identifier("a").optional().dot("b").dot("c"))
+        ); assertNotifiedChange()
+    }
+    
     // Test negative cases where it's not supposed to do anything
+    
+    func testIgnoreImplicitlyUnwrappedMemberAccess() {
+        // a.b
+        let exp = Expression.identifier("a").dot("b")
+        
+        exp.asPostfix?.exp.resolvedType = .implicitUnwrappedOptional(.typeName("A"))
+        exp.resolvedType = .optional(.typeName("Int"))
+        
+        assertTransform(
+            // { a.b }
+            statement: .expression(exp),
+            // { a.b }
+            into: .expression(Expression.identifier("a").dot("b"))
+        ); assertDidNotNotifyChange()
+    }
     
     func testIgnoreNonOptionalValues() {
         let exp = Expression

@@ -534,7 +534,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "closure", type: .block(returnType: .void, parameters: []))
             .resolve()
-            .thenAssertExpression(resolvedAs: .void)
+            .thenAssertExpression(resolvedAs: .optional(.void))
     }
     
     func testEnumCaseLookup() {
@@ -606,6 +606,19 @@ class ExpressionTypeResolverTests: XCTestCase {
         XCTAssertEqual(callbacks[0].asPostfix?.resolvedType, .optional(.void))
         XCTAssertEqual(callbacks[1].asPostfix?.resolvedType, .optional(.void))
         XCTAssertEqual(callbacks[2].asPostfix?.resolvedType, .optional(.void))
+    }
+    
+    func testChainedOptionalAccess() {
+        let exp = Expression.identifier("a").optional().dot("b").dot("c")
+        
+        _=startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                builder.addingProperty(named: "b", type: .typeName("B")).build()
+            }.definingType(named: "B") { builder in
+                builder.addingProperty(named: "c", type: .int).build()
+            }.definingLocal(name: "a", type: .optional(.typeName("A")))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .optional(.int))
     }
 }
 

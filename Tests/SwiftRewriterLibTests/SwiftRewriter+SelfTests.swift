@@ -406,7 +406,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 
                 @objc
                 func f1(_ value: A!) {
-                    // type: Int
+                    // type: Int!
                     (value.prop)
                 }
             }

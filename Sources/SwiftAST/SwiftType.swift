@@ -64,6 +64,18 @@ indirect public enum SwiftType: Equatable {
     
     /// If this type is an `.optional` or `.implicitUnwrappedOptional` type, returns
     /// an unwrapped version of self.
+    /// The return is unwrapped only once.
+    public var unwrapped: SwiftType {
+        switch self {
+        case .optional(let type), .implicitUnwrappedOptional(let type):
+            return type
+        default:
+            return self
+        }
+    }
+    
+    /// If this type is an `.optional` or `.implicitUnwrappedOptional` type, returns
+    /// an unwrapped version of self.
     /// The return is then recursively unwrapped again until a non-optional base
     /// type is reached.
     public var deepUnwrapped: SwiftType {

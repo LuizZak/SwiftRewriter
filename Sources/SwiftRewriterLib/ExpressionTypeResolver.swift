@@ -507,10 +507,10 @@ private class MemberInvocationResolver {
             
             if let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: type) {
                 member.memberDefinition = property
-                exp.resolvedType = property.storage.type
+                exp.resolvedType = property.storage.type.withSameOptionalityAs(innerType)
             } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype, in: type) {
                 member.memberDefinition = field
-                exp.resolvedType = field.storage.type
+                exp.resolvedType = field.storage.type.withSameOptionalityAs(innerType)
             } else {
                 return exp.makeErrorTyped()
             }
@@ -518,12 +518,14 @@ private class MemberInvocationResolver {
         case let optional as OptionalAccessPostfix:
             // Take the result of the (non) optional access and wrap it into an
             // optional result
-            let exp = resolve(postfix: exp, op: optional.postfix)
-            if !exp.isErrorTyped, let type = exp.resolvedType {
-                exp.resolvedType = .optional(type)
+            let resExp = resolve(postfix: exp, op: optional.postfix)
+            
+            // Elevate an implicitly-unwrapped optional access to an optional access
+            if case .implicitUnwrappedOptional(let inner)? = resExp.resolvedType {
+                resExp.resolvedType = .optional(inner)
             }
             
-            return exp
+            return resExp
             
         default:
             break
@@ -590,7 +592,7 @@ private class MemberInvocationResolver {
         }
         // Local closure/global function type
         if let target = postfix.exp.asIdentifier, let type = target.resolvedType, case .block(let ret, _) = type.deepUnwrapped {
-            postfix.resolvedType = ret
+            postfix.resolvedType = ret.withSameOptionalityAs(type)
         }
         
         return postfix
