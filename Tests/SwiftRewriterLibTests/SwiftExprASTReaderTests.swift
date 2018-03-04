@@ -46,23 +46,25 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
     
     func testSubscript() {
-        assert(objcExpr: "aSubscript[1]", readsAs: .postfix(.identifier("aSubscript"), .subscript(.constant(1))))
+        assert(objcExpr: "aSubscript[1]", readsAs: Expression.identifier("aSubscript").sub(.constant(1)))
     }
     
     func testMemberAccess() {
-        assert(objcExpr: "aSubscript.def", readsAs: .postfix(.identifier("aSubscript"), .member("def")))
+        assert(objcExpr: "aValue.member", readsAs: Expression.identifier("aValue").dot("member"))
     }
     
     func testSelectorMessage() {
-        assert(objcExpr: "[a selector]", readsAs: .postfix(.postfix(.identifier("a"), .member("selector")), .functionCall(arguments: [])))
+        assert(objcExpr: "[a selector]", readsAs: Expression.identifier("a").dot("selector").call(arguments: []))
         
         assert(objcExpr: "[a selector:1, 2, 3]",
-               readsAs: .postfix(.postfix(.identifier("a"), .member("selector")),
-                                 .functionCall(arguments: [.unlabeled(.constant(1)), .unlabeled(.constant(2)), .unlabeled(.constant(3))])))
+               readsAs: Expression
+                .identifier("a")
+                .dot("selector").call(arguments: [.unlabeled(.constant(1)), .unlabeled(.constant(2)), .unlabeled(.constant(3))]))
         
         assert(objcExpr: "[a selector:1 c:2, 3]",
-               readsAs: .postfix(.postfix(.identifier("a"), .member("selector")),
-                                 .functionCall(arguments: [.unlabeled(.constant(1)), .labeled("c", .constant(2)), .unlabeled(.constant(3))])))
+               readsAs: Expression
+                .identifier("a")
+                .dot("selector").call(arguments: [.unlabeled(.constant(1)), .labeled("c", .constant(2)), .unlabeled(.constant(3))]))
     }
     
     func testCastExpression() {
@@ -80,23 +82,21 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
     
     func testAssignmentWithMethodCall() {
-        let exp =
-            Expression.postfix(
-                .postfix(
-                    .postfix(
-                        .postfix(.identifier("UIView"), .member("alloc")),
-                        .functionCall(arguments: [])), .member("initWithFrame")), .functionCall(arguments:
+        let exp = Expression
+            .identifier("UIView")
+            .dot("alloc").call()
+            .dot("initWithFrame").call(arguments: [
+                .unlabeled(
+                    Expression
+                        .identifier("CGRectMake")
+                        .call(arguments:
                             [
-                            .unlabeled(
-                                .postfix(.identifier("CGRectMake"),
-                                         .functionCall(arguments:
-                                            [
-                                            .unlabeled(.constant(0)),
-                                            .unlabeled(.identifier("kCPDefaultTimelineRowHeight")),
-                                            .unlabeled(.postfix(.identifier("self"), .member("ganttWidth"))),
-                                            .unlabeled(.postfix(.identifier("self"), .member("ganttHeight")))
-                                            ])))
+                                .unlabeled(.constant(0)),
+                                .unlabeled(.identifier("kCPDefaultTimelineRowHeight")),
+                                .unlabeled(.postfix(.identifier("self"), .member("ganttWidth"))),
+                                .unlabeled(.postfix(.identifier("self"), .member("ganttHeight")))
                             ]))
+                ])
         
         assert(objcExpr: """
             _cellContainerView =
@@ -165,26 +165,38 @@ class SwiftExprASTReaderTests: XCTestCase {
     func testBlockExpression() {
         assert(objcExpr: "^{ thing(); }",
                readsAs: .block(parameters: [], return: .void, body: [
-                .expression(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                .expression(Expression.identifier("thing").call())
                 ]))
         assert(objcExpr: "^NSString*{ return thing(); }",
                readsAs: .block(parameters: [],
                                return: SwiftType.string.asImplicitUnwrapped,
                                body: [
-                                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                                .return(Expression.identifier("thing").call())
                                 ]))
         assert(objcExpr: "^NSString*(NSInteger inty){ return thing(); }",
                readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
                                return: SwiftType.string.asImplicitUnwrapped,
                                body: [
-                                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                                .return(Expression.identifier("thing").call())
                                 ]))
         assert(objcExpr: "^(NSInteger inty){ return thing(); }",
                readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
                                return: .void,
                                body: [
-                                .return(.postfix(.identifier("thing"), .functionCall(arguments: [])))
+                                .return(Expression.identifier("thing").call())
                                 ]))
+    }
+    
+    func testBlockMultiExpression() {
+        assert(objcExpr: "^{ thing(); thing2(); }",
+               readsAs: .block(parameters: [], return: .void, body: [
+                .expression(
+                    Expression.identifier("thing").call()
+                    ),
+                .expression(
+                    Expression.identifier("thing2").call()
+                    )
+                ]))
     }
     
     func testRangeExpression() {

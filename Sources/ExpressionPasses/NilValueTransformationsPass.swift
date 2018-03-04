@@ -33,14 +33,14 @@ public class NilValueTransformationsPass: SyntaxNodeRewriterPass {
             notifyChange()
         }
         
-        return stmt
+        return super.visitExpressions(stmt)
     }
     
     func runAnalysis(on exp: PostfixExpression) -> Expression? {
         guard exp.exp.resolvedType?.isOptional == true else {
             return nil
         }
-        guard let fc = exp.functionCall, fc.arguments.isEmpty else {
+        guard let fc = exp.functionCall else {
             return nil
         }
         

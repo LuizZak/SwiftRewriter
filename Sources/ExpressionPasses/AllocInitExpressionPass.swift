@@ -9,17 +9,17 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
         if let newInit = convertAllocInit(exp: exp) {
             notifyChange()
             
-            return newInit
+            return super.visitExpression(newInit)
         }
         if let newInitParametrized = convertAllocInitWithParameters(exp: exp) {
             notifyChange()
             
-            return newInitParametrized
+            return super.visitExpression(newInitParametrized)
         }
         if let newInit = convertSuperInit(exp: exp) {
             notifyChange()
             
-            return newInit
+            return super.visitExpression(newInit)
         }
         
         return super.visitPostfix(exp)

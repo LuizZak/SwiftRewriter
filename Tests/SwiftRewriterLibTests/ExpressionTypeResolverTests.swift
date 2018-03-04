@@ -563,6 +563,50 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         XCTAssertEqual(a.resolvedType, .int)
     }
+    
+    func testLooksDeepIntoBlocks() {
+        var callbacks: [Expression] = []
+        let makeCallback: () -> Expression = {
+            let callback = Expression.identifier("callback").optional().call()
+            callbacks.append(callback)
+            return callback
+        }
+        
+        let exp = Expression
+            .identifier("self").dot("member").call()
+            .dot("then").call(arguments: [
+                .unlabeled(
+                    .block(parameters: [],
+                           return: .void,
+                           body: [
+                            .expression(makeCallback())
+                        ]))
+                ])
+            .dot("then").call(arguments: [
+                .unlabeled(
+                    .block(parameters: [],
+                           return: .void,
+                           body: [
+                            .expression(makeCallback())
+                        ]))
+                ])
+            .dot("always").call(arguments: [
+                .unlabeled(
+                    .block(parameters: [],
+                           return: .void,
+                           body: [
+                            .expression(makeCallback())
+                        ]))
+                ])
+        
+        _=startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "callback", type: .optional(.block(returnType: .void, parameters: [])))
+            .resolve()
+        
+        XCTAssertEqual(callbacks[0].asPostfix?.resolvedType, .optional(.void))
+        XCTAssertEqual(callbacks[1].asPostfix?.resolvedType, .optional(.void))
+        XCTAssertEqual(callbacks[2].asPostfix?.resolvedType, .optional(.void))
+    }
 }
 
 // MARK: - Test Building Helpers

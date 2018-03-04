@@ -5,7 +5,7 @@ import SwiftRewriterLib
 
 let parser =
     ArgumentParser(
-        usage: "[--colorize] [--print-expression-types] [--print-tracing-history] [--verbose] [files <files...> | path <path> [--exclude-pattern <pattern>] [--skip-confirm]]",
+        usage: "[--colorize] [--print-expression-types] [--print-tracing-history] [--verbose] [files <files...> | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]",
         overview: """
             Converts a set of files, or, if not provided, starts an interactive menu to navigate the file system and choose files to convert.
             """)
@@ -44,7 +44,7 @@ let filesParser =
 let filesArg: PositionalArgument<[String]> =
     filesParser.add(positional: "files", kind: [String].self, usage: "Objective-C file(s) to convert.")
 
-// path <path> [--exclude-pattern <pattern>] [--skip-confirm]
+// path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]
 
 let pathParser =
     parser.add(subparser: "path",
@@ -55,6 +55,8 @@ let excludePatternArg: OptionArgument<String> =
     pathParser.add(option: "--exclude-pattern", kind: String.self, usage: "Provides a regex-like pattern for excluding matches from the initial Objective-C files search. Pattern is applied to the full path.")
 let skipConfirmArg: OptionArgument<Bool> =
     pathParser.add(option: "--skip-confirm", kind: Bool.self, usage: "Skipts asking for confirmation prior to parsing")
+let overwriteArg: OptionArgument<Bool> =
+    pathParser.add(option: "--overwrite", kind: Bool.self, usage: "Overwrites any .swift file with a matching output name on the target path.")
 
 do {
     let arguments = Array(ProcessInfo.processInfo.arguments.dropFirst())
@@ -85,6 +87,7 @@ do {
         
         let skipConfirm = result.get(skipConfirmArg) ?? false
         let excludePattern = result.get(excludePatternArg)
+        let overwrite = result.get(overwriteArg) ?? false
         
         let service = SwiftRewriterServiceImpl.fileDiskService
         
@@ -95,6 +98,7 @@ do {
         interface.searchAndShowConfirm(in: menu,
                                        path: (path as NSString).standardizingPath,
                                        skipConfirm: skipConfirm,
+                                       overwrite: overwrite,
                                        excludePattern: excludePattern)
     } else {
         let output = StdoutWriterOutput(colorize: colorize)

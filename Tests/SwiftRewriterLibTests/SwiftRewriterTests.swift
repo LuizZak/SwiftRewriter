@@ -931,4 +931,69 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testAddNullCoallesceToCompletionBlockInvocationsDeepIntoBlockExpressions() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)finishRequested:(void (^)())completion
+            {
+                [super finishRequested:^{
+                    [_updateLink invalidate];
+             
+                    [_rootController hideContentController:_logViewController
+                                                 animation:ViewControllerAnimationNone
+                                                completion:^(BOOL success) {
+                                                    completion();
+                                                }];
+                }];
+            }
+            @end
+            """, swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func finishRequested(_ completion: (() -> Void)!) {
+                    super.finishRequested { () -> Void in
+                        _updateLink.invalidate()
+                        _rootController.hideContentController(_logViewController, animation: ViewControllerAnimationNone) { (success: Bool) -> Void in
+                            completion?()
+                        }
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testApplyNilCoallesceInDeeplyNestedExpressionsProperly() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)loadDataWithCallback:(void(^)(NSArray *data, NSError *error))callback
+            {
+                [self doThing].then(^(NSArray *results){
+                    callback(results, nil);
+                }).catch(^(NSError *error){
+                    callback(nil, error);
+                }).always(^{
+                    lastSync = CFAbsoluteTimeGetCurrent();
+                });
+            }
+            @end
+            """, swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func loadDataWithCallback(_ callback: ((NSArray!, NSError!) -> Void)!) {
+                    self.doThing().then { (results: NSArray!) -> Void in
+                        callback?(results, nil)
+                    }.catch { (error: NSError!) -> Void in
+                        callback?(nil, error)
+                    }.always { () -> Void in
+                        lastSync = CFAbsoluteTimeGetCurrent()
+                    }
+                }
+            }
+            """)
+    }
 }

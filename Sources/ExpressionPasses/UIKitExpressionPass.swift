@@ -10,7 +10,7 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
         if let exp = enumify(ident: exp.identifier, enumPrefix: "UIControlEvent", swiftEnumName: "UIControlEvents") {
             notifyChange()
             
-            return exp
+            return super.visitExpression(exp)
         }
         
         return super.visitIdentifier(exp)
@@ -84,7 +84,7 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
     /// "UIControlEvents" (Swift)
     /// will return `.postfix(.identifier("UIControlEvents"), .member("touchUpInside"))`.
     func enumify(ident: String, enumPrefix: String, swiftEnumName: String) -> Expression? {
-        if !ident.hasPrefix(enumPrefix) {
+        if !ident.hasPrefix(enumPrefix) || ident == swiftEnumName {
             return nil
         }
         

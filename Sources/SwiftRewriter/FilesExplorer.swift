@@ -135,7 +135,9 @@ class SuggestConversionInterface {
         searchAndShowConfirm(in: menu, path: path)
     }
     
-    func searchAndShowConfirm(in menu: MenuController, path directoryPath: String, skipConfirm: Bool = false, excludePattern: String? = nil) {
+    func searchAndShowConfirm(in menu: MenuController, path directoryPath: String,
+                              skipConfirm: Bool = false, overwrite: Bool = false,
+                              excludePattern: String? = nil) {
         let console = menu.console
         let fileManager = FileManager.default
         
@@ -146,6 +148,8 @@ class SuggestConversionInterface {
             console.printLine("Failed to iterate files from path \(directoryPath)".terminalColorize(.red))
             return
         }
+        
+        var overwriteCount = 0
         
         var objcFiles: [URL] =
             files
@@ -170,8 +174,22 @@ class SuggestConversionInterface {
                     URL(fileURLWithPath: path)
                 }
                 // Check a matching .swift file doesn't already exist for the paths
+                // (if `overwrite` is not on)
                 .filter { (url: URL) -> Bool in
-                    !fileManager.fileExists(atPath: ((url.path as NSString).deletingPathExtension as NSString).appendingPathExtension("swift")!)
+                    let swiftFile =
+                        ((url.path as NSString)
+                            .deletingPathExtension as NSString)
+                            .appendingPathExtension("swift")!
+                    
+                    if !fileManager.fileExists(atPath: swiftFile) {
+                        return true
+                    }
+                    if overwrite {
+                        overwriteCount += 1
+                        return true
+                    }
+                    
+                    return false
                 }
         
         if let excludePattern = excludePattern {
@@ -205,7 +223,15 @@ class SuggestConversionInterface {
         }
         
         if !skipConfirm {
-            let convert = console.readLineWith(prompt: "Found \(objcFiles.count) file(s) to convert. Convert now? y/n")?.lowercased() == "y"
+            let prompt: String
+                
+            if overwriteCount == 0 {
+                prompt = "Found \(objcFiles.count) file(s) to convert. Convert now? y/n"
+            } else {
+                prompt = "Found \(objcFiles.count) file(s) to convert (will overwrite \(overwriteCount) file(s)). Convert now? y/n"
+            }
+            
+            let convert = console.readLineWith(prompt: prompt)?.lowercased() == "y"
             guard convert else {
                 return
             }

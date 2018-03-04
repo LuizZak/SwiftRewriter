@@ -85,6 +85,32 @@ indirect public enum SwiftType: Equatable {
         return .implicitUnwrappedOptional(self)
     }
     
+    /// Returns this type, wrapped in the same optionality depth as another given
+    /// type.
+    ///
+    /// In case the other type is not an optional type, returns this type with
+    /// no optionality laters.
+    public func withSameOptionalityAs(_ type: SwiftType) -> SwiftType {
+        return type.wrappingOther(self.deepUnwrapped)
+    }
+    
+    /// In case this type represents an optional value, returns a new optional type
+    /// with the same optionality as this type, but wrapping over a given type.
+    ///
+    /// If this type is not optional, `type` is returned, instead.
+    ///
+    /// Lookup is deep, and returns the same optionality chain as this type's.
+    private func wrappingOther(_ type: SwiftType) -> SwiftType {
+        switch self {
+        case .optional(let inner):
+            return .optional(inner.wrappingOther(type))
+        case .implicitUnwrappedOptional(let inner):
+            return .implicitUnwrappedOptional(inner.wrappingOther(type))
+        default:
+            return type
+        }
+    }
+    
     case typeName(String)
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)

@@ -14,10 +14,13 @@ class FileOutputImpl: FileOutput {
     init(path: String) {
         if !FileManager.default.fileExists(atPath: path) {
             FileManager.default.createFile(atPath: path, contents: nil)
+        } else {
+            
         }
         
         // Open output stream
         let handle = /* TODO: Deal with this force unwrap! */ FileHandle(forWritingAtPath: path)!
+        handle.truncateFile(atOffset: 0)
         
         self.path = path
         file = FileOutputTarget(fileHandle: handle)
