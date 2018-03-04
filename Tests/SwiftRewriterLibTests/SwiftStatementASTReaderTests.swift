@@ -9,15 +9,15 @@ class SwiftStatementASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
     
     func testIfStatement() {
-        assert(objcExpr: "if(abc) { }",
+        assert(objcStmt: "if(abc) { }",
                readsAs: .if(.identifier("abc"), body: .empty, else: nil)
         )
         
-        assert(objcExpr: "if(abc) { } else { }",
+        assert(objcStmt: "if(abc) { } else { }",
                readsAs: .if(.identifier("abc"), body: .empty, else: .empty)
         )
         
-        assert(objcExpr: "if(abc) { } else if(def) { }",
+        assert(objcStmt: "if(abc) { } else if(def) { }",
                readsAs: .if(.identifier("abc"),
                             body: .empty,
                             else: CompoundStatement(statements: [.if(.identifier("def"), body: .empty, else: nil)]))
@@ -25,10 +25,10 @@ class SwiftStatementASTReaderTests: XCTestCase {
     }
     
     func testWhile() {
-        assert(objcExpr: "while(true) { }",
+        assert(objcStmt: "while(true) { }",
                readsAs: .while(.constant(true), body: .empty)
         )
-        assert(objcExpr: "while(true) { thing(); }",
+        assert(objcStmt: "while(true) { thing(); }",
                readsAs: .while(.constant(true),
                                body: CompoundStatement(statements: [
                                 .expression(
@@ -39,22 +39,22 @@ class SwiftStatementASTReaderTests: XCTestCase {
     }
     
     func testFor() {
-        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++) { }",
+        assert(objcStmt: "for(NSInteger i = 0; i < 10; i++) { }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .openRange, rhs: .constant(10)),
                              body: [])
         )
-        assert(objcExpr: "for(NSInteger i = 0; i <= 10; i++) { }",
+        assert(objcStmt: "for(NSInteger i = 0; i <= 10; i++) { }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .closedRange, rhs: .constant(10)),
                              body: [])
         )
         
-        assert(objcExpr: "for(NSInteger i = 16; i <= 59; i += 1) { }",
+        assert(objcStmt: "for(NSInteger i = 16; i <= 59; i += 1) { }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(16), op: .closedRange, rhs: .constant(59)),
                              body: [])
         )
         
         // Loop variable is being accessed, but not modified, within loop
-        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++) { print(i); }",
+        assert(objcStmt: "for(NSInteger i = 0; i < 10; i++) { print(i); }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .openRange, rhs: .constant(10)),
                              body: [
                                 .expression(.postfix(.identifier("print"),
@@ -71,7 +71,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         // This test method tests for such behavior.
         
         // Loop iterator is being modified within the loop's body
-        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++) { i++; }",
+        assert(objcStmt: "for(NSInteger i = 0; i < 10; i++) { i++; }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -87,7 +87,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Loop iterator is not incrementing the loop variable.
-        assert(objcExpr: "for(NSInteger i = 0; i < 10; i--) { }",
+        assert(objcStmt: "for(NSInteger i = 0; i < 10; i--) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -102,7 +102,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Loop iterator is assigning to different variable than loop variable
-        assert(objcExpr: "for(NSInteger i = 0; i < 10; j++) { }",
+        assert(objcStmt: "for(NSInteger i = 0; i < 10; j++) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -117,7 +117,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Loop iterator is complex (changing two values)
-        assert(objcExpr: "for(NSInteger i = 0; i < 10; i++, j--) { }",
+        assert(objcStmt: "for(NSInteger i = 0; i < 10; i++, j--) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -133,7 +133,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Missing loop start
-        assert(objcExpr: "for(; i < 10; i++) { }",
+        assert(objcStmt: "for(; i < 10; i++) { }",
                readsAs:
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
                        body: [
@@ -144,7 +144,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Missing loop condition
-        assert(objcExpr: "for(NSInteger i = 0;; i++) { }",
+        assert(objcStmt: "for(NSInteger i = 0;; i++) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.constant(true),
@@ -157,7 +157,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Missing loop iterator
-        assert(objcExpr: "for(NSInteger i = 0; i < 10;) { }",
+        assert(objcStmt: "for(NSInteger i = 0; i < 10;) { }",
                readsAs: .compound([
                 .variableDeclaration(identifier: "i", type: .int, initialization: .constant(0)),
                 .while(.binary(lhs: .identifier("i"), op: .lessThan, rhs: .constant(10)),
@@ -166,28 +166,28 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
         
         // Missing all loop components
-        assert(objcExpr: "for(;;) { }",
+        assert(objcStmt: "for(;;) { }",
                readsAs: .while(.constant(true), body: .empty))
     }
     
     func testForIn() {
-        assert(objcExpr: "for(NSString *item in list) { }",
+        assert(objcStmt: "for(NSString *item in list) { }",
                readsAs: .for(.identifier("item"), .identifier("list"), body: .empty)
         )
         
-        assert(objcExpr: "for(NSString *item in @[]) { }",
+        assert(objcStmt: "for(NSString *item in @[]) { }",
                readsAs: .for(.identifier("item"), .arrayLiteral([]), body: .empty)
         )
     }
     
     func testSwitch() {
-        assert(objcExpr: "switch(value) { case 0: break; }",
+        assert(objcStmt: "switch(value) { case 0: break; }",
                readsAs: .switch(.identifier("value"),
                                 cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [.break])],
                                 default: [.break])
         )
         
-        assert(objcExpr: "switch(value) { case 0: break; case 1: break }",
+        assert(objcStmt: "switch(value) { case 0: break; case 1: break }",
                readsAs: .switch(.identifier("value"),
                                 cases: [
                                     SwitchCase(patterns: [.expression(.constant(0))], statements: [.break]),
@@ -196,7 +196,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                 default: [.break])
         )
         
-        assert(objcExpr: "switch(value) { case 0: case 1: break }",
+        assert(objcStmt: "switch(value) { case 0: case 1: break }",
                readsAs: .switch(.identifier("value"),
                                 cases: [
                                     SwitchCase(patterns: [.expression(.constant(0)), .expression(.constant(1))], statements: [.break])
@@ -204,7 +204,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                 default: [.break])
         )
         
-        assert(objcExpr: "switch(value) { case 0: case 1: break; default: stmt(); }",
+        assert(objcStmt: "switch(value) { case 0: case 1: break; default: stmt(); }",
                readsAs: .switch(.identifier("value"),
                                 cases: [
                                     SwitchCase(patterns: [.expression(.constant(0)),
@@ -222,24 +222,36 @@ class SwiftStatementASTReaderTests: XCTestCase {
     }
     
     func testExpressions() {
-        assert(objcExpr: "abc;",
+        assert(objcStmt: "abc;",
                readsAs: .expression(.identifier("abc"))
         )
-        assert(objcExpr: "abc, def;",
+        assert(objcStmt: "abc, def;",
                readsAs: .expressions([.identifier("abc"), .identifier("def")])
         )
     }
     
     func testDeclaration() {
-        assert(objcExpr: "CGFloat value = 1;",
+        assert(objcStmt: "CGFloat value = 1;",
                parseBlock: { try $0.declaration() },
                readsAs: .variableDeclaration(identifier: "value",
                                              type: .typeName("CGFloat"),
                                              initialization: .constant(1)))
     }
     
-    func assert(objcExpr: String, parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() }, readsAs expected: Statement, file: String = #file, line: Int = #line) {
-        let input = ANTLRInputStream(objcExpr)
+    func testBlockDeclaration() {
+        assert(objcStmt: "void(^callback)();",
+               parseBlock: { try $0.declaration() },
+               readsAs: .variableDeclaration(identifier: "callback",
+                                             type: .block(returnType: .void, parameters: []),
+                                             initialization: nil))
+    }
+    
+    func assert(objcStmt: String,
+                parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() },
+                readsAs expected: Statement,
+                file: String = #file,
+                line: Int = #line) {
+        let input = ANTLRInputStream(objcStmt)
         let lxr = ObjectiveCLexer(input)
         tokens = CommonTokenStream(lxr)
         
@@ -264,7 +276,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                 
                 recordFailure(withDescription: """
                     Failed: Expected to read Objective-C expression
-                    \(objcExpr)
+                    \(objcStmt)
                     as
                     \(expStr)
                     but read as

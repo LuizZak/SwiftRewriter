@@ -11,7 +11,9 @@ indirect public enum SwiftType: Equatable {
         }
     }
     
-    public var isNullable: Bool {
+    /// Returns `true` if this type is either an optional or implicitly unwrapped
+    /// optional.
+    public var isOptional: Bool {
         switch self {
         case .optional, .implicitUnwrappedOptional:
             return true

@@ -413,4 +413,28 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testVariableDeclarationCascadesTypeOfInitialExpression() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)f1 {
+                void(^callback)();
+                (callback);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func f1() {
+                    var callback: () -> Void
+                    // type: () -> Void
+                    (callback)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

@@ -475,22 +475,26 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         }
         
         override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> Statement? {
+            guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
+                return .unknown(UnknownASTContext(context: ctx.getText()))
+            }
             guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else {
                 return .unknown(UnknownASTContext(context: ctx.getText()))
             }
             
-            let types = VarDeclarationTypeExtractor.extractAll(from: ctx)
-            
             var declarations: [StatementVariableDeclaration] = []
             
-            for (typeName, initDeclarator) in zip(types, initDeclarators) {
-                guard let type = try? ObjcParser(string: typeName).parseObjcType() else {
+            for initDeclarator in initDeclarators {
+                guard let declarator = initDeclarator.declarator() else {
                     continue
                 }
                 guard let directDeclarator = initDeclarator.declarator()?.directDeclarator() else {
                     continue
                 }
                 guard let identifier = directDeclarator.identifier()?.getText() else {
+                    continue
+                }
+                guard let type = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,declarator: declarator) else {
                     continue
                 }
                 
