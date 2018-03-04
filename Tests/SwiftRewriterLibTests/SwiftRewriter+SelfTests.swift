@@ -417,21 +417,62 @@ class SwiftRewriter_SelfTests: XCTestCase {
     func testVariableDeclarationCascadesTypeOfInitialExpression() throws {
         try assertObjcParse(
             objc: """
+            @interface A: NSObject
+            {
+                void(^ _Nullable callback)();
+            }
+            @end
             @implementation A
             - (void)f1 {
-                void(^callback)();
-                (callback);
+                void(^_callback)() = self->callback;
+                _callback();
             }
             @end
             """,
             swift: """
             @objc
             class A: NSObject {
+                private var callback: (() -> Void)?
+                
                 @objc
                 func f1() {
-                    var callback: () -> Void
-                    // type: () -> Void
-                    (callback)
+                    var _callback = self.callback
+                    // type: Void
+                    _callback()
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testExpressionWithinBracelessIfStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            {
+                void(^ _Nullable callback)();
+            }
+            @end
+            @implementation A
+            - (void)f1 {
+                void(^_callback)() = self->callback;
+                if(_callback != nil)
+                    _callback();
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var callback: (() -> Void)?
+                
+                @objc
+                func f1() {
+                    var _callback = self.callback
+                    if _callback != nil {
+                        // type: Void
+                        _callback()
+                    }
                 }
             }
             """,

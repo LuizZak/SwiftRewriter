@@ -11,6 +11,16 @@ indirect public enum SwiftType: Equatable {
         }
     }
     
+    /// Returns `true` if this type is a block type
+    public var isBlock: Bool {
+        switch self {
+        case .block:
+            return true
+        default:
+            return false
+        }
+    }
+    
     /// Returns `true` if this type is either an optional or implicitly unwrapped
     /// optional.
     public var isOptional: Bool {

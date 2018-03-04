@@ -54,7 +54,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         for decl in stmt.decl {
             let definition = CodeDefinition(name: decl.identifier, type: decl.type, intention: nil)
-            stmt.nearestScope.recordDefinition(definition)
+            stmt.nearestScope?.recordDefinition(definition)
         }
         
         return super.visitVariableDeclarations(stmt)
@@ -406,7 +406,7 @@ extension ExpressionTypeResolver {
         }
         
         // Visit identifier's type from current context
-        if let definition = exp.nearestScope.definition(named: exp.identifier) {
+        if let definition = exp.nearestScope?.definition(named: exp.identifier) {
             return .local(definition)
         }
         
@@ -587,6 +587,10 @@ private class MemberInvocationResolver {
             postfix.resolvedType = method.signature.returnType
             
             return postfix
+        }
+        // Local closure/global function type
+        if let target = postfix.exp.asIdentifier, case .block(let ret, _)? = target.resolvedType {
+            postfix.resolvedType = ret
         }
         
         return postfix

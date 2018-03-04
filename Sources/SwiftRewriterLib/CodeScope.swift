@@ -24,7 +24,7 @@ public extension CodeScopeStatement where Self: Statement {
             return def
         }
         
-        return nearestScope.definition(named: name)
+        return nearestScopeThatIsNotSelf?.definition(named: name)
     }
     
     public func allDefinitions() -> [CodeDefinition] {
@@ -43,17 +43,32 @@ public extension CodeScopeStatement where Self: Statement {
 public extension SyntaxNode {
     /// Finds the nearest definition scope in the hierarchy chain for this syntax
     /// node.
-    public var nearestScope: CodeScope {
+    public var nearestScope: CodeScopeStatement? {
+        var parent: SyntaxNode? = self
+        while let p = parent {
+            if let compound = p as? CompoundStatement {
+                return compound
+            }
+            
+            parent = p.parent
+        }
+        
+        return nil
+    }
+    
+    /// Finds the nearest definition scope in the hierarchy chain for this syntax
+    /// node which is not `self`
+    internal var nearestScopeThatIsNotSelf: CodeScopeStatement? {
         var parent: SyntaxNode? = self
         while let p = parent {
             parent = p.parent
             
-            if let compound = p as? CompoundStatement {
-                return compound.definitions
+            if p !== self, let compound = p as? CompoundStatement {
+                return compound
             }
         }
         
-        return EmptyCodeScope()
+        return nil
     }
 }
 

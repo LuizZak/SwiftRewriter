@@ -426,6 +426,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testMemberLookup() {
+        // a.b
         let exp = Expression.postfix(.identifier("a"), .member("b"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
@@ -441,6 +442,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testMethodLookup() {
+        // a.aMethod(1, secondParameter: 1)
         let exp = Expression.postfix(.postfix(.identifier("a"),
                                               .member("aMethod")),
                                      .functionCall(arguments: [
@@ -466,6 +468,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testStaticMemberLookup() {
+        // A.a
         let asClass = Expression.postfix(.identifier("A"), .member("a"))
         
         let Atype =
@@ -484,6 +487,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .int)
         
         // Test that instance accessing doesn't work
+        // A().a
         let asInstance =
             Expression.postfix(.postfix(.identifier("A"),
                                         .functionCall(arguments: [])),
@@ -496,6 +500,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testOptionalAccess() {
+        // a?.b
         let exp =
             Expression.postfix(.identifier("a"), .optionalAccess(.member("b")))
         
@@ -511,7 +516,18 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .optional(.int))
     }
     
+    func testCallClosureType() {
+        // closure()
+        let exp = Expression.postfix(.identifier("closure"), .functionCall())
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "closure", type: .block(returnType: .void, parameters: []))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .void)
+    }
+    
     func testEnumCaseLookup() {
+        // A.a
         let exp = Expression.postfix(.identifier("A"), .member("a"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
