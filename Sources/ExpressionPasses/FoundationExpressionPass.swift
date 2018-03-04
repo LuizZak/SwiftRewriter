@@ -57,6 +57,8 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
             FunctionArgument.labeled("to", fc.arguments[0].expression)
         ])
         
+        exp.resolvedType = .bool
+        
         return exp
     }
     
@@ -68,7 +70,11 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
                 return nil
         }
         
-        return .binary(lhs: postfix.exp, op: .equals, rhs: args[0].expression)
+        let res = postfix.exp.binary(op: .equals, rhs: args[0].expression)
+        
+        res.resolvedType = .bool
+        
+        return res
     }
     
     /// Converts [NSString stringWithFormat:@"format", <...>] -> String(format: "format", <...>)
@@ -84,6 +90,8 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         
         exp.exp = .identifier("String")
         exp.op = .functionCall(arguments: newArgs)
+        
+        exp.resolvedType = .string
         
         return exp
     }
@@ -102,6 +110,8 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         exp.exp = .postfix(memberPostfix.exp, .member("addObjects"))
         exp.op = .functionCall(arguments: newArgs)
         
+        exp.resolvedType = .void
+        
         return exp
     }
     
@@ -116,7 +126,10 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         
         // Use resolved expression type, if available
         if case .metatype? = classMember.exp.resolvedType {
-            return Expression.postfix(classMember.exp, .member("self"))
+            let exp = Expression.postfix(classMember.exp, .member("self"))
+            exp.resolvedType = classMember.exp.resolvedType
+            
+            return exp
         } else if !classMember.exp.isErrorTyped && classMember.exp.resolvedType != nil {
             return Expression.postfix(.identifier("type"),
                                       .functionCall(arguments: [
@@ -156,7 +169,10 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
              ("NSSet", "set"),
              ("NSMutableSet", "set"),
              ("NSDate", "date"):
-            return .postfix(.identifier(typeName), .functionCall(arguments: []))
+            let res = Expression.identifier(typeName).call()
+            res.resolvedType = .typeName(typeName)
+            
+            return res
         default:
             return nil
         }

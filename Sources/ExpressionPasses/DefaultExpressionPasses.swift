@@ -8,7 +8,8 @@ public class DefaultExpressionPasses: SyntaxNodeRewriterPassSource {
         FoundationExpressionPass.self,
         UIKitExpressionPass.self,
         NilValueTransformationsPass.self,
-        NumberCommonsExpressionPass.self
+        NumberCommonsExpressionPass.self,
+        ASTCorrectorExpressionPass.self
     ]
     
     public init() {

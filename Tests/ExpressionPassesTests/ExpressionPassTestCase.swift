@@ -37,26 +37,40 @@ class ExpressionPassTestCase: XCTestCase {
         }
     }
     
-    func assertTransformParsed(expression original: String, into expected: String, file: String = #file, line: Int = #line) {
+    @discardableResult
+    func assertTransformParsed(expression original: String, into expected: String,
+                               file: String = #file, line: Int = #line) -> Expression {
         notified = false
-        let result = sut.apply(on: parse(original, file: file, line: line), context: makeContext())
+        let exp = parse(original, file: file, line: line)
+        
+        let result = sut.apply(on: exp, context: makeContext())
         
         if expected != result.description {
             recordFailure(withDescription:
                 "Failed to convert: Expected to convert expression\n\n\(expected)\n\nbut received\n\n\(result.description)",
                 inFile: file, atLine: line, expected: true)
         }
+        
+        return result
     }
     
-    func assertTransformParsed(expression original: String, into expected: Expression, file: String = #file, line: Int = #line) {
-        assertTransform(expression: parse(original, file: file, line: line), into: expected, file: file, line: line)
+    @discardableResult
+    func assertTransformParsed(expression original: String, into expected: Expression,
+                               file: String = #file, line: Int = #line) -> Expression {
+        let exp = parse(original, file: file, line: line)
+        return assertTransform(expression: exp, into: expected, file: file, line: line)
     }
     
-    func assertTransformParsed(statement original: String, into expected: Statement, file: String = #file, line: Int = #line) {
-        assertTransform(statement: parseStmt(original, file: file, line: line), into: expected, file: file, line: line)
+    @discardableResult
+    func assertTransformParsed(statement original: String, into expected: Statement,
+                               file: String = #file, line: Int = #line) -> Statement {
+        let stmt = parseStmt(original, file: file, line: line)
+        return assertTransform(statement: stmt, into: expected, file: file, line: line)
     }
     
-    func assertTransform(expression: Expression, into expected: Expression, file: String = #file, line: Int = #line) {
+    @discardableResult
+    func assertTransform(expression: Expression, into expected: Expression,
+                         file: String = #file, line: Int = #line) -> Expression {
         notified = false
         let result = sut.apply(on: expression, context: makeContext())
         
@@ -70,9 +84,13 @@ class ExpressionPassTestCase: XCTestCase {
             recordFailure(withDescription: "Failed to convert: Expected to convert expression into\n\(expString)\nbut received\n\(resString)",
                           inFile: file, atLine: line, expected: true)
         }
+        
+        return result
     }
     
-    func assertTransform(statement: Statement, into expected: Statement, file: String = #file, line: Int = #line) {
+    @discardableResult
+    func assertTransform(statement: Statement, into expected: Statement,
+                         file: String = #file, line: Int = #line) -> Statement {
         notified = false
         let result = sut.apply(on: statement, context: makeContext())
         
@@ -86,6 +104,8 @@ class ExpressionPassTestCase: XCTestCase {
             recordFailure(withDescription: "Failed to convert: Expected to convert statement into\n\(expString)\nbut received\n\(resString)",
                           inFile: file, atLine: line, expected: true)
         }
+        
+        return result
     }
     
     func parse(_ exp: String, file: String = #file, line: Int = #line) -> Expression {

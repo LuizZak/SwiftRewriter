@@ -9,16 +9,18 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testIsEqualToString() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[self.aString isEqualToString:@\"abc\"]",
             into: .binary(lhs: .postfix(.identifier("self"), .member("aString")),
                               op: .equals,
                               rhs: .constant("abc"))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .bool)
     }
     
     func testNSStringWithFormat() {
-        assertTransformParsed(
+        var res = assertTransformParsed(
             expression: "[NSString stringWithFormat:@\"%@\", self]",
             into: .postfix(.identifier("String"),
                                .functionCall(arguments: [
@@ -26,30 +28,40 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                                 .unlabeled(.identifier("self"))
                                 ]))
         ); assertNotifiedChange()
-        assertTransformParsed(
+        
+        XCTAssertEqual(res.resolvedType, .string)
+        
+        res = assertTransformParsed(
             expression: "[NSString stringWithFormat:@\"%@\"]",
             into: .postfix(.identifier("String"),
                                .functionCall(arguments: [
                                 .labeled("format", .constant("%@"))
                                 ]))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .string)
     }
     
     func testAddObjectsFromArray() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[array addObjectsFromArray:@[]]",
             into: .postfix(.postfix(.identifier("array"), .member("addObjects")),
                                .functionCall(arguments: [
                                 .labeled("from", .arrayLiteral([]))
                                 ]))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .void)
     }
     
     func testNSArrayArrayCreator() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[NSArray array]",
             into: .postfix(.identifier("NSArray"), .functionCall(arguments: []))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSArray"))
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSArray array:thing]",
@@ -58,10 +70,13 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testNSMutableArrayArrayCreator() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[NSMutableArray array]",
             into: .postfix(.identifier("NSMutableArray"), .functionCall(arguments: []))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSMutableArray"))
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSMutableArray array:thing]",
@@ -70,10 +85,13 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testNSDictionaryDictionaryCreator() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[NSDictionary dictionary]",
             into: .postfix(.identifier("NSDictionary"), .functionCall(arguments: []))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSDictionary"))
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSDictionary dictionary:thing]",
@@ -82,10 +100,13 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testNSMutableDictionaryDictionaryCreator() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[NSMutableDictionary dictionary]",
             into: .postfix(.identifier("NSMutableDictionary"), .functionCall(arguments: []))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSMutableDictionary"))
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSMutableDictionary dictionary:thing]",
@@ -94,10 +115,13 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testNSSetSetCreator() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[NSSet set]",
             into: .postfix(.identifier("NSSet"), .functionCall(arguments: []))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSSet"))
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSSet set:thing]",
@@ -106,10 +130,13 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testNSMutableSetSetCreator() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[NSMutableSet set]",
             into: .postfix(.identifier("NSMutableSet"), .functionCall(arguments: []))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSMutableSet"))
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSMutableSet set:thing]",
@@ -118,10 +145,13 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testNSDateDateCreator() {
-        assertTransformParsed(
+        let res = assertTransformParsed(
             expression: "[NSDate date]",
             into: .postfix(.identifier("NSDate"), .functionCall(arguments: []))
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSDate"))
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSDate date:thing]",
@@ -131,7 +161,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     
     func testClassTypeMethod() {
         // Uppercase -> <Type>.self
-        assertTransformParsed(
+         assertTransformParsed(
             expression: "[NSObject class]",
             into: .postfix(.identifier("NSObject"), .member("self"))
         ); assertNotifiedChange()
@@ -178,24 +208,23 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         let valueExp = Expression.identifier("LocalName")
         valueExp.resolvedType = .int
         
-        assertTransform(
-            expression: .postfix(.postfix(typeNameExp, .member("class")), .functionCall(arguments: [])),
-            into: .postfix(typeNameExp, .member("self"))
+        let res = assertTransform(
+            expression: typeNameExp.dot("class").call(),
+            into: typeNameExp.dot("self")
         ); assertNotifiedChange()
         
+        XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("aTypeName")))
+        
         assertTransform(
-            expression: .postfix(.postfix(valueExp, .member("class")), .functionCall(arguments: [])),
-            into: .postfix(.identifier("type"),
-                               .functionCall(arguments: [
-                                .labeled("of", valueExp)
-                                ]))
+            expression: valueExp.dot("class").call(),
+            into: Expression.identifier("type").call(arguments: [.labeled("of", valueExp)])
         ); assertNotifiedChange()
     }
     
     func testRespondsToSelector() {
         // Tests conversion of 'respondsToSelector' methods
         
-        assertTransform(
+        let res = assertTransform(
             expression: Expression
                 .identifier("a")
                 .dot("respondsToSelector")
@@ -210,5 +239,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                             ]))
                     ])
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .bool)
     }
 }
