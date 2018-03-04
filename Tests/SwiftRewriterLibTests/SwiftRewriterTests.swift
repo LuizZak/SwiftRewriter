@@ -728,7 +728,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    if self.respondsToSelector(Selector("abc:")) {
+                    if self.responds(to: Selector("abc:")) {
                         thing()
                     }
                 }
