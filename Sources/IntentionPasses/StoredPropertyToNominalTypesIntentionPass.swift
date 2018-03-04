@@ -18,11 +18,15 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
         return "\(StoredPropertyToNominalTypesIntentionPass.self):\(operationsNumber)"
     }
     
+    private var context: IntentionPassContext!
+    
     public init() {
         
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        self.context = context
+        
         let classes = intentionCollection.classIntentions()
         let extensions = intentionCollection.extensionIntentions()
         
@@ -55,6 +59,8 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
                         Moving field from \(TypeFormatter.asString(extension: first)) \
                         to type declaration \(second.typeName)
                         """, relatedIntentions: [first])
+                
+                context.notifyChange()
             } else {
                 first.removeInstanceVariable(named: ivar.name)
                 
@@ -65,6 +71,8 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
                          since matching field name was found on original declaration
                          """, relatedIntentions: [first])
             }
+            
+            context.notifyChange()
             
             operationsNumber += 1
         }
@@ -93,6 +101,8 @@ public class StoredPropertyToNominalTypesIntentionPass: IntentionPass {
                          since matching property name was found on original declaration
                          """, relatedIntentions: [first])
             }
+            
+            context.notifyChange()
             
             operationsNumber += 1
         }

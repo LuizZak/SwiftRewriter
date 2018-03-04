@@ -64,5 +64,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             
             return intent.isEmpty
         }
+        
+        context.notifyChange()
     }
 }

@@ -231,7 +231,7 @@ class SwiftExprASTReaderTests: XCTestCase {
                     \(expStr)
                     but read as
                     \(resStr)
-                    """, inFile: file, atLine: line, expected: false)
+                    """, inFile: file, atLine: line, expected: true)
             }
         } catch {
             recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)

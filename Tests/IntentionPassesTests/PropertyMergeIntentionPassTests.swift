@@ -194,6 +194,59 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         )
     }
     
+    /// If a property is marked as `readonly` in Objective-C, don't synthesize
+    /// a setter during backing-field search
+    func testSynthesizesReadOnlyBackingFieldIfPropertyIsReadOnly() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a",
+                                        type: .int,
+                                        attributes: [.attribute("readonly")])
+                        .createVoidMethod(named: "b") { method in
+                            method.setBody([
+                                .expression(
+                                    .assignment(lhs: .identifier("_a"),
+                                                op: .assign,
+                                                rhs: .constant(1)))
+                                ])
+                    }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 1)
+        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
+        XCTAssertEqual(cls.properties.count, 1)
+        
+        switch cls.properties[0].mode {
+        case .computed(let get):
+            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
+        default:
+            XCTFail("Expected to synthesize getter/setter with backing field.")
+        }
+        
+        XCTAssertEqual(
+            cls.history.summary,
+            """
+            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            that the backing field of A.a: Int was being used inside the class.
+            """
+        )
+        XCTAssertEqual(
+            cls.properties[0].history.summary,
+            """
+            [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
+            that the backing field of A.a: Int was being used inside the class.
+            """
+        )
+    }
+    
+    /// Test that local definitions that have the same name than a potential backing
+    /// field are not confused with an actual backing field access.
     func testDoesntConfusesLocalVariableWithSynthesizedBackingField() {
         let intentions =
             IntentionCollectionBuilder()
@@ -211,8 +264,10 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
+        let context = makeContext(intentions: intentions)
+        context.typeResolverInvoker.resolveAllExpressionTypes(in: intentions, force: true)
         
-        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        sut.apply(on: intentions, context: context)
         
         XCTAssertEqual(cls.instanceVariables.count, 0)
         XCTAssertEqual(cls.properties.count, 1)

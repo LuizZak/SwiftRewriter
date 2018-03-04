@@ -49,9 +49,11 @@ class SwiftOperatorTests: XCTestCase {
     }
     
     private func assert(_ op: SwiftOperator, is category: SwiftOperatorCategory, line: Int = #line) {
-        if op.category != category {
-            recordFailure(withDescription: "Assertion failure: Expected '\(op)' to be '\(category)', received '\(op.category)'",
-                          inFile: #file, atLine: line, expected: false)
+        if op.category == category {
+            return
         }
+        
+        recordFailure(withDescription: "Assertion failure: Expected '\(op)' to be '\(category)', received '\(op.category)'",
+                      inFile: #file, atLine: line, expected: true)
     }
 }

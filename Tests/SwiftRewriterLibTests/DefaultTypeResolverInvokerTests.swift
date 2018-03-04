@@ -27,13 +27,12 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 }
                 .build()
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
-        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
-        let sut = DefaultTypeResolverInvoker(typeResolver: typeResolver)
+        let sut = DefaultTypeResolverInvoker(typeSystem: typeSystem)
         let methodA = intentions.classIntentions()[0].methods[0]
         let methodB = intentions.classIntentions()[1].methods[0]
         
-        sut.resolveExpressionTypes(in: methodA)
-        sut.resolveExpressionTypes(in: methodB)
+        sut.resolveExpressionTypes(in: methodA, force: true)
+        sut.resolveExpressionTypes(in: methodB, force: true)
         
         XCTAssertEqual(
             methodA.functionBody?

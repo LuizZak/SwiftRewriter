@@ -304,7 +304,7 @@ extension DefaultTypeMapperTests {
                 Expected Objective-C type \(type) to convert into '\(expected)', \
                 but received '\(converted)' instead.
                 """,
-                inFile: file, atLine: line, expected: false)
+                inFile: file, atLine: line, expected: true)
         }
     }
     
@@ -318,7 +318,7 @@ extension DefaultTypeMapperTests {
                 Expected Swift type \(type) to convert into '\(expected)', but \
                 received '\(converted)' instead.
                 """,
-                inFile: file, atLine: line, expected: false)
+                inFile: file, atLine: line, expected: true)
         }
     }
     

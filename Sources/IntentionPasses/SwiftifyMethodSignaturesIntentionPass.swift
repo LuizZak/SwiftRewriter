@@ -62,6 +62,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                 
                 operationsNumber += 1
                 
+                context.notifyChange()
+                
                 type.addConstructor(initIntention)
             }
         }
@@ -94,9 +96,14 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count == 0 }) {
             return false
         }
+        if !splitOnWith[0].hasPrefix("init") {
+            return false
+        }
         
         method.signature.parameters[0].label = splitOnWith[1].lowercasedFirstLetter
         method.signature.name = "init"
+        
+        context.notifyChange()
         
         return true
     }
@@ -156,6 +163,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
             
             operationsNumber += 1
             
+            context.notifyChange()
+            
             return true
         }
         
@@ -197,7 +206,8 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         
         operationsNumber += 1
         
+        context.notifyChange()
+        
         return true
     }
 }
-

@@ -17,7 +17,8 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
                         expected: "static const NSString*_Nonnull")
     }
     
-    func assertTypeVisit(objc: String, _ parseBlock: (ObjectiveCParser) throws -> ParserRuleContext, expected: String, file: String = #file, line: Int = #line) {
+    func assertTypeVisit(objc: String, _ parseBlock: (ObjectiveCParser) throws -> ParserRuleContext,
+                         expected: String, file: String = #file, line: Int = #line) {
         let sut = VarDeclarationTypeExtractor()
         
         do {
@@ -41,10 +42,11 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
                     but translated as
                     
                     \(output as Any)
-                    """, inFile: file, atLine: line, expected: false)
+                    """, inFile: file, atLine: line, expected: true)
             }
         } catch {
-            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
+            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
+                          inFile: file, atLine: line, expected: false)
         }
     }
     

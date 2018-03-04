@@ -762,7 +762,7 @@ extension SyntaxNodeIteratorTests {
                 recordFailure(withDescription: """
                     Items at index \(i) of type \(type(of: expect)) and \(type(of: actual)) \
                     cannot be compared.
-                    """, inFile: file, atLine: line, expected: false)
+                    """, inFile: file, atLine: line, expected: true)
                 break
             }
             
@@ -777,7 +777,7 @@ extension SyntaxNodeIteratorTests {
                 \(expString)
                 but found:
                 \(actString)
-                """, inFile: file, atLine: line, expected: false)
+                """, inFile: file, atLine: line, expected: true)
             return
         }
         
@@ -785,7 +785,7 @@ extension SyntaxNodeIteratorTests {
             recordFailure(withDescription: """
                 Mismatched result count: Expected \(expected.count) item(s) but \
                 received \(result.count)
-                """, inFile: file, atLine: line, expected: false)
+                """, inFile: file, atLine: line, expected: true)
         }
     }
     
@@ -810,7 +810,7 @@ extension SyntaxNodeIteratorTests {
                 \(expString)
                 but found:
                 \(actString)
-                """, inFile: file, atLine: line, expected: false)
+                """, inFile: file, atLine: line, expected: true)
             return
         }
         
@@ -818,7 +818,7 @@ extension SyntaxNodeIteratorTests {
             recordFailure(withDescription: """
                 Mismatched result count: Expected \(expected.count) item(s) but \
                 received \(result.count)
-                """, inFile: file, atLine: line, expected: false)
+                """, inFile: file, atLine: line, expected: true)
         }
     }
 }

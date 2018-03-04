@@ -218,6 +218,10 @@ public enum TypeFormatter {
     public static func asString(signature: FunctionSignature, includeName: Bool = false) -> String {
         var result = ""
         
+        if signature.isStatic {
+            result += "static "
+        }
+        
         if includeName {
             result += signature.name
         }

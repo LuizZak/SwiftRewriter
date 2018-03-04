@@ -48,18 +48,20 @@ class MultiFileTestBuilder {
                     Diff:
                     
                     \(expectedSwift.makeDifferenceMarkString(against: output.buffer))
-                    """, inFile: file, atLine: line, expected: false)
+                    """, inFile: file, atLine: line, expected: true)
             }
             
             if !expectsErrors && sut.diagnostics.errors.count != 0 {
-                test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(sut.diagnostics.errors.description)", inFile: file, atLine: line, expected: false)
+                test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(sut.diagnostics.errors.description)",
+                                   inFile: file, atLine: line, expected: true)
             }
             
             var errorsOutput = ""
             sut.diagnostics.printDiagnostics(to: &errorsOutput)
             errors = errorsOutput.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
-            test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
+            test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
+                               inFile: file, atLine: line, expected: true)
         }
         
         return self
@@ -67,7 +69,8 @@ class MultiFileTestBuilder {
     
     func assertErrorStreamIs(_ expected: String, file: String = #file, line: Int = #line) {
         if errors != expected {
-            test.recordFailure(withDescription: "Mismatched errors stream. Expected \(expected) but found \(errors)", inFile: file, atLine: line, expected: false)
+            test.recordFailure(withDescription: "Mismatched errors stream. Expected \(expected) but found \(errors)",
+                               inFile: file, atLine: line, expected: true)
         }
     }
 }

@@ -174,22 +174,34 @@ public class SwiftRewriter {
                                           typeSystem: typeSystem,
                                           typeResolver: typeResolver)
         
-        let typeResolverInvoker = DefaultTypeResolverInvoker(typeResolver: typeResolver)
-        let context =
-            IntentionPassContext(typeSystem: typeSystem,
-                                 typeMapper: typeMapper,
-                                 typeResolverInvoker: typeResolverInvoker)
+        let typeResolverInvoker = DefaultTypeResolverInvoker(typeSystem: typeSystem)
         
         if verbose {
             print("Running intention passes...")
         }
         
         // Make a pre-type resolve before applying passes
-        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection)
+        typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
+        
+        var requiresResolve = false
+        
+        let context =
+            IntentionPassContext(typeSystem: typeSystem,
+                                 typeMapper: typeMapper,
+                                 typeResolverInvoker: typeResolverInvoker,
+                                 notifyChange: { requiresResolve = true })
         
         for pass in intentionPassesSource.intentionPasses {
             autoreleasepool {
+                requiresResolve = false
+                
                 pass.apply(on: intentionCollection, context: context)
+                
+                if requiresResolve {
+                    typeResolverInvoker
+                        .resolveAllExpressionTypes(in: intentionCollection,
+                                                   force: true)
+                }
             }
         }
         

@@ -107,14 +107,17 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
             
             // Assert
             if type != expectedType {
-                recordFailure(withDescription: "Failed: Expected to parse type '\(source)' as '\(expectedType)', but received '\(type)'", inFile: file, atLine: line, expected: false)
+                recordFailure(withDescription: "Failed: Expected to parse type '\(source)' as '\(expectedType)', but received '\(type)'",
+                              inFile: file, atLine: line, expected: true)
             }
             
             if sut.diagnostics.errors.count != 0 {
-                recordFailure(withDescription: "Error(s) parsing type: \(sut.diagnostics.errors.description)", inFile: file, atLine: line, expected: false)
+                recordFailure(withDescription: "Error(s) parsing type: \(sut.diagnostics.errors.description)",
+                              inFile: file, atLine: line, expected: true)
             }
         } catch {
-            recordFailure(withDescription: "Error(s) parsing type: \(error)", inFile: file, atLine: line, expected: false)
+            recordFailure(withDescription: "Error(s) parsing type: \(error)",
+                          inFile: file, atLine: line, expected: true)
         }
     }
 }

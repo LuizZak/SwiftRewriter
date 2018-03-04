@@ -3,7 +3,7 @@ import SwiftAST
 
 /// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
 /// all function bodies found in one go.
-public class SyntaxNodeRewriterPassApplier {
+public final class SyntaxNodeRewriterPassApplier {
     public var passes: [SyntaxNodeRewriterPass]
     public var typeSystem: TypeSystem
     public var typeResolver: ExpressionTypeResolver

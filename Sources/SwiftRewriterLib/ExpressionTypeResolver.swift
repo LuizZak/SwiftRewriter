@@ -1,7 +1,7 @@
 import SwiftAST
 import ObjcParser
 
-public class ExpressionTypeResolver: SyntaxNodeRewriter {
+public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public var typeSystem: TypeSystem
     
     /// Intrinsic variables provided by the type system
@@ -407,8 +407,8 @@ extension ExpressionTypeResolver {
         }
         
         // Check type system for a metatype with the identifier name
-        if let type = typeSystem.knownTypeWithName(exp.identifier) {
-            return .type(named: type.typeName)
+        if typeSystem.typeExists(exp.identifier) {
+            return .type(named: exp.identifier)
         }
         
         return nil

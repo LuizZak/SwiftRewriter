@@ -88,54 +88,21 @@ public class PropertyMergeIntentionPass: IntentionPass {
     }
     
     private func synthesizeBackingFieldIfUsing(in intent: BaseClassIntention, for prop: PropertyGenerationIntention) {
-        enum BodyMatch {
-            case method(MethodGenerationIntention, FunctionBodyIntention)
-            case getter(PropertyGenerationIntention, FunctionBodyIntention)
-            case setter(PropertyGenerationIntention, FunctionBodyIntention)
-            
-            var property: PropertyGenerationIntention? {
-                switch self {
-                case .getter(let prop, _), .setter(let prop, _):
-                    return prop
-                default:
-                    return nil
-                }
-            }
-            
-            var method: MethodGenerationIntention? {
-                switch self {
-                case .method(let method, _):
-                    return method
-                default:
-                    return nil
-                }
-            }
-            
-            var body: CompoundStatement {
-                switch self {
-                case .getter(_, let body),
-                     .setter(_, let body),
-                     .method(_, let body):
-                    return body.body
-                }
-            }
-        }
-        
-        func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [BodyMatch] {
-            var bodies: [BodyMatch] = []
+        func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [FunctionBodyIntention] {
+            var bodies: [FunctionBodyIntention] = []
             
             for method in collectMethods(fromClass: classIntention) {
                 if let body = method.functionBody {
-                    bodies.append(.method(method, body))
+                    bodies.append(body)
                 }
             }
             
             for prop in classIntention.properties {
                 if let getter = prop.getter {
-                    bodies.append(.getter(prop, getter))
+                    bodies.append(getter)
                 }
                 if let setter = prop.setter {
-                    bodies.append(.getter(prop, setter.body))
+                    bodies.append(setter.body)
                 }
             }
             
@@ -146,18 +113,9 @@ public class PropertyMergeIntentionPass: IntentionPass {
         
         let fieldName = "_" + prop.name
         
-        for bodyMatch in matches {
-            // Type-resolve members first so we can later find references for
-            // identifier expressions
-            switch bodyMatch {
-            case .getter(let prop, _), .setter(let prop, _):
-                context.typeResolverInvoker.resolveExpressionTypes(in: prop)
-            case .method(let method, _):
-                context.typeResolverInvoker.resolveExpressionTypes(in: method)
-            }
-            
+        for body in matches {
             let matches =
-                SyntaxNodeSequence(statement: bodyMatch.body, inspectBlocks: true)
+                SyntaxNodeSequence(statement: body.body, inspectBlocks: true)
                     .lazy
                     .compactMap { node in node as? Expression }
                     .contains { exp in
@@ -179,18 +137,31 @@ public class PropertyMergeIntentionPass: IntentionPass {
             if matches {
                 let field = synthesizeBackingField(for: prop, in: intent)
                 
+                let mode: PropertyGenerationIntention.Mode
+                
                 let getter =
-                    FunctionBodyIntention(body: [.return(.postfix(.identifier("self"), .member(fieldName)))])
-                let setter =
                     FunctionBodyIntention(body: [
-                        .expression(
-                            .assignment(lhs: .postfix(.identifier("self"), .member(fieldName)),
-                                        op: .assign,
-                                        rhs: .identifier("newValue"))
-                            )
+                        .return(.postfix(.identifier("self"), .member(fieldName)))
                         ])
                 
-                prop.mode = .property(get: getter, set: .init(valueIdentifier: "newValue", body: setter))
+                // If the property is marked read-only, synthesize the backing
+                // field only.
+                if prop.isReadOnly {
+                    mode = .computed(getter)
+                } else {
+                    let setter =
+                        FunctionBodyIntention(body: [
+                            .expression(
+                                .assignment(lhs: .postfix(.identifier("self"), .member(fieldName)),
+                                            op: .assign,
+                                            rhs: .identifier("newValue"))
+                            )
+                            ])
+                    
+                    mode = .property(get: getter, set: .init(valueIdentifier: "newValue", body: setter))
+                }
+                
+                prop.mode = mode
                 
                 intent.history
                     .recordChange(tag: historyTag,
@@ -200,11 +171,11 @@ public class PropertyMergeIntentionPass: IntentionPass {
                         was being used inside the class.
                         """)
                     .echoRecord(to: prop)
-                    .echoRecord(to: getter)
-                    .echoRecord(to: setter)
                     .echoRecord(to: field)
                 
                 operationsNumber += 1
+                
+                context.notifyChange()
                 
                 return
             }
@@ -270,6 +241,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             operationsNumber += 1
             
+            context.notifyChange()
+            
             return true
             
         // Getter-only on readonly property: Create computed property.
@@ -292,6 +265,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .echoRecord(to: getterBody)
             
             operationsNumber += 1
+            
+            context.notifyChange()
             
             return true
             
@@ -334,6 +309,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             operationsNumber += 1
             
+            context.notifyChange()
+            
             return true
         default:
             return false
@@ -355,6 +332,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                                                 source: property.source)
         
         type.addInstanceVariable(field)
+        
+        context.notifyChange()
         
         return field
     }

@@ -53,24 +53,27 @@ class SingleFileTestBuilder {
                     \(formatCodeForDisplay(output.buffer)
                         .makeDifferenceMarkString(against:
                             formatCodeForDisplay(expectedSwift)))
-                    """, inFile: file, atLine: line, expected: false)
+                    """, inFile: file, atLine: line, expected: true)
             }
             
             if !expectsErrors && sut.diagnostics.errors.count != 0 {
-                test.recordFailure(withDescription: "Unexpected error(s) converting objective-c: \(sut.diagnostics.errors.description)", inFile: file, atLine: line, expected: false)
+                test.recordFailure(withDescription: "Unexpected error(s) converting objective-c: \(sut.diagnostics.errors.description)",
+                                   inFile: file, atLine: line, expected: true)
             }
             
             diagnosticsStream = ""
             sut.diagnostics.printDiagnostics(to: &diagnosticsStream)
             diagnosticsStream = diagnosticsStream.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
-            test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
+            test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
+                               inFile: file, atLine: line, expected: false)
         }
     }
     
     func assertDiagnostics(_ expected: String, file: String = #file, line: Int = #line) {
         if diagnosticsStream != expected {
-            test.recordFailure(withDescription: "Mismatched output stream. Expected \(expected) but found \(diagnosticsStream)", inFile: file, atLine: line, expected: false)
+            test.recordFailure(withDescription: "Mismatched output stream. Expected \(expected) but found \(diagnosticsStream)",
+                               inFile: file, atLine: line, expected: true)
         }
     }
     

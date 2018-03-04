@@ -18,10 +18,21 @@ public struct IntentionPassContext {
     /// entire intention collections.
     public let typeResolverInvoker: TypeResolverInvoker
     
-    public init(typeSystem: TypeSystem, typeMapper: TypeMapper, typeResolverInvoker: TypeResolverInvoker) {
+    /// Must be called by every `IntentionPass` if it makes any sort of change
+    /// to the intentions list, or syntax tree of any member.
+    ///
+    /// Not calling this method may result in stale syntax structure metadata,
+    /// like expression types, being fed to subsequent intention passes.
+    public let notifyChange: () -> Void
+    
+    public init(typeSystem: TypeSystem,
+                typeMapper: TypeMapper,
+                typeResolverInvoker: TypeResolverInvoker,
+                notifyChange: @escaping () -> Void = { }) {
         self.typeSystem = typeSystem
         self.typeMapper = typeMapper
         self.typeResolverInvoker = typeResolverInvoker
+        self.notifyChange = notifyChange
     }
 }
 

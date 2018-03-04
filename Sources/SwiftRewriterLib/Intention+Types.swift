@@ -321,6 +321,11 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         }
     }
     
+    /// Returns `true` if the original Objective-C property is marked with a
+    /// "readonly" attribute.
+    ///
+    /// This is not analogous to `storage.isStatic`, and references only the
+    /// Objective-C property.
     public var isReadOnly: Bool  {
         return attributes.contains { $0.rawString == "readonly" }
     }

@@ -1,3 +1,4 @@
+import Foundation
 import SwiftAST
 
 /// A basic protocol with two front-end methods for requesting resolving of types
@@ -5,36 +6,71 @@ import SwiftAST
 public protocol TypeResolverInvoker {
     /// Invocates the resolution of types for all expressions from all method bodies
     /// contained within an intention collection.
-    func resolveAllExpressionTypes(in intentions: IntentionCollection)
+    func resolveAllExpressionTypes(in intentions: IntentionCollection, force: Bool)
     
     /// Resolves all types within a given method intention.
-    func resolveExpressionTypes(in method: MethodGenerationIntention)
+    func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool)
     
     /// Resolves all types from all expressions that may be contained within
     /// computed accessors of a given property
-    func resolveExpressionTypes(in property: PropertyGenerationIntention)
+    func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool)
 }
 
+
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
-    public var typeResolver: ExpressionTypeResolver
+    public var typeSystem: TypeSystem
     
-    public init(typeResolver: ExpressionTypeResolver) {
+    public init(typeSystem: TypeSystem) {
+        self.typeSystem = typeSystem
+    }
+    
+    public func resolveAllExpressionTypes(in intentions: IntentionCollection, force: Bool) {
+        // Make a file invoker for each file and execute resolving in parallel
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 10
+        
+        for file in intentions.fileIntentions() {
+            let invoker = makeResolverInvoker(forceResolve: force)
+            
+            queue.addOperation {
+                invoker.applyOnFile(file)
+            }
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
+    }
+    
+    public func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool) {
+        let invoker = makeResolverInvoker(forceResolve: force)
+        
+        invoker.applyOnMethod(method)
+    }
+    
+    public func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool) {
+        let invoker = makeResolverInvoker(forceResolve: force)
+        
+        invoker.applyOnProperty(property)
+    }
+    
+    // MARK: - Private methods
+    
+    private func makeResolverInvoker(forceResolve: Bool) -> InternalTypeResolverInvoker {
+        let typeResolver =
+            ExpressionTypeResolver(typeSystem: typeSystem,
+                                   intrinsicVariables: EmptyCodeScope())
+        typeResolver.ignoreResolvedExpressions = !forceResolve
+        
+        return InternalTypeResolverInvoker(typeResolver: typeResolver)
+    }
+}
+
+private class InternalTypeResolverInvoker {
+    var typeResolver: ExpressionTypeResolver
+    
+    init(typeResolver: ExpressionTypeResolver) {
         self.typeResolver = typeResolver
     }
     
-    public func resolveAllExpressionTypes(in intentions: IntentionCollection) {
-        apply(on: intentions)
-    }
-    
-    public func resolveExpressionTypes(in method: MethodGenerationIntention) {
-        applyOnMethod(method)
-    }
-    
-    public func resolveExpressionTypes(in property: PropertyGenerationIntention) {
-        applyOnProperty(property)
-    }
-    
-    // MARK: - Private method
     internal func apply(on intentions: IntentionCollection) {
         let files = intentions.fileIntentions()
         

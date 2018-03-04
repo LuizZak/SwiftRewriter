@@ -35,11 +35,10 @@ public class IntentionCollectionBuilder {
     public func build(typeChecked: Bool = false) -> IntentionCollection {
         if typeChecked {
             let system = IntentionCollectionTypeSystem(intentions: intentions)
-            let resolver = ExpressionTypeResolver(typeSystem: system)
             
-            let invoker = DefaultTypeResolverInvoker(typeResolver: resolver)
+            let invoker = DefaultTypeResolverInvoker(typeSystem: system)
             
-            invoker.resolveAllExpressionTypes(in: intentions)
+            invoker.resolveAllExpressionTypes(in: intentions, force: true)
         }
         
         return intentions

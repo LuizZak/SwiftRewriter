@@ -193,7 +193,7 @@ extension ObjcLexer_TokenizerTests {
             
             if actual.type != expected {
                 recordFailure(withDescription: "Expected token type: \(expected) received token type: \(actual.type) at loc. \(actual.location)",
-                    inFile: file, atLine: line, expected: false)
+                              inFile: file, atLine: line, expected: true)
             }
         }
     }
@@ -213,7 +213,7 @@ extension ObjcLexer_TokenizerTests {
         
         if lexer.token() != expected {
             recordFailure(withDescription: "Expected token: \(expected) received token: \(lexer.token())",
-                          inFile: file, atLine: line, expected: false)
+                          inFile: file, atLine: line, expected: true)
         }
     }
     

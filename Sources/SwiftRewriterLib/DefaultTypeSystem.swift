@@ -18,6 +18,10 @@ public class DefaultTypeSystem: TypeSystem {
         typesByName[type.typeName] = type
     }
     
+    public func typeExists(_ name: String) -> Bool {
+        return typesByName.keys.contains(name)
+    }
+    
     public func knownTypeWithName(_ name: String) -> KnownType? {
         return typesByName[name]
     }
@@ -246,6 +250,20 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         return super.isClassInstanceType(typeName)
+    }
+    
+    public override func typeExists(_ name: String) -> Bool {
+        if super.typeExists(name) {
+            return true
+        }
+        
+        for file in intentions.fileIntentions() {
+            if file.typeIntentions.contains(where: { $0.typeName == name }) {
+                return true
+            }
+        }
+        
+        return false
     }
     
     public override func knownTypeWithName(_ name: String) -> KnownType? {

@@ -146,6 +146,18 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .converts(toInitializer: [ParameterSignature(label: "objectList", name: "objects", type: .array(.typeName("Object")))])
     }
     
+    func testDontConvertNonInitMethods() {
+        let sut = SwiftifyMethodSignaturesIntentionPass()
+        
+        testThat(typeName: "Squeak", sut: sut)
+            .method(withObjcSignature: "- (Squeak*)getSqueakWithID:(NSInteger)id;")
+            .converts(to: FunctionSignature(name: "getSqueakWithID",
+                                            parameters: [ParameterSignature(label: "_", name: "id", type: .int)],
+                                            returnType: .implicitUnwrappedOptional(.typeName("Squeak")),
+                                            isStatic: false)
+        )
+    }
+    
     /// Tests automatic swiftification of `[NSTypeName typeNameWithThing:<x>]`-style
     /// initializers.
     /// This helps test mimicing of Swift's importer behavior.
@@ -226,8 +238,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
     func method(withSignature signature: FunctionSignature) -> Asserter {
         type.addMethod(MethodGenerationIntention(signature: signature))
         
-        let resolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
-        let invoker = DefaultTypeResolverInvoker(typeResolver: resolver)
+        let invoker = DefaultTypeResolverInvoker(typeSystem: DefaultTypeSystem())
         let ctx = TypeConstructionContext(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
         let mapper = DefaultTypeMapper(context: ctx)
         let context =
@@ -291,7 +302,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                     Found these methods instead:
                     \(dumpType())
                     """
-                    , inFile: file, atLine: line, expected: false)
+                    , inFile: file, atLine: line, expected: true)
                 return
             }
             guard ctor.parameters != parameters else {
@@ -302,7 +313,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 Expected to generate constructor with parameters \(parameters),
                 but converted to \(ctor.parameters)
                 """
-                , inFile: file, atLine: line, expected: false)
+                , inFile: file, atLine: line, expected: true)
         }
         
         func converts(toInitializer expected: String, file: String = #file, line: Int = #line) {
@@ -313,7 +324,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                     Found these methods instead:
                     \(dumpType())
                     """
-                    , inFile: file, atLine: line, expected: false)
+                    , inFile: file, atLine: line, expected: true)
                 return
             }
             
@@ -327,19 +338,30 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 Expected to generate constructor with parameters \(expected),
                 but converted to \(result)
                 """
-                , inFile: file, atLine: line, expected: false)
+                , inFile: file, atLine: line, expected: true)
         }
         
         func converts(to signature: FunctionSignature, file: String = #file, line: Int = #line) {
-            guard type.methods.first?.signature != signature else {
+            guard let method = type.methods.first else {
+                testCase.recordFailure(withDescription: """
+                    Failed to generate method: No methods where found on \
+                    target type.
+                    Found these methods instead:
+                    \(dumpType())
+                    """
+                    , inFile: file, atLine: line, expected: true)
+                return
+            }
+            
+            guard method.signature != signature else {
                 return
             }
             
             testCase.recordFailure(withDescription: """
                 Expected signature \(TypeFormatter.asString(signature: signature, includeName: true)), \
-                but converted to \(TypeFormatter.asString(signature: type.methods[0].signature, includeName: true))
+                but converted to \(TypeFormatter.asString(signature: method.signature, includeName: true))
                 """
-                , inFile: file, atLine: line, expected: false)
+                , inFile: file, atLine: line, expected: true)
         }
         
         func converts(to signature: String, file: String = #file, line: Int = #line) {
@@ -350,7 +372,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                     Found these methods instead:
                     \(dumpType())
                     """
-                    , inFile: file, atLine: line, expected: false)
+                    , inFile: file, atLine: line, expected: true)
                 return
             }
             
@@ -362,14 +384,30 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
             testCase.recordFailure(withDescription: """
                 Expected signature \(signature), but converted to \(converted)
                 """
-                , inFile: file, atLine: line, expected: false)
+                , inFile: file, atLine: line, expected: true)
         }
         
         func dumpType() -> String {
-            return
-                type.methods
-                    .map { "Method: \(TypeFormatter.asString(signature: $0.signature, includeName: true))" }
-                    .joined(separator: "\n")
+            var dump = ""
+            
+            if type.constructors.count > 0 {
+                dump += "Initializers:\n"
+                
+                for ctor in type.constructors {
+                    dump += "init\(TypeFormatter.asString(parameters: ctor.parameters))\n"
+                }
+            }
+            
+            if type.methods.count > 0 {
+                dump += "Methods:\n"
+                
+                for method in type.methods {
+                    dump += "Method: \(TypeFormatter.asString(signature: method.signature, includeName: true))"
+                    dump += "\n"
+                }
+            }
+            
+            return dump
         }
     }
 }

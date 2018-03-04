@@ -150,7 +150,7 @@ extension ExpressionTypeResolverTests {
                 testCase.recordFailure(withDescription: """
                     Failed to find expected local definition '\(name)' on scope.
                     """,
-                    inFile: file, atLine: line, expected: false)
+                    inFile: file, atLine: line, expected: true)
                 
                 return self
             }
@@ -160,7 +160,7 @@ extension ExpressionTypeResolverTests {
                     Definition '\(name)' has different storage \(defined.storage) than \
                     expected storage \(storage)
                     """,
-                    inFile: file, atLine: line, expected: false)
+                    inFile: file, atLine: line, expected: true)
             }
             
             return self
@@ -221,7 +221,7 @@ extension ExpressionTypeResolverTests {
                         Expected expression to resolve as \(type?.description ?? "nil"), \
                         but received \(expression.resolvedType?.description ?? "nil")"
                         """,
-                        inFile: file, atLine: line, expected: false)
+                        inFile: file, atLine: line, expected: true)
                 }
                 
                 return self

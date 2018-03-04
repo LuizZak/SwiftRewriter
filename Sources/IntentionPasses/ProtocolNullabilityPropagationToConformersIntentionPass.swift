@@ -34,5 +34,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                 mergeMethodSignatures(from: prot, into: cls)
             }
         }
+        
+        context.notifyChange()
     }
 }
