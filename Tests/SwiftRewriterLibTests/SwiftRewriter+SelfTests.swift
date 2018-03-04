@@ -437,7 +437,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func f1() {
                     var _callback = self.callback
-                    // type: Void
+                    // type: Void?
                     _callback?()
                 }
             }
@@ -469,10 +469,8 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func f1() {
                     var _callback = self.callback
-                    if _callback != nil {
-                        // type: Void
-                        _callback?()
-                    }
+                    // type: Void?
+                    _callback?()
                 }
             }
             """,

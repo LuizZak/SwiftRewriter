@@ -21,20 +21,27 @@ import SwiftRewriterLib
 public class NilValueTransformationsPass: SyntaxNodeRewriterPass {
     public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
         for (i, exp) in stmt.expressions.enumerated() {
-            if let postfix = exp.asPostfix {
-                stmt.expressions[i] = runAnalysis(on: postfix)
+            guard let postfix = exp.asPostfix else {
+                continue
             }
+            guard let transformed = runAnalysis(on: postfix) else {
+                continue
+            }
+            
+            stmt.expressions[i] = transformed
+            
+            notifyChange()
         }
         
         return stmt
     }
     
-    func runAnalysis(on exp: PostfixExpression) -> Expression {
+    func runAnalysis(on exp: PostfixExpression) -> Expression? {
         guard exp.exp.resolvedType?.isOptional == true else {
-            return exp
+            return nil
         }
         guard let fc = exp.functionCall, fc.arguments.isEmpty else {
-            return exp
+            return nil
         }
         
         exp.op = .optionalAccess(fc)

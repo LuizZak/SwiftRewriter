@@ -6,10 +6,40 @@ import SwiftRewriterLib
 import SwiftAST
 
 class ExpressionPassTestCase: XCTestCase {
+    var notified: Bool = false
     var sut: SyntaxNodeRewriterPass!
     
+    override func setUp() {
+        super.setUp()
+        
+        notified = false
+    }
+    
+    func assertNotifiedChange(file: String = #file, line: Int = #line) {
+        if !notified {
+            recordFailure(withDescription:
+                """
+                Expected syntax rewriter \(type(of: sut!)) to notify change via \
+                \(\SyntaxNodeRewriterPassContext.notifyChangedTree), but it did not.
+                """,
+                inFile: file, atLine: line, expected: true)
+        }
+    }
+    
+    func assertDidNotNotifyChange(file: String = #file, line: Int = #line) {
+        if notified {
+            recordFailure(withDescription:
+                """
+                Expected syntax rewriter \(type(of: sut!)) to not notify any changes \
+                via \(\SyntaxNodeRewriterPassContext.notifyChangedTree), but it did.
+                """,
+                inFile: file, atLine: line, expected: true)
+        }
+    }
+    
     func assertTransformParsed(expression original: String, into expected: String, file: String = #file, line: Int = #line) {
-        let result = parse(original).accept(sut)
+        notified = false
+        let result = sut.apply(on: parse(original, file: file, line: line), context: makeContext())
         
         if expected != result.description {
             recordFailure(withDescription:
@@ -19,11 +49,16 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     func assertTransformParsed(expression original: String, into expected: Expression, file: String = #file, line: Int = #line) {
-        assertTransform(expression: parse(original), into: expected, file: file, line: line)
+        assertTransform(expression: parse(original, file: file, line: line), into: expected, file: file, line: line)
     }
     
-    func assertTransform(expression original: Expression, into expected: Expression, file: String = #file, line: Int = #line) {
-        let result = original.accept(sut)
+    func assertTransformParsed(statement original: String, into expected: Statement, file: String = #file, line: Int = #line) {
+        assertTransform(statement: parseStmt(original, file: file, line: line), into: expected, file: file, line: line)
+    }
+    
+    func assertTransform(expression: Expression, into expected: Expression, file: String = #file, line: Int = #line) {
+        notified = false
+        let result = sut.apply(on: expression, context: makeContext())
         
         if expected != result {
             var expString = ""
@@ -38,7 +73,8 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     func assertTransform(statement: Statement, into expected: Statement, file: String = #file, line: Int = #line) {
-        let result = statement.accept(sut)
+        notified = false
+        let result = sut.apply(on: statement, context: makeContext())
         
         if expected != result {
             var expString = ""
@@ -52,15 +88,50 @@ class ExpressionPassTestCase: XCTestCase {
         }
     }
     
-    func parse(_ exp: String) -> Expression {
+    func parse(_ exp: String, file: String = #file, line: Int = #line) -> Expression {
         let (stream, parser) = objcParser(for: exp)
         defer {
             _=stream // Keep alive!
         }
+        let diag = DiagnosticsErrorListener(source: StringCodeSource(source: exp),
+                                            diagnostics: Diagnostics())
+        parser.addErrorListener(diag)
+        
         let expression = try! parser.expression()
+        
+        if !diag.diagnostics.diagnostics.isEmpty {
+            let summary = diag.diagnostics.diagnosticsSummary()
+            recordFailure(withDescription:
+                "Unexpected diagnostics while parsing expression:\n\(summary)",
+                inFile: file, atLine: line, expected: true)
+        }
         
         let reader = SwiftExprASTReader(typeMapper: DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
         return expression.accept(reader)!
+    }
+    
+    func parseStmt(_ stmtString: String, file: String = #file, line: Int = #line) -> Statement {
+        let (stream, parser) = objcParser(for: stmtString)
+        defer {
+            _=stream // Keep alive!
+        }
+        let diag = DiagnosticsErrorListener(source: StringCodeSource(source: stmtString),
+                                            diagnostics: Diagnostics())
+        parser.addErrorListener(diag)
+        
+        let stmt = try! parser.statement()
+        
+        if !diag.diagnostics.diagnostics.isEmpty {
+            let summary = diag.diagnostics.diagnosticsSummary()
+            recordFailure(withDescription:
+                "Unexpected diagnostics while parsing statement:\n\(summary)",
+                inFile: file, atLine: line, expected: true)
+        }
+        
+        let expReader = SwiftExprASTReader(typeMapper: DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
+        let reader = SwiftStatementASTReader(expressionReader: expReader)
+        
+        return stmt.accept(reader)!
     }
     
     func objcParser(for objc: String) -> (CommonTokenStream, ObjectiveCParser) {
@@ -74,6 +145,11 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     func makeContext() -> SyntaxNodeRewriterPassContext {
-        return SyntaxNodeRewriterPassContext(typeSystem: DefaultTypeSystem())
+        let block: () -> Void = { [weak self] in
+            self?.notified = true
+        }
+        
+        return SyntaxNodeRewriterPassContext(typeSystem: DefaultTypeSystem(),
+                                             notifyChangedTree: block)
     }
 }

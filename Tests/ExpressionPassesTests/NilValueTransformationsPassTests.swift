@@ -19,7 +19,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             statement: .expression(exp),
             // { a?() }
             into: .expression(.postfix(.identifier("a"), .optionalAccess(.functionCall())))
-        )
+        ); assertNotifiedChange()
     }
     
     func testTopLevelBlockInvocationOnImplicitlyUnwrapped() {
@@ -33,7 +33,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             statement: .expression(exp),
             // { a?() }
             into: .expression(.postfix(.identifier("a"), .optionalAccess(.functionCall())))
-        )
+        ); assertNotifiedChange()
     }
     
     func testNestedMemberOptionalMethodInvocation() {
@@ -48,7 +48,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             statement: .expression(exp),
             // { a.b?() }
             into: .expression(.postfix(.postfix(.identifier("a"), .member("b")), .optionalAccess(.functionCall())))
-        )
+        ); assertNotifiedChange()
     }
     
     // Test negative cases where it's not supposed to do anything
@@ -63,7 +63,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             statement: .expression(exp),
             // { a() }
             into: .expression(.postfix(.identifier("a"), .functionCall()))
-        )
+        ); assertDidNotNotifyChange()
     }
     
     func testDontModifyExpressionsInsideOtherExpressions() {
@@ -86,6 +86,6 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
                     )
                 )
             )
-        )
+        ); assertDidNotNotifyChange()
     }
 }

@@ -13,6 +13,8 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
             expression: "[[ClassName alloc] init]",
             into: .postfix(.identifier("ClassName"), .functionCall(arguments: []))
         )
+        
+        assertNotifiedChange()
     }
     
     func testInitWith() {
@@ -20,6 +22,8 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
             expression: "[[ClassName alloc] initWithName:@\"abc\"]",
             into: .postfix(.identifier("ClassName"), .functionCall(arguments: [.labeled("name", .constant("abc"))]))
         )
+        
+        assertNotifiedChange()
     }
     
     func testInitWithCompoundName() {
@@ -30,12 +34,16 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                                                          .labeled("secondName", .constant("Doe"))]))
         )
         
+        assertNotifiedChange()
+        
         assertTransformParsed(
             expression: "[[ClassName alloc] initWith:@\"John\" secondName:@\"Doe\"]",
             into: .postfix(.identifier("ClassName"),
                                .functionCall(arguments: [.unlabeled(.constant("John")),
                                                          .labeled("secondName", .constant("Doe"))]))
         )
+        
+        assertNotifiedChange()
     }
     
     func testSuperInitWith() {
@@ -48,12 +56,16 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                                 ]))
         )
         
+        assertNotifiedChange()
+        
         // Test we leave simple super.init() calls alone
         assertTransformParsed(
             expression: "[super init]",
             into: .postfix(.postfix(.identifier("super"), .member("init")),
                                .functionCall(arguments: []))
         )
+        
+        assertDidNotNotifyChange()
     }
     
     /// Tests `[[self alloc] init]` where `self` is a metatype results in a
@@ -72,6 +84,8 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                                         .member("init")),
                                .functionCall(arguments: []))
         )
+        
+        assertNotifiedChange()
     }
     
     /// Tests `[[[self alloc] initWithThing:[...]]` where `self` is a metatype
@@ -93,5 +107,7 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
                                         .member("init")),
                                .functionCall(arguments: [.labeled("thing", .constant(1))]))
         )
+        
+        assertNotifiedChange()
     }
 }

@@ -14,8 +14,58 @@ public class ASTSimplifier: SyntaxNodeRewriterPass {
             stmt.definitions.recordDefinition(def)
         }
         
-        context.notifyChangedTree()
+        notifyChange()
         
-        return stmt
+        return super.visitCompound(stmt)
+    }
+    
+    /// Simplify check before invoking nullable closure
+    public override func visitIf(_ stmt: IfStatement) -> Statement {
+        nullCheck:
+        if stmt.elseBody == nil, let nullCheckMember = stmt.nullCheckMember, nullCheckMember.asIdentifier != nil {
+            guard stmt.body.statements.count == 1 else {
+                break nullCheck
+            }
+            let body = stmt.body.statements[0]
+            guard body.asExpressions?.expressions.count == 1, let exp = body.asExpressions?.expressions.first else {
+                break nullCheck
+            }
+            guard let postfix = exp.asPostfix, postfix.exp == nullCheckMember else {
+                break nullCheck
+            }
+            guard postfix.functionCall != nil else {
+                break nullCheck
+            }
+            
+            let statement =
+                Statement
+                    .expression(
+                        PostfixExpression(exp: postfix.exp, op: .optionalAccess(postfix.op))
+            )
+            
+            notifyChange()
+            
+            return super.visitStatement(statement)
+        }
+        
+        return super.visitIf(stmt)
+    }
+}
+
+extension IfStatement {
+    var isNullCheck: Bool {
+        guard let binary = exp.asBinary else {
+            return false
+        }
+        
+        return binary.op == .unequals && binary.rhs == .constant(.nil)
+    }
+    
+    var nullCheckMember: Expression? {
+        guard isNullCheck, let binary = exp.asBinary else {
+            return nil
+        }
+        
+        return binary.rhs == .constant(.nil) ? binary.lhs : binary.rhs
     }
 }

@@ -11,26 +11,26 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             expression: "[UIColor orangeColor]",
             into: .postfix(.identifier("UIColor"), .member("orange"))
-        )
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[UIColor redColor]",
             into: .postfix(.identifier("UIColor"), .member("red"))
-        )
+        ); assertNotifiedChange()
         
         // Test unrecognized cases are left alone
         assertTransformParsed(
             expression: "UIColor->redColor",
             into: "UIColor.redColor"
-        )
+        ); assertDidNotNotifyChange()
         assertTransformParsed(
             expression: "[UIColor redColor:@1]",
             into: "UIColor.redColor(1)"
-        )
+        ); assertDidNotNotifyChange()
         assertTransformParsed(
             expression: "[UIColor Color:@1]",
             into: "UIColor.Color(1)"
-        )
+        ); assertDidNotNotifyChange()
     }
     
     func testAddTarget() {
@@ -46,6 +46,6 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                                                                 ]))),
                                 .labeled("for", .postfix(.identifier("UIControlEvents"), .member("touchUpInside")))
                                 ]))
-        )
+        ); assertNotifiedChange()
     }
 }

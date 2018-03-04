@@ -377,22 +377,22 @@ public class ObjcParser {
     }
 }
 
-private class DiagnosticsErrorListener: BaseErrorListener {
-    let source: Source
-    let diagnostics: Diagnostics
+public class DiagnosticsErrorListener: BaseErrorListener {
+    public let source: Source
+    public let diagnostics: Diagnostics
     
-    init(source: Source, diagnostics: Diagnostics) {
+    public init(source: Source, diagnostics: Diagnostics) {
         self.source = source
         self.diagnostics = diagnostics
         super.init()
     }
     
-    override func syntaxError<T>(_ recognizer: Recognizer<T>,
-                                 _ offendingSymbol: AnyObject?,
-                                 _ line: Int,
-                                 _ charPositionInLine: Int,
-                                 _ msg: String,
-                                 _ e: AnyObject?) where T : ATNSimulator {
+    public override func syntaxError<T>(_ recognizer: Recognizer<T>,
+                                        _ offendingSymbol: AnyObject?,
+                                        _ line: Int,
+                                        _ charPositionInLine: Int,
+                                        _ msg: String,
+                                        _ e: AnyObject?) where T : ATNSimulator {
         diagnostics.error(msg, location: .invalid)
     }
 }

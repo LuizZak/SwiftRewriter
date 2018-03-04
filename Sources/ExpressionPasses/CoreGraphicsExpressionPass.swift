@@ -32,7 +32,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             exp.exp = .identifier("CGRect")
             exp.op = .functionCall(arguments: newArgs)
             
-            context.notifyChangedTree()
+            notifyChange()
             
         // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>) -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
         case (.identifier("UIEdgeInsetsMake"), let functionCall as FunctionCallPostfix)
@@ -59,7 +59,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             exp.exp = .identifier("UIEdgeInsets")
             exp.op = .functionCall(arguments: newArgs)
             
-            context.notifyChangedTree()
+            notifyChange()
             
         // CGRectGetWidth(<exp>) -> <exp>.width
         case (.identifier("CGRectGetWidth"), _):
@@ -98,7 +98,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .labeled("y", args[1].expression)
                 ])
             
-            context.notifyChangedTree()
+            notifyChange()
             
         // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
         case (.identifier("CGSizeMake"), let functionCall as FunctionCallPostfix)
@@ -111,7 +111,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .labeled("height", args[1].expression)
                 ])
             
-            context.notifyChangedTree()
+            notifyChange()
             
         // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
         case (.identifier("CGRectIntersection"), let functionCall as FunctionCallPostfix)
@@ -123,7 +123,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .unlabeled(args[1].expression)
                 ])
             
-            context.notifyChangedTree()
+            notifyChange()
             
         // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
         case (.identifier("CGRectIntersectsRect"), let functionCall as FunctionCallPostfix)
@@ -135,7 +135,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .unlabeled(args[1].expression)
                 ])
             
-            context.notifyChangedTree()
+            notifyChange()
             
         // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
         case (.identifier("CGRectContainsRect"), let functionCall as FunctionCallPostfix)
@@ -147,7 +147,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .unlabeled(args[1].expression)
                 ])
             
-            context.notifyChangedTree()
+            notifyChange()
             
         // CGRectContainsPoint(<r1>, <r2>) -> <r1>.contains(<r2>)
         case (.identifier("CGRectContainsPoint"), let functionCall as FunctionCallPostfix)
@@ -159,7 +159,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .unlabeled(args[1].expression)
                 ])
             
-            context.notifyChangedTree()
+            notifyChange()
             
         default:
             break
@@ -177,7 +177,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             exp.exp = functionCall.arguments[0].expression.accept(self)
             exp.op = .member(field)
             
-            context.notifyChangedTree()
+            notifyChange()
         default:
             exp.exp = exp.exp.accept(self)
         }

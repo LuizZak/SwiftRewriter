@@ -7,17 +7,17 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let newInit = convertAllocInit(exp: exp) {
-            context.notifyChangedTree()
+            notifyChange()
             
             return newInit
         }
         if let newInitParametrized = convertAllocInitWithParameters(exp: exp) {
-            context.notifyChangedTree()
+            notifyChange()
             
             return newInitParametrized
         }
         if let newInit = convertSuperInit(exp: exp) {
-            context.notifyChangedTree()
+            notifyChange()
             
             return newInit
         }

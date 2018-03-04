@@ -141,7 +141,7 @@ private class InternalSyntaxNodeApplier {
             passes.forEach {
                 didChangeTree = false
                 
-                $0.apply(on: functionBody.body, context: expContext)
+                _=$0.apply(on: functionBody.body, context: expContext)
                 
                 if didChangeTree {
                     // After each apply to the body, we must re-type check the result

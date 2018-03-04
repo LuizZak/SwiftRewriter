@@ -15,10 +15,10 @@ public struct SyntaxNodeRewriterPassContext {
     /// like expression types, being fed to subsequent expression passes.
     public let notifyChangedTree: () -> Void
     
-    public init(typeSystem: TypeSystem) {
+    public init(typeSystem: TypeSystem, notifyChangedTree: @escaping () -> Void = { }) {
         self.typeSystem = typeSystem
         self.typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
-        self.notifyChangedTree = { }
+        self.notifyChangedTree = notifyChangedTree
     }
     
     public init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver, notifyChangedTree: @escaping () -> Void = { }) {
@@ -39,15 +39,21 @@ open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
         
     }
     
-    open func apply(on statement: Statement, context: SyntaxNodeRewriterPassContext) {
+    open func apply(on statement: Statement, context: SyntaxNodeRewriterPassContext) -> Statement {
         self.context = context
         
-        _=statement.accept(self)
+        return statement.accept(self)
     }
     
-    open func apply(on expression: Expression, context: SyntaxNodeRewriterPassContext) {
+    open func apply(on expression: Expression, context: SyntaxNodeRewriterPassContext) -> Expression {
         self.context = context
         
-        _=expression.accept(self)
+        return expression.accept(self)
+    }
+    
+    /// Notifies the context of this syntax rewriter that the rewriter has invoked
+    /// changes to the syntax tree.
+    public func notifyChange() {
+        context.notifyChangedTree()
     }
 }

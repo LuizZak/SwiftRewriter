@@ -92,7 +92,7 @@ let package = Package(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",
                            "Antlr4", "ObjcParser", "ObjcParserAntlr",
-                           "IntentionPasses", "IntentionPasses"]),
+                           "IntentionPasses", "IntentionPasses", "TestCommons"]),
         .testTarget(
             name: "SourcePreprocessorsTests",
             dependencies: ["SourcePreprocessors", "Utils", "SwiftRewriterLib",

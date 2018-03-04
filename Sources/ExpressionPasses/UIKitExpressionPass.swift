@@ -8,7 +8,7 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         // 'enumifications'
         if let exp = enumify(ident: exp.identifier, enumPrefix: "UIControlEvent", swiftEnumName: "UIControlEvents") {
-            context.notifyChangedTree()
+            notifyChange()
             
             return exp
         }
@@ -18,12 +18,12 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let exp = convertUIColorStaticColorMethodCall(exp) {
-            context.notifyChangedTree()
+            notifyChange()
             
             return super.visitExpression(exp)
         }
         if let exp = convertAddTargetForControlEvents(exp) {
-            context.notifyChangedTree()
+            notifyChange()
             
             return super.visitExpression(exp)
         }
