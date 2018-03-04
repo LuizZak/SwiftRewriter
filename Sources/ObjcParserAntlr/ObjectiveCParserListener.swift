@@ -955,18 +955,6 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitTypeDeclaratorList(_ ctx: ObjectiveCParser.TypeDeclaratorListContext)
 	/**
-	 * Enter a parse tree produced by {@link ObjectiveCParser#typeDeclarator}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func enterTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext)
-	/**
-	 * Exit a parse tree produced by {@link ObjectiveCParser#typeDeclarator}.
-	 - Parameters:
-	   - ctx: the parse tree
-	 */
-	func exitTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext)
-	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#declarationSpecifiers}.
 	 - Parameters:
 	   - ctx: the parse tree

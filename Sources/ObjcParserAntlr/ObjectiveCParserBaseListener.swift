@@ -1042,19 +1042,6 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	open func enterTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	open func exitTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext) { }
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	open func enterDeclarationSpecifiers(_ ctx: ObjectiveCParser.DeclarationSpecifiersContext) { }
 	/**
 	 * {@inheritDoc}

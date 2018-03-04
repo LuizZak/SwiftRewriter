@@ -163,8 +163,15 @@ public class MemberBuilder<T: MemberGenerationIntention> {
 
 public extension MemberBuilder where T: MethodGenerationIntention {
     @discardableResult
-    public func setBody(_ body: CompoundStatement) -> MemberBuilder<T> {
+    public func setBody(_ body: CompoundStatement) -> MemberBuilder {
         targetMember.functionBody = FunctionBodyIntention(body: body)
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setIsStatic(_ isStatic: Bool) -> MemberBuilder {
+        targetMember.signature.isStatic = isStatic
         
         return self
     }
@@ -172,7 +179,7 @@ public extension MemberBuilder where T: MethodGenerationIntention {
 
 public extension MemberBuilder where T: InitGenerationIntention {
     @discardableResult
-    public func setBody(_ body: CompoundStatement) -> MemberBuilder<T> {
+    public func setBody(_ body: CompoundStatement) -> MemberBuilder {
         targetMember.functionBody = FunctionBodyIntention(body: body)
         
         return self

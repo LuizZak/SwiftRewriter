@@ -281,6 +281,23 @@ class ObjcParserTests: XCTestCase {
         XCTAssertNotNil(funcDecl?.methodBody)
         XCTAssertNotNil(funcDecl?.methodBody?.statements)
     }
+    
+    func testParseClassMethodDeclaration() {
+        let node = parserTest("""
+            @interface A
+            + (void)method;
+            @end
+            @implementation A
+            + (void)method {
+            }
+            @end
+            """)
+        
+        let interface: ObjcClassInterface? = node.firstChild()
+        let implementation: ObjcClassInterface? = node.firstChild()
+        XCTAssert(interface!.methods[0].isClassMethod)
+        XCTAssert(implementation!.methods[0].isClassMethod)
+    }
 }
 
 extension ObjcParserTests {

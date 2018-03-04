@@ -351,4 +351,56 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                         )
                         )])
     }
+    
+    func testDoesntMergeStaticAndNonStaticSelectors() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { builder in
+                        builder
+                            .createVoidMethod(named: "a")
+                            .setAsInterfaceSource()
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") { builder in
+                        builder.createVoidMethod(named: "a") { method in
+                            method.setIsStatic(true)
+                        }
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        let methods = files[0].classIntentions[0].methods
+        XCTAssertEqual(methods.count, 2)
+    }
+    
+    func testProperMergeOfStaticSelectors() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { builder in
+                        builder
+                            .createVoidMethod(named: "a") { method in
+                                method.setIsStatic(true)
+                            }
+                            .setAsInterfaceSource()
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") { builder in
+                        builder.createVoidMethod(named: "a") { method in
+                            method.setIsStatic(true)
+                        }
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        let methods = files[0].classIntentions[0].methods
+        XCTAssertEqual(methods.count, 1)
+    }
 }

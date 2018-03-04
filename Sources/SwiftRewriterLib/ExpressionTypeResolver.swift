@@ -589,7 +589,7 @@ private class MemberInvocationResolver {
             return postfix
         }
         // Local closure/global function type
-        if let target = postfix.exp.asIdentifier, case .block(let ret, _)? = target.resolvedType {
+        if let target = postfix.exp.asIdentifier, case .block(let ret, _)? = target.resolvedType?.deepUnwrapped {
             postfix.resolvedType = ret
         }
         

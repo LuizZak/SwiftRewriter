@@ -375,7 +375,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .errorType)
     }
     
-    func testForLoopArrayTypeResolving() {
+    func testForLoopArrayIteratorTypeResolving() {
         let exp = Expression.identifier("")
         exp.resolvedType = .array(.int)
         
@@ -519,6 +519,17 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testCallClosureType() {
         // closure()
         let exp = Expression.postfix(.identifier("closure"), .functionCall())
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingLocal(name: "closure", type: .block(returnType: .void, parameters: []))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .void)
+    }
+    
+    func testCallOptionalClosureType() {
+        // closure()
+        let exp = Expression.postfix(.identifier("closure"), .functionCall())
+        exp.exp.resolvedType = .optional(.block(returnType: .void, parameters: []))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "closure", type: .block(returnType: .void, parameters: []))

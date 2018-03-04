@@ -327,33 +327,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         context.addChildNode(spec)
     }
     
-    override func enterKeywordDeclarator(_ ctx: ObjectiveCParser.KeywordDeclaratorContext) {
-        guard let node = context.currentContextNode(as: KeywordDeclarator.self) else {
-            return
-        }
-        
-        let selectorIdent =
-            (ctx.selector()?.identifier()).map { ctx -> Identifier in
-                let node = Identifier(name: ctx.getText())
-                node.sourceRuleContext = ctx
-                return node
-            }
-        
-        let ident =
-            ctx.identifier().map { ctx -> Identifier in
-                let node = Identifier(name: ctx.getText())
-                node.sourceRuleContext = ctx
-                return node
-            }
-        
-        if let ident = selectorIdent {
-            node.addChild(ident)
-        }
-        if let ident = ident {
-            node.addChild(ident)
-        }
-    }
-    
     // MARK: - Method Declaration
     override func enterMethodDeclaration(_ ctx: ObjectiveCParser.MethodDeclarationContext) {
         guard let node = context.currentContextNode(as: MethodDefinition.self) else {
@@ -387,6 +360,35 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
     }
     
+    override func enterKeywordDeclarator(_ ctx: ObjectiveCParser.KeywordDeclaratorContext) {
+        guard let node = context.currentContextNode(as: KeywordDeclarator.self) else {
+            return
+        }
+        
+        let selectorIdent =
+            (ctx.selector()?.identifier()).map { ctx -> Identifier in
+                let node = Identifier(name: ctx.getText())
+                node.sourceRuleContext = ctx
+                return node
+        }
+        
+        let ident =
+            ctx.identifier().map { ctx -> Identifier in
+                let node = Identifier(name: ctx.getText())
+                node.sourceRuleContext = ctx
+                return node
+        }
+        
+        if let ident = selectorIdent {
+            node.addChild(ident)
+        }
+        if let ident = ident {
+            node.addChild(ident)
+        }
+    }
+    
+    // MARK: - Typedef
+    
     override func enterTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
         guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
             return
@@ -396,7 +398,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             return
         }
         
-        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
+        for typeDeclarator in typeDeclaratorList.declarator() {
             guard let directDeclarator = typeDeclarator.directDeclarator() else {
                 continue
             }
@@ -409,8 +411,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             typedefNode.addChild(identifierNode)
         }
     }
-    
-    // MARK: - Typedef
     
     override func exitTypedefDeclaration(_ ctx: ObjectiveCParser.TypedefDeclarationContext) {
         guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
@@ -425,7 +425,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         // Detect block types
-        for typeDeclarator in typeDeclaratorList.typeDeclarator() {
+        for typeDeclarator in typeDeclaratorList.declarator() {
             guard let directDeclarator = typeDeclarator.directDeclarator() else {
                 continue
             }
@@ -434,7 +434,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             }
             
             guard let type = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
-                                                              typeDeclarator: typeDeclarator) else
+                                                       declarator: typeDeclarator) else
             {
                 continue
             }

@@ -79,10 +79,20 @@ public enum ObjcType: Equatable, CustomStringConvertible {
             return ptr.normalized
         case let .generic(type, parameters):
             return .generic(type, parameters: parameters.map { $0.normalized })
+            
         case let .qualified(type, qualifiers) where qualifiers.isEmpty:
             return type.normalized
+            
         case let .specified(specifiers, type) where specifiers.isEmpty:
             return type.normalized
+            
+        // Nested specified and qualified types can be unwrapped into one single
+        // qualified/specified type with all annotations in a row
+        case let .qualified(.qualified(innerType, innerQualifiers), qualifiers):
+            return .qualified(innerType, qualifiers: qualifiers + innerQualifiers)
+        case let .specified(specifiers, .specified(innerSpecifiers, innerType)):
+            return .specified(specifiers: specifiers + innerSpecifiers, innerType)
+            
         case let .blockType(name, returnType, parameters):
             return .blockType(name: name, returnType: returnType.normalized,
                               parameters: parameters.map { $0.normalized })
@@ -94,7 +104,7 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     /// Returns true if this is a pointer type
     public var isPointer: Bool {
         switch self {
-        case .pointer, .id, .instancetype:
+        case .pointer, .id, .instancetype, .blockType:
             return true
         case .specified(_, let type):
             return type.isPointer

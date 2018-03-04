@@ -265,14 +265,14 @@ class DefaultTypeMapperTests: XCTestCase {
                           parameters: [.qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"]),
                                        .pointer(.struct("NSString"))]),
                withExplicitNullability: nil,
-               toConvertTo: "(String?, String!) -> Int")
+               toConvertTo: "((String?, String!) -> Int)!")
         
         expect(.blockType(name: "block",
                           returnType: .struct("NSInteger"),
                           parameters: [.specified(specifiers: ["nonnull"], .pointer(.struct("NSString"))),
                                        .pointer(.struct("NSString"))]),
                withExplicitNullability: nil,
-               toConvertTo: "(String, String!) -> Int")
+               toConvertTo: "((String, String!) -> Int)!")
     }
     
     func testNullableBlock() {
@@ -280,6 +280,16 @@ class DefaultTypeMapperTests: XCTestCase {
                           qualifiers: ["_Nullable"]),
                withExplicitNullability: nil,
                toConvertTo: "(() -> Void)?"
+        )
+    }
+    
+    func testBlockWithNoNullabilityAnnotationInfersAsImplicitlyUnwrappedOptional() {
+        // Blocks should behave like pointer types and be properly annotated as
+        // implicitly unwrapped optional, if lacking type annotations.
+        
+        expect(.blockType(name: "block", returnType: .void, parameters: []),
+               withExplicitNullability: nil,
+               toConvertTo: "(() -> Void)!"
         )
     }
     

@@ -800,16 +800,6 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
-	 * Visit a parse tree produced by {@link ObjectiveCParser#typeDeclarator}.
-	- Parameters:
-	  - ctx: the parse tree
-	- returns: the visitor result
-	 */
-	open func visitTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext) -> T{
-	 	fatalError(#function + " must be overridden")
-	}
-
-	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#declarationSpecifiers}.
 	- Parameters:
 	  - ctx: the parse tree

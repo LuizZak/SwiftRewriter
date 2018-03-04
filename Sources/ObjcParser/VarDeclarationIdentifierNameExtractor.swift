@@ -5,9 +5,6 @@ public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<
     public static func extract(from ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
         return ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
-    public static func extract(from ctx: ObjectiveCParser.TypeDeclaratorContext) -> String? {
-        return ctx.accept(VarDeclarationIdentifierNameExtractor())
-    }
     public static func extract(from ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> String? {
         return ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
@@ -32,9 +29,6 @@ public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<
     // MARK: Members
     public override func visitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
         return ctx.typeVariableDeclarator()?.accept(self)
-    }
-    public override func visitTypeDeclarator(_ ctx: ObjectiveCParser.TypeDeclaratorContext) -> String? {
-        return ctx.directDeclarator()?.accept(self)
     }
     public override func visitTypeVariableDeclarator(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> String? {
         return ctx.declarator()?.accept(self)

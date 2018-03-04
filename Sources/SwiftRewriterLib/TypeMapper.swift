@@ -84,15 +84,15 @@ public struct TypeMappingContext {
         self.inNonnullContext = inNonnull
     }
     
-    public func asAlwaysClass() -> TypeMappingContext {
+    public func asAlwaysClass(isOn: Bool = true) -> TypeMappingContext {
         var copy = self
-        copy.alwaysClass = true
+        copy.alwaysClass = isOn
         return copy
     }
     
-    public func asAlwaysNonNull() -> TypeMappingContext {
+    public func asAlwaysNonNull(isOn: Bool = true) -> TypeMappingContext {
         var copy = self
-        copy.alwaysNonnull = true
+        copy.alwaysNonnull = isOn
         return copy
     }
     
@@ -431,8 +431,11 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     private func swiftBlockType(forReturnType returnType: ObjcType, parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
-        return .block(returnType: swiftType(forObjcType: returnType, context: context),
-                      parameters: parameters.map { swiftType(forObjcType: $0) })
+        let type: SwiftType =
+            .block(returnType: swiftType(forObjcType: returnType, context: context.asAlwaysNonNull(isOn: false)),
+                   parameters: parameters.map { swiftType(forObjcType: $0) })
+        
+        return swiftType(type: type, withNullability: context.nullability())
     }
     
     private func shouldParenthesize(type: ObjcType) -> Bool {

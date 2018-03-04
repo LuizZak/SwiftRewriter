@@ -34,6 +34,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         converter.syntaxNodeRewriters.append(CoreGraphicsExpressionPass.self)
         converter.syntaxNodeRewriters.append(FoundationExpressionPass.self)
         converter.syntaxNodeRewriters.append(UIKitExpressionPass.self)
+        converter.syntaxNodeRewriters.append(NilValueTransformationsPass.self)
         
         converter.writerOptions = options
         converter.verbose = verbose

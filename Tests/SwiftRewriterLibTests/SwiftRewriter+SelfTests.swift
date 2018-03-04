@@ -419,7 +419,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             objc: """
             @interface A: NSObject
             {
-                void(^ _Nullable callback)();
+                void(^_Nullable callback)();
             }
             @end
             @implementation A
@@ -438,7 +438,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 func f1() {
                     var _callback = self.callback
                     // type: Void
-                    _callback()
+                    _callback?()
                 }
             }
             """,
@@ -471,7 +471,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     var _callback = self.callback
                     if _callback != nil {
                         // type: Void
-                        _callback()
+                        _callback?()
                     }
                 }
             }

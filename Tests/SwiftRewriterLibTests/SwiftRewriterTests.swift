@@ -565,7 +565,7 @@ class SwiftRewriterTests: XCTestCase {
     func testRewriteBlockTypeDef() throws {
         try assertObjcParse(
             objc: """
-            typedef void(^errorBlock)();
+            typedef void(^_Nonnull errorBlock)();
             """,
             swift: """
             typealias errorBlock = () -> Void
@@ -589,14 +589,14 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @interface AClass
             - (void)aBlocky:(void(^)())blocky;
-            - (void)aBlockyWithString:(void(^)(nonnull NSString*))blocky;
+            - (void)aBlockyWithString:(void(^_Nonnull)(nonnull NSString*))blocky;
             @end
             """,
             swift: """
             @objc
             class AClass: NSObject {
                 @objc
-                func aBlocky(_ blocky: () -> Void) {
+                func aBlocky(_ blocky: (() -> Void)!) {
                 }
                 @objc
                 func aBlockyWithString(_ blocky: (String) -> Void) {
@@ -610,16 +610,18 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @interface MyClass
             {
-                void(^_Nullable callback)();
+                void(^_Nonnull callback)(NSObject*o);
                 void(^anotherCallback)(NSString*_Nonnull);
+                NSObject*_Nullable(^_Nullable yetAnotherCallback)(NSString*_Nonnull);
             }
             @end
             """,
             swift: """
             @objc
             class MyClass: NSObject {
-                private var callback: (() -> Void)?
-                private var anotherCallback: (String) -> Void
+                private var callback: (NSObject!) -> Void
+                private var anotherCallback: ((String) -> Void)!
+                private var yetAnotherCallback: ((String) -> NSObject?)?
             }
             """)
     }
@@ -629,14 +631,14 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @interface MyClass
             {
-                void(^callback)(void(^_Nullable)());
+                void(^callback)(id(^_Nullable)());
             }
             @end
             """,
             swift: """
             @objc
             class MyClass: NSObject {
-                private var callback: ((() -> Void)?) -> Void
+                private var callback: (((() -> AnyObject!)?) -> Void)!
             }
             """)
     }
