@@ -4,6 +4,44 @@ import SwiftAST
 /// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
 /// all function bodies found in one go.
 public final class SyntaxNodeRewriterPassApplier {
+    public var passes: [SyntaxNodeRewriterPass.Type]
+    public var typeSystem: TypeSystem
+    
+    public init(passes: [SyntaxNodeRewriterPass.Type], typeSystem: TypeSystem) {
+        self.passes = passes
+        self.typeSystem = typeSystem
+    }
+    
+    public func apply(on intentions: IntentionCollection) {
+        // Apply expression passes in a multi-threaded context.
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 10
+        
+        for file in intentions.fileIntentions() {
+            let invoker = makeResolverInvoker()
+            queue.addOperation {
+                invoker.applyOnFile(file)
+            }
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
+    }
+    
+    private func makeResolverInvoker() -> InternalSyntaxNodeApplier {
+        let typeResolver =
+            ExpressionTypeResolver(typeSystem: typeSystem,
+                                   intrinsicVariables: EmptyCodeScope())
+        
+        // Initializer the passes instances
+        let passes = self.passes.map { $0.init() }
+        
+        return InternalSyntaxNodeApplier(passes: passes, typeSystem: typeSystem,
+                                         typeResolver: typeResolver)
+    }
+}
+
+// MARK: Invoker instance
+private class InternalSyntaxNodeApplier {
     public var passes: [SyntaxNodeRewriterPass]
     public var typeSystem: TypeSystem
     public var typeResolver: ExpressionTypeResolver
@@ -14,17 +52,7 @@ public final class SyntaxNodeRewriterPassApplier {
         self.typeResolver = typeResolver
     }
     
-    public func apply(on intentions: IntentionCollection) {
-        let files = intentions.fileIntentions()
-        
-        for file in files {
-            applyOnFile(file)
-        }
-    }
-    
-    // MARK: - Private members
-    
-    private func applyOnFile(_ file: FileGenerationIntention) {
+    func applyOnFile(_ file: FileGenerationIntention) {
         for cls in file.classIntentions {
             applyOnClass(cls)
         }

@@ -24,11 +24,11 @@ class SingleFileTestBuilder {
         
         sut.writerOptions = options
         
-        sut.syntaxNodeRewriters.append(ASTSimplifier())
-        sut.syntaxNodeRewriters.append(AllocInitExpressionPass())
-        sut.syntaxNodeRewriters.append(CoreGraphicsExpressionPass())
-        sut.syntaxNodeRewriters.append(FoundationExpressionPass())
-        sut.syntaxNodeRewriters.append(UIKitExpressionPass())
+        sut.syntaxNodeRewriters.append(ASTSimplifier.self)
+        sut.syntaxNodeRewriters.append(AllocInitExpressionPass.self)
+        sut.syntaxNodeRewriters.append(CoreGraphicsExpressionPass.self)
+        sut.syntaxNodeRewriters.append(FoundationExpressionPass.self)
+        sut.syntaxNodeRewriters.append(UIKitExpressionPass.self)
         
         sut.intentionPassesSource = DefaultIntentionPasses()
         

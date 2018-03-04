@@ -29,8 +29,15 @@ public struct SyntaxNodeRewriterPassContext {
 }
 
 /// A base class for expression rewriting passes.
+///
+/// Syntax rewriters are run on every method body found to apply transformations
+/// to source code before it is output on files.
 open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
     public var context: SyntaxNodeRewriterPassContext = .empty
+    
+    public override required init() {
+        
+    }
     
     open func apply(on statement: Statement, context: SyntaxNodeRewriterPassContext) {
         self.context = context

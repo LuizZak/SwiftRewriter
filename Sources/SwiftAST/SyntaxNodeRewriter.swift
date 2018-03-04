@@ -345,7 +345,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting the variables statement
     open func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         for i in 0..<stmt.decl.count {
-            stmt.decl[i].initialization = stmt.decl[i].initialization?.accept(self)
+            stmt.decl[i].initialization =
+                stmt.decl[i].initialization?.accept(self)
         }
         
         return stmt

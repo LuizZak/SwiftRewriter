@@ -37,7 +37,7 @@ public class SwiftRewriter {
     
     /// An expression pass is executed for every method expression to allow custom
     /// transformations to be applied to resulting code.
-    public var syntaxNodeRewriters: [SyntaxNodeRewriterPass] = []
+    public var syntaxNodeRewriters: [SyntaxNodeRewriterPass.Type] = []
     
     /// Custom source pre-processors that are applied to each input source code
     /// before parsing.
@@ -163,16 +163,11 @@ public class SwiftRewriter {
     }
     
     private func performIntentionPasses() {
-        let typeResolver =
-            ExpressionTypeResolver(typeSystem: typeSystem,
-                                   intrinsicVariables: EmptyCodeScope())
-        
-        let syntaxPasses = [MandatorySyntaxNodePass()] + syntaxNodeRewriters
+        let syntaxPasses = [MandatorySyntaxNodePass.self] + syntaxNodeRewriters
         
         let applier =
             SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
-                                          typeSystem: typeSystem,
-                                          typeResolver: typeResolver)
+                                          typeSystem: typeSystem)
         
         let typeResolverInvoker = DefaultTypeResolverInvoker(typeSystem: typeSystem)
         
