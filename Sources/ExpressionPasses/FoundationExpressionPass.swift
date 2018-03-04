@@ -31,8 +31,33 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
             
             return super.visitExpression(new)
         }
+        if let new = convertRespondsToSelector(exp) {
+            notifyChange()
+            
+            return super.visitExpression(new)
+        }
         
         return super.visitPostfix(exp)
+    }
+    
+    /// Converts [<lhs> respondsToSelector:<selector>] -> <lhs>.responds(to: <selector>)
+    func convertRespondsToSelector(_ exp: PostfixExpression) -> Expression? {
+        guard let postfix = exp.exp.asPostfix, let fc = exp.functionCall else {
+            return nil
+        }
+        guard postfix.member?.name == "respondsToSelector" else {
+            return nil
+        }
+        guard fc.arguments.count == 1 else {
+            return nil
+        }
+        
+        postfix.op = .member("responds")
+        exp.op = .functionCall(arguments: [
+            FunctionArgument.labeled("to", fc.arguments[0].expression)
+        ])
+        
+        return exp
     }
     
     /// Converts [<lhs> isEqualToString:<rhs>] -> <lhs> == <rhs>

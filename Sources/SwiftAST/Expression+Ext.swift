@@ -14,6 +14,12 @@ public extension Expression {
         return .postfix(self, .functionCall(arguments: arguments))
     }
     
+    /// Creates a function call invocation postfix expression with this expression
+    /// with a sequence of unlabeled function argument expressions
+    public func call(_ unlabeledArguments: [Expression]) -> PostfixExpression {
+        return .postfix(self, .functionCall(arguments: unlabeledArguments.map(FunctionArgument.unlabeled)))
+    }
+    
     /// Creates a member access postfix expression with this expression
     public func dot(_ member: String) -> PostfixExpression {
         return .postfix(self, .member(member))

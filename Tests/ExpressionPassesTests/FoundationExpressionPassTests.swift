@@ -191,4 +191,24 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                                 ]))
         ); assertNotifiedChange()
     }
+    
+    func testRespondsToSelector() {
+        // Tests conversion of 'respondsToSelector' methods
+        
+        assertTransform(
+            expression: Expression
+                .identifier("a")
+                .dot("respondsToSelector")
+                .call([Expression.identifier("Selector").call([.constant("selector:")])]),
+            into: Expression
+                .identifier("a")
+                .dot("responds")
+                .call(arguments: [
+                    .labeled("to", Expression
+                        .identifier("Selector").call([
+                            .constant("selector:")
+                            ]))
+                    ])
+        ); assertNotifiedChange()
+    }
 }
