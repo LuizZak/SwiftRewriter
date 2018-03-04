@@ -322,6 +322,10 @@ public class DefaultTypeMapper: TypeMapper {
             
             return .array(inner)
         }
+        // NSMutableArray<type> -> NSMutableArray
+        if name == "NSMutableArray" && parameters.count == 1 {
+            return .typeName(name)
+        }
         
         // NSDictionary<,> -> Dictionary<,> conversion
         if name == "NSDictionary" && parameters.count == 2 {
@@ -334,6 +338,11 @@ public class DefaultTypeMapper: TypeMapper {
                           context: context.asAlwaysNonNull().asAlwaysClass())
             
             return .dictionary(key: inner0, value: inner1)
+        }
+        
+        // NSMutableDictionary<type> -> NSMutableDictionary conversion
+        if name == "NSMutableDictionary" && parameters.count == 2 {
+            return .typeName(name)
         }
         
         let types =

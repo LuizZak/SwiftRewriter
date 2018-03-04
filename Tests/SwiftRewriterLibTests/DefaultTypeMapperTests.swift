@@ -202,10 +202,10 @@ class DefaultTypeMapperTests: XCTestCase {
     /// not fully compatible with Swift's array...
     func testNSMutableArray() {
         expect(.pointer(.generic("NSMutableArray", parameters: [.pointer(.struct("NSObject"))])),
-               toConvertTo: "NSMutableArray<NSObject>")
+               toConvertTo: "NSMutableArray")
         
         expect(.pointer(.generic("NSMutableArray", parameters: [.pointer(.struct("NSString"))])),
-               toConvertTo: "NSMutableArray<String>")
+               toConvertTo: "NSMutableArray")
         
         expect(.pointer(.generic("NSMutableArray", parameters: [])),
                toConvertTo: "NSMutableArray")
@@ -216,7 +216,7 @@ class DefaultTypeMapperTests: XCTestCase {
     /// ...ditto for NSMutableDictionary
     func testNSMutableDictionary() {
         expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))])),
-               toConvertTo: "NSMutableDictionary<String, NSObject>")
+               toConvertTo: "NSMutableDictionary")
         
         expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString"))])),
                toConvertTo: "NSMutableDictionary<String>")

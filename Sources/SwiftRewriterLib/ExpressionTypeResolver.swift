@@ -300,7 +300,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         _=super.visitPostfix(exp)
         
         let resolver = MemberInvocationResolver(typeSystem: typeSystem, typeResolver: self)
-        return resolver.resolve(postfix: exp)
+        return resolver.resolve(postfix: exp, op: exp.op)
     }
     
     // MARK: - Array and Dictionary literal resolving
@@ -368,6 +368,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 
 extension ExpressionTypeResolver {
     func findType(for swiftType: SwiftType) -> KnownType? {
+        let swiftType = swiftType.deepUnwrapped
+        
         switch swiftType {
         case .typeName(let typeName):
             return findTypeNamed(typeName)
@@ -383,6 +385,8 @@ extension ExpressionTypeResolver {
     }
     
     func findMetatype(forType type: SwiftType) -> KnownType? {
+        let type = type.deepUnwrapped
+        
         switch type {
         case .typeName(let name):
             return typeSystem.knownTypeWithName(name)
@@ -425,8 +429,8 @@ private class MemberInvocationResolver {
         self.typeResolver = typeResolver
     }
     
-    func resolve(postfix exp: PostfixExpression) -> Expression {
-        switch exp.op {
+    func resolve(postfix exp: PostfixExpression, op: Postfix) -> Expression {
+        switch op {
         case let sub as SubscriptPostfix:
             // Propagate error type
             if exp.exp.isErrorTyped {
@@ -510,9 +514,16 @@ private class MemberInvocationResolver {
             } else {
                 return exp.makeErrorTyped()
             }
-        case _ as OptionalAccessPostfix:
-            // TODO: Support .optionalAccess here
-            break
+            
+        case let optional as OptionalAccessPostfix:
+            // Take the result of the (non) optional access and wrap it into an
+            // optional result
+            let exp = resolve(postfix: exp, op: optional.postfix)
+            if !exp.isErrorTyped, let type = exp.resolvedType {
+                exp.resolvedType = .optional(type)
+            }
+            
+            return exp
             
         default:
             break

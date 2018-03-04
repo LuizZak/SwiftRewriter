@@ -495,6 +495,22 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .errorType)
     }
     
+    func testOptionalAccess() {
+        let exp =
+            Expression.postfix(.identifier("a"), .optionalAccess(.member("b")))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .definingType(named: "A") { builder in
+                return
+                    builder
+                        .addingProperty(named: "b", type: .int)
+                        .build()
+            }
+            .definingLocal(name: "a", type: .optional(.typeName("A")))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .optional(.int))
+    }
+    
     func testEnumCaseLookup() {
         let exp = Expression.postfix(.identifier("A"), .member("a"))
         

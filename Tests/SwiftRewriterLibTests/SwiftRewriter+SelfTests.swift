@@ -363,4 +363,54 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testIntrinsicsExposeMethodParameters() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)f1:(A*)value {
+                (value);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func f1(_ value: A!) {
+                    // type: A!
+                    (value)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testPropertyResolutionLooksThroughNullability() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property NSInteger prop;
+            @end
+            
+            @implementation A
+            - (void)f1:(A*)value {
+                (value.prop);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var prop: Int
+                
+                @objc
+                func f1(_ value: A!) {
+                    // type: Int
+                    (value.prop)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
