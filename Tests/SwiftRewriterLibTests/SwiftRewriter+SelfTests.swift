@@ -621,4 +621,53 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testTypeLookupIntoComposedProtocols() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol A <NSObject>
+            @property BOOL a;
+            @end
+            @protocol B <NSObject>
+            @property NSInteger b;
+            @end
+            
+            @interface C: NSObject
+            @property id<A, B> composed;
+            @end
+            @implementation C
+            - (void)method {
+                (self.composed);
+                (self.composed.a);
+                (self.composed.b);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            protocol A: NSObjectProtocol {
+                @objc var a: Bool
+            }
+            @objc
+            protocol B: NSObjectProtocol {
+                @objc var b: Int
+            }
+
+            @objc
+            class C: NSObject {
+                @objc var composed: (A & B)!
+                
+                @objc
+                func method() {
+                    // type: (A & B)!
+                    (self.composed)
+                    // type: Bool?
+                    (self.composed.a)
+                    // type: Int?
+                    (self.composed.b)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
