@@ -46,6 +46,17 @@ public class DefaultTypeSystem: TypeSystem {
         guard let type = knownTypeWithName(typeName) else {
             return false
         }
+        
+        // Direct supertype name fetching
+        switch type.supertype {
+        case .some(.typeName(let tn)) where tn == supertypeName:
+            return true
+        case .some(.knownType(let kt)):
+            return isType(kt.typeName, subtypeOf: supertypeName)
+        default:
+            break
+        }
+        
         guard let supertype = knownTypeWithName(supertypeName) else {
             return false
         }
