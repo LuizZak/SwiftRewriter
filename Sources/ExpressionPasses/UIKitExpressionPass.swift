@@ -27,8 +27,53 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
             
             return super.visitExpression(exp)
         }
+        if let exp = convertBooleanGetters(exp) {
+            notifyChange()
+            
+            return super.visitExpression(exp)
+        }
         
         return super.visitPostfix(exp)
+    }
+    
+    /// Corrects boolean getters `.hidden` -> `.isHidden`, `.editable` -> `.isEditable`, etc.
+    func convertBooleanGetters(_ exp: PostfixExpression) -> Expression? {
+        // Make sure we're handling a UIView subclass here
+        guard case .typeName(let typeName)? = exp.exp.resolvedType else {
+            return nil
+        }
+        guard let member = exp.member else {
+            return nil
+        }
+        
+        if !context.typeSystem.isType(typeName, subtypeOf: "UIView") {
+            return nil
+        }
+        
+        switch member.name {
+        case "hidden":
+            exp.op = .member("isHidden")
+            return exp
+        case "editable":
+            exp.op = .member("isEditable")
+            return exp
+        case "focused":
+            exp.op = .member("isFocused")
+            return exp
+        case "firstResponder":
+            exp.op = .member("isFirstResponder")
+            return exp
+        case "userInteractionEnabled":
+            exp.op = .member("isUserInteractionEnabled")
+            return exp
+        case "opaque":
+            exp.op = .member("isOpaque")
+            return exp
+        default:
+            break
+        }
+        
+        return nil
     }
     
     /// Converts UIColor.orangeColor() -> UIColor.orange, etc.

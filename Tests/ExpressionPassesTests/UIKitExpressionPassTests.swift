@@ -1,6 +1,7 @@
 import XCTest
 import ExpressionPasses
 import SwiftRewriterLib
+import SwiftAST
 
 class UIKitExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
@@ -46,6 +47,45 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                                                                 ]))),
                                 .labeled("for", .postfix(.identifier("UIControlEvents"), .member("touchUpInside")))
                                 ]))
+        ); assertNotifiedChange()
+    }
+    
+    func testConvertBooleanGetters() {
+        let exp = Expression.identifier("view")
+        exp.resolvedType = .typeName("UIView")
+        
+        let makeGetter: (String) -> Expression = {
+            return exp.dot($0)
+        }
+        
+        assertTransform(
+            expression: makeGetter("opaque"),
+            into: exp.dot("isOpaque")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: makeGetter("hidden"),
+            into: exp.dot("isHidden")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: makeGetter("editable"),
+            into: exp.dot("isEditable")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: makeGetter("userInteractionEnabled"),
+            into: exp.dot("isUserInteractionEnabled")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: makeGetter("focused"),
+            into: exp.dot("isFocused")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: makeGetter("firstResponder"),
+            into: exp.dot("isFirstResponder")
         ); assertNotifiedChange()
     }
 }

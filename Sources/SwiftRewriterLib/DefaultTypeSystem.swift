@@ -39,6 +39,10 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
+        if typeName == supertypeName {
+            return true
+        }
+        
         guard let type = knownTypeWithName(typeName) else {
             return false
         }
@@ -53,6 +57,16 @@ public class DefaultTypeSystem: TypeSystem {
             }
             
             current = c.supertype?.asKnownType
+        }
+        
+        // Search type definitions
+        var currentClassType = classTypeDefinition(name: typeName)
+        while let c = currentClassType {
+            if c.typeName == supertypeName {
+                return true
+            }
+            
+            currentClassType = classTypeDefinition(name: c.superclass)
         }
         
         return false
@@ -174,6 +188,10 @@ public class DefaultTypeSystem: TypeSystem {
         return supertype(of: type).flatMap {
             field(named: name, static: isStatic, in: $0)
         }
+    }
+    
+    private func classTypeDefinition(name: String) -> ClassType? {
+        return TypeDefinitions.classesList.classes.first(where: { $0.typeName == name })
     }
 }
 
