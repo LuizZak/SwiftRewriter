@@ -17,7 +17,7 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
             let newExp =
                 Expression
                     .identifier(name)
-                    .call(arguments: [.unlabeled(exp.exp)])
+                    .call([.unlabeled(exp.exp)])
             
             notifyChange()
             

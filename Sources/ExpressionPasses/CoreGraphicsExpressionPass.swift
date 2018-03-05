@@ -182,6 +182,118 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             exp.exp = exp.exp.accept(self)
         }
     }
+    
+    func createCoreGraphicsTransformers() {
+        func make(_ name: String, swiftName: String, arguments: [FunctionSignatureTransformer.ArgumentStrategy]) {
+            
+        }
+        
+        /// Converts two expressions into a CGPoint initializer
+        let toCGPoint: (Expression, Expression) -> Expression = { x, y in
+            Expression
+                .identifier("CGPoint")
+                .call([.labeled("x", x), .labeled("y", y)])
+        }
+        
+        make("CGPathAddPoint", swiftName: "addPoint",
+             arguments: [.labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)), .fromArgIndex(0)])
+        
+        make("CGPathAddRoundedRect", swiftName: "addRoundedRect",
+             arguments: [.labeled("in", .fromArgIndex(1)),
+                         .labeled("cornerWidth", .fromArgIndex(2)),
+                         .labeled("cornerHeight", .fromArgIndex(3)),
+                         .labeled("transform", .fromArgIndex(0))])
+        
+        /*
+        make("CGPathAddPoint", swiftName: "addPoint",
+             arguments: [.moveTo(index: 1), .labeled("to", .mergeWithNext(toCGPoint))])
+        
+        make("CGPathAddRoundedRect", swiftName: "addRoundedRect",
+             arguments: [.moveTo(index: 1), .mergeWithNext(toCGPoint)])
+        */
+    }
+}
+
+private final class FunctionSignatureTransformer {
+    let name: String
+    let swiftName: String
+    
+    /// Strategy to apply to each argument in the call.
+    let arguments: [ArgumentStrategy]
+    
+    /// The number of arguments this function signature transformer needs, exactly,
+    /// in order to be fulfilled.
+    let requiredArgumentCount: Int
+    
+    init(name: String, swiftName: String, arguments: [ArgumentStrategy]) {
+        self.name = name
+        self.swiftName = swiftName
+        self.arguments = arguments
+        
+        requiredArgumentCount =
+            arguments.reduce(0) { $0 + $1.argumentConsumeCount }
+    }
+    
+    /// What to do with one or more arguments of a function call
+    enum ArgumentStrategy {
+        case fromArgIndex(Int)
+        
+        case asIs
+        
+        case mergeArguments(arg0: Int, arg1: Int, (Expression, Expression) -> Expression)
+        
+        indirect case labeled(String, ArgumentStrategy)
+        
+        /// Gets the number of arguments this argument strategy will consume when
+        /// applied.
+        var argumentConsumeCount: Int {
+            switch self {
+            case .asIs, .fromArgIndex:
+                return 1
+            case .mergeArguments:
+                return 2
+            case .labeled(_, let inner):
+                return inner.argumentConsumeCount
+            }
+        }
+        
+        /*
+        /// Does nothing with argument- keeps it in place and moves on to the next.
+        case asIs
+        
+        /// Merges the argument with the next argument in the sequence, flattening
+        /// the result into a single argument using a given transformation closure.
+        ///
+        /// The next argument is then skipped, as it's considered to be already
+        /// processed.
+        case mergeWithNext((Expression, Expression) -> Expression)
+        
+        /// Indicates the argument must be moved to a specified index.
+        /// Only one argument can be contained on an index by the end of the
+        /// signature transformation.
+        case moveTo(index: Int)
+        
+        /// Indicates a strategy is to be applied, and on the resulting argument,
+        /// the label for the function call must be set to a given label.
+        ///
+        /// In case the strategy within is itself a label strategy, the label is
+        /// updated to use the new outermost `label`.
+        indirect case labeled(String, ArgumentStrategy)
+        
+        /// Gets the number of arguments this argument strategy will consume when
+        /// applied.
+        var argumentConsumeCount: Int {
+            switch self {
+            case .asIs, .moveTo:
+                return 1
+            case .mergeWithNext:
+                return 2
+            case .labeled(_, let inner):
+                return inner.argumentConsumeCount
+            }
+        }
+        */
+    }
 }
 
 internal extension Sequence where Element == FunctionArgument {

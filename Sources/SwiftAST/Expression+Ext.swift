@@ -10,7 +10,7 @@ public extension Expression {
     }
     
     /// Creates a function call invocation postfix expression with this expression
-    public func call(arguments: [FunctionArgument] = []) -> PostfixExpression {
+    public func call(_ arguments: [FunctionArgument] = []) -> PostfixExpression {
         return .postfix(self, .functionCall(arguments: arguments))
     }
     
