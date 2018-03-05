@@ -73,6 +73,18 @@ class DefaultTypeSystemTests: XCTestCase {
         
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSObject's default parameterless constructor")
+        XCTAssertNotNil(sut.conformance(toProtocolName: "NSObjectProtocol", in: type))
+        
+        // NSObjectProtocol methods
+        XCTAssertNotNil(
+            sut.method(withObjcSelector: FunctionSignature(name: "responds",
+                                                           parameters: [
+                                                            ParameterSignature(label: "to",
+                                                                               name: "selector",
+                                                                               type: .selector)]),
+                       static: false,
+                       in: type)
+        )
     }
     
     func testNSArrayDefinition() {
@@ -161,6 +173,15 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(type.supertype?.asTypeName, "NSString")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSMutableString's default parameterless constructor")
+    }
+    
+    func testNSObjectProtocolDefinition() {
+        guard let type = sut.knownTypeWithName("NSObjectProtocol") else {
+            XCTFail("Expected NSObjectProtocol to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.kind, .protocol)
     }
     
     func testConstructorSearchesThroughSupertypes() {

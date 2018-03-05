@@ -15,6 +15,9 @@ public protocol KnownType: KnownSupertypeConvertible {
     /// Name for this known type
     var typeName: String { get }
     
+    /// The kind of this known type
+    var kind: KnownTypeKind { get }
+    
     /// Gets an array of all known constructors for this type
     var knownConstructors: [KnownConstructor] { get }
     
@@ -29,6 +32,16 @@ public protocol KnownType: KnownSupertypeConvertible {
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
+}
+
+/// The kind of a known type
+public enum KnownTypeKind {
+    /// A concrete class type
+    case `class`
+    /// A protocol type
+    case `protocol`
+    /// A value type
+    case valueType
 }
 
 /// Defines the known supertype of a `KnownType`

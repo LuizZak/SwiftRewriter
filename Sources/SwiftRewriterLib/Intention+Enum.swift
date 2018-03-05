@@ -7,6 +7,10 @@ public class EnumGenerationIntention: TypeGenerationIntention {
         return source as? ObjcEnumDeclaration
     }
     
+    public override var kind: KnownTypeKind {
+        return .valueType
+    }
+    
     public var rawValueType: SwiftType
     
     public var cases: [EnumCaseGenerationIntention] {

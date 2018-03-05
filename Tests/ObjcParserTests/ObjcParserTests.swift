@@ -298,6 +298,17 @@ class ObjcParserTests: XCTestCase {
         XCTAssert(interface!.methods[0].isClassMethod)
         XCTAssert(implementation!.methods[0].isClassMethod)
     }
+    
+    func testParseProtocolReferenceListInProtocol() {
+        let node = parserTest("""
+            @protocol A <B>
+            @end
+            """)
+        
+        let prot: ProtocolDeclaration? = node.firstChild()
+        XCTAssertNotNil(prot?.protocolList)
+        XCTAssertNotNil(prot?.protocolList?.protocols.first?.name, "B")
+    }
 }
 
 extension ObjcParserTests {

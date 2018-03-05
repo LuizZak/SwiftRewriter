@@ -142,6 +142,8 @@ indirect public enum SwiftType: Equatable {
     public static let any = SwiftType.typeName("Any")
     public static let anyObject = SwiftType.typeName("AnyObject")
     
+    public static let selector = SwiftType.typeName("Selector")
+    
     public static let nsArray = SwiftType.typeName("NSArray")
     public static let nsDictionary = SwiftType.typeName("NSDictionary")
     

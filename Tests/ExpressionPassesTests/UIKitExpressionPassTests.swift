@@ -50,6 +50,13 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testEnumifyUIGestureRecognizerState() {
+        assertTransform(
+            expression: .identifier("UIGestureRecognizerStateEnded"),
+            into: Expression.identifier("UIGestureRecognizerState").dot("ended")
+        ); assertNotifiedChange()
+    }
+    
     func testConvertBooleanGetters() {
         let exp = Expression.identifier("view")
         exp.resolvedType = .typeName("UIView")

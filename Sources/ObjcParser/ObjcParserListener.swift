@@ -274,6 +274,24 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             identifierNode.sourceRuleContext = identifier
             context.addChildNode(identifierNode)
         }
+        
+        // Protocol list
+        if let protocolList = ctx.protocolList() {
+            let protocolListNode = ProtocolReferenceList()
+            protocolListNode.sourceRuleContext = protocolList
+            
+            for prot in protocolList.protocolName() {
+                guard let identifier = prot.identifier() else {
+                    continue
+                }
+                
+                let protNameNode = ProtocolName(name: identifier.getText())
+                protNameNode.sourceRuleContext = identifier
+                protocolListNode.addChild(protNameNode)
+            }
+            
+            context.addChildNode(protocolListNode)
+        }
     }
     
     override func enterProtocolDeclarationSection(_ ctx: ObjectiveCParser.ProtocolDeclarationSectionContext) {

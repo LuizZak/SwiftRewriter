@@ -12,6 +12,11 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
             
             return super.visitExpression(exp)
         }
+        if let exp = enumify(ident: exp.identifier, enumPrefix: "UIGestureRecognizerState", swiftEnumName: "UIGestureRecognizerState") {
+            notifyChange()
+            
+            return super.visitExpression(exp)
+        }
         
         return super.visitIdentifier(exp)
     }

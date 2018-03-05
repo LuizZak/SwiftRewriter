@@ -300,7 +300,29 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         _=super.visitPostfix(exp)
         
         let resolver = MemberInvocationResolver(typeSystem: typeSystem, typeResolver: self)
-        return resolver.resolve(postfix: exp, op: exp.op)
+        let result = resolver.resolve(postfix: exp, op: exp.op)
+        
+        func hasOptional(_ exp: PostfixExpression, _ op: Postfix) -> Bool {
+            if exp.resolvedType?.isOptional == true {
+                return true
+            }
+            
+            switch op {
+            case is OptionalAccessPostfix:
+                return true
+            default:
+                if let post = exp.exp.asPostfix {
+                    return hasOptional(post, post.op)
+                }
+                return false
+            }
+        }
+        
+        if !exp.isErrorTyped, let type = exp.resolvedType, !type.isOptional, hasOptional(exp, exp.op) {
+            exp.resolvedType = .optional(type)
+        }
+        
+        return result
     }
     
     // MARK: - Array and Dictionary literal resolving
@@ -507,10 +529,10 @@ private class MemberInvocationResolver {
             
             if let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: type) {
                 member.memberDefinition = property
-                exp.resolvedType = property.storage.type.withSameOptionalityAs(innerType)
+                exp.resolvedType = property.storage.type
             } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype, in: type) {
                 member.memberDefinition = field
-                exp.resolvedType = field.storage.type.withSameOptionalityAs(innerType)
+                exp.resolvedType = field.storage.type
             } else {
                 return exp.makeErrorTyped()
             }

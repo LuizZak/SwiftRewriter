@@ -5,15 +5,24 @@ import SwiftAST
 public class KnownTypeBuilder {
     private let type: DummyType
     
-    public init(typeName: String, supertype: KnownSupertypeConvertible? = nil, file: String = #file, line: Int = #line) {
+    public init(typeName: String, supertype: KnownSupertypeConvertible? = nil,
+                kind: KnownTypeKind = .class, file: String = #file,
+                line: Int = #line) {
         type = DummyType(typeName: typeName, supertype: supertype)
         
+        type.kind = kind
         type.origin = "Synthesized with \(KnownTypeBuilder.self) at \(file) line \(line)"
     }
     
     /// Sets the supertype of the type being constructed on this known type builder
     public func settingSupertype(_ supertype: KnownSupertypeConvertible?) -> KnownTypeBuilder {
         type.supertype = supertype?.asKnownSupertype
+        return self
+    }
+    
+    /// Sets the kind of the type being built
+    public func settingKind(_ kind: KnownTypeKind) -> KnownTypeBuilder {
+        type.kind = kind
         return self
     }
     
@@ -141,6 +150,7 @@ public class KnownTypeBuilder {
 private class DummyType: KnownType {
     var origin: String
     var typeName: String
+    var kind: KnownTypeKind = .class
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []

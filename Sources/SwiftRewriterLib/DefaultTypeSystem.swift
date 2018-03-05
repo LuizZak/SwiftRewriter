@@ -169,6 +169,17 @@ public class DefaultTypeSystem: TypeSystem {
             return method
         }
         
+        // Search on protocol conformances
+        for conformance in type.knownProtocolConformances {
+            guard let prot = knownTypeWithName(conformance.protocolName) else {
+                continue
+            }
+            
+            if let method = method(withObjcSelector: selector, static: isStatic, in: prot) {
+                return method
+            }
+        }
+        
         // Search on supertypes
         return supertype(of: type).flatMap {
             method(withObjcSelector: selector, static: isStatic, in: $0)
@@ -209,9 +220,20 @@ public class DefaultTypeSystem: TypeSystem {
 extension DefaultTypeSystem {
     /// Initializes the default known types
     func registerInitialKnownTypes() {
+        let nsObjectProtocol =
+            KnownTypeBuilder(typeName: "NSObjectProtocol", kind: .protocol)
+                .addingMethod(withSignature:
+                    FunctionSignature(name: "responds",
+                                      parameters: [ParameterSignature(label: "to", name: "selector", type: .selector)],
+                                      returnType: .bool,
+                                      isStatic: false)
+                )
+                .build()
+        
         let nsObject =
             KnownTypeBuilder(typeName: "NSObject")
                 .addingConstructor()
+                .addingProtocolConformance(protocolName: "NSObjectProtocol")
                 .build()
         
         let nsArray =
@@ -249,6 +271,7 @@ extension DefaultTypeSystem {
                 )
                 .build()
         
+        addType(nsObjectProtocol)
         addType(nsObject)
         addType(nsArray)
         addType(nsMutableArray)
@@ -341,6 +364,10 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         
         var typeName: String
         var typeSystem: TypeSystem
+        
+        lazy var kind: KnownTypeKind = {
+            return types[0].kind
+        }()
         
         lazy var origin: String = {
             return types[0].origin

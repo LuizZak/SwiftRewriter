@@ -387,6 +387,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
     }
     
     func testPropertyResolutionLooksThroughNullability() throws {
+        // FIXME: Maybe it's desireable to infer as `Int!` instead?
         try assertObjcParse(
             objc: """
             @interface A : NSObject
@@ -406,7 +407,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 
                 @objc
                 func f1(_ value: A!) {
-                    // type: Int!
+                    // type: Int
                     (value.prop)
                 }
             }
@@ -471,6 +472,150 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     var _callback = self.callback
                     // type: Void?
                     _callback?()
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testLookThroughProtocolConformances() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            @property (nullable) NSObject *b;
+            @end
+            
+            @implementation A
+            - (void)method {
+                [b respondsToSelector:@selector(abc:)];
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var b: NSObject?
+                
+                @objc
+                func method() {
+                    // type: Bool?
+                    b?.responds(to: Selector("abc:"))
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testChainedOptionalAccessMethodCall() throws {
+        // With a (nonnull B*)method;
+        try assertObjcParse(
+            objc: """
+            @interface B: NSObject
+            - (nonnull B*)method;
+            @end
+            @interface A: NSObject
+            @property (nullable) B *b;
+            @end
+            
+            @implementation A
+            - (void)method {
+                [[self.b method] method];
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class B: NSObject {
+                @objc
+                func method() -> B {
+                }
+            }
+            @objc
+            class A: NSObject {
+                @objc var b: B?
+                
+                @objc
+                func method() {
+                    // type: B?
+                    self.b?.method().method()
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testChainedOptionalAccessMethodCall2() throws {
+        // With a (nullable B*)method;
+        try assertObjcParse(
+            objc: """
+            @interface B: NSObject
+            - (nullable B*)method;
+            @end
+            @interface A: NSObject
+            @property (nullable) B *b;
+            @end
+            
+            @implementation A
+            - (void)method {
+                [[self.b method] method];
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class B: NSObject {
+                @objc
+                func method() -> B? {
+                }
+            }
+            @objc
+            class A: NSObject {
+                @objc var b: B?
+                
+                @objc
+                func method() {
+                    // type: B?
+                    self.b?.method().method()
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testChainCallRespondsToSelector() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol B <NSObject>
+            @end
+            @interface A: NSObject
+            @property (weak) B *b;
+            @end
+            
+            @implementation A
+            - (void)method {
+                [self.b respondsToSelector:@selector(abc:)];
+
+                if([self.b respondsToSelector:@selector(abc:)]) {
+                    
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            protocol B: NSObjectProtocol {
+            }
+
+            @objc
+            class A: NSObject {
+                @objc weak var b: B?
+                
+                @objc
+                func method() {
+                    // type: Bool?
+                    self.b?.responds(to: Selector("abc:"))
+                    if self.b?.responds(to: Selector("abc:")) == true {
+                    }
                 }
             }
             """,

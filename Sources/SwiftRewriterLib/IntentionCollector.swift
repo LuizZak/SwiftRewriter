@@ -422,7 +422,10 @@ public class IntentionCollector {
         }
         
         for protNode in node.protocols {
-            let intent = ProtocolInheritanceIntention(protocolName: protNode.name, source: protNode)
+            // In Swift, 'NSObject' protocol is written as 'NSObjectProtocol'
+            let protName = protNode.name == "NSObject" ? "NSObjectProtocol" : protNode.name
+            
+            let intent = ProtocolInheritanceIntention(protocolName: protName, source: protNode)
             recordSourceHistory(intention: intent, node: node)
             
             ctx.addProtocol(intent)

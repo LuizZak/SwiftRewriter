@@ -119,6 +119,10 @@ public class TypeGenerationIntention: FromSourceIntention {
         return []
     }
     
+    public var kind: KnownTypeKind {
+        return .class
+    }
+    
     public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
         
