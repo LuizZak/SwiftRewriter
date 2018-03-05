@@ -405,17 +405,21 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             let reader = SwiftStatementASTReader(expressionReader: expressionReader)
             reader.expressionReader = expressionReader
             
-            let rules: [ParserRuleContext] =
-                ctx.declaration().map { $0 } + ctx.statement().map { $0 }
+            let rules: [ParserRuleContext] = ctx.children?.compactMap {
+                $0 as? ParserRuleContext
+            } ?? []
             
-            return CompoundStatement(statements: rules.compactMap { stmt -> Statement? in
+            return CompoundStatement(statements: rules.map { stmt -> Statement in
+                let unknown = UnknownStatement.unknown(UnknownASTContext(context: stmt.getText()))
+                
                 if let stmt = stmt as? ObjectiveCParser.StatementContext {
-                    return reader.visitStatement(stmt)
+                    return reader.visitStatement(stmt) ?? unknown
                 }
                 if let declaration = stmt as? ObjectiveCParser.DeclarationContext {
-                    return reader.visitDeclaration(declaration)
+                    return reader.visitDeclaration(declaration) ?? unknown
                 }
-                return .unknown(UnknownASTContext(context: stmt))
+                
+                return unknown
             }.flatMap { stmt -> [Statement] in
                 // Free compound blocks cannot be declared in Swift
                 if let inner = stmt.asCompound {

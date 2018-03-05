@@ -996,4 +996,75 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    /// Regression test for a very shameful oversight related to ordering the parser
+    /// read the statements and variable declarations within a compound statement.
+    func testParsingKeepsOrderingOfStatementsAndDeclarations() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)recreatePath
+            {
+                CGFloat top = startsAtTop ? 0 : circle.center.y;
+                CGFloat bottom = MAX(self.bounds.size.height, top);
+                
+                if(top == bottom)
+                {
+                    shapeLayer.path = nil;
+                    return;
+                }
+                
+                CGMutablePathRef path = CGPathCreateMutable();
+                CGPathMoveToPoint(path, nil, 0, top);
+                CGPathAddLineToPoint(path, nil, 0, bottom);
+                
+                shapeLayer.strokeColor = self.dateLabel.textColor.CGColor;
+                shapeLayer.lineWidth = 1;
+                shapeLayer.lineCap = kCALineCapSquare;
+                shapeLayer.lineJoin = kCALineJoinRound;
+                
+                if (dashType == CPTimeSeparatorDash_Dash)
+                {
+                    shapeLayer.lineDashPattern = @[@3, @5];
+                }
+                else
+                {
+                    shapeLayer.lineDashPattern = nil;
+                }
+                
+                shapeLayer.path = path;
+                
+                CGPathRelease(path);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func recreatePath() {
+                    var top = startsAtTop ? 0 : circle.center.y
+                    var bottom = max(self.bounds.size.height, top)
+                    if top == bottom {
+                        shapeLayer.path = nil
+                        return
+                    }
+                    var path = CGPathCreateMutable()
+                    CGPathMoveToPoint(path, nil, 0, top)
+                    CGPathAddLineToPoint(path, nil, 0, bottom)
+                    shapeLayer.strokeColor = self.dateLabel.textColor.CGColor
+                    shapeLayer.lineWidth = 1
+                    shapeLayer.lineCap = kCALineCapSquare
+                    shapeLayer.lineJoin = kCALineJoinRound
+                    if dashType == CPTimeSeparatorDash_Dash {
+                        shapeLayer.lineDashPattern = [3, 5]
+                    } else {
+                        shapeLayer.lineDashPattern = nil
+                    }
+                    shapeLayer.path = path
+                    CGPathRelease(path)
+                }
+            }
+            """)
+    }
 }
