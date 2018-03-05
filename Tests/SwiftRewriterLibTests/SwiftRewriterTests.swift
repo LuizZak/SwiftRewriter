@@ -1049,9 +1049,9 @@ class SwiftRewriterTests: XCTestCase {
                         shapeLayer.path = nil
                         return
                     }
-                    var path = CGPathCreateMutable()
-                    CGPathMoveToPoint(path, nil, 0, top)
-                    CGPathAddLineToPoint(path, nil, 0, bottom)
+                    var path = CGMutablePath()
+                    path.move(to: CGPoint(x: 0, y: top))
+                    path.addLine(to: CGPoint(x: 0, y: bottom))
                     shapeLayer.strokeColor = self.dateLabel.textColor.CGColor
                     shapeLayer.lineWidth = 1
                     shapeLayer.lineCap = kCALineCapSquare
@@ -1062,7 +1062,6 @@ class SwiftRewriterTests: XCTestCase {
                         shapeLayer.lineDashPattern = nil
                     }
                     shapeLayer.path = path
-                    CGPathRelease(path)
                 }
             }
             """)

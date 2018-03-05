@@ -574,7 +574,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         let exp = Expression
             .identifier("self").dot("member").call()
-            .dot("then").call(arguments: [
+            .dot("then").call([
                 .unlabeled(
                     .block(parameters: [],
                            return: .void,
@@ -582,7 +582,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                             .expression(makeCallback())
                         ]))
                 ])
-            .dot("then").call(arguments: [
+            .dot("then").call([
                 .unlabeled(
                     .block(parameters: [],
                            return: .void,
@@ -590,7 +590,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                             .expression(makeCallback())
                         ]))
                 ])
-            .dot("always").call(arguments: [
+            .dot("always").call([
                 .unlabeled(
                     .block(parameters: [],
                            return: .void,
