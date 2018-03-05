@@ -40,7 +40,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
-        // Move all enum/protocols from .h to .m files, when available
+        // Move all enum/protocol/global variables from .h to .m files, when
+        // available
         for header in headers {
             let path = (header.sourcePath as NSString).deletingPathExtension
             guard let impl = implementations.first(where: { ($0.sourcePath as NSString).deletingPathExtension == path }) else {
@@ -55,6 +56,11 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             for prot in header.protocolIntentions {
                 header.removeTypes(where: { $0 === prot })
                 impl.addType(prot)
+            }
+            
+            for gvar in header.globalVariableIntentions {
+                header.removeGlobalVariables(where: { $0 === gvar })
+                impl.addGlobalVariable(gvar)
             }
         }
         

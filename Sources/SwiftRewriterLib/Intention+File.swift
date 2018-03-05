@@ -123,6 +123,15 @@ public class FileGenerationIntention: Intention {
         }
     }
     
+    public func removeGlobalVariables(where predicate: (GlobalVariableGenerationIntention) -> Bool) {
+        for (i, gvar) in globalVariableIntentions.enumerated().reversed() {
+            if predicate(gvar) {
+                gvar.parent = nil
+                globalVariableIntentions.remove(at: i)
+            }
+        }
+    }
+    
     public func addProtocol(_ intention: ProtocolGenerationIntention) {
         typeIntentions.append(intention)
         intention.parent = self

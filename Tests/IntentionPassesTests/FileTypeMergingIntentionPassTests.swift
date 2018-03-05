@@ -437,4 +437,21 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files.first?.sourcePath, "A.m")
         XCTAssertEqual(files.first?.protocolIntentions.count, 1)
     }
+    
+    func testMovesGlobalVariablesToImplementationWhenAvailable() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createGlobalVariable(withName: "abc", type: .int)
+                }.createFile(named: "A.m")
+                .build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.sourcePath, "A.m")
+        XCTAssertEqual(files.first?.globalVariableIntentions.count, 1)
+    }
 }
