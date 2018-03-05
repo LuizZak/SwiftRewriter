@@ -44,10 +44,10 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
     /// Corrects boolean getters `.hidden` -> `.isHidden`, `.editable` -> `.isEditable`, etc.
     func convertBooleanGetters(_ exp: PostfixExpression) -> Expression? {
         // Make sure we're handling a UIView subclass here
-        guard case .typeName(let typeName)? = exp.exp.resolvedType else {
+        guard case .typeName(let typeName)? = exp.exp.resolvedType?.deepUnwrapped else {
             return nil
         }
-        guard let member = exp.member else {
+        guard let member = exp.op.unwrappedOptionalAccess.asMember else {
             return nil
         }
         
@@ -55,24 +55,31 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
             return nil
         }
         
+        let makeMember: (String) -> Postfix = {
+            if let opt = exp.op.asOptionalAccess {
+                return opt.wrappingOptionalPostfixes(over: .member($0))
+            }
+            return .member($0)
+        }
+        
         switch member.name {
         case "hidden":
-            exp.op = .member("isHidden")
+            exp.op = makeMember("isHidden")
             return exp
         case "editable":
-            exp.op = .member("isEditable")
+            exp.op = makeMember("isEditable")
             return exp
         case "focused":
-            exp.op = .member("isFocused")
+            exp.op = makeMember("isFocused")
             return exp
         case "firstResponder":
-            exp.op = .member("isFirstResponder")
+            exp.op = makeMember("isFirstResponder")
             return exp
         case "userInteractionEnabled":
-            exp.op = .member("isUserInteractionEnabled")
+            exp.op = makeMember("isUserInteractionEnabled")
             return exp
         case "opaque":
-            exp.op = .member("isOpaque")
+            exp.op = makeMember("isOpaque")
             return exp
         default:
             break

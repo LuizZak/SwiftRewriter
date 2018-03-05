@@ -1153,6 +1153,7 @@ public extension Postfix {
         return self as? OptionalAccessPostfix
     }
     
+    /*
     /// Returns the first non-optional access postfix operator on this optional
     /// postfix access chain.
     public var unwrappingOptionalAccesses: Postfix {
@@ -1162,6 +1163,7 @@ public extension Postfix {
         
         return self
     }
+    */
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
