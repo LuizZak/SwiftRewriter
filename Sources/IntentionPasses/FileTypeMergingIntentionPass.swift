@@ -60,7 +60,10 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             
             for gvar in header.globalVariableIntentions {
                 header.removeGlobalVariables(where: { $0 === gvar })
-                impl.addGlobalVariable(gvar)
+                
+                if !impl.globalVariableIntentions.contains(where: { $0.name == gvar.name }) {
+                    impl.addGlobalVariable(gvar)
+                }
             }
         }
         

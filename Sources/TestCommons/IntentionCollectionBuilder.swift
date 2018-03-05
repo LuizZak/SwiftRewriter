@@ -57,21 +57,31 @@ public class FileIntentionBuilder {
                                      type: SwiftType,
                                      ownership: Ownership = .strong,
                                      isConstant: Bool = false,
-                                     accessLevel: AccessLevel = .internal) -> FileIntentionBuilder {
+                                     accessLevel: AccessLevel = .internal,
+                                     initialExpression: Expression? = nil) -> FileIntentionBuilder {
         let storage =
             ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
         
-        return createGlobalVariable(withName: name, storage: storage, accessLevel: accessLevel)
+        return createGlobalVariable(withName: name, storage: storage,
+                                    accessLevel: accessLevel,
+                                    initialExpression: initialExpression)
     }
     
     @discardableResult
     public func createGlobalVariable(withName name: String,
                                      storage: ValueStorage,
-                                     accessLevel: AccessLevel = .internal) -> FileIntentionBuilder {
+                                     accessLevel: AccessLevel = .internal,
+                                     initialExpression: Expression? = nil) -> FileIntentionBuilder {
         let varIntention =
             GlobalVariableGenerationIntention(name: name,
                                               storage: storage,
                                               accessLevel: accessLevel)
+        
+        if let initialExpression = initialExpression {
+            varIntention.initialValueExpr =
+                GlobalVariableInitialValueIntention(expression: initialExpression,
+                                                    source: nil)
+        }
         
         intention.addGlobalVariable(varIntention)
         
