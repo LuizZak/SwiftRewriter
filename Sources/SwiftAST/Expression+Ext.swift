@@ -40,7 +40,7 @@ public struct OptionalAccessPostfixBuilder {
     public var exp: Expression
     
     /// Creates a function call invocation postfix expression with this expression
-    public func call(arguments: [FunctionArgument] = []) -> PostfixExpression {
+    public func call(_ arguments: [FunctionArgument] = []) -> PostfixExpression {
         return .postfix(exp, .optionalAccess(.functionCall(arguments: arguments)))
     }
     

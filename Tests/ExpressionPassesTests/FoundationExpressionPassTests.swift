@@ -83,7 +83,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                 .identifier("array")
                 .optional()
                 .dot("addObjects")
-                .call(arguments: [.labeled("from", .arrayLiteral([]))])
+                .call([.labeled("from", .arrayLiteral([]))])
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .optional(.void))
@@ -252,7 +252,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         
         assertTransform(
             expression: valueExp.dot("class").call(),
-            into: Expression.identifier("type").call(arguments: [.labeled("of", valueExp)])
+            into: Expression.identifier("type").call([.labeled("of", valueExp)])
         ); assertNotifiedChange()
     }
     
@@ -267,7 +267,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             into: Expression
                 .identifier("a")
                 .dot("responds")
-                .call(arguments: [
+                .call([
                     .labeled("to", Expression
                         .identifier("Selector").call([
                             .constant("selector:")
@@ -291,7 +291,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                 .identifier("a")
                 .optional()
                 .dot("responds")
-                .call(arguments: [
+                .call([
                     .labeled("to", Expression
                         .identifier("Selector").call([
                             .constant("selector:")

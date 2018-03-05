@@ -17,9 +17,7 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             into: Expression
                 .identifier("Float")
-                .call(arguments: [
-                    .unlabeled(.constant(1))
-                    ])
+                .call([.unlabeled(.constant(1))])
         )
         
         assertNotifiedChange()

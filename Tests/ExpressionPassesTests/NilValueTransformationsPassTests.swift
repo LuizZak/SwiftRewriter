@@ -119,7 +119,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
     func testDontModifyExpressionsInsideOtherExpressions() {
         // a(b())
         let exp = Expression
-            .identifier("a").call(arguments: [.unlabeled(.postfix(.identifier("b"), .functionCall()))])
+            .identifier("a").call([.unlabeled(.postfix(.identifier("b"), .functionCall()))])
         
         exp.subExpressions[1].subExpressions[0].resolvedType =
             .optional(.block(returnType: .void, parameters: []))
@@ -145,7 +145,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
         
         let exp = Expression
             .identifier("takesBlock")
-            .call(arguments: [
+            .call([
                 .unlabeled(
                     .block(parameters: [],
                            return: .void,
@@ -158,14 +158,15 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
                             .expression(
                                 Expression
                                     .identifier("block2")
-                                    .call(arguments: [
+                                    .call([
                                         .unlabeled(
                                             Expression.block(
                                                 parameters: [],
                                                 return: .void,
                                                 body: [
                                                     .expression(nilBlock)
-                                                ]))
+                                                ])
+                                        )
                                         ])
                             )
                         ])
@@ -178,7 +179,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             // takesBlock({ block1(); block2?() })
             into: Expression
                 .identifier("takesBlock")
-                .call(arguments: [
+                .call([
                     .unlabeled(
                         .block(parameters: [],
                                return: .void,
@@ -187,7 +188,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
                                 .expression(
                                     Expression
                                         .identifier("block2")
-                                        .call(arguments: [
+                                        .call([
                                             .unlabeled(
                                                 Expression.block(
                                                     parameters: [],
@@ -211,9 +212,9 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             }
             
             if collesced {
-                exp = Expression.identifier("callback").optional().call(arguments: params)
+                exp = Expression.identifier("callback").optional().call(params)
             } else {
-                exp = Expression.identifier("callback").call(arguments: params)
+                exp = Expression.identifier("callback").call(params)
             }
             
             exp.asPostfix?.exp.resolvedType = .optional(.block(returnType: .void, parameters: []))
@@ -223,7 +224,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
         
         let exp = Expression
             .identifier("self").dot("member").call()
-            .dot("then").call(arguments: [
+            .dot("then").call([
                 .unlabeled(
                     .block(parameters: [],
                            return: .void,
@@ -231,7 +232,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
                             .expression(makeCallback(/* coallesced: */ false, /* argCount: */ 0))
                         ]))
                 ])
-            .dot("then").call(arguments: [
+            .dot("then").call([
                 .unlabeled(
                     .block(parameters: [],
                            return: .void,
@@ -239,7 +240,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
                             .expression(makeCallback(/* coallesced: */ false, /* argCount: */ 1))
                         ]))
                 ])
-            .dot("always").call(arguments: [
+            .dot("always").call([
                 .unlabeled(
                     .block(parameters: [],
                            return: .void,
@@ -267,7 +268,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             into: Expression
                 .identifier("self")
                 .dot("member").call()
-                .dot("then").call(arguments: [
+                .dot("then").call([
                     .unlabeled(
                         .block(parameters: [],
                                return: .void,
@@ -275,7 +276,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
                                 .expression(makeCallback(/* coallesced: */ true, /* argCount: */ 0))
                             ]))
                     ])
-                .dot("then").call(arguments: [
+                .dot("then").call([
                     .unlabeled(
                         .block(parameters: [],
                                return: .void,
@@ -283,7 +284,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
                                 .expression(makeCallback(/* coallesced: */ true, /* argCount: */ 1))
                             ]))
                     ])
-                .dot("always").call(arguments: [
+                .dot("always").call([
                     .unlabeled(
                         .block(parameters: [],
                                return: .void,

@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import SwiftAST
 import ExpressionPasses
 
 class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
@@ -288,5 +289,23 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         )
         
         assertNotifiedChange()
+    }
+    
+    func testConvertCGPathAddPoint() {
+        assertTransformParsed(
+            expression: "CGPathAddPoint(path, nil, 1, 2)",
+            into: Expression
+                .identifier("path")
+                .dot("addPoint")
+                .call([.labeled("to",
+                                Expression
+                                    .identifier("CGPoint")
+                                    .call([
+                                        .labeled("x", .constant(1)),
+                                        .labeled("y", .constant(2))
+                                        ])),
+                       .labeled("transform",
+                                Expression.constant(.nil))
+                    ]))
     }
 }

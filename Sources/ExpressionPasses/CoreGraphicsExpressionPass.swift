@@ -5,6 +5,13 @@ import Utils
 
 public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     
+    private var transformers: [FunctionSignatureTransformer] = []
+    
+    public required init() {
+        super.init()
+        createCoreGraphicsTransformers()
+    }
+    
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         switch (exp.exp, exp.op) {
         // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
@@ -165,6 +172,13 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             break
         }
         
+        if let transf = transformers.first(where: { $0.canApply(to: exp) }),
+            let res = transf.attemptApply(on: exp) {
+            notifyChange()
+            
+            return super.visitExpression(res)
+        }
+        
         return super.visitPostfix(exp)
     }
     
@@ -185,7 +199,11 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     
     func createCoreGraphicsTransformers() {
         func make(_ name: String, swiftName: String, arguments: [FunctionSignatureTransformer.ArgumentStrategy]) {
+            let transformer =
+                FunctionSignatureTransformer(name: name, swiftName: swiftName,
+                                             arguments: arguments)
             
+            transformers.append(transformer)
         }
         
         /// Converts two expressions into a CGPoint initializer
@@ -196,21 +214,14 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
         }
         
         make("CGPathAddPoint", swiftName: "addPoint",
-             arguments: [.labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)), .fromArgIndex(0)])
+             arguments: [.labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                         .labeled("transform", .fromArgIndex(0))])
         
         make("CGPathAddRoundedRect", swiftName: "addRoundedRect",
              arguments: [.labeled("in", .fromArgIndex(1)),
                          .labeled("cornerWidth", .fromArgIndex(2)),
                          .labeled("cornerHeight", .fromArgIndex(3)),
                          .labeled("transform", .fromArgIndex(0))])
-        
-        /*
-        make("CGPathAddPoint", swiftName: "addPoint",
-             arguments: [.moveTo(index: 1), .labeled("to", .mergeWithNext(toCGPoint))])
-        
-        make("CGPathAddRoundedRect", swiftName: "addRoundedRect",
-             arguments: [.moveTo(index: 1), .mergeWithNext(toCGPoint)])
-        */
     }
 }
 
@@ -232,6 +243,88 @@ private final class FunctionSignatureTransformer {
         
         requiredArgumentCount =
             arguments.reduce(0) { $0 + $1.argumentConsumeCount }
+    }
+    
+    func canApply(to postfix: PostfixExpression) -> Bool {
+        guard postfix.exp.asIdentifier?.identifier == name else {
+            return false
+        }
+        guard let functionCall = postfix.functionCall else {
+            return false
+        }
+        
+        // First argument is always the target instance, so we subtract from the
+        // final effective arguments count
+        if functionCall.arguments.count - 1 != requiredArgumentCount {
+            return false
+        }
+        
+        return true
+    }
+    
+    func attemptApply(on postfix: PostfixExpression) -> Expression? {
+        guard postfix.exp.asIdentifier?.identifier == name else {
+            return nil
+        }
+        guard let functionCall = postfix.functionCall else {
+            return nil
+        }
+        guard self.arguments.count > 0, functionCall.arguments.count > 0 else {
+            return nil
+        }
+        
+        // First argument is always the target instance, so we subtract from the
+        // final effective arguments count
+        if functionCall.arguments.count - 1 != requiredArgumentCount {
+            return nil
+        }
+        
+        var arguments = Array(functionCall.arguments.dropFirst())
+        var result: [FunctionArgument] = []
+        
+        func handleArg(i: Int, argument: ArgumentStrategy) -> FunctionArgument {
+            switch argument {
+            case .asIs:
+                return arguments[i]
+            case let .mergeArguments(arg0, arg1, merger):
+                let arg = FunctionArgument(label: nil,
+                                           expression: merger(arguments[arg0].expression,
+                                                              arguments[arg1].expression)
+                )
+                
+                return arg
+            case .fromArgIndex(let index):
+                return arguments[index]
+            case let .labeled(label, strat):
+                let arg = handleArg(i: i, argument: strat)
+                
+                return .labeled(label, arg.expression)
+            }
+        }
+        
+        var i = 0
+        while i < self.arguments.count {
+            let arg = self.arguments[i]
+            let res = handleArg(i: i, argument: arg)
+            result.append(res)
+            
+            if case .mergeArguments = arg {
+                i += 1
+            }
+            
+            i += 1
+        }
+        
+        // Construct a new postfix operation with the result
+        let exp =
+            functionCall
+                .arguments[0]
+                .expression
+                .dot(swiftName)
+                .call(result)
+        exp.resolvedType = postfix.resolvedType
+        
+        return exp
     }
     
     /// What to do with one or more arguments of a function call

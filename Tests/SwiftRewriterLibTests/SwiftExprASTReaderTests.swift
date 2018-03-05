@@ -54,17 +54,17 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
     
     func testSelectorMessage() {
-        assert(objcExpr: "[a selector]", readsAs: Expression.identifier("a").dot("selector").call(arguments: []))
+        assert(objcExpr: "[a selector]", readsAs: Expression.identifier("a").dot("selector").call())
         
         assert(objcExpr: "[a selector:1, 2, 3]",
                readsAs: Expression
                 .identifier("a")
-                .dot("selector").call(arguments: [.unlabeled(.constant(1)), .unlabeled(.constant(2)), .unlabeled(.constant(3))]))
+                .dot("selector").call([.unlabeled(.constant(1)), .unlabeled(.constant(2)), .unlabeled(.constant(3))]))
         
         assert(objcExpr: "[a selector:1 c:2, 3]",
                readsAs: Expression
                 .identifier("a")
-                .dot("selector").call(arguments: [.unlabeled(.constant(1)), .labeled("c", .constant(2)), .unlabeled(.constant(3))]))
+                .dot("selector").call([.unlabeled(.constant(1)), .labeled("c", .constant(2)), .unlabeled(.constant(3))]))
     }
     
     func testCastExpression() {
@@ -85,11 +85,11 @@ class SwiftExprASTReaderTests: XCTestCase {
         let exp = Expression
             .identifier("UIView")
             .dot("alloc").call()
-            .dot("initWithFrame").call(arguments: [
+            .dot("initWithFrame").call([
                 .unlabeled(
                     Expression
                         .identifier("CGRectMake")
-                        .call(arguments:
+                        .call(
                             [
                                 .unlabeled(.constant(0)),
                                 .unlabeled(.identifier("kCPDefaultTimelineRowHeight")),
