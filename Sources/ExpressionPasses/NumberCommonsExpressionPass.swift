@@ -29,20 +29,32 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
     
     // Converts `floorf`, `roundf`, `ceilf` to simply `floor`, `round`, `ceil`.
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        if exp.functionCall?.arguments.count == 1, let ident = exp.exp.asIdentifier?.identifier {
-            let matchers: [String: String] = [
-                "floorf": "floor",
-                "ceilf": "ceil",
-                "roundf": "round",
-                "fabs": "abs"
-            ]
-            
-            if let match = matchers[ident] {
-                exp.exp.asIdentifier?.identifier = match
-                notifyChange()
+        if let ident = exp.exp.asIdentifier?.identifier {
+            if exp.functionCall?.arguments.count == 1 {
+                let matchers: [String: String] = [
+                    "floorf": "floor",
+                    "ceilf": "ceil",
+                    "roundf": "round",
+                    "fabs": "abs"
+                ]
+                
+                if let match = matchers[ident] {
+                    exp.exp.asIdentifier?.identifier = match
+                    notifyChange()
+                }
             }
             
-            return super.visitPostfix(exp)
+            if exp.functionCall?.arguments.count == 2 {
+                let matchers: [String: String] = [
+                    "MAX": "max",
+                    "MIN": "min"
+                ]
+                
+                if let match = matchers[ident] {
+                    exp.exp.asIdentifier?.identifier = match
+                    notifyChange()
+                }
+            }
         }
         
         return super.visitPostfix(exp)
