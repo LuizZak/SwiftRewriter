@@ -232,7 +232,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
-    func testTypeLookupsHappenAfterAllSourceCodeIsParsed() throws {
+    func testTypeLookupsHappenAfterAllSourceCodeIsParsed() {
         assertThat()
             .file(name: "A.h",
             """
@@ -280,6 +280,68 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             }
             // End of file B.swift
             """)
+    }
+    
+    func testChainCallRespondsToSelectorWithReproCase() {
+        assertThat()
+            .file(name: "A.h",
+            """
+            #pragma mark - Delegate
+            @class Class;
+            @protocol Delegate <NSObject>
+            - (void)delegateMethod:(nonnull Class*)cls;
+            @end
+
+            @interface Class : UIView
+            @property (weak, nullable) id<Delegate> delegate;
+            @end
+
+            NS_ASSUME_NONNULL_END
+            """)
+            .file(name: "A.m", """
+            @implementation Class
+            #pragma mark - Calculation methods
+            - (void)method
+            {
+                (self.delegate);
+                [self.delegate respondsToSelector:@selector(delegateMethod:)];
+                if([self.delegate respondsToSelector:@selector(delegateMethod:)])
+                {
+                    [self.delegate delegateMethod:self];
+                }
+            }
+            @end
+            """)
+            .translatesToSwift(        
+            """
+            // Preprocessor directives found in file:
+            // #pragma mark - Delegate
+            // #pragma mark - Calculation methods
+            @objc
+            protocol Delegate: NSObjectProtocol {
+                @objc
+                func delegateMethod(_ cls: Class)
+            }
+
+            @objc
+            class Class: UIView {
+                @objc weak var delegate: Delegate?
+                
+                @objc
+                func method() {
+                    // type: Delegate?
+                    (self.delegate)
+                    // type: Bool?
+                    self.delegate?.responds(to: Selector("delegateMethod:"))
+                    if self.delegate?.responds(to: Selector("delegateMethod:")) == true {
+                        // type: Void?
+                        self.delegate?.delegateMethod(self)
+                    }
+                }
+            }
+            // End of file A.swift
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
     private func assertThat() -> MultiFileTestBuilder {

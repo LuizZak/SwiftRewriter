@@ -20,14 +20,14 @@ class MultiFileTestBuilder {
     
     /// Assertion execution point
     @discardableResult
-    func translatesToSwift(_ expectedSwift: String, expectsErrors: Bool = false, file: String = #file, line: Int = #line) -> MultiFileTestBuilder {
+    func translatesToSwift(_ expectedSwift: String, expectsErrors: Bool = false, options: ASTWriterOptions = .default, file: String = #file, line: Int = #line) -> MultiFileTestBuilder {
         let inputs = files.map(TestInputSource.init)
         
         let output = TestWriterOutput()
         let input = TestMultiInputProvider(inputs: inputs)
         
         let sut = SwiftRewriter(input: input, output: output)
-        
+        sut.writerOptions = options
         sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
         sut.intentionPassesSource = DefaultIntentionPasses()
         

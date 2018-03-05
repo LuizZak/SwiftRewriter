@@ -11,6 +11,18 @@ indirect public enum SwiftType: Equatable {
         }
     }
     
+    /// Returns a normalized version of this type, getting rid of redundancies.
+    public var normalized: SwiftType {
+        switch self {
+        case .protocolComposition(let comp) where comp.count == 1:
+            return comp[0]
+        case let .generic(name, params) where params.count == 0:
+            return .typeName(name)
+        default:
+            return self
+        }
+    }
+    
     /// Returns `true` if this type is a block type
     public var isBlock: Bool {
         switch self {

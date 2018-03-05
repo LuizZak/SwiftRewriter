@@ -390,7 +390,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 
 extension ExpressionTypeResolver {
     func findType(for swiftType: SwiftType) -> KnownType? {
-        let swiftType = swiftType.deepUnwrapped
+        let swiftType = swiftType.normalized.deepUnwrapped
         
         switch swiftType {
         case .typeName(let typeName):
@@ -399,6 +399,9 @@ extension ExpressionTypeResolver {
         // Meta-types recurse on themselves
         case .metatype(for: let inner):
             return findMetatype(forType: inner)
+            
+        case .protocolComposition(let types):
+            return typeSystem.composeTypeWithKnownTypes(types.map { $0.description })
             
         // Other Swift types are not supported, at the moment.
         default:

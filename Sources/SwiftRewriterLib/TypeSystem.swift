@@ -14,6 +14,10 @@ public protocol TypeSystem {
     /// Gets a known type with a given name from this type system.
     func knownTypeWithName(_ name: String) -> KnownType?
     
+    /// Returns a composition of a set of types as a single known type.
+    /// Returns nil, if any of the types is unknown, or the list is empty.
+    func composeTypeWithKnownTypes(_ typeNames: [String]) -> KnownType?
+    
     /// Returns `true` if a given type is considered a class instance type.
     /// Class instance types are considered to be any type that is either a Swift
     /// or Objective-C class/protocol, or a subclass implementer of one of them.
