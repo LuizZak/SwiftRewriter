@@ -12,6 +12,23 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
         createCoreGraphicsTransformers()
     }
     
+    public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
+        // Remove CGPathRelease
+        stmt.expressions = stmt.expressions.compactMap { (exp: Expression) -> Expression? in
+            guard let call = exp.asPostfix?.functionCall, let ident = exp.asPostfix?.exp.asIdentifier else {
+                return exp
+            }
+            
+            if ident.identifier == "CGPathRelease" && call.arguments.count == 1 && !call.arguments.hasLabeledArguments() {
+                return nil
+            }
+            
+            return exp
+        }
+        
+        return super.visitExpressions(stmt)
+    }
+    
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         switch (exp.exp, exp.op) {
         // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
@@ -168,6 +185,30 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             
             notifyChange()
             
+        // MARK: CGPath
+            
+        // CGPathCreateMutable() -> CGMutablePath()
+        case (.identifier("CGPathCreateMutable"), .functionCall()):
+            exp.exp.asIdentifier?.identifier = "CGMutablePath"
+            
+            notifyChange()
+            
+        // CGPathIsEmpty(<path>) -> <path>.isEmpty
+        case (.identifier("CGPathIsEmpty"), _):
+            convertMethodToField(field: "isEmpty", ifArgCountIs: 1, exp)
+            
+        // CGPathGetCurrentPoint(<path>) -> <path>.currentPoint
+        case (.identifier("CGPathGetCurrentPoint"), _):
+            convertMethodToField(field: "currentPoint", ifArgCountIs: 1, exp)
+            
+        // CGPathGetBoundingBox(<path>) -> <path>.boundingBox
+        case (.identifier("CGPathGetBoundingBox"), _):
+            convertMethodToField(field: "boundingBox", ifArgCountIs: 1, exp)
+            
+        // CGPathGetPathBoundingBox(<path>) -> <path>.boundingBoxOfPath
+        case (.identifier("CGPathGetPathBoundingBox"), _):
+            convertMethodToField(field: "boundingBoxOfPath", ifArgCountIs: 1, exp)
+            
         default:
             break
         }
@@ -213,15 +254,124 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .call([.labeled("x", x), .labeled("y", y)])
         }
         
-        make("CGPathAddPoint", swiftName: "addPoint",
-             arguments: [.labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
-                         .labeled("transform", .fromArgIndex(0))])
+        /// Default `transform` parameter handler
+        let transform: FunctionSignatureTransformer.ArgumentStrategy =
+            .omitIf(matches: .constant(.nil), .labeled("transform", .fromArgIndex(0)))
         
         make("CGPathAddRoundedRect", swiftName: "addRoundedRect",
-             arguments: [.labeled("in", .fromArgIndex(1)),
-                         .labeled("cornerWidth", .fromArgIndex(2)),
-                         .labeled("cornerHeight", .fromArgIndex(3)),
-                         .labeled("transform", .fromArgIndex(0))])
+             arguments: [
+                .labeled("in", .fromArgIndex(1)),
+                .labeled("cornerWidth", .fromArgIndex(2)),
+                .labeled("cornerHeight", .fromArgIndex(3)),
+                transform
+            ]
+        )
+        
+        make("CGPathMoveToPoint", swiftName: "move",
+             arguments: [
+                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddLineToPoint", swiftName: "addLine",
+             arguments: [
+                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddQuadCurveToPoint", swiftName: "addQuadCurve",
+             arguments: [
+                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("control", .mergeArguments(arg0: 3, arg1: 4, toCGPoint)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddCurveToPoint", swiftName: "addCurve",
+             arguments: [
+                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("control1", .mergeArguments(arg0: 3, arg1: 4, toCGPoint)),
+                .labeled("control2", .mergeArguments(arg0: 5, arg1: 6, toCGPoint)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddRect", swiftName: "addRect",
+             arguments: [
+                .fromArgIndex(1),
+                transform
+            ]
+        )
+        
+        make("CGPathAddRects", swiftName: "addRects",
+             arguments: [
+                .fromArgIndex(1),
+                transform
+            ]
+        )
+        
+        // TODO: This considers a `count` value. We need to make sure in case the
+        // count is passed lower than the array's actual count that we keep the
+        // same behavior.
+        make("CGPathAddLines", swiftName: "addLines",
+             arguments: [
+                .labeled("between", .fromArgIndex(1)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddEllipseInRect", swiftName: "addEllipse",
+             arguments: [
+                .labeled("in", .fromArgIndex(1)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddRelativeArc", swiftName: "addRelativeArc",
+             arguments: [
+                .labeled("center", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("radius", .fromArgIndex(3)),
+                .labeled("startAngle", .fromArgIndex(4)),
+                .labeled("delta", .fromArgIndex(5)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddArc", swiftName: "addArc",
+             arguments: [
+                .labeled("center", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("radius", .fromArgIndex(3)),
+                .labeled("startAngle", .fromArgIndex(4)),
+                .labeled("endAngle", .fromArgIndex(5)),
+                .labeled("clockwise", .fromArgIndex(6)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddArcToPoint", swiftName: "addArc",
+             arguments: [
+                .labeled("tangent1End", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("tangent2End", .mergeArguments(arg0: 3, arg1: 4, toCGPoint)),
+                .labeled("radius", .fromArgIndex(5)),
+                transform
+            ]
+        )
+        
+        make("CGPathAddPath", swiftName: "addPath",
+             arguments: [
+                .fromArgIndex(1),
+                transform
+            ]
+        )
+        
+        make("CGPathAddPath", swiftName: "addPath",
+             arguments: [
+                .fromArgIndex(1),
+                transform
+            ]
+        )
     }
 }
 
@@ -282,7 +432,7 @@ private final class FunctionSignatureTransformer {
         var arguments = Array(functionCall.arguments.dropFirst())
         var result: [FunctionArgument] = []
         
-        func handleArg(i: Int, argument: ArgumentStrategy) -> FunctionArgument {
+        func handleArg(i: Int, argument: ArgumentStrategy) -> FunctionArgument? {
             switch argument {
             case .asIs:
                 return arguments[i]
@@ -293,23 +443,38 @@ private final class FunctionSignatureTransformer {
                 )
                 
                 return arg
+            
             case .fromArgIndex(let index):
                 return arguments[index]
-            case let .labeled(label, strat):
-                let arg = handleArg(i: i, argument: strat)
                 
-                return .labeled(label, arg.expression)
+            case let .omitIf(matches: exp, strat):
+                guard let result = handleArg(i: i, argument: strat) else {
+                    return nil
+                }
+                
+                if result.expression == exp {
+                    return nil
+                }
+                
+                return result
+            case let .labeled(label, strat):
+                if let arg = handleArg(i: i, argument: strat) {
+                    return .labeled(label, arg.expression)
+                }
+                
+                return nil
             }
         }
         
         var i = 0
         while i < self.arguments.count {
             let arg = self.arguments[i]
-            let res = handleArg(i: i, argument: arg)
-            result.append(res)
-            
-            if case .mergeArguments = arg {
-                i += 1
+            if let res = handleArg(i: i, argument: arg) {
+                result.append(res)
+                
+                if case .mergeArguments = arg {
+                    i += 1
+                }
             }
             
             i += 1
@@ -335,6 +500,8 @@ private final class FunctionSignatureTransformer {
         
         case mergeArguments(arg0: Int, arg1: Int, (Expression, Expression) -> Expression)
         
+        indirect case omitIf(matches: Expression, ArgumentStrategy)
+        
         indirect case labeled(String, ArgumentStrategy)
         
         /// Gets the number of arguments this argument strategy will consume when
@@ -345,47 +512,10 @@ private final class FunctionSignatureTransformer {
                 return 1
             case .mergeArguments:
                 return 2
-            case .labeled(_, let inner):
+            case .labeled(_, let inner), .omitIf(_, let inner):
                 return inner.argumentConsumeCount
             }
         }
-        
-        /*
-        /// Does nothing with argument- keeps it in place and moves on to the next.
-        case asIs
-        
-        /// Merges the argument with the next argument in the sequence, flattening
-        /// the result into a single argument using a given transformation closure.
-        ///
-        /// The next argument is then skipped, as it's considered to be already
-        /// processed.
-        case mergeWithNext((Expression, Expression) -> Expression)
-        
-        /// Indicates the argument must be moved to a specified index.
-        /// Only one argument can be contained on an index by the end of the
-        /// signature transformation.
-        case moveTo(index: Int)
-        
-        /// Indicates a strategy is to be applied, and on the resulting argument,
-        /// the label for the function call must be set to a given label.
-        ///
-        /// In case the strategy within is itself a label strategy, the label is
-        /// updated to use the new outermost `label`.
-        indirect case labeled(String, ArgumentStrategy)
-        
-        /// Gets the number of arguments this argument strategy will consume when
-        /// applied.
-        var argumentConsumeCount: Int {
-            switch self {
-            case .asIs, .moveTo:
-                return 1
-            case .mergeWithNext:
-                return 2
-            case .labeled(_, let inner):
-                return inner.argumentConsumeCount
-            }
-        }
-        */
     }
 }
 

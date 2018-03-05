@@ -293,10 +293,26 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
     
     func testConvertCGPathAddPoint() {
         assertTransformParsed(
-            expression: "CGPathAddPoint(path, nil, 1, 2)",
+            expression: "CGPathAddLineToPoint(path, nil, 1, 2)",
             into: Expression
                 .identifier("path")
-                .dot("addPoint")
+                .dot("addLine")
+                .call([.labeled("to",
+                                Expression
+                                    .identifier("CGPoint")
+                                    .call([
+                                        .labeled("x", .constant(1)),
+                                        .labeled("y", .constant(2))
+                                        ]))
+                    ]))
+    }
+    
+    func testConvertCGPathAddPointWithTransform() {
+        assertTransformParsed(
+            expression: "CGPathAddLineToPoint(path, t, 1, 2)",
+            into: Expression
+                .identifier("path")
+                .dot("addLine")
                 .call([.labeled("to",
                                 Expression
                                     .identifier("CGPoint")
@@ -305,7 +321,14 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                         .labeled("y", .constant(2))
                                         ])),
                        .labeled("transform",
-                                Expression.constant(.nil))
+                                Expression.identifier("t"))
                     ]))
+    }
+    
+    func testRemovesCGPathRelease() {
+        assertTransform(
+            statement: .expression(Expression.identifier("CGPathRelease").call([.identifier("a")])),
+            into: .expressions([])
+        )
     }
 }
