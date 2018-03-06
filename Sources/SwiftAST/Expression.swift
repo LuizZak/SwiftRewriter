@@ -1152,18 +1152,6 @@ public extension Postfix {
     public var asOptionalAccess: OptionalAccessPostfix? {
         return self as? OptionalAccessPostfix
     }
-    
-    /*
-    /// Returns the first non-optional access postfix operator on this optional
-    /// postfix access chain.
-    public var unwrappingOptionalAccesses: Postfix {
-        if let opt = asOptionalAccess {
-            return opt.unwrappedOptionalAccess
-        }
-        
-        return self
-    }
-    */
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
