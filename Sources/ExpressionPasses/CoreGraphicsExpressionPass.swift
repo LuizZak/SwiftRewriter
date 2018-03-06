@@ -9,11 +9,11 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     
     public required init() {
         super.init()
-        createCoreGraphicsTransformers()
+        createTransformers()
     }
     
     public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
-        // Remove CGPathRelease
+        // Remove CGPathRelease(<path>)
         stmt.expressions = stmt.expressions.compactMap { (exp: Expression) -> Expression? in
             guard let call = exp.asPostfix?.functionCall, let ident = exp.asPostfix?.exp.asIdentifier else {
                 return exp
@@ -31,60 +31,6 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         switch (exp.exp, exp.op) {
-        // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
-        case (.identifier("CGRectMake"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 4 && !functionCall.arguments.hasLabeledArguments():
-            
-            let newArgs = functionCall.arguments.enumerated().map { (i, arg) -> FunctionArgument in
-                let lbl: String
-                switch i {
-                case 0:
-                    lbl = "x"
-                case 1:
-                    lbl = "y"
-                case 2:
-                    lbl = "width"
-                case 3:
-                    lbl = "height"
-                default:
-                    lbl = "_"
-                }
-                
-                return .labeled(lbl, arg.expression)
-            }
-            
-            exp.exp = .identifier("CGRect")
-            exp.op = .functionCall(arguments: newArgs)
-            
-            notifyChange()
-            
-        // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>) -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
-        case (.identifier("UIEdgeInsetsMake"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 4 && !functionCall.arguments.hasLabeledArguments():
-            
-            let newArgs = functionCall.arguments.enumerated().map { (i, arg) -> FunctionArgument in
-                let lbl: String
-                switch i {
-                case 0:
-                    lbl = "top"
-                case 1:
-                    lbl = "left"
-                case 2:
-                    lbl = "bottom"
-                case 3:
-                    lbl = "right"
-                default:
-                    lbl = "_"
-                }
-                
-                return .labeled(lbl, arg.expression)
-            }
-            
-            exp.exp = .identifier("UIEdgeInsets")
-            exp.op = .functionCall(arguments: newArgs)
-            
-            notifyChange()
-            
         // CGRectGetWidth(<exp>) -> <exp>.width
         case (.identifier("CGRectGetWidth"), _):
             convertMethodToField(field: "width", ifArgCountIs: 1, exp)
@@ -238,16 +184,46 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
         }
     }
     
-    func createCoreGraphicsTransformers() {
+    func createTransformers() {
+        func make(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy]) {
+            let transformer =
+                FunctionInvocationTransformer(name: name, swiftName: swiftName,
+                                              firstArgIsInstance: false,
+                                              arguments: arguments)
+            transformers.append(transformer)
+        }
+        
+        // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>) -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
+        make("UIEdgeInsetsMake", swiftName: "UIEdgeInsets",
+             arguments: [
+                .labeled("top", .asIs), .labeled("left", .asIs),
+                .labeled("bottom", .asIs), .labeled("right", .asIs)
+            ])
+        // CGointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
+        make("CGPointMake", swiftName: "CGPoint",
+             arguments: [
+                .labeled("x", .asIs), .labeled("y", .asIs)
+            ])
+        // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
+        make("CGRectMake", swiftName: "CGRect",
+             arguments: [
+                .labeled("x", .asIs), .labeled("y", .asIs),
+                .labeled("width", .asIs), .labeled("height", .asIs)
+            ])
+        
+        createCGPathTransformers()
+    }
+    
+    func createCGPathTransformers() {
         /// Default `transform` parameter handler
         let transform: FunctionInvocationTransformer.ArgumentStrategy =
             .omitIf(matches: .constant(.nil), .labeled("transform", .fromArgIndex(0)))
         
-        func make(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy]) {
+        func makeInstance(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy]) {
             let transformer =
                 FunctionInvocationTransformer(name: name, swiftName: swiftName,
-                                             firstArgIsInstance: true,
-                                             arguments: arguments + [transform])
+                                              firstArgIsInstance: true,
+                                              arguments: arguments + [transform])
             
             transformers.append(transformer)
         }
@@ -259,7 +235,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .call([.labeled("x", x), .labeled("y", y)])
         }
         
-        make("CGPathAddRoundedRect", swiftName: "addRoundedRect",
+        makeInstance("CGPathAddRoundedRect", swiftName: "addRoundedRect",
              arguments: [
                 .labeled("in", .fromArgIndex(1)),
                 .labeled("cornerWidth", .fromArgIndex(2)),
@@ -267,26 +243,26 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             ]
         )
         
-        make("CGPathMoveToPoint", swiftName: "move",
+        makeInstance("CGPathMoveToPoint", swiftName: "move",
              arguments: [
                 .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint))
             ]
         )
         
-        make("CGPathAddLineToPoint", swiftName: "addLine",
+        makeInstance("CGPathAddLineToPoint", swiftName: "addLine",
              arguments: [
                 .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint))
             ]
         )
         
-        make("CGPathAddQuadCurveToPoint", swiftName: "addQuadCurve",
+        makeInstance("CGPathAddQuadCurveToPoint", swiftName: "addQuadCurve",
              arguments: [
                 .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
                 .labeled("control", .mergeArguments(arg0: 3, arg1: 4, toCGPoint))
             ]
         )
         
-        make("CGPathAddCurveToPoint", swiftName: "addCurve",
+        makeInstance("CGPathAddCurveToPoint", swiftName: "addCurve",
              arguments: [
                 .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
                 .labeled("control1", .mergeArguments(arg0: 3, arg1: 4, toCGPoint)),
@@ -294,13 +270,13 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             ]
         )
         
-        make("CGPathAddRect", swiftName: "addRect",
+        makeInstance("CGPathAddRect", swiftName: "addRect",
              arguments: [
                 .fromArgIndex(1)
             ]
         )
         
-        make("CGPathAddRects", swiftName: "addRects",
+        makeInstance("CGPathAddRects", swiftName: "addRects",
              arguments: [
                 .fromArgIndex(1)
             ]
@@ -309,19 +285,19 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
         // TODO: This considers a `count` value. We need to make sure in case the
         // count is passed lower than the array's actual count that we keep the
         // same behavior.
-        make("CGPathAddLines", swiftName: "addLines",
+        makeInstance("CGPathAddLines", swiftName: "addLines",
              arguments: [
                 .labeled("between", .fromArgIndex(1))
             ]
         )
         
-        make("CGPathAddEllipseInRect", swiftName: "addEllipse",
+        makeInstance("CGPathAddEllipseInRect", swiftName: "addEllipse",
              arguments: [
                 .labeled("in", .fromArgIndex(1))
             ]
         )
         
-        make("CGPathAddRelativeArc", swiftName: "addRelativeArc",
+        makeInstance("CGPathAddRelativeArc", swiftName: "addRelativeArc",
              arguments: [
                 .labeled("center", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
                 .labeled("radius", .fromArgIndex(3)),
@@ -330,7 +306,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             ]
         )
         
-        make("CGPathAddArc", swiftName: "addArc",
+        makeInstance("CGPathAddArc", swiftName: "addArc",
              arguments: [
                 .labeled("center", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
                 .labeled("radius", .fromArgIndex(3)),
@@ -340,7 +316,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             ]
         )
         
-        make("CGPathAddArcToPoint", swiftName: "addArc",
+        makeInstance("CGPathAddArcToPoint", swiftName: "addArc",
              arguments: [
                 .labeled("tangent1End", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
                 .labeled("tangent2End", .mergeArguments(arg0: 3, arg1: 4, toCGPoint)),
@@ -348,13 +324,13 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             ]
         )
         
-        make("CGPathAddPath", swiftName: "addPath",
+        makeInstance("CGPathAddPath", swiftName: "addPath",
              arguments: [
                 .fromArgIndex(1)
             ]
         )
         
-        make("CGPathAddPath", swiftName: "addPath",
+        makeInstance("CGPathAddPath", swiftName: "addPath",
              arguments: [
                 .fromArgIndex(1)
             ]

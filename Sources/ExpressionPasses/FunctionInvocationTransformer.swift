@@ -72,14 +72,14 @@ public final class FunctionInvocationTransformer {
         self.arguments = arguments
         self.firstArgIsInstance = firstArgIsInstance
         
-        var requiredArgs =
-            (firstArgIsInstance ? 1 : 0) + arguments.reduce(0) { $0 + $1.argumentConsumeCount }
+        let offset = firstArgIsInstance ? 1 : 0
+        
+        var requiredArgs = arguments.reduce(0) { $0 + $1.argumentConsumeCount } + offset
         
         // Verify max arg count inferred from indexes of arguments
-        if let max = arguments.map({ $0.maxArgumentReferenced }).max(), max > requiredArgs {
+        if let max = arguments.map({ $0.maxArgumentReferenced + offset }).max(), max > requiredArgs {
             requiredArgs = max
         }
-            
         
         requiredArgumentCount = requiredArgs
     }

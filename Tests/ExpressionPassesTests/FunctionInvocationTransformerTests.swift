@@ -42,6 +42,44 @@ class FunctionInvocationTransformerTests: XCTestCase {
         XCTAssertEqual(sutSkippingSecondArg.requiredArgumentCount, 3)
     }
     
+    /// Tests that the required argument count value also takes into consideration
+    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
+    /// actual number of target arguments.
+    func testRequiredArgumentCounWithFirstArgumentIsInstanceInference() {
+        let sut = FunctionInvocationTransformer(
+            name: "objc", swiftName: "swift",
+            firstArgIsInstance: true,
+            arguments: [.asIs, .asIs]
+        )
+        let sutSkippingSecondArg = FunctionInvocationTransformer(
+            name: "objc", swiftName: "swift",
+            firstArgIsInstance: true,
+            arguments: [.asIs, .asIs]
+        )
+        
+        XCTAssertEqual(sut.requiredArgumentCount, 3)
+        XCTAssertEqual(sutSkippingSecondArg.requiredArgumentCount, 3)
+    }
+    
+    /// Tests that the required argument count value also takes into consideration
+    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
+    /// actual number of target arguments.
+    func testRequiredArgumentCountFromArgIndexWithFirstArgumentIsInstanceInference() {
+        let sut = FunctionInvocationTransformer(
+            name: "objc", swiftName: "swift",
+            firstArgIsInstance: true,
+            arguments: [.fromArgIndex(0), .fromArgIndex(1)]
+        )
+        let sutSkippingSecondArg = FunctionInvocationTransformer(
+            name: "objc", swiftName: "swift",
+            firstArgIsInstance: true,
+            arguments: [.fromArgIndex(0), .fromArgIndex(3)]
+        )
+        
+        XCTAssertEqual(sut.requiredArgumentCount, 3)
+        XCTAssertEqual(sutSkippingSecondArg.requiredArgumentCount, 4)
+    }
+    
     func testAsIs() {
         let sut = FunctionInvocationTransformer(
             name: "objc", swiftName: "swift", firstArgIsInstance: false,
