@@ -19,7 +19,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
         typeSystem.addType(en)
         
         assertTransform(
-            expression: .identifier("Enum_Case1"),
+            expression: Expression.identifier("Enum_Case1").makeErrorTyped(),
             into: Expression.identifier("Enum").dot("Enum_Case1")
         )
     }
@@ -33,7 +33,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
                 .build()
         typeSystem.addType(en)
         
-        let res = sut.apply(on: .identifier("Enum_Case1"), context: makeContext())
+        let res = sut.apply(on: Expression.identifier("Enum_Case1").makeErrorTyped(), context: makeContext())
         
         XCTAssertEqual(
             res.asPostfix?.member?
@@ -41,5 +41,24 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
                 .ownerType?.typeName, enumName)
         XCTAssertEqual(res.asPostfix?.exp.asIdentifier?.definition?.typeName, enumName)
         XCTAssertEqual(res.asPostfix?.exp.asIdentifier?.resolvedType, .metatype(for: .typeName(enumName)))
+    }
+    
+    /// Make sure we don't apply any transformation on types that are resolved
+    /// properly, since they may be referencing local variables or other members
+    /// shadowing the global enum.
+    func testDontApplyTransformationOnIdentifierWithDefinition() {
+        let en =
+            KnownTypeBuilder(typeName: "Enum", supertype: nil, kind: .enum)
+                .addingProperty(named: "Enum_Case1", type: .int, isStatic: true)
+                .build()
+        typeSystem.addType(en)
+        
+        let exp = Expression.identifier("Enum_Case1")
+        exp.resolvedType = .int
+        
+        assertTransform(
+            expression: exp,
+            into: .identifier("Enum_Case1")
+        )
     }
 }

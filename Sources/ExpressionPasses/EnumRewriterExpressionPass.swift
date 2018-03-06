@@ -20,7 +20,7 @@ public class EnumRewriterExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         // Verify if expression is unresolved
-        guard exp.definition == nil, !exp.isErrorTyped else {
+        guard exp.definition == nil, exp.isErrorTyped else {
             return super.visitIdentifier(exp)
         }
         

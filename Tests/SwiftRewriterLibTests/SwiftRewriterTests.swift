@@ -1086,4 +1086,32 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testEnumAccessRewriting() throws {
+        try assertObjcParse(
+            objc: """
+            typedef NS_ENUM(NSInteger, MyEnum) {
+                MyEnumCase
+            };
+            @implementation A
+            - (void)method {
+                (MyEnumCase);
+            }
+            @end
+            """,
+            swift: """
+            @objc enum MyEnum: Int {
+                case MyEnumCase
+            }
+
+
+            @objc
+            class A: NSObject {
+                @objc
+                func method() {
+                    (MyEnum.MyEnumCase)
+                }
+            }
+            """)
+    }
 }
