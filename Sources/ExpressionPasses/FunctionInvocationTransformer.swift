@@ -132,6 +132,14 @@ public final class FunctionInvocationTransformer {
                     )
                 
                 return arg
+                
+            case let .transformed(transform, strat):
+                if var arg = handleArg(i: i, argument: strat) {
+                    arg.expression = transform(arg.expression)
+                    return arg
+                }
+                
+                return nil
             
             case .fromArgIndex(let index):
                 return arguments[index]
@@ -201,6 +209,9 @@ public final class FunctionInvocationTransformer {
         /// transformation closure.
         case mergeArguments(arg0: Int, arg1: Int, (Expression, Expression) -> Expression)
         
+        /// Transforms an argument using a given transformation method
+        indirect case transformed((Expression) -> Expression, ArgumentStrategy)
+        
         /// Creates a rule that omits the argument in case it matches a given
         /// expression.
         indirect case omitIf(matches: Expression, ArgumentStrategy)
@@ -217,7 +228,7 @@ public final class FunctionInvocationTransformer {
                 return 1
             case .mergeArguments:
                 return 2
-            case .labeled(_, let inner), .omitIf(_, let inner):
+            case .labeled(_, let inner), .omitIf(_, let inner), .transformed(_, let inner):
                 return inner.argumentConsumeCount
             }
         }
@@ -233,7 +244,7 @@ public final class FunctionInvocationTransformer {
                 return index
             case let .mergeArguments(index1, index2, _):
                 return max(index1, index2)
-            case .labeled(_, let inner), .omitIf(_, let inner):
+            case .labeled(_, let inner), .omitIf(_, let inner), .transformed(_, let inner):
                 return inner.maxArgumentReferenced
             }
         }

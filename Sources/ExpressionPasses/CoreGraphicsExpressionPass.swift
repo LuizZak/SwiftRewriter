@@ -57,80 +57,6 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
         case (.identifier("CGRectIsNull"), _):
             convertMethodToField(field: "isNull", ifArgCountIs: 1, exp)
             
-        // CGPointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
-        case (.identifier("CGPointMake"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
-            let args = functionCall.arguments
-            
-            exp.exp = .identifier("CGPoint")
-            exp.op = .functionCall(arguments: [
-                .labeled("x", args[0].expression),
-                .labeled("y", args[1].expression)
-                ])
-            
-            notifyChange()
-            
-        // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
-        case (.identifier("CGSizeMake"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
-            let args = functionCall.arguments
-            
-            exp.exp = .identifier("CGSize")
-            exp.op = .functionCall(arguments: [
-                .labeled("width", args[0].expression),
-                .labeled("height", args[1].expression)
-                ])
-            
-            notifyChange()
-            
-        // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
-        case (.identifier("CGRectIntersection"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
-            let args = functionCall.arguments
-            
-            exp.exp = .postfix(args[0].expression, .member("intersection"))
-            exp.op = .functionCall(arguments: [
-                .unlabeled(args[1].expression)
-                ])
-            
-            notifyChange()
-            
-        // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
-        case (.identifier("CGRectIntersectsRect"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
-            let args = functionCall.arguments
-            
-            exp.exp = .postfix(args[0].expression, .member("intersects"))
-            exp.op = .functionCall(arguments: [
-                .unlabeled(args[1].expression)
-                ])
-            
-            notifyChange()
-            
-        // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
-        case (.identifier("CGRectContainsRect"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
-            let args = functionCall.arguments
-            
-            exp.exp = .postfix(args[0].expression, .member("contains"))
-            exp.op = .functionCall(arguments: [
-                .unlabeled(args[1].expression)
-                ])
-            
-            notifyChange()
-            
-        // CGRectContainsPoint(<r1>, <r2>) -> <r1>.contains(<r2>)
-        case (.identifier("CGRectContainsPoint"), let functionCall as FunctionCallPostfix)
-            where functionCall.arguments.count == 2 && !functionCall.arguments.hasLabeledArguments():
-            let args = functionCall.arguments
-            
-            exp.exp = .postfix(args[0].expression, .member("contains"))
-            exp.op = .functionCall(arguments: [
-                .unlabeled(args[1].expression)
-                ])
-            
-            notifyChange()
-            
         // MARK: CGPath
             
         // CGPathCreateMutable() -> CGMutablePath()
@@ -185,10 +111,11 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     }
     
     func createTransformers() {
-        func make(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy]) {
+        func make(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy],
+                  firstArgIsInstance: Bool = false) {
             let transformer =
                 FunctionInvocationTransformer(name: name, swiftName: swiftName,
-                                              firstArgIsInstance: false,
+                                              firstArgIsInstance: firstArgIsInstance,
                                               arguments: arguments)
             transformers.append(transformer)
         }
@@ -210,6 +137,23 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .labeled("x", .asIs), .labeled("y", .asIs),
                 .labeled("width", .asIs), .labeled("height", .asIs)
             ])
+        // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
+        make("CGSizeMake", swiftName: "CGSize",
+             arguments: [
+                .labeled("width", .asIs), .labeled("height", .asIs)
+            ])
+        // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
+        make("CGRectIntersectsRect", swiftName: "intersects", arguments: [.asIs],
+             firstArgIsInstance: true)
+        // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
+        make("CGRectIntersection", swiftName: "intersection", arguments: [.asIs],
+             firstArgIsInstance: true)
+        // CGRectContainsPoint(<r>, <p>) -> <r>.contains(<p>)
+        make("CGRectContainsPoint", swiftName: "contains", arguments: [.asIs],
+             firstArgIsInstance: true)
+        // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
+        make("CGRectContainsRect", swiftName: "contains", arguments: [.asIs],
+             firstArgIsInstance: true)
         
         createCGPathTransformers()
     }
