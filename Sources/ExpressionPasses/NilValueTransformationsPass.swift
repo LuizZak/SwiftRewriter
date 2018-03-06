@@ -60,14 +60,14 @@ public class NilValueTransformationsPass: SyntaxNodeRewriterPass {
             if let innerMemberAccess = inner.member,
                 let innerMember = innerMemberAccess.memberDefinition as? KnownProperty,
                 case .optional = innerMember.storage.type {
-                exp.op = .optionalAccess(exp.op)
+                exp.op.hasOptionalAccess = true
                 
                 notifyChange()
             }
         } else {
             // Handle non-chained-postfix access cases, now.
             if case .optional? = exp.exp.resolvedType {
-                exp.op = .optionalAccess(exp.op)
+                exp.op.hasOptionalAccess = true
                 
                 notifyChange()
             }
@@ -82,8 +82,8 @@ public class NilValueTransformationsPass: SyntaxNodeRewriterPass {
         }
         
         // Function call
-        if let fc = exp.functionCall {
-            exp.op = .optionalAccess(fc)
+        if exp.op is FunctionCallPostfix {
+            exp.op.hasOptionalAccess = true
             
             return exp
         }

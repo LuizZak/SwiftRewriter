@@ -307,15 +307,15 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 return true
             }
             
-            switch op {
-            case is OptionalAccessPostfix:
+            if op.hasOptionalAccess {
                 return true
-            default:
-                if let post = exp.exp.asPostfix {
-                    return hasOptional(post, post.op)
-                }
-                return false
             }
+            
+            if let post = exp.exp.asPostfix {
+                return hasOptional(post, post.op)
+            }
+            
+            return false
         }
         
         if !exp.isErrorTyped, let type = exp.resolvedType, !type.isOptional, hasOptional(exp, exp.op) {
@@ -455,6 +455,13 @@ private class MemberInvocationResolver {
     }
     
     func resolve(postfix exp: PostfixExpression, op: Postfix) -> Expression {
+        defer {
+            // Elevate an implicitly-unwrapped optional access to an optional access
+            if exp.op.hasOptionalAccess, case .implicitUnwrappedOptional(let inner)? = exp.resolvedType {
+                exp.resolvedType = .optional(inner)
+            }
+        }
+        
         switch op {
         case let sub as SubscriptPostfix:
             // Propagate error type
@@ -540,6 +547,7 @@ private class MemberInvocationResolver {
                 return exp.makeErrorTyped()
             }
             
+            /*
         case let optional as OptionalAccessPostfix:
             // Take the result of the (non) optional access and wrap it into an
             // optional result
@@ -551,6 +559,7 @@ private class MemberInvocationResolver {
             }
             
             return resExp
+            */
             
         default:
             break

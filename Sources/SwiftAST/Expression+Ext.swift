@@ -41,16 +41,30 @@ public struct OptionalAccessPostfixBuilder {
     
     /// Creates a function call invocation postfix expression with this expression
     public func call(_ arguments: [FunctionArgument] = []) -> PostfixExpression {
-        return .postfix(exp, .optionalAccess(.functionCall(arguments: arguments)))
+        let op = Postfix.functionCall(arguments: arguments)
+        op.hasOptionalAccess = true
+        return .postfix(exp, op)
+    }
+    
+    /// Creates a function call invocation postfix expression with this expression
+    /// with a sequence of unlabeled function argument expressions
+    public func call(_ unlabeledArguments: [Expression]) -> PostfixExpression {
+        let op = Postfix.functionCall(arguments:unlabeledArguments.map(FunctionArgument.unlabeled))
+        op.hasOptionalAccess = true
+        return .postfix(exp, op)
     }
     
     /// Creates a member access postfix expression with this expression
     public func dot(_ member: String) -> PostfixExpression {
-        return .postfix(exp, .optionalAccess(.member(member)))
+        let op = Postfix.member(member)
+        op.hasOptionalAccess = true
+        return .postfix(exp, op)
     }
     
     /// Creates a subscript access postfix expression with this expression
     public func sub(_ exp: Expression) -> PostfixExpression {
-        return .postfix(exp, .optionalAccess(.subscript(exp)))
+        let op = Postfix.subscript(exp)
+        op.hasOptionalAccess = true
+        return .postfix(exp, op)
     }
 }

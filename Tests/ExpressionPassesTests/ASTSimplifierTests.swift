@@ -68,8 +68,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             """,
             into: Statement
                 .expression(
-                    Expression.postfix(.identifier("block"),
-                                       .optionalAccess(.functionCall()))
+                    Expression.identifier("block").optional().call()
                 )
         )
         
@@ -83,9 +82,8 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             """,
             into: Statement
                 .expression(
-                    Expression.postfix(.identifier("block"),
-                                       .optionalAccess(.functionCall()))
-            )
+                    Expression.identifier("block").optional().call()
+                )
         )
         
         assertNotifiedChange()

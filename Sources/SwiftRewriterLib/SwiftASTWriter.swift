@@ -169,64 +169,60 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     func visitPostfix(_ exp: PostfixExpression) {
         visitExpression(exp.exp, parens: exp.exp.requiresParens)
         
-        func recursePostfix(_ op: Postfix) {
-            switch op {
-            case let member as MemberPostfix:
-                target.outputInline(".")
-                target.outputInline(member.name, style: .memberName)
-                
-            case let optional as OptionalAccessPostfix:
-                target.outputInline("?")
-                recursePostfix(optional.postfix)
-                
-            case let subscription as SubscriptPostfix:
-                target.outputInline("[")
-                visitExpression(subscription.expression)
-                target.outputInline("]")
-                
-            case let functionCall as FunctionCallPostfix:
-                var arguments = functionCall.arguments
-                
-                var trailingClosure: Expression?
-                // If the last argument is a block type, close the
-                // parameters list earlier and use the block as a
-                // trailing closure.
-                if arguments.last?.expression is BlockLiteralExpression {
-                    trailingClosure = arguments.last?.expression
-                    arguments.removeLast()
-                }
-                
-                // No need to emit parenthesis if a trailing closure
-                // is present as the only argument of the function
-                if arguments.count > 0 || trailingClosure == nil {
-                    target.outputInline("(")
-                    
-                    commaSeparated(arguments) { arg in
-                        if let label = arg.label {
-                            target.outputInline(label)
-                            target.outputInline(": ")
-                        }
-                        
-                        visitExpression(arg.expression)
-                    }
-                    
-                    target.outputInline(")")
-                }
-                
-                // Emit trailing closure now, if present
-                if let trailingClosure = trailingClosure {
-                    // Nicer spacing
-                    target.outputInline(" ")
-                    visitExpression(trailingClosure)
-                }
-                
-            default:
-                target.outputInline("/* Unsupported postfix operation type \(type(of: op)) */")
-                break
-            }
+        if exp.op.hasOptionalAccess {
+            target.outputInline("?")
         }
         
-        recursePostfix(exp.op)
+        switch exp.op {
+        case let member as MemberPostfix:
+            target.outputInline(".")
+            target.outputInline(member.name, style: .memberName)
+            
+        case let subscription as SubscriptPostfix:
+            target.outputInline("[")
+            visitExpression(subscription.expression)
+            target.outputInline("]")
+            
+        case let functionCall as FunctionCallPostfix:
+            var arguments = functionCall.arguments
+            
+            var trailingClosure: Expression?
+            // If the last argument is a block type, close the
+            // parameters list earlier and use the block as a
+            // trailing closure.
+            if arguments.last?.expression is BlockLiteralExpression {
+                trailingClosure = arguments.last?.expression
+                arguments.removeLast()
+            }
+            
+            // No need to emit parenthesis if a trailing closure
+            // is present as the only argument of the function
+            if arguments.count > 0 || trailingClosure == nil {
+                target.outputInline("(")
+                
+                commaSeparated(arguments) { arg in
+                    if let label = arg.label {
+                        target.outputInline(label)
+                        target.outputInline(": ")
+                    }
+                    
+                    visitExpression(arg.expression)
+                }
+                
+                target.outputInline(")")
+            }
+            
+            // Emit trailing closure now, if present
+            if let trailingClosure = trailingClosure {
+                // Nicer spacing
+                target.outputInline(" ")
+                visitExpression(trailingClosure)
+            }
+            
+        default:
+            target.outputInline("/* Unsupported postfix operation type \(type(of: exp.op)) */")
+            break
+        }
     }
     
     func visitConstant(_ exp: ConstantExpression) {

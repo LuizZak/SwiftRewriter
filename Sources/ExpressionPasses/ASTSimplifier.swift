@@ -37,11 +37,9 @@ public class ASTSimplifier: SyntaxNodeRewriterPass {
                 break nullCheck
             }
             
-            let statement =
-                Statement
-                    .expression(
-                        PostfixExpression(exp: postfix.exp, op: .optionalAccess(postfix.op))
-            )
+            postfix.op.hasOptionalAccess = true
+            
+            let statement = Statement.expression(exp)
             
             notifyChange()
             

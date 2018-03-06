@@ -47,7 +47,7 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
         guard case .typeName(let typeName)? = exp.exp.resolvedType?.deepUnwrapped else {
             return nil
         }
-        guard let member = exp.op.unwrappedOptionalAccess.asMember else {
+        guard let member = exp.member else {
             return nil
         }
         
@@ -56,10 +56,10 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
         }
         
         let makeMember: (String) -> Postfix = {
-            if let opt = exp.op.asOptionalAccess {
-                return opt.wrappingOptionalPostfixes(over: .member($0))
-            }
-            return .member($0)
+            let op = Postfix.member($0)
+            op.hasOptionalAccess = exp.op.hasOptionalAccess
+            
+            return op
         }
         
         switch member.name {

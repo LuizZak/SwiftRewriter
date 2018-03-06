@@ -19,7 +19,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             // { a() }
             statement: .expression(exp),
             // { a?() }
-            into: .expression(.postfix(.identifier("a"), .optionalAccess(.functionCall())))
+            into: .expression(Expression.identifier("a").optional().call())
         ); assertNotifiedChange()
     }
     
@@ -33,7 +33,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             // { a() }
             statement: .expression(exp),
             // { a?() }
-            into: .expression(.postfix(.identifier("a"), .optionalAccess(.functionCall())))
+            into: .expression(Expression.identifier("a").optional().call())
         ); assertNotifiedChange()
     }
     
@@ -49,7 +49,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
             // { a.b() }
             statement: .expression(exp),
             // { a.b?() }
-            into: .expression(.postfix(.postfix(.identifier("a"), .member("b")), .optionalAccess(.functionCall())))
+            into: .expression(Expression.identifier("a").dot("b").optional().call())
         ); assertNotifiedChange()
     }
     

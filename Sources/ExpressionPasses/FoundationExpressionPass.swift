@@ -45,7 +45,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         guard let postfix = exp.exp.asPostfix, let fc = exp.functionCall else {
             return nil
         }
-        guard postfix.op.unwrappedOptionalAccess.asMember?.name == "respondsToSelector" else {
+        guard postfix.member?.name == "respondsToSelector" else {
             return nil
         }
         guard fc.arguments.count == 1 else {
@@ -56,9 +56,10 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
             FunctionArgument.labeled("to", fc.arguments[0].expression)
         ])
         
-        if let optional = postfix.optionalAccess {
-            postfix.op = optional.wrappingOptionalPostfixes(over: .member("responds"))
-            exp.resolvedType = optional.wrappingOptionals(in: .bool)
+        if postfix.op.hasOptionalAccess {
+            postfix.op = .member("responds")
+            postfix.op.hasOptionalAccess = true
+            exp.resolvedType = .optional(.bool)
         } else {
             postfix.op = .member("responds")
             exp.resolvedType = .bool
@@ -69,8 +70,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts [<lhs> isEqualToString:<rhs>] -> <lhs> == <rhs>
     func convertIsEqualToString(_ exp: PostfixExpression) -> Expression? {
-        guard let postfix = exp.exp.asPostfix,
-            postfix.op.unwrappedOptionalAccess == .member("isEqualToString"),
+        guard let postfix = exp.exp.asPostfix, postfix.member?.name == "isEqualToString",
             let args = exp.functionCall?.arguments, args.count == 1 && !args.hasLabeledArguments() else {
             return nil
         }
@@ -84,7 +84,12 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts [NSString stringWithFormat:@"format", <...>] -> String(format: "format", <...>)
     func convertStringWithFormat(_ exp: PostfixExpression) -> Expression? {
-        guard exp.exp == .postfix(.identifier("NSString"), .member("stringWithFormat")),
+        guard let postfix = exp.exp.asPostfix else {
+            return nil
+        }
+        
+        guard postfix.exp.asIdentifier?.identifier == "NSString",
+            postfix.op.asMember?.name == "stringWithFormat",
             let args = exp.functionCall?.arguments, args.count > 0 else {
             return nil
         }
@@ -103,8 +108,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     /// Converts [<array> addObjectsFromArray:<exp>] -> <array>.addObjects(from: <exp>)
     func convertAddObjectsFromArray(_ exp: PostfixExpression) -> Expression? {
-        guard let postfix = exp.exp.asPostfix,
-            postfix.op.unwrappedOptionalAccess == .member("addObjectsFromArray"),
+        guard let postfix = exp.exp.asPostfix, postfix.member?.name == "addObjectsFromArray",
             let args = exp.functionCall?.arguments, args.count == 1 else {
             return nil
         }
@@ -113,15 +117,12 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
             .labeled("from", args[0].expression)
         ])
         
-        if let optional = postfix.optionalAccess {
-            exp.exp = .postfix(postfix.exp, optional.wrappingOptionalPostfixes(over: .member("addObjects")))
-            
-            exp.resolvedType = optional.wrappingOptionals(in: .void)
-            
-        } else {
-            exp.exp = .postfix(postfix.exp, .member("addObjects"))
-            
-            exp.resolvedType = .void
+        exp.exp = .postfix(postfix.exp, .member("addObjects"))
+        exp.resolvedType = .void
+        
+        if postfix.op.hasOptionalAccess {
+            exp.exp.asPostfix?.member?.hasOptionalAccess = true
+            exp.resolvedType = .optional(.void)
         }
         
         return exp
@@ -132,7 +133,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         guard let args = exp.functionCall?.arguments, args.count == 0 else {
             return nil
         }
-        guard let classMember = exp.exp.asPostfix, classMember.op == .member("class") else {
+        guard let classMember = exp.exp.asPostfix, classMember.member?.name == "class" else {
             return nil
         }
         

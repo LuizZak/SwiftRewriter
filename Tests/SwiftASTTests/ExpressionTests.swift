@@ -28,8 +28,9 @@ class ExpressionTests: XCTestCase {
     
     func testDescriptionOptionalAccess() {
         XCTAssertEqual(
-            Expression.postfix(.cast(.identifier("abc"), type: .string), .optionalAccess(.member("count"))).description,
-            "(abc as? String)?.count")
+            Expression.identifier("abc").casted(to: .string).optional().dot("count").description,
+            "(abc as? String)?.count"
+        )
     }
     
     func testDescriptionBinaryOps() {

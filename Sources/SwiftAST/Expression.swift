@@ -1061,8 +1061,12 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
     /// Custom metadata that can be associated with this expression node
     public var metadata: [String: Any] = [:]
     
+    /// Returns `true` if this postfix operation has an optional access specified
+    /// to come before it.
+    public var hasOptionalAccess: Bool = false
+    
     public var description: String {
-        return ""
+        return hasOptionalAccess ? "?" : ""
     }
     
     public var subExpressions: [Expression] {
@@ -1073,16 +1077,6 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         
     }
     
-    /// Unwraps all levels of .optionalAccess until the first non-optionalAccess
-    /// postfix operator is found.
-    public var unwrappedOptionalAccess: Postfix {
-        if let asOpt = asOptionalAccess {
-            return asOpt.postfix.unwrappedOptionalAccess
-        }
-        
-        return self
-    }
-    
     public func isEqual(to other: Postfix) -> Bool {
         return false
     }
@@ -1091,80 +1085,11 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         return lhs.isEqual(to: rhs)
     }
 }
-
-public final class OptionalAccessPostfix: Postfix {
-    public let postfix: Postfix
-    
-    public override var description: String {
-        return "?" + postfix.description
-    }
-    
-    public override var subExpressions: [Expression] {
-        return postfix.subExpressions
-    }
-    
-    public init(postfix: Postfix) {
-        self.postfix = postfix
-    }
-    
-    /// Returns an optional version of a given type, wrapped by however many
-    /// optional accesses are chained on this optional access postfix.
-    public func wrappingOptionals(in type: SwiftType) -> SwiftType {
-        let type = SwiftType.optional(type)
-        
-        if let next = postfix.asOptionalAccess {
-            return next.wrappingOptionals(in: type)
-        }
-        
-        return type
-    }
-    
-    /// Returns an optional version of a given postfix operator, wrapped by
-    /// however many optional accesses are chained on this optional access postfix.
-    public func wrappingOptionalPostfixes(over postfix: Postfix) -> Postfix {
-        let op = Postfix.optionalAccess(postfix)
-        
-        if let next = postfix.asOptionalAccess {
-            return next.wrappingOptionalPostfixes(over: op)
-        }
-        
-        return op
-    }
-    
-    public override func isEqual(to other: Postfix) -> Bool {
-        switch other {
-        case let rhs as OptionalAccessPostfix:
-            return self == rhs
-        default:
-            return false
-        }
-    }
-    
-    public static func ==(lhs: OptionalAccessPostfix, rhs: OptionalAccessPostfix) -> Bool {
-        return lhs.postfix.isEqual(to: rhs.postfix)
-    }
-}
-public extension Postfix {
-    public static func optionalAccess(_ op: Postfix) -> OptionalAccessPostfix {
-        return OptionalAccessPostfix(postfix: op)
-    }
-    
-    public var asOptionalAccess: OptionalAccessPostfix? {
-        return self as? OptionalAccessPostfix
-    }
-}
-// Helper casting getter extensions to postfix expression
-public extension PostfixExpression {
-    var optionalAccess: OptionalAccessPostfix? {
-        return op as? OptionalAccessPostfix
-    }
-}
-
 public final class MemberPostfix: Postfix {
     public let name: String
     
     public override var description: String {
-        return "." + name
+        return super.description + "." + name
     }
     
     public init(name: String) {
@@ -1181,7 +1106,7 @@ public final class MemberPostfix: Postfix {
     }
     
     public static func ==(lhs: MemberPostfix, rhs: MemberPostfix) -> Bool {
-        return lhs.name == rhs.name
+        return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.name == rhs.name
     }
 }
 public extension Postfix {
@@ -1204,7 +1129,7 @@ public final class SubscriptPostfix: Postfix {
     public let expression: Expression
     
     public override var description: String {
-        return "[" + expression.description + "]"
+        return super.description + "[" + expression.description + "]"
     }
     
     public override var subExpressions: [Expression] {
@@ -1225,7 +1150,7 @@ public final class SubscriptPostfix: Postfix {
     }
     
     public static func ==(lhs: SubscriptPostfix, rhs: SubscriptPostfix) -> Bool {
-        return lhs.expression == rhs.expression
+        return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.expression == rhs.expression
     }
 }
 public extension Postfix {
@@ -1244,12 +1169,12 @@ public extension PostfixExpression {
     }
 }
 
-
+/// Postfix access that invokes an expression as a function.
 public final class FunctionCallPostfix: Postfix {
     public let arguments: [FunctionArgument]
     
     public override var description: String {
-        return "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
+        return super.description + "(" + arguments.map { $0.description }.joined(separator: ", ") + ")"
     }
     
     public override var subExpressions: [Expression] {
@@ -1270,7 +1195,7 @@ public final class FunctionCallPostfix: Postfix {
     }
     
     public static func ==(lhs: FunctionCallPostfix, rhs: FunctionCallPostfix) -> Bool {
-        return lhs.arguments == rhs.arguments
+        return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.arguments == rhs.arguments
     }
 }
 public extension Postfix {

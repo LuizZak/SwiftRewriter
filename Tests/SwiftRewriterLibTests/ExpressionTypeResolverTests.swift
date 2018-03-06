@@ -501,8 +501,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testOptionalAccess() {
         // a?.b
-        let exp =
-            Expression.postfix(.identifier("a"), .optionalAccess(.member("b")))
+        let exp = Expression.identifier("a").optional().dot("b")
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "A") { builder in
