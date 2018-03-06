@@ -10,12 +10,13 @@ class ImportDirectiveIntentionPassTests: XCTestCase {
                 .createFile(named: "file") { file in
                     file.addPreprocessorDirective("#import <UIKit/UIKit.h>")
                         .addPreprocessorDirective("#import <Foundation/Foundation.h>")
+                        .addPreprocessorDirective("#import <Framework.h>")
                 }.build()
         let sut = ImportDirectiveIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
         let file = intentions.fileIntentions()[0]
-        XCTAssertEqual(file.importDirectives, ["UIKit", "Foundation"])
+        XCTAssertEqual(file.importDirectives, ["UIKit", "Foundation", "Framework"])
     }
 }

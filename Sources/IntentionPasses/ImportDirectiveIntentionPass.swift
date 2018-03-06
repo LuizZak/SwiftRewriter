@@ -29,13 +29,13 @@ public class ImportDirectiveIntentionPass: IntentionPass {
         
         // For "#import <Framework/Framework.h>" paths, import "Framework" directly
         for imp in objc {
-            guard imp.pathComponents.count == 2 else {
-                continue
-            }
-            
-            // "Framework/Framework.h" => "Framework" (+ ".h")
-            if imp.pathComponents[0] + ".h" == imp.pathComponents[1] {
-                modules.append(imp.pathComponents[0])
+            if imp.pathComponents.count == 1 {
+                modules.append((imp.pathComponents[0] as NSString).deletingPathExtension)
+            } else if imp.pathComponents.count == 2 {
+                // "Framework/Framework.h" => "Framework" (+ ".h")
+                if imp.pathComponents[0] + ".h" == imp.pathComponents[1] {
+                    modules.append(imp.pathComponents[0])
+                }
             }
         }
         
