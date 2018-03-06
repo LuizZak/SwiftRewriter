@@ -90,7 +90,7 @@ class SwiftRewriterTests: XCTestCase {
             };
             """,
             swift: """
-            enum MyEnum: Int {
+            @objc enum MyEnum: Int {
                 case MyEnumCase1 = 0
                 case MyEnumCase2
             }

@@ -256,7 +256,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .translatesToSwift("""
-            enum AnEnum: String {
+            @objc enum AnEnum: String {
                 case AnEnumCase1
             }
             

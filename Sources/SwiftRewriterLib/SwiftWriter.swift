@@ -148,8 +148,9 @@ public final class SwiftWriter {
     private func outputEnum(_ intention: EnumGenerationIntention, target: RewriterOutputTarget) {
         let rawTypeName = typeMapper.typeNameString(for: intention.rawValueType)
         
-        // enum <Name>: <RawValue> {
+        // @objc enum <Name>: <RawValue> {
         target.outputIdentation()
+        target.outputInlineWithSpace("@objc", style: .keyword)
         target.outputInlineWithSpace("enum", style: .keyword)
         target.outputInline(intention.typeName, style: .typeName)
         target.outputInline(": ")
