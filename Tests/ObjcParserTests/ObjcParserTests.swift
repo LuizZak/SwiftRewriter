@@ -309,6 +309,56 @@ class ObjcParserTests: XCTestCase {
         XCTAssertNotNil(prot?.protocolList)
         XCTAssertNotNil(prot?.protocolList?.protocols.first?.name, "B")
     }
+    
+    func testParseError() {
+        _=parserTest("""
+            @interface ViewController (Private)
+            
+            @property (strong, nonatomic) ViewControllerDataSource *dataSource;
+            
+            @end
+            
+            @interface ViewControllerSpec : QuickSpec
+            @end
+            @implementation ViewControllerSpec
+            - (void)spec {
+            
+            describe(@"ViewControllerSpec", ^{
+            
+                __block ViewController *baseViewController;
+                beforeEach(^{
+                    baseViewController =
+                    [ViewController controllerInstanceFromStoryboard];
+                    [baseViewController view];
+                });
+            
+                describe(@"Verifica comportamentos iniciais", ^{
+            
+                    it(@"title deve ser saldo detalhado", ^{
+                        expect(baseViewController.title).equal(@"saldo detalhado");
+                    });
+                
+                    it(@"propriedades não devem ser nulas", ^{
+                        expect(baseViewController.dataSource).toNot.beNil();
+                        expect(baseViewController.collectionView.dataSource).toNot.beNil();
+                        expect(baseViewController.collectionView.delegate).toNot.beNil();
+                    });
+            
+                });
+            
+                describe(@"Verifica carregamento do xib", ^{
+                    expect([ViewController controllerInstanceFromStoryboard]).beAKindOf([ViewController class]);
+                });
+            
+                describe(@"Verifica ação de alterar limite", ^{
+                    #warning TODO
+                });
+            
+            });
+            }
+            @end
+            """)
+    }
 }
 
 extension ObjcParserTests {

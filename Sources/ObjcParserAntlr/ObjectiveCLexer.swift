@@ -1,4 +1,4 @@
-// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCLexer.g4 by ANTLR 4.7
+// Generated from /Users/luizsilva/Desktop/grammars-v4-master/objc/ObjectiveCLexer.g4 by ANTLR 4.7
 import Antlr4
 
 open class ObjectiveCLexer: Lexer {
@@ -214,7 +214,7 @@ open class ObjectiveCLexer: Lexer {
 		}
 		return tokenNames
 	}()
-    
+
 	open func getTokenNames() -> [String?]? {
 		return tokenNames
 	}
