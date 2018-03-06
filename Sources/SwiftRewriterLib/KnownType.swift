@@ -40,8 +40,8 @@ public enum KnownTypeKind {
     case `class`
     /// A protocol type
     case `protocol`
-    /// A value type
-    case valueType
+    /// An enumeration type
+    case `enum`
 }
 
 /// Defines the known supertype of a `KnownType`

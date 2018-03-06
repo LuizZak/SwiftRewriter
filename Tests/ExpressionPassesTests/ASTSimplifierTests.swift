@@ -6,6 +6,8 @@ import TestCommons
 
 class ASTSimplifierTests: ExpressionPassTestCase {
     override func setUp() {
+        super.setUp()
+        
         sut = ASTSimplifier()
     }
     

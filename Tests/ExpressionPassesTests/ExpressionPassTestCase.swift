@@ -8,10 +8,12 @@ import SwiftAST
 class ExpressionPassTestCase: XCTestCase {
     var notified: Bool = false
     var sut: SyntaxNodeRewriterPass!
+    var typeSystem: DefaultTypeSystem!
     
     override func setUp() {
         super.setUp()
         
+        typeSystem = DefaultTypeSystem()
         notified = false
     }
     
@@ -169,7 +171,7 @@ class ExpressionPassTestCase: XCTestCase {
             self?.notified = true
         }
         
-        return SyntaxNodeRewriterPassContext(typeSystem: DefaultTypeSystem(),
+        return SyntaxNodeRewriterPassContext(typeSystem: typeSystem,
                                              notifyChangedTree: block)
     }
 }

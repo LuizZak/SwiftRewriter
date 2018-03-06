@@ -9,7 +9,8 @@ public class DefaultExpressionPasses: SyntaxNodeRewriterPassSource {
         UIKitExpressionPass.self,
         NilValueTransformationsPass.self,
         NumberCommonsExpressionPass.self,
-        ASTCorrectorExpressionPass.self
+        ASTCorrectorExpressionPass.self,
+        EnumRewriterExpressionPass.self
     ]
     
     public init() {

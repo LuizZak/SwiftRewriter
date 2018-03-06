@@ -5,6 +5,8 @@ import ExpressionPasses
 
 class AllocInitExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
+        super.setUp()
+        
         sut = AllocInitExpressionPass()
     }
     

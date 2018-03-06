@@ -5,6 +5,7 @@ import TestCommons
 class NilValueTransformationsPasTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
+        
         sut = NilValueTransformationsPass()
     }
     

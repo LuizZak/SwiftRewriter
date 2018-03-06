@@ -8,7 +8,7 @@ public class EnumGenerationIntention: TypeGenerationIntention {
     }
     
     public override var kind: KnownTypeKind {
-        return .valueType
+        return .enum
     }
     
     public var rawValueType: SwiftType

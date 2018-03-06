@@ -22,6 +22,10 @@ public class DefaultTypeSystem: TypeSystem {
         return typesByName.keys.contains(name)
     }
     
+    public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
+        return types.filter { $0.kind == kind }
+    }
+    
     public func knownTypeWithName(_ name: String) -> KnownType? {
         return typesByName[name]
     }
@@ -438,6 +442,20 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         return false
     }
     
+    public override func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
+        var types = super.knownTypes(ofKind: kind)
+        
+        for file in intentions.fileIntentions() {
+            for type in file.typeIntentions {
+                if type.kind == kind {
+                    types.append(type)
+                }
+            }
+        }
+        
+        return types
+    }
+    
     public override func knownTypeWithName(_ name: String) -> KnownType? {
         if let type = super.knownTypeWithName(name) {
             return type
@@ -445,7 +463,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         
         // Search in type intentions
         var types: [KnownType] = []
-        outer: for file in intentions.fileIntentions() {
+        for file in intentions.fileIntentions() {
             for type in file.typeIntentions {
                 if type.typeName == name {
                     types.append(type)

@@ -5,6 +5,8 @@ import ExpressionPasses
 
 class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
+        super.setUp()
+        
         sut = CoreGraphicsExpressionPass()
     }
     

@@ -5,6 +5,8 @@ import SwiftAST
 
 class UIKitExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
+        super.setUp()
+        
         sut = UIKitExpressionPass()
     }
     

@@ -78,10 +78,10 @@ public class KnownTypeBuilder {
     }
     
     /// Adds a strong property with no attributes with a given name and type
-    public func addingProperty(named name: String, type: SwiftType) -> KnownTypeBuilder {
+    public func addingProperty(named name: String, type: SwiftType, isStatic: Bool = false) -> KnownTypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
-        return addingProperty(named: name, storage: storage)
+        return addingProperty(named: name, storage: storage, isStatic: isStatic)
     }
     
     /// Adds a property with no attributes with a given name and storage

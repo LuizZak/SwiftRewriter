@@ -11,6 +11,9 @@ public protocol TypeSystem {
     /// Returns `true` if a type is known to exists with a given name.
     func typeExists(_ name: String) -> Bool
     
+    /// Returns all known types that match a specified type
+    func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType]
+    
     /// Gets a known type with a given name from this type system.
     func knownTypeWithName(_ name: String) -> KnownType?
     
