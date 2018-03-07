@@ -96,6 +96,7 @@ public class SwiftRewriter {
         let sources = sourcesProvider.sources()
         
         let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
         
         var outError: Error?
         
