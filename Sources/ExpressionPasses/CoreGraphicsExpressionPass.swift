@@ -20,6 +20,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             }
             
             if ident.identifier == "CGPathRelease" && call.arguments.count == 1 && !call.arguments.hasLabeledArguments() {
+                notifyChange()
                 return nil
             }
             

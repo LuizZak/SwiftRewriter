@@ -39,16 +39,14 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testAddTarget() {
         assertTransformParsed(
             expression: "[self.button addTarget:self action:@selector(didTapButton:) forControlEvents: UIControlEventTouchUpInside]",
-            into: .postfix(.postfix(.postfix(.identifier("self"), .member("button")),
-                                        .member("addTarget")),
-                               .functionCall(arguments: [
-                                .unlabeled(.identifier("self")),
-                                .labeled("action", .postfix(.identifier("Selector"),
-                                                            .functionCall(arguments: [
-                                                                .unlabeled(.constant("didTapButton:"))
-                                                                ]))),
-                                .labeled("for", .postfix(.identifier("UIControlEvents"), .member("touchUpInside")))
-                                ]))
+            into: Expression
+                .identifier("self").dot("button")
+                .dot("addTarget")
+                .call([
+                    .unlabeled(.identifier("self")),
+                    .labeled("action", Expression.identifier("Selector").call([.constant("didTapButton:")])),
+                    .labeled("for", Expression.identifier("UIControlEvents").dot("touchUpInside"))
+                ])
         ); assertNotifiedChange()
     }
     

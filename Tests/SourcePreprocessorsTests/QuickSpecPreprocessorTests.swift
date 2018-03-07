@@ -145,7 +145,7 @@ class QuickSpecPreprocessorTests: XCTestCase {
 
                     });
                 });
-
+            
             }
             @end
             """
@@ -247,53 +247,7 @@ class QuickSpecPreprocessorTests: XCTestCase {
     func testBugReproCase() {
         let sut = QuickSpecPreprocessor()
         
-        XCTAssertEqual(
-            sut.preprocess(source: """
-            @interface ViewController (Private)
-
-            @property (strong, nonatomic) ViewControllerDataSource *dataSource;
-
-            @end
-
-            QuickSpecBegin(ViewControllerSpec)
-
-            describe(@"ViewControllerSpec", ^{
-                
-                __block ViewController *baseViewController;
-                beforeEach(^{
-                    baseViewController =
-                    [ViewController controllerInstanceFromStoryboard];
-                    [baseViewController view];
-                });
-                
-                describe(@"Verifica comportamentos iniciais", ^{
-                    
-                    it(@"title deve ser saldo detalhado", ^{
-                        expect(baseViewController.title).equal(@"saldo detalhado");
-                    });
-                    
-                    it(@"propriedades não devem ser nulas", ^{
-                        expect(baseViewController.dataSource).toNot.beNil();
-                        expect(baseViewController.collectionView.dataSource).toNot.beNil();
-                        expect(baseViewController.collectionView.delegate).toNot.beNil();
-                    });
-                    
-                });
-
-                describe(@"Verifica carregamento do xib", ^{
-                    expect([ViewController controllerInstanceFromStoryboard]).beAKindOf([ViewController class]);
-                });
-                
-                describe(@"Verifica ação de alterar limite", ^{
-                    #warning TODO FNA
-                });
-                
-            });
-
-            QuickSpecEnd
-            """,
-            context: EmptyContext()),
-            """
+        let expected = """
             @interface ViewController (Private)
 
             @property (strong, nonatomic) ViewControllerDataSource *dataSource;
@@ -335,11 +289,60 @@ class QuickSpecPreprocessorTests: XCTestCase {
                 describe(@"Verifica ação de alterar limite", ^{
                     #warning TODO FNA
                 });
-                
+            
             });
             }
             @end
-            """)
+            """
+        
+        let result =
+            sut.preprocess(
+                source: """
+                @interface ViewController (Private)
+
+                @property (strong, nonatomic) ViewControllerDataSource *dataSource;
+
+                @end
+
+                QuickSpecBegin(ViewControllerSpec)
+
+                describe(@"ViewControllerSpec", ^{
+                    
+                    __block ViewController *baseViewController;
+                    beforeEach(^{
+                        baseViewController =
+                        [ViewController controllerInstanceFromStoryboard];
+                        [baseViewController view];
+                    });
+                    
+                    describe(@"Verifica comportamentos iniciais", ^{
+                        
+                        it(@"title deve ser saldo detalhado", ^{
+                            expect(baseViewController.title).equal(@"saldo detalhado");
+                        });
+                        
+                        it(@"propriedades não devem ser nulas", ^{
+                            expect(baseViewController.dataSource).toNot.beNil();
+                            expect(baseViewController.collectionView.dataSource).toNot.beNil();
+                            expect(baseViewController.collectionView.delegate).toNot.beNil();
+                        });
+                        
+                    });
+
+                    describe(@"Verifica carregamento do xib", ^{
+                        expect([ViewController controllerInstanceFromStoryboard]).beAKindOf([ViewController class]);
+                    });
+                    
+                    describe(@"Verifica ação de alterar limite", ^{
+                        #warning TODO FNA
+                    });
+                
+                });
+                QuickSpecEnd
+                """,
+                context: EmptyContext())
+        
+        XCTAssertEqual(result, expected, expected.makeDifferenceMarkString(against: result))
     }
     
     private class EmptyContext: PreprocessingContext {

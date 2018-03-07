@@ -817,6 +817,7 @@ class SwiftRewriterTests: XCTestCase {
             #define MACRO 123
             """,
             swift: """
+            import File
             // Preprocessor directives found in file:
             // #import "File.h"
             // #import <File.h>

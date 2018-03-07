@@ -13,36 +13,47 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
     func testCGRectMake() {
         assertTransformParsed(
             expression: "CGRectMake(1, 2, 3, 4)",
-            into: .postfix(.identifier("CGRect"),
-                               .functionCall(arguments: [
-                                    .labeled("x", .constant(1)),
-                                    .labeled("y", .constant(2)),
-                                    .labeled("width", .constant(3)),
-                                    .labeled("height", .constant(4))
-                                ])))
+            into: Expression
+                .identifier("CGRect").call([
+                    .labeled("x", .constant(1)),
+                    .labeled("y", .constant(2)),
+                    .labeled("width", .constant(3)),
+                    .labeled("height", .constant(4))
+                ])
+        ); assertNotifiedChange()
         
-        assertNotifiedChange()
-        
-        assertTransformParsed(
-            expression: "abc = [[UIView alloc] initWithFrame:CGRectMake(1, 2, 3, 4)]",
-            into: .assignment(lhs: .identifier("abc"),
-                                  op: .assign,
-                                  rhs: .postfix(
-                                    .postfix(
-                                        .postfix(
-                                            .postfix(.identifier("UIView"), .member("alloc")),
-                                            .functionCall(arguments: [])), .member("initWithFrame")
-                                    ),
-                                    .functionCall(arguments: [.unlabeled(.postfix(.identifier("CGRect"),
-                                                                                  .functionCall(arguments: [
-                                                                                    .labeled("x", .constant(1)),
-                                                                                    .labeled("y", .constant(2)),
-                                                                                    .labeled("width", .constant(3)),
-                                                                                    .labeled("height", .constant(4))
-                                                                                    ])))])))
-        )
-        
-        assertNotifiedChange()
+        assertTransform(
+            expression: Expression
+                .identifier("abc")
+                .assignment(op: .assign, rhs:
+                    Expression.identifier("UIView")
+                        .dot("alloc").call()
+                        .dot("initWithFrame").call([
+                            Expression.identifier("CGRectMake").call([
+                                .unlabeled(.constant(1)),
+                                .unlabeled(.constant(2)),
+                                .unlabeled(.constant(3)),
+                                .unlabeled(.constant(4)),
+                            ])
+                        ])
+            ),
+            into: Expression
+                .identifier("abc")
+                .assignment(op: .assign,
+                            rhs: Expression
+                                .identifier("UIView")
+                                .dot("alloc").call()
+                                .dot("initWithFrame")
+                                .call([
+                                    .unlabeled(.postfix(.identifier("CGRect"),
+                                                        .functionCall(arguments: [
+                                                            .labeled("x", .constant(1)),
+                                                            .labeled("y", .constant(2)),
+                                                            .labeled("width", .constant(3)),
+                                                            .labeled("height", .constant(4))
+                                                        ])))
+                                    ]))
+        ); assertNotifiedChange()
     }
     
     func testUIEdgeInsetsMake() {
@@ -54,77 +65,74 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                 .labeled("left", .constant(2)),
                                 .labeled("bottom", .constant(3)),
                                 .labeled("right", .constant(4))
-                                ])))
-        
-        assertNotifiedChange()
+                                ]))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "abc = [[UIView alloc] initWithInsets:UIEdgeInsetsMake(1, 2, 3, 4)]",
-            into: .assignment(lhs: .identifier("abc"),
-                                  op: .assign,
-                                  rhs: .postfix(
-                                    .postfix(
-                                        .postfix(
-                                            .postfix(.identifier("UIView"), .member("alloc")),
-                                            .functionCall(arguments: [])), .member("initWithInsets")
-                                    ),
-                                    .functionCall(arguments: [.unlabeled(.postfix(.identifier("UIEdgeInsets"),
-                                                                                  .functionCall(arguments: [
-                                                                                    .labeled("top", .constant(1)),
-                                                                                    .labeled("left", .constant(2)),
-                                                                                    .labeled("bottom", .constant(3)),
-                                                                                    .labeled("right", .constant(4))
-                                                                                    ])))])))
-        )
-        
-        assertNotifiedChange()
+            into: Expression
+                .identifier("abc")
+                .assignment(op: .assign, rhs:
+                    Expression
+                        .identifier("UIView")
+                        .dot("alloc").call()
+                        .dot("initWithInsets")
+                        .call([.unlabeled(.postfix(.identifier("UIEdgeInsets"),
+                                                   .functionCall(arguments: [
+                                                    .labeled("top", .constant(1)),
+                                                    .labeled("left", .constant(2)),
+                                                    .labeled("bottom", .constant(3)),
+                                                    .labeled("right", .constant(4))
+                                                    ])))]
+                ))
+        ); assertNotifiedChange()
     }
     
     func testCGRecsGetters() {
         assertTransformParsed(
             expression: "CGRectGetWidth(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("width")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("width"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectGetHeight(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("height")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("height"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectGetMinX(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("minX")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("minX"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectGetMaxX(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("maxX")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("maxX"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectGetMinY(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("minY")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("minY"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectGetMaxY(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("maxY")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("maxY"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectGetMidX(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("midX")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("midX"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectGetMidY(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("midY")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("midY"))
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "CGRectIsNull(self.frame)",
-            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("isNull")))
-        assertNotifiedChange()
+            into: .postfix(.postfix(.identifier("self"), .member("frame")), .member("isNull"))
+        ); assertNotifiedChange()
         
         // Test transformations keep unrecognized members alone
         assertTransformParsed(
@@ -159,105 +167,94 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
     func testCGRectIsNullWithCGRectMake() {
         assertTransformParsed(
             expression: "CGRectIsNull(CGRectMake(1, 2, 3, 4))",
-            into: .postfix(.postfix(.identifier("CGRect"),
-                                        .functionCall(arguments: [
-                                            .labeled("x", .constant(1)),
-                                            .labeled("y", .constant(2)),
-                                            .labeled("width", .constant(3)),
-                                            .labeled("height", .constant(4))
-                                            ])),
-                               .member("isNull")))
-        
-        assertNotifiedChange()
+            into: Expression
+                .identifier("CGRect")
+                .call([
+                    .labeled("x", .constant(1)),
+                    .labeled("y", .constant(2)),
+                    .labeled("width", .constant(3)),
+                    .labeled("height", .constant(4))
+                    ]).dot("isNull")
+        ); assertNotifiedChange()
     }
     
     func testCGRectContainsRectWithCGRectMake() {
         assertTransformParsed(
             expression: "CGRectContainsRect(CGRectMake(1, 2, 3, 4), CGRectMake(1, 2, 3, 4))",
-            into: .postfix(.postfix(.postfix(.identifier("CGRect"),
-                                        .functionCall(arguments: [
-                                            .labeled("x", .constant(1)),
-                                            .labeled("y", .constant(2)),
-                                            .labeled("width", .constant(3)),
-                                            .labeled("height", .constant(4))
-                                            ])),
-                                        .member("contains")),
-                               .functionCall(arguments: [
-                                .unlabeled(.postfix(.identifier("CGRect"),
-                                                    .functionCall(arguments: [
-                                                        .labeled("x", .constant(1)),
-                                                        .labeled("y", .constant(2)),
-                                                        .labeled("width", .constant(3)),
-                                                        .labeled("height", .constant(4))
-                                                        ])))
-                                ])))
-        
-        assertNotifiedChange()
+            into: Expression
+                .identifier("CGRect").call([
+                    .labeled("x", .constant(1)),
+                    .labeled("y", .constant(2)),
+                    .labeled("width", .constant(3)),
+                    .labeled("height", .constant(4))
+                ])
+                .dot("contains").call([
+                    Expression
+                        .identifier("CGRect")
+                        .call([
+                            .labeled("x", .constant(1)),
+                            .labeled("y", .constant(2)),
+                            .labeled("width", .constant(3)),
+                            .labeled("height", .constant(4))
+                        ])
+                ])
+        ); assertNotifiedChange()
     }
     
     func testCGRectContainsPointWithCGPointMake() {
         assertTransformParsed(
             expression: "CGRectContainsPoint(CGRectMake(1, 2, 3, 4), CGPointMake(1, 2))",
-            into: .postfix(.postfix(.postfix(.identifier("CGRect"),
-                                                 .functionCall(arguments: [
-                                                    .labeled("x", .constant(1)),
-                                                    .labeled("y", .constant(2)),
-                                                    .labeled("width", .constant(3)),
-                                                    .labeled("height", .constant(4))
-                                                    ])),
-                                        .member("contains")),
-                               .functionCall(arguments: [
-                                .unlabeled(.postfix(.identifier("CGPoint"),
-                                                    .functionCall(arguments: [
-                                                        .labeled("x", .constant(1)),
-                                                        .labeled("y", .constant(2))
-                                                        ])))
-                                ])))
-        
-        assertNotifiedChange()
+            into: Expression
+                .identifier("CGRect").call([
+                    .labeled("x", .constant(1)),
+                    .labeled("y", .constant(2)),
+                    .labeled("width", .constant(3)),
+                    .labeled("height", .constant(4))
+                ])
+                .dot("contains").call([
+                    Expression
+                        .identifier("CGPoint")
+                        .call([
+                            .labeled("x", .constant(1)),
+                            .labeled("y", .constant(2))
+                        ])
+                    ])
+        ); assertNotifiedChange()
     }
     
     func testCGRectIntersection() {
         assertTransformParsed(
             expression: "CGRectIntersection(self.frame, self.frame)",
-            into: .postfix(.postfix(.postfix(.identifier("self"),
-                                                 .member("frame")),
-                                        .member("intersection")),
-                               .functionCall(arguments: [
-                                .unlabeled(.postfix(.identifier("self"),
-                                                    .member("frame")))
-                                ]))
-        )
-        
-        assertNotifiedChange()
+            into: Expression
+                .identifier("self")
+                .dot("frame")
+                .dot("intersection").call([
+                    Expression.identifier("self").dot("frame")
+                ])
+        ); assertNotifiedChange()
     }
     
     func testCGRectIntersectsRect() {
         assertTransformParsed(
             expression: "CGRectIntersectsRect(self.frame, self.frame)",
-            into: .postfix(.postfix(.postfix(.identifier("self"),
-                                                 .member("frame")),
-                                        .member("intersects")),
-                               .functionCall(arguments: [
-                                .unlabeled(.postfix(.identifier("self"),
-                                                    .member("frame")))
-                                ]))
-        )
-        
-        assertNotifiedChange()
+            into: Expression
+                .identifier("self")
+                .dot("frame")
+                .dot("intersects").call([
+                    Expression.identifier("self").dot("frame")
+                ])
+        ); assertNotifiedChange()
     }
     
     func testCGPointMake() {
         assertTransformParsed(
             expression: "CGPointMake(1, 2)",
-            into: .postfix(.identifier("CGPoint"),
-                               .functionCall(arguments: [
-                                .labeled("x", .constant(1)),
-                                .labeled("y", .constant(2))
-                                ]))
-        )
-        
-        assertNotifiedChange()
+            into: Expression
+                .identifier("CGPoint").call([
+                    .labeled("x", .constant(1)),
+                    .labeled("y", .constant(2))
+                ])
+        ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "abc = [[UIView alloc] initWithPoint:CGPointMake(1, 2)]",
@@ -274,9 +271,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                                                                     .labeled("x", .constant(1)),
                                                                                     .labeled("y", .constant(2))
                                                                                     ])))])))
-        )
-        
-        assertNotifiedChange()
+        ); assertNotifiedChange()
     }
     
     func testCGSizeMake() {
@@ -288,9 +283,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                 .labeled("height", .constant(2))
                                 ])
             )
-        )
-        
-        assertNotifiedChange()
+        ); assertNotifiedChange()
     }
     
     func testConvertCGPathAddPoint() {
@@ -306,7 +299,8 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                         .labeled("x", .constant(1)),
                                         .labeled("y", .constant(2))
                                         ]))
-                    ]))
+                    ])
+        ); assertNotifiedChange()
     }
     
     func testConvertCGPathAddPointWithTransform() {
@@ -324,13 +318,14 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                         ])),
                        .labeled("transform",
                                 Expression.identifier("t"))
-                    ]))
+                    ])
+        ); assertNotifiedChange()
     }
     
     func testRemovesCGPathRelease() {
         assertTransform(
             statement: .expression(Expression.identifier("CGPathRelease").call([.identifier("a")])),
             into: .expressions([])
-        )
+        ); assertNotifiedChange()
     }
 }

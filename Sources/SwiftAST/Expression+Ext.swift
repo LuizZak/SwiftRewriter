@@ -1,8 +1,14 @@
 public extension Expression {
-    /// Creates a BiniaryExpression between this expression and a right-hand-side
+    /// Creates a BinaryExpression between this expression and a right-hand-side
     /// expression.
     public func binary(op: SwiftOperator, rhs: Expression) -> BinaryExpression {
         return .binary(lhs: self, op: op, rhs: rhs)
+    }
+    
+    /// Creates a BinaryExpression between this expression and a right-hand-side
+    /// expression.
+    public func assignment(op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
+        return .assignment(lhs: self, op: op, rhs: rhs)
     }
     
     public func optional() -> OptionalAccessPostfixBuilder {
