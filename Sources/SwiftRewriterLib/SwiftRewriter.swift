@@ -2,6 +2,7 @@ import Foundation
 import GrammarModels
 import ObjcParser
 import SwiftAST
+import Utils
 
 private typealias NonnullTokenRange = (start: Int, end: Int)
 
@@ -9,7 +10,6 @@ private typealias NonnullTokenRange = (start: Int, end: Int)
 public class SwiftRewriter {
     
     private var outputTarget: WriterOutput
-    private let context: TypeConstructionContext
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
@@ -21,12 +21,6 @@ public class SwiftRewriter {
     
     /// Full path of files from followed includes, when `followIncludes` is on.
     private var includesFollowed: [String] = []
-    
-    /// During parsing, the index of each NS_ASSUME_NONNULL_BEGIN/END pair is
-    /// collected so during source analysis by SwiftRewriter we can verify whether
-    /// or not a declaration is under the effects of NS_ASSUME_NONNULL by checking
-    /// whether it is contained within one of these ranges.
-    private var nonnullTokenRanges: [NonnullTokenRange] = []
     
     /// To keep token sources alive long enough.
     private var parsers: [ObjcParser] = []
@@ -77,7 +71,7 @@ public class SwiftRewriter {
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         
-        self.context = TypeConstructionContext(typeSystem: typeSystem)
+        let context = TypeConstructionContext(typeSystem: typeSystem)
         self.typeMapper = DefaultTypeMapper(context: context)
         self.settings = settings
     }
@@ -111,6 +105,7 @@ public class SwiftRewriter {
     /// Evaluate all type signatures, now with the knowledge of all types present
     /// in the program.
     private func evaluateTypes() {
+        let context = TypeConstructionContext(typeSystem: typeSystem)
         context.pushContext(AssumeNonnullContext(isNonnullOn: false))
         defer {
             context.popContext()
@@ -287,79 +282,27 @@ public class SwiftRewriter {
         
         try parser.parse()
         
-        nonnullTokenRanges = parser.nonnullMacroRegionsTokenRange
+        let collectorDelegate =
+            CollectorDelegate(typeMapper: typeMapper,
+                              nonnullTokenRanges: parser.nonnullMacroRegionsTokenRange)
+        
+        let ctx = TypeConstructionContext(typeSystem: typeSystem)
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
-        intentionCollection.addIntention(fileIntent)
-        context.pushContext(fileIntent)
+        ctx.pushContext(fileIntent)
+        
+        let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)
+        intentionCollector.collectIntentions(parser.rootNode)
         
         resolveIncludes(in: fileIntent.preprocessorDirectives,
                         basePath: (src.filePath as NSString).deletingLastPathComponent)
         
-        let intentionCollector = IntentionCollector(delegate: self)
-        intentionCollector.collectIntentions(parser.rootNode)
+        ctx.popContext() // FileGenerationIntention
         
-        context.popContext() // FileGenerationIntention
-    }
-}
-
-// MARK: - IntentionCollectorDelegate
-extension SwiftRewriter: IntentionCollectorDelegate {
-    public func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
-        let ranges = nonnullTokenRanges
+        lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
         
-        // Requires original ANTLR's rule context
-        guard let ruleContext = node.sourceRuleContext else {
-            return false
-        }
-        // Fetch the token indices of the node's start and end
-        guard let startToken = ruleContext.getStart(), let stopToken = ruleContext.getStop() else {
-            return false
-        }
-        
-        // Check if it the token start/end indices are completely contained
-        // within NS_ASSUME_NONNULL_BEGIN/END intervals
-        for n in ranges {
-            if n.start <= startToken.getTokenIndex() && n.end >= stopToken.getTokenIndex() {
-                return true
-            }
-        }
-        
-        return false
-    }
-    
-    public func reportForLazyResolving(intention: Intention) {
-        switch intention {
-        case let intention as GlobalVariableGenerationIntention:
-            lazyResolve.append(.globalVar(intention))
-            
-        case let intention as GlobalFunctionGenerationIntention:
-            lazyResolve.append(.globalFunc(intention))
-            
-        case let intention as PropertyGenerationIntention:
-            lazyResolve.append(.property(intention))
-            
-        case let intention as MethodGenerationIntention:
-            lazyResolve.append(.method(intention))
-            
-        case let intention as EnumGenerationIntention:
-            lazyResolve.append(.enumDecl(intention))
-            
-        case let intention as InstanceVariableGenerationIntention:
-            lazyResolve.append(.ivar(intention))
-            
-        default:
-            break
-        }
-    }
-    
-    public func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
-        return typeMapper
-    }
-    
-    public func typeConstructionContext(for intentionCollector: IntentionCollector) -> TypeConstructionContext {
-        return context
+        intentionCollection.addIntention(fileIntent)
     }
     
     /// Settings for a `SwiftRewriter` instance
@@ -382,6 +325,78 @@ extension SwiftRewriter: IntentionCollectorDelegate {
         public init(numThreads: Int, verbose: Bool) {
             self.numThreads = numThreads
             self.verbose = verbose
+        }
+    }
+}
+
+// MARK: - IntentionCollectorDelegate
+fileprivate extension SwiftRewriter {
+    fileprivate class CollectorDelegate: IntentionCollectorDelegate {
+        /// During parsing, the index of each NS_ASSUME_NONNULL_BEGIN/END pair is
+        /// collected so during source analysis by SwiftRewriter we can verify whether
+        /// or not a declaration is under the effects of NS_ASSUME_NONNULL by checking
+        /// whether it is contained within one of these ranges.
+        var nonnullTokenRanges: [NonnullTokenRange]
+        
+        var typeMapper: TypeMapper
+        
+        var lazyResolve: [LazyTypeResolveItem] = []
+        
+        init(typeMapper: TypeMapper, nonnullTokenRanges: [NonnullTokenRange]) {
+            self.typeMapper = typeMapper
+            self.nonnullTokenRanges = nonnullTokenRanges
+        }
+        
+        public func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+            let ranges = nonnullTokenRanges
+            
+            // Requires original ANTLR's rule context
+            guard let ruleContext = node.sourceRuleContext else {
+                return false
+            }
+            // Fetch the token indices of the node's start and end
+            guard let startToken = ruleContext.getStart(), let stopToken = ruleContext.getStop() else {
+                return false
+            }
+            
+            // Check if it the token start/end indices are completely contained
+            // within NS_ASSUME_NONNULL_BEGIN/END intervals
+            for n in ranges {
+                if n.start <= startToken.getTokenIndex() && n.end >= stopToken.getTokenIndex() {
+                    return true
+                }
+            }
+            
+            return false
+        }
+        
+        public func reportForLazyResolving(intention: Intention) {
+            switch intention {
+            case let intention as GlobalVariableGenerationIntention:
+                lazyResolve.append(.globalVar(intention))
+                
+            case let intention as GlobalFunctionGenerationIntention:
+                lazyResolve.append(.globalFunc(intention))
+                
+            case let intention as PropertyGenerationIntention:
+                lazyResolve.append(.property(intention))
+                
+            case let intention as MethodGenerationIntention:
+                lazyResolve.append(.method(intention))
+                
+            case let intention as EnumGenerationIntention:
+                lazyResolve.append(.enumDecl(intention))
+                
+            case let intention as InstanceVariableGenerationIntention:
+                lazyResolve.append(.ivar(intention))
+                
+            default:
+                break
+            }
+        }
+        
+        public func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
+            return typeMapper
         }
     }
 }

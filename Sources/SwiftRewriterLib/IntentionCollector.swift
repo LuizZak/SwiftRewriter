@@ -5,7 +5,6 @@ public protocol IntentionCollectorDelegate {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool
     func reportForLazyResolving(intention: Intention)
     func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper
-    func typeConstructionContext(for intentionCollector: IntentionCollector) -> TypeConstructionContext
 }
 
 /// Traverses a provided AST node, and produces intentions that are recorded by
@@ -13,15 +12,18 @@ public protocol IntentionCollectorDelegate {
 public class IntentionCollector {
     public let delegate: IntentionCollectorDelegate
     
-    private var context: TypeConstructionContext {
-        return delegate.typeConstructionContext(for: self)
-    }
+    var context: TypeConstructionContext
     
-    public init(delegate: IntentionCollectorDelegate) {
+    public init(delegate: IntentionCollectorDelegate, context: TypeConstructionContext) {
         self.delegate = delegate
+        self.context = context
     }
     
     public func collectIntentions(_ node: ASTNode) {
+        startNodeVisit(node)
+    }
+    
+    private func startNodeVisit(_ node: ASTNode) {
         let visitor = AnyASTVisitor()
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
@@ -533,10 +535,9 @@ public class IntentionCollector {
             return
         }
         
-        let typeCtx = delegate.typeConstructionContext(for: self)
         let mapper = delegate.typeMapper(for: self)
         
-        let gen = SwiftMethodSignatureGen(context: typeCtx, typeMapper: mapper)
+        let gen = SwiftMethodSignatureGen(context: context, typeMapper: mapper)
         let signature = gen.generateDefinitionSignature(from: node)
         
         let globalFunc = GlobalFunctionGenerationIntention(signature: signature, source: node)
@@ -546,7 +547,7 @@ public class IntentionCollector {
             .findContext(ofType: FileGenerationIntention.self)?
             .addGlobalFunction(globalFunc)
         
-        typeCtx.pushContext(globalFunc)
+        context.pushContext(globalFunc)
         
         delegate.reportForLazyResolving(intention: globalFunc)
     }

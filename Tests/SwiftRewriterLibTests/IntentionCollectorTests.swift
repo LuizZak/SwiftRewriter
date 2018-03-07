@@ -12,8 +12,12 @@ class IntentionCollectorTests: XCTestCase {
         super.setUp()
         
         file = FileGenerationIntention(sourcePath: "A.m", targetPath: "A.swift")
+        
+        let context = TypeConstructionContext(typeSystem: DefaultTypeSystem.defaultTypeSystem)
+        context.pushContext(file)
+        
         delegate = TestCollectorDelegate(file: file)
-        sut = IntentionCollector(delegate: delegate)
+        sut = IntentionCollector(delegate: delegate, context: context)
     }
     
     func testCollectFunctionDefinition() {
