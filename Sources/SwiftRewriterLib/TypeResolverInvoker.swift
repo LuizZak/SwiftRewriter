@@ -18,15 +18,17 @@ public protocol TypeResolverInvoker {
 
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public var typeSystem: TypeSystem
+    public var numThreads: Int
     
-    public init(typeSystem: TypeSystem) {
+    public init(typeSystem: TypeSystem, numThreads: Int = 8) {
         self.typeSystem = typeSystem
+        self.numThreads = numThreads
     }
     
     public func resolveAllExpressionTypes(in intentions: IntentionCollection, force: Bool) {
         // Make a file invoker for each file and execute resolving in parallel
         let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 10
+        queue.maxConcurrentOperationCount = numThreads
         
         for file in intentions.fileIntentions() {
             let invoker = makeResolverInvoker(forceResolve: force)

@@ -51,23 +51,23 @@ public class SwiftRewriter {
     /// files found during importing are included into the transpilation step.
     public var followIncludes: Bool = false
     
-    /// If true, a little more information is printed during the translation process
-    /// to the standard output.
-    public var verbose: Bool = false
+    /// Describes settings for the current `SwiftRewriter` invocation
+    public var settings: Settings
     
+    /// Describes settings to pass to the AST writers when outputting code
     public var writerOptions: ASTWriterOptions = .default
     
     public convenience init(input: InputSourcesProvider, output: WriterOutput) {
-        self.init(input: input,
-                  output: output,
+        self.init(input: input, output: output,
                   intentionPassesSource: ArrayIntentionPassSource(intentionPasses: []),
-                  syntaxNodeRewriterSources: ArraySyntaxNodeRewriterPassSource(syntaxNodePasses: [])
-        )
+                  syntaxNodeRewriterSources: ArraySyntaxNodeRewriterPassSource(syntaxNodePasses: []),
+                  settings: .default)
     }
     
     public init(input: InputSourcesProvider, output: WriterOutput,
                 intentionPassesSource: IntentionPassSource,
-                syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource) {
+                syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource,
+                settings: Settings) {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
         self.outputTarget = output
@@ -79,6 +79,7 @@ public class SwiftRewriter {
         
         self.context = TypeConstructionContext(typeSystem: typeSystem)
         self.typeMapper = DefaultTypeMapper(context: context)
+        self.settings = settings
     }
     
     public func rewrite() throws {
@@ -174,11 +175,12 @@ public class SwiftRewriter {
         
         let applier =
             SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
-                                          typeSystem: typeSystem)
+                                          typeSystem: typeSystem,
+                                          numThreds: settings.numThreads)
         
         let typeResolverInvoker = DefaultTypeResolverInvoker(typeSystem: typeSystem)
         
-        if verbose {
+        if settings.verbose {
             print("Running intention passes...")
         }
         
@@ -207,7 +209,7 @@ public class SwiftRewriter {
             }
         }
         
-        if verbose {
+        if settings.verbose {
             print("Running syntax passes...")
         }
         
@@ -269,7 +271,7 @@ public class SwiftRewriter {
         // Generate intention for this source
         var path = source.sourceName()
         
-        if verbose {
+        if settings.verbose {
             print("Parsing \((path as NSString).lastPathComponent)...")
         }
         
@@ -359,6 +361,29 @@ extension SwiftRewriter: IntentionCollectorDelegate {
     public func typeConstructionContext(for intentionCollector: IntentionCollector) -> TypeConstructionContext {
         return context
     }
+    
+    /// Settings for a `SwiftRewriter` instance
+    public struct Settings {
+        /// Gets the default settings for a `SwiftRewriter` invocation
+        public static var `default`: Settings = Settings(numThreads: 8, verbose: false)
+        
+        /// The number of concurrent threads to use when applying intention/syntax
+        /// node passes and other multi-threadable operations.
+        ///
+        /// Default is 8.
+        public var numThreads: Int
+        
+        /// Whether to deploy a verbose mode that outputs information about the
+        /// transpilation process while executing it.
+        ///
+        /// Default is false.
+        public var verbose: Bool
+        
+        public init(numThreads: Int, verbose: Bool) {
+            self.numThreads = numThreads
+            self.verbose = verbose
+        }
+    }
 }
 
 private enum LazyTypeResolveItem {
@@ -370,7 +395,7 @@ private enum LazyTypeResolveItem {
     case enumDecl(EnumGenerationIntention)
     
     /// Returns the base `FromSourceIntention`-typed value, which is the intention
-    /// associated with evert case.
+    /// associated with every case.
     var fromSourceIntention: FromSourceIntention {
         switch self {
         case .property(let i):

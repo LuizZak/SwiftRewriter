@@ -4,8 +4,13 @@ import ExpressionPasses
 import SourcePreprocessors
 import IntentionPasses
 
-var options = ASTWriterOptions()
-var verbose = false
+public enum Settings {
+    /// Settings for the AST writer
+    public static var astWriter = ASTWriterOptions()
+    
+    /// General settings for `SwiftRewriter` instances
+    public static var rewriter: SwiftRewriter.Settings = .default
+}
 
 /// Protocol for enabling Swift rewriting service from CLI
 public protocol SwiftRewriterService {
@@ -25,15 +30,15 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
     public func rewrite(files: [URL]) throws {
         let input = FileInputProvider(files: files)
         
-        let converter = SwiftRewriter(input: input, output: output)
+        let converter =
+            SwiftRewriter(input: input, output: output,
+                          intentionPassesSource: DefaultIntentionPasses(),
+                          syntaxNodeRewriterSources: DefaultExpressionPasses(),
+                          settings: Settings.rewriter)
         
         converter.preprocessors.append(QuickSpecPreprocessor())
         
-        converter.writerOptions = options
-        converter.verbose = verbose
-        
-        converter.syntaxNodeRewriterSources = DefaultExpressionPasses()
-        converter.intentionPassesSource = DefaultIntentionPasses()
+        converter.writerOptions = Settings.astWriter
         
         try converter.rewrite()
         

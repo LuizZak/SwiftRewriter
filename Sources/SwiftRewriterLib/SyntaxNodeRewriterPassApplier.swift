@@ -6,16 +6,18 @@ import SwiftAST
 public final class SyntaxNodeRewriterPassApplier {
     public var passes: [SyntaxNodeRewriterPass.Type]
     public var typeSystem: TypeSystem
+    public var numThreds: Int
     
-    public init(passes: [SyntaxNodeRewriterPass.Type], typeSystem: TypeSystem) {
+    public init(passes: [SyntaxNodeRewriterPass.Type], typeSystem: TypeSystem, numThreds: Int = 8) {
         self.passes = passes
         self.typeSystem = typeSystem
+        self.numThreds = numThreds
     }
     
     public func apply(on intentions: IntentionCollection) {
         // Apply expression passes in a multi-threaded context.
         let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 10
+        queue.maxConcurrentOperationCount = numThreds
         
         for file in intentions.fileIntentions() {
             let invoker = makeResolverInvoker()
