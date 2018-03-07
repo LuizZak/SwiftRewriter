@@ -2,16 +2,9 @@
 import Antlr4
 
 open class ObjectiveCPreprocessorLexer: Lexer {
-	internal static var _decisionToDFA: [DFA] = {
-          var decisionToDFA = [DFA]()
-          let length = ObjectiveCPreprocessorLexer._ATN.getNumberOfDecisions()
-          for i in 0..<length {
-          	    decisionToDFA.append(DFA(ObjectiveCPreprocessorLexer._ATN.getDecisionState(i)!, i))
-          }
-           return decisionToDFA
-     }()
+	internal var _decisionToDFA: [DFA]
 
-	internal static let _sharedContextCache:PredictionContextCache = PredictionContextCache()
+	internal let _sharedContextCache:PredictionContextCache = PredictionContextCache()
 	public static let SHARP=1, CODE=2, IMPORT=3, INCLUDE=4, PRAGMA=5, DEFINE=6, 
                    DEFINED=7, IF=8, ELIF=9, ELSE=10, UNDEF=11, IFDEF=12, 
                    IFNDEF=13, ENDIF=14, TRUE=15, FALSE=16, ERROR=17, WARNING=18, 
@@ -92,9 +85,17 @@ open class ObjectiveCPreprocessorLexer: Lexer {
     }
 
 	public required init(_ input: CharStream) {
+        var decisionToDFA = [DFA]()
+        let length = _ATN.getNumberOfDecisions()
+        for i in 0..<length {
+            decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
+        }
+        
+        _decisionToDFA = decisionToDFA
+        
 	    RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
 		super.init(input)
-		_interp = LexerATNSimulator(self, ObjectiveCPreprocessorLexer._ATN, ObjectiveCPreprocessorLexer._decisionToDFA, ObjectiveCPreprocessorLexer._sharedContextCache)
+		_interp = LexerATNSimulator(self, _ATN, _decisionToDFA, _sharedContextCache)
 	}
 
 	override
@@ -113,8 +114,8 @@ open class ObjectiveCPreprocessorLexer: Lexer {
 	open func getModeNames() -> [String] { return ObjectiveCPreprocessorLexer.modeNames }
 
 	override
-	open func getATN() -> ATN { return ObjectiveCPreprocessorLexer._ATN }
+	open func getATN() -> ATN { return _ATN }
 
     public static let _serializedATN: String = ObjectiveCPreprocessorLexerATN().jsonString
-	public static let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
+	public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
 }

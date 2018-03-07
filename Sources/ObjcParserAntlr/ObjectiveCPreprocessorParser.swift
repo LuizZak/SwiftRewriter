@@ -3,15 +3,8 @@ import Antlr4
 
 open class ObjectiveCPreprocessorParser: Parser {
 
-	internal static var _decisionToDFA: [DFA] = {
-          var decisionToDFA = [DFA]()
-          let length = ObjectiveCPreprocessorParser._ATN.getNumberOfDecisions()
-          for i in 0..<length {
-            decisionToDFA.append(DFA(ObjectiveCPreprocessorParser._ATN.getDecisionState(i)!, i))
-           }
-           return decisionToDFA
-     }()
-	internal static let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+	internal var _decisionToDFA: [DFA]
+	internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
 	public enum Tokens: Int {
 		case EOF = -1, SHARP = 1, CODE = 2, IMPORT = 3, INCLUDE = 4, PRAGMA = 5, 
                  DEFINE = 6, DEFINED = 7, IF = 8, ELIF = 9, ELSE = 10, UNDEF = 11, 
@@ -81,16 +74,23 @@ open class ObjectiveCPreprocessorParser: Parser {
 	open func getSerializedATN() -> String { return ObjectiveCPreprocessorParser._serializedATN }
 
 	override
-	open func getATN() -> ATN { return ObjectiveCPreprocessorParser._ATN }
+	open func getATN() -> ATN { return _ATN }
 
 	open override func getVocabulary() -> Vocabulary {
 	    return ObjectiveCPreprocessorParser.VOCABULARY
 	}
 
 	public override init(_ input:TokenStream)throws {
+        var decisionToDFA = [DFA]()
+        let length = _ATN.getNumberOfDecisions()
+        for i in 0..<length {
+            decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
+        }
+        _decisionToDFA = decisionToDFA
+        
 	    RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
 		try super.init(input)
-		_interp = ParserATNSimulator(self,ObjectiveCPreprocessorParser._ATN,ObjectiveCPreprocessorParser._decisionToDFA, ObjectiveCPreprocessorParser._sharedContextCache)
+		_interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
 	}
 	open class ObjectiveCDocumentContext:ParserRuleContext {
 		open func EOF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.EOF.rawValue, 0) }
@@ -1287,5 +1287,5 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 
    public static let _serializedATN : String = ObjectiveCPreprocessorParserATN().jsonString
-   public static let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
+   public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
 }

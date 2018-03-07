@@ -95,11 +95,27 @@ public class SwiftRewriter {
         // Load input sources
         let sources = sourcesProvider.sources()
         
+        let queue = OperationQueue()
+        
+        var outError: Error?
+        
         for src in sources {
-            try autoreleasepool {
-                try loadObjcSource(from: src)
+            queue.addOperation {
+                do {
+                    try autoreleasepool {
+                        try self.loadObjcSource(from: src)
+                    }
+                } catch {
+                    outError = error
+                }
             }
         }
+        
+        if let error = outError {
+            throw error
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
@@ -277,7 +293,6 @@ public class SwiftRewriter {
         let processedSrc = applyPreprocessors(source: src)
         
         let parser = ObjcParser(string: processedSrc, fileName: src.filePath)
-        parsers.append(parser)
         
         try parser.parse()
         
@@ -299,9 +314,12 @@ public class SwiftRewriter {
         
         ctx.popContext() // FileGenerationIntention
         
-        lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
-        diagnostics.merge(with: parser.diagnostics)
-        intentionCollection.addIntention(fileIntent)
+        synchronized(self) {
+            parsers.append(parser)
+            lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
+            diagnostics.merge(with: parser.diagnostics)
+            intentionCollection.addIntention(fileIntent)
+        }
     }
     
     /// Settings for a `SwiftRewriter` instance

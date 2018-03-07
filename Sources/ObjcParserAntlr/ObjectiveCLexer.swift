@@ -3,16 +3,9 @@ import Antlr4
 import Foundation
 
 open class ObjectiveCLexer: Lexer {
-	internal static var _decisionToDFA: [DFA] = {
-          var decisionToDFA = [DFA]()
-          let length = ObjectiveCLexer._ATN.getNumberOfDecisions()
-          for i in 0..<length {
-          	    decisionToDFA.append(DFA(ObjectiveCLexer._ATN.getDecisionState(i)!, i))
-          }
-           return decisionToDFA
-     }()
+	internal var _decisionToDFA: [DFA]
 
-	internal static let _sharedContextCache:PredictionContextCache = PredictionContextCache()
+	internal let _sharedContextCache:PredictionContextCache = PredictionContextCache()
 	public static let AUTO=1, BREAK=2, CASE=3, CHAR=4, CONST=5, CONTINUE=6, 
                    DEFAULT=7, DO=8, DOUBLE=9, ELSE=10, ENUM=11, EXTERN=12, 
                    FLOAT=13, FOR=14, GOTO=15, IF=16, INLINE=17, INT=18, 
@@ -225,9 +218,18 @@ open class ObjectiveCLexer: Lexer {
     }
 
 	public required init(_ input: CharStream) {
+        var decisionToDFA = [DFA]()
+        
+        let length = _ATN.getNumberOfDecisions()
+        for i in 0..<length {
+            decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
+        }
+        
+        self._decisionToDFA = decisionToDFA
+        
 	    RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
 		super.init(input)
-		_interp = LexerATNSimulator(self, ObjectiveCLexer._ATN, ObjectiveCLexer._decisionToDFA, ObjectiveCLexer._sharedContextCache)
+		_interp = LexerATNSimulator(self, _ATN, _decisionToDFA, _sharedContextCache)
 	}
 
 	override
@@ -246,8 +248,8 @@ open class ObjectiveCLexer: Lexer {
 	open func getModeNames() -> [String] { return ObjectiveCLexer.modeNames }
 
 	override
-	open func getATN() -> ATN { return ObjectiveCLexer._ATN }
+	open func getATN() -> ATN { return _ATN }
 
     public static let _serializedATN: String = ObjectiveCLexerATN().jsonString
-	public static let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
+	public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
 }

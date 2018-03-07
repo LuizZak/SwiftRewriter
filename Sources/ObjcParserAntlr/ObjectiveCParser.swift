@@ -3,15 +3,9 @@ import Antlr4
 
 open class ObjectiveCParser: Parser {
 
-	internal static var _decisionToDFA: [DFA] = {
-          var decisionToDFA = [DFA]()
-          let length = ObjectiveCParser._ATN.getNumberOfDecisions()
-          for i in 0..<length {
-            decisionToDFA.append(DFA(ObjectiveCParser._ATN.getDecisionState(i)!, i))
-           }
-           return decisionToDFA
-     }()
-	internal static let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+	internal var _decisionToDFA: [DFA]
+    
+	internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
 	public enum Tokens: Int {
 		case EOF = -1, AUTO = 1, BREAK = 2, CASE = 3, CHAR = 4, CONST = 5, CONTINUE = 6, 
                  DEFAULT = 7, DO = 8, DOUBLE = 9, ELSE = 10, ENUM = 11, 
@@ -285,16 +279,23 @@ open class ObjectiveCParser: Parser {
 	open func getSerializedATN() -> String { return ObjectiveCParser._serializedATN }
 
 	override
-	open func getATN() -> ATN { return ObjectiveCParser._ATN }
+	open func getATN() -> ATN { return _ATN }
 
 	open override func getVocabulary() -> Vocabulary {
 	    return ObjectiveCParser.VOCABULARY
 	}
 
 	public override init(_ input:TokenStream)throws {
+        var decisionToDFA = [DFA]()
+        let length = _ATN.getNumberOfDecisions()
+        for i in 0..<length {
+            decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
+        }
+        self._decisionToDFA = decisionToDFA
+        
 	    RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
 		try super.init(input)
-		_interp = ParserATNSimulator(self,ObjectiveCParser._ATN,ObjectiveCParser._decisionToDFA, ObjectiveCParser._sharedContextCache)
+		_interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
 	}
 	open class TranslationUnitContext:ParserRuleContext {
 		open func EOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.EOF.rawValue, 0) }
@@ -14572,5 +14573,5 @@ open class ObjectiveCParser: Parser {
 	}
 
    public static let _serializedATN : String = ObjectiveCParserATN().jsonString
-   public static let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
+   public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
 }
