@@ -45,9 +45,9 @@ public extension String {
         // Find first character differing across both strings
         let _offset =
             zip(indices, zip(self, string))
-                .first { (offset, chars) -> Bool in
+                .first { (_, chars) -> Bool in
                     return chars.0 != chars.1
-                }?.0
+                }?.0 // <result>.0: offset
         
         let offset = _offset ?? endIndex
         
