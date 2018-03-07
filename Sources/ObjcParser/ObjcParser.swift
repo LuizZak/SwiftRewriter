@@ -7,13 +7,25 @@ import class Antlr4.ATNSimulator
 import class Antlr4.ANTLRInputStream
 import class Antlr4.CommonTokenStream
 import class Antlr4.ParseTreeWalker
+import class Antlr4.Lexer
+import class Antlr4.Parser
 import ObjcParserAntlr
 
+struct AntlrParserState<Lexer: Antlr4.Lexer, Parser: Antlr4.Parser> {
+    var lexer: Lexer
+    var parser: Parser
+    var tokens: CommonTokenStream
+}
+
 public class ObjcParser {
+    // MARK: ANTLR parser
+    var parserState: AntlrParserState<ObjectiveCLexer, ObjectiveCParser>?
+    var preprocessorState: AntlrParserState<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser>?
+    
+    // MARK: Internal members
     let lexer: ObjcLexer
     let source: CodeSource
     let context: NodeCreationContext
-    var tokens: CommonTokenStream?
     
     /// Whether a token has been read yet by this parser
     internal var _hasReadToken: Bool = false
@@ -97,15 +109,35 @@ public class ObjcParser {
         traverser.traverse()
     }
     
+    // MARK: - Antlr parser generator
+    
+    private func mainParser(input: String) throws -> AntlrParserState<ObjectiveCLexer, ObjectiveCParser> {
+        let input = ANTLRInputStream(input)
+        let lxr = ObjectiveCLexer(input)
+        let tokens = CommonTokenStream(lxr)
+        let parser = try ObjectiveCParser(tokens)
+        
+        return AntlrParserState(lexer: lxr, parser: parser, tokens: tokens)
+    }
+    
+    private func makePreprocessorParser(input: String) throws -> AntlrParserState<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser> {
+        let input = ANTLRInputStream(input)
+        let lxr = ObjectiveCPreprocessorLexer(input)
+        let tokens = CommonTokenStream(lxr)
+        let parser = try ObjectiveCPreprocessorParser(tokens)
+        
+        return AntlrParserState(lexer: lxr, parser: parser, tokens: tokens)
+    }
+    
+    // MARK: -
+    
     /// Main source parsing pass which takes in preprocessors while parsing
     private func parsePreprocessor() throws -> String {
         let src = source.fetchSource()
         
-        let input = ANTLRInputStream(src)
-        let lxr = ObjectiveCPreprocessorLexer(input)
-        let tokens = CommonTokenStream(lxr)
-        
-        let parser = try ObjectiveCPreprocessorParser(tokens)
+        let parserState = try preprocessorState ?? makePreprocessorParser(input: src)
+        preprocessorState = parserState
+        let parser = parserState.parser
         parser.addErrorListener(
             DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
         )
@@ -124,22 +156,8 @@ public class ObjcParser {
         }
         
         // Return proper code
-        let processed = ObjectiveCPreprocessor(commonTokenStream: tokens)
+        let processed = ObjectiveCPreprocessor(commonTokenStream: parserState.tokens)
         return processed.visitObjectiveCDocument(root) ?? ""
-    }
-    
-    private func initMainTokenStream(input: String) -> CommonTokenStream {
-        if let tokens = self.tokens {
-            return tokens
-        }
-        
-        let input = ANTLRInputStream(input)
-        let lxr = ObjectiveCLexer(input)
-        let tokens = CommonTokenStream(lxr)
-        
-        self.tokens = tokens
-        
-        return tokens
     }
     
     private func parseMainChannel(input: String) throws {
@@ -147,7 +165,9 @@ public class ObjcParser {
         // known constructs
         let src = source.fetchSource()
         
-        let parser = try ObjectiveCParser(initMainTokenStream(input: input))
+        let parserState = try self.parserState ?? mainParser(input: input)
+        self.parserState = parserState
+        let parser = parserState.parser
         parser.addErrorListener(
             DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
         )
@@ -165,10 +185,10 @@ public class ObjcParser {
     private func parsePreprocessorDirectivesChannel() throws {
         let src = source.fetchSource()
         
-        let input = ANTLRInputStream(src)
-        let lexer = ObjectiveCLexer(input)
-        lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
-        let tokens = CommonTokenStream(lexer)
+        let state = try mainParser(input: src)
+        
+        state.lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
+        let tokens = CommonTokenStream(state.lexer)
         try tokens.fill()
         
         let allTokens = tokens.getTokens()
