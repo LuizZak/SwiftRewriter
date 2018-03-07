@@ -43,6 +43,10 @@ public class Diagnostics {
         }
     }
     
+    public func merge(with other: Diagnostics) {
+        diagnostics.append(contentsOf: other.diagnostics)
+    }
+    
     public func error(_ message: String, location: SourceLocation) {
         let diag = DiagnosticMessage.error(message: message, location: location)
         

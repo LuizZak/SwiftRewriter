@@ -278,7 +278,6 @@ public class SwiftRewriter {
         
         let parser = ObjcParser(string: processedSrc, fileName: src.filePath)
         parsers.append(parser)
-        parser.diagnostics = diagnostics
         
         try parser.parse()
         
@@ -301,7 +300,7 @@ public class SwiftRewriter {
         ctx.popContext() // FileGenerationIntention
         
         lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
-        
+        diagnostics.merge(with: parser.diagnostics)
         intentionCollection.addIntention(fileIntent)
     }
     
