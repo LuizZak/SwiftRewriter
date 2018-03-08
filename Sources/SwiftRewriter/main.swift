@@ -39,7 +39,7 @@ let verboseArg
 let numThreadsArg
     = parser.add(option: "--num-threads",
                  kind: Int.self,
-                 usage: "Specifies the number of threads to use when performing intention and expression passes. If not specified, defaults to 8.")
+                 usage: "Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, defaults to 8.")
 
 //// files <files...>
 

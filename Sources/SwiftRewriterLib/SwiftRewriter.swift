@@ -130,46 +130,58 @@ public class SwiftRewriter {
     
     /// Parses all statements now, with proper type information available.
     private func parseStatements() {
-        let context = TypeConstructionContext(typeSystem: typeSystem)
-        context.pushContext(AssumeNonnullContext(isNonnullOn: false))
-        defer {
-            context.popContext()
+        if settings.verbose {
+            print("Parsing function bodies...")
         }
         
-        let typeMapper = DefaultTypeMapper(context: context)
-        let state = SwiftRewriter._parserStatePool.pull()
-        let typeParser = TypeParsing(state: state)
-        defer {
-            SwiftRewriter._parserStatePool.repool(state)
-        }
-        
-        let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in lazyParse {
-            context.assumeNonnulContext?.isNonnullOn = item.fromSourceIntention.inNonnullContext
-            
-            switch item {
-            case .enumCase(let enCase):
-                guard let expression = (enCase.source as? ObjcEnumCase)?.expression?.expression else {
-                    continue
+            queue.addOperation {
+                let context = TypeConstructionContext(typeSystem: self.typeSystem)
+                context.pushContext(AssumeNonnullContext(isNonnullOn: false))
+                defer {
+                    context.popContext()
                 }
                 
-                enCase.expression = reader.parseExpression(expression: expression)
-            case .functionBody(let funcBody):
-                guard let body = funcBody.typedSource?.statements else {
-                    continue
+                let typeMapper = DefaultTypeMapper(context: context)
+                let state = SwiftRewriter._parserStatePool.pull()
+                let typeParser = TypeParsing(state: state)
+                defer {
+                    SwiftRewriter._parserStatePool.repool(state)
                 }
                 
-                funcBody.body = reader.parseStatements(compoundStatement: body)
+                let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
                 
-            case .globalVar(let v):
-                guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
-                    continue
+                
+                context.assumeNonnulContext?.isNonnullOn = item.fromSourceIntention.inNonnullContext
+                
+                switch item {
+                case .enumCase(let enCase):
+                    guard let expression = (enCase.source as? ObjcEnumCase)?.expression?.expression else {
+                        return
+                    }
+                    
+                    enCase.expression = reader.parseExpression(expression: expression)
+                case .functionBody(let funcBody):
+                    guard let body = funcBody.typedSource?.statements else {
+                        return
+                    }
+                    
+                    funcBody.body = reader.parseStatements(compoundStatement: body)
+                    
+                case .globalVar(let v):
+                    guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
+                        return
+                    }
+                    
+                    v.expression = reader.parseExpression(expression: expression)
                 }
-                
-                v.expression = reader.parseExpression(expression: expression)
             }
         }
+        
+        queue.waitUntilAllOperationsAreFinished()
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
