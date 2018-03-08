@@ -71,6 +71,10 @@ private class TestCollectorDelegate: IntentionCollectorDelegate {
         return false
     }
     
+    func reportForLazyParsing(intention: Intention) {
+        
+    }
+    
     func reportForLazyResolving(intention: Intention) {
         
     }
