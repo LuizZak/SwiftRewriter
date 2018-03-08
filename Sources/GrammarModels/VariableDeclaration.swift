@@ -19,7 +19,7 @@ public class VariableDeclaration: ASTNode, InitializableNode {
 
 /// Represents the initial expression for a global variable definition.
 public class InitialExpression: ASTNode, InitializableNode {
-    public var expression: ConstantExpressionNode? {
+    public var constantExpression: ConstantExpressionNode? {
         return firstChild()
     }
     

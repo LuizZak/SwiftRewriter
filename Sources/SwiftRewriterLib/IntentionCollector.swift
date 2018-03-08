@@ -4,6 +4,7 @@ import SwiftAST
 
 public protocol IntentionCollectorDelegate {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool
+    func reportForLazyParsing(intention: Intention)
     func reportForLazyResolving(intention: Intention)
     func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper
     func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing
@@ -181,18 +182,14 @@ public class IntentionCollector {
         intent.inNonnullContext = delegate.isNodeInNonnullContext(node)
         recordSourceHistory(intention: intent, node: node)
         
-        if let initialExpression = node.initialExpression,
-            let expression = initialExpression.expression?.expression?.expression {
-            let reader = SwiftASTReader()
-            let typeMapper = delegate.typeMapper(for: self)
-            let typeParser = delegate.typeParser(for: self)
-            let expression =
-                reader.parseExpression(expression: expression, typeMapper: typeMapper,
-                                       typeParser: typeParser)
-            
-            intent.initialValueExpr =
-                GlobalVariableInitialValueIntention(expression: expression,
+        if let initialExpression = node.initialExpression {
+            let initialExpr =
+                GlobalVariableInitialValueIntention(expression: .constant(0),
                                                     source: initialExpression)
+            
+            delegate.reportForLazyParsing(intention: initialExpr)
+            
+            intent.initialValueExpr = initialExpr
         }
         
         ctx.addGlobalVariable(intent)
@@ -398,16 +395,11 @@ public class IntentionCollector {
         
         recordSourceHistory(intention: method, node: node)
         
-        if let body = node.body, let statements = body.statements {
-            let reader = SwiftASTReader()
-            let typeMapper = delegate.typeMapper(for: self)
-            let typeParser = delegate.typeParser(for: self)
-            let compound =
-                reader.parseStatements(compoundStatement: statements,
-                                       typeMapper: typeMapper, typeParser: typeParser)
-            
-            let methodBodyIntention = FunctionBodyIntention(body: compound, source: body)
+        if let body = node.body {
+            let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
             recordSourceHistory(intention: methodBodyIntention, node: body)
+            
+            delegate.reportForLazyParsing(intention: methodBodyIntention)
             method.functionBody = methodBodyIntention
         }
         
@@ -515,16 +507,7 @@ public class IntentionCollector {
                                         accessLevel: .internal, source: node)
         recordSourceHistory(intention: enumCase, node: node)
         
-        if let expression = node.expression?.expression {
-            let reader = SwiftASTReader()
-            let typeMapper = delegate.typeMapper(for: self)
-            let typeParser = delegate.typeParser(for: self)
-            let exp =
-                reader.parseExpression(expression: expression, typeMapper: typeMapper,
-                                       typeParser: typeParser)
-            
-            enumCase.expression = exp
-        }
+        delegate.reportForLazyParsing(intention: enumCase)
         
         ctx.addCase(enumCase)
     }

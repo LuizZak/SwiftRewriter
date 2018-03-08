@@ -19,6 +19,10 @@ public class SwiftRewriter {
     /// For pooling and reusing Antlr parser states to aid in performance
     private var parserStatePool: ObjcParserStatePool { return SwiftRewriter._parserStatePool }
     
+    /// Items to type-parse after parsing is complete, and all types have been
+    /// gathered.
+    private var lazyParse: [LazyParseItem] = []
+    
     /// Items to type-resolve after parsing is complete, and all types have been
     /// gathered.
     private var lazyResolve: [LazyTypeResolveItem] = []
@@ -89,6 +93,7 @@ public class SwiftRewriter {
             parsers.removeAll()
             
             try loadInputSources()
+            parseStatements()
             evaluateTypes()
             performIntentionPasses()
             outputDefinitions()
@@ -121,6 +126,50 @@ public class SwiftRewriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+    }
+    
+    /// Parses all statements now, with proper type information available.
+    private func parseStatements() {
+        let context = TypeConstructionContext(typeSystem: typeSystem)
+        context.pushContext(AssumeNonnullContext(isNonnullOn: false))
+        defer {
+            context.popContext()
+        }
+        
+        let typeMapper = DefaultTypeMapper(context: context)
+        let state = SwiftRewriter._parserStatePool.pull()
+        let typeParser = TypeParsing(state: state)
+        defer {
+            SwiftRewriter._parserStatePool.repool(state)
+        }
+        
+        let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
+        
+        for item in lazyParse {
+            context.assumeNonnulContext?.isNonnullOn = item.fromSourceIntention.inNonnullContext
+            
+            switch item {
+            case .enumCase(let enCase):
+                guard let expression = (enCase.source as? ObjcEnumCase)?.expression?.expression else {
+                    continue
+                }
+                
+                enCase.expression = reader.parseExpression(expression: expression)
+            case .functionBody(let funcBody):
+                guard let body = funcBody.typedSource?.statements else {
+                    continue
+                }
+                
+                funcBody.body = reader.parseStatements(compoundStatement: body)
+                
+            case .globalVar(let v):
+                guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
+                    continue
+                }
+                
+                v.expression = reader.parseExpression(expression: expression)
+            }
+        }
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
@@ -303,6 +352,8 @@ public class SwiftRewriter {
         let parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
         try parser.parse()
         
+        let typeSystem = DefaultTypeSystem.defaultTypeSystem
+        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: typeSystem))
         let typeParser = TypeParsing(state: state)
         
         let collectorDelegate =
@@ -318,16 +369,17 @@ public class SwiftRewriter {
         let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)
         intentionCollector.collectIntentions(parser.rootNode)
         
-        resolveIncludes(in: fileIntent.preprocessorDirectives,
-                        basePath: (src.filePath as NSString).deletingLastPathComponent)
-        
         ctx.popContext() // FileGenerationIntention
         
         synchronized(self) {
             parsers.append(parser)
+            lazyParse.append(contentsOf: collectorDelegate.lazyParse)
             lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
+            
+            resolveIncludes(in: fileIntent.preprocessorDirectives,
+                            basePath: (src.filePath as NSString).deletingLastPathComponent)
         }
     }
     
@@ -367,6 +419,7 @@ fileprivate extension SwiftRewriter {
         var typeMapper: TypeMapper
         var typeParser: TypeParsing
         
+        var lazyParse: [LazyParseItem] = []
         var lazyResolve: [LazyTypeResolveItem] = []
         
         init(typeMapper: TypeMapper, typeParser: TypeParsing, nonnullTokenRanges: [NonnullTokenRange]) {
@@ -423,12 +476,47 @@ fileprivate extension SwiftRewriter {
             }
         }
         
+        func reportForLazyParsing(intention: Intention) {
+            switch intention {
+            case let intention as GlobalVariableInitialValueIntention:
+                lazyParse.append(.globalVar(intention))
+                
+            case let intention as FunctionBodyIntention:
+                lazyParse.append(.functionBody(intention))
+                
+            case let intention as EnumCaseGenerationIntention:
+                lazyParse.append(.enumCase(intention))
+                
+            default:
+                break
+            }
+        }
+        
         public func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
             return typeMapper
         }
         
         func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
             return typeParser
+        }
+    }
+}
+
+private enum LazyParseItem {
+    case enumCase(EnumCaseGenerationIntention)
+    case functionBody(FunctionBodyIntention)
+    case globalVar(GlobalVariableInitialValueIntention)
+    
+    /// Returns the base `FromSourceIntention`-typed value, which is the intention
+    /// associated with every case.
+    var fromSourceIntention: FromSourceIntention {
+        switch self {
+        case .enumCase(let i):
+            return i
+        case .functionBody(let i):
+            return i
+        case .globalVar(let i):
+            return i
         }
     }
 }

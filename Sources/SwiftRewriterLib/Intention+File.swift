@@ -207,6 +207,10 @@ public class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIn
 
 /// An intention to generate the initial value for a global variable.
 public class GlobalVariableInitialValueIntention: FromSourceIntention {
+    public var typedSource: InitialExpression? {
+        return source as? InitialExpression
+    }
+    
     public var expression: Expression
     
     public init(expression: Expression, source: ASTNode?) {
