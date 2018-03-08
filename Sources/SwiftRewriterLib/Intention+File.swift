@@ -97,37 +97,46 @@ public class FileGenerationIntention: Intention {
     }
     
     public func removeTypes(where predicate: (TypeGenerationIntention) -> Bool) {
-        for (i, type) in typeIntentions.enumerated().reversed() {
-            if predicate(type) {
-                type.parent = nil
+        for (i, intent) in typeIntentions.enumerated().reversed() {
+            if predicate(intent) {
+                intent.parent = nil
                 typeIntentions.remove(at: i)
             }
         }
     }
     
     public func removeFunctions(where predicate: (GlobalFunctionGenerationIntention) -> Bool) {
-        for (i, function) in globalFunctionIntentions.enumerated().reversed() {
-            if predicate(function) {
-                function.parent = nil
+        for (i, intent) in globalFunctionIntentions.enumerated().reversed() {
+            if predicate(intent) {
+                intent.parent = nil
                 globalFunctionIntentions.remove(at: i)
             }
         }
     }
     
     public func removeClassTypes(where predicate: (BaseClassIntention) -> Bool) {
-        for (i, type) in typeIntentions.enumerated().reversed() {
-            if let classType = type as? BaseClassIntention, predicate(classType) {
-                type.parent = nil
+        for (i, intent) in typeIntentions.enumerated().reversed() {
+            if let classType = intent as? BaseClassIntention, predicate(classType) {
+                intent.parent = nil
                 typeIntentions.remove(at: i)
             }
         }
     }
     
     public func removeGlobalVariables(where predicate: (GlobalVariableGenerationIntention) -> Bool) {
-        for (i, gvar) in globalVariableIntentions.enumerated().reversed() {
-            if predicate(gvar) {
-                gvar.parent = nil
+        for (i, intent) in globalVariableIntentions.enumerated().reversed() {
+            if predicate(intent) {
+                intent.parent = nil
                 globalVariableIntentions.remove(at: i)
+            }
+        }
+    }
+    
+    public func removeTypealiases(where predicate: (TypealiasIntention) -> Bool) {
+        for (i, intent) in typealiasIntentions.enumerated().reversed() {
+            if predicate(intent) {
+                intent.parent = nil
+                typealiasIntentions.remove(at: i)
             }
         }
     }

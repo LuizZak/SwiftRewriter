@@ -123,6 +123,15 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func createTypealias(withName name: String, type: ObjcType) -> FileIntentionBuilder {
+        let intent = TypealiasIntention(fromType: type, named: name)
+        
+        intention.addTypealias(intent)
+        
+        return self
+    }
+    
+    @discardableResult
     public func createExtension(forClassNamed name: String, categoryName: String? = nil, initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
         let classIntention = ClassExtensionGenerationIntention(typeName: name)
         classIntention.categoryName = categoryName

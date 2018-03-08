@@ -572,7 +572,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteManyTypeAliasSequentially() throws {
+    func testRewriteManyTypeliasSequentially() throws {
         try assertObjcParse(
             objc: """
             typedef NSInteger MyInteger;

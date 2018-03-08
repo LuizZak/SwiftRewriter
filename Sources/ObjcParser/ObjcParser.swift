@@ -185,6 +185,8 @@ public class ObjcParser {
             DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
         )
         
+        try parser.reset()
+        
         let root = try parser.translationUnit()
         
         let listener = ObjcParserListener(sourceString: src, source: source, state: state)

@@ -65,6 +65,11 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                     impl.addGlobalVariable(gvar)
                 }
             }
+            
+            for alias in header.typealiasIntentions {
+                header.removeTypealiases(where: { $0 === alias })
+                impl.addTypealias(alias)
+            }
         }
         
         // Move all directives from .h to matching .m files
@@ -85,11 +90,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         
         // Remove all empty header files
         intentionCollection.removeIntentions { intent -> Bool in
-            if !intent.sourcePath.hasSuffix(".h") {
-                return false
-            }
-            
-            return intent.isEmpty
+            return intent.sourcePath.hasSuffix(".h") && intent.isEmpty
         }
         
         context.notifyChange()

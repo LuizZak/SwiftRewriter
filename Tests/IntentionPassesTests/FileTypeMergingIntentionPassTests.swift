@@ -404,6 +404,23 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(methods.count, 1)
     }
     
+    func testMovesTypealiasesToImplementationWhenAvailable() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createTypealias(withName: "Abc", type: .struct("NSInteger"))
+                }.createFile(named: "A.m")
+                .build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.sourcePath, "A.m")
+        XCTAssertEqual(files.first?.typealiasIntentions.count, 1)
+    }
+    
     func testMovesEnumsToImplementationWhenAvailable() {
         let intentions =
             IntentionCollectionBuilder()
