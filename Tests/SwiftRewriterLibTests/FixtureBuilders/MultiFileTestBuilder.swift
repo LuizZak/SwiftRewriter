@@ -34,16 +34,22 @@ class MultiFileTestBuilder {
         do {
             try sut.rewrite()
             
-            if output.buffer != expectedSwift {
+            // Compute output
+            let buffer = output.outputs
+                .sorted { $0.path < $1.path }
+                .map { $0.buffer }
+                .joined(separator: "\n")
+            
+            if buffer != expectedSwift {
                 test.recordFailure(withDescription: """
                     Failed: Expected to translate Objective-C inputs as:
                     \(expectedSwift)
                     but translated as:
-                    \(output.buffer)
+                    \(buffer)
                     
                     Diff:
                     
-                    \(expectedSwift.makeDifferenceMarkString(against: output.buffer))
+                    \(expectedSwift.makeDifferenceMarkString(against: buffer))
                     """, inFile: file, atLine: line, expected: true)
             }
             
@@ -99,21 +105,13 @@ class TestMultiInputProvider: InputSourcesProvider {
 class TestFileOutput: FileOutput {
     var path: String
     var buffer: String = ""
-    var writerOutput: TestWriterOutput
     
-    init(path: String, writerOutput: TestWriterOutput) {
+    init(path: String) {
         self.path = path
-        self.writerOutput = writerOutput
     }
     
     func close() {
         buffer += "\n// End of file \(path)"
-        
-        if !writerOutput.buffer.isEmpty {
-            writerOutput.buffer += "\n"
-        }
-        
-        writerOutput.buffer += buffer
     }
     
     func outputTarget() -> RewriterOutputTarget {
@@ -128,9 +126,11 @@ class TestFileOutput: FileOutput {
 }
 
 class TestWriterOutput: WriterOutput {
-    var buffer: String = ""
+    var outputs: [TestFileOutput] = []
     
     func createFile(path: String) -> FileOutput {
-        return TestFileOutput(path: path, writerOutput: self)
+        let output = TestFileOutput(path: path)
+        outputs.append(output)
+        return output
     }
 }

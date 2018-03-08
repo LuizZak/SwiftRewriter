@@ -74,15 +74,6 @@ public class ObjcParser {
         return lexer.location()
     }
     
-    func withTemporaryContextNode(_ node: ASTNode, do action: () throws -> ()) rethrows {
-        context.pushContext(node: node)
-        defer {
-            context.popContext()
-        }
-        
-        try action()
-    }
-    
     func withTemporaryContext<T: ASTNode & InitializableNode>(nodeType: T.Type = T.self, do action: () throws -> ()) rethrows -> T {
         let node = context.pushContext(nodeType: nodeType)
         defer {
