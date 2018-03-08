@@ -1,10 +1,12 @@
 import GrammarModels
+import ObjcParser
 import SwiftAST
 
 public protocol IntentionCollectorDelegate {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool
     func reportForLazyResolving(intention: Intention)
     func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper
+    func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing
 }
 
 /// Traverses a provided AST node, and produces intentions that are recorded by
@@ -183,9 +185,10 @@ public class IntentionCollector {
             let expression = initialExpression.expression?.expression?.expression {
             let reader = SwiftASTReader()
             let typeMapper = delegate.typeMapper(for: self)
-            
+            let typeParser = delegate.typeParser(for: self)
             let expression =
-                reader.parseExpression(expression: expression, typeMapper: typeMapper)
+                reader.parseExpression(expression: expression, typeMapper: typeMapper,
+                                       typeParser: typeParser)
             
             intent.initialValueExpr =
                 GlobalVariableInitialValueIntention(expression: expression,
@@ -398,7 +401,10 @@ public class IntentionCollector {
         if let body = node.body, let statements = body.statements {
             let reader = SwiftASTReader()
             let typeMapper = delegate.typeMapper(for: self)
-            let compound = reader.parseStatements(compoundStatement: statements, typeMapper: typeMapper)
+            let typeParser = delegate.typeParser(for: self)
+            let compound =
+                reader.parseStatements(compoundStatement: statements,
+                                       typeMapper: typeMapper, typeParser: typeParser)
             
             let methodBodyIntention = FunctionBodyIntention(body: compound, source: body)
             recordSourceHistory(intention: methodBodyIntention, node: body)
@@ -512,8 +518,10 @@ public class IntentionCollector {
         if let expression = node.expression?.expression {
             let reader = SwiftASTReader()
             let typeMapper = delegate.typeMapper(for: self)
+            let typeParser = delegate.typeParser(for: self)
             let exp =
-                reader.parseExpression(expression: expression, typeMapper: typeMapper)
+                reader.parseExpression(expression: expression, typeMapper: typeMapper,
+                                       typeParser: typeParser)
             
             enumCase.expression = exp
         }

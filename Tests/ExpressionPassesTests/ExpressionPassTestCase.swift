@@ -6,6 +6,8 @@ import SwiftRewriterLib
 import SwiftAST
 
 class ExpressionPassTestCase: XCTestCase {
+    static var _state: ObjcParserState = ObjcParserState()
+    
     var notified: Bool = false
     var sut: SyntaxNodeRewriterPass!
     var typeSystem: DefaultTypeSystem!
@@ -128,7 +130,10 @@ class ExpressionPassTestCase: XCTestCase {
                 inFile: file, atLine: line, expected: true)
         }
         
-        let reader = SwiftExprASTReader(typeMapper: DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
+        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        
+        let reader = SwiftExprASTReader(typeMapper: typeMapper,
+                                        typeParser: TypeParsing(state: ExpressionPassTestCase._state))
         return expression.accept(reader)!
     }
     
@@ -150,20 +155,18 @@ class ExpressionPassTestCase: XCTestCase {
                 inFile: file, atLine: line, expected: true)
         }
         
-        let expReader = SwiftExprASTReader(typeMapper: DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
+        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        let typeParser = TypeParsing(state: ExpressionPassTestCase._state)
+        
+        let expReader = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
         let reader = SwiftStatementASTReader(expressionReader: expReader)
         
         return stmt.accept(reader)!
     }
     
     func objcParser(for objc: String) -> (CommonTokenStream, ObjectiveCParser) {
-        let input = ANTLRInputStream(objc)
-        let lxr = ObjectiveCLexer(input)
-        let tokens = CommonTokenStream(lxr)
-        
-        let parser = try! ObjectiveCParser(tokens)
-        
-        return (tokens, parser)
+        let parser = try! ExpressionPassTestCase._state.makeMainParser(input: objc)
+        return (parser.tokens, parser.parser)
     }
     
     func makeContext() -> SyntaxNodeRewriterPassContext {

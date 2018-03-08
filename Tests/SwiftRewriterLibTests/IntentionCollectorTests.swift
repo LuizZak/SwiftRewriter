@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import ObjcParser
 import GrammarModels
 import SwiftAST
 
@@ -80,5 +81,9 @@ private class TestCollectorDelegate: IntentionCollectorDelegate {
     
     func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
         return DefaultTypeMapper(context: typeConstructionContext(for: intentionCollector))
+    }
+    
+    func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
+        return TypeParsing(state: ObjcParserState())
     }
 }

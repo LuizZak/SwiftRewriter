@@ -251,7 +251,9 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         // loop that is compatible with the original for-loop's behavior
         
         // for(<initExprs>; <condition>; <iteration>)
-        let initExpr = ctx.forLoopInitializer()?.accept(VarDeclarationExtractor(expressionReader: expressionReader))
+        let initExpr =
+            ctx.forLoopInitializer()?
+                .accept(VarDeclarationExtractor(expressionReader: expressionReader))
         
         let condition = ctx.expression()?.accept(expressionReader)
         
@@ -498,7 +500,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 guard let identifier = directDeclarator.identifier()?.getText() else {
                     continue
                 }
-                guard let type = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,declarator: declarator) else {
+                guard let type = expressionReader.typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,declarator: declarator) else {
                     continue
                 }
                 

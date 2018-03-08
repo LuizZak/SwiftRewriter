@@ -11,25 +11,60 @@ import class Antlr4.Lexer
 import class Antlr4.Parser
 import ObjcParserAntlr
 
-struct AntlrParserState<Lexer: Antlr4.Lexer, Parser: Antlr4.Parser> {
-    var lexer: Lexer
-    var parser: Parser
-    var tokens: CommonTokenStream
+public struct AntlrParser<Lexer: Antlr4.Lexer, Parser: Antlr4.Parser> {
+    public var lexer: Lexer
+    public var parser: Parser
+    public var tokens: CommonTokenStream
+}
+
+/// Describes a parser state for a single `ObjcParser` instance, with internal
+/// fields that are used by the parser.
+///
+/// - Note: States are not shareable across many `ObjcParser` instances at the same
+/// time.
+public class ObjcParserState {
+    var parserState = (lexer: ObjectiveCLexer.State(), parser: ObjectiveCParser.State())
+    var preprocessorState = (lexer: ObjectiveCPreprocessorLexer.State(), parser: ObjectiveCPreprocessorParser.State())
+    
+    public init() {
+        
+    }
+    
+    public func makeMainParser(input: String) throws -> AntlrParser<ObjectiveCLexer, ObjectiveCParser> {
+        let input = ANTLRInputStream(input)
+        let lxr = ObjectiveCLexer(input, parserState.lexer)
+        let tokens = CommonTokenStream(lxr)
+        let parser = try ObjectiveCParser(tokens, parserState.parser)
+        
+        return AntlrParser(lexer: lxr, parser: parser, tokens: tokens)
+    }
+    
+    public func makePreprocessorParser(input: String) throws -> AntlrParser<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser> {
+        let input = ANTLRInputStream(input)
+        let lxr = ObjectiveCPreprocessorLexer(input, preprocessorState.lexer)
+        let tokens = CommonTokenStream(lxr)
+        let parser = try ObjectiveCPreprocessorParser(tokens, preprocessorState.parser)
+        
+        return AntlrParser(lexer: lxr, parser: parser, tokens: tokens)
+    }
 }
 
 public class ObjcParser {
+    /// A state used to instance single threaded parsers.
+    /// The default parser state, in case the user did not provide one on init.
+    private static var _singleThreadState: ObjcParserState = ObjcParserState()
+    
     // MARK: ANTLR parser
-    var parserState: AntlrParserState<ObjectiveCLexer, ObjectiveCParser>?
-    var preprocessorState: AntlrParserState<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser>?
+    var mainParser: AntlrParser<ObjectiveCLexer, ObjectiveCParser>?
+    var preprocessorParser: AntlrParser<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser>?
+    
+    /// Gets or sets the underlying parser state for this parser
+    public var state: ObjcParserState
     
     // MARK: Internal members
     let lexer: ObjcLexer
     let source: CodeSource
     let context: NodeCreationContext
-    
-    /// Whether a token has been read yet by this parser
-    internal var _hasReadToken: Bool = false
-    internal var currentToken: Token = Token(type: .eof, string: "", location: .invalid)
     
     public var diagnostics: Diagnostics
     
@@ -51,8 +86,17 @@ public class ObjcParser {
         self.init(source: StringCodeSource(source: string, fileName: fileName))
     }
     
-    public init(source: CodeSource) {
+    public convenience init(string: String, fileName: String = "", state: ObjcParserState) {
+        self.init(source: StringCodeSource(source: string, fileName: fileName), state: state)
+    }
+    
+    public convenience init(source: CodeSource) {
+        self.init(source: source, state: ObjcParser._singleThreadState)
+    }
+    
+    public init(source: CodeSource, state: ObjcParserState) {
         self.source = source
+        self.state = state
         lexer = ObjcLexer(source: source)
         context = NodeCreationContext()
         diagnostics = Diagnostics()
@@ -100,35 +144,13 @@ public class ObjcParser {
         traverser.traverse()
     }
     
-    // MARK: - Antlr parser generator
-    
-    private func mainParser(input: String) throws -> AntlrParserState<ObjectiveCLexer, ObjectiveCParser> {
-        let input = ANTLRInputStream(input)
-        let lxr = ObjectiveCLexer(input)
-        let tokens = CommonTokenStream(lxr)
-        let parser = try ObjectiveCParser(tokens)
-        
-        return AntlrParserState(lexer: lxr, parser: parser, tokens: tokens)
-    }
-    
-    private func makePreprocessorParser(input: String) throws -> AntlrParserState<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser> {
-        let input = ANTLRInputStream(input)
-        let lxr = ObjectiveCPreprocessorLexer(input)
-        let tokens = CommonTokenStream(lxr)
-        let parser = try ObjectiveCPreprocessorParser(tokens)
-        
-        return AntlrParserState(lexer: lxr, parser: parser, tokens: tokens)
-    }
-    
-    // MARK: -
-    
     /// Main source parsing pass which takes in preprocessors while parsing
     private func parsePreprocessor() throws -> String {
         let src = source.fetchSource()
         
-        let parserState = try preprocessorState ?? makePreprocessorParser(input: src)
-        preprocessorState = parserState
+        let parserState = try state.makePreprocessorParser(input: src)
         let parser = parserState.parser
+        preprocessorParser = parserState
         parser.addErrorListener(
             DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
         )
@@ -156,16 +178,16 @@ public class ObjcParser {
         // known constructs
         let src = source.fetchSource()
         
-        let parserState = try self.parserState ?? mainParser(input: input)
-        self.parserState = parserState
+        let parserState = try self.mainParser ?? state.makeMainParser(input: input)
         let parser = parserState.parser
+        mainParser = parserState
         parser.addErrorListener(
             DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
         )
         
         let root = try parser.translationUnit()
         
-        let listener = ObjcParserListener(sourceString: src, source: source)
+        let listener = ObjcParserListener(sourceString: src, source: source, state: state)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
@@ -176,10 +198,15 @@ public class ObjcParser {
     private func parsePreprocessorDirectivesChannel() throws {
         let src = source.fetchSource()
         
-        let state = try mainParser(input: src)
+        let parser = try self.state.makeMainParser(input: src)
+        parser.lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
+        defer {
+            // Don't forget to reset token channel, as this state may be shared
+            // with other parsers later on
+            parser.lexer.setChannel(ObjectiveCLexer.DEFAULT_TOKEN_CHANNEL)
+        }
         
-        state.lexer.setChannel(ObjectiveCLexer.DIRECTIVE_CHANNEL)
-        let tokens = CommonTokenStream(state.lexer)
+        let tokens = parser.tokens
         try tokens.fill()
         
         let allTokens = tokens.getTokens()
@@ -205,10 +232,7 @@ public class ObjcParser {
         
         let src = source.fetchSource()
         
-        let input = ANTLRInputStream(src)
-        let lexer = ObjectiveCLexer(input)
-        lexer.setChannel(ObjectiveCLexer.IGNORED_MACROS)
-        let tokens = CommonTokenStream(lexer)
+        let tokens = try self.state.makeMainParser(input: src).tokens
         try tokens.fill()
         
         let allTokens = tokens.getTokens()

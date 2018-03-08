@@ -215,15 +215,15 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
     
     func assert(objcExpr: String, parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() }, readsAs expected: Expression, file: String = #file, line: Int = #line) {
-        let input = ANTLRInputStream(objcExpr)
-        let lxr = ObjectiveCLexer(input)
-        tokens = CommonTokenStream(lxr)
-        
-        let sut = SwiftExprASTReader(typeMapper: DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem())))
+        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        let typeParser = TypeParsing(state: SwiftExprASTReaderTests._state)
+        let sut = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
         
         do {
-            let parser = try ObjectiveCParser(tokens)
-            let expr = try parseWith(parser)
+            let state = try SwiftExprASTReaderTests._state.makeMainParser(input: objcExpr)
+            tokens = state.tokens
+            
+            let expr = try parseWith(state.parser)
             
             let result = expr.accept(sut)
             
@@ -249,4 +249,6 @@ class SwiftExprASTReaderTests: XCTestCase {
             recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
         }
     }
+    
+    private static var _state = ObjcParserState()
 }

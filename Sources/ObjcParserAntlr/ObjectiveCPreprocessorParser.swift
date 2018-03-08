@@ -2,9 +2,34 @@
 import Antlr4
 
 open class ObjectiveCPreprocessorParser: Parser {
-
-	internal var _decisionToDFA: [DFA]
-	internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+    public class State {
+        public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
+        
+        internal var _decisionToDFA: [DFA]
+        internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+        
+        public init() {
+            var decisionToDFA = [DFA]()
+            let length = _ATN.getNumberOfDecisions()
+            for i in 0..<length {
+                decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
+            }
+            _decisionToDFA = decisionToDFA
+        }
+    }
+    
+    public var _ATN: ATN {
+        return state._ATN
+    }
+    internal var _decisionToDFA: [DFA] {
+        return state._decisionToDFA
+    }
+    internal var _sharedContextCache: PredictionContextCache {
+        return state._sharedContextCache
+    }
+    
+    public var state: State
+    
 	public enum Tokens: Int {
 		case EOF = -1, SHARP = 1, CODE = 2, IMPORT = 3, INCLUDE = 4, PRAGMA = 5, 
                  DEFINE = 6, DEFINED = 7, IF = 8, ELIF = 9, ELSE = 10, UNDEF = 11, 
@@ -80,18 +105,22 @@ open class ObjectiveCPreprocessorParser: Parser {
 	    return ObjectiveCPreprocessorParser.VOCABULARY
 	}
 
-	public override init(_ input:TokenStream)throws {
-        var decisionToDFA = [DFA]()
-        let length = _ATN.getNumberOfDecisions()
-        for i in 0..<length {
-            decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
-        }
-        _decisionToDFA = decisionToDFA
+    public override init(_ input: TokenStream) throws {
+        self.state = State()
         
-	    RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
-		try super.init(input)
-		_interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
-	}
+        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
+        try super.init(input)
+        _interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+    }
+    
+    public init(_ input: TokenStream, _ state: State) throws {
+        self.state = state
+        
+        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
+        try super.init(input)
+        _interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+    }
+    
 	open class ObjectiveCDocumentContext:ParserRuleContext {
 		open func EOF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.EOF.rawValue, 0) }
 		open func text() -> Array<TextContext> {
@@ -1286,6 +1315,5 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 
-   public static let _serializedATN : String = ObjectiveCPreprocessorParserATN().jsonString
-   public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
+    public static let _serializedATN : String = ObjectiveCPreprocessorParserATN().jsonString
 }

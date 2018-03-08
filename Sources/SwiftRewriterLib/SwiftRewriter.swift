@@ -8,12 +8,16 @@ private typealias NonnullTokenRange = (start: Int, end: Int)
 
 /// Main front-end for Swift Rewriter
 public class SwiftRewriter {
+    private static var _parserStatePool: ObjcParserStatePool = ObjcParserStatePool()
     
     private var outputTarget: WriterOutput
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
     private let sourcesProvider: InputSourcesProvider
     private var typeSystem: IntentionCollectionTypeSystem
+    
+    /// For pooling and reusing Antlr parser states to aid in performance
+    private var parserStatePool: ObjcParserStatePool { return SwiftRewriter._parserStatePool }
     
     /// Items to type-resolve after parsing is complete, and all types have been
     /// gathered.
@@ -280,6 +284,9 @@ public class SwiftRewriter {
     }
     
     private func loadObjcSource(from source: InputSource) throws {
+        let state = parserStatePool.pull()
+        defer { parserStatePool.repool(state) }
+        
         // Generate intention for this source
         var path = source.sourceName()
         
@@ -293,12 +300,13 @@ public class SwiftRewriter {
         
         let processedSrc = applyPreprocessors(source: src)
         
-        let parser = ObjcParser(string: processedSrc, fileName: src.filePath)
-        
+        let parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
         try parser.parse()
         
+        let typeParser = TypeParsing(state: state)
+        
         let collectorDelegate =
-            CollectorDelegate(typeMapper: typeMapper,
+            CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser,
                               nonnullTokenRanges: parser.nonnullMacroRegionsTokenRange)
         
         let ctx = TypeConstructionContext(typeSystem: typeSystem)
@@ -357,11 +365,13 @@ fileprivate extension SwiftRewriter {
         var nonnullTokenRanges: [NonnullTokenRange]
         
         var typeMapper: TypeMapper
+        var typeParser: TypeParsing
         
         var lazyResolve: [LazyTypeResolveItem] = []
         
-        init(typeMapper: TypeMapper, nonnullTokenRanges: [NonnullTokenRange]) {
+        init(typeMapper: TypeMapper, typeParser: TypeParsing, nonnullTokenRanges: [NonnullTokenRange]) {
             self.typeMapper = typeMapper
+            self.typeParser = typeParser
             self.nonnullTokenRanges = nonnullTokenRanges
         }
         
@@ -415,6 +425,10 @@ fileprivate extension SwiftRewriter {
         
         public func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
             return typeMapper
+        }
+        
+        func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
+            return typeParser
         }
     }
 }

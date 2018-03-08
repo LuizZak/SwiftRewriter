@@ -8,9 +8,11 @@ import SwiftAST
 /// enum cases.
 public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     public var typeMapper: TypeMapper
+    public var typeParser: TypeParsing
     
-    public init(typeMapper: TypeMapper) {
+    public init(typeMapper: TypeMapper, typeParser: TypeParsing) {
         self.typeMapper = typeMapper
+        self.typeParser = typeParser
     }
     
     public override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression? {
@@ -112,8 +114,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         if let unary = ctx.unaryExpression() {
             return unary.accept(self)
         }
-        if let typeName = ctx.typeName(), let typeNameString = VarDeclarationTypeExtractor.extract(from: typeName),
-            let cast = ctx.castExpression()?.accept(self), let type = try? ObjcParser(string: typeNameString).parseObjcType() {
+        if let typeName = ctx.typeName(), let type = typeParser.parseObjcType(fromTypeName: typeName),
+            let cast = ctx.castExpression()?.accept(self) {
             
             let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
             return .cast(cast, type: swiftType)
@@ -138,13 +140,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         // sizeof(<expr>) / sizeof(<type>)
         if ctx.SIZEOF() != nil {
-            if let type = ctx.typeSpecifier() {
-                guard let typeString = VarDeclarationTypeExtractor.extract(from: type) else {
-                    return .unknown(UnknownASTContext(context: ctx.getText()))
-                }
-                guard let type = try? ObjcParser(string: typeString).parseObjcType() else {
-                    return .unknown(UnknownASTContext(context: ctx.getText()))
-                }
+            if let typeSpecifier = ctx.typeSpecifier(), let type = typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier) {
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
@@ -335,36 +331,31 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     
     public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
         let returnType = ctx.typeSpecifier().flatMap { typeSpecifier -> ObjcType? in
-            guard let typeName = VarDeclarationTypeExtractor.extract(from: typeSpecifier) else {
-                return nil
-            }
-            return try? ObjcParser(string: typeName).parseObjcType()
+            return typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier)
         } ?? .void
         
         let parameters: [BlockParameter]
         if let blockParameters = ctx.blockParameters() {
+            let types = typeParser.parseObjcTypes(fromBlockParameters: blockParameters)
+            let args = blockParameters.typeVariableDeclaratorOrName()
+            
             parameters =
-                blockParameters
-                    .typeVariableDeclaratorOrName().map { param -> BlockParameter in
-                        guard let name = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
-                            return BlockParameter(name: "<unknown>", type: .void)
-                        }
-                        guard let typeName = VarDeclarationTypeExtractor.extract(from: param) else {
-                            return BlockParameter(name: name, type: .void)
-                        }
-                        guard let type = try? ObjcParser(string: typeName).parseObjcType() else {
-                            return BlockParameter(name: name, type: .void)
-                        }
-                        
-                        let swiftType = typeMapper.swiftType(forObjcType: type)
-                        
-                        return BlockParameter(name: name, type: swiftType)
+                zip(args, types).map { (param, type) -> BlockParameter in
+                    guard let name = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
+                        return BlockParameter(name: "<unknown>", type: .void)
                     }
+                    
+                    let swiftType = typeMapper.swiftType(forObjcType: type)
+                    
+                    return BlockParameter(name: name, type: swiftType)
+                }
         } else {
             parameters = []
         }
         
-        let compoundVisitor = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: self)
+        let compoundVisitor =
+            SwiftStatementASTReader
+                .CompoundStatementVisitor(expressionReader: self)
         guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }

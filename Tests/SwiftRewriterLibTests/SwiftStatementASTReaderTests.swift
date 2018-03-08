@@ -257,16 +257,13 @@ class SwiftStatementASTReaderTests: XCTestCase {
                 readsAs expected: Statement,
                 file: String = #file,
                 line: Int = #line) {
-        let input = ANTLRInputStream(objcStmt)
-        let lxr = ObjectiveCLexer(input)
-        tokens = CommonTokenStream(lxr)
-        
         let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        let typeParser = TypeParsing(state: SwiftStatementASTReaderTests._state)
         
-        let sut = SwiftStatementASTReader(expressionReader: SwiftExprASTReader(typeMapper: typeMapper))
+        let sut = SwiftStatementASTReader(expressionReader: SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser))
         
         do {
-            let parser = try ObjectiveCParser(tokens)
+            let parser = try SwiftStatementASTReaderTests._state.makeMainParser(input: objcStmt).parser
             let expr = try parseBlock(parser)
             
             let result = expr.accept(sut)
@@ -293,5 +290,6 @@ class SwiftStatementASTReaderTests: XCTestCase {
             recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
         }
     }
+    
+    private static var _state = ObjcParserState()
 }
-

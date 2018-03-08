@@ -115,13 +115,6 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
-            @objc
-            class MyClass: NSObject {
-                @objc
-                func originalMethod() {
-                }
-            }
-            // End of file MyClass.swift
             // MARK: - Extension
             @objc
             extension MyClass {
@@ -133,6 +126,13 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
             }
             // End of file MyClass+Ext.swift
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func originalMethod() {
+                }
+            }
+            // End of file MyClass.swift
             """)
     }
     
@@ -174,10 +174,6 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .translatesToSwift("""
-            @objc
-            class MyClass: NSObject {
-            }
-            // End of file Class.swift
             // MARK: - Ext1
             @objc
             extension MyClass {
@@ -195,6 +191,10 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
             }
             // End of file Class+Ext.swift
+            @objc
+            class MyClass: NSObject {
+            }
+            // End of file Class.swift
             """)
     }
     

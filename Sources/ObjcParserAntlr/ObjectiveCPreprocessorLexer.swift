@@ -2,9 +2,34 @@
 import Antlr4
 
 open class ObjectiveCPreprocessorLexer: Lexer {
-	internal var _decisionToDFA: [DFA]
-
-	internal let _sharedContextCache:PredictionContextCache = PredictionContextCache()
+    public class State {
+        public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
+        
+        internal var _decisionToDFA: [DFA]
+        internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+        
+        public init() {
+            var decisionToDFA = [DFA]()
+            let length = _ATN.getNumberOfDecisions()
+            for i in 0..<length {
+                decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
+            }
+            _decisionToDFA = decisionToDFA
+        }
+    }
+    
+    public var _ATN: ATN {
+        return state._ATN
+    }
+    internal var _decisionToDFA: [DFA] {
+        return state._decisionToDFA
+    }
+    internal var _sharedContextCache: PredictionContextCache {
+        return state._sharedContextCache
+    }
+    
+    public var state: State
+    
 	public static let SHARP=1, CODE=2, IMPORT=3, INCLUDE=4, PRAGMA=5, DEFINE=6, 
                    DEFINED=7, IF=8, ELIF=9, ELSE=10, UNDEF=11, IFDEF=12, 
                    IFNDEF=13, ENDIF=14, TRUE=15, FALSE=16, ERROR=17, WARNING=18, 
@@ -84,19 +109,21 @@ open class ObjectiveCPreprocessorLexer: Lexer {
         return ObjectiveCPreprocessorLexer.VOCABULARY
     }
 
-	public required init(_ input: CharStream) {
-        var decisionToDFA = [DFA]()
-        let length = _ATN.getNumberOfDecisions()
-        for i in 0..<length {
-            decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
-        }
+    public required init(_ input: CharStream) {
+        self.state = State()
         
-        _decisionToDFA = decisionToDFA
+        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
+        super.init(input)
+        _interp = LexerATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+    }
+    
+    public init(_ input: CharStream, _ state: State) {
+        self.state = state
         
-	    RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
-		super.init(input)
-		_interp = LexerATNSimulator(self, _ATN, _decisionToDFA, _sharedContextCache)
-	}
+        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
+        super.init(input)
+        _interp = LexerATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+    }
 
 	override
 	open func getGrammarFileName() -> String { return "ObjectiveCPreprocessorLexer.g4" }
@@ -117,5 +144,4 @@ open class ObjectiveCPreprocessorLexer: Lexer {
 	open func getATN() -> ATN { return _ATN }
 
     public static let _serializedATN: String = ObjectiveCPreprocessorLexerATN().jsonString
-	public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
 }

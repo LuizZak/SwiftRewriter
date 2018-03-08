@@ -5,6 +5,7 @@ import ObjcParserAntlr
 internal class ObjcParserListener: ObjectiveCParserBaseListener {
     let context: NodeCreationContext
     let rootNode: GlobalContextNode
+    let typeParser: TypeParsing
     private let mapper: GenericParseTreeContextMapper
     private let sourceString: String
     private let source: Source
@@ -13,9 +14,10 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     /// marked @optional.
     private var inOptionalContext: Bool = false
     
-    init(sourceString: String, source: Source) {
+    init(sourceString: String, source: Source, state: ObjcParserState) {
         self.sourceString = sourceString
         self.source = source
+        self.typeParser = TypeParsing(state: state)
         
         context = NodeCreationContext()
         context.autoUpdatesSourceRange = false
@@ -26,8 +28,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         configureMappers()
     }
-    
-    
     
     private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
         guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
@@ -76,7 +76,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     // MARK: - Global Context
     override func enterTranslationUnit(_ ctx: ObjectiveCParser.TranslationUnitContext) {
         // Collect global variables
-        let globalVariableListener = GlobalVariableListener()
+        let globalVariableListener = GlobalVariableListener(typeParser: typeParser)
         let walker = ParseTreeWalker()
         try? walker.walk(globalVariableListener, ctx)
         
@@ -244,7 +244,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
                     continue
                 }
-                guard let type = TypeParsing.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
+                guard let type = typeParser.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
                     continue
                 }
                 
@@ -308,7 +308,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     // MARK: - Property Declaration
     override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
-        let listener = PropertyListener()
+        let listener = PropertyListener(typeParser: typeParser)
         let walker = ParseTreeWalker()
         try? walker.walk(listener, ctx)
         
@@ -322,7 +322,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func enterTypeName(_ ctx: ObjectiveCParser.TypeNameContext) {
-        guard let type = TypeParsing.parseObjcType(fromTypeName: ctx) else {
+        guard let type = typeParser.parseObjcType(fromTypeName: ctx) else {
             return
         }
         
@@ -451,8 +451,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 continue
             }
             
-            guard let type = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
-                                                       declarator: typeDeclarator) else
+            guard let type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+                                                      declarator: typeDeclarator) else
             {
                 continue
             }
@@ -511,7 +511,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
         for typeVariableDeclaratorOrName in ctx.typeVariableDeclaratorOrName() {
-            guard let type = TypeParsing.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
+            guard let type = typeParser.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
                 continue
             }
             
@@ -544,7 +544,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         var returnType: ObjcType?
         if let declarationSpecifiers = ctx.declarationSpecifiers() {
-            returnType = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers)
+            returnType = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers)
         }
         
         if let returnType = returnType {
@@ -585,7 +585,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 guard let name = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
                     continue
                 }
-                guard let type = TypeParsing.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers, declarator: declarator) else {
+                guard let type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers, declarator: declarator) else {
                     continue
                 }
                 
@@ -609,11 +609,16 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
 
 private class GlobalVariableListener: ObjectiveCParserBaseListener {
     var variables: [VariableDeclaration] = []
+    var typeParser: TypeParsing
+    
+    init(typeParser: TypeParsing) {
+        self.typeParser = typeParser
+    }
     
     // Pick global variable declarations on top level
     override func enterTranslationUnit(_ ctx: ObjectiveCParser.TranslationUnitContext) {
         let topLevelDeclarations = ctx.topLevelDeclaration()
-        let visitor = GlobalVariableVisitor()
+        let visitor = GlobalVariableVisitor(typeParser: typeParser)
         
         for topLevelDeclaration in topLevelDeclarations {
             guard let declaration = topLevelDeclaration.declaration() else { continue }
@@ -632,7 +637,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
             return
         }
         
-        let visitor = GlobalVariableVisitor()
+        let visitor = GlobalVariableVisitor(typeParser: typeParser)
         
         if let vars = ctx.accept(visitor) {
             variables.append(contentsOf: vars)
@@ -640,6 +645,12 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
     }
     
     private class GlobalVariableVisitor: ObjectiveCParserBaseVisitor<[VariableDeclaration]> {
+        var typeParser: TypeParsing
+        
+        init(typeParser: TypeParsing) {
+            self.typeParser = typeParser
+        }
+        
         override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> [VariableDeclaration]? {
             var variables: [VariableDeclaration] = []
             
@@ -651,7 +662,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 guard let identifier = initDeclarator.declarator()?.directDeclarator()?.identifier() else { continue }
                 
                 // Get a type string to convert into a proper type
-                guard let type = TypeParsing.parseObjcType(typeString) else { continue }
+                guard let type = typeParser.parseObjcType(typeString) else { continue }
                 
                 let varDecl = VariableDeclaration()
                 varDecl.sourceRuleContext = ctx
@@ -682,6 +693,11 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
 
 private class PropertyListener: ObjectiveCParserBaseListener {
     var property = PropertyDefinition()
+    var typeParser: TypeParsing
+    
+    init(typeParser: TypeParsing) {
+        self.typeParser = typeParser
+    }
     
     override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
         property.sourceRuleContext = ctx
@@ -701,7 +717,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         }
         
         if let fieldDeclaration = ctx.fieldDeclaration() {
-            if let type = TypeParsing.parseObjcType(inDeclaration: fieldDeclaration) {
+            if let type = typeParser.parseObjcType(inDeclaration: fieldDeclaration) {
                 let typeNode = TypeNameNode(type: type)
                 typeNode.sourceRuleContext = ctx
                 property.addChild(typeNode)

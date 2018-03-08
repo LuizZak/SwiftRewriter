@@ -26,8 +26,11 @@ public struct ASTWriterOptions {
 
 /// Reader that reads Objective-C AST and outputs equivalent a Swift AST
 class SwiftASTReader {
-    public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext, typeMapper: TypeMapper) -> CompoundStatement {
-        let parser = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: SwiftExprASTReader(typeMapper: typeMapper))
+    public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext,
+                                typeMapper: TypeMapper, typeParser: TypeParsing) -> CompoundStatement {
+        let parser =
+            SwiftStatementASTReader
+                .CompoundStatementVisitor(expressionReader: SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser))
         guard let result = compoundStatement.accept(parser) else {
             return [.unknown(UnknownASTContext(context: compoundStatement))]
         }
@@ -35,8 +38,8 @@ class SwiftASTReader {
         return result
     }
     
-    public func parseExpression(expression: ObjectiveCParser.ExpressionContext, typeMapper: TypeMapper) -> Expression {
-        let parser = SwiftExprASTReader(typeMapper: typeMapper)
+    public func parseExpression(expression: ObjectiveCParser.ExpressionContext, typeMapper: TypeMapper, typeParser: TypeParsing) -> Expression {
+        let parser = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
         guard let result = expression.accept(parser) else {
             return .unknown(UnknownASTContext(context: expression))
         }
@@ -67,20 +70,22 @@ class SwiftASTWriter {
     }
     
     public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext,
-                        into target: RewriterOutputTarget) {
+                        typeParser: TypeParsing, into target: RewriterOutputTarget) {
         
         let reader = SwiftASTReader()
         
-        let result = reader.parseStatements(compoundStatement: compoundStatement, typeMapper: typeMapper)
+        let result = reader.parseStatements(compoundStatement: compoundStatement,
+                                            typeMapper: typeMapper,
+                                            typeParser: typeParser)
         write(compoundStatement: result, into: target)
     }
     
     public func rewrite(expression: ObjectiveCParser.ExpressionContext,
-                        into target: RewriterOutputTarget) {
+                        typeParser: TypeParsing, into target: RewriterOutputTarget) {
         
         let reader = SwiftASTReader()
         
-        let result = reader.parseExpression(expression: expression, typeMapper: typeMapper)
+        let result = reader.parseExpression(expression: expression, typeMapper: typeMapper, typeParser: typeParser)
         write(expression: result, into: target)
     }
 }
