@@ -5,8 +5,9 @@ import SwiftRewriterLib
 class IntentionPassesTests: XCTestCase {
     func testDefaultIntentionPasses() {
         let intents = DefaultIntentionPasses().intentionPasses
-        var intentsIterator = intents.makeIterator()
+        var intentsIterator = intents.makeIterator() // Using iterator so we can test ordering without indexing into array (could crash and abort tests halfway through)
         
+        // Asserter shortcut
         func assertNext<T: IntentionPass>(is type: T.Type, _ line: Int = #line) {
             guard let next = intentsIterator.next() else {
                 recordFailure(withDescription: "Reached end of list.", inFile: #file, atLine: line, expected: true)
