@@ -312,7 +312,7 @@ public class SwiftRewriter {
     
     private func outputDefinitions() {
         if settings.verbose {
-            print("Outputting files...")
+            print("Saving files...")
         }
         
         let writer = SwiftWriter(intentions: intentionCollection,

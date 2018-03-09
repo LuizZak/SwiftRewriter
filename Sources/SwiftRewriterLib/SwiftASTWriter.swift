@@ -1,3 +1,4 @@
+import class Foundation.OperationQueue
 import SwiftAST
 import Antlr4
 import GrammarModels
@@ -18,9 +19,14 @@ public struct ASTWriterOptions {
     /// as a comment for inspection.
     public var printIntentionHistory: Bool
     
-    public init(outputExpressionTypes: Bool = false, printIntentionHistory: Bool = false) {
+    /// Number of concurrent threads to use when saving files.
+    public var numThreads: Int
+    
+    public init(outputExpressionTypes: Bool = false, printIntentionHistory: Bool = false,
+                numThreads: Int = OperationQueue.defaultMaxConcurrentOperationCount) {
         self.outputExpressionTypes = outputExpressionTypes
         self.printIntentionHistory = printIntentionHistory
+        self.numThreads = numThreads
     }
 }
 

@@ -1,7 +1,9 @@
+import Foundation
 import GrammarModels
 import ObjcParser
 import ObjcParserAntlr
 import SwiftAST
+import Utils
 
 /// Gets as inputs a series of intentions and outputs actual files and script
 /// contents.
@@ -25,14 +27,60 @@ public final class SwiftWriter {
     }
     
     public func execute() {
+        var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
         
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = options.numThreads
+        
         for file in fileIntents {
-            outputFile(file)
+            if unique.contains(file.targetPath) {
+                print("""
+                    Found duplicated file intent to save to path \(file.targetPath).
+                    This usually means an original .h/.m source pairs could not be \
+                    properly reduced to a single .swift file.
+                    """)
+                continue
+            }
+            unique.insert(file.targetPath)
+            
+            let writer = InternalSwiftWriter(
+                intentions: intentions, options: options, diagnostics: Diagnostics(),
+                output: output, typeMapper: typeMapper)
+            
+            queue.addOperation {
+                writer.outputFile(file)
+                
+                synchronized(self) {
+                    self.diagnostics.merge(with: writer.diagnostics)
+                }
+            }
         }
+        
+        queue.waitUntilAllOperationsAreFinished()
+    }
+}
+
+class InternalSwiftWriter {
+    var intentions: IntentionCollection
+    var output: WriterOutput
+    let typeMapper: TypeMapper
+    var diagnostics: Diagnostics
+    var options: ASTWriterOptions
+    let astWriter: SwiftASTWriter
+    
+    init(intentions: IntentionCollection, options: ASTWriterOptions,
+         diagnostics: Diagnostics, output: WriterOutput,
+         typeMapper: TypeMapper) {
+        self.intentions = intentions
+        self.options = options
+        self.diagnostics = diagnostics
+        self.output = output
+        self.typeMapper = typeMapper
+        astWriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
     }
     
-    private func outputFile(_ fileIntent: FileGenerationIntention) {
+    func outputFile(_ fileIntent: FileGenerationIntention) {
         let file = output.createFile(path: fileIntent.targetPath)
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
@@ -102,7 +150,7 @@ public final class SwiftWriter {
         file.close()
     }
     
-    public func outputImports(_ imports: [String], target: RewriterOutputTarget) {
+    func outputImports(_ imports: [String], target: RewriterOutputTarget) {
         if imports.isEmpty {
             return
         }
@@ -115,7 +163,7 @@ public final class SwiftWriter {
         }
     }
     
-    public func outputPreprocessorDirectives(_ preproc: [String], target: RewriterOutputTarget) {
+    func outputPreprocessorDirectives(_ preproc: [String], target: RewriterOutputTarget) {
         if preproc.isEmpty {
             return
         }
@@ -126,9 +174,9 @@ public final class SwiftWriter {
         }
     }
     
-    private func outputTypealias(_ typeali: TypealiasIntention, target: RewriterOutputTarget) {
+    func outputTypealias(_ typeali: TypealiasIntention, target: RewriterOutputTarget) {
         let nullability =
-            SwiftWriter._typeNullability(inType: typeali.fromType)
+            InternalSwiftWriter._typeNullability(inType: typeali.fromType)
         
         let ctx =
             TypeMappingContext(explicitNullability: nullability,
@@ -145,7 +193,7 @@ public final class SwiftWriter {
         target.outputLineFeed()
     }
     
-    private func outputEnum(_ intention: EnumGenerationIntention, target: RewriterOutputTarget) {
+    func outputEnum(_ intention: EnumGenerationIntention, target: RewriterOutputTarget) {
         let rawTypeName = typeMapper.typeNameString(for: intention.rawValueType)
         
         // @objc enum <Name>: <RawValue> {
@@ -176,12 +224,12 @@ public final class SwiftWriter {
         target.output(line: "}")
     }
     
-    private func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention,
-                                           target: RewriterOutputTarget) {
+    func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention,
+                                   target: RewriterOutputTarget) {
         let name = varDecl.name
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr
-        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: varDecl.accessLevel)
+        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: varDecl.accessLevel)
         let ownership = varDecl.ownership
         let varOrLet = varDecl.isConstant ? "let" : "var"
         let typeName = typeMapper.typeNameString(for: type)
@@ -218,7 +266,7 @@ public final class SwiftWriter {
     
     private func outputFunctionDeclaration(_ funcDef: GlobalFunctionGenerationIntention, target: RewriterOutputTarget) {
         let accessModifier =
-            SwiftWriter._accessModifierFor(accessLevel: funcDef.accessLevel)
+            InternalSwiftWriter._accessModifierFor(accessLevel: funcDef.accessLevel)
         
         // '<access modifier> func' ...
         target.outputIdentation()
@@ -399,7 +447,7 @@ public final class SwiftWriter {
         
         target.outputIdentation()
         
-        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: ivar.accessLevel)
+        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: ivar.accessLevel)
         let varOrLet = ivar.isConstant ? "let" : "var"
         
         let typeName = typeMapper.typeNameString(for: ivar.type)
@@ -434,7 +482,7 @@ public final class SwiftWriter {
         
         target.outputInlineWithSpace("@objc", style: .keyword)
         
-        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
+        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: prop.type)
         
         if !accessModifier.isEmpty {
@@ -497,7 +545,7 @@ public final class SwiftWriter {
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
-        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: initMethod.accessLevel)
+        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: initMethod.accessLevel)
         
         if !accessModifier.isEmpty && !(initMethod.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -534,7 +582,7 @@ public final class SwiftWriter {
         target.output(line: "@objc", style: .keyword)
         target.outputIdentation()
         
-        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
+        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
         
         if !accessModifier.isEmpty && !(method.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -562,7 +610,7 @@ public final class SwiftWriter {
         
         target.outputIdentation()
         
-        let accessModifier = SwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
+        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
         
         if !accessModifier.isEmpty && !(method.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -612,8 +660,8 @@ public final class SwiftWriter {
     }
     
     private func outputParameters(_ parameters: [ParameterSignature],
-                                    into target: RewriterOutputTarget,
-                                    inNonnullContext: Bool = false) {
+                                  into target: RewriterOutputTarget,
+                                  inNonnullContext: Bool = false) {
         
         target.outputInline("(")
         
