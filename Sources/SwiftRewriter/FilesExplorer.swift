@@ -121,6 +121,16 @@ public class FilesExplorerService {
 }
 
 class SuggestConversionInterface {
+    struct Options {
+        static var `default` = Options(overwrite: false, skipConfirm: false,
+                                       excludePattern: nil, includePattern: nil)
+        
+        var overwrite: Bool
+        var skipConfirm: Bool
+        var excludePattern: String?
+        var includePattern: String?
+    }
+    
     var rewriterService: SwiftRewriterService
     
     init(rewriterService: SwiftRewriterService) {
@@ -136,42 +146,20 @@ class SuggestConversionInterface {
     }
     
     func searchAndShowConfirm(in menu: MenuController, path directoryPath: String,
-                              skipConfirm: Bool = false, overwrite: Bool = false,
-                              excludePattern: String? = nil) {
+                              options: Options = .default) {
         let console = menu.console
         let fileManager = FileManager.default
         
         console.printLine("Inspecting path \(directoryPath)...")
         
-        // Search all files there
-        guard let files = fileManager.enumerator(atPath: directoryPath) else {
-            console.printLine("Failed to iterate files from path \(directoryPath)".terminalColorize(.red))
-            return
-        }
-        
         var overwriteCount = 0
         
-        var objcFiles: [URL] =
-            files
-                // Type the array properly
-                .compactMap { value -> String? in
-                    value as? String
-                }
+        let objcFiles: [URL] =
+            filesAt(path: directoryPath, includePattern: options.includePattern,
+                    excludePattern: options.excludePattern)
                 // Filter down to .h/.m files
-                .filter { (path: String) -> Bool in
-                    ((path as NSString).pathExtension == "m" || (path as NSString).pathExtension == "h")
-                }
-                // Unfold full paths
-                .map { (path: String) -> String in
-                    (directoryPath as NSString).appendingPathComponent(path)
-                }
-                // Sort files, for convenience of better conveying progress to use
-                .sorted { (s1: String, s2: String) -> Bool in
-                    s1.compare(s2, options: .numeric) == .orderedAscending
-                }
-                // Convert back to the URL
-                .map { (path: String) -> URL in
-                    URL(fileURLWithPath: path)
+                .filter { (path: URL) -> Bool in
+                    ((path.path as NSString).pathExtension == "m" || (path.path as NSString).pathExtension == "h")
                 }
                 // Check a matching .swift file doesn't already exist for the paths
                 // (if `overwrite` is not on)
@@ -184,7 +172,7 @@ class SuggestConversionInterface {
                     if !fileManager.fileExists(atPath: swiftFile) {
                         return true
                     }
-                    if overwrite {
+                    if options.overwrite {
                         overwriteCount += 1
                         return true
                     }
@@ -192,37 +180,16 @@ class SuggestConversionInterface {
                     return false
                 }
         
-        if let excludePattern = excludePattern {
-            do {
-                let pattern = try NSRegularExpression(pattern: excludePattern, options: .caseInsensitive)
-                
-                objcFiles = objcFiles.filter { url in
-                    let path = url.path
-                    
-                    let range = NSMakeRange(0, (path as NSString).length)
-                    return pattern.firstMatch(in: url.path, range: range) == nil
-                }
-                
-            } catch {
-                console.printLine("Error processing regular expression for file exclusion: \(error)")
-                if !skipConfirm {
-                    _=console.readLineWith(prompt: "Press [Enter] to continue.")
-                }
-                
-                return
-            }
-        }
-        
         if objcFiles.count == 0 {
             console.printLine("No files where found to process.")
-            if !skipConfirm {
+            if !options.skipConfirm {
                 _=console.readLineWith(prompt: "Press [Enter] to continue.")
             }
             
             return
         }
         
-        if !skipConfirm {
+        if !options.skipConfirm {
             let prompt: String
                 
             if overwriteCount == 0 {

@@ -108,24 +108,38 @@ public class SwiftRewriter {
         queue.maxConcurrentOperationCount = settings.numThreads
         
         var outError: Error?
+        let outErrorBarrier
+            = DispatchQueue(label: "br.com.swiftrewriter",
+                            qos: .default,
+                            attributes: .concurrent,
+                            autoreleaseFrequency: .inherit,
+                            target: nil)
         
-        for src in sources {
+        for (i, src) in sources.enumerated() {
             queue.addOperation {
+                if outErrorBarrier.sync(execute: { outError }) != nil {
+                    return
+                }
+                
                 do {
                     try autoreleasepool {
-                        try self.loadObjcSource(from: src)
+                        try self.loadObjcSource(from: src, index: i)
                     }
                 } catch {
-                    outError = error
+                    outErrorBarrier.sync(flags: .barrier) {
+                        if outError != nil { return }
+                        
+                        outError = error
+                    }
                 }
             }
         }
         
+        queue.waitUntilAllOperationsAreFinished()
+        
         if let error = outError {
             throw error
         }
-        
-        queue.waitUntilAllOperationsAreFinished()
     }
     
     /// Parses all statements now, with proper type information available.
@@ -344,7 +358,7 @@ public class SwiftRewriter {
         }
     }
     
-    private func loadObjcSource(from source: InputSource) throws {
+    private func loadObjcSource(from source: InputSource, index: Int) throws {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
@@ -376,6 +390,7 @@ public class SwiftRewriter {
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
+        fileIntent._index = index
         ctx.pushContext(fileIntent)
         
         let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)

@@ -3,6 +3,10 @@ import GrammarModels
 
 /// An intention to create a .swift file
 public class FileGenerationIntention: Intention {
+    /// Used to sort file generation intentions after multi-threaded parsing is
+    /// finished.
+    var _index: Int = 0
+    
     /// The source path for this file
     public var sourcePath: String
     

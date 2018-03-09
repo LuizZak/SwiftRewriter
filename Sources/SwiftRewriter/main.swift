@@ -1,4 +1,5 @@
 import Foundation
+import Dispatch
 import Utility
 import Console
 import SwiftRewriterLib
@@ -39,7 +40,7 @@ let verboseArg
 let numThreadsArg
     = parser.add(option: "--num-threads",
                  kind: Int.self,
-                 usage: "Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, defaults to 8.")
+                 usage: "Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.")
 
 //// files <files...>
 
@@ -60,7 +61,11 @@ let pathArg
 
 let excludePatternArg
     = pathParser.add(option: "--exclude-pattern", kind: String.self,
-                     usage: "Provides a regex-like pattern for excluding matches from the initial Objective-C files search. Pattern is applied to the full path.")
+                     usage: "Provides a file pattern for excluding matches from the initial Objective-C files search. Pattern is applied to the full path.")
+
+let includePatternArg
+    = pathParser.add(option: "--include-pattern", kind: String.self,
+                     usage: "Provides a pattern for including matches from the initial Objective-C files search. Pattern is applied to the full path. --exclude-pattern takes priority over --include-pattern matches.")
 
 let skipConfirmArg
     = pathParser.add(option: "--skip-confirm", kind: Bool.self,
@@ -79,7 +84,7 @@ do {
     
     // Read settings
     Settings.rewriter.verbose = result.get(verboseArg) ?? false
-    Settings.rewriter.numThreads = result.get(numThreadsArg) ?? 8
+    Settings.rewriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
     Settings.astWriter.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false
     Settings.astWriter.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
     
@@ -100,6 +105,7 @@ do {
         
         let skipConfirm = result.get(skipConfirmArg) ?? false
         let excludePattern = result.get(excludePatternArg)
+        let includePattern = result.get(includePatternArg)
         let overwrite = result.get(overwriteArg) ?? false
         
         let service = SwiftRewriterServiceImpl.fileDiskService
@@ -107,12 +113,14 @@ do {
         let console = Console()
         let menu = Menu(rewriterService: service, console: console)
         
+        let options: SuggestConversionInterface.Options
+            = .init(overwrite: overwrite, skipConfirm: skipConfirm,
+                    excludePattern: excludePattern, includePattern: includePattern)
+        
         let interface = SuggestConversionInterface(rewriterService: service)
         interface.searchAndShowConfirm(in: menu,
                                        path: (path as NSString).standardizingPath,
-                                       skipConfirm: skipConfirm,
-                                       overwrite: overwrite,
-                                       excludePattern: excludePattern)
+                                       options: options)
     } else {
         let output = StdoutWriterOutput(colorize: colorize)
         let service = SwiftRewriterServiceImpl(output: output)
