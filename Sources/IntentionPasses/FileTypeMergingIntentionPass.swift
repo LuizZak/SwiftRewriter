@@ -109,6 +109,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             return intent.sourcePath.hasSuffix(".h") && intent.isEmpty
         }
         
+        // Always notify a change- it's easier to just consider things as changed
+        // instead of inserting change notifications to each and every block above.
         context.notifyChange()
     }
 }

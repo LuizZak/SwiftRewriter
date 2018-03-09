@@ -5,11 +5,15 @@ import MiniLexer
 /// Verifies the #import directives on every file and convert them to the appropriate
 /// Swift lib import declaration.
 public class ImportDirectiveIntentionPass: IntentionPass {
+    private var context: IntentionPassContext!
+    
     public init() {
         
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        self.context = context
+        
         for file in intentionCollection.fileIntentions() {
             applyOnFile(file: file)
         }
