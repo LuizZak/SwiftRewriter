@@ -5,15 +5,28 @@ import SwiftRewriterLib
 class IntentionPassesTests: XCTestCase {
     func testDefaultIntentionPasses() {
         let intents = DefaultIntentionPasses().intentionPasses
+        var intentsIterator = intents.makeIterator()
         
-        XCTAssertEqual(intents.count, 6)
+        func assertNext<T: IntentionPass>(is type: T.Type, _ line: Int = #line) {
+            guard let next = intentsIterator.next() else {
+                recordFailure(withDescription: "Reached end of list.", inFile: #file, atLine: line, expected: true)
+                return
+            }
+            
+            if Swift.type(of: next) != type {
+                recordFailure(withDescription: "Expected type \(type) but found \(Swift.type(of: next))", inFile: #file, atLine: line, expected: true)
+            }
+        }
         
-        XCTAssert(intents[0] is FileTypeMergingIntentionPass, "\(type(of: intents[0]))")
-        XCTAssert(intents[1] is ProtocolNullabilityPropagationToConformersIntentionPass, "\(type(of: intents[1]))")
-        XCTAssert(intents[2] is PropertyMergeIntentionPass, "\(type(of: intents[2]))")
-        XCTAssert(intents[3] is StoredPropertyToNominalTypesIntentionPass, "\(type(of: intents[3]))")
-        XCTAssert(intents[4] is SwiftifyMethodSignaturesIntentionPass, "\(type(of: intents[4]))")
-        XCTAssert(intents[5] is ImportDirectiveIntentionPass, "\(type(of: intents[5]))")
+        XCTAssertEqual(intents.count, 7)
+        
+        assertNext(is: FileTypeMergingIntentionPass.self)
+        assertNext(is: ProtocolNullabilityPropagationToConformersIntentionPass.self)
+        assertNext(is: PropertyMergeIntentionPass.self)
+        assertNext(is: StoredPropertyToNominalTypesIntentionPass.self)
+        assertNext(is: SwiftifyMethodSignaturesIntentionPass.self)
+        assertNext(is: ImportDirectiveIntentionPass.self)
+        assertNext(is: DropNSFromTypesIntentionPass.self)
     }
 }
 
