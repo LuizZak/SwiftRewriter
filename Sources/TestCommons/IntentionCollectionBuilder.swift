@@ -100,6 +100,7 @@ public class FileIntentionBuilder {
         return createGlobalFunction(withSignature: signature, body: body)
     }
     
+    @discardableResult
     public func createGlobalFunction(withSignature signature: FunctionSignature,
                                      body: CompoundStatement? = nil) -> FileIntentionBuilder {
         let funcIntent =

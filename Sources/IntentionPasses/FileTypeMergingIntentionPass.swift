@@ -58,6 +58,11 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                 impl.addType(prot)
             }
             
+            for alias in header.typealiasIntentions {
+                header.removeTypealiases(where: { $0 === alias })
+                impl.addTypealias(alias)
+            }
+            
             for gvar in header.globalVariableIntentions {
                 header.removeGlobalVariables(where: { $0 === gvar })
                 
@@ -66,9 +71,12 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                 }
             }
             
-            for alias in header.typealiasIntentions {
-                header.removeTypealiases(where: { $0 === alias })
-                impl.addTypealias(alias)
+            for gfunc in header.globalFunctionIntentions {
+                header.removeGlobalFunctions(where: { $0 === gfunc })
+                
+                if !impl.globalFunctionIntentions.contains(where: { gfunc.signature.matchesAsCFunction($0.signature) }) {
+                    impl.addGlobalFunction(gfunc)
+                }
             }
         }
         

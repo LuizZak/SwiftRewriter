@@ -136,6 +136,15 @@ public class FileGenerationIntention: Intention {
         }
     }
     
+    public func removeGlobalFunctions(where predicate: (GlobalFunctionGenerationIntention) -> Bool) {
+        for (i, intent) in globalFunctionIntentions.enumerated().reversed() {
+            if predicate(intent) {
+                intent.parent = nil
+                globalFunctionIntentions.remove(at: i)
+            }
+        }
+    }
+    
     public func removeTypealiases(where predicate: (TypealiasIntention) -> Bool) {
         for (i, intent) in typealiasIntentions.enumerated().reversed() {
             if predicate(intent) {

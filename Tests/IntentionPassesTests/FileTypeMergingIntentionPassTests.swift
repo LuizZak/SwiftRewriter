@@ -490,4 +490,41 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files.first?.sourcePath, "A.m")
         XCTAssertEqual(files.first?.globalVariableIntentions.count, 1)
     }
+    
+    func testMovesGlobalFunctionsToImplementationWhenAvailable() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createGlobalFunction(withName: "a")
+                }.createFile(named: "A.m")
+                .build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.sourcePath, "A.m")
+        XCTAssertEqual(files.first?.globalFunctionIntentions.count, 1)
+    }
+    
+    func testDontDuplicateGlobalFunctionsDeclarationsWhenMovingFromHeaderToImplementation() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createGlobalFunction(withName: "a")
+                }.createFile(named: "A.m") { file in
+                    file.createGlobalFunction(withSignature: FunctionSignature(name: "a", parameters: []),
+                                              body: [])
+                }
+                .build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.sourcePath, "A.m")
+        XCTAssertEqual(files.first?.globalFunctionIntentions.count, 1)
+    }
 }
