@@ -3,6 +3,7 @@ import ObjcParser
 import SwiftRewriterLib
 import ExpressionPasses
 import IntentionPasses
+import Utils
 
 class MultiFileTestBuilder {
     var test: XCTestCase
@@ -130,7 +131,9 @@ class TestWriterOutput: WriterOutput {
     
     func createFile(path: String) -> FileOutput {
         let output = TestFileOutput(path: path)
-        outputs.append(output)
+        synchronized(self) {
+            outputs.append(output)
+        }
         return output
     }
 }
