@@ -335,21 +335,23 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
         let files = intentions.fileIntentions()
-        XCTAssertEqual(files.count, 2)
-        // a(int)
-        XCTAssertEqual(files[0].sourcePath, "A.h")
-        XCTAssertEqual(files[0].globalFunctionIntentions.count, 1)
-        XCTAssertNil(files[0].globalFunctionIntentions.first?.functionBody?.body)
+        let functions = files[0].globalFunctionIntentions
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files[0].sourcePath, "A.m")
+        XCTAssertEqual(functions.count, 2)
+        
         // a()
-        XCTAssertEqual(files[1].sourcePath, "A.m")
-        XCTAssertEqual(files[1].globalFunctionIntentions.count, 1)
-        XCTAssertEqual(files[1].globalFunctionIntentions.first?.functionBody?.body,
-                       [.expression(
-                        .postfix(
-                            .identifier("a"),
-                            .functionCall()
-                        )
+        XCTAssertEqual(functions[0].functionBody?.body,
+                       [
+                        .expression(
+                            .postfix(
+                                .identifier("a"),
+                                .functionCall()
+                            )
                         )])
+        
+        // a(int)
+        XCTAssertNil(functions[1].functionBody?.body)
     }
     
     func testDoesntMergeStaticAndNonStaticSelectors() {
