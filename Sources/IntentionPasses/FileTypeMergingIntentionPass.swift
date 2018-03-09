@@ -70,6 +70,18 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                     impl.addGlobalVariable(gvar)
                 }
             }
+        }
+        
+        // Find all global function declarations and match them to their matching
+        // implementation
+        mergeGlobalFunctionDefinitions(in: intentionCollection)
+        
+        // Merge remaining global functions
+        for header in headers {
+            let path = (header.sourcePath as NSString).deletingPathExtension
+            guard let impl = implementations.first(where: { ($0.sourcePath as NSString).deletingPathExtension == path }) else {
+                continue
+            }
             
             for gfunc in header.globalFunctionIntentions {
                 header.removeGlobalFunctions(where: { $0 === gfunc })
@@ -91,10 +103,6 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             impl.preprocessorDirectives.insert(contentsOf: header.preprocessorDirectives, at: 0)
             header.preprocessorDirectives.removeAll()
         }
-        
-        // Find all global function declarations and match them to their matching
-        // implementation
-        mergeGlobalFunctionDefinitions(in: intentionCollection)
         
         // Remove all empty header files
         intentionCollection.removeIntentions { intent -> Bool in
