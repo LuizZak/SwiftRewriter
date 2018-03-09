@@ -73,7 +73,7 @@ public class IntentionCollection {
 }
 
 extension IntentionCollection {
-    func sortFileIntentionsByName() {
+    func sortFileIntentions() {
         _intentions.sort { $0._index < $1._index }
     }
 }

@@ -140,6 +140,9 @@ public class SwiftRewriter {
         if let error = outError {
             throw error
         }
+        
+        // Keep file ordering of intentions
+        intentionCollection.sortFileIntentions()
     }
     
     /// Parses all statements now, with proper type information available.
@@ -308,6 +311,10 @@ public class SwiftRewriter {
     }
     
     private func outputDefinitions() {
+        if settings.verbose {
+            print("Outputting files...")
+        }
+        
         let writer = SwiftWriter(intentions: intentionCollection,
                                  options: writerOptions,
                                  diagnostics: diagnostics,
