@@ -197,7 +197,22 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             expression: "[NSDate date:thing]",
             into: "Date.date(thing)"
+        ); assertDidNotNotifyChange()
+    }
+    
+    func testNSMutableStringCreator() {
+        let res = assertTransformParsed(
+            expression: "[NSMutableString string]",
+            into: Expression.identifier("NSMutableString").call()
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("NSMutableString"))
+        
+        // Test unrecognized members are left alone
+        assertTransformParsed(
+            expression: "[NSMutableString string:thing]",
+            into: "NSMutableString.string(thing)"
+        ); assertDidNotNotifyChange()
     }
     
     func testNSTimeZoneSystemTimeZone() {

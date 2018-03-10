@@ -278,7 +278,8 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
              ("NSMutableDictionary", "dictionary"),
              ("NSSet", "set"),
              ("NSMutableSet", "set"),
-             ("NSDate", "date"):
+             ("NSDate", "date"),
+             ("NSMutableString", "string"):
             let res = Expression.identifier(typeName).call()
             res.resolvedType = .typeName(typeName)
             
