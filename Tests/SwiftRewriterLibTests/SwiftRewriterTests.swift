@@ -1131,4 +1131,24 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testAppliesTypenameConversionToCategories() throws {
+        try assertObjcParse(
+            objc: """
+            @interface NSString (Extension)
+            @end
+            @implementation NSDate (Extension)
+            @end
+            """,
+            swift: """
+            // MARK: - Extension
+            @objc
+            extension String {
+            }
+            // MARK: - Extension
+            @objc
+            extension Date {
+            }
+            """)
+    }
 }

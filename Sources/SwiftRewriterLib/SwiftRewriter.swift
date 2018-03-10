@@ -258,6 +258,10 @@ public class SwiftRewriter {
                 
                 let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
                 fn.signature = signGen.generateDefinitionSignature(from: node)
+                
+            case .extensionDecl(let ext):
+                let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
+                ext.typeName = typeName
             }
         }
     }
@@ -505,8 +509,11 @@ fileprivate extension SwiftRewriter {
             case let intention as InstanceVariableGenerationIntention:
                 lazyResolve.append(.ivar(intention))
                 
+            case let intention as ClassExtensionGenerationIntention:
+                lazyResolve.append(.extensionDecl(intention))
+                
             default:
-                break
+                fatalError("Cannot handle type resolving for intention of type \(type(of: intention))")
             }
         }
         
@@ -522,7 +529,7 @@ fileprivate extension SwiftRewriter {
                 lazyParse.append(.enumCase(intention))
                 
             default:
-                break
+                fatalError("Cannot handle parsing for intention of type \(type(of: intention))")
             }
         }
         
@@ -562,6 +569,7 @@ private enum LazyTypeResolveItem {
     case globalVar(GlobalVariableGenerationIntention)
     case globalFunc(GlobalFunctionGenerationIntention)
     case enumDecl(EnumGenerationIntention)
+    case extensionDecl(ClassExtensionGenerationIntention)
     
     /// Returns the base `FromSourceIntention`-typed value, which is the intention
     /// associated with every case.
@@ -578,6 +586,8 @@ private enum LazyTypeResolveItem {
         case .globalFunc(let i):
             return i
         case .enumDecl(let i):
+            return i
+        case .extensionDecl(let i):
             return i
         }
     }

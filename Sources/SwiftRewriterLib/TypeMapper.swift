@@ -438,17 +438,6 @@ public class DefaultTypeMapper: TypeMapper {
         return swiftType(type: type, withNullability: context.nullability())
     }
     
-    private func shouldParenthesize(type: ObjcType) -> Bool {
-        switch type {
-        case .generic(_, let params):
-            return !isPointerOnly(types: params)
-        case .pointer(let inner):
-            return shouldParenthesize(type: inner)
-        default:
-            return false
-        }
-    }
-    
     private func isPointerOnly(types: [ObjcType]) -> Bool {
         if types.count == 0 {
             return false

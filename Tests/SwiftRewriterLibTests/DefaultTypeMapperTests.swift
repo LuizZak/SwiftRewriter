@@ -18,6 +18,7 @@ class DefaultTypeMapperTests: XCTestCase {
         expectSwift(.optional(.protocolComposition([.typeName("Type1"), .typeName("Type2")])), toConvertTo: "(Type1 & Type2)?")
         expectSwift(.block(returnType: .int, parameters: [.int]), toConvertTo: "(Int) -> Int")
         expectSwift(.optional(.block(returnType: .int, parameters: [.int])), toConvertTo: "((Int) -> Int)?")
+        expectSwift(.metatype(for: .int), toConvertTo: "Int.self")
     }
     
     func testConvertNSObjectSubclassPointersAsInstanceTypes() {

@@ -226,6 +226,7 @@ public class IntentionCollector {
         }
         
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
+        delegate.reportForLazyResolving(intention: intent)
         intent.categoryName = node.categoryName?.name
         recordSourceHistory(intention: intent, node: node)
         
@@ -269,6 +270,7 @@ public class IntentionCollector {
         }
         
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
+        delegate.reportForLazyResolving(intention: intent)
         intent.categoryName = node.categoryName?.name
         recordSourceHistory(intention: intent, node: node)
         
