@@ -312,8 +312,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             }
             @end
             """)
-            .translatesToSwift(        
-            """
+            .translatesToSwift("""
             // Preprocessor directives found in file:
             // #pragma mark - Delegate
             // #pragma mark - Calculation methods

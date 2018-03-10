@@ -116,7 +116,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                   firstArgIsInstance: Bool = false) {
             let transformer =
                 FunctionInvocationTransformer(name: name, swiftName: swiftName,
-                                              firstArgIsInstance: firstArgIsInstance,
+                                              firstArgumentBecomesInstance: firstArgIsInstance,
                                               arguments: arguments)
             transformers.append(transformer)
         }
@@ -164,10 +164,12 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
         let transform: FunctionInvocationTransformer.ArgumentStrategy =
             .omitIf(matches: .constant(.nil), .labeled("transform", .fromArgIndex(0)))
         
-        func makeInstance(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy]) {
+        func makeInstanceCall(_ name: String,
+                              swiftName: String,
+                              arguments: [FunctionInvocationTransformer.ArgumentStrategy] = [.fromArgIndex(1)]) {
             let transformer =
                 FunctionInvocationTransformer(name: name, swiftName: swiftName,
-                                              firstArgIsInstance: true,
+                                              firstArgumentBecomesInstance: true,
                                               arguments: arguments + [transform])
             
             transformers.append(transformer)
@@ -180,7 +182,7 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
                 .call([.labeled("x", x), .labeled("y", y)])
         }
         
-        makeInstance("CGPathAddRoundedRect", swiftName: "addRoundedRect",
+        makeInstanceCall("CGPathAddRoundedRect", swiftName: "addRoundedRect",
              arguments: [
                 .labeled("in", .fromArgIndex(1)),
                 .labeled("cornerWidth", .fromArgIndex(2)),
@@ -188,72 +190,64 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             ]
         )
         
-        makeInstance("CGPathMoveToPoint", swiftName: "move",
+        makeInstanceCall("CGPathMoveToPoint", swiftName: "move",
              arguments: [
-                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint))
+                .labeled("to", .mergingArguments(arg0: 1, arg1: 2, toCGPoint))
             ]
         )
         
-        makeInstance("CGPathAddLineToPoint", swiftName: "addLine",
+        makeInstanceCall("CGPathAddLineToPoint", swiftName: "addLine",
              arguments: [
-                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint))
+                .labeled("to", .mergingArguments(arg0: 1, arg1: 2, toCGPoint))
             ]
         )
         
-        makeInstance("CGPathAddQuadCurveToPoint", swiftName: "addQuadCurve",
+        makeInstanceCall("CGPathAddQuadCurveToPoint", swiftName: "addQuadCurve",
              arguments: [
-                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
-                .labeled("control", .mergeArguments(arg0: 3, arg1: 4, toCGPoint))
+                .labeled("to", .mergingArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("control", .mergingArguments(arg0: 3, arg1: 4, toCGPoint))
             ]
         )
         
-        makeInstance("CGPathAddCurveToPoint", swiftName: "addCurve",
+        makeInstanceCall("CGPathAddCurveToPoint", swiftName: "addCurve",
              arguments: [
-                .labeled("to", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
-                .labeled("control1", .mergeArguments(arg0: 3, arg1: 4, toCGPoint)),
-                .labeled("control2", .mergeArguments(arg0: 5, arg1: 6, toCGPoint))
+                .labeled("to", .mergingArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("control1", .mergingArguments(arg0: 3, arg1: 4, toCGPoint)),
+                .labeled("control2", .mergingArguments(arg0: 5, arg1: 6, toCGPoint))
             ]
         )
         
-        makeInstance("CGPathAddRect", swiftName: "addRect",
-             arguments: [
-                .fromArgIndex(1)
-            ]
-        )
+        makeInstanceCall("CGPathAddRect", swiftName: "addRect", arguments: [.fromArgIndex(1)])
         
-        makeInstance("CGPathAddRects", swiftName: "addRects",
-             arguments: [
-                .fromArgIndex(1)
-            ]
-        )
+        makeInstanceCall("CGPathAddRects", swiftName: "addRects")
         
         // TODO: This considers a `count` value. We need to make sure in case the
         // count is passed lower than the array's actual count that we keep the
         // same behavior.
-        makeInstance("CGPathAddLines", swiftName: "addLines",
+        makeInstanceCall("CGPathAddLines", swiftName: "addLines",
              arguments: [
                 .labeled("between", .fromArgIndex(1))
             ]
         )
         
-        makeInstance("CGPathAddEllipseInRect", swiftName: "addEllipse",
+        makeInstanceCall("CGPathAddEllipseInRect", swiftName: "addEllipse",
              arguments: [
                 .labeled("in", .fromArgIndex(1))
             ]
         )
         
-        makeInstance("CGPathAddRelativeArc", swiftName: "addRelativeArc",
+        makeInstanceCall("CGPathAddRelativeArc", swiftName: "addRelativeArc",
              arguments: [
-                .labeled("center", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("center", .mergingArguments(arg0: 1, arg1: 2, toCGPoint)),
                 .labeled("radius", .fromArgIndex(3)),
                 .labeled("startAngle", .fromArgIndex(4)),
                 .labeled("delta", .fromArgIndex(5))
             ]
         )
         
-        makeInstance("CGPathAddArc", swiftName: "addArc",
+        makeInstanceCall("CGPathAddArc", swiftName: "addArc",
              arguments: [
-                .labeled("center", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("center", .mergingArguments(arg0: 1, arg1: 2, toCGPoint)),
                 .labeled("radius", .fromArgIndex(3)),
                 .labeled("startAngle", .fromArgIndex(4)),
                 .labeled("endAngle", .fromArgIndex(5)),
@@ -261,25 +255,15 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             ]
         )
         
-        makeInstance("CGPathAddArcToPoint", swiftName: "addArc",
+        makeInstanceCall("CGPathAddArcToPoint", swiftName: "addArc",
              arguments: [
-                .labeled("tangent1End", .mergeArguments(arg0: 1, arg1: 2, toCGPoint)),
-                .labeled("tangent2End", .mergeArguments(arg0: 3, arg1: 4, toCGPoint)),
+                .labeled("tangent1End", .mergingArguments(arg0: 1, arg1: 2, toCGPoint)),
+                .labeled("tangent2End", .mergingArguments(arg0: 3, arg1: 4, toCGPoint)),
                 .labeled("radius", .fromArgIndex(5))
             ]
         )
         
-        makeInstance("CGPathAddPath", swiftName: "addPath",
-             arguments: [
-                .fromArgIndex(1)
-            ]
-        )
-        
-        makeInstance("CGPathAddPath", swiftName: "addPath",
-             arguments: [
-                .fromArgIndex(1)
-            ]
-        )
+        makeInstanceCall("CGPathAddPath", swiftName: "addPath")
     }
 }
 

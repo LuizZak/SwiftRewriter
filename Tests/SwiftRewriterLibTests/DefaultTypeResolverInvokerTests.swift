@@ -4,7 +4,7 @@ import SwiftAST
 import TestCommons
 
 class DefaultTypeResolverInvokerTests: XCTestCase {
-    func testExposesGlobalVariablesFromIntrinsics() {
+    func testExposesGlobalVariablesAsIntrinsics() {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.m") { file in

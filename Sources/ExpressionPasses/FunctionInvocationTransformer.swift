@@ -10,7 +10,7 @@ import SwiftAST
 /// FunctionInvocationTransformer(
 ///     name: "CGPointMake",
 ///     swiftName: "CGPoint",
-///     firstArgIsInstance: false,
+///     firstArgumentBecomesInstance: false,
 ///     arguments: [
 ///         .labeled("x", .asIs),
 ///         .labeled("y", .asIs)
@@ -30,13 +30,13 @@ import SwiftAST
 /// FunctionInvocationTransformer(
 ///     name: "CGPathMoveToPoint",
 ///     swiftName: "move",
-///     firstArgIsInstance: true,
+///     firstArgumentBecomesInstance: true,
 ///     arguments: [
 ///         .labeled("to",
-///                  .mergeArguments(arg0: 1, arg1: 2, { x, y in
-///                                     Expression.identifier("CGPoint")
-///                                     .call([.labeled("x", x), .labeled("y", y)])
-///                                  }))
+///                  .mergingArguments(arg0: 1, arg1: 2, { x, y in
+///                                       Expression.identifier("CGPoint")
+///                                       .call([.labeled("x", x), .labeled("y", y)])
+///                                    }))
 ///     ])
 /// ```
 ///
@@ -66,13 +66,23 @@ public final class FunctionInvocationTransformer {
     /// such that the free function call becomes a method call.
     public let firstArgIsInstance: Bool
     
-    public init(name: String, swiftName: String, firstArgIsInstance: Bool, arguments: [ArgumentStrategy]) {
+    /// Initializes a new function transformer instance.
+    ///
+    /// - Parameters:
+    ///   - name: Name of free function to match with this converter.
+    ///   - swiftName: Name of resulting swift function to transform matching
+    /// free-function calls into.
+    ///   - firstArgumentBecomesInstance: Whether to convert the first argument
+    /// of the call into a target instance, such that the free function call becomes
+    /// a method call.
+    ///   - arguments: Strategy to apply to each argument in the call.
+    public init(name: String, swiftName: String, firstArgumentBecomesInstance: Bool, arguments: [ArgumentStrategy]) {
         self.name = name
         self.swiftName = swiftName
         self.arguments = arguments
-        self.firstArgIsInstance = firstArgIsInstance
+        self.firstArgIsInstance = firstArgumentBecomesInstance
         
-        let offset = firstArgIsInstance ? 1 : 0
+        let offset = firstArgumentBecomesInstance ? 1 : 0
         
         var requiredArgs = arguments.reduce(0) { $0 + $1.argumentConsumeCount } + offset
         
@@ -123,7 +133,7 @@ public final class FunctionInvocationTransformer {
             switch argument {
             case .asIs:
                 return arguments[i]
-            case let .mergeArguments(arg0, arg1, merger):
+            case let .mergingArguments(arg0, arg1, merger):
                 let arg =
                     FunctionArgument(
                         label: nil,
@@ -169,7 +179,7 @@ public final class FunctionInvocationTransformer {
             if let res = handleArg(i: i, argument: arg) {
                 result.append(res)
                 
-                if case .mergeArguments = arg {
+                if case .mergingArguments = arg {
                     i += 1
                 }
             }
@@ -207,7 +217,7 @@ public final class FunctionInvocationTransformer {
         
         /// Merges two argument indices into a single expression, using a given
         /// transformation closure.
-        case mergeArguments(arg0: Int, arg1: Int, (Expression, Expression) -> Expression)
+        case mergingArguments(arg0: Int, arg1: Int, (Expression, Expression) -> Expression)
         
         /// Transforms an argument using a given transformation method
         indirect case transformed((Expression) -> Expression, ArgumentStrategy)
@@ -226,7 +236,7 @@ public final class FunctionInvocationTransformer {
             switch self {
             case .asIs, .fromArgIndex:
                 return 1
-            case .mergeArguments:
+            case .mergingArguments:
                 return 2
             case .labeled(_, let inner), .omitIf(_, let inner), .transformed(_, let inner):
                 return inner.argumentConsumeCount
@@ -242,7 +252,7 @@ public final class FunctionInvocationTransformer {
                 return 0
             case .fromArgIndex(let index):
                 return index
-            case let .mergeArguments(index1, index2, _):
+            case let .mergingArguments(index1, index2, _):
                 return max(index1, index2)
             case .labeled(_, let inner), .omitIf(_, let inner), .transformed(_, let inner):
                 return inner.maxArgumentReferenced
