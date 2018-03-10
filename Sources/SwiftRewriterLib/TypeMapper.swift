@@ -477,7 +477,8 @@ public class DefaultTypeMapper: TypeMapper {
         "wchar_t": .typeName("CWideChar"),
         "char16_t": .typeName("CChar16"),
         "char32_t": .typeName("CChar32"),
-        "Bool": .typeName("CBool")
+        "Bool": .typeName("CBool"),
+        "NSTimeInterval": .typeName("TimeInterval")
     ]
     
     /// For mapping pointer-reference structs (could be Objc-C classes) into
@@ -488,7 +489,6 @@ public class DefaultTypeMapper: TypeMapper {
         "NSArray": .typeName("NSArray"),
         "NSMutableArray": .typeName("NSMutableArray"),
         "NSString": .string,
-        "NSTimeInterval": .typeName("TimeInterval"),
         "NSDate": .typeName("Date")
     ]
 }

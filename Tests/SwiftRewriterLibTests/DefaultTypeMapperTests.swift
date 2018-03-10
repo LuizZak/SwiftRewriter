@@ -175,7 +175,7 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.pointer(.struct("NSDate")), toConvertTo: "Date")
         expect(.pointer(.struct("NSString")), toConvertTo: "String")
         expect(.pointer(.struct("NSObject")), toConvertTo: "NSObject")
-        expect(.pointer(.struct("NSTimeInterval")), toConvertTo: "TimeInterval")
+        expect(.struct("NSTimeInterval"), toConvertTo: "TimeInterval")
     }
     
     func testNSArray() {
