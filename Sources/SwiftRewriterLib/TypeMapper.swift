@@ -498,7 +498,9 @@ public class DefaultTypeMapper: TypeMapper {
         "NSIndexSet": .typeName("IndexSet"),
         "NSNotification": .typeName("Notification"),
         "NSLocale": .typeName("Locale"),
-        "NSTimeZone": .typeName("TimeZone")
+        "NSTimeZone": .typeName("TimeZone"),
+        "NSDateFormatter": .typeName("DateFormatter"),
+        "NSNumberFormatter": .typeName("NumberFormatter")
     ]
 }
 

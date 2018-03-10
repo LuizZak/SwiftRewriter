@@ -197,7 +197,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             expression: "[NSDate date:thing]",
             into: "Date.date(thing)"
-        ); assertDidNotNotifyChange()
+        ); assertNotifiedChange()
     }
     
     func testNSMutableStringCreator() {

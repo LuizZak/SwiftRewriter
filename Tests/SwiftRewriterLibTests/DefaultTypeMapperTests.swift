@@ -163,8 +163,7 @@ class DefaultTypeMapperTests: XCTestCase {
                toConvertTo: "AnyObject?")
     }
     
-    /// Test we properly map NS- types into equivalent Swift types (as of Swift 4.1).
-    func testMapNSTypes() {
+    func testQualifiedAndSpecifiedTypesDontMapIntoPointersAutomatically() {
         expect(.specified(specifiers: ["const"], .struct("NSInteger")),
                toConvertTo: "Int")
         
@@ -172,6 +171,16 @@ class DefaultTypeMapperTests: XCTestCase {
                withExplicitNullability: nil,
                toConvertTo: "Int")
         
+        expect(.qualified(.struct("NSInteger"), qualifiers: ["const"]),
+               toConvertTo: "Int")
+        
+        expect(.qualified(.struct("NSInteger"), qualifiers: ["const"]),
+               withExplicitNullability: nil,
+               toConvertTo: "Int")
+    }
+    
+    /// Test we properly map NS- types into equivalent Swift types (as of Swift 4.1).
+    func testMapNSTypes() {
         expect(.pointer(.struct("NSDate")), toConvertTo: "Date")
         expect(.pointer(.struct("NSString")), toConvertTo: "String")
         expect(.pointer(.struct("NSObject")), toConvertTo: "NSObject")
@@ -184,8 +193,12 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.pointer(.struct("NSNotification")), toConvertTo: "Notification")
         expect(.pointer(.struct("NSTimeZone")), toConvertTo: "TimeZone")
         expect(.pointer(.struct("NSLocale")), toConvertTo: "Locale")
+        expect(.pointer(.struct("NSDateFormatter")), toConvertTo: "DateFormatter")
+        expect(.pointer(.struct("NSNumberFormatter")), toConvertTo: "NumberFormatter")
         
         expect(.struct("NSTimeInterval"), toConvertTo: "TimeInterval")
+        expect(.struct("NSInteger"), toConvertTo: "Int")
+        expect(.struct("NSUInteger"), toConvertTo: "UInt")
     }
     
     func testNSArray() {
