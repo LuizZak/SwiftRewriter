@@ -184,6 +184,25 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(type.kind, .protocol)
     }
     
+    func testNSFormatterDefinition() {
+        guard let type = sut.knownTypeWithName("NSFormatter") else {
+            XCTFail("Expected NSFormatter to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.kind, .class)
+        XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
+    }
+    func testNSDateFormatterDefinition() {
+        guard let type = sut.knownTypeWithName("NSDateFormatter") else {
+            XCTFail("Expected NSDateFormatter to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.kind, .class)
+        XCTAssertEqual(type.supertype?.asTypeName, "NSFormatter")
+    }
+    
     func testConstructorSearchesThroughSupertypes() {
         let type1 = KnownTypeBuilder(typeName: "A").addingConstructor().build()
         let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()

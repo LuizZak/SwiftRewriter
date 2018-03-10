@@ -322,7 +322,7 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         }
         
         exp.identifier = typeName
-        exp.resolvedType = newType
+        exp.resolvedType = .metatype(for: .typeName(typeName))
         
         return exp
     }

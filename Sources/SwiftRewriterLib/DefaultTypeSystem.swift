@@ -392,6 +392,7 @@ extension DefaultTypeSystem {
         
         // Foundation types
         registerFoundation(nsObject: nsObject)
+        registerFormatters(nsObject: nsObject)
     }
     
     private func registerFoundation(nsObject: KnownType) {
@@ -407,6 +408,14 @@ extension DefaultTypeSystem {
         addType(nsData)
         addType(nsMutableData)
         addType(nsMutableString)
+    }
+    
+    private func registerFormatters(nsObject: KnownType) {
+        let nsFormatter = KnownTypeBuilder(typeName: "NSFormatter", supertype: nsObject).build()
+        let nsDateFormatter = KnownTypeBuilder(typeName: "NSDateFormatter", supertype: nsFormatter).build()
+        
+        addType(nsFormatter)
+        addType(nsDateFormatter)
     }
 }
 

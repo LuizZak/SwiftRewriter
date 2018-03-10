@@ -22,7 +22,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testIntrinsicVariableTakesPrecedenceOverLocal() {
         startScopedTest(with: .identifier("self"), sut: ExpressionTypeResolver())
-            .definingLocal(name: "sef", type: .errorType)
+            .definingLocal(name: "self", type: .errorType)
             .definingIntrinsic(name: "self", type: .typeName("MyType"))
             .resolve()
             .thenAssertExpression(resolvedAs: .typeName("MyType"))

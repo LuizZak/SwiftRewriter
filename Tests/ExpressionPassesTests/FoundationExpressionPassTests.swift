@@ -326,6 +326,24 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
+    func testNSDateFormatter() {
+        let res = assertTransformParsed(
+            expression: "NSDateFormatter",
+            into: Expression.identifier("DateFormatter")
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("DateFormatter")))
+    }
+    
+    func testNSNumberFormatter() {
+        let res = assertTransformParsed(
+            expression: "NSNumberFormatter",
+            into: Expression.identifier("NumberFormatter")
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("NumberFormatter")))
+    }
+    
     func testClassTypeMethodWithResolvedExpressionType() {
         // Tests that if an expression contains either a .metaType or other type
         // assigned to it, that the expression pass takes advantage of that to
