@@ -689,4 +689,52 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testLocalVariableDeclarationInitializedTransmits() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass
+            - (nullable NSString*)optional;
+            - (nonnull NSString*)nonOptional;
+            - (NSString*)unspecifiedOptional;
+            @end
+            @implementation MyClass
+            - (void)method {
+                NSString *local1 = [self optional];
+                NSString *local2 = [self nonOptional];
+                NSString *local3 = [self unspecifiedOptional];
+                (local1);
+                (local2);
+                (local3);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func method() {
+                    var local1 = self.optional()
+                    var local2 = self.nonOptional()
+                    var local3 = self.unspecifiedOptional()
+                    // type: String?
+                    (local1)
+                    // type: String
+                    (local2)
+                    // type: String!
+                    (local3)
+                }
+                @objc
+                func optional() -> String? {
+                }
+                @objc
+                func nonOptional() -> String {
+                }
+                @objc
+                func unspecifiedOptional() -> String! {
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

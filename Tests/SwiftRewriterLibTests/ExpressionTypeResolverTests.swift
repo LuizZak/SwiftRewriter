@@ -619,6 +619,32 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.int))
     }
+    
+    func testVariableDeclarationTransmitsOptionalFromInitializerValue() {
+        _=startScopedTest(with:
+            Statement.variableDeclaration(identifier: "a",
+                                          type: .implicitUnwrappedOptional(.string),
+                                          initialization: Expression.identifier("value")),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .string)
+            .thenAssertDefined(localNamed: "a", type: .string)
+        
+        _=startScopedTest(with:
+            Statement.variableDeclaration(identifier: "a",
+                                          type: .implicitUnwrappedOptional(.string),
+                                          initialization: Expression.identifier("value")),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .optional(.string))
+            .thenAssertDefined(localNamed: "a", type: .optional(.string))
+        
+        _=startScopedTest(with:
+            Statement.variableDeclaration(identifier: "a",
+                                          type: .implicitUnwrappedOptional(.string),
+                                          initialization: Expression.identifier("value")),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .implicitUnwrappedOptional(.string))
+            .thenAssertDefined(localNamed: "a", type: .implicitUnwrappedOptional(.string))
+    }
 }
 
 // MARK: - Test Building Helpers

@@ -52,12 +52,22 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     
     // MARK: - Definition Collection
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
+        _=super.visitVariableDeclarations(stmt)
+        
         for decl in stmt.decl {
-            let definition = CodeDefinition(name: decl.identifier, type: decl.type, intention: nil)
+            var type = decl.type
+            
+            if let initializerOptionality = decl.initialization?.resolvedType {
+                type = type.withSameOptionalityAs(initializerOptionality)
+            }
+            
+            let definition = CodeDefinition(name: decl.identifier,
+                                            type: type,
+                                            intention: nil)
             stmt.nearestScope?.recordDefinition(definition)
         }
         
-        return super.visitVariableDeclarations(stmt)
+        return stmt
     }
     
     public override func visitFor(_ stmt: ForStatement) -> Statement {
