@@ -253,6 +253,11 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             into: Expression.identifier("Locale").dot("autoupdatingCurrent")
         ); assertNotifiedChange()
         
+        assertTransformParsed(
+            expression: "[NSLocale localeWithLocaleIdentifier:@\"locale\"]",
+            into: Expression.identifier("Locale").call([.labeled("identifier", .constant("locale"))])
+        ); assertNotifiedChange()
+        
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "NSNotALocale.currentLocale",
