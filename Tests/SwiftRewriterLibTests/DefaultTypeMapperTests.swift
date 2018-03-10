@@ -190,6 +190,7 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.pointer(.struct("NSError")), toConvertTo: "Error")
         expect(.pointer(.struct("NSIndexPath")), toConvertTo: "IndexPath")
         expect(.pointer(.struct("NSIndexSet")), toConvertTo: "IndexSet")
+        expect(.pointer(.struct("NSNotificationCenter")), toConvertTo: "NotificationCenter")
         expect(.pointer(.struct("NSNotification")), toConvertTo: "Notification")
         expect(.pointer(.struct("NSTimeZone")), toConvertTo: "TimeZone")
         expect(.pointer(.struct("NSLocale")), toConvertTo: "Locale")

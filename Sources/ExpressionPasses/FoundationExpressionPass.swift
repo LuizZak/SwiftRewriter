@@ -4,77 +4,13 @@ import SwiftAST
 
 /// Applies passes to simplify known Foundation methods
 public class FoundationExpressionPass: SyntaxNodeRewriterPass {
-    var transformers: [StaticConstructorTransformers] = []
+    var transformers: [StaticConstructorTransformer] = []
+    var enumMappings: [String: () -> Expression] = [:]
     
     public required init() {
         super.init()
-        makeTransformers()
-    }
-    
-    func makeTransformers() {
-        func make(typeName: String, property: String, convertInto: @autoclosure @escaping () -> Expression,
-                  andTypeAs type: SwiftType? = nil) {
-            let transformer
-                = StaticConstructorTransformers(
-                    typeName: typeName,
-                    kind: .property(property),
-                    conversion: {
-                        let exp = convertInto()
-                        exp.resolvedType = type
-                        return exp
-                    })
-            
-            transformers.append(transformer)
-        }
-        
-        func make(typeName: String, method: String, convertInto: @autoclosure @escaping () -> Expression,
-                  andCallWithArguments args: [FunctionInvocationTransformer.ArgumentStrategy],
-                  andTypeAs type: SwiftType? = nil) {
-            let transformer
-                = StaticConstructorTransformers(
-                    typeName: typeName,
-                    kind: .method(method, args),
-                    conversion: {
-                        let exp = convertInto()
-                        exp.resolvedType = type
-                        return exp
-                    })
-            
-            transformers.append(transformer)
-        }
-        
-        // MARK: NSTimeZone
-        
-        make(typeName: "NSTimeZone", property: "localTimeZone",
-             convertInto: Expression.identifier("TimeZone").dot("autoupdatingCurrent"),
-             andTypeAs: .typeName("TimeZone"))
-        
-        make(typeName: "NSTimeZone", property: "defaultTimeZone",
-             convertInto: Expression.identifier("TimeZone").dot("current"),
-             andTypeAs: .typeName("TimeZone"))
-        
-        make(typeName: "NSTimeZone", property: "systemTimeZone",
-             convertInto: Expression.identifier("TimeZone").dot("current"),
-             andTypeAs: .typeName("TimeZone"))
-        
-        // MARK: NSLocale
-        
-        make(typeName: "NSLocale", method: "localeWithLocaleIdentifier",
-             convertInto: Expression.identifier("Locale"),
-             andCallWithArguments: [.labeled("identifier", .asIs)],
-             andTypeAs: .typeName("Locale"))
-        
-        make(typeName: "NSLocale", property: "currentLocale",
-             convertInto: Expression.identifier("Locale").dot("current"),
-             andTypeAs: .typeName("Locale"))
-        
-        make(typeName: "NSLocale", property: "systemLocale",
-             convertInto: Expression.identifier("Locale").dot("current"),
-             andTypeAs: .typeName("Locale"))
-        
-        make(typeName: "NSLocale", property: "autoupdatingCurrentLocale",
-             convertInto: Expression.identifier("Locale").dot("autoupdatingCurrent"),
-             andTypeAs: .typeName("Locale"))
+        makeInitializerTransformers()
+        makeEnumTransformers()
     }
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
@@ -119,6 +55,11 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         if let new = convertNSPrefixedTypeName(exp) {
+            notifyChange()
+            
+            return super.visitExpression(new)
+        }
+        if let new = convertEnumIdentifier(exp) {
             notifyChange()
             
             return super.visitExpression(new)
@@ -327,6 +268,14 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         return exp
     }
     
+    func convertEnumIdentifier(_ identifier: IdentifierExpression) -> Expression? {
+        if let mapped = enumMappings[identifier.identifier] {
+            return mapped()
+        }
+        
+        return nil
+    }
+    
     /// Returns `true` if a given identifier is contained in a possibly type name
     /// usage context.
     /// Non type contexts include prefix/unary/binary operations, and as the lhs
@@ -346,108 +295,131 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
     }
 }
 
-/// Transforms static type initializers into other expression constructs.
-///
-/// Example:
-/// ```
-/// StaticConstructorTransformers(
-///     typeName: "NSTimeZone",
-///     kind: .property("systemTimeZone"),
-///     conversion: Expression.identifier("TimeZone").dot("current"))
-/// ```
-///
-/// would perform conversions of the form:
-///
-/// ```
-/// NSTimeZone.systemTimeZone
-/// // or
-/// [NSTimeZone systemTimeZone]
-/// ```
-///
-/// into a Swift equivalent:
-///
-/// ```
-/// TimeZone.current
-/// ```
-///
-/// There's also support for method transformers that work on expressions that are
-/// static constructors:
-///
-/// ```
-/// StaticConstructorTransformers(
-///     typeName: "NSLocale",
-///     kind: .method("localeWithLocaleIdentifier", .labeled("identifier", .asIs)),
-///     conversion: Expression.identifier("Locale"))
-/// ```
-///
-/// which would transform into (method call is appended to `conversion` expression
-/// automatically):
-///
-/// ```
-/// [NSLocale localeWithLocaleIdentifier:@"en_US"]
-/// ```
-///
-/// to Swift:
-///
-/// ```
-/// Locale(identifier: "en_US")
-/// ```
-final class StaticConstructorTransformers {
-    let typeName: String
-    let kind: Kind
-    let conversion: () -> Expression
-    
-    init(typeName: String, kind: Kind, conversion: @escaping () -> Expression) {
-        self.typeName = typeName
-        self.kind = kind
-        self.conversion = conversion
-    }
-    
-    func attemptApply(on postfix: PostfixExpression) -> Expression? {
-        switch kind {
-        case .property(let property):
-            // For properties, accessing via '.' or via function call are
-            // semantically equivalent in Objective-C.
-            if postfix.exp.asIdentifier?.identifier == typeName && postfix.op == .member(property) {
-                if postfix.parent is PostfixExpression {
-                    return nil
-                }
-                
-                return conversion()
-            }
-            guard postfix.exp.asPostfix?.exp.asIdentifier?.identifier == typeName else {
-                return nil
-            }
-            guard let call = postfix.functionCall, call.arguments.count == 0 else {
-                return nil
-            }
-            guard let inner = postfix.exp.asPostfix, inner.member?.name == property else {
-                return nil
-            }
+// MARK: - Transformations
+
+extension FoundationExpressionPass {
+    func makeInitializerTransformers() {
+        func make(typeName: String, property: String, convertInto: @autoclosure @escaping () -> Expression,
+                  andTypeAs type: SwiftType? = nil) {
+            let transformer
+                = StaticConstructorTransformer(
+                    typeName: typeName,
+                    kind: .property(property),
+                    conversion: {
+                        let exp = convertInto()
+                        exp.resolvedType = type
+                        return exp
+                    })
             
-            return conversion()
-        case .method(let methodName, let args):
-            let transformer =
-                FunctionInvocationTransformer(
-                    name: "", swiftName: "",
-                    firstArgumentBecomesInstance: false,
-                    arguments: args)
-            
-            guard let call = postfix.functionCall, let result = transformer.apply(on: call) else {
-                return nil
-            }
-            guard let inner = postfix.exp.asPostfix, inner.member?.name == methodName else {
-                return nil
-            }
-            
-            let base = conversion()
-            
-            return base.call(result.arguments)
+            transformers.append(transformer)
         }
+        
+        func make(typeName: String, method: String, convertInto: @autoclosure @escaping () -> Expression,
+                  andCallWithArguments args: [FunctionInvocationTransformer.ArgumentStrategy],
+                  andTypeAs type: SwiftType? = nil) {
+            let transformer
+                = StaticConstructorTransformer(
+                    typeName: typeName,
+                    kind: .method(method, args),
+                    conversion: {
+                        let exp = convertInto()
+                        exp.resolvedType = type
+                        return exp
+                    })
+            
+            transformers.append(transformer)
+        }
+        
+        // MARK: NSTimeZone
+        
+        make(typeName: "NSTimeZone", property: "localTimeZone",
+             convertInto: Expression.identifier("TimeZone").dot("autoupdatingCurrent"),
+             andTypeAs: .typeName("TimeZone"))
+        
+        make(typeName: "NSTimeZone", property: "defaultTimeZone",
+             convertInto: Expression.identifier("TimeZone").dot("current"),
+             andTypeAs: .typeName("TimeZone"))
+        
+        make(typeName: "NSTimeZone", property: "systemTimeZone",
+             convertInto: Expression.identifier("TimeZone").dot("current"),
+             andTypeAs: .typeName("TimeZone"))
+        
+        // MARK: NSLocale
+        
+        make(typeName: "NSLocale", method: "localeWithLocaleIdentifier",
+             convertInto: Expression.identifier("Locale"),
+             andCallWithArguments: [.labeled("identifier", .asIs)],
+             andTypeAs: .typeName("Locale"))
+        
+        make(typeName: "NSLocale", property: "currentLocale",
+             convertInto: Expression.identifier("Locale").dot("current"),
+             andTypeAs: .typeName("Locale"))
+        
+        make(typeName: "NSLocale", property: "systemLocale",
+             convertInto: Expression.identifier("Locale").dot("current"),
+             andTypeAs: .typeName("Locale"))
+        
+        make(typeName: "NSLocale", property: "autoupdatingCurrentLocale",
+             convertInto: Expression.identifier("Locale").dot("autoupdatingCurrent"),
+             andTypeAs: .typeName("Locale"))
+        
+        // MARK: NSNotificationCenter
+        make(typeName: "NSNotificationCenter", property: "defaultCenter",
+             convertInto: Expression.identifier("NotificationCenter").dot("default"),
+             andTypeAs: .typeName("NotificationCenter"))
     }
     
-    enum Kind {
-        case property(String)
-        case method(String, [FunctionInvocationTransformer.ArgumentStrategy])
+    func makeEnumTransformers() {
+        enumMappings["NSCalendarUnitEra"] = {
+            Expression.identifier("Calendar").dot("Component").dot("era")
+        }
+        enumMappings["NSCalendarUnitYear"] = {
+            Expression.identifier("Calendar").dot("Component").dot("year")
+        }
+        enumMappings["NSCalendarUnitMonth"] = {
+            Expression.identifier("Calendar").dot("Component").dot("month")
+        }
+        enumMappings["NSCalendarUnitDay"] = {
+            Expression.identifier("Calendar").dot("Component").dot("day")
+        }
+        enumMappings["NSCalendarUnitHour"] = {
+            Expression.identifier("Calendar").dot("Component").dot("hour")
+        }
+        enumMappings["NSCalendarUnitMinute"] = {
+            Expression.identifier("Calendar").dot("Component").dot("minute")
+        }
+        enumMappings["NSCalendarUnitSecond"] = {
+            Expression.identifier("Calendar").dot("Component").dot("second")
+        }
+        enumMappings["NSCalendarUnitWeekday"] = {
+            Expression.identifier("Calendar").dot("Component").dot("weekday")
+        }
+        enumMappings["NSCalendarUnitWeekdayOrdinal"] = {
+            Expression.identifier("Calendar").dot("Component").dot("weekdayOrdinal")
+        }
+        enumMappings["NSCalendarUnitQuarter"] = {
+            Expression.identifier("Calendar").dot("Component").dot("quarter")
+        }
+        enumMappings["NSCalendarUnitWeekOfMonth"] = {
+            Expression.identifier("Calendar").dot("Component").dot("weekOfMonth")
+        }
+        enumMappings["NSCalendarUnitWeekOfYear"] = {
+            Expression.identifier("Calendar").dot("Component").dot("weekOfYear")
+        }
+        enumMappings["NSCalendarUnitYearForWeekOfYear"] = {
+            Expression.identifier("Calendar").dot("Component").dot("weekOfYear")
+        }
+        enumMappings["NSCalendarUnitYearForWeekOfYear"] = {
+            Expression.identifier("Calendar").dot("Component").dot("yearForWeekOfYear")
+        }
+        enumMappings["NSCalendarUnitNanosecond"] = {
+            Expression.identifier("Calendar").dot("Component").dot("nanosecond")
+        }
+        enumMappings["NSCalendarUnitCalendar"] = {
+            Expression.identifier("Calendar").dot("Component").dot("calendar")
+        }
+        enumMappings["NSCalendarUnitTimeZone"] = {
+            Expression.identifier("Calendar").dot("Component").dot("timeZone")
+        }
     }
 }

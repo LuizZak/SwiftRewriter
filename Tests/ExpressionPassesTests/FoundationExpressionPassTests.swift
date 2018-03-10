@@ -285,6 +285,20 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
+    func testNSNotificationCenterTransform() {
+        let res = assertTransformParsed(
+            expression: "NSNotificationCenter",
+            into: Expression.identifier("NotificationCenter")
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("NotificationCenter")))
+        
+        assertTransformParsed(
+            expression: "[NSNotificationCenter defaultCenter]",
+            into: Expression.identifier("NotificationCenter").dot("default")
+        ); assertNotifiedChange()
+    }
+    
     func testClassTypeMethod() {
         // Uppercase -> <Type>.self
          assertTransformParsed(
@@ -413,5 +427,87 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .optional(.bool))
+    }
+    
+    func testNSCalendarUnitConversions() {
+        assertTransform(
+            expression: .identifier("NSCalendarUnitEra"),
+            into: Expression.identifier("Calendar").dot("Component").dot("era")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitYear"),
+            into: Expression.identifier("Calendar").dot("Component").dot("year")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitMonth"),
+            into: Expression.identifier("Calendar").dot("Component").dot("month")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitDay"),
+            into: Expression.identifier("Calendar").dot("Component").dot("day")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitHour"),
+            into: Expression.identifier("Calendar").dot("Component").dot("hour")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitMinute"),
+            into: Expression.identifier("Calendar").dot("Component").dot("minute")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitSecond"),
+            into: Expression.identifier("Calendar").dot("Component").dot("second")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitWeekday"),
+            into: Expression.identifier("Calendar").dot("Component").dot("weekday")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitWeekdayOrdinal"),
+            into: Expression.identifier("Calendar").dot("Component").dot("weekdayOrdinal")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitQuarter"),
+            into: Expression.identifier("Calendar").dot("Component").dot("quarter")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitWeekOfMonth"),
+            into: Expression.identifier("Calendar").dot("Component").dot("weekOfMonth")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitWeekOfYear"),
+            into: Expression.identifier("Calendar").dot("Component").dot("weekOfYear")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitYearForWeekOfYear"),
+            into: Expression.identifier("Calendar").dot("Component").dot("yearForWeekOfYear")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitNanosecond"),
+            into: Expression.identifier("Calendar").dot("Component").dot("nanosecond")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitCalendar"),
+            into: Expression.identifier("Calendar").dot("Component").dot("calendar")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSCalendarUnitTimeZone"),
+            into: Expression.identifier("Calendar").dot("Component").dot("timeZone")
+        ); assertNotifiedChange()
     }
 }
