@@ -10,6 +10,23 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         sut = UIKitExpressionPass()
     }
     
+    func testNSTextAlignment() {
+        assertTransformParsed(
+            expression: "NSTextAlignmentLeft",
+            into: Expression.identifier("NSTextAlignment").dot("left")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "NSTextAlignmentRight",
+            into: Expression.identifier("NSTextAlignment").dot("right")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "NSTextAlignmentCenter",
+            into: Expression.identifier("NSTextAlignment").dot("center")
+        ); assertNotifiedChange()
+    }
+    
     func testUIColor() {
         assertTransformParsed(
             expression: "[UIColor orangeColor]",

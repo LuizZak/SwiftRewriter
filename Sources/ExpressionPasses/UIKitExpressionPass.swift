@@ -3,7 +3,13 @@ import Utils
 import SwiftAST
 
 /// Applies passes to simplify known UIKit methods and constructs
-public class UIKitExpressionPass: SyntaxNodeRewriterPass {
+public class UIKitExpressionPass: BaseExpressionPass {
+    
+    public required init() {
+        super.init()
+        
+        makeEnumTransformers()
+    }
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         // 'enumifications'
@@ -149,5 +155,19 @@ public class UIKitExpressionPass: SyntaxNodeRewriterPass {
         let enumCase = suffix.lowercasedFirstLetter
         
         return .postfix(.identifier(swiftEnumName), .member(enumCase))
+    }
+}
+
+extension UIKitExpressionPass {
+    func makeEnumTransformers() {
+        enumMappings["NSTextAlignmentLeft"] = {
+            Expression.identifier("NSTextAlignment").dot("left")
+        }
+        enumMappings["NSTextAlignmentRight"] = {
+            Expression.identifier("NSTextAlignment").dot("right")
+        }
+        enumMappings["NSTextAlignmentCenter"] = {
+            Expression.identifier("NSTextAlignment").dot("center")
+        }
     }
 }
