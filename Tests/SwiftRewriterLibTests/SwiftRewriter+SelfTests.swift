@@ -34,7 +34,17 @@ class SwiftRewriter_SelfTests: XCTestCase {
     func testSelfTypeInClassMethodsPointsToMetatype() throws {
         try assertObjcParse(
             objc: """
+            @interface MyClass
+            @property (class, readonly) BOOL a;
+            @property (readonly) BOOL b;
+            @end
             @implementation MyClass
+            + (BOOL)a {
+                (self);
+            }
+            - (BOOL)b {
+                (self);
+            }
             + (void)classMethod {
                 (self);
             }
@@ -48,6 +58,15 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
+                @objc static var a: Bool {
+                    // type: MyClass.self
+                    (self)
+                }
+                @objc var b: Bool {
+                    // type: MyClass
+                    (self)
+                }
+                
                 @objc
                 static func classMethod() {
                     // type: MyClass.self

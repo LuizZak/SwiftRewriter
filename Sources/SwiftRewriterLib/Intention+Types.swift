@@ -328,10 +328,16 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     /// Returns `true` if the original Objective-C property is marked with a
     /// "readonly" attribute.
     ///
-    /// This is not analogous to `storage.isStatic`, and references only the
+    /// This is not analogous to `storage.isConstant`, and references only the
     /// Objective-C property.
     public var isReadOnly: Bool  {
         return attributes.contains { $0.rawString == "readonly" }
+    }
+    
+    /// Returns `true` if the original Objective-C property is marked with a
+    /// "class" attribute.
+    public var isClassProperty: Bool  {
+        return attributes.contains { $0.rawString == "class" }
     }
     
     /// If this property features a synthesized getter, returns the body intention
@@ -354,6 +360,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         default:
             return nil
         }
+    }
+    
+    public override var isStatic: Bool {
+        return isClassProperty
     }
     
     public var name: String

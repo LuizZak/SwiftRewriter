@@ -499,6 +499,9 @@ class InternalSwiftWriter {
                 target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
             }
         }
+        if prop.isClassProperty {
+            target.outputInlineWithSpace("static", style: .keyword)
+        }
         
         target.outputInlineWithSpace("var", style: .keyword)
         target.outputInline(prop.name, style: .plain)

@@ -496,7 +496,9 @@ public class DefaultTypeMapper: TypeMapper {
         "NSError": .typeName("Error"),
         "NSIndexPath": .typeName("IndexPath"),
         "NSIndexSet": .typeName("IndexSet"),
-        "NSNotification": .typeName("Notification")
+        "NSNotification": .typeName("Notification"),
+        "NSLocale": .typeName("Locale"),
+        "NSTimeZone": .typeName("TimeZone")
     ]
 }
 

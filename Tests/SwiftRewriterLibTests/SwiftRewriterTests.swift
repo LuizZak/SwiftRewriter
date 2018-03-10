@@ -112,6 +112,21 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteClassProperty() throws {
+        try assertObjcParse(
+            objc: """
+            @interface MyClass
+            @property (class) MyClass *myClass;
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc static var myClass: MyClass!
+            }
+            """)
+    }
+    
     func testRewriteClassProperties() throws {
         try assertObjcParse(
             objc: """
