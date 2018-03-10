@@ -3,12 +3,10 @@ import SwiftRewriterLib
 import SwiftAST
 import Utils
 
-public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
-    
-    private var transformers: [FunctionInvocationTransformer] = []
-    
+public class CoreGraphicsExpressionPass: BaseExpressionPass {
     public required init() {
         super.init()
+        
         createTransformers()
     }
     
@@ -86,13 +84,6 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
             break
         }
         
-        if let transf = transformers.first(where: { $0.canApply(to: exp) }),
-            let res = transf.attemptApply(on: exp) {
-            notifyChange()
-            
-            return super.visitExpression(res)
-        }
-        
         return super.visitPostfix(exp)
     }
     
@@ -112,48 +103,39 @@ public class CoreGraphicsExpressionPass: SyntaxNodeRewriterPass {
     }
     
     func createTransformers() {
-        func make(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy],
-                  firstArgIsInstance: Bool = false) {
-            let transformer =
-                FunctionInvocationTransformer(name: name, swiftName: swiftName,
-                                              firstArgumentBecomesInstance: firstArgIsInstance,
-                                              arguments: arguments)
-            transformers.append(transformer)
-        }
-        
         // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>) -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
-        make("UIEdgeInsetsMake", swiftName: "UIEdgeInsets",
+        makeFuncTransform("UIEdgeInsetsMake", swiftName: "UIEdgeInsets",
              arguments: [
                 .labeled("top", .asIs), .labeled("left", .asIs),
                 .labeled("bottom", .asIs), .labeled("right", .asIs)
             ])
         // CGointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
-        make("CGPointMake", swiftName: "CGPoint",
+        makeFuncTransform("CGPointMake", swiftName: "CGPoint",
              arguments: [
                 .labeled("x", .asIs), .labeled("y", .asIs)
             ])
         // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
-        make("CGRectMake", swiftName: "CGRect",
+        makeFuncTransform("CGRectMake", swiftName: "CGRect",
              arguments: [
                 .labeled("x", .asIs), .labeled("y", .asIs),
                 .labeled("width", .asIs), .labeled("height", .asIs)
             ])
         // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
-        make("CGSizeMake", swiftName: "CGSize",
+        makeFuncTransform("CGSizeMake", swiftName: "CGSize",
              arguments: [
                 .labeled("width", .asIs), .labeled("height", .asIs)
             ])
         // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
-        make("CGRectIntersectsRect", swiftName: "intersects", arguments: [.asIs],
+        makeFuncTransform("CGRectIntersectsRect", swiftName: "intersects", arguments: [.asIs],
              firstArgIsInstance: true)
         // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
-        make("CGRectIntersection", swiftName: "intersection", arguments: [.asIs],
+        makeFuncTransform("CGRectIntersection", swiftName: "intersection", arguments: [.asIs],
              firstArgIsInstance: true)
         // CGRectContainsPoint(<r>, <p>) -> <r>.contains(<p>)
-        make("CGRectContainsPoint", swiftName: "contains", arguments: [.asIs],
+        makeFuncTransform("CGRectContainsPoint", swiftName: "contains", arguments: [.asIs],
              firstArgIsInstance: true)
         // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
-        make("CGRectContainsRect", swiftName: "contains", arguments: [.asIs],
+        makeFuncTransform("CGRectContainsRect", swiftName: "contains", arguments: [.asIs],
              firstArgIsInstance: true)
         
         createCGPathTransformers()

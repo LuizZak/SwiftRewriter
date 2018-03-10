@@ -9,6 +9,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
         super.init()
         
         makeEnumTransformers()
+        makeFunctionTransformers()
     }
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
@@ -169,5 +170,75 @@ extension UIKitExpressionPass {
         enumMappings["NSTextAlignmentCenter"] = {
             Expression.identifier("NSTextAlignment").dot("center")
         }
+        
+        enumMappings["UIFontWeightUltraLight"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("ultraLight")
+        }
+        enumMappings["UIFontWeightLight"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("light")
+        }
+        enumMappings["UIFontWeightThin"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("thin")
+        }
+        enumMappings["UIFontWeightRegular"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("regular")
+        }
+        enumMappings["UIFontWeightMedium"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("medium")
+        }
+        enumMappings["UIFontWeightSemibold"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("semibold")
+        }
+        enumMappings["UIFontWeightBold"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("bold")
+        }
+        enumMappings["UIFontWeightHeavy"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("heavy")
+        }
+        enumMappings["UIFontWeightBlack"] = {
+            Expression.identifier("UIFont").dot("Weight").dot("black")
+        }
+    }
+    
+    func makeFunctionTransformers() {
+        // UIFont.systemFontOfSize() -> UIFont.systemFont(ofSize:)
+        makeInit(
+            typeName: "UIFont", method: "systemFontOfSize",
+            convertInto: Expression.identifier("UIFont").dot("systemFont"),
+            andCallWithArguments: [.labeled("ofSize", .asIs)],
+            andTypeAs: .typeName("UIFont")
+        )
+        
+        // UIFont.boldSystemFontOfSize() -> UIFont.boldSystemFont(ofSize:)
+        makeInit(
+            typeName: "UIFont", method: "boldSystemFontOfSize",
+            convertInto: Expression.identifier("UIFont").dot("boldSystemFont"),
+            andCallWithArguments: [.labeled("ofSize", .asIs)],
+            andTypeAs: .typeName("UIFont")
+        )
+        
+        // UIFont.italicSystemFontOfFont() -> UIFont.italicSystemFont(ofSize:)
+        makeInit(
+            typeName: "UIFont", method: "italicSystemFontOfFont",
+            convertInto: Expression.identifier("UIFont").dot("italicSystemFont"),
+            andCallWithArguments: [.labeled("ofSize", .asIs)],
+            andTypeAs: .typeName("UIFont")
+        )
+        
+        // UIFont.systemFontOfFont(_:weight:) -> UIFont.systemFont(ofSize:weight:)
+        makeInit(
+            typeName: "UIFont", method: "systemFontOfFont",
+            convertInto: Expression.identifier("UIFont").dot("systemFont"),
+            andCallWithArguments: [.labeled("ofSize", .asIs), .labeled("weight", .asIs)],
+            andTypeAs: .typeName("UIFont")
+        )
+        
+        // UIFont.monospacedDigitSystemFontOfSize(_:weight:) -> UIFont.monospacedDigitSystemFont(ofSize:weight:)
+        makeInit(
+            typeName: "UIFont", method: "monospacedDigitSystemFontOfSize",
+            convertInto: Expression.identifier("UIFont").dot("monospacedDigitSystemFont"),
+            andCallWithArguments: [.labeled("ofSize", .asIs), .labeled("weight", .asIs)],
+            andTypeAs: .typeName("UIFont")
+        )
     }
 }

@@ -3,7 +3,8 @@ import Utils
 import SwiftAST
 
 public class BaseExpressionPass: SyntaxNodeRewriterPass {
-    var transformers: [StaticConstructorTransformer] = []
+    var staticConstructorTransformers: [StaticConstructorTransformer] = []
+    var transformers: [FunctionInvocationTransformer] = []
     var enumMappings: [String: () -> Expression] = [:]
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
@@ -27,9 +28,14 @@ public class BaseExpressionPass: SyntaxNodeRewriterPass {
     }
     
     func applyTransformers(_ exp: PostfixExpression) -> Expression? {
-        for transformer in transformers {
+        for transformer in staticConstructorTransformers {
             if let result = transformer.attemptApply(on: exp) {
                 return result
+            }
+        }
+        for transformer in transformers {
+            if let res = transformer.attemptApply(on: exp) {
+                return res
             }
         }
         
@@ -58,7 +64,7 @@ public extension BaseExpressionPass {
                     return exp
             })
         
-        transformers.append(transformer)
+        staticConstructorTransformers.append(transformer)
     }
     
     func makeInit(typeName: String, method: String, convertInto: @autoclosure @escaping () -> Expression,
@@ -74,6 +80,15 @@ public extension BaseExpressionPass {
                     return exp
             })
         
+        staticConstructorTransformers.append(transformer)
+    }
+    
+    func makeFuncTransform(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy],
+                           firstArgIsInstance: Bool = false) {
+        let transformer =
+            FunctionInvocationTransformer(name: name, swiftName: swiftName,
+                                          firstArgumentBecomesInstance: firstArgIsInstance,
+                                          arguments: arguments)
         transformers.append(transformer)
     }
 }

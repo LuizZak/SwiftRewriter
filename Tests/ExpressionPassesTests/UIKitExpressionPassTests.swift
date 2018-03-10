@@ -151,4 +151,84 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
             into: exp.dot("isFirstResponder")
         ); assertNotifiedChange()
     }
+    
+    func testUIFontInitializers() {
+        assertTransformParsed(
+            expression: "[UIFont systemFontOfSize:12]",
+            into: Expression.identifier("UIFont").dot("systemFont").call([.labeled("ofSize", .constant(12))])
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "[UIFont boldSystemFontOfSize:12]",
+            into: Expression.identifier("UIFont").dot("boldSystemFont").call([.labeled("ofSize", .constant(12))])
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "[UIFont italicSystemFontOfFont:12]",
+            into: Expression.identifier("UIFont").dot("italicSystemFont").call([.labeled("ofSize", .constant(12))])
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "[UIFont systemFontOfFont:12 weight:UIFontWeightBold]",
+            into: Expression.identifier("UIFont").dot("systemFont").call([
+                .labeled("ofSize", .constant(12)),
+                .labeled("weight", Expression.identifier("UIFont").dot("Weight").dot("bold"))
+            ])
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "[UIFont monospacedDigitSystemFontOfSize:12 weight:UIFontWeightBold]",
+            into: Expression.identifier("UIFont").dot("monospacedDigitSystemFont").call([
+                .labeled("ofSize", .constant(12)),
+                .labeled("weight", Expression.identifier("UIFont").dot("Weight").dot("bold"))
+                ])
+        ); assertNotifiedChange()
+    }
+    
+    func testUIFontWeight() {
+        assertTransformParsed(
+            expression: "UIFontWeightUltraLight",
+            into: Expression.identifier("UIFont").dot("Weight").dot("ultraLight")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightLight",
+            into: Expression.identifier("UIFont").dot("Weight").dot("light")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightThin",
+            into: Expression.identifier("UIFont").dot("Weight").dot("thin")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightRegular",
+            into: Expression.identifier("UIFont").dot("Weight").dot("regular")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightMedium",
+            into: Expression.identifier("UIFont").dot("Weight").dot("medium")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightSemibold",
+            into: Expression.identifier("UIFont").dot("Weight").dot("semibold")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightBold",
+            into: Expression.identifier("UIFont").dot("Weight").dot("bold")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightHeavy",
+            into: Expression.identifier("UIFont").dot("Weight").dot("heavy")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UIFontWeightBlack",
+            into: Expression.identifier("UIFont").dot("Weight").dot("black")
+        ); assertNotifiedChange()
+    }
 }
