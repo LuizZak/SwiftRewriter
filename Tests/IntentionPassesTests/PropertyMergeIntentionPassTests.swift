@@ -283,4 +283,36 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(cls.history.summary, "<empty>")
         XCTAssertEqual(cls.properties[0].history.summary, "<empty>")
     }
+    
+    func testDontMergeInstancePropertyWithClassGetterSetterLikesAndViceVersa() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createProperty(named: "a", type: .int, attributes: [.attribute("class")])
+                        .createMethod(named: "a", returnType: .int)
+                        .createMethod(named: "setA", parameters: [
+                            ParameterSignature(label: "_", name: "a", type: .int)
+                        ])
+                        .createProperty(named: "b", type: .int)
+                        .createMethod(named: "b", returnType: .int, isStatic: true)
+                        .createMethod(named: "setB", parameters: [
+                            ParameterSignature(label: "_", name: "a", type: .int)
+                        ], isStatic: true)
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.methods.count, 4)
+        XCTAssertEqual(cls.properties.count, 2)
+        switch cls.properties[0].mode {
+        case .asField:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+    }
 }

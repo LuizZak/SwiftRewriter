@@ -43,6 +43,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // with the return type matching the property's type
             let potentialGetters =
                 methods.filter { $0.name == property.name }
+                    .filter { $0.isStatic == property.isStatic }
                     .filter { $0.returnType.deepUnwrapped == property.type.deepUnwrapped }
                     .filter { $0.parameters.count == 0 }
             
@@ -51,6 +52,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // uppercased
             let potentialSetters =
                 methods.filter { $0.returnType == .void }
+                    .filter { $0.isStatic == property.isStatic }
                     .filter { $0.parameters.count == 1 }
                     .filter { $0.parameters[0].type.deepUnwrapped == property.type.deepUnwrapped }
                     .filter { $0.name == expectedName }
