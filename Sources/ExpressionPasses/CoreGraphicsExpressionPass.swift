@@ -137,6 +137,10 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
         makeFuncTransform("CGRectContainsRect", swiftName: "contains", arguments: [.asIs],
              firstArgIsInstance: true)
+        // CGRectOffset(<r>, <x>, <y>) -> <r>.offsetBy(dx: <x>, dy: <y>)
+        makeFuncTransform("CGRectOffset", swiftName: "offsetBy",
+                          arguments: [.labeled("dx", .asIs), .labeled("dy", .asIs)],
+                          firstArgIsInstance: true)
         
         createCGPathTransformers()
     }

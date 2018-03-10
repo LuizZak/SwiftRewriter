@@ -246,6 +246,19 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testCGRectOffset() {
+        assertTransformParsed(
+            expression: "CGRectOffset(self.frame, 1, 2)",
+            into: Expression
+                .identifier("self")
+                .dot("frame")
+                .dot("offsetBy").call([
+                    .labeled("dx", Expression.constant(1)),
+                    .labeled("dy", Expression.constant(2))
+                    ])
+        ); assertNotifiedChange()
+    }
+    
     func testCGPointMake() {
         assertTransformParsed(
             expression: "CGPointMake(1, 2)",
