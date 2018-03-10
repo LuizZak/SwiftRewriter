@@ -404,6 +404,9 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
                     
                     return conversion()
                 }
+                guard postfix.exp.asPostfix?.member?.name == typeName else {
+                    return nil
+                }
                 guard let call = postfix.functionCall, call.arguments.count == 0 else {
                     return nil
                 }

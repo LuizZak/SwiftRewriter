@@ -205,18 +205,51 @@ class SuggestConversionInterface {
         }
         
         do {
+            let stopwatch = Stopwatch.start()
+            
             try autoreleasepool {
                 let rewriter = SwiftRewriterServiceImpl.fileDiskService
                 
                 try rewriter.rewrite(files: objcFiles)
             }
             
-            console.printLine("Finishing converting \(objcFiles.count) files.")
+            let duration = stopwatch.stop()
+            
+            console.printLine("Finishing converting \(objcFiles.count) files in \(String(format: "%.2lf", duration))s.")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         } catch {
             console.printLine("Error converting files: \(error)")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         }
+    }
+}
+
+fileprivate class Stopwatch {
+    var start: timespec = timespec()
+    
+    private init() {
+        if #available(OSX 10.12, *) {
+            clock_gettime(CLOCK_MONOTONIC_RAW, &start)
+        } else {
+            fatalError()
+        }
+    }
+    
+    static func start() -> Stopwatch {
+        return Stopwatch()
+    }
+    
+    func stop() -> TimeInterval {
+        var end: timespec = timespec()
+        if #available(OSX 10.12, *) {
+            clock_gettime(CLOCK_MONOTONIC_RAW, &end)
+        } else {
+            fatalError()
+        }
+        
+        let delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+        
+        return TimeInterval(delta_us) / 1_000_000
     }
 }
 

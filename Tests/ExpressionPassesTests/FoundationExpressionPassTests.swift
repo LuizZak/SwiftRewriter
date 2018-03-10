@@ -252,6 +252,17 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             expression: "NSLocale.autoupdatingCurrentLocale",
             into: Expression.identifier("Locale").dot("autoupdatingCurrent")
         ); assertNotifiedChange()
+        
+        // Test unrecognized members are left alone
+        assertTransformParsed(
+            expression: "NSNotALocale.currentLocale",
+            into: Expression.identifier("NSNotALocale").dot("currentLocale")
+        ); assertDidNotNotifyChange()
+        
+        assertTransformParsed(
+            expression: "[NSNotALocale currentLocale]",
+            into: Expression.identifier("NSNotALocale").dot("currentLocale").call()
+        ); assertDidNotNotifyChange()
     }
     
     func testClassTypeMethod() {
