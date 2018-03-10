@@ -50,7 +50,7 @@ let package = Package(
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils"]),
         .target(
             name: "IntentionPasses",
-            dependencies: ["SwiftRewriterLib", "SwiftAST", "ExpressionPasses", "Utils", "MiniLexer"]),
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils", "MiniLexer"]),
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils"]),
