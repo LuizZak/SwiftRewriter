@@ -113,7 +113,7 @@ indirect public enum SwiftType: Equatable {
     /// type.
     ///
     /// In case the other type is not an optional type, returns this type with
-    /// no optionality laters.
+    /// no optionality.
     public func withSameOptionalityAs(_ type: SwiftType) -> SwiftType {
         return type.wrappingOther(self.deepUnwrapped)
     }

@@ -5,6 +5,29 @@ import SwiftRewriterLib
 import SwiftAST
 
 class DropNSFromTypesIntentionPassTests: XCTestCase {
+    
+    // MARK: Type name tests
+    func testConvertsNSData() {
+        assert(type: .typeName("NSData"), matches: .typeName("Data"))
+    }
+    
+    func testConvertsNSDate() {
+        assert(type: .typeName("NSDate"), matches: .typeName("Date"))
+    }
+    
+    func testConvertsNSTimeInterval() {
+        assert(type: .typeName("NSTimeInterval"), matches: .typeName("TimeInterval"))
+    }
+    
+    func testRetainsOptionalityOfOriginalType() {
+        assert(type: .optional(.typeName("NSDate")),
+               matches: .optional(.typeName("Date")))
+        assert(type: .implicitUnwrappedOptional(.optional(.typeName("NSDate"))),
+               matches: .implicitUnwrappedOptional(.optional(.typeName("Date"))))
+    }
+    
+    // MARK: Conversion scope tests
+    
     func testConvertGlobalVariable() {
         let intentions
             = IntentionCollectionBuilder()
@@ -78,5 +101,26 @@ class DropNSFromTypesIntentionPassTests: XCTestCase {
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
         XCTAssertEqual(intentions.typeIntentions()[0].constructors[0].parameters[0].type, .typeName("Date"))
+    }
+}
+
+extension DropNSFromTypesIntentionPassTests {
+    func assert(type original: SwiftType, matches expected: SwiftType, line: Int = #line) {
+        let intentions
+            = IntentionCollectionBuilder()
+                .createFile(named: "A") { file in
+                    file.createGlobalVariable(withName: "a", type: original)
+                }.build()
+        let sut = DropNSFromTypesIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let result = intentions.globalVariables()[0].type
+        
+        if result != expected {
+            recordFailure(withDescription: """
+                Expected to convert '\(original)' into '\(expected)', but received '\(result)'
+                """, inFile: #file, atLine: line, expected: true)
+        }
     }
 }

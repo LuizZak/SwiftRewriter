@@ -7,7 +7,8 @@ import SwiftAST
 public class DropNSFromTypesIntentionPass: IntentionPass {
     private static let _mappings: [String: String] = [
         "NSData": "Data",
-        "NSDate": "Date"
+        "NSDate": "Date",
+        "NSTimeInterval": "TimeInterval"
     ]
     
     private var context: IntentionPassContext!
@@ -26,7 +27,7 @@ public class DropNSFromTypesIntentionPass: IntentionPass {
         switch type.deepUnwrapped {
         case .typeName(let typeName):
             if let newName = DropNSFromTypesIntentionPass._mappings[typeName] {
-                return .typeName(newName)
+                return SwiftType.typeName(newName).withSameOptionalityAs(type)
             }
             
             return type
