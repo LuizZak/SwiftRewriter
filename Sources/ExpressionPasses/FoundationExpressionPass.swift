@@ -4,6 +4,115 @@ import SwiftAST
 
 /// Applies passes to simplify known Foundation methods
 public class FoundationExpressionPass: SyntaxNodeRewriterPass {
+    var transformers: [StaticConstructorTransformers] = []
+    
+    public required init() {
+        super.init()
+        makeTransformers()
+    }
+    
+    func makeTransformers() {
+        func make(typeName: String, property: String, convertInto: @autoclosure @escaping () -> Expression,
+                  andTypeAs type: SwiftType? = nil) {
+            let transformer
+                = StaticConstructorTransformers(
+                    typeName: typeName,
+                    kind: .property(property),
+                    conversion: {
+                        let exp = convertInto()
+                        exp.resolvedType = type
+                        return exp
+                    })
+            
+            transformers.append(transformer)
+        }
+        
+        func make(typeName: String, method: String, convertInto: @autoclosure @escaping () -> Expression,
+                  andCallWithArguments args: [FunctionInvocationTransformer.ArgumentStrategy],
+                  andTypeAs type: SwiftType? = nil) {
+            let transformer
+                = StaticConstructorTransformers(
+                    typeName: typeName,
+                    kind: .method(method, args),
+                    conversion: {
+                        let exp = convertInto()
+                        exp.resolvedType = type
+                        return exp
+                    })
+            
+            transformers.append(transformer)
+        }
+        
+        // MARK: NSTimeZone
+        
+        make(typeName: "NSTimeZone", property: "localTimeZone",
+             convertInto: Expression.identifier("TimeZone").dot("autoupdatingCurrent"),
+             andTypeAs: .typeName("TimeZone"))
+        
+        make(typeName: "NSTimeZone", property: "defaultTimeZone",
+             convertInto: Expression.identifier("TimeZone").dot("current"),
+             andTypeAs: .typeName("TimeZone"))
+        
+        make(typeName: "NSTimeZone", property: "systemTimeZone",
+             convertInto: Expression.identifier("TimeZone").dot("current"),
+             andTypeAs: .typeName("TimeZone"))
+        
+        // MARK: NSLocale
+        
+        make(typeName: "NSLocale", method: "localeWithLocaleIdentifier",
+             convertInto: Expression.identifier("Locale"),
+             andCallWithArguments: [.labeled("locale", .asIs)],
+             andTypeAs: .typeName("Locale"))
+        
+        make(typeName: "NSLocale", property: "currentLocale",
+             convertInto: Expression.identifier("Locale").dot("current"),
+             andTypeAs: .typeName("Locale"))
+        
+        make(typeName: "NSLocale", property: "systemLocale",
+             convertInto: Expression.identifier("Locale").dot("current"),
+             andTypeAs: .typeName("Locale"))
+        
+        make(typeName: "NSLocale", property: "autoupdatingCurrentLocale",
+             convertInto: Expression.identifier("Locale").dot("autoupdatingCurrent"),
+             andTypeAs: .typeName("Locale"))
+        
+        
+        /*
+         func testNSTimeZoneTransformers() {
+            assertTransformParsed(
+                expression: "NSTimeZone.localTimeZone",
+                into: Expression.identifier("TimeZone").dot("current")
+            ); assertNotifiedChange()
+         
+            assertTransformParsed(
+                expression: "NSTimeZone.defaultTimeZone",
+                into: Expression.identifier("Locale").dot("current")
+            ); assertNotifiedChange()
+         
+            assertTransformParsed(
+                expression: "NSTimeZone.systemTimeZone",
+                into: Expression.identifier("Locale").dot("current")
+            ); assertNotifiedChange()
+        }
+        
+        func testNSLocaleTransformers() {
+            assertTransformParsed(
+                expression: "NSLocale.currentLocale",
+                into: Expression.identifier("Locale").dot("current")
+            ); assertNotifiedChange()
+         
+            assertTransformParsed(
+                expression: "NSLocale.systemLocale",
+                into: Expression.identifier("Locale").dot("current")
+            ); assertNotifiedChange()
+         
+            assertTransformParsed(
+                expression: "NSLocale.autoupdatingCurrentLocale",
+                into: Expression.identifier("Locale").dot("autoupdatingCurrent")
+            ); assertNotifiedChange()
+        }
+        */
+    }
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let new = convertIsEqualToString(exp) {
@@ -36,6 +145,11 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
             
             return super.visitExpression(new)
         }
+        if let new = applyTransformers(exp) {
+            notifyChange()
+            
+            return super.visitExpression(new)
+        }
         
         return super.visitPostfix(exp)
     }
@@ -48,6 +162,16 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         }
         
         return super.visitIdentifier(exp)
+    }
+    
+    func applyTransformers(_ exp: PostfixExpression) -> Expression? {
+        for transformer in transformers {
+            if let result = transformer.attemptApply(on: exp) {
+                return result
+            }
+        }
+        
+        return nil
     }
     
     /// Converts [<lhs> respondsToSelector:<selector>] -> <lhs>.responds(to: <selector>)
@@ -255,5 +379,62 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         }
         
         return true
+    }
+    
+    final class StaticConstructorTransformers {
+        let typeName: String
+        let kind: Kind
+        let conversion: () -> Expression
+        
+        init(typeName: String, kind: Kind, conversion: @escaping () -> Expression) {
+            self.typeName = typeName
+            self.kind = kind
+            self.conversion = conversion
+        }
+        
+        func attemptApply(on postfix: PostfixExpression) -> Expression? {
+            switch kind {
+            case .property(let property):
+                // For properties, accessing via '.' or via function call are
+                // semantically equivalent in Objective-C.
+                if postfix.exp.asIdentifier?.identifier == typeName && postfix.op == .member(property) {
+                    if postfix.parent is PostfixExpression {
+                        return nil
+                    }
+                    
+                    return conversion()
+                }
+                guard let call = postfix.functionCall, call.arguments.count == 0 else {
+                    return nil
+                }
+                guard let inner = postfix.exp.asPostfix, inner.member?.name == property else {
+                    return nil
+                }
+                
+                return conversion()
+            case .method(let methodName, let args):
+                let transformer =
+                    FunctionInvocationTransformer(
+                        name: "", swiftName: "",
+                        firstArgumentBecomesInstance: false,
+                        arguments: args)
+                
+                guard let call = postfix.functionCall, let result = transformer.apply(on: call) else {
+                    return nil
+                }
+                guard let inner = postfix.exp.asPostfix, inner.member?.name == methodName else {
+                    return nil
+                }
+                
+                let base = conversion()
+                
+                return base.call(result.arguments)
+            }
+        }
+        
+        enum Kind {
+            case property(String)
+            case method(String, [FunctionInvocationTransformer.ArgumentStrategy])
+        }
     }
 }

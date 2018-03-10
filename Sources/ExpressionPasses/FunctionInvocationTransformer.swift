@@ -82,16 +82,8 @@ public final class FunctionInvocationTransformer {
         self.arguments = arguments
         self.firstArgIsInstance = firstArgumentBecomesInstance
         
-        let offset = firstArgumentBecomesInstance ? 1 : 0
-        
-        var requiredArgs = arguments.reduce(0) { $0 + $1.argumentConsumeCount } + offset
-        
-        // Verify max arg count inferred from indexes of arguments
-        if let max = arguments.map({ $0.maxArgumentReferenced + offset }).max(), max > requiredArgs {
-            requiredArgs = max
-        }
-        
-        requiredArgumentCount = requiredArgs
+        requiredArgumentCount =
+            arguments.requiredArgumentCount() + (firstArgIsInstance ? 1 : 0)
     }
     
     public func canApply(to postfix: PostfixExpression) -> Bool {
@@ -120,6 +112,30 @@ public final class FunctionInvocationTransformer {
             return nil
         }
         
+        guard let result = apply(on: functionCall) else {
+            return nil
+        }
+        
+        // Construct a new postfix operation with the result
+        if firstArgIsInstance {
+            let exp =
+                functionCall
+                    .arguments[0]
+                    .expression
+                    .dot(swiftName)
+                    .call(result.arguments)
+            exp.resolvedType = postfix.resolvedType
+            
+            return exp
+        }
+        
+        let exp = Expression.identifier(swiftName).call(result.arguments)
+        exp.resolvedType = postfix.resolvedType
+        
+        return exp
+    }
+    
+    public func apply(on functionCall: FunctionCallPostfix) -> FunctionCallPostfix? {
         if functionCall.arguments.count != requiredArgumentCount {
             return nil
         }
@@ -139,7 +155,7 @@ public final class FunctionInvocationTransformer {
                         label: nil,
                         expression: merger(arguments[arg0].expression,
                                            arguments[arg1].expression)
-                    )
+                )
                 
                 return arg
                 
@@ -150,7 +166,7 @@ public final class FunctionInvocationTransformer {
                 }
                 
                 return nil
-            
+                
             case .fromArgIndex(let index):
                 return arguments[index]
                 
@@ -187,23 +203,7 @@ public final class FunctionInvocationTransformer {
             i += 1
         }
         
-        // Construct a new postfix operation with the result
-        if firstArgIsInstance {
-            let exp =
-                functionCall
-                    .arguments[0]
-                    .expression
-                    .dot(swiftName)
-                    .call(result)
-            exp.resolvedType = postfix.resolvedType
-            
-            return exp
-        }
-        
-        let exp = Expression.identifier(swiftName).call(result)
-        exp.resolvedType = postfix.resolvedType
-        
-        return exp
+        return FunctionCallPostfix(arguments: result)
     }
     
     /// What to do with one or more arguments of a function call
@@ -258,5 +258,18 @@ public final class FunctionInvocationTransformer {
                 return inner.maxArgumentReferenced
             }
         }
+    }
+}
+
+public extension Sequence where Element == FunctionInvocationTransformer.ArgumentStrategy {
+    public func requiredArgumentCount() -> Int {
+        var requiredArgs = reduce(0) { $0 + $1.argumentConsumeCount }
+        
+        // Verify max arg count inferred from indexes of arguments
+        if let max = map({ $0.maxArgumentReferenced }).max(), max > requiredArgs {
+            requiredArgs = max
+        }
+        
+        return requiredArgs
     }
 }

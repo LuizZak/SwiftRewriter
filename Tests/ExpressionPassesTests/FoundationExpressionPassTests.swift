@@ -200,6 +200,60 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testNSTimeZoneSystemTimeZone() {
+        let res = assertTransformParsed(
+            expression: "[NSTimeZone systemTimeZone]",
+            into: Expression.identifier("TimeZone").dot("current")
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .typeName("TimeZone"))
+        
+        assertTransformParsed(
+            expression: "NSTimeZone.systemTimeZone",
+            into: Expression.identifier("TimeZone").dot("current")
+        ); assertNotifiedChange()
+        
+        // Test unrecognized members are left alone
+        assertTransformParsed(
+            expression: "[NSTimeZone systemTimeZone:thing]",
+            into: "TimeZone.systemTimeZone(thing)"
+        ); assertNotifiedChange()
+    }
+    
+    func testNSTimeZoneTransformers() {
+        assertTransformParsed(
+            expression: "NSTimeZone.localTimeZone",
+            into: Expression.identifier("TimeZone").dot("autoupdatingCurrent")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "NSTimeZone.defaultTimeZone",
+            into: Expression.identifier("TimeZone").dot("current")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "NSTimeZone.systemTimeZone",
+            into: Expression.identifier("TimeZone").dot("current")
+        ); assertNotifiedChange()
+    }
+    
+    func testNSLocaleTransformers() {
+        assertTransformParsed(
+            expression: "NSLocale.currentLocale",
+            into: Expression.identifier("Locale").dot("current")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "NSLocale.systemLocale",
+            into: Expression.identifier("Locale").dot("current")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "NSLocale.autoupdatingCurrentLocale",
+            into: Expression.identifier("Locale").dot("autoupdatingCurrent")
+        ); assertNotifiedChange()
+    }
+    
     func testClassTypeMethod() {
         // Uppercase -> <Type>.self
          assertTransformParsed(
