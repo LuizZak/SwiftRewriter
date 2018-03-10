@@ -188,7 +188,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testNSDateDateCreator() {
         let res = assertTransformParsed(
             expression: "[NSDate date]",
-            into: Expression.identifier("NSDate").call()
+            into: Expression.identifier("Date").call()
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .typeName("NSDate"))
@@ -196,8 +196,8 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         // Test unrecognized members are left alone
         assertTransformParsed(
             expression: "[NSDate date:thing]",
-            into: "NSDate.date(thing)"
-        ); assertDidNotNotifyChange()
+            into: "Date.date(thing)"
+        ); assertNotifiedChange()
     }
     
     func testClassTypeMethod() {

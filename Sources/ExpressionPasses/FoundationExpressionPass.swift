@@ -40,6 +40,16 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         return super.visitPostfix(exp)
     }
     
+    public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
+        if let new = convertNSPrefixedTypeName(exp) {
+            notifyChange()
+            
+            return super.visitExpression(new)
+        }
+        
+        return super.visitIdentifier(exp)
+    }
+    
     /// Converts [<lhs> respondsToSelector:<selector>] -> <lhs>.responds(to: <selector>)
     func convertRespondsToSelector(_ exp: PostfixExpression) -> Expression? {
         guard let postfix = exp.exp.asPostfix, let fc = exp.functionCall else {
@@ -189,5 +199,61 @@ public class FoundationExpressionPass: SyntaxNodeRewriterPass {
         default:
             return nil
         }
+    }
+    
+    /// Converts NSDate -> Date, NSTimeZone -> TimeZone, etc.
+    func convertNSPrefixedTypeName(_ exp: IdentifierExpression) -> Expression? {
+        let ident = exp.identifier
+        guard ident.hasPrefix("NS") && ident.count > 2 else {
+            return nil
+        }
+        guard isIdentifierUsedInTypeNameContext(exp) else {
+            return nil
+        }
+        // Make sure we don't convert local/globals that some reason have an NS-
+        // prefix.
+        guard exp.definition?.local == nil && exp.definition?.global == nil else {
+            return nil
+        }
+        // Can only convert known instance types
+        guard self.context.typeSystem.isClassInstanceType(exp.identifier) else {
+            return nil
+        }
+        
+        let context = TypeConstructionContext(typeSystem: self.context.typeSystem)
+        let mapper = DefaultTypeMapper(context: context)
+        
+        let newType =
+            mapper.swiftType(forObjcType: .pointer(.struct(ident)),
+                             context: .alwaysNonnull)
+        
+        let typeName = mapper.typeNameString(for: newType)
+        
+        if exp.identifier == typeName {
+            return nil
+        }
+        
+        exp.identifier = typeName
+        exp.resolvedType = newType
+        
+        return exp
+    }
+    
+    /// Returns `true` if a given identifier is contained in a possibly type name
+    /// usage context.
+    /// Non type contexts include prefix/unary/binary operations, and as the lhs
+    /// on an assignment expression.
+    private func isIdentifierUsedInTypeNameContext(_ exp: IdentifierExpression) -> Bool {
+        if exp.parent is PrefixExpression || exp.parent is UnaryExpression {
+            return false
+        }
+        if let binary = exp.parent as? BinaryExpression, binary.lhs === exp {
+            return false
+        }
+        if let assignment = exp.parent as? AssignmentExpression, assignment.lhs === exp {
+            return false
+        }
+        
+        return true
     }
 }
