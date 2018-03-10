@@ -1021,10 +1021,10 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class A: NSObject {
                 @objc
-                func loadDataWithCallback(_ callback: ((NSArray!, NSError!) -> Void)!) {
+                func loadDataWithCallback(_ callback: ((NSArray!, Error!) -> Void)!) {
                     self.doThing().then { (results: NSArray!) -> Void in
                         callback?(results, nil)
-                    }.catch { (error: NSError!) -> Void in
+                    }.catch { (error: Error!) -> Void in
                         callback?(nil, error)
                     }.always { () -> Void in
                         lastSync = CFAbsoluteTimeGetCurrent()

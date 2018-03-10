@@ -175,6 +175,14 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.pointer(.struct("NSDate")), toConvertTo: "Date")
         expect(.pointer(.struct("NSString")), toConvertTo: "String")
         expect(.pointer(.struct("NSObject")), toConvertTo: "NSObject")
+        expect(.pointer(.struct("NSCalendar")), toConvertTo: "Calendar")
+        expect(.pointer(.struct("NSURL")), toConvertTo: "URL")
+        expect(.pointer(.struct("NSURLComponents")), toConvertTo: "URLComponents")
+        expect(.pointer(.struct("NSError")), toConvertTo: "Error")
+        expect(.pointer(.struct("NSIndexPath")), toConvertTo: "IndexPath")
+        expect(.pointer(.struct("NSIndexSet")), toConvertTo: "IndexSet")
+        expect(.pointer(.struct("NSNotification")), toConvertTo: "Notification")
+        
         expect(.struct("NSTimeInterval"), toConvertTo: "TimeInterval")
     }
     

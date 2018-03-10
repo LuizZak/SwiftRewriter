@@ -489,7 +489,14 @@ public class DefaultTypeMapper: TypeMapper {
         "NSArray": .typeName("NSArray"),
         "NSMutableArray": .typeName("NSMutableArray"),
         "NSString": .string,
-        "NSDate": .typeName("Date")
+        "NSDate": .typeName("Date"),
+        "NSCalendar": .typeName("Calendar"),
+        "NSURL": .typeName("URL"),
+        "NSURLComponents": .typeName("URLComponents"),
+        "NSError": .typeName("Error"),
+        "NSIndexPath": .typeName("IndexPath"),
+        "NSIndexSet": .typeName("IndexSet"),
+        "NSNotification": .typeName("Notification")
     ]
 }
 
