@@ -506,6 +506,23 @@ class InternalSwiftWriter {
         
         target.outputInline(typeName, style: .typeName)
         
+        // Protocol variables require get/set specifiers
+        if prop.type is ProtocolGenerationIntention {
+            target.outputInline(" ") // Space after type
+            target.outputInline("{ ")
+            if prop.isReadOnly {
+                target.outputInlineWithSpace("get", style: .keyword)
+            } else {
+                target.outputInlineWithSpace("get", style: .keyword)
+                target.outputInlineWithSpace("set", style: .keyword)
+            }
+            
+            target.outputInline("}")
+            target.outputLineFeed()
+            
+            return
+        }
+        
         switch prop.mode {
         case .asField:
             target.outputLineFeed()

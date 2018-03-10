@@ -778,6 +778,22 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteProtocolPropertiesWithGetSetSpecifiers() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol MyProtocol
+            @property BOOL value1;
+            @property (readonly) BOOL value2;
+            @end
+            """, swift: """
+            @objc
+            protocol MyProtocol: NSObjectProtocol {
+                @objc var value1: Bool { get set }
+                @objc var value2: Bool { get }
+            }
+            """)
+    }
+    
     func testConvertAssignProperty() throws {
         try assertObjcParse(
             objc: """
