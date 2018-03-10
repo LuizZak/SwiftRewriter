@@ -646,11 +646,11 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             protocol A: NSObjectProtocol {
-                @objc var a: Bool
+                @objc var a: Bool { get set }
             }
             @objc
             protocol B: NSObjectProtocol {
-                @objc var b: Int
+                @objc var b: Int { get set }
             }
 
             @objc

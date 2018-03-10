@@ -139,19 +139,6 @@ class DefaultTypeMapperTests: XCTestCase {
     }
     
     func testMapSimpleTypes() {
-        expect(.specified(specifiers: ["const"], .struct("NSInteger")),
-               toConvertTo: "Int")
-        
-        expect(.specified(specifiers: ["const"], .struct("NSInteger")),
-               withExplicitNullability: nil,
-               toConvertTo: "Int")
-        
-        expect(.pointer(.struct("NSString")),
-               toConvertTo: "String")
-        
-        expect(.pointer(.struct("NSObject")),
-               toConvertTo: "NSObject")
-        
         expect(.id(protocols: []),
                toConvertTo: "AnyObject")
         
@@ -173,6 +160,21 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
                withExplicitNullability: nil,
                toConvertTo: "AnyObject?")
+    }
+    
+    /// Test we properly map NS- types into equivalent Swift types (as of Swift 4.1).
+    func testMapNSTypes() {
+        expect(.specified(specifiers: ["const"], .struct("NSInteger")),
+               toConvertTo: "Int")
+        
+        expect(.specified(specifiers: ["const"], .struct("NSInteger")),
+               withExplicitNullability: nil,
+               toConvertTo: "Int")
+        
+        expect(.pointer(.struct("NSDate")), toConvertTo: "Date")
+        expect(.pointer(.struct("NSString")), toConvertTo: "String")
+        expect(.pointer(.struct("NSObject")), toConvertTo: "NSObject")
+        expect(.pointer(.struct("NSTimeInterval")), toConvertTo: "TimeInterval")
     }
     
     func testNSArray() {

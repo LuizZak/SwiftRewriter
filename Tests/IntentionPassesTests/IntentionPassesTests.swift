@@ -10,7 +10,7 @@ class IntentionPassesTests: XCTestCase {
         // Asserter shortcut
         func assertNext<T: IntentionPass>(is type: T.Type, _ line: Int = #line) {
             guard let next = intentsIterator.next() else {
-                recordFailure(withDescription: "Reached end of list.", inFile: #file, atLine: line, expected: true)
+                recordFailure(withDescription: "Reached unexpected end of intentions list.", inFile: #file, atLine: line, expected: true)
                 return
             }
             
@@ -19,7 +19,7 @@ class IntentionPassesTests: XCTestCase {
             }
         }
         
-        XCTAssertEqual(intents.count, 7)
+        XCTAssertEqual(intents.count, 6)
         
         assertNext(is: FileTypeMergingIntentionPass.self)
         assertNext(is: ProtocolNullabilityPropagationToConformersIntentionPass.self)
@@ -27,7 +27,6 @@ class IntentionPassesTests: XCTestCase {
         assertNext(is: StoredPropertyToNominalTypesIntentionPass.self)
         assertNext(is: SwiftifyMethodSignaturesIntentionPass.self)
         assertNext(is: ImportDirectiveIntentionPass.self)
-        assertNext(is: DropNSFromTypesIntentionPass.self)
     }
 }
 

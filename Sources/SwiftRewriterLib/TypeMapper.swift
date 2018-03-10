@@ -498,7 +498,9 @@ public class DefaultTypeMapper: TypeMapper {
         "NSNumber": .typeName("NSNumber"),
         "NSArray": .typeName("NSArray"),
         "NSMutableArray": .typeName("NSMutableArray"),
-        "NSString": .string
+        "NSString": .string,
+        "NSTimeInterval": .typeName("TimeInterval"),
+        "NSDate": .typeName("Date")
     ]
 }
 
