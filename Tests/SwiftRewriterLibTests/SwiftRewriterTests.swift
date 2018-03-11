@@ -107,7 +107,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                @objc weak var myClass: MyClass?
+                @objc weak var myClass: MyClass? = nil
             }
             """)
     }
@@ -122,7 +122,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                @objc static var myClass: MyClass!
+                @objc static var myClass: MyClass! = nil
             }
             """)
     }
@@ -147,16 +147,16 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                @objc var someField: Bool
-                @objc var someOtherField: Int
+                @objc var someField: Bool = false
+                @objc var someOtherField: Int = 0
                 @objc var aRatherStringlyField: String
-                @objc var specifiedNull: String?
+                @objc var specifiedNull: String? = nil
                 @objc var nonNullWithQualifier: String
-                @objc var nonSpecifiedNull: String!
-                @objc var idType: AnyObject!
-                @objc weak var delegate: (MyDelegate & MyDataSource)?
+                @objc var nonSpecifiedNull: String! = nil
+                @objc var idType: AnyObject! = nil
+                @objc weak var delegate: (MyDelegate & MyDataSource)? = nil
                 @objc var tableWithDataSource: UITableView & UITableViewDataSource
-                @objc weak var weakViewWithDelegate: (UIView & UIDelegate)?
+                @objc weak var weakViewWithDelegate: (UIView & UIDelegate)? = nil
                 @objc unowned(unsafe) var assignProp: MyClass
             }
             """)
@@ -184,10 +184,10 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 @objc var nontypedArray: NSArray
-                @objc var nontypedArrayNull: NSArray?
-                @objc var stringArray: [String]!
+                @objc var nontypedArrayNull: NSArray? = nil
+                @objc var stringArray: [String]! = nil
                 @objc var clsArray: [SomeType]
-                @objc var clsArrayNull: [SomeType]?
+                @objc var clsArrayNull: [SomeType]? = nil
                 @objc var delegateable: SomeType & SomeDelegate
             }
             """)
@@ -206,8 +206,8 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var _myString: String!
-                private weak var _delegate: AnyObject?
+                private var _myString: String! = nil
+                private weak var _delegate: AnyObject? = nil
             }
             """)
     }
@@ -343,9 +343,9 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var _myString: String!
-                weak var _delegate: AnyObject?
-                public var _myInt: Int
+                private var _myString: String! = nil
+                weak var _delegate: AnyObject? = nil
+                public var _myInt: Int = 0
             }
             """)
     }
@@ -430,7 +430,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var anIVar: Int
+                private var anIVar: Int = 0
                 
                 @objc
                 init(thing: AnyObject!) {
@@ -635,8 +635,8 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 private var callback: (NSObject!) -> Void
-                private var anotherCallback: ((String) -> Void)!
-                private var yetAnotherCallback: ((String) -> NSObject?)?
+                private var anotherCallback: ((String) -> Void)! = nil
+                private var yetAnotherCallback: ((String) -> NSObject?)? = nil
             }
             """)
     }
@@ -653,7 +653,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var callback: (((() -> AnyObject!)?) -> Void)!
+                private var callback: (((() -> AnyObject!)?) -> Void)! = nil
             }
             """)
     }
@@ -831,9 +831,9 @@ class SwiftRewriterTests: XCTestCase {
             }
             @objc
             class MyClass: NSObject {
-                @objc unowned(unsafe) var aClass: AClass!
-                @objc var anInt: Int
-                @objc var aProperInt: Int
+                @objc unowned(unsafe) var aClass: AClass! = nil
+                @objc var anInt: Int = 0
+                @objc var aProperInt: Int = 0
             }
             """)
     }
@@ -934,7 +934,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                private var _u: RACSubject<[B]>!
+                private var _u: RACSubject<[B]>! = nil
             }
             """)
     }
@@ -1163,6 +1163,68 @@ class SwiftRewriterTests: XCTestCase {
             // MARK: - Extension
             @objc
             extension Date {
+            }
+            """)
+    }
+    
+    /// Make sure scalar stored properties always initialize with zero, so the
+    /// class mimics more closely the behavior of the original Objective-C class
+    /// (which initializes all fields to zero on `init`)
+    func testScalarTypeStoredPropertiesAlwaysInitializeAtZero() throws {
+        try assertObjcParse(
+            objc: """
+            typedef NS_ENUM(NSInteger, E) {
+                E_1
+            };
+            @interface A
+            {
+                BOOL _a;
+                NSInteger _b;
+                NSUInteger _c;
+                float _d;
+                double _e;
+                CGFloat _e;
+                NSString *_f;
+                E _g;
+                NSString *_Nonnull _h;
+            }
+            @property BOOL a;
+            @property NSInteger b;
+            @property NSUInteger c;
+            @property float d;
+            @property double e;
+            @property CGFloat e;
+            @property NSString *f;
+            @property E g;
+            @property (nonnull) NSString *h;
+            @end
+            """,
+            swift: """
+            @objc enum E: Int {
+                case E_1
+            }
+
+
+            @objc
+            class A: NSObject {
+                private var _a: Bool = false
+                private var _b: Int = 0
+                private var _c: UInt = 0
+                private var _d: CFloat = 0
+                private var _e: CDouble = 0
+                private var _e: CGFloat = 0
+                private var _f: String! = nil
+                private var _g: E
+                private var _h: String
+                @objc var a: Bool = false
+                @objc var b: Int = 0
+                @objc var c: UInt = 0
+                @objc var d: CFloat = 0
+                @objc var e: CDouble = 0
+                @objc var e: CGFloat = 0
+                @objc var f: String! = nil
+                @objc var g: E
+                @objc var h: String
             }
             """)
     }

@@ -85,7 +85,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var _value: Bool
+                private var _value: Bool = false
                 @objc var value: Bool {
                     get {
                         return self._value

@@ -159,7 +159,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                @objc var aValue: Int
+                @objc var aValue: Int = 0
                 
                 @objc
                 func method() {
@@ -368,8 +368,8 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                private var field: Int
-                @objc var value: Bool
+                private var field: Int = 0
+                @objc var value: Bool = false
                 
                 @objc
                 func f1() {
@@ -422,7 +422,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                @objc var prop: Int
+                @objc var prop: Int = 0
                 
                 @objc
                 func f1(_ value: A!) {
@@ -452,7 +452,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                private var callback: (() -> Void)?
+                private var callback: (() -> Void)? = nil
                 
                 @objc
                 func f1() {
@@ -484,7 +484,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                private var callback: (() -> Void)?
+                private var callback: (() -> Void)? = nil
                 
                 @objc
                 func f1() {
@@ -513,7 +513,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                @objc var b: NSObject?
+                @objc var b: NSObject? = nil
                 
                 @objc
                 func method() {
@@ -551,7 +551,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                @objc var b: B?
+                @objc var b: B? = nil
                 
                 @objc
                 func method() {
@@ -589,7 +589,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                @objc var b: B?
+                @objc var b: B? = nil
                 
                 @objc
                 func method() {
@@ -627,7 +627,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
 
             @objc
             class A: NSObject {
-                @objc weak var b: B?
+                @objc weak var b: B? = nil
                 
                 @objc
                 func method() {
@@ -674,7 +674,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
 
             @objc
             class C: NSObject {
-                @objc var composed: (A & B)!
+                @objc var composed: (A & B)! = nil
                 
                 @objc
                 func method() {

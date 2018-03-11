@@ -264,7 +264,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             
             @objc
             class A: NSObject {
-                private var ivarB: B!
+                private var ivarB: B! = nil
                 @objc var b: B
                 
                 @objc
@@ -324,7 +324,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
 
             @objc
             class Class: UIView {
-                @objc weak var delegate: Delegate?
+                @objc weak var delegate: Delegate? = nil
                 
                 @objc
                 func method() {

@@ -14,15 +14,17 @@ public final class SwiftWriter {
     var diagnostics: Diagnostics
     var options: ASTWriterOptions
     let astWriter: SwiftASTWriter
+    let typeSystem: TypeSystem
     
     public init(intentions: IntentionCollection, options: ASTWriterOptions,
                 diagnostics: Diagnostics, output: WriterOutput,
-                typeMapper: TypeMapper) {
+                typeMapper: TypeMapper, typeSystem: TypeSystem) {
         self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
         self.output = output
         self.typeMapper = typeMapper
+        self.typeSystem = typeSystem
         astWriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
     }
     
@@ -44,9 +46,10 @@ public final class SwiftWriter {
             }
             unique.insert(file.targetPath)
             
-            let writer = InternalSwiftWriter(
-                intentions: intentions, options: options, diagnostics: Diagnostics(),
-                output: output, typeMapper: typeMapper)
+            let writer
+                = InternalSwiftWriter(
+                    intentions: intentions, options: options, diagnostics: Diagnostics(),
+                    output: output, typeMapper: typeMapper, typeSystem: typeSystem)
             
             queue.addOperation {
                 writer.outputFile(file)
@@ -68,15 +71,17 @@ class InternalSwiftWriter {
     var diagnostics: Diagnostics
     var options: ASTWriterOptions
     let astWriter: SwiftASTWriter
+    let typeSystem: TypeSystem
     
     init(intentions: IntentionCollection, options: ASTWriterOptions,
          diagnostics: Diagnostics, output: WriterOutput,
-         typeMapper: TypeMapper) {
+         typeMapper: TypeMapper, typeSystem: TypeSystem) {
         self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
         self.output = output
         self.typeMapper = typeMapper
+        self.typeSystem = typeSystem
         astWriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
     }
     
@@ -471,6 +476,9 @@ class InternalSwiftWriter {
         target.outputInline(ivar.name)
         target.outputInline(": ")
         target.outputInline(typeName, style: .typeName)
+        
+        outputInitialZeroValueForType(ivar.type, target: target)
+        
         target.outputLineFeed()
     }
     
@@ -528,6 +536,7 @@ class InternalSwiftWriter {
         
         switch prop.mode {
         case .asField:
+            outputInitialZeroValueForType(prop.type, target: target)
             target.outputLineFeed()
             break
         case .computed(let body):
@@ -554,6 +563,19 @@ class InternalSwiftWriter {
             }
             
             target.output(line: "}")
+        }
+    }
+    
+    // TODO: Maybe this should be extracted to an external `IntentionPass`?
+    private func outputInitialZeroValueForType(_ type: SwiftType, target: RewriterOutputTarget) {
+        if typeSystem.isNumeric(type) {
+            target.outputInline(" = 0")
+        }
+        if type.isOptional {
+            target.outputInline(" = nil")
+        }
+        if type == .bool {
+            target.outputInline(" = false")
         }
     }
     

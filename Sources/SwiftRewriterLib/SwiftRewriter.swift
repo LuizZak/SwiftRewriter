@@ -323,7 +323,8 @@ public class SwiftRewriter {
                                  options: writerOptions,
                                  diagnostics: diagnostics,
                                  output: outputTarget,
-                                 typeMapper: typeMapper)
+                                 typeMapper: typeMapper,
+                                 typeSystem: typeSystem)
         
         writer.execute()
     }
