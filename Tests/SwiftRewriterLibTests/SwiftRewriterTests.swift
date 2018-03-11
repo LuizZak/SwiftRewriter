@@ -1228,4 +1228,26 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewritesNew() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)method {
+                [A new];
+                A.new;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func method() {
+                    A()
+                    A()
+                }
+            }
+            """)
+    }
 }
