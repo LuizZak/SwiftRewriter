@@ -207,9 +207,11 @@ class InternalSwiftWriter {
     func outputEnum(_ intention: EnumGenerationIntention, target: RewriterOutputTarget) {
         let rawTypeName = typeMapper.typeNameString(for: intention.rawValueType)
         
-        // @objc enum <Name>: <RawValue> {
+        // [@objc] enum <Name>: <RawValue> {
         target.outputIdentation()
-        target.outputInlineWithSpace("@objc", style: .keyword)
+        if !options.omitObjcCompatibility {
+            target.outputInlineWithSpace("@objc", style: .keyword)
+        }
         target.outputInlineWithSpace("enum", style: .keyword)
         target.outputInline(intention.typeName, style: .typeName)
         target.outputInline(": ")
@@ -319,7 +321,9 @@ class InternalSwiftWriter {
         } else {
             target.output(line: "// MARK: -", style: .comment)
         }
-        target.output(line: "@objc", style: .keyword)
+        if !options.omitObjcCompatibility {
+            target.output(line: "@objc", style: .keyword)
+        }
         target.outputIdentation()
         target.outputInlineWithSpace("extension", style: .keyword)
         target.outputInline(cls.typeName, style: .typeName)
@@ -330,7 +334,9 @@ class InternalSwiftWriter {
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
         outputHistory(cls.history, target: target)
         
-        target.output(line: "@objc", style: .keyword)
+        if !options.omitObjcCompatibility {
+            target.output(line: "@objc", style: .keyword)
+        }
         target.outputIdentation()
         target.outputInlineWithSpace("class", style: .keyword)
         target.outputInline(cls.typeName, style: .typeName)
@@ -344,8 +350,9 @@ class InternalSwiftWriter {
         if let cls = cls as? ClassGenerationIntention {
             if let sup = cls.superclassName {
                 inheritances.append(sup)
-            } else {
-                // Always inherit from NSObject, at least.
+            } else if !options.omitObjcCompatibility {
+                // Always inherit from NSObject, at least, in Objective-C
+                // compatibility mode.
                 inheritances.append("NSObject")
             }
         }
@@ -405,12 +412,14 @@ class InternalSwiftWriter {
         var inheritances: [String] = []
         inheritances.append(contentsOf: prot.protocols.map { p in p.protocolName })
         
-        // Always inherit form NSObjectProtocol
-        if !inheritances.contains("NSObjectProtocol") {
-            inheritances.insert("NSObjectProtocol", at: 0)
-        }
+        if !options.omitObjcCompatibility {
+            // Always inherit form NSObjectProtocol in Objective-C compatibility mode
+            if !inheritances.contains("NSObjectProtocol") {
+                inheritances.insert("NSObjectProtocol", at: 0)
+            }
         
-        target.output(line: "@objc", style: .keyword)
+            target.output(line: "@objc", style: .keyword)
+        }
         target.outputIdentation()
         target.outputInlineWithSpace("protocol", style: .keyword)
         target.outputInline(prot.typeName, style: .typeName)
@@ -494,7 +503,9 @@ class InternalSwiftWriter {
         
         target.outputIdentation()
         
-        target.outputInlineWithSpace("@objc", style: .keyword)
+        if !options.omitObjcCompatibility {
+            target.outputInlineWithSpace("@objc", style: .keyword)
+        }
         
         let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: prop.type)
@@ -544,7 +555,6 @@ class InternalSwiftWriter {
         case .asField:
             outputInitialZeroValueForType(prop.type, target: target)
             target.outputLineFeed()
-            break
         case .computed(let body):
             outputMethodBody(body, target: target)
         case let .property(getter, setter):
@@ -590,7 +600,9 @@ class InternalSwiftWriter {
                                   target: RewriterOutputTarget) {
         outputHistory(for: initMethod, target: target)
         
-        target.output(line: "@objc", style: .keyword)
+        if !options.omitObjcCompatibility {
+            target.output(line: "@objc", style: .keyword)
+        }
         target.outputIdentation()
         
         let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: initMethod.accessLevel)
@@ -627,7 +639,9 @@ class InternalSwiftWriter {
                               target: RewriterOutputTarget) {
         outputHistory(for: method, target: target)
         
-        target.output(line: "@objc", style: .keyword)
+        if !options.omitObjcCompatibility {
+            target.output(line: "@objc", style: .keyword)
+        }
         target.outputIdentation()
         
         let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
@@ -654,7 +668,9 @@ class InternalSwiftWriter {
                               target: RewriterOutputTarget) {
         outputHistory(for: method, target: target)
         
-        target.output(line: "@objc", style: .keyword)
+        if !options.omitObjcCompatibility {
+            target.output(line: "@objc", style: .keyword)
+        }
         
         target.outputIdentation()
         
@@ -667,9 +683,11 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("static", style: .keyword)
         }
         
-        // Protocol 'optional' keyword
-        if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
-            target.outputInlineWithSpace("optional", style: .keyword)
+        if !options.omitObjcCompatibility {
+            // Protocol 'optional' keyword
+            if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
+                target.outputInlineWithSpace("optional", style: .keyword)
+            }
         }
         
         target.outputInlineWithSpace("func", style: .keyword)

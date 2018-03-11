@@ -171,7 +171,6 @@ public class SwiftRewriter {
                 
                 let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
                 
-                
                 context.assumeNonnulContext?.isNonnullOn = item.fromSourceIntention.inNonnullContext
                 
                 switch item {

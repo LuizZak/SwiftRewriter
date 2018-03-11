@@ -201,6 +201,14 @@ func mergeTypes(from first: KnownType,
         }
     }
     
+    mergePropertySignatures(from: first, into: second)
+    
+    // Methods
+    mergeMethodSignatures(from: first, into: second)
+}
+
+/// Merges properties from a starting type into a target type.
+func mergePropertySignatures(from first: KnownType, into second: TypeGenerationIntention) {
     // Properties
     for prop in first.knownProperties {
         if !second.hasProperty(named: prop.name) {
@@ -211,9 +219,6 @@ func mergeTypes(from first: KnownType,
             }
         }
     }
-    
-    // Methods
-    mergeMethodSignatures(from: first, into: second)
 }
 
 /// Merges the signatures of a given known type's methods into the second type's

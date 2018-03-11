@@ -53,6 +53,15 @@ let numThreadsArg
         is defined by the system depending on usage conditions.
         """)
 
+// --omit-objc-compatibility
+let omitObjcCompatibilityArg
+    = parser.add(
+        option: "--omit-objc-compatibility", kind: Bool.self,
+        usage: """
+        Don't emit '@objc' attributes on definitions, and don't emit NSObject subclass \
+        and NSObjectProtocol conformance by default.
+        """)
+
 //// files <files...>
 
 let filesParser
@@ -113,6 +122,7 @@ do {
     Settings.astWriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
     Settings.astWriter.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false
     Settings.astWriter.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
+    Settings.astWriter.omitObjcCompatibility = result.get(omitObjcCompatibilityArg) ?? false
     
     if result.subparser(parser) == "files" {
         guard let files = result.get(filesArg) else {

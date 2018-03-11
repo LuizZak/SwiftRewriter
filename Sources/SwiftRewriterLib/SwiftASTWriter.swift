@@ -27,7 +27,8 @@ public struct ASTWriterOptions {
     public var numThreads: Int
     
     public init(outputExpressionTypes: Bool = false, printIntentionHistory: Bool = false,
-                omitObjcCompatibility: Bool = false, numThreads: Int = OperationQueue.defaultMaxConcurrentOperationCount) {
+                omitObjcCompatibility: Bool = false,
+                numThreads: Int = OperationQueue.defaultMaxConcurrentOperationCount) {
         self.outputExpressionTypes = outputExpressionTypes
         self.printIntentionHistory = printIntentionHistory
         self.omitObjcCompatibility = omitObjcCompatibility
@@ -700,54 +701,7 @@ private class StatementWriter: StatementVisitor {
             }
             return .other
         } else if let binary = exp.asBinary {
-            let lhs = binary.lhs
-            let op = binary.op
-            let rhs = binary.rhs
-            
-            switch op.category {
-            case .arithmetic, .bitwise:
-                let lhsType = deduceType(from: lhs)
-                let rhsType = deduceType(from: rhs)
-                
-                // Arithmetic and bitwise operators keep operand types, if they
-                // are the same.
-                if lhsType == rhsType {
-                    return lhsType
-                }
-                
-                // Float takes precedence over ints on arithmetic operators
-                if op.category == .arithmetic {
-                    switch (lhsType, rhsType) {
-                    case (.float, .int), (.int, .float):
-                        return .float
-                    default:
-                        break
-                    }
-                } else if op.category == .bitwise {
-                    // Bitwise operators always cast the result to integers, if
-                    // one of the operands is an integer
-                    switch (lhsType, rhsType) {
-                    case (_, .int), (.int, _):
-                        return .int
-                    default:
-                        break
-                    }
-                }
-                
-                return .other
-                
-            case .assignment:
-                return deduceType(from: rhs)
-                
-            case .comparison:
-                return .bool
-                
-            case .logical:
-                return .bool
-                
-            case .nullCoallesce, .range:
-                return .other
-            }
+            return deduceType(binary)
         } else if let assignment = exp.asAssignment {
             return deduceType(from: assignment.rhs)
         } else if let parens = exp.asParens {
@@ -778,6 +732,57 @@ private class StatementWriter: StatementVisitor {
         }
         
         return .other
+    }
+    
+    private func deduceType(_ binary: BinaryExpression) -> StatementWriter.DeducedType {
+        let lhs = binary.lhs
+        let op = binary.op
+        let rhs = binary.rhs
+        
+        switch op.category {
+        case .arithmetic, .bitwise:
+            let lhsType = deduceType(from: lhs)
+            let rhsType = deduceType(from: rhs)
+            
+            // Arithmetic and bitwise operators keep operand types, if they
+            // are the same.
+            if lhsType == rhsType {
+                return lhsType
+            }
+            
+            // Float takes precedence over ints on arithmetic operators
+            if op.category == .arithmetic {
+                switch (lhsType, rhsType) {
+                case (.float, .int), (.int, .float):
+                    return .float
+                default:
+                    break
+                }
+            } else if op.category == .bitwise {
+                // Bitwise operators always cast the result to integers, if
+                // one of the operands is an integer
+                switch (lhsType, rhsType) {
+                case (_, .int), (.int, _):
+                    return .int
+                default:
+                    break
+                }
+            }
+            
+            return .other
+            
+        case .assignment:
+            return deduceType(from: rhs)
+            
+        case .comparison:
+            return .bool
+            
+        case .logical:
+            return .bool
+            
+        case .nullCoallesce, .range:
+            return .other
+        }
     }
     
     private enum DeducedType {
