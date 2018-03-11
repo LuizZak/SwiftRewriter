@@ -1136,7 +1136,6 @@ class SwiftRewriterTests: XCTestCase {
                 case MyEnumCase
             }
 
-
             @objc
             class A: NSObject {
                 @objc
@@ -1203,7 +1202,6 @@ class SwiftRewriterTests: XCTestCase {
             @objc enum E: Int {
                 case E_1
             }
-
 
             @objc
             class A: NSObject {

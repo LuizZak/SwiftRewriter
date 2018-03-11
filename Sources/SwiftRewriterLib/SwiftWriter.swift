@@ -103,6 +103,11 @@ class InternalSwiftWriter {
             addSeparator = true
         }
         
+        if addSeparator {
+            out.output(line: "")
+            addSeparator = false
+        }
+        
         for en in fileIntent.enumIntentions {
             outputEnum(en, target: out)
             addSeparator = true
@@ -110,6 +115,7 @@ class InternalSwiftWriter {
         
         if addSeparator {
             out.output(line: "")
+            addSeparator = false
         }
         
         for varDef in fileIntent.globalVariableIntentions {
