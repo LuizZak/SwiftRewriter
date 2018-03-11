@@ -68,11 +68,13 @@ public extension ASTTraverser where Visitor.Result == Void {
 public class AnyASTVisitor<T>: ASTVisitor {
     public typealias Result = T
     
-    public var onEnterClosure: (ASTNode) -> ()
+    public var onEnterClosure: (ASTNode) -> Void
     public var visitClosure: (ASTNode) -> (T)
-    public var onExitClosure: (ASTNode) -> ()
+    public var onExitClosure: (ASTNode) -> Void
     
-    public init(onEnter: @escaping (ASTNode) -> () = { _ in }, visit: @escaping (ASTNode) -> (T), onExit: @escaping (ASTNode) -> () = { _ in }) {
+    public init(onEnter: @escaping (ASTNode) -> Void = { _ in },
+                visit: @escaping (ASTNode) -> (T),
+                onExit: @escaping (ASTNode) -> Void = { _ in }) {
         self.onEnterClosure = onEnter
         self.visitClosure = visit
         self.onExitClosure = onExit

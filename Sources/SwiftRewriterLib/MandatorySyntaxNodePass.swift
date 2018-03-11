@@ -14,7 +14,7 @@ class MandatorySyntaxNodePass: SyntaxNodeRewriterPass {
         
         // [Type new] expressions
         if let ident = exp.exp.asPostfix?.exp.asIdentifier,
-            exp.functionCall?.arguments.count == 0,
+            exp.functionCall?.arguments.isEmpty == true,
             exp.exp.asPostfix?.member?.name == "new" {
             let result: Expression
             if ident.identifier == "self" {

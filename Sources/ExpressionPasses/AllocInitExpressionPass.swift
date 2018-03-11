@@ -37,7 +37,8 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
         guard let allocInvocation = initTarget.exp.asPostfix, allocInvocation.op == .functionCall(arguments: []) else {
             return nil
         }
-        guard let alloc = allocInvocation.exp.asPostfix, alloc.exp is IdentifierExpression, alloc.op == .member("alloc") else {
+        guard let alloc = allocInvocation.exp.asPostfix,
+            alloc.exp is IdentifierExpression, alloc.op == .member("alloc") else {
             return nil
         }
         
@@ -52,16 +53,19 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
     /// Converts `[[Class alloc] initWithThing:[...]]` -> `Class(thing: [...])`
     /// and `[[self alloc] initWithThing:[...]]` -> `self.init(thing: [...])`
     func convertAllocInitWithParameters(exp: PostfixExpression) -> Expression? {
-        guard let initInvocation = exp.asPostfix, let args = initInvocation.functionCall?.arguments, args.count > 0 else {
+        guard let initInvocation = exp.asPostfix,
+            let args = initInvocation.functionCall?.arguments, !args.isEmpty else {
             return nil
         }
-        guard let initTarget = initInvocation.exp.asPostfix, let initName = initTarget.member?.name, initName.hasPrefix("initWith") else {
+        guard let initTarget = initInvocation.exp.asPostfix,
+            let initName = initTarget.member?.name, initName.hasPrefix("initWith") else {
             return nil
         }
         guard let allocInvocation = initTarget.exp.asPostfix, allocInvocation.op == .functionCall(arguments: []) else {
             return nil
         }
-        guard let alloc = allocInvocation.exp.asPostfix, let typeName = alloc.exp.asIdentifier?.identifier, alloc.op == .member("alloc") else {
+        guard let alloc = allocInvocation.exp.asPostfix,
+            let typeName = alloc.exp.asIdentifier?.identifier, alloc.op == .member("alloc") else {
             return nil
         }
         
@@ -77,10 +81,12 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
     
     /// Convert [super initWithThing:[...]] -> super.init(thing: [...])
     func convertSuperInit(exp: PostfixExpression) -> Expression? {
-        guard let initInvocation = exp.asPostfix, let args = initInvocation.functionCall?.arguments, args.count > 0 else {
+        guard let initInvocation = exp.asPostfix,
+            let args = initInvocation.functionCall?.arguments, !args.isEmpty else {
             return nil
         }
-        guard let initTarget = initInvocation.exp.asPostfix, let initName = initTarget.member?.name, initName.hasPrefix("initWith") else {
+        guard let initTarget = initInvocation.exp.asPostfix,
+            let initName = initTarget.member?.name, initName.hasPrefix("initWith") else {
             return nil
         }
         guard let superTarget = initTarget.exp.asIdentifier, superTarget.identifier == "super" else {

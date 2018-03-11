@@ -10,7 +10,7 @@ final class ObjcParserStatePool {
     /// - Returns: An `ObjcParserState` ready to parse data.
     func pull() -> ObjcParserState {
         return synchronized(self) {
-            if pool.count > 0 {
+            if !pool.isEmpty {
                 return pool.removeFirst()
             }
             

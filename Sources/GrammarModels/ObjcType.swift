@@ -48,13 +48,13 @@ public enum ObjcType: Equatable, CustomStringConvertible {
         case let .generic(cl, parameters):
             let typeNames = parameters.map { $0.description }.joined(separator: ", ")
             
-            if typeNames.count > 0 {
+            if !typeNames.isEmpty {
                 return "\(cl)<\(typeNames)>"
             } else {
                 return cl
             }
         case .id(let protocols):
-            if protocols.count > 0 {
+            if !protocols.isEmpty {
                 let protocolNames = protocols.joined(separator: ", ")
                 return "id<\(protocolNames)>"
             } else {

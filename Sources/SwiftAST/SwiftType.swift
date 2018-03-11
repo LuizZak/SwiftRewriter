@@ -16,8 +16,10 @@ indirect public enum SwiftType: Equatable {
         switch self {
         case .protocolComposition(let comp) where comp.count == 1:
             return comp[0]
-        case let .generic(name, params) where params.count == 0:
+        case let .generic(name, params) where params.isEmpty:
             return .typeName(name)
+        case .metatype(.metatype(let inner)):
+            return .metatype(for: inner.normalized)
         default:
             return self
         }

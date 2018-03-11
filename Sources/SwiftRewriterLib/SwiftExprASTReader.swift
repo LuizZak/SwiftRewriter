@@ -140,7 +140,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         // sizeof(<expr>) / sizeof(<type>)
         if ctx.SIZEOF() != nil {
-            if let typeSpecifier = ctx.typeSpecifier(), let type = typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier) {
+            if let typeSpecifier = ctx.typeSpecifier(),
+                let type = typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier) {
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
@@ -393,7 +394,8 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         if let oct = ctx.OCTAL_LITERAL(), let int = Int(dropIntSuffixes(from: oct.getText()), radix: 8) {
             return .constant(.octal(int))
         }
-        if let binary = ctx.BINARY_LITERAL(), let int = Int(dropIntSuffixes(from: binary.getText()).dropFirst(2), radix: 2) {
+        if let binary = ctx.BINARY_LITERAL(),
+            let int = Int(dropIntSuffixes(from: binary.getText()).dropFirst(2), radix: 2) {
             return .constant(.binary(int))
         }
         if let hex = ctx.HEX_LITERAL(), let int = Int(dropIntSuffixes(from: hex.getText()).dropFirst(2), radix: 16) {

@@ -14,12 +14,16 @@ public class UIKitExpressionPass: BaseExpressionPass {
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
         // 'enumifications'
-        if let exp = enumify(ident: exp.identifier, enumPrefix: "UIControlEvent", swiftEnumName: "UIControlEvents") {
+        if let exp = enumify(ident: exp.identifier,
+                             enumPrefix: "UIControlEvent",
+                             swiftEnumName: "UIControlEvents") {
             notifyChange()
             
             return super.visitExpression(exp)
         }
-        if let exp = enumify(ident: exp.identifier, enumPrefix: "UIGestureRecognizerState", swiftEnumName: "UIGestureRecognizerState") {
+        if let exp = enumify(ident: exp.identifier,
+                             enumPrefix: "UIGestureRecognizerState",
+                             swiftEnumName: "UIGestureRecognizerState") {
             notifyChange()
             
             return super.visitExpression(exp)
@@ -97,7 +101,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
     
     /// Converts UIColor.orangeColor() -> UIColor.orange, etc.
     func convertUIColorStaticColorMethodCall(_ exp: PostfixExpression) -> Expression? {
-        guard let args = exp.functionCall?.arguments, args.count == 0 else {
+        guard let args = exp.functionCall?.arguments, args.isEmpty else {
             return nil
         }
         guard let colorMember = exp.exp.asPostfix, colorMember.exp == .identifier("UIColor"),
@@ -114,7 +118,8 @@ public class UIKitExpressionPass: BaseExpressionPass {
         return exp
     }
     
-    /// Converts [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>] -> <exp>.addTarget(<a1>, action: <a2>, for: <a3>)
+    /// Converts [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>]
+    /// -> <exp>.addTarget(<a1>, action: <a2>, for: <a3>)
     func convertAddTargetForControlEvents(_ exp: PostfixExpression) -> Expression? {
         guard let args = exp.functionCall?.arguments, args.count == 3 else {
             return nil

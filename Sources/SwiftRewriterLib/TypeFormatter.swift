@@ -96,4 +96,3 @@ public enum TypeFormatter {
         return type.description
     }
 }
-

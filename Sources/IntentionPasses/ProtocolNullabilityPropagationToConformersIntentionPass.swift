@@ -17,7 +17,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         let protocols = intentionCollection.protocolIntentions()
         let classes = intentionCollection.classIntentions()
         
-        if protocols.count == 0 || classes.count == 0 {
+        if protocols.isEmpty || classes.isEmpty {
             return
         }
         

@@ -85,7 +85,7 @@ public class SwiftMethodSignatureGen {
     
     private func processKeywords(_ keywords: [KeywordDeclarator],
                                  _ target: inout FunctionSignature) {
-        guard keywords.count > 0 else {
+        guard !keywords.isEmpty else {
             return
         }
         

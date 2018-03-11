@@ -399,37 +399,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 }
 
 extension ExpressionTypeResolver {
-    func findType(for swiftType: SwiftType) -> KnownType? {
-        let swiftType = swiftType.normalized.deepUnwrapped
-        
-        switch swiftType {
-        case .typeName(let typeName):
-            return findTypeNamed(typeName)
-            
-        // Meta-types recurse on themselves
-        case .metatype(for: let inner):
-            return findMetatype(forType: inner)
-            
-        case .protocolComposition(let types):
-            return typeSystem.composeTypeWithKnownTypes(types.map { $0.description })
-            
-        // Other Swift types are not supported, at the moment.
-        default:
-            return nil
-        }
-    }
-    
-    func findMetatype(forType type: SwiftType) -> KnownType? {
-        let type = type.deepUnwrapped
-        
-        switch type {
-        case .typeName(let name):
-            return typeSystem.knownTypeWithName(name)
-        default:
-            return findType(for: type)
-        }
-    }
-    
     func findTypeNamed(_ typeName: String) -> KnownType? {
         return typeSystem.knownTypeWithName(typeName)
     }
@@ -465,6 +434,13 @@ private class MemberInvocationResolver {
     }
     
     func resolve(postfix exp: PostfixExpression, op: Postfix) -> Expression {
+        // If this type is a function call of a member access of, postpone the
+        // resolving to the parent (function call) node, since we could possibly
+        // end up performing an unnecessary type lookup here.
+        if op.asMember != nil, let parent = exp.parent as? PostfixExpression, parent.functionCall != nil {
+            return exp
+        }
+        
         defer {
             // Elevate an implicitly-unwrapped optional access to an optional access
             if exp.op.hasOptionalAccess, case .implicitUnwrappedOptional(let inner)? = exp.resolvedType {
@@ -543,33 +519,16 @@ private class MemberInvocationResolver {
             guard let innerType = exp.exp.resolvedType else {
                 return exp.makeErrorTyped()
             }
-            guard let type = typeResolver.findType(for: innerType) else {
-                return exp.makeErrorTyped()
-            }
             
-            if let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: type) {
+            if let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: innerType) {
                 member.memberDefinition = property
                 exp.resolvedType = property.storage.type
-            } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype, in: type) {
+            } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype, in: innerType) {
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
             } else {
                 return exp.makeErrorTyped()
             }
-            
-            /*
-        case let optional as OptionalAccessPostfix:
-            // Take the result of the (non) optional access and wrap it into an
-            // optional result
-            let resExp = resolve(postfix: exp, op: optional.postfix)
-            
-            // Elevate an implicitly-unwrapped optional access to an optional access
-            if case .implicitUnwrappedOptional(let inner)? = resExp.resolvedType {
-                resExp.resolvedType = .optional(inner)
-            }
-            
-            return resExp
-            */
             
         default:
             break
@@ -583,15 +542,12 @@ private class MemberInvocationResolver {
         
         // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
         if let target = postfix.exp.asPostfix?.exp.asIdentifier,
-            postfix.exp.asPostfix?.op == .member("init") && arguments.count == 0
+            postfix.exp.asPostfix?.op == .member("init") && arguments.isEmpty
         {
             guard let metatype = extractMetatype(from: target) else {
                 return postfix.makeErrorTyped()
             }
-            guard let knownType = typeResolver.findType(for: metatype) else {
-                return postfix.makeErrorTyped()
-            }
-            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: knownType) != nil else {
+            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) != nil else {
                 return postfix.makeErrorTyped()
             }
             
@@ -601,10 +557,7 @@ private class MemberInvocationResolver {
         }
         // Direct type constuctor `MyClass([params])`
         if let target = postfix.exp.asIdentifier, let metatype = extractMetatype(from: target) {
-            guard let knownType = typeResolver.findType(for: metatype) else {
-                return postfix.makeErrorTyped()
-            }
-            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: knownType) != nil else {
+            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) != nil else {
                 return postfix.makeErrorTyped()
             }
             
@@ -617,13 +570,10 @@ private class MemberInvocationResolver {
             guard let type = target.resolvedType else {
                 return postfix.makeErrorTyped()
             }
-            guard let knownType = typeResolver.findType(for: type) else {
-                return postfix.makeErrorTyped()
-            }
             guard let method = method(isStatic: type.isMetatype,
                                       memberName: member.name,
                                       arguments: arguments,
-                                      in: knownType) else {
+                                      in: type) else {
                 return postfix.makeErrorTyped()
             }
             
@@ -635,11 +585,17 @@ private class MemberInvocationResolver {
             return postfix
         }
         // Local closure/global function type
-        if let target = postfix.exp.asIdentifier, let type = target.resolvedType, case .block(let ret, _) = type.deepUnwrapped {
+        if let target = postfix.exp.asIdentifier,
+            let type = target.resolvedType,
+            case .block(let ret, _) = type.deepUnwrapped {
             postfix.resolvedType = ret.withSameOptionalityAs(type)
         }
         
         return postfix
+    }
+    
+    func findType(for type: SwiftType) -> KnownType? {
+        return typeSystem.findType(for: type)
     }
     
     func extractMetatype(from exp: Expression) -> SwiftType? {
@@ -664,12 +620,12 @@ private class MemberInvocationResolver {
         return arguments.map { $0.label ?? "_" }
     }
     
-    func method(isStatic: Bool, memberName: String, arguments: [FunctionArgument], in type: KnownType) -> KnownMethod? {
+    func method(isStatic: Bool, memberName: String, arguments: [FunctionArgument], in type: SwiftType) -> KnownMethod? {
         // Create function signature
         let parameters =
             labels(in: arguments).map { lbl in
                 ParameterSignature.init(label: lbl, name: "", type: .void)
-            }
+        }
         
         let signature =
             FunctionSignature(name: memberName,

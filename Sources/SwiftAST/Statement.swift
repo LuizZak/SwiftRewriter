@@ -24,7 +24,7 @@ open class Statement: SyntaxNode, Equatable {
         return false
     }
     
-    public static func ==(lhs: Statement, rhs: Statement) -> Bool {
+    public static func == (lhs: Statement, rhs: Statement) -> Bool {
         return lhs.isEqual(to: rhs)
     }
     
@@ -671,7 +671,9 @@ public extension Statement {
     public static func compound(_ cpd: [Statement]) -> CompoundStatement {
         return CompoundStatement(statements: cpd)
     }
-    public static func `if`(_ exp: Expression, body: CompoundStatement, else elseBody: CompoundStatement?) -> IfStatement {
+    public static func `if`(_ exp: Expression, body: CompoundStatement,
+                            else elseBody: CompoundStatement?) -> IfStatement {
+        
         return IfStatement(exp: exp, body: body, elseBody: elseBody)
     }
     public static func `while`(_ exp: Expression, body: CompoundStatement) -> WhileStatement {
@@ -680,7 +682,9 @@ public extension Statement {
     public static func `for`(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement) -> ForStatement {
         return ForStatement(pattern: pattern, exp: exp, body: body)
     }
-    public static func `switch`(_ exp: Expression, cases: [SwitchCase], default defaultCase: [Statement]?) -> SwitchStatement {
+    public static func `switch`(_ exp: Expression, cases: [SwitchCase],
+                                default defaultCase: [Statement]?) -> SwitchStatement {
+        
         return SwitchStatement(exp: exp, cases: cases, defaultCase: defaultCase)
     }
     public static func `do`(_ stmt: CompoundStatement) -> DoStatement {
@@ -711,7 +715,10 @@ public extension Statement {
         return .expressions([expr])
     }
     
-    public static func variableDeclaration(identifier: String, type: SwiftType, ownership: Ownership = .strong, isConstant: Bool = false, initialization: Expression?) -> Statement {
+    public static func variableDeclaration(
+        identifier: String, type: SwiftType, ownership: Ownership = .strong,
+        isConstant: Bool = false, initialization: Expression?) -> Statement {
+        
         return .variableDeclarations([
             StatementVariableDeclaration(identifier: identifier, type: type,
                                          ownership: ownership, isConstant: isConstant,

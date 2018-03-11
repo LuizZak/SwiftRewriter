@@ -48,9 +48,12 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     private func configureMappers() {
         mapper.addRuleMap(rule: ObjectiveCParser.TranslationUnitContext.self, node: rootNode)
         mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategoryInterface.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.CategoryImplementationContext.self, nodeType: ObjcClassCategoryImplementation.self)
+        mapper.addRuleMap(
+            rule: ObjectiveCParser.ClassImplementationContext.self, nodeType: ObjcClassImplementation.self)
+        mapper.addRuleMap(
+            rule: ObjectiveCParser.CategoryInterfaceContext.self, nodeType: ObjcClassCategoryInterface.self)
+        mapper.addRuleMap(
+            rule: ObjectiveCParser.CategoryImplementationContext.self, nodeType: ObjcClassCategoryImplementation.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDeclarationContext.self, nodeType: MethodDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.MethodDefinitionContext.self, nodeType: MethodDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.KeywordDeclaratorContext.self, nodeType: KeywordDeclarator.self)
@@ -244,7 +247,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
                     continue
                 }
-                guard let type = typeParser.parseObjcType(inSpecifierQualifierList: specifierQualifierList, declarator: declarator) else {
+                guard let type = typeParser.parseObjcType(inSpecifierQualifierList: specifierQualifierList,
+                                                          declarator: declarator) else {
                     continue
                 }
                 
@@ -511,7 +515,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     
     override func enterBlockParameters(_ ctx: ObjectiveCParser.BlockParametersContext) {
         for typeVariableDeclaratorOrName in ctx.typeVariableDeclaratorOrName() {
-            guard let type = typeParser.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
+            guard let type
+                = typeParser.parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
                 continue
             }
             
@@ -585,7 +590,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 guard let name = VarDeclarationIdentifierNameExtractor.extract(from: declarator) else {
                     continue
                 }
-                guard let type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers, declarator: declarator) else {
+                guard let type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+                                                          declarator: declarator) else {
                     continue
                 }
                 

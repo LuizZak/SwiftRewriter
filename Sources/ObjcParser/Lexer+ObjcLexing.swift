@@ -4,8 +4,10 @@ extension Lexer {
     /// Lexes a token with the following grammar:
     ///
     /// ```
-    /// type_qualifier:
-    ///         'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | 'nonnull' | 'nullable' | 'null_unspecified' | 'null_resettable' | '__weak' | '__strong' | '__kindof' | '__block' | '__unused';
+    /// type_qualifier
+    ///         : 'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable'
+    ///         | 'nonnull' | 'nullable' | 'null_unspecified' | 'null_resettable'
+    ///         | '__weak' | '__strong' | '__kindof' | '__block' | '__unused';
     /// ```
     @inline(__always)
     public func lexTypeQualifier() throws -> Substring {
@@ -24,8 +26,7 @@ extension Lexer {
                 !lexer.advanceIf(equals: "__strong") &&
                 !lexer.advanceIf(equals: "__kindof") &&
                 !lexer.advanceIf(equals: "__block") &&
-                !lexer.advanceIf(equals: "__unused")
-            {
+                !lexer.advanceIf(equals: "__unused") {
                 throw LexerError.syntaxError("Expected type qualifier")
             }
         }
@@ -235,8 +236,10 @@ extension Lexer {
     /// Returns whether a given string represents a type qualifier.
     ///
     /// ```
-    /// type_qualifier:
-    ///         'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable' | '__weak' | '__strong' | '__kindof' | '__block | '__unused';
+    /// type_qualifier
+    ///         : 'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable'
+    ///         | 'nonnull' | 'nullable' | 'null_unspecified' | 'null_resettable'
+    ///         | '__weak' | '__strong' | '__kindof' | '__block' | '__unused';
     /// ```
     public static func isTypeQualifier(_ string: String) -> Bool {
         return _typeQualifiers.contains(string)
@@ -290,7 +293,9 @@ public extension Lexer {
     /// ```
     @inline(__always)
     public func fragmentIntegerTypeSuffix() throws {
-        try advance(validatingCurrent: { (atom: Atom) -> Bool in atom == "u" || atom == "U" || atom == "l" || atom == "L" })
+        try advance(validatingCurrent: { (atom: Atom) -> Bool in
+            atom == "u" || atom == "U" || atom == "l" || atom == "L"
+        })
     }
     
     /// `LETTER : '$' | 'A'..'Z' | 'a'..'z' | '_' ;`
@@ -339,7 +344,9 @@ public extension Lexer {
     /// ```
     @inline(__always)
     public func fragmentFloatTypeSuffix() throws {
-        try advance(validatingCurrent: { (atom: Atom) -> Bool in atom == "f" || atom == "F" || atom == "d" || atom == "D" })
+        try advance(validatingCurrent: { (atom: Atom) -> Bool in
+            atom == "f" || atom == "F" || atom == "d" || atom == "D"
+        })
     }
     
     /// ```
@@ -367,7 +374,8 @@ public extension Lexer {
         }
         
         // TODO: Parse octal strings
-        throw LexerError.syntaxError("Parsing octal escape sequences in strings are not yet supported. See \(#file) line \(#line)")
+        throw LexerError.syntaxError(
+            "Parsing octal escape sequences in strings are not yet supported. See \(#file) line \(#line)")
     }
     
     /// `ANGLE_STRING : '<' .* '>'`

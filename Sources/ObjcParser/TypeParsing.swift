@@ -3,6 +3,8 @@ import Antlr4
 import ObjcParserAntlr
 
 public class TypeParsing {
+    public typealias Parser = ObjectiveCParser
+    
     public let state: ObjcParserState
     
     public init(state: ObjcParserState) {
@@ -17,7 +19,7 @@ public class TypeParsing {
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
-    public func parseObjcType(inDeclaration decl: ObjectiveCParser.FieldDeclarationContext) -> ObjcType? {
+    public func parseObjcType(inDeclaration decl: Parser.FieldDeclarationContext) -> ObjcType? {
         guard let specQualifier = decl.specifierQualifierList() else {
             return nil
         }
@@ -32,7 +34,7 @@ public class TypeParsing {
         
         var typeName = "\(baseTypeString) \(pointerDecl.map { $0.getText() } ?? "")"
         
-        if specQualifier.arcBehaviourSpecifier().count > 0 {
+        if !specQualifier.arcBehaviourSpecifier().isEmpty {
             let arcSpecifiers =
                 specQualifier.arcBehaviourSpecifier().map {
                     $0.getText()
@@ -48,7 +50,7 @@ public class TypeParsing {
         return type
     }
     
-    public func parseObjcType(inSpecifierQualifierList specQual: ObjectiveCParser.SpecifierQualifierListContext) -> ObjcType? {
+    public func parseObjcType(inSpecifierQualifierList specQual: Parser.SpecifierQualifierListContext) -> ObjcType? {
         guard let typeName = VarDeclarationTypeExtractor.extract(from: specQual) else {
             return nil
         }
@@ -56,8 +58,8 @@ public class TypeParsing {
         return parseObjcType(typeName)
     }
     
-    public func parseObjcType(inSpecifierQualifierList specifierQualifierList: ObjectiveCParser.SpecifierQualifierListContext,
-                              declarator: ObjectiveCParser.DeclaratorContext) -> ObjcType? {
+    public func parseObjcType(inSpecifierQualifierList specifierQualifierList: Parser.SpecifierQualifierListContext,
+                              declarator: Parser.DeclaratorContext) -> ObjcType? {
         guard let specifiersString = VarDeclarationTypeExtractor.extract(from: specifierQualifierList) else {
             return nil
         }
@@ -80,7 +82,9 @@ public class TypeParsing {
         return type
     }
     
-    public func parseObjcType(inDeclarationSpecifiers declarationSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext) -> ObjcType? {
+    public func parseObjcType(
+        inDeclarationSpecifiers declarationSpecifiers: Parser.DeclarationSpecifiersContext) -> ObjcType? {
+        
         guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
             return nil
         }
@@ -88,8 +92,10 @@ public class TypeParsing {
         return parseObjcType(specifiersString)
     }
     
-    public func parseObjcType(inDeclarationSpecifiers declarationSpecifiers: ObjectiveCParser.DeclarationSpecifiersContext,
-                                     declarator: ObjectiveCParser.DeclaratorContext) -> ObjcType? {
+    public func parseObjcType(
+        inDeclarationSpecifiers declarationSpecifiers: Parser.DeclarationSpecifiersContext,
+        declarator: Parser.DeclaratorContext) -> ObjcType? {
+        
         guard let specifiersString = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
             return nil
         }
@@ -113,8 +119,8 @@ public class TypeParsing {
     }
     
     private func manageBlock(baseType: ObjcType,
-                             qualifiers: [ObjectiveCParser.TypeQualifierContext],
-                             declarator: ObjectiveCParser.DeclaratorContext) -> ObjcType? {
+                             qualifiers: [Parser.TypeQualifierContext],
+                             declarator: Parser.DeclaratorContext) -> ObjcType? {
         var type = baseType
         
         // Block type
@@ -129,7 +135,7 @@ public class TypeParsing {
                               parameters: blockParameterTypes)
             
             // Verify qualifiers
-            if qualifiers.count > 0 {
+            if !qualifiers.isEmpty {
                 let qualifiers = qualifiers.map { $0.getText() }
                 type = .specified(specifiers: qualifiers, type)
             }
@@ -144,13 +150,15 @@ public class TypeParsing {
         return nil
     }
     
-    public func parseObjcTypes(fromBlockParameters blockParameters: ObjectiveCParser.BlockParametersContext) -> [ObjcType] {
+    public func parseObjcTypes(
+        fromBlockParameters blockParameters: Parser.BlockParametersContext) -> [ObjcType] {
         let typeVariableDeclaratorOrNames = blockParameters.typeVariableDeclaratorOrName()
         
         var paramTypes: [ObjcType] = []
         
         for typeVariableDeclaratorOrName in typeVariableDeclaratorOrNames {
-            guard let paramType = parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
+            guard let paramType
+                = parseObjcType(fromTypeVariableDeclaratorOrTypeName: typeVariableDeclaratorOrName) else {
                 continue
             }
             
@@ -160,7 +168,9 @@ public class TypeParsing {
         return paramTypes
     }
     
-    public func parseObjcType(fromTypeVariableDeclaratorOrTypeName typeContext: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
+    public func parseObjcType(
+        fromTypeVariableDeclaratorOrTypeName typeContext: Parser.TypeVariableDeclaratorOrNameContext) -> ObjcType? {
+        
         if let typeName = typeContext.typeName(),
             let type = parseObjcType(fromTypeName: typeName) {
             return type
@@ -183,7 +193,9 @@ public class TypeParsing {
         return parseObjcType(typeString)
     }
     
-    public func parseObjcType(fromTypeVariableDeclarator typeVariableDecl: ObjectiveCParser.TypeVariableDeclaratorContext) -> ObjcType? {
+    public func parseObjcType(
+        fromTypeVariableDeclarator typeVariableDecl: Parser.TypeVariableDeclaratorContext) -> ObjcType? {
+        
         if let blockParameters = typeVariableDecl.declarator()?.directDeclarator()?.blockParameters() {
             guard let declarationSpecifiers = typeVariableDecl.declarationSpecifiers() else {
                 return nil
@@ -191,7 +203,9 @@ public class TypeParsing {
             
             let parameters = parseObjcTypes(fromBlockParameters: blockParameters)
             
-            guard let returnTypeName = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else { return nil }
+            guard let returnTypeName = VarDeclarationTypeExtractor.extract(from: declarationSpecifiers) else {
+                return nil
+            }
             guard let returnType = parseObjcType(returnTypeName) else { return nil }
             
             let identifier = VarDeclarationIdentifierNameExtractor.extract(from: typeVariableDecl)
@@ -217,7 +231,7 @@ public class TypeParsing {
         return type
     }
     
-    public func parseObjcType(fromTypeSpecifier typeSpecifier: ObjectiveCParser.TypeSpecifierContext) -> ObjcType? {
+    public func parseObjcType(fromTypeSpecifier typeSpecifier: Parser.TypeSpecifierContext) -> ObjcType? {
         guard let typeString = VarDeclarationTypeExtractor.extract(from: typeSpecifier) else {
             return nil
         }
@@ -228,7 +242,7 @@ public class TypeParsing {
         return type
     }
     
-    public func parseObjcType(fromBlockType blockType: ObjectiveCParser.BlockTypeContext) -> ObjcType? {
+    public func parseObjcType(fromBlockType blockType: Parser.BlockTypeContext) -> ObjcType? {
         guard let returnTypeSpecifier = blockType.typeSpecifier(0) else {
             return nil
         }
@@ -257,7 +271,7 @@ public class TypeParsing {
         return type
     }
     
-    public func parseObjcType(fromTypeName typeName: ObjectiveCParser.TypeNameContext) -> ObjcType? {
+    public func parseObjcType(fromTypeName typeName: Parser.TypeNameContext) -> ObjcType? {
         // Block type
         if let blockType = typeName.blockType() {
             return parseObjcType(fromBlockType: blockType)
@@ -275,11 +289,11 @@ public class TypeParsing {
 }
 
 extension TypeParsing {
-    static func qualifiers(from spec: ObjectiveCParser.SpecifierQualifierListContext) -> [ObjectiveCParser.TypeQualifierContext] {
+    static func qualifiers(from spec: Parser.SpecifierQualifierListContext) -> [Parser.TypeQualifierContext] {
         return spec.typeQualifier()
     }
     
-    static func qualifiers(from spec: ObjectiveCParser.DeclarationSpecifiersContext) -> [ObjectiveCParser.TypeQualifierContext] {
+    static func qualifiers(from spec: Parser.DeclarationSpecifiersContext) -> [Parser.TypeQualifierContext] {
         return spec.typeQualifier()
     }
 }

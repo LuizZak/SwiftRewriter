@@ -56,8 +56,10 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                 
                 initIntention.history
                     .recordCreation(description: """
-                        Converted from original init-like method \(TypeFormatter.asString(signature: method.signature, includeName: true)) \
-                        to init\(TypeFormatter.asString(parameters: initIntention.parameters))
+                        Converted from original init-like method \
+                        \(TypeFormatter.asString(signature: method.signature, includeName: true)) \
+                        to init \
+                        \(TypeFormatter.asString(parameters: initIntention.parameters))
                         """)
                 
                 operationsNumber += 1
@@ -70,7 +72,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
     }
     
     private func apply(on method: MethodGenerationIntention) {
-        if !method.signature.name.contains("With") || method.signature.parameters.count == 0 {
+        if !method.signature.name.contains("With") || method.signature.parameters.isEmpty {
             return
         }
         
@@ -93,7 +95,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         
         // Check `initWith<...>` prefix
         let splitOnWith = signature.name.components(separatedBy: "With")
-        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count == 0 }) {
+        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.isEmpty }) {
             return false
         }
         if !splitOnWith[0].hasPrefix("init") {
@@ -112,7 +114,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         let signature = method.signature
         
         let splitOnWith = signature.name.components(separatedBy: "With")
-        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.count == 0 }) {
+        if splitOnWith.count != 2 || splitOnWith.contains(where: { $0.isEmpty }) {
             return false
         }
         

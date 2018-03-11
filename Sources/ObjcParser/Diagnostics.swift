@@ -28,7 +28,8 @@ public class Diagnostics {
         return diag
     }
     
-    public func printDiagnostics<Target>(to output: inout Target, includeNotes: Bool = false) where Target: TextOutputStream {
+    public func printDiagnostics<Target>(to output: inout Target,
+                                         includeNotes: Bool = false) where Target: TextOutputStream {
         for error in errors {
             print("Error: " + error.description, to: &output)
         }

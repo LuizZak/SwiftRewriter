@@ -45,7 +45,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 methods.filter { $0.name == property.name }
                     .filter { $0.isStatic == property.isStatic }
                     .filter { $0.returnType.deepUnwrapped == property.type.deepUnwrapped }
-                    .filter { $0.parameters.count == 0 }
+                    .filter { $0.parameters.isEmpty }
             
             // Setters: All methods named `func set[Name](_ name: Type)` where
             // `[Name]` is the same as the property's name with the first letter
@@ -89,7 +89,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
         return classIntention.methods
     }
     
-    private func synthesizeBackingFieldIfUsing(in intent: BaseClassIntention, for prop: PropertyGenerationIntention) {
+    private func synthesizeBackingFieldIfUsing(in intent: BaseClassIntention,
+                                               for prop: PropertyGenerationIntention) {
         func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [FunctionBodyIntention] {
             var bodies: [FunctionBodyIntention] = []
             
@@ -123,14 +124,22 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     .contains { exp in
                         // TODO: Support indirect field resolution
                         // (i.e.: `notSelfButAVarWithSelfAssigned->_field`)
-                        
                         switch exp {
                         case let identifier as IdentifierExpression where identifier.identifier == fieldName:
                             // Match only if identifier matched to nothing yet
                             return identifier.definition == nil
                             
-                        case let postfix as PostfixExpression:
-                            return postfix.exp.asIdentifier?.identifier == "self" && postfix.member?.name == fieldName
+                        case let postfix as PostfixExpression where postfix.member?.name == fieldName:
+                            // Direct `self` access
+                            if postfix.exp.asIdentifier?.identifier == "self" {
+                                return true
+                            }
+                            // Indirect type access
+                            if postfix.exp.resolvedType?.unwrapped == .typeName(intent.typeName) {
+                                return true
+                            }
+                            
+                            return false
                         default:
                             return false
                         }
@@ -169,7 +178,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     .recordChange(tag: historyTag,
                                   description: """
                         Created field \(TypeFormatter.asString(field: field, ofType: intent)) \
-                        as it was detected that the backing field of \(TypeFormatter.asString(property: prop, ofType: intent)) \
+                        as it was detected that the backing field of \
+                        \(TypeFormatter.asString(property: prop, ofType: intent)) \
                         was being used inside the class.
                         """)
                     .echoRecord(to: prop)
@@ -231,14 +241,16 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .recordChange(tag: historyTag,
                               description: """
                     Removed method \(TypeFormatter.asString(method: getter, ofType: classIntention)) since deduced it \
-                    is a getter for property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    is a getter for property \
+                    \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
                     """)
             
             classIntention.history
                 .recordChange(tag: historyTag,
                               description: """
                     Removed method \(TypeFormatter.asString(method: setter, ofType: classIntention)) since deduced it \
-                    is a setter for property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    is a setter for property \
+                    \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
                     """)
             
             operationsNumber += 1
@@ -261,7 +273,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .recordChange(tag: historyTag,
                               description: """
                     Merged getter method \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
-                    into the getter-only property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    into the getter-only property \
+                    \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
                     """, relatedIntentions: [propertySet.property, getterBody])
                 .echoRecord(to: propertySet.property)
                 .echoRecord(to: getterBody)
@@ -303,7 +316,8 @@ public class PropertyMergeIntentionPass: IntentionPass {
                               description: """
                     Merged found setter method \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
                     into property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention)) \
-                    and creating a getter body + synthesized backing field \(TypeFormatter.asString(field: field, ofType: classIntention))
+                    and creating a getter body + synthesized backing field \
+                    \(TypeFormatter.asString(field: field, ofType: classIntention))
                     """, relatedIntentions: [field, setter, propertySet.property])
                 .echoRecord(to: field)
                 .echoRecord(to: setter)

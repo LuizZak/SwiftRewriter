@@ -14,27 +14,26 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         var headers: [FileGenerationIntention] = []
         var implementations: [FileGenerationIntention] = []
         
-        for intent in intentions {
-            if intent.sourcePath.hasSuffix(".m") {
-                implementations.append(intent)
-            } else if intent.sourcePath.hasSuffix(".h") {
-                headers.append(intent)
-            }
+        headers = intentions.filter { intent in
+            intent.sourcePath.hasSuffix(".h")
+        }
+        implementations = intentions.filter { intent in
+            intent.sourcePath.hasSuffix(".m")
         }
         
         // Merge all types from the header files into the associated implementation
         // files.
-        for implementation in implementations {
+        implementations.forEach { implementation in
             // First, merge within implementations themselves
             mergeDuplicatedTypesInFile(implementation)
             
-            for header in headers {
+            headers.forEach { header in
                 mergeTypesToMatchingImplementations(from: header, into: implementation)
             }
         }
         
         // Remove empty extension/categories from files
-        for ext in intentionCollection.extensionIntentions() {
+        intentionCollection.extensionIntentions().forEach { ext in
             if ext.isEmptyType && (ext.categoryName == nil || ext.categoryName?.isEmpty == true) {
                 ext.file?.removeTypes { $0 === ext }
             }
@@ -44,26 +43,28 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         // available
         for header in headers {
             let path = (header.sourcePath as NSString).deletingPathExtension
-            guard let impl = implementations.first(where: { ($0.sourcePath as NSString).deletingPathExtension == path }) else {
+            guard let impl = implementations.first(where: {
+                ($0.sourcePath as NSString).deletingPathExtension == path
+            }) else {
                 continue
             }
             
-            for en in header.enumIntentions {
+            header.enumIntentions.forEach { en in
                 header.removeTypes(where: { $0 === en })
                 impl.addType(en)
             }
             
-            for prot in header.protocolIntentions {
+            header.protocolIntentions.forEach { prot in
                 header.removeTypes(where: { $0 === prot })
                 impl.addType(prot)
             }
             
-            for alias in header.typealiasIntentions {
+            header.typealiasIntentions.forEach { alias in
                 header.removeTypealiases(where: { $0 === alias })
                 impl.addTypealias(alias)
             }
             
-            for gvar in header.globalVariableIntentions {
+            header.globalVariableIntentions.forEach { gvar in
                 header.removeGlobalVariables(where: { $0 === gvar })
                 
                 if !impl.globalVariableIntentions.contains(where: { $0.name == gvar.name }) {
@@ -79,14 +80,18 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         // Merge remaining global functions
         for header in headers {
             let path = (header.sourcePath as NSString).deletingPathExtension
-            guard let impl = implementations.first(where: { ($0.sourcePath as NSString).deletingPathExtension == path }) else {
+            guard let impl = implementations.first(where: {
+                ($0.sourcePath as NSString).deletingPathExtension == path
+            }) else {
                 continue
             }
             
             for gfunc in header.globalFunctionIntentions {
                 header.removeGlobalFunctions(where: { $0 === gfunc })
                 
-                if !impl.globalFunctionIntentions.contains(where: { gfunc.signature.matchesAsCFunction($0.signature) }) {
+                if !impl.globalFunctionIntentions.contains(where: {
+                    gfunc.signature.matchesAsCFunction($0.signature)
+                }) {
                     impl.addGlobalFunction(gfunc)
                 }
             }
@@ -95,7 +100,9 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         // Move all directives from .h to matching .m files
         for header in headers where header.isEmptyExceptDirectives {
             let path = (header.sourcePath as NSString).deletingPathExtension
-            guard let impl = implementations.first(where: { ($0.sourcePath as NSString).deletingPathExtension == path }) else {
+            guard let impl = implementations.first(where: {
+                ($0.sourcePath as NSString).deletingPathExtension == path
+            }) else {
                 continue
             }
             

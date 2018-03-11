@@ -28,7 +28,7 @@ public class KnownTypeBuilder {
     
     /// Adds a parameter-less constructor to this type
     public func addingConstructor() -> KnownTypeBuilder {
-        assert(!type.knownConstructors.contains { $0.parameters.count == 0 },
+        assert(!type.knownConstructors.contains { $0.parameters.isEmpty },
                "An empty constructor is already provided")
         
         return addingConstructor(withParameters: [])
@@ -87,7 +87,9 @@ public class KnownTypeBuilder {
     /// Adds a property with no attributes with a given name and storage
     public func addingProperty(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
         // Check duplicates
-        guard !type.knownProperties.contains(where: { $0.name == name && $0.storage == storage && $0.isStatic == isStatic }) else {
+        guard !type.knownProperties.contains(where: {
+            $0.name == name && $0.storage == storage && $0.isStatic == isStatic
+        }) else {
             return self
         }
         
@@ -112,7 +114,9 @@ public class KnownTypeBuilder {
     /// Adds a property with no attributes with a given name and storage
     public func addingField(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
         // Check duplicates
-        guard !type.knownFields.contains(where: { $0.name == name && $0.storage == storage && $0.isStatic == isStatic }) else {
+        guard !type.knownFields.contains(where: {
+            $0.name == name && $0.storage == storage && $0.isStatic == isStatic
+        }) else {
             return self
         }
         

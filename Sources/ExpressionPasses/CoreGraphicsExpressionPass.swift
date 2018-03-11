@@ -17,7 +17,8 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
                 return exp
             }
             
-            if ident.identifier == "CGPathRelease" && call.arguments.count == 1 && !call.arguments.hasLabeledArguments() {
+            if ident.identifier == "CGPathRelease" && call.arguments.count == 1
+                && !call.arguments.hasLabeledArguments() {
                 notifyChange()
                 return nil
             }
@@ -103,7 +104,8 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
     }
     
     func createTransformers() {
-        // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>) -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
+        // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>)
+        // -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
         makeFuncTransform("UIEdgeInsetsMake", swiftName: "UIEdgeInsets",
              arguments: [
                 .labeled("top", .asIs), .labeled("left", .asIs),
@@ -145,27 +147,25 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         createCGPathTransformers()
     }
     
-    func createCGPathTransformers() {
+    private func makeInstanceCall(_ name: String,
+                                  swiftName: String,
+                                  arguments: [FunctionInvocationTransformer.ArgumentStrategy] = [.fromArgIndex(1)]) {
         /// Default `transform` parameter handler
         let transform: FunctionInvocationTransformer.ArgumentStrategy =
             .omitIf(matches: .constant(.nil), .labeled("transform", .fromArgIndex(0)))
         
-        func makeInstanceCall(_ name: String,
-                              swiftName: String,
-                              arguments: [FunctionInvocationTransformer.ArgumentStrategy] = [.fromArgIndex(1)]) {
-            let transformer =
-                FunctionInvocationTransformer(name: name, swiftName: swiftName,
-                                              firstArgumentBecomesInstance: true,
-                                              arguments: arguments + [transform])
-            
-            transformers.append(transformer)
-        }
+        let transformer =
+            FunctionInvocationTransformer(name: name, swiftName: swiftName,
+                                          firstArgumentBecomesInstance: true,
+                                          arguments: arguments + [transform])
         
+        transformers.append(transformer)
+    }
+    
+    func createCGPathTransformers() {
         /// Converts two expressions into a CGPoint initializer
         let toCGPoint: (Expression, Expression) -> Expression = { x, y in
-            Expression
-                .identifier("CGPoint")
-                .call([.labeled("x", x), .labeled("y", y)])
+            Expression.identifier("CGPoint").call([.labeled("x", x), .labeled("y", y)])
         }
         
         makeInstanceCall("CGPathAddRoundedRect", swiftName: "addRoundedRect",
@@ -177,10 +177,7 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         )
         
         makeInstanceCall("CGPathMoveToPoint", swiftName: "move",
-             arguments: [
-                .labeled("to", .mergingArguments(arg0: 1, arg1: 2, toCGPoint))
-            ]
-        )
+                         arguments: [.labeled("to", .mergingArguments(arg0: 1, arg1: 2, toCGPoint))])
         
         makeInstanceCall("CGPathAddLineToPoint", swiftName: "addLine",
              arguments: [
@@ -211,16 +208,10 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         // count is passed lower than the array's actual count that we keep the
         // same behavior.
         makeInstanceCall("CGPathAddLines", swiftName: "addLines",
-             arguments: [
-                .labeled("between", .fromArgIndex(1))
-            ]
-        )
+                         arguments: [.labeled("between", .fromArgIndex(1))])
         
         makeInstanceCall("CGPathAddEllipseInRect", swiftName: "addEllipse",
-             arguments: [
-                .labeled("in", .fromArgIndex(1))
-            ]
-        )
+                         arguments: [.labeled("in", .fromArgIndex(1))])
         
         makeInstanceCall("CGPathAddRelativeArc", swiftName: "addRelativeArc",
              arguments: [

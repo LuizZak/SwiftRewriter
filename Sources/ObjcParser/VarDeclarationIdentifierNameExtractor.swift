@@ -27,7 +27,9 @@ public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<
     }
     
     // MARK: Members
-    public override func visitTypeVariableDeclaratorOrName(_ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
+    public override func visitTypeVariableDeclaratorOrName(
+        _ ctx: ObjectiveCParser.TypeVariableDeclaratorOrNameContext) -> String? {
+        
         return ctx.typeVariableDeclarator()?.accept(self)
     }
     public override func visitTypeVariableDeclarator(_ ctx: ObjectiveCParser.TypeVariableDeclaratorContext) -> String? {

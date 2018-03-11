@@ -105,12 +105,12 @@ public class FoundationExpressionPass: BaseExpressionPass {
         
         guard postfix.exp.asIdentifier?.identifier == "NSString",
             postfix.op.asMember?.name == "stringWithFormat",
-            let args = exp.functionCall?.arguments, args.count > 0 else {
+            let args = exp.functionCall?.arguments, !args.isEmpty else {
             return nil
         }
         
         let newArgs: [FunctionArgument] = [
-            .labeled("format", args[0].expression),
+            .labeled("format", args[0].expression)
         ] + args.dropFirst()
         
         exp.exp = .identifier("String")
@@ -145,7 +145,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
     
     /// Converts [Type class] and [expression class] expressions
     func convertClassCall(_ exp: PostfixExpression) -> Expression? {
-        guard let args = exp.functionCall?.arguments, args.count == 0 else {
+        guard let args = exp.functionCall?.arguments, args.isEmpty else {
             return nil
         }
         guard let classMember = exp.exp.asPostfix, classMember.member?.name == "class" else {
@@ -179,7 +179,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
     
     /// Converts [NSArray array], [NSDictionary dictionary], etc. constructs
     func convertDataStructureInit(_ exp: PostfixExpression) -> Expression? {
-        guard let args = exp.functionCall?.arguments, args.count == 0 else {
+        guard let args = exp.functionCall?.arguments, args.isEmpty else {
             return nil
         }
         guard let initMember = exp.exp.asPostfix, let typeName = initMember.exp.asIdentifier?.identifier else {

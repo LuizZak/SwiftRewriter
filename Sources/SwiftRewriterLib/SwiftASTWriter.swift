@@ -40,9 +40,8 @@ class SwiftASTReader {
     }
     
     public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement {
-        let parser =
-            SwiftStatementASTReader
-                .CompoundStatementVisitor(expressionReader: SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser))
+        let expressionReader = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
+        let parser = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: expressionReader)
         guard let result = compoundStatement.accept(parser) else {
             return [.unknown(UnknownASTContext(context: compoundStatement))]
         }
@@ -100,7 +99,7 @@ class SwiftASTWriter {
     }
 }
 
-fileprivate class ExpressionWriter: ExpressionVisitor {
+private class ExpressionWriter: ExpressionVisitor {
     
     typealias ExprResult = Void
     
@@ -163,7 +162,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
         visitExpression(exp.exp, parens: exp.exp.requiresParens)
     }
     
-    func visitSizeOf(_ exp: SizeOfExpression) -> Void {
+    func visitSizeOf(_ exp: SizeOfExpression) {
         switch exp.value {
         case .type(let type):
             target.outputInline("MemoryLayout<")
@@ -212,7 +211,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
             
             // No need to emit parenthesis if a trailing closure
             // is present as the only argument of the function
-            if arguments.count > 0 || trailingClosure == nil {
+            if !arguments.isEmpty || trailingClosure == nil {
                 target.outputInline("(")
                 
                 commaSeparated(arguments) { arg in
@@ -236,7 +235,6 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
             
         default:
             target.outputInline("/* Unsupported postfix operation type \(type(of: exp.op)) */")
-            break
         }
     }
     
@@ -296,7 +294,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     }
     
     func visitDictionary(_ exp: DictionaryLiteralExpression) {
-        if exp.pairs.count == 0 {
+        if exp.pairs.isEmpty {
             target.outputInline("[:]")
             return
         }
@@ -367,13 +365,13 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
         target.outputInline("}")
     }
     
-    func visitUnknown(_ exp: UnknownExpression) -> Void {
+    func visitUnknown(_ exp: UnknownExpression) {
         target.outputInline("/*", style: .comment)
         target.outputInline(exp.context.description, style: .comment)
         target.outputInline("*/", style: .comment)
     }
     
-    private func commaSeparated<T>(_ values: [T], do block: (T) -> ()) {
+    private func commaSeparated<T>(_ values: [T], do block: (T) -> Void) {
         for (i, value) in values.enumerated() {
             if i > 0 {
                 target.outputInline(", ")
@@ -384,7 +382,7 @@ fileprivate class ExpressionWriter: ExpressionVisitor {
     }
 }
 
-fileprivate class StatementWriter: StatementVisitor {
+private class StatementWriter: StatementVisitor {
     public typealias StmtResult = Void
     
     let options: ASTWriterOptions
@@ -397,11 +395,11 @@ fileprivate class StatementWriter: StatementVisitor {
         self.typeMapper = typeMapper
     }
     
-    func visitStatement(_ statement: Statement) -> Void {
+    func visitStatement(_ statement: Statement) {
         statement.accept(self)
     }
     
-    func visitSemicolon(_ stmt: SemicolonStatement) -> Void {
+    func visitSemicolon(_ stmt: SemicolonStatement) {
         target.output(line: ";")
     }
     
@@ -518,7 +516,7 @@ fileprivate class StatementWriter: StatementVisitor {
             }
         }
         
-        if cases.count == 0 && def == nil {
+        if cases.isEmpty && def == nil {
             target.outputLineFeed()
         }
         
@@ -611,7 +609,7 @@ fileprivate class StatementWriter: StatementVisitor {
             }
         }
         
-        if stmt.decl.count == 0 {
+        if stmt.decl.isEmpty {
             return
         }
         

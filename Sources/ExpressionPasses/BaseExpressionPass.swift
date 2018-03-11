@@ -83,7 +83,9 @@ public extension BaseExpressionPass {
         staticConstructorTransformers.append(transformer)
     }
     
-    func makeFuncTransform(_ name: String, swiftName: String, arguments: [FunctionInvocationTransformer.ArgumentStrategy],
+    func makeFuncTransform(_ name: String,
+                           swiftName: String,
+                           arguments: [FunctionInvocationTransformer.ArgumentStrategy],
                            firstArgIsInstance: Bool = false) {
         let transformer =
             FunctionInvocationTransformer(name: name, swiftName: swiftName,

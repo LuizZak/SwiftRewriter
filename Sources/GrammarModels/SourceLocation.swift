@@ -52,7 +52,7 @@ public final class SourceLocation {
 }
 
 extension SourceLocation: Equatable {
-    public static func ==(lhs: SourceLocation, rhs: SourceLocation) -> Bool {
+    public static func == (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
         return lhs.range == rhs.range && lhs.source.isEqual(to: rhs.source)
     }
 }

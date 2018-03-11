@@ -245,10 +245,13 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))])),
                toConvertTo: "NSMutableDictionary")
         
-        expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString"))])),
-               toConvertTo: "NSMutableDictionary<String>")
         expect(.pointer(.struct("NSMutableDictionary")),
                toConvertTo: "NSMutableDictionary")
+    }
+    
+    func testNSMutableDictionaryWithSingleTypeParameter() {
+        expect(.pointer(.generic("NSMutableDictionary", parameters: [.pointer(.struct("NSString"))])),
+               toConvertTo: "NSMutableDictionary<String>")
     }
     
     func testNestedTypeInGenericIsAlwaysReadAsObjectType() {

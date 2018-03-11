@@ -14,6 +14,9 @@ public protocol TypeSystem {
     /// Returns all known types that match a specified type
     func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType]
     
+    /// Returns a known type for a given SwiftType, if present.
+    func findType(for swiftType: SwiftType) -> KnownType?
+    
     /// Gets a known type with a given name from this type system.
     func knownTypeWithName(_ name: String) -> KnownType?
     
@@ -36,20 +39,37 @@ public protocol TypeSystem {
     /// - Returns: The supertype of the given type.
     func supertype(of type: KnownType) -> KnownType?
     
-    // MARK: Member searching methods
+    // MARK: Member searching methods - KnownType
     
-    /// Gets a constructor matching a given argument label set.
+    /// Gets a constructor matching a given argument label set on a given known type.
     func constructor(withArgumentLabels labels: [String], in type: KnownType) -> KnownConstructor?
     
-    /// Gets a protocol conformance to a given protocol name.
+    /// Gets a protocol conformance to a given protocol name on a given known type.
     func conformance(toProtocolName name: String, in type: KnownType) -> KnownProtocolConformance?
     
     /// Searches for a method with a given Objective-C equivalent selector.
     func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool, in type: KnownType) -> KnownMethod?
     
-    /// Gets a property with a given name.
+    /// Gets a property with a given name on a given known type.
     func property(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty?
     
-    /// Gets an instance field with a given name.
+    /// Gets an instance field with a given name on a given known type.
     func field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty?
+    
+    // MARK: Member searching methods - SwiftType
+    
+    /// Gets a constructor matching a given argument label set on a given known type.
+    func constructor(withArgumentLabels labels: [String], in type: SwiftType) -> KnownConstructor?
+    
+    /// Gets a protocol conformance to a given protocol name on a given known type.
+    func conformance(toProtocolName name: String, in type: SwiftType) -> KnownProtocolConformance?
+    
+    /// Searches for a method with a given Objective-C equivalent selector.
+    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool, in type: SwiftType) -> KnownMethod?
+    
+    /// Gets a property with a given name on a given known type.
+    func property(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty?
+    
+    /// Gets an instance field with a given name on a given known type.
+    func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty?
 }

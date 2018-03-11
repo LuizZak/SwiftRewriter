@@ -21,7 +21,8 @@ public struct SyntaxNodeRewriterPassContext {
         self.notifyChangedTree = notifyChangedTree
     }
     
-    public init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver, notifyChangedTree: @escaping () -> Void = { }) {
+    public init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver,
+                notifyChangedTree: @escaping () -> Void = { }) {
         self.typeSystem = typeSystem
         self.typeResolver = typeResolver
         self.notifyChangedTree = notifyChangedTree

@@ -134,7 +134,9 @@ public class TypeGenerationIntention: FromSourceIntention {
     ///
     /// - Parameter knownProtocol: A known protocol conformance.
     @discardableResult
-    public func generateProtocolConformance(from knownProtocol: KnownProtocolConformance) -> ProtocolInheritanceIntention {
+    public func generateProtocolConformance(
+        from knownProtocol: KnownProtocolConformance) -> ProtocolInheritanceIntention {
+        
         let intention =
             ProtocolInheritanceIntention(protocolName: knownProtocol.protocolName)
         
@@ -330,13 +332,13 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     ///
     /// This is not analogous to `storage.isConstant`, and references only the
     /// Objective-C property.
-    public var isReadOnly: Bool  {
+    public var isReadOnly: Bool {
         return attributes.contains { $0.rawString == "readonly" }
     }
     
     /// Returns `true` if the original Objective-C property is marked with a
     /// "class" attribute.
-    public var isClassProperty: Bool  {
+    public var isClassProperty: Bool {
         return attributes.contains { $0.rawString == "class" }
     }
     

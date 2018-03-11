@@ -6,10 +6,16 @@ import SwiftRewriterLib
 
 let parser =
     ArgumentParser(
-        usage: "[--colorize] [--print-expression-types] [--print-tracing-history] [--verbose] [--num-threads <n>] [files <files...> | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]",
+        usage: """
+        [--colorize] [--print-expression-types] [--print-tracing-history] \
+        [--verbose] [--num-threads <n>]
+        [files <files...> \
+        | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]
+        """,
         overview: """
-            Converts a set of files, or, if not provided, starts an interactive menu to navigate the file system and choose files to convert.
-            """)
+        Converts a set of files, or, if not provided, starts an interactive \
+        menu to navigate the file system and choose files to convert.
+        """)
 
 // --colorize
 let colorArg
@@ -38,9 +44,14 @@ let verboseArg
 
 // --num-threads
 let numThreadsArg
-    = parser.add(option: "--num-threads",
-                 kind: Int.self,
-                 usage: "Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.")
+    = parser.add(
+        option: "--num-threads",
+        kind: Int.self,
+        usage: """
+        Specifies the number of threads to use when performing parsing, as well \
+        as intention and expression passes. If not specified, thread allocation \
+        is defined by the system depending on usage conditions.
+        """)
 
 //// files <files...>
 
@@ -53,19 +64,33 @@ let filesArg
 //// path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]
 
 let pathParser
-    = parser.add(subparser: "path",
-                 overview: "Examines a path and collects all .h/.m files to convert, before presenting a prompt to confirm conversion of files.")
+    = parser.add(
+        subparser: "path",
+        overview: """
+        Examines a path and collects all .h/.m files to convert, before presenting \
+        a prompt to confirm conversion of files.
+        """)
+
 let pathArg
     = pathParser.add(positional: "path", kind: String.self,
                      usage: "Path to the project to inspect")
 
 let excludePatternArg
-    = pathParser.add(option: "--exclude-pattern", kind: String.self,
-                     usage: "Provides a file pattern for excluding matches from the initial Objective-C files search. Pattern is applied to the full path.")
+    = pathParser.add(
+        option: "--exclude-pattern", kind: String.self,
+        usage: """
+        Provides a file pattern for excluding matches from the initial Objective-C \
+        files search. Pattern is applied to the full path.
+        """)
 
 let includePatternArg
-    = pathParser.add(option: "--include-pattern", kind: String.self,
-                     usage: "Provides a pattern for including matches from the initial Objective-C files search. Pattern is applied to the full path. --exclude-pattern takes priority over --include-pattern matches.")
+    = pathParser.add(
+        option: "--include-pattern", kind: String.self,
+        usage: """
+        Provides a pattern for including matches from the initial Objective-C files \
+        search. Pattern is applied to the full path. --exclude-pattern takes \
+        priority over --include-pattern matches.
+        """)
 
 let skipConfirmArg
     = pathParser.add(option: "--skip-confirm", kind: Bool.self,

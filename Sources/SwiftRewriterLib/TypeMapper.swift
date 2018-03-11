@@ -298,7 +298,7 @@ public class DefaultTypeMapper: TypeMapper {
     private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> SwiftType {
         let type: SwiftType
         
-        if protocols.count == 0 {
+        if protocols.isEmpty {
             type = .anyObject
         } else {
             type = .protocolComposition(protocols.map { .typeName($0) })
@@ -307,8 +307,9 @@ public class DefaultTypeMapper: TypeMapper {
         return swiftType(type: type, withNullability: context.nullability())
     }
     
-    private func swiftType(forGenericObjcType name: String, parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
-        if parameters.count == 0 {
+    private func swiftType(forGenericObjcType name: String, parameters: [ObjcType],
+                           context: TypeMappingContext) -> SwiftType {
+        if parameters.isEmpty {
             return .typeName(name)
         }
         
@@ -396,7 +397,8 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
-    private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String], context: TypeMappingContext) -> SwiftType {
+    private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String],
+                           context: TypeMappingContext) -> SwiftType {
         let locSpecifiers = context.withSpecifiers(specifiers)
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
@@ -413,7 +415,8 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
-    private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String], context: TypeMappingContext) -> SwiftType {
+    private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String],
+                           context: TypeMappingContext) -> SwiftType {
         let locQualifiers = context.withQualifiers(qualifiers)
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
@@ -430,7 +433,8 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
-    private func swiftBlockType(forReturnType returnType: ObjcType, parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
+    private func swiftBlockType(forReturnType returnType: ObjcType,
+                                parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
         let type: SwiftType =
             .block(returnType: swiftType(forObjcType: returnType, context: context.asAlwaysNonNull(isOn: false)),
                    parameters: parameters.map { swiftType(forObjcType: $0) })
@@ -439,17 +443,11 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     private func isPointerOnly(types: [ObjcType]) -> Bool {
-        if types.count == 0 {
+        if types.isEmpty {
             return false
         }
         
-        for type in types {
-            if !type.isPointer {
-                return false
-            }
-        }
-        
-        return true
+        return types.contains { $0.isPointer }
     }
     
     private static let _scalarMappings: [String: SwiftType] = [

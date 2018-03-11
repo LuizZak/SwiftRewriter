@@ -90,7 +90,7 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
         return false
     }
     
-    public static func ==(lhs: Expression, rhs: Expression) -> Bool {
+    public static func == (lhs: Expression, rhs: Expression) -> Bool {
         return lhs.isEqual(to: rhs)
     }
     
@@ -156,7 +156,7 @@ public class AssignmentExpression: Expression {
         }
     }
     
-    public static func ==(lhs: AssignmentExpression, rhs: AssignmentExpression) -> Bool {
+    public static func == (lhs: AssignmentExpression, rhs: AssignmentExpression) -> Bool {
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
     }
 }
@@ -227,7 +227,7 @@ public class BinaryExpression: Expression {
         }
     }
     
-    public static func ==(lhs: BinaryExpression, rhs: BinaryExpression) -> Bool {
+    public static func == (lhs: BinaryExpression, rhs: BinaryExpression) -> Bool {
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
     }
 }
@@ -287,7 +287,7 @@ public class UnaryExpression: Expression {
         }
     }
     
-    public static func ==(lhs: UnaryExpression, rhs: UnaryExpression) -> Bool {
+    public static func == (lhs: UnaryExpression, rhs: UnaryExpression) -> Bool {
         return lhs.op == rhs.op && lhs.exp == rhs.exp
     }
 }
@@ -341,7 +341,7 @@ public class SizeOfExpression: Expression {
         }
     }
     
-    public static func ==(lhs: SizeOfExpression, rhs: SizeOfExpression) -> Bool {
+    public static func == (lhs: SizeOfExpression, rhs: SizeOfExpression) -> Bool {
         return lhs.value == rhs.value
     }
     
@@ -407,7 +407,7 @@ public class PrefixExpression: Expression {
         }
     }
     
-    public static func ==(lhs: PrefixExpression, rhs: PrefixExpression) -> Bool {
+    public static func == (lhs: PrefixExpression, rhs: PrefixExpression) -> Bool {
         return lhs.op == rhs.op && lhs.exp == rhs.exp
     }
 }
@@ -472,7 +472,7 @@ public class PostfixExpression: Expression {
         }
     }
     
-    public static func ==(lhs: PostfixExpression, rhs: PostfixExpression) -> Bool {
+    public static func == (lhs: PostfixExpression, rhs: PostfixExpression) -> Bool {
         return lhs.exp == rhs.exp && lhs.op == rhs.op
     }
 }
@@ -482,7 +482,8 @@ extension Expression {
     }
 }
 
-public class ConstantExpression: Expression, ExpressibleByStringLiteral, ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+public class ConstantExpression: Expression, ExpressibleByStringLiteral,
+                                 ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     public var constant: Constant
     
     public override var isLiteralExpression: Bool {
@@ -529,7 +530,7 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral, Express
         }
     }
     
-    public static func ==(lhs: ConstantExpression, rhs: ConstantExpression) -> Bool {
+    public static func == (lhs: ConstantExpression, rhs: ConstantExpression) -> Bool {
         return lhs.constant == rhs.constant
     }
 }
@@ -582,7 +583,7 @@ public class ParensExpression: Expression {
         }
     }
     
-    public static func ==(lhs: ParensExpression, rhs: ParensExpression) -> Bool {
+    public static func == (lhs: ParensExpression, rhs: ParensExpression) -> Bool {
         return lhs.exp == rhs.exp
     }
 }
@@ -629,7 +630,7 @@ public class IdentifierExpression: Expression {
         }
     }
     
-    public static func ==(lhs: IdentifierExpression, rhs: IdentifierExpression) -> Bool {
+    public static func == (lhs: IdentifierExpression, rhs: IdentifierExpression) -> Bool {
         return lhs.identifier == rhs.identifier
     }
 }
@@ -684,7 +685,7 @@ public class CastExpression: Expression {
         }
     }
     
-    public static func ==(lhs: CastExpression, rhs: CastExpression) -> Bool {
+    public static func == (lhs: CastExpression, rhs: CastExpression) -> Bool {
         return lhs.exp == rhs.exp && lhs.type == rhs.type
     }
 }
@@ -731,7 +732,7 @@ public class ArrayLiteralExpression: Expression {
         }
     }
     
-    public static func ==(lhs: ArrayLiteralExpression, rhs: ArrayLiteralExpression) -> Bool {
+    public static func == (lhs: ArrayLiteralExpression, rhs: ArrayLiteralExpression) -> Bool {
         return lhs.items == rhs.items
     }
 }
@@ -754,7 +755,7 @@ public class DictionaryLiteralExpression: Expression {
     }
     
     public override var description: String {
-        if pairs.count == 0 {
+        if pairs.isEmpty {
             return "[:]"
         }
         
@@ -782,7 +783,7 @@ public class DictionaryLiteralExpression: Expression {
         }
     }
     
-    public static func ==(lhs: DictionaryLiteralExpression, rhs: DictionaryLiteralExpression) -> Bool {
+    public static func == (lhs: DictionaryLiteralExpression, rhs: DictionaryLiteralExpression) -> Bool {
         return lhs.pairs == rhs.pairs
     }
 }
@@ -859,7 +860,7 @@ public class TernaryExpression: Expression {
         }
     }
     
-    public static func ==(lhs: TernaryExpression, rhs: TernaryExpression) -> Bool {
+    public static func == (lhs: TernaryExpression, rhs: TernaryExpression) -> Bool {
         return lhs.exp == rhs.exp && lhs.ifTrue == rhs.ifTrue && lhs.ifFalse == rhs.ifFalse
     }
 }
@@ -924,7 +925,7 @@ public class BlockLiteralExpression: Expression {
         }
     }
     
-    public static func ==(lhs: BlockLiteralExpression, rhs: BlockLiteralExpression) -> Bool {
+    public static func == (lhs: BlockLiteralExpression, rhs: BlockLiteralExpression) -> Bool {
         return lhs.parameters == rhs.parameters &&
             lhs.returnType == rhs.returnType &&
             lhs.body == rhs.body
@@ -955,7 +956,7 @@ public class UnknownExpression: Expression {
         return other is UnknownExpression
     }
     
-    public static func ==(lhs: UnknownExpression, rhs: UnknownExpression) -> Bool {
+    public static func == (lhs: UnknownExpression, rhs: UnknownExpression) -> Bool {
         return true
     }
 }
@@ -1019,15 +1020,21 @@ public extension Expression {
         return DictionaryLiteralExpression(pairs: pairs)
     }
     
-    public static func dictionaryLiteral(_ pairs: DictionaryLiteral<Expression, Expression>) -> DictionaryLiteralExpression {
+    public static func dictionaryLiteral(
+        _ pairs: DictionaryLiteral<Expression, Expression>) -> DictionaryLiteralExpression {
+        
         return DictionaryLiteralExpression(pairs: pairs.map { ExpressionDictionaryPair(key: $0.key, value: $0.value) })
     }
     
-    public static func ternary(_ exp: Expression, `true` ifTrue: Expression, `false` ifFalse: Expression) -> TernaryExpression {
+    public static func ternary(_ exp: Expression, `true` ifTrue: Expression,
+                               `false` ifFalse: Expression) -> TernaryExpression {
+        
         return TernaryExpression(exp: exp, ifTrue: ifTrue, ifFalse: ifFalse)
     }
     
-    public static func block(parameters: [BlockParameter], `return` returnType: SwiftType, body: CompoundStatement) -> BlockLiteralExpression {
+    public static func block(parameters: [BlockParameter], `return` returnType: SwiftType,
+                             body: CompoundStatement) -> BlockLiteralExpression {
+        
         return BlockLiteralExpression(parameters: parameters, returnType: returnType, body: body)
     }
     
@@ -1081,7 +1088,7 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         return false
     }
     
-    public static func ==(lhs: Postfix, rhs: Postfix) -> Bool {
+    public static func == (lhs: Postfix, rhs: Postfix) -> Bool {
         return lhs.isEqual(to: rhs)
     }
 }
@@ -1105,7 +1112,7 @@ public final class MemberPostfix: Postfix {
         }
     }
     
-    public static func ==(lhs: MemberPostfix, rhs: MemberPostfix) -> Bool {
+    public static func == (lhs: MemberPostfix, rhs: MemberPostfix) -> Bool {
         return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.name == rhs.name
     }
 }
@@ -1149,7 +1156,7 @@ public final class SubscriptPostfix: Postfix {
         }
     }
     
-    public static func ==(lhs: SubscriptPostfix, rhs: SubscriptPostfix) -> Bool {
+    public static func == (lhs: SubscriptPostfix, rhs: SubscriptPostfix) -> Bool {
         return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.expression == rhs.expression
     }
 }
@@ -1194,7 +1201,7 @@ public final class FunctionCallPostfix: Postfix {
         }
     }
     
-    public static func ==(lhs: FunctionCallPostfix, rhs: FunctionCallPostfix) -> Bool {
+    public static func == (lhs: FunctionCallPostfix, rhs: FunctionCallPostfix) -> Bool {
         return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.arguments == rhs.arguments
     }
 }
@@ -1459,39 +1466,39 @@ extension Constant: ExpressibleByStringLiteral {
 
 // MARK: - Operator definitions
 public extension Expression {
-    public static func +(lhs: Expression, rhs: Expression) -> Expression {
+    public static func + (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .add, rhs: rhs)
     }
     
-    public static func -(lhs: Expression, rhs: Expression) -> Expression {
+    public static func - (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .subtract, rhs: rhs)
     }
     
-    public static func *(lhs: Expression, rhs: Expression) -> Expression {
+    public static func * (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .multiply, rhs: rhs)
     }
     
-    public static func /(lhs: Expression, rhs: Expression) -> Expression {
+    public static func / (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .divide, rhs: rhs)
     }
     
-    public static prefix func !(lhs: Expression) -> Expression {
+    public static prefix func ! (lhs: Expression) -> Expression {
         return .unary(op: .negate, lhs)
     }
     
-    public static func &&(lhs: Expression, rhs: Expression) -> Expression {
+    public static func && (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .and, rhs: rhs)
     }
     
-    public static func ||(lhs: Expression, rhs: Expression) -> Expression {
+    public static func || (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .or, rhs: rhs)
     }
     
-    public static func |(lhs: Expression, rhs: Expression) -> Expression {
+    public static func | (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .bitwiseOr, rhs: rhs)
     }
     
-    public static func &(lhs: Expression, rhs: Expression) -> Expression {
+    public static func & (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .bitwiseAnd, rhs: rhs)
     }
 }

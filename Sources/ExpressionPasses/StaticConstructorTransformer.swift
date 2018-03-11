@@ -72,7 +72,7 @@ final class StaticConstructorTransformer {
             guard postfix.exp.asPostfix?.exp.asIdentifier?.identifier == typeName else {
                 return nil
             }
-            guard let call = postfix.functionCall, call.arguments.count == 0 else {
+            guard let call = postfix.functionCall, call.arguments.isEmpty else {
                 return nil
             }
             guard let inner = postfix.exp.asPostfix, inner.member?.name == property else {

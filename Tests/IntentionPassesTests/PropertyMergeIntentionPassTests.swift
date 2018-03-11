@@ -219,11 +219,11 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
         XCTAssertEqual(cls.instanceVariables.count, 1)
-        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
+        XCTAssertEqual(cls.instanceVariables.first?.name, "_a")
         XCTAssertEqual(cls.properties.count, 1)
         
-        switch cls.properties[0].mode {
-        case .computed(let get):
+        switch cls.properties.first?.mode {
+        case .computed(let get)?:
             XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
         default:
             XCTFail("Expected to synthesize getter/setter with backing field.")
@@ -243,6 +243,49 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             that the backing field of A.a: Int was being used inside the class.
             """
         )
+    }
+    
+    /// Test that backing field usage detection can detect indirect references to
+    /// the backing field by looking into member lookups for local variables that
+    /// are the exact type as self (e.g. `strongSelf->_field`).
+    func testSynthesizeBackingFieldOnIndirectReferences() {
+        let sSelf = Expression.identifier("sSelf")
+        sSelf.resolvedType = .typeName("A")
+        
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { (builder) in
+                    builder
+                        .createProperty(named: "a",
+                                        type: .int,
+                                        attributes: [.attribute("readonly")])
+                        .createVoidMethod(named: "b") { method in
+                            method.setBody([
+                                .variableDeclarations([
+                                    StatementVariableDeclaration(identifier: "sSelf", type: .typeName("A"))]
+                                ),
+                                .expression(
+                                    .assignment(lhs: sSelf.dot("_a"),
+                                                op: .assign,
+                                                rhs: .constant(1)))
+                                ])
+                    }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 1)
+        XCTAssertEqual(cls.instanceVariables.first?.name, "_a")
+        XCTAssertEqual(cls.properties.count, 1)
+        
+        switch cls.properties.first?.mode {
+        case .computed(let get)?:
+            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
+        default:
+            XCTFail("Expected to synthesize getter/setter with backing field.")
+        }
     }
     
     /// Test that local definitions that have the same name than a potential backing

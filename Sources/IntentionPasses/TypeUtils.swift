@@ -100,8 +100,7 @@ func mergeDuplicatedTypesInFile(_ file: FileGenerationIntention) {
 /// original types, with matching method/property signatures merged into one when
 /// duplicated.
 func mergeAllTypeDefinitions(in types: [TypeGenerationIntention],
-                             on target: TypeGenerationIntention)
-{
+                             on target: TypeGenerationIntention) {
     for source in types {
         target.history.mergeHistories(source.history)
         
@@ -152,14 +151,16 @@ func mergeGlobalFunctionDefinitions(in intentions: IntentionCollection) {
 /// are flattened to properly nullability-annotated methods.
 func mergeTypes(from first: KnownType,
                 into second: TypeGenerationIntention) {
+    
     // Protocols
     for prot in first.knownProtocolConformances {
         if !second.hasProtocol(named: prot.protocolName) {
             let generated = second.generateProtocolConformance(from: prot)
             
             second.history
-                .recordChange(tag: "TypeMerge",
-                              description: "Generating protocol conformance \(prot.protocolName) due to \(first.origin)")
+                .recordChange(
+                    tag: "TypeMerge",
+                    description: "Generating protocol conformance \(prot.protocolName) due to \(first.origin)")
             
             if let historic = prot as? Historic {
                 generated.history.mergeHistories(historic.history)
@@ -174,8 +175,12 @@ func mergeTypes(from first: KnownType,
             second.superclassName = superclass
             
             second.history
-                .recordChange(tag: "TypeMerge",
-                              description: "Setting superclass of \(second.typeName) to \(superclass) due to superclass definition found at \(first.origin)")
+                .recordChange(
+                    tag: "TypeMerge",
+                    description: """
+                    Setting superclass of \(second.typeName) to \(superclass) due to \
+                    superclass definition found at \(first.origin)
+                    """)
         }
     }
     
@@ -187,8 +192,11 @@ func mergeTypes(from first: KnownType,
                 second.addInstanceVariable(ivar)
                 
                 second.history
-                    .recordChange(tag: "TypeMerge",
-                                  description: "Moved ivar \(ivar.name) from \(first.origin) to \(second.file?.sourcePath ?? "")")
+                    .recordChange(
+                        tag: "TypeMerge",
+                        description: """
+                        Moved ivar \(ivar.name) from \(first.origin) to \(second.file?.sourcePath ?? "")
+                        """)
             }
         }
     }
@@ -226,8 +234,12 @@ func mergeMethodSignatures(from first: KnownType,
             let generated = second.generateMethod(from: knownMethod)
             
             second.history
-                .recordChange(tag: "TypeMerge",
-                              description: "Creating definition for newly found method \(TypeFormatter.asString(method: knownMethod, ofType: first))")
+                .recordChange(
+                    tag: "TypeMerge",
+                    description: """
+                    Creating definition for newly found method \
+                    \(TypeFormatter.asString(method: knownMethod, ofType: first))
+                    """)
             
             if let historic = knownMethod as? Historic {
                 generated.history.mergeHistories(historic.history)
@@ -289,12 +301,20 @@ func mergeMethods(_ source: KnownMethod,
         
         if let type = source.ownerType {
             target.history
-                .recordChange(tag: historyTag,
-                              description: "Inserted body from method \(TypeFormatter.asString(method: source, ofType: type))")
+                .recordChange(
+                    tag: historyTag,
+                    description: """
+                    Inserted body from method \
+                    \(TypeFormatter.asString(method: source, ofType: type))
+                    """)
         } else {
             target.history
-                .recordChange(tag: historyTag,
-                              description: "Inserted body from function \(TypeFormatter.asString(signature: source.signature, includeName: false))")
+                .recordChange(
+                    tag: historyTag,
+                    description: """
+                    Inserted body from function \
+                    \(TypeFormatter.asString(signature: source.signature, includeName: false))
+                    """)
         }
     }
 }
@@ -302,7 +322,8 @@ func mergeMethods(_ source: KnownMethod,
 /// Merges two global functions such that the target one retains all proper nullability
 /// annotations and the implementation body.
 func mergeFunction(_ source: GlobalFunctionGenerationIntention,
-                    into target: GlobalFunctionGenerationIntention) {
+                   into target: GlobalFunctionGenerationIntention) {
+    
     let originalSignature = target.signature
     
     target.signature = mergeSignatures(source.signature, target.signature)
@@ -323,9 +344,10 @@ func mergeFunction(_ source: GlobalFunctionGenerationIntention,
         
         target.functionBody?.history.recordCreation(description: "Merged from existing type body")
         
+        let funcSign = TypeFormatter.asString(signature: source.signature, includeName: false)
+        
         target.history
-            .recordChange(tag: historyTag,
-                          description: "Inserted body from function \(TypeFormatter.asString(signature: source.signature, includeName: false))")
+            .recordChange(tag: historyTag, description: "Inserted body from function \(funcSign)")
     }
 }
 
@@ -347,7 +369,9 @@ func mergeSignatures(_ sign1: FunctionSignature,
         }
         
         let p2 = sign2.parameters[i]
-        if !p1.type.isImplicitlyUnwrapped && p2.type.isImplicitlyUnwrapped && p1.type.deepUnwrapped == p2.type.deepUnwrapped {
+        if !p1.type.isImplicitlyUnwrapped && p2.type.isImplicitlyUnwrapped
+            && p1.type.deepUnwrapped == p2.type.deepUnwrapped {
+            
             result.parameters[i].type = p1.type
         }
     }

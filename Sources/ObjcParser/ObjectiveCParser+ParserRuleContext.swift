@@ -33,16 +33,12 @@ public protocol ParseTreeContextable: Tree {
 public extension ParseTreeContextable {
     /// Context extensions.
     public static var context: Contextable<Self>.Type {
-        get {
-            return Contextable<Self>.self
-        }
+        return Contextable<Self>.self
     }
     
     /// Context extensions.
     public var context: Contextable<Self> {
-        get {
-            return Contextable(self)
-        }
+        return Contextable(self)
     }
 }
 

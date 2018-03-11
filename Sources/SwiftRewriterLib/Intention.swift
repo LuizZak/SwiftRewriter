@@ -81,7 +81,7 @@ public struct IntentionHistoryEntryEcho {
 
 public extension IntentionHistory {
     public var summary: String {
-        if entries.count == 0 {
+        if entries.isEmpty {
             return "<empty>"
         }
         
@@ -109,12 +109,14 @@ public extension IntentionHistory {
     }
     
     @discardableResult
-    public func recordChange(tag: String, description: String, relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
+    public func recordChange(tag: String, description: String,
+                             relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
         return record(IntentionHistoryEntry(tag: tag, description: description, relatedIntentions: relatedIntentions))
     }
     
     @discardableResult
-    public func recordMerge(with intentions: [Intention], tag: String, description: String) -> IntentionHistoryEntryEcho {
+    public func recordMerge(with intentions: [Intention], tag: String,
+                            description: String) -> IntentionHistoryEntryEcho {
         return record(IntentionHistoryEntry(tag: tag, description: description, relatedIntentions: intentions))
     }
     

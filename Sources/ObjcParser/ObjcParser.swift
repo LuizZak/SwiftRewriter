@@ -17,6 +17,9 @@ public struct AntlrParser<Lexer: Antlr4.Lexer, Parser: Antlr4.Parser> {
     public var tokens: CommonTokenStream
 }
 
+public typealias ObjectiveCParserAntlr = AntlrParser<ObjectiveCLexer, ObjectiveCParser>
+public typealias ObjectiveCPreprocessorAntlr = AntlrParser<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser>
+
 /// Describes a parser state for a single `ObjcParser` instance, with internal
 /// fields that are used by the parser.
 ///
@@ -30,22 +33,22 @@ public class ObjcParserState {
         
     }
     
-    public func makeMainParser(input: String) throws -> AntlrParser<ObjectiveCLexer, ObjectiveCParser> {
+    public func makeMainParser(input: String) throws -> ObjectiveCParserAntlr {
         let input = ANTLRInputStream(input)
         let lxr = ObjectiveCLexer(input, parserState.lexer)
         let tokens = CommonTokenStream(lxr)
         let parser = try ObjectiveCParser(tokens, parserState.parser)
         
-        return AntlrParser(lexer: lxr, parser: parser, tokens: tokens)
+        return ObjectiveCParserAntlr(lexer: lxr, parser: parser, tokens: tokens)
     }
     
-    public func makePreprocessorParser(input: String) throws -> AntlrParser<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser> {
+    public func makePreprocessorParser(input: String) throws -> ObjectiveCPreprocessorAntlr {
         let input = ANTLRInputStream(input)
         let lxr = ObjectiveCPreprocessorLexer(input, preprocessorState.lexer)
         let tokens = CommonTokenStream(lxr)
         let parser = try ObjectiveCPreprocessorParser(tokens, preprocessorState.parser)
         
-        return AntlrParser(lexer: lxr, parser: parser, tokens: tokens)
+        return ObjectiveCPreprocessorAntlr(lexer: lxr, parser: parser, tokens: tokens)
     }
 }
 
@@ -118,7 +121,9 @@ public class ObjcParser {
         return lexer.location()
     }
     
-    func withTemporaryContext<T: ASTNode & InitializableNode>(nodeType: T.Type = T.self, do action: () throws -> ()) rethrows -> T {
+    func withTemporaryContext<T: ASTNode & InitializableNode>(
+        nodeType: T.Type = T.self, do action: () throws -> ()) rethrows -> T {
+        
         let node = context.pushContext(nodeType: nodeType)
         defer {
             context.popContext()
@@ -315,10 +320,10 @@ public class ObjcParser {
             qualifiers.append(qual)
         }
         
-        if qualifiers.count > 0 {
+        if !qualifiers.isEmpty {
             type = .qualified(type, qualifiers: qualifiers)
         }
-        if specifiers.count > 0 {
+        if !specifiers.isEmpty {
             type = .specified(specifiers: specifiers, type)
         }
         
@@ -362,7 +367,10 @@ public class ObjcParser {
     /// of errors as diagnostics must be made by this closure.
     /// - Returns: An array of items returned by `itemParser` for each successful
     /// parse performed.
-    internal func _parseCommaSeparatedList<T>(braces openBrace: TokenType, _ closeBrace: TokenType, addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
+    internal func _parseCommaSeparatedList<T>(
+        braces openBrace: TokenType, _ closeBrace: TokenType,
+        addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
+        
         do {
             try parseTokenNode(openBrace, addToContext: addTokensToContext)
         } catch {

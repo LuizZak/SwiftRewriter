@@ -351,7 +351,7 @@ class InternalSwiftWriter {
         }
         inheritances.append(contentsOf: cls.protocols.map { p in p.protocolName })
         
-        if inheritances.count > 0 {
+        if !inheritances.isEmpty {
             target.outputInline(": ")
             
             for (i, inheritance) in inheritances.enumerated() {
@@ -375,7 +375,7 @@ class InternalSwiftWriter {
                 outputProperty(prop, selfType: cls, target: target)
             }
             
-            if (cls.instanceVariables.count > 0 || cls.properties.count > 0) && cls.methods.count > 0 {
+            if (!cls.instanceVariables.isEmpty || !cls.properties.isEmpty) && !cls.methods.isEmpty {
                 target.output(line: "")
             }
             
@@ -389,7 +389,7 @@ class InternalSwiftWriter {
                 // TODO: Create a separate GenerationIntention entirely for dealloc
                 // methods and detect them during SwiftRewriter's parsing with
                 // IntentionPass's instead of postponing to here.
-                if method.signature.name == "dealloc" && method.signature.parameters.count == 0 {
+                if method.signature.name == "dealloc" && method.signature.parameters.isEmpty {
                     outputDeinit(method, selfType: cls, target: target)
                 } else {
                     outputMethod(method, selfType: cls, target: target)
@@ -415,7 +415,7 @@ class InternalSwiftWriter {
         target.outputInlineWithSpace("protocol", style: .keyword)
         target.outputInline(prot.typeName, style: .typeName)
         
-        if inheritances.count > 0 {
+        if !inheritances.isEmpty {
             target.outputInline(": ")
             
             for (i, inheritance) in inheritances.enumerated() {
@@ -436,7 +436,7 @@ class InternalSwiftWriter {
                 outputProperty(prop, selfType: prot, target: target)
             }
             
-            if prot.properties.count > 0 && prot.methods.count > 0 {
+            if !prot.properties.isEmpty && !prot.methods.isEmpty {
                 target.output(line: "")
             }
             
@@ -600,7 +600,7 @@ class InternalSwiftWriter {
         }
         
         // Emit required "override" keyword
-        if initMethod.parent is ClassGenerationIntention && initMethod.parameters.count == 0 {
+        if initMethod.parent is ClassGenerationIntention && initMethod.parameters.isEmpty {
             target.outputInlineWithSpace("override", style: .keyword)
         }
         

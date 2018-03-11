@@ -1,0 +1,25 @@
+disabled_rules:
+  - colon
+  - comma
+  - control_statement
+  - identifier_name
+  - trailing_whitespace
+  - type_name
+  - todo
+opt_in_rules:
+  - empty_count
+excluded:
+  - ObjcParserAntlr
+
+force_cast: warning
+force_try: warning
+line_length: 120
+type_body_length:
+  warning: 300
+  error: 1200
+file_length:
+  warning: 500
+  error: 2000
+cyclomatic_complexity:
+  error: 50
+reporter: "xcode"

@@ -108,7 +108,7 @@ public final class FunctionInvocationTransformer {
         guard let functionCall = postfix.functionCall else {
             return nil
         }
-        guard self.arguments.count > 0, functionCall.arguments.count > 0 else {
+        guard !arguments.isEmpty, !functionCall.arguments.isEmpty else {
             return nil
         }
         

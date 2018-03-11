@@ -180,7 +180,7 @@ class SuggestConversionInterface {
                     return false
                 }
         
-        if objcFiles.count == 0 {
+        if objcFiles.isEmpty {
             console.printLine("No files where found to process.")
             if !options.skipConfirm {
                 _=console.readLineWith(prompt: "Press [Enter] to continue.")
@@ -195,7 +195,10 @@ class SuggestConversionInterface {
             if overwriteCount == 0 {
                 prompt = "Found \(objcFiles.count) file(s) to convert. Convert now? y/n"
             } else {
-                prompt = "Found \(objcFiles.count) file(s) to convert (will overwrite \(overwriteCount) file(s)). Convert now? y/n"
+                prompt = """
+                Found \(objcFiles.count) file(s) to convert \
+                (will overwrite \(overwriteCount) file(s)). Convert now? y/n
+                """
             }
             
             let convert = console.readLineWith(prompt: prompt)?.lowercased() == "y"
@@ -224,7 +227,7 @@ class SuggestConversionInterface {
     }
 }
 
-fileprivate class Stopwatch {
+private class Stopwatch {
     var start: timespec = timespec()
     
     private init() {
@@ -247,13 +250,13 @@ fileprivate class Stopwatch {
             fatalError()
         }
         
-        let delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000;
+        let delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000
         
         return TimeInterval(delta_us) / 1_000_000
     }
 }
 
-fileprivate class FileFinderInterface {
+private class FileFinderInterface {
     var rewriterService: SwiftRewriterService
     
     init(rewriterService: SwiftRewriterService) {
@@ -302,7 +305,7 @@ fileprivate class FileFinderInterface {
                 s1.compare(s2, options: .numeric) == .orderedAscending
             }
             
-            if matches.count == 0 {
+            if matches.isEmpty {
                 console.printLine("Found 0 matches in directory!".terminalColorize(.yellow))
                 _=console.readLineWith(prompt: "Press [Enter] to return")
                 continue
@@ -312,8 +315,11 @@ fileprivate class FileFinderInterface {
                 // Present selection to user
                 let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
                 
-                let indexes = presentFileSelection(in: menu, list: matches.asPaths, prompt: "\(matchesString), select one to convert")
-                guard indexes.count > 0 else {
+                let indexes = presentFileSelection(
+                    in: menu, list: matches.asPaths,
+                    prompt: "\(matchesString), select one to convert")
+                
+                guard !indexes.isEmpty else {
                     return
                 }
                 
@@ -335,7 +341,7 @@ fileprivate class FileFinderInterface {
 
 /// Presents a CLI-gui for navigating folders and selecting files to process
 /// into SwiftRewriter
-fileprivate class FilesExplorer: PagesCommandHandler {
+private class FilesExplorer: PagesCommandHandler {
     var commandPrompt: String? {
         return "Select a file above or input '0' to quit"
     }
@@ -394,7 +400,8 @@ fileprivate class FilesExplorer: PagesCommandHandler {
         }
         
         // Work with relative paths
-        if let newPathAttempt = newPathAttempt, FileManager.default.fileExists(atPath: newPathAttempt.absoluteURL.relativePath) {
+        if let newPathAttempt = newPathAttempt,
+            FileManager.default.fileExists(atPath: newPathAttempt.absoluteURL.relativePath) {
             newPath = newPathAttempt.absoluteURL
         }
         // Search file name from list
@@ -406,7 +413,9 @@ fileprivate class FilesExplorer: PagesCommandHandler {
         // Check if it's an index
         else if let index = Int(input) {
             guard index > 0 && index <= fileList.count else {
-                return .loop("Invalid index \(index): Only have \(fileList.count) files to select!".terminalColorize(.red))
+                return .loop(
+                    "Invalid index \(index): Only have \(fileList.count) files to select!"
+                    .terminalColorize(.red))
             }
             
             newPath = fileList.fileList[index - 1]
@@ -441,7 +450,8 @@ fileprivate class FilesExplorer: PagesCommandHandler {
         
         // Raw .h/.m file
         if file.hasSuffix(".h") || file.hasSuffix(".m") {
-            guard FileManager.default.fileExists(atPath: newPath.relativePath, isDirectory: &isDirectory) && !isDirectory.boolValue else {
+            let exists = FileManager.default.fileExists(atPath: newPath.relativePath, isDirectory: &isDirectory)
+            guard exists && !isDirectory.boolValue else {
                 return false
             }
             
@@ -488,7 +498,7 @@ fileprivate class FilesExplorer: PagesCommandHandler {
                     ($0.pathExtension == "h" || $0.pathExtension == "m")
                 }
             
-            if matches.count == 0 {
+            if matches.isEmpty {
                 return false
             }
             

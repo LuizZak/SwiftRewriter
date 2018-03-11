@@ -21,7 +21,8 @@ extension Sequence {
     /// Can be used to improve speed, in case it is known that very large arrays
     /// will be created when generating the dictionaries.
     /// - Returns: A dictionary from the sequence keyed by the given closure.
-    public func groupBy<T: Hashable>(_ key: (Iterator.Element) -> T, reserving capacity: Int) -> [T: [Iterator.Element]] {
+    public func groupBy<T: Hashable>(_ key: (Iterator.Element) -> T,
+                                     reserving capacity: Int) -> [T: [Iterator.Element]] {
         // Manual containers
         var containers: [[Iterator.Element]] = []
         // Manual key indexes
@@ -51,7 +52,8 @@ extension Sequence {
     /// for the same value passed in, so values can be grouped correctly.
     /// The transform can be used to manipulate values so that keys are removed
     /// from the resulting values on the arrays of each dictionary entry
-    public func groupBy<T: Hashable, U>(_ key: (Iterator.Element) -> T, transform: (Iterator.Element) -> U) -> [T: [U]] {
+    public func groupBy<T: Hashable, U>(_ key: (Iterator.Element) -> T,
+                                        transform: (Iterator.Element) -> U) -> [T: [U]] {
         // Manual containers
         var containers: [[U]] = []
         // Manual key indexes
@@ -89,7 +91,9 @@ extension Sequence {
     
     /// A group-by where each value for the T-key gets modified by an accumulator
     /// as the key closure returns the same key for a previously existing element
-    public func groupByReduced<T: Hashable, U>(_ key: (Iterator.Element) -> T, initial: U, _ nextPartialResult: (U, Iterator.Element) -> U) -> [T: U] {
+    public func groupByReduced<T: Hashable, U>(_ key: (Iterator.Element) -> T,
+                                               initial: U,
+                                               _ nextPartialResult: (U, Iterator.Element) -> U) -> [T: U] {
         // Manual containers
         var containers: [U] = []
         // Manual key indexes
