@@ -87,7 +87,7 @@ final class StaticConstructorTransformer {
                     firstArgumentBecomesInstance: false,
                     arguments: args)
             
-            guard let call = postfix.functionCall, let result = transformer.apply(on: call) else {
+            guard let call = postfix.functionCall, let result = transformer.attemptApply(on: call) else {
                 return nil
             }
             guard let inner = postfix.exp.asPostfix, inner.member?.name == methodName else {

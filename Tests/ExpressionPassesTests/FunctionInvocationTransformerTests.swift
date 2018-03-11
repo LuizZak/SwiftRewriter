@@ -25,6 +25,18 @@ class FunctionInvocationTransformerTests: XCTestCase {
         XCTAssertEqual(sutInstance.requiredArgumentCount, 3) // first-arg as instance requires an extra argument on call site
     }
     
+    func testTransformsTargetZeroArgumentCall() {
+        let sut = FunctionInvocationTransformer(
+            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: true,
+            arguments: []
+        )
+        
+        XCTAssertEqual(
+            sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a")])),
+            Expression.identifier("a").dot("swift").call()
+        )
+    }
+    
     /// Tests that the required argument count value also takes into consideration
     /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
     /// actual number of target arguments.

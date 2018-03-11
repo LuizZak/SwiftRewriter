@@ -108,11 +108,11 @@ public final class FunctionInvocationTransformer {
         guard let functionCall = postfix.functionCall else {
             return nil
         }
-        guard !arguments.isEmpty, !functionCall.arguments.isEmpty else {
+        guard !functionCall.arguments.isEmpty else {
             return nil
         }
         
-        guard let result = apply(on: functionCall) else {
+        guard let result = attemptApply(on: functionCall) else {
             return nil
         }
         
@@ -135,7 +135,7 @@ public final class FunctionInvocationTransformer {
         return exp
     }
     
-    public func apply(on functionCall: FunctionCallPostfix) -> FunctionCallPostfix? {
+    public func attemptApply(on functionCall: FunctionCallPostfix) -> FunctionCallPostfix? {
         if functionCall.arguments.count != requiredArgumentCount {
             return nil
         }
@@ -159,6 +159,9 @@ public final class FunctionInvocationTransformer {
                 )
                 
                 return arg
+                
+            case let .fixed(maker):
+                return FunctionArgument(label: nil, expression: maker())
                 
             case let .transformed(transform, strat):
                 if var arg = handleArg(i: i, argument: strat) {
@@ -220,6 +223,9 @@ public final class FunctionInvocationTransformer {
         /// transformation closure.
         case mergingArguments(arg0: Int, arg1: Int, (Expression, Expression) -> Expression)
         
+        /// Puts out a fixed expression at the target argument position
+        case fixed(() -> Expression)
+        
         /// Transforms an argument using a given transformation method
         indirect case transformed((Expression) -> Expression, ArgumentStrategy)
         
@@ -235,6 +241,8 @@ public final class FunctionInvocationTransformer {
         /// applied.
         var argumentConsumeCount: Int {
             switch self {
+            case .fixed:
+                return 0
             case .asIs, .fromArgIndex:
                 return 1
             case .mergingArguments:
@@ -249,7 +257,7 @@ public final class FunctionInvocationTransformer {
         /// Returns 0, for non-indexed arguments.
         var maxArgumentReferenced: Int {
             switch self {
-            case .asIs:
+            case .asIs, .fixed:
                 return 0
             case .fromArgIndex(let index):
                 return index

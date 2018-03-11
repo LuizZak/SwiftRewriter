@@ -341,4 +341,11 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             into: .expressions([])
         ); assertNotifiedChange()
     }
+    
+    func testCGContextStrokePath() {
+        assertTransform(
+            expression: Expression.identifier("CGContextStrokePath").call([.identifier("context")]),
+            into: Expression.identifier("context").dot("strokePath").call()
+        ); assertNotifiedChange()
+    }
 }
