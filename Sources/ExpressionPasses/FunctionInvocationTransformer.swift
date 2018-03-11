@@ -140,8 +140,9 @@ public final class FunctionInvocationTransformer {
             return nil
         }
         
-        var arguments =
-            firstArgIsInstance ? Array(functionCall.arguments.dropFirst()) : functionCall.arguments
+        var arguments = firstArgIsInstance
+            ? Array(functionCall.arguments.dropFirst())
+            : functionCall.arguments
         
         var result: [FunctionArgument] = []
         

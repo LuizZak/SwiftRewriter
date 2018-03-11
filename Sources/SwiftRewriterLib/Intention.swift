@@ -52,7 +52,6 @@ public protocol IntentionHistory {
     func recordSplit(from intention: Intention, tag: String, description: String) -> IntentionHistoryEntryEcho
 }
 
-
 /// Allows 'echoing' the recording of a history entry into other history trackers.
 ///
 /// e.g.:
