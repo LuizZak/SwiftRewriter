@@ -147,10 +147,6 @@ public class ObjcLexer {
         
         lexer.skipWhitespace()
         
-        if autoSkipComments {
-            skipComments()
-        }
-        
         if lexer.isEof() {
             if currentToken.type != .eof {
                 currentToken = Token(type: .eof, string: "", location: location())
@@ -162,11 +158,7 @@ public class ObjcLexer {
         do {
             let p = try! lexer.peek()
             
-            if !autoSkipComments && attemptReadCommentToken() {
-                // Done!
-            } else if attemptReadPreprocessorDirective() {
-                // Done!
-            } else if Lexer.isLetter(p) || p == "_" || p == "@" {
+            if Lexer.isLetter(p) || p == "_" || p == "@" {
                 if try !attemptReadKeywordToken() && !attemptReadQualifierToken()  {
                     if p == "@" {
                         _=try attemptReadSpecialChar()
@@ -180,73 +172,6 @@ public class ObjcLexer {
         } catch {
             currentToken = Token(type: .eof, string: "", location: .invalid)
         }
-    }
-    
-    private func skipComments() {
-        while attemptReadCommentToken() {
-            lexer.skipWhitespace()
-        }
-    }
-    
-    private func attemptReadCommentToken() -> Bool {
-        let range = startRange()
-        let tokenType: TokenType
-        
-        if lexer.advanceIf(equals: "//") {
-            lexer.advance(until: { $0 == "\n" })
-            _=lexer.safeAdvance()
-            
-            tokenType = .singleLineComment
-        } else if lexer.advanceIf(equals: "/*") {
-            let bk = backtracker()
-            
-            while !lexer.isEof() {
-                if !lexer.safeAdvance() {
-                    bk.backtrack()
-                    return false
-                }
-                
-                if lexer.advanceIf(equals: "*/") {
-                    break
-                }
-            }
-            
-            tokenType = .multiLineComment
-        } else {
-            return false
-        }
-        
-        currentToken =
-            Token(type: tokenType, string: range.makeString(), location: range.makeLocation())
-        
-        return true
-    }
-    
-    /// Parses a pre-processor directive token.
-    /// Pre-processor tokens start with a '#' and end at the end of the line it's
-    /// at.
-    ///
-    /// ```
-    /// preprocessor_directive:
-    ///    '#' ~[\n]* '\n'
-    /// ```
-    private func attemptReadPreprocessorDirective() -> Bool {
-        // TODO: Have preprocessors only work if they are the first non-comment
-        // token on a line.
-        guard lexer.safeIsNextChar(equalTo: "#") else {
-            return false
-        }
-        
-        let range = startRange()
-        let type = TokenType.preprocessorDirective
-        
-        lexer.advance(until: { $0 == "\n" })
-        _=lexer.safeAdvance()
-        
-        currentToken =
-            Token(type: type, string: range.makeString(), location: range.makeLocation())
-        
-        return true
     }
     
     private func readIdentifierToken() throws {
