@@ -39,6 +39,7 @@ class FileOutputTarget: RewriterOutputTarget {
     private var identDepth: Int = 0
     private var settings: RewriterOutputSettings
     var fileHandle: FileHandle
+    var buffer: String = ""
     
     var colorize: Bool = true
     
@@ -48,31 +49,33 @@ class FileOutputTarget: RewriterOutputTarget {
     }
     
     func close() {
+        if let data = buffer.data(using: .utf8) {
+            fileHandle.write(data)
+        }
+        
         fileHandle.closeFile()
     }
     
-    func writeToFile(_ buffer: String) {
-        if let data = buffer.data(using: .utf8) {
-          fileHandle.write(data)
-        }
+    func writeBufferFile(_ buffer: String) {
+        self.buffer += buffer
     }
     
     public func output(line: String, style: TextStyle) {
         outputIdentation()
-        writeToFile(line)
+        writeBufferFile(line)
         outputLineFeed()
     }
     
     public func outputIdentation() {
-        writeToFile(identString())
+        writeBufferFile(identString())
     }
     
     public func outputLineFeed() {
-        writeToFile("\n")
+        writeBufferFile("\n")
     }
     
     public func outputInline(_ content: String, style: TextStyle) {
-        writeToFile(content)
+        writeBufferFile(content)
     }
     
     public func increaseIdentation() {
