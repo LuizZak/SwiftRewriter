@@ -121,22 +121,6 @@ public class ObjcLexer {
         }
     }
     
-    /// Advances through the tokens until a given token.
-    ///
-    /// The method stops such that the next token is the first token of the given
-    /// type that was found.
-    ///
-    /// The method returns automatically when end-of-file is reached.
-    public func advance(untilTokenType type: TokenType) {
-        while !isEof {
-            if tokenType(type) {
-                return
-            }
-            
-            skipToken()
-        }
-    }
-    
     internal func _readToken() {
         let index = lexer.inputIndex
         defer {

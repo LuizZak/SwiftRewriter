@@ -453,11 +453,6 @@ public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
         
         super.init(accessLevel: .public, source: source)
     }
-    
-    /// Returns an iterator for all expressions within this method body.
-    public func expressionsIterator(inspectBlocks: Bool) -> ExpressionSequence {
-        return ExpressionSequence(statement: body, inspectBlocks: inspectBlocks)
-    }
 }
 
 /// Access level visibility for a member or type

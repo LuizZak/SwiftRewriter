@@ -763,37 +763,4 @@ extension SyntaxNodeIteratorTests {
                 """, inFile: file, atLine: line, expected: true)
         }
     }
-    
-    private func assertIterator(iterator: StatementIterator,
-                                iterates expected: [Statement],
-                                file: String = #file, line: Int = #line) {
-        let result = Array(AnyIterator(iterator))
-        
-        for (i, (actual, expect)) in zip(result, expected).enumerated() {
-            guard actual != expect else {
-                continue
-            }
-            
-            var expString = ""
-            var actString = ""
-            
-            dump(expect, to: &expString)
-            dump(actual, to: &actString)
-            
-            recordFailure(withDescription: """
-                Expected index \(i) of iterator to be:
-                \(expString)
-                but found:
-                \(actString)
-                """, inFile: file, atLine: line, expected: true)
-            return
-        }
-        
-        if expected.count != result.count {
-            recordFailure(withDescription: """
-                Mismatched result count: Expected \(expected.count) item(s) but \
-                received \(result.count)
-                """, inFile: file, atLine: line, expected: true)
-        }
-    }
 }
