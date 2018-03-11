@@ -1235,6 +1235,10 @@ class SwiftRewriterTests: XCTestCase {
                 [A new];
                 A.new;
             }
+            + (void)method2 {
+                [self new];
+                self.new;
+            }
             @end
             """,
             swift: """
@@ -1244,6 +1248,11 @@ class SwiftRewriterTests: XCTestCase {
                 func method() {
                     A()
                     A()
+                }
+                @objc
+                static func method2() {
+                    self.init()
+                    self.init()
                 }
             }
             """)

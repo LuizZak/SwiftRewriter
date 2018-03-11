@@ -16,7 +16,13 @@ class MandatorySyntaxNodePass: SyntaxNodeRewriterPass {
         if let ident = exp.exp.asPostfix?.exp.asIdentifier,
             exp.functionCall?.arguments.count == 0,
             exp.exp.asPostfix?.member?.name == "new" {
-            let result = ident.call()
+            let result: Expression
+            if ident.identifier == "self" {
+                result = ident.dot("init").call()
+            } else {
+                result = ident.call()
+            }
+            
             result.resolvedType = exp.resolvedType
             
             return super.visitExpression(result)
@@ -24,7 +30,13 @@ class MandatorySyntaxNodePass: SyntaxNodeRewriterPass {
         
         // Type.new expressions
         if let ident = exp.exp.asIdentifier, exp.member?.name == "new" {
-            let result = ident.call()
+            let result: Expression
+            if ident.identifier == "self" {
+                result = ident.dot("init").call()
+            } else {
+                result = ident.call()
+            }
+            
             result.resolvedType = exp.resolvedType
             
             return super.visitExpression(result)
