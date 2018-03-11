@@ -165,13 +165,9 @@ public class ObjcLexer {
             if !autoSkipComments && attemptReadCommentToken() {
                 // Done!
             } else if attemptReadPreprocessorDirective() {
-               // Done!
-            } else if isStringLiteralToken() {
-                try readStringLiteralToken()
-            } else if Lexer.isDigit(p) {
-                try readNumberToken()
+                // Done!
             } else if Lexer.isLetter(p) || p == "_" || p == "@" {
-                if try !attemptReadKeywordToken() && !attemptReadQualifierToken() {
+                if try !attemptReadKeywordToken() && !attemptReadQualifierToken()  {
                     if p == "@" {
                         _=try attemptReadSpecialChar()
                     } else {

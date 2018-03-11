@@ -18,19 +18,6 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         autoSkipComments = true
     }
     
-    func testTokenizeLiterals() {
-        expect("123", toTokenizeAs: .decimalLiteral)
-        expect("123.4", toTokenizeAs: .floatLiteral)
-        expect("123.4e+10", toTokenizeAs: .floatLiteral)
-        expect("123.4e+10f", toTokenizeAs: .floatLiteral)
-        expect("123E10f", toTokenizeAs: .floatLiteral)
-        expect("123E-5F", toTokenizeAs: .floatLiteral)
-        expect("0123", toTokenizeAs: .octalLiteral)
-        expect("\"abc\"", toTokenizeAs: .stringLiteral)
-        expect("@\"abc\"", toTokenizeAs: .stringLiteral)
-        expect("L\"abc\"", toTokenizeAs: .stringLiteral)
-    }
-    
     func testTokenizeIdentifiers() {
         expect("AnIdentifier", toTokenizeAs: .identifier)
         expect("_AnIdentifier_", toTokenizeAs: .identifier)
@@ -129,55 +116,6 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("=", toTokenizeAs: .operator(.assign))
         expect("==", toTokenizeAs: .operator(.equals))
         expect("!=", toTokenizeAs: .operator(.unequals))
-    }
-    
-    func testTokenizePreprocessorDirective() {
-        expect("#include \"MyFile.h\"", toTokenizeAs: .preprocessorDirective)
-        expect("#pragma my pragma", toTokenizeAs: .preprocessorDirective)
-        expect("#import <MyFile.h>", toTokenizeAs: .preprocessorDirective)
-        expect("#error an error pragma", toTokenizeAs: .preprocessorDirective)
-        expect("#warning a warning pragma", toTokenizeAs: .preprocessorDirective)
-    }
-    
-    func testSkipComments() {
-        expect(sequence: "abc // test\n123", toTokenizeAs: [.identifier, .decimalLiteral])
-        expect(sequence: """
-            123
-            /* test
-             comment */
-            abc
-            """, toTokenizeAs: [.decimalLiteral, .identifier])
-    }
-    
-    func testConsumeComments() {
-        autoSkipComments = false
-        
-        expect(sequence: "abc // test\n123", toTokenizeAs: [.identifier, .singleLineComment, .decimalLiteral])
-        expect(sequence: """
-            123
-            /* test
-             comment */
-            abc
-            """, toTokenizeAs: [.decimalLiteral, .multiLineComment, .identifier])
-    }
-    
-    func testTokenizeSequence() {
-        let source = """
-            >> << @@ >= <= identifier @interface @notkeyword 1234 0x0f1Ab,1,2.3F
-            // A comment
-            //
-            
-            #preprocessor line same preproc
-            adef
-            """
-        
-        expect(sequence: source, toTokenizeAs: [
-            .operator(.bitwiseShiftRight), .operator(.bitwiseShiftLeft),
-            .operator(.greaterThanOrEqual), .operator(.lessThanOrEqual),
-            .at, .at, .identifier, .keyword(.atInterface), .at, .identifier,
-            .decimalLiteral, .hexLiteral, .comma, .decimalLiteral, .comma,
-            .floatLiteral, .preprocessorDirective, .identifier
-            ])
     }
 }
 
