@@ -15,6 +15,10 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
     public override var isStatic: Bool {
         return signature.isStatic
     }
+    public var optional: Bool {
+        return false
+    }
+    
     public var name: String {
         return signature.name
     }

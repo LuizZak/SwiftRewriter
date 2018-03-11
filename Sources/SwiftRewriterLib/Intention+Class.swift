@@ -98,4 +98,8 @@ extension InstanceVariableGenerationIntention: KnownProperty {
     public var attributes: [PropertyAttribute] {
         return []
     }
+    
+    public var optional: Bool {
+        return false
+    }
 }

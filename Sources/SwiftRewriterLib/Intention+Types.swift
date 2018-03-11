@@ -368,6 +368,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         return isClassProperty
     }
     
+    public var optional: Bool {
+        return false
+    }
+    
     public var name: String
     public var storage: ValueStorage
     public var mode: Mode = .asField

@@ -222,15 +222,24 @@ func mergeTypes(from first: KnownType,
 /// Matching signatures (matched by Objective-C selector) have their nullability
 /// merged, and new methods not existent on the target type are created anew.
 ///
+/// If `skipCreatingOptionalMethods` is `true`, protocol methods that are marked
+/// `optional` that do not match any method on the target type are ignored and
+/// are not created. Defaults to `true`.
+///
 /// Bodies from the methods are not copied over.
 /// - SeeAlso:
 /// `mergeMethods(_ method1:KnownMethod, into method2: MethodGenerationIntention)`
 func mergeMethodSignatures(from first: KnownType,
-                           into second: TypeGenerationIntention) {
+                           into second: TypeGenerationIntention,
+                           skipCreatingOptionalMethods: Bool = true) {
     for knownMethod in first.knownMethods {
         if let existing = second.method(matchingSelector: knownMethod.signature) {
             mergeMethods(knownMethod, into: existing)
         } else {
+            if skipCreatingOptionalMethods && knownMethod.optional {
+                continue
+            }
+            
             let generated = second.generateMethod(from: knownMethod)
             
             second.history

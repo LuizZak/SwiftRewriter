@@ -767,6 +767,37 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteProtocolConformance() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol MyProtocol
+            @optional
+            - (void)myMethod;  // Result should not contain this optional method...
+            - (void)myMethod2; // ...but should contain this one, which is implemented
+                               // by the conforming class.
+            @end
+            @interface A : NSObject <MyProtocol>
+            - (void)myMethod2;
+            @end
+            """,
+            swift: """
+            @objc
+            protocol MyProtocol: NSObjectProtocol {
+                @objc
+                optional func myMethod()
+                @objc
+                optional func myMethod2()
+            }
+
+            @objc
+            class A: NSObject, MyProtocol {
+                @objc
+                func myMethod2() {
+                }
+            }
+            """)
+    }
+    
     func testRewriteProtocolOptionalRequiredSections() throws {
         try assertObjcParse(
             objc: """
@@ -1256,5 +1287,47 @@ class SwiftRewriterTests: XCTestCase {
                 }
             }
             """)
+    }
+    
+    func testOmitObjcAttribute() throws {
+        try assertObjcParse(
+            objc: """
+            typedef NS_ENUM(NSInteger, Enum) {
+                Enum_A
+            };
+            
+            @protocol A
+            @property BOOL b;
+            - (void)method;
+            @end
+            
+            @interface B: A
+            @property BOOL b;
+            @end
+            
+            @implementation B
+            - (void)method {
+            }
+            @end
+            """,
+            swift: """
+            enum Enum: Int {
+                case Enum_A
+            }
+            
+            protocol A {
+                var b: Bool { get set }
+                
+                func method()
+            }
+            
+            class B: A {
+                var b: Bool = false
+                
+                func method() {
+                }
+            }
+            """,
+            options: ASTWriterOptions(omitObjcCompatibility: true))
     }
 }

@@ -520,10 +520,12 @@ private class MemberInvocationResolver {
                 return exp.makeErrorTyped()
             }
             
-            if let property = typeSystem.property(named: member.name, static: innerType.isMetatype, in: innerType) {
+            if let property = typeSystem.property(named: member.name, static: innerType.isMetatype,
+                                                  includeOptional: true, in: innerType) {
                 member.memberDefinition = property
                 exp.resolvedType = property.storage.type
-            } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype, in: innerType) {
+            } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype,
+                                                   in: innerType) {
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
             } else {
@@ -633,6 +635,7 @@ private class MemberInvocationResolver {
                               returnType: .void,
                               isStatic: isStatic)
         
-        return typeSystem.method(withObjcSelector: signature, static: isStatic, in: type)
+        return typeSystem.method(withObjcSelector: signature, static: isStatic,
+                                 includeOptional: true, in: type)
     }
 }

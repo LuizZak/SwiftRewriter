@@ -264,7 +264,8 @@ public struct FunctionSignature: Equatable {
     public var returnType: SwiftType
     public var parameters: [ParameterSignature]
     
-    public init(name: String, parameters: [ParameterSignature], returnType: SwiftType = .void, isStatic: Bool = false) {
+    public init(name: String, parameters: [ParameterSignature] = [],
+                returnType: SwiftType = .void, isStatic: Bool = false) {
         self.isStatic = isStatic
         self.name = name
         self.returnType = returnType

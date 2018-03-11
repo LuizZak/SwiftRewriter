@@ -47,11 +47,17 @@ public protocol TypeSystem {
     /// Gets a protocol conformance to a given protocol name on a given known type.
     func conformance(toProtocolName name: String, in type: KnownType) -> KnownProtocolConformance?
     
-    /// Searches for a method with a given Objective-C equivalent selector.
-    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool, in type: KnownType) -> KnownMethod?
+    /// Searches for a method with a given Objective-C equivalent selector, also
+    /// specifying whether to include optional methods (from optional protocol
+    /// methods that where not implemented by a concrete class).
+    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
+                includeOptional: Bool, in type: KnownType) -> KnownMethod?
     
-    /// Gets a property with a given name on a given known type.
-    func property(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty?
+    /// Gets a property with a given name on a given known type, also specifying
+    /// whether to include optional methods (from optional protocol methods that
+    /// where not implemented by a concrete class).
+    func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+                  in type: KnownType) -> KnownProperty?
     
     /// Gets an instance field with a given name on a given known type.
     func field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty?
@@ -64,11 +70,17 @@ public protocol TypeSystem {
     /// Gets a protocol conformance to a given protocol name on a given known type.
     func conformance(toProtocolName name: String, in type: SwiftType) -> KnownProtocolConformance?
     
-    /// Searches for a method with a given Objective-C equivalent selector.
-    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool, in type: SwiftType) -> KnownMethod?
+    /// Searches for a method with a given Objective-C equivalent selector, also
+    /// specifying whether to include optional methods (from optional protocol
+    /// methods that where not implemented by a concrete class).
+    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
+                includeOptional: Bool, in type: SwiftType) -> KnownMethod?
     
-    /// Gets a property with a given name on a given known type.
-    func property(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty?
+    /// Gets a property with a given name on a given known type, also specifying
+    /// whether to include optional methods (from optional protocol methods that
+    /// where not implemented by a concrete class).
+    func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+                  in type: SwiftType) -> KnownProperty?
     
     /// Gets an instance field with a given name on a given known type.
     func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty?

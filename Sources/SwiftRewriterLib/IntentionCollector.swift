@@ -2,7 +2,7 @@ import GrammarModels
 import ObjcParser
 import SwiftAST
 
-public protocol IntentionCollectorDelegate {
+public protocol IntentionCollectorDelegate: class {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool
     func reportForLazyParsing(intention: Intention)
     func reportForLazyResolving(intention: Intention)
@@ -13,7 +13,7 @@ public protocol IntentionCollectorDelegate {
 /// Traverses a provided AST node, and produces intentions that are recorded by
 /// pushing and popping them as contexts on a delegate's context object.
 public class IntentionCollector {
-    public let delegate: IntentionCollectorDelegate
+    public weak var delegate: IntentionCollectorDelegate?
     
     var context: TypeConstructionContext
     
@@ -32,7 +32,7 @@ public class IntentionCollector {
         
         visitor.onEnterClosure = { node in
             if let ctx = self.context.findContext(ofType: AssumeNonnullContext.self) {
-                ctx.isNonnullOn = self.delegate.isNodeInNonnullContext(node)
+                ctx.isNonnullOn = self.delegate?.isNodeInNonnullContext(node) ?? false
             }
             
             switch node {
@@ -137,7 +137,7 @@ public class IntentionCollector {
         
         let intent = TypealiasIntention(fromType: type.type, named: name)
         recordSourceHistory(intention: intent, node: node)
-        intent.inNonnullContext = delegate.isNodeInNonnullContext(node)
+        intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         
         ctx.addTypealias(intent)
     }
@@ -179,7 +179,7 @@ public class IntentionCollector {
             ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
         
         let intent = GlobalVariableGenerationIntention(name: name.name, storage: storage, source: node)
-        intent.inNonnullContext = delegate.isNodeInNonnullContext(node)
+        intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         recordSourceHistory(intention: intent, node: node)
         
         if let initialExpression = node.initialExpression {
@@ -187,14 +187,14 @@ public class IntentionCollector {
                 GlobalVariableInitialValueIntention(expression: .constant(0),
                                                     source: initialExpression)
             
-            delegate.reportForLazyParsing(intention: initialExpr)
+            delegate?.reportForLazyParsing(intention: initialExpr)
             
             intent.initialValueExpr = initialExpr
         }
         
         ctx.addGlobalVariable(intent)
         
-        delegate.reportForLazyResolving(intention: intent)
+        delegate?.reportForLazyResolving(intention: intent)
     }
     
     // MARK: - ObjcClassInterface
@@ -226,7 +226,7 @@ public class IntentionCollector {
         }
         
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
-        delegate.reportForLazyResolving(intention: intent)
+        delegate?.reportForLazyResolving(intention: intent)
         intent.categoryName = node.categoryName?.name
         recordSourceHistory(intention: intent, node: node)
         
@@ -270,7 +270,7 @@ public class IntentionCollector {
         }
         
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
-        delegate.reportForLazyResolving(intention: intent)
+        delegate?.reportForLazyResolving(intention: intent)
         intent.categoryName = node.categoryName?.name
         recordSourceHistory(intention: intent, node: node)
         
@@ -345,23 +345,23 @@ public class IntentionCollector {
                                                     attributes: attributes,
                                                     source: node)
             prop.isOptional = node.isOptionalProperty
-            prop.inNonnullContext = delegate.isNodeInNonnullContext(node)
+            prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
             
-            delegate.reportForLazyResolving(intention: prop)
+            delegate?.reportForLazyResolving(intention: prop)
         } else {
             let prop = PropertyGenerationIntention(name: node.identifier?.name ?? "",
                                                    storage: storage,
                                                    attributes: attributes,
                                                    source: node)
-            prop.inNonnullContext = delegate.isNodeInNonnullContext(node)
+            prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
             
-            delegate.reportForLazyResolving(intention: prop)
+            delegate?.reportForLazyResolving(intention: prop)
         }
     }
     
@@ -393,7 +393,7 @@ public class IntentionCollector {
             method = MethodGenerationIntention(signature: sign, source: node)
         }
         
-        method.inNonnullContext = delegate.isNodeInNonnullContext(node)
+        method.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         
         recordSourceHistory(intention: method, node: node)
         
@@ -401,13 +401,13 @@ public class IntentionCollector {
             let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
             recordSourceHistory(intention: methodBodyIntention, node: body)
             
-            delegate.reportForLazyParsing(intention: methodBodyIntention)
+            delegate?.reportForLazyParsing(intention: methodBodyIntention)
             method.functionBody = methodBodyIntention
         }
         
         ctx.addMethod(method)
         
-        delegate.reportForLazyResolving(intention: method)
+        delegate?.reportForLazyResolving(intention: method)
     }
     
     private func visitObjcClassSuperclassName(_ node: SuperclassName) {
@@ -462,12 +462,12 @@ public class IntentionCollector {
                                                 storage: storage,
                                                 accessLevel: access,
                                                 source: node)
-        ivar.inNonnullContext = delegate.isNodeInNonnullContext(node)
+        ivar.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         recordSourceHistory(intention: ivar, node: node)
         
         classCtx.addInstanceVariable(ivar)
         
-        delegate.reportForLazyResolving(intention: ivar)
+        delegate?.reportForLazyResolving(intention: ivar)
     }
     
     private func exitObjcClassIVarsListNode(_ node: IVarsList) {
@@ -484,7 +484,7 @@ public class IntentionCollector {
             EnumGenerationIntention(typeName: identifier.name,
                                     rawValueType: .anyObject,
                                     source: node)
-        enumIntention.inNonnullContext = delegate.isNodeInNonnullContext(node)
+        enumIntention.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         recordSourceHistory(intention: enumIntention, node: node)
         
         context
@@ -493,7 +493,7 @@ public class IntentionCollector {
         
         context.pushContext(enumIntention)
         
-        delegate.reportForLazyResolving(intention: enumIntention)
+        delegate?.reportForLazyResolving(intention: enumIntention)
     }
     
     private func visitObjcEnumCaseNode(_ node: ObjcEnumCase) {
@@ -509,7 +509,7 @@ public class IntentionCollector {
                                         accessLevel: .internal, source: node)
         recordSourceHistory(intention: enumCase, node: node)
         
-        delegate.reportForLazyParsing(intention: enumCase)
+        delegate?.reportForLazyParsing(intention: enumCase)
         
         ctx.addCase(enumCase)
     }
@@ -522,13 +522,15 @@ public class IntentionCollector {
         context.popContext() // EnumGenerationIntention
     }
     
-    // Mark: - Function Definition
+    // MARK: - Function Definition
     private func enterFunctionDefinitionNode(_ node: FunctionDefinition) {
         guard node.identifier != nil else {
             return
         }
         
-        let mapper = delegate.typeMapper(for: self)
+        guard let mapper = delegate?.typeMapper(for: self) else {
+            return
+        }
         
         let gen = SwiftMethodSignatureGen(context: context, typeMapper: mapper)
         let signature = gen.generateDefinitionSignature(from: node)
@@ -542,7 +544,7 @@ public class IntentionCollector {
         
         context.pushContext(globalFunc)
         
-        delegate.reportForLazyResolving(intention: globalFunc)
+        delegate?.reportForLazyResolving(intention: globalFunc)
     }
     
     private func exitFunctionDefinitionNode(_ node: FunctionDefinition) {

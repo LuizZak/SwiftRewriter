@@ -118,6 +118,9 @@ public protocol KnownMethod: KnownMember {
     
     /// Gets a known body for this method
     var body: KnownMethodBody? { get }
+    
+    /// True if this method is an optional protocol conformance method
+    var optional: Bool { get }
 }
 
 /// Describes a method body that is known to the transpiler
@@ -135,6 +138,9 @@ public protocol KnownProperty: KnownMember {
     
     /// Property's attributes
     var attributes: [PropertyAttribute] { get }
+    
+    /// True if this method is an optional protocol conformance property
+    var optional: Bool { get }
 }
 
 /// Describes a known protocol conformance

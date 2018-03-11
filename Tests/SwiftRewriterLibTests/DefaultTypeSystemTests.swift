@@ -83,6 +83,7 @@ class DefaultTypeSystemTests: XCTestCase {
                                                                                name: "selector",
                                                                                type: .selector)]),
                        static: false,
+                       includeOptional: true,
                        in: type)
         )
     }
@@ -229,5 +230,30 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type1))
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type2))
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type3))
+    }
+    
+    func testMethodLookupIgnoresOptionalProtocolMethodsNotImplemented() {
+        let prot =
+            KnownTypeBuilder(typeName: "A", kind: .protocol)
+                .addingMethod(named: "nonOptional", returning: .void)
+                .addingMethod(named: "optional", returning: .void, optional: true)
+                .addingMethod(named: "optionalImplemented", returning: .void, optional: true)
+                .build()
+        let cls =
+            KnownTypeBuilder(typeName: "B")
+                .addingProtocolConformance(protocolName: "A")
+                .addingMethod(named: "optionalImplemented", returning: .void)
+                .build()
+        sut.addType(prot)
+        sut.addType(cls)
+        
+        XCTAssertNotNil(sut.method(withObjcSelector: FunctionSignature(name: "nonOptional"),
+                                   static: false, includeOptional: false, in: cls))
+        XCTAssertNil(sut.method(withObjcSelector: FunctionSignature(name: "optional"),
+                                static: false, includeOptional: false, in: cls))
+        XCTAssertNotNil(sut.method(withObjcSelector: FunctionSignature(name: "optional"),
+                                static: false, includeOptional: true, in: cls))
+        XCTAssertNotNil(sut.method(withObjcSelector: FunctionSignature(name: "optionalImplemented"),
+                                   static: false, includeOptional: false, in: cls))
     }
 }

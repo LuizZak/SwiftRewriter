@@ -190,10 +190,12 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
-                       in type: KnownType) -> KnownMethod? {
-        if let method =
-            type.knownMethods
-                .first(where: { $0.signature.matchesAsSelector(selector) && $0.isStatic == isStatic }) {
+                       includeOptional: Bool, in type: KnownType) -> KnownMethod? {
+        if let method = type.knownMethods.first(where: {
+            $0.signature.matchesAsSelector(selector)
+                && $0.isStatic == isStatic
+                && (includeOptional || !$0.optional)
+        }) {
             return method
         }
         
@@ -203,27 +205,31 @@ public class DefaultTypeSystem: TypeSystem {
                 continue
             }
             
-            if let method = method(withObjcSelector: selector, static: isStatic, in: prot) {
+            if let method = method(withObjcSelector: selector, static: isStatic,
+                                   includeOptional: includeOptional, in: prot) {
                 return method
             }
         }
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            method(withObjcSelector: selector, static: isStatic, in: $0)
+            method(withObjcSelector: selector, static: isStatic, includeOptional: includeOptional, in: $0)
         }
     }
     
-    public func property(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty? {
-        if let property =
-            type.knownProperties
-                .first(where: { $0.name == name && $0.isStatic == isStatic }) {
+    public func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+                         in type: KnownType) -> KnownProperty? {
+        if let property = type.knownProperties.first(where: {
+            $0.name == name
+                && $0.isStatic == isStatic
+                && (includeOptional || !$0.optional)
+        }) {
             return property
         }
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            property(named: name, static: isStatic, in: $0)
+            property(named: name, static: isStatic, includeOptional: includeOptional, in: $0)
         }
     }
     
@@ -306,18 +312,21 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
-                       in type: SwiftType) -> KnownMethod? {
+                       includeOptional: Bool, in type: SwiftType) -> KnownMethod? {
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        return method(withObjcSelector: selector, static: isStatic, in: knownType)
+        return method(withObjcSelector: selector, static: isStatic, includeOptional: includeOptional,
+                      in: knownType)
     }
     
-    public func property(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty? {
+    public func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+                         in type: SwiftType) -> KnownProperty? {
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        return property(named: name, static: isStatic, in: knownType)
+        return property(named: name, static: isStatic, includeOptional: includeOptional,
+                        in: knownType)
     }
     
     public func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty? {
@@ -493,9 +502,10 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     
     // MARK: Shortcuts for member searching
     
-    public override func property(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty? {
+    public override func property(named name: String, static isStatic: Bool,
+                                  includeOptional: Bool, in type: SwiftType) -> KnownProperty? {
         guard let typeName = typeNameIn(swiftType: type) else {
-            return super.property(named: name, static: isStatic, in: type)
+            return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
         }
         
         for file in intentions.fileIntentions() {
@@ -506,7 +516,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             }
         }
         
-        return super.property(named: name, static: isStatic, in: type)
+        return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
     }
     
     public override func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty? {
@@ -526,9 +536,10 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     }
     
     public override func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
-                                in type: SwiftType) -> KnownMethod? {
+                                includeOptional: Bool, in type: SwiftType) -> KnownMethod? {
         guard let typeName = typeNameIn(swiftType: type) else {
-            return super.method(withObjcSelector: selector, static: isStatic, in: type)
+            return super.method(withObjcSelector: selector, static: isStatic,
+                                includeOptional: includeOptional, in: type)
         }
         
         for file in intentions.fileIntentions() {
@@ -539,7 +550,8 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             }
         }
         
-        return super.method(withObjcSelector: selector, static: isStatic, in: type)
+        return super.method(withObjcSelector: selector, static: isStatic,
+                            includeOptional: includeOptional, in: type)
     }
 }
 

@@ -28,7 +28,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                     cls.protocols.contains {
                         $0.protocolName == prot.typeName
                     }
-            }
+                }
             
             for prot in knownProtocols {
                 mergeMethodSignatures(from: prot, into: cls)
