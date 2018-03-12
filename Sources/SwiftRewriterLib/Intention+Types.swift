@@ -307,13 +307,15 @@ extension MemberGenerationIntention: KnownMember {
 
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
-public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
+public class PropertyGenerationIntention: MemberGenerationIntention, OverridableMemberGenerationIntention, ValueStorageIntention {
     public var propertySource: PropertyDefinition? {
         return source as? PropertyDefinition
     }
     public var synthesizeSource: PropertySynthesizeItem? {
         return source as? PropertySynthesizeItem
     }
+    
+    public var isOverride: Bool = false
     
     /// Returns `true` if this property requires a backing field to be created.
     /// Backing fields must be created for fully-synthesized properties, as well

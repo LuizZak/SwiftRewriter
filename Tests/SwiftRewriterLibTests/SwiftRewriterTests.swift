@@ -1330,4 +1330,40 @@ class SwiftRewriterTests: XCTestCase {
             """,
             options: ASTWriterOptions(omitObjcCompatibility: true))
     }
+    
+    /// Tests calls that override a super call by detection of a `super` call on
+    /// a super method with the same signature as the method being analyzed.
+    func testMarkOverrideIfSuperCallIsDetected() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)a {
+                [super a];
+            }
+            - (void)b:(NSInteger)a {
+                [super b:a];
+            }
+            - (void)c:(NSInteger)a {
+                [super c]; // Make sure we don't create unnecessary overrides
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                override func a() {
+                    super.a()
+                }
+                @objc
+                override func b(_ a: Int) {
+                    super.b(a)
+                }
+                @objc
+                func c(_ a: Int) {
+                    super.c()
+                }
+            }
+            """)
+    }
 }

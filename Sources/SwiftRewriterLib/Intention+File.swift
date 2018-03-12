@@ -257,12 +257,27 @@ public protocol FunctionIntention: Intention {
     var functionBody: FunctionBodyIntention? { get }
 }
 
+/// Represents an Objective-C selector signature.
+public struct SelectorSignature: Equatable {
+    public var isStatic: Bool
+    
+    public var keywords: [String?] = []
+}
+
 /// Signature for a function intention
 public struct FunctionSignature: Equatable {
     public var isStatic: Bool
     public var name: String
     public var returnType: SwiftType
     public var parameters: [ParameterSignature]
+    
+    public var asSelector: SelectorSignature {
+        return
+            SelectorSignature(
+                isStatic: isStatic,
+                keywords: [name] + parameters.map { $0.label == "_" ? nil : $0.label }
+            )
+    }
     
     public init(name: String, parameters: [ParameterSignature] = [],
                 returnType: SwiftType = .void, isStatic: Bool = false) {
@@ -291,23 +306,7 @@ public struct FunctionSignature: Equatable {
     /// Returns `true` iff `self` and `other` match using Objective-C signature
     /// matching rules.
     public func matchesAsSelector(_ other: FunctionSignature) -> Bool {
-        if isStatic != other.isStatic {
-            return false
-        }
-        if name != other.name {
-            return false
-        }
-        if parameters.count != other.parameters.count {
-            return false
-        }
-        
-        for (p1, p2) in zip(parameters, other.parameters) {
-            if p1.label != p2.label {
-                return false
-            }
-        }
-        
-        return true
+        return asSelector == other.asSelector
     }
     
     /// Returns `true` iff `self` and `other` match using C signature matching
@@ -317,6 +316,17 @@ public struct FunctionSignature: Equatable {
     /// number of parameters.
     public func matchesAsCFunction(_ other: FunctionSignature) -> Bool {
         return name == other.name && parameters.count == other.parameters.count
+    }
+}
+
+public extension FunctionCallPostfix {
+    /// Generates an Objective-C selector from this function call united with
+    /// a given method name.
+    public func selectorWith(methodName: String) -> SelectorSignature {
+        let selectors: [String?]
+            = [methodName] + arguments.map { $0.label }
+        
+        return SelectorSignature(isStatic: false, keywords: selectors)
     }
 }
 

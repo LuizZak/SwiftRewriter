@@ -33,8 +33,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
         
         XCTAssertEqual(
             sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a")])),
-            Expression.identifier("a").dot("swift").call()
-        )
+            Expression.identifier("a").dot("swift").call())
     }
     
     /// Tests that the required argument count value also takes into consideration

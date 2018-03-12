@@ -528,6 +528,10 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("static", style: .keyword)
         }
         
+        if prop.isOverride {
+            target.outputInlineWithSpace("override", style: .keyword)
+        }
+        
         target.outputInlineWithSpace("var", style: .keyword)
         target.outputInline(prop.name, style: .plain)
         target.outputInline(": ")
@@ -688,6 +692,10 @@ class InternalSwiftWriter {
             if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
                 target.outputInlineWithSpace("optional", style: .keyword)
             }
+        }
+        
+        if method.isOverride {
+            target.outputInlineWithSpace("override", style: .keyword)
         }
         
         target.outputInlineWithSpace("func", style: .keyword)

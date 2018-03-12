@@ -292,7 +292,11 @@ public class SwiftRewriter {
                                  typeResolverInvoker: typeResolverInvoker,
                                  notifyChange: { requiresResolve = true })
         
-        for pass in intentionPassesSource.intentionPasses {
+        let intentionPasses =
+            [MandatoryIntentionPass()]
+                + intentionPassesSource.intentionPasses
+        
+        for pass in intentionPasses {
             autoreleasepool {
                 requiresResolve = false
                 

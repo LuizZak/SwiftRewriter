@@ -52,6 +52,14 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
     /// Is `nil`, in case it has not been resolved yet.
     open var resolvedType: SwiftType?
     
+    /// An expected type for this expression.
+    /// This is usually set by an outer syntax node context to hint at an expected
+    /// resulting type for this expression, such as boolean expressions in `if`
+    /// statements or rhs types in assignment operations.
+    ///
+    /// Is nil, in case no specific type is expected.
+    open var expectedType: SwiftType?
+    
     /// Returns `true` if this expression's type has been successfully resolved
     /// with a non-error type.
     public var isTypeResolved: Bool {

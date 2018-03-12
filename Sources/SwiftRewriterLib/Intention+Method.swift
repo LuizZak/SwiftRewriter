@@ -3,10 +3,12 @@ import SwiftAST
 import GrammarModels
 
 /// An intention to generate a static/instance function for a type.
-public class MethodGenerationIntention: MemberGenerationIntention, FunctionIntention {
+public class MethodGenerationIntention: MemberGenerationIntention, OverridableMemberGenerationIntention, FunctionIntention {
     public var typedSource: MethodDefinition? {
         return source as? MethodDefinition
     }
+    
+    public var isOverride: Bool = false
     
     public var signature: FunctionSignature
     
@@ -27,6 +29,9 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
     }
     public var parameters: [ParameterSignature] {
         return signature.parameters
+    }
+    public var selector: SelectorSignature {
+        return signature.asSelector
     }
     
     public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature],
