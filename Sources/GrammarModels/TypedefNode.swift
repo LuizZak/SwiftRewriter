@@ -3,6 +3,9 @@ public class TypedefNode: ASTNode, InitializableNode {
     public var identifier: Identifier? {
         return firstChild()
     }
+    public var structDeclaration: ObjcStructDeclaration? {
+        return firstChild()
+    }
     public var type: TypeNameNode? {
         return firstChild()
     }

@@ -4,18 +4,24 @@ public class ObjcStructDeclaration: ASTNode, InitializableNode {
         return childrenMatching()
     }
     
+    public var name: Identifier? {
+        return firstChild()
+    }
+    
     public required init() {
         super.init(location: .invalid, existsInSource: true)
     }
 }
 
-public class ObjcStructField: ASTNode {
-    public var name: Identifier
-    public var type: TypeNameNode
+public class ObjcStructField: ASTNode, InitializableNode {
+    public var name: Identifier? {
+        return firstChild()
+    }
+    public var type: TypeNameNode? {
+        return firstChild()
+    }
     
-    public init(name: Identifier, type: TypeNameNode) {
-        self.name = name
-        self.type = type
+    public required init() {
         super.init(location: .invalid, existsInSource: true)
     }
 }

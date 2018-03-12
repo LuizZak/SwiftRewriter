@@ -1,11 +1,27 @@
 import GrammarModels
 
+/// An intention for a type that can contain instance variables
+public protocol InstanceVariableContainerIntention: Intention {
+    var instanceVariables: [InstanceVariableGenerationIntention] { get }
+    
+    func addInstanceVariable(_ intention: InstanceVariableGenerationIntention)
+    func hasInstanceVariable(named name: String) -> Bool
+    func removeInstanceVariable(named name: String)
+}
+
+public extension InstanceVariableContainerIntention {
+    public func hasInstanceVariable(named name: String) -> Bool {
+        return instanceVariables.contains(where: { $0.name == name })
+    }
+}
+
 /// Base intention for Class and Class Category intentions
-public class BaseClassIntention: TypeGenerationIntention {
+public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContainerIntention {
     /// Returns `true` if this class intention originated from an `@interface`
     /// declaration.
     public var isInterfaceSource: Bool {
-        return source is ObjcClassInterface || source is ObjcClassCategoryInterface
+        return source is ObjcClassInterface
+            || source is ObjcClassCategoryInterface
     }
     
     public override var isEmptyType: Bool {
@@ -23,19 +39,17 @@ public class BaseClassIntention: TypeGenerationIntention {
             parent.removeInstanceVariable(named: intention.name)
         }
         
-        self.instanceVariables.append(intention)
+        instanceVariables.append(intention)
         intention.parent = self
     }
     
-    public func hasInstanceVariable(named name: String) -> Bool {
-        return instanceVariables.contains(where: { $0.name == name })
-    }
-    
     public func removeInstanceVariable(named name: String) {
-        if let index = instanceVariables.index(where: { $0.name == name }) {
-            instanceVariables[index].parent = nil
-            instanceVariables.remove(at: index)
+        guard let index = instanceVariables.index(where: { $0.name == name }) else {
+            return
         }
+        
+        instanceVariables[index].parent = nil
+        instanceVariables.remove(at: index)
     }
 }
 

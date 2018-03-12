@@ -19,6 +19,49 @@ public class TypeParsing {
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
+    // Finds all types from the
+    public func parseObjcTypes(inDeclaration decl: Parser.FieldDeclarationContext) -> [ObjcType] {
+        var types: [ObjcType] = []
+        
+        guard let specQualifier = decl.specifierQualifierList() else {
+            return []
+        }
+        guard let baseTypeString = specQualifier.typeSpecifier(0)?.getText() else {
+            return []
+        }
+        
+        guard let fieldDeclaratorList = decl.fieldDeclaratorList() else {
+            return []
+        }
+        
+        for fieldDeclarator in fieldDeclaratorList.fieldDeclarator() {
+            guard let declarator = fieldDeclarator.declarator() else {
+                continue
+            }
+            
+            let pointer = declarator.pointer()?.accept(VarDeclarationTypeExtractor())
+            
+            var typeName = "\(baseTypeString) \(pointer ?? "")"
+            
+            if !specQualifier.arcBehaviourSpecifier().isEmpty {
+                let arcSpecifiers =
+                    specQualifier.arcBehaviourSpecifier().map {
+                        $0.getText()
+                    }
+                
+                typeName = "\(arcSpecifiers.joined(separator: " ")) \(typeName)"
+            }
+            
+            if let type = parseObjcType(typeName) {
+                types.append(type)
+            }
+        }
+        
+        return types
+    }
+    
+    // Helper for mapping Objective-C types from type declarations into structured
+    // types.
     public func parseObjcType(inDeclaration decl: Parser.FieldDeclarationContext) -> ObjcType? {
         guard let specQualifier = decl.specifierQualifierList() else {
             return nil
@@ -30,15 +73,15 @@ public class TypeParsing {
             return nil
         }
         
-        let pointerDecl = declarator.pointer()
+        let pointer = declarator.pointer()?.accept(VarDeclarationTypeExtractor())
         
-        var typeName = "\(baseTypeString) \(pointerDecl.map { $0.getText() } ?? "")"
+        var typeName = "\(baseTypeString) \(pointer ?? "")"
         
         if !specQualifier.arcBehaviourSpecifier().isEmpty {
             let arcSpecifiers =
                 specQualifier.arcBehaviourSpecifier().map {
                     $0.getText()
-            }
+                }
             
             typeName = "\(arcSpecifiers.joined(separator: " ")) \(typeName)"
         }

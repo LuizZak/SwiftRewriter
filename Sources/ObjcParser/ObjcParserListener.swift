@@ -415,10 +415,16 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
             return
         }
-        
         guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
             return
         }
+        
+        // Collect structs
+        let listener = StructListener(typeParser: typeParser)
+        let walker = ParseTreeWalker()
+        try? walker.walk(listener, ctx)
+        
+        typedefNode.addChildren(listener.structs)
         
         for typeDeclarator in typeDeclaratorList.declarator() {
             guard let directDeclarator = typeDeclarator.directDeclarator() else {
@@ -611,6 +617,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             }
         }
     }
+    
+    // MARK: - Struct
 }
 
 private class GlobalVariableListener: ObjectiveCParserBaseListener {
@@ -694,6 +702,56 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
             
             return variables
         }
+    }
+}
+
+private class StructListener: ObjectiveCParserBaseListener {
+    var structs: [ObjcStructDeclaration] = []
+    var typeParser: TypeParsing
+    
+    init(typeParser: TypeParsing) {
+        self.typeParser = typeParser
+    }
+    
+    override func enterStructOrUnionSpecifier(_ ctx: ObjectiveCParser.StructOrUnionSpecifierContext) {
+        guard ctx.STRUCT() != nil else {
+            return
+        }
+        
+        let str = ObjcStructDeclaration()
+        
+        if let identifier = ctx.identifier() {
+            let identifier = Identifier(name: identifier.getText())
+            identifier.sourceRuleContext = ctx
+            
+            str.addChild(identifier)
+        }
+        
+        for fieldDeclaration in ctx.fieldDeclaration() {
+            let names
+                = VarDeclarationIdentifierNameExtractor
+                    .extractAll(from: fieldDeclaration)
+            
+            let types
+                = typeParser.parseObjcTypes(inDeclaration: fieldDeclaration)
+            
+            for (type, name) in zip(types, names) {
+                let field = ObjcStructField()
+                
+                let identifier = Identifier(name: name)
+                identifier.sourceRuleContext = ctx
+                
+                let typeNode = TypeNameNode(type: type)
+                typeNode.sourceRuleContext = ctx
+                
+                field.addChild(identifier)
+                field.addChild(typeNode)
+                
+                str.addChild(field)
+            }
+        }
+        
+        structs.append(str)
     }
 }
 

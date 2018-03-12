@@ -85,6 +85,14 @@ open class ASTNode: ASTNodeValue {
         children.insert(node, at: index)
     }
     
+    /// Adds a new series of nodes as children of this node
+    /// - precondition: All of the nodes have no previous parent node (`node.parent == nil`).
+    public func addChildren(_ nodes: [ASTNode]) {
+        for node in nodes {
+            addChild(node)
+        }
+    }
+    
     /// Removes a node as a child of this node
     public func removeChild(_ node: ASTNode) {
         guard node.parent === self else {

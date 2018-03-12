@@ -982,6 +982,16 @@ class SwiftRewriterTests: XCTestCase {
             struct VertexObject {
                 var position: vector_float3
                 var color: packed_float4
+                
+                init() {
+                    position = vector_float3()
+                    color = packed_float4()
+                }
+                
+                init(position: vector_float3, color: packed_float4) {
+                    self.position = position
+                    self.color = color
+                }
             }
             """)
     }
