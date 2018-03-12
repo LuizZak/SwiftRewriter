@@ -1036,7 +1036,7 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class A: NSObject {
                 @objc
-                func finishRequested(_ completion: (() -> Void)!) {
+                override func finishRequested(_ completion: (() -> Void)!) {
                     super.finishRequested { () -> Void in
                         _updateLink.invalidate()
                         _rootController.hideContentController(_logViewController, animation: ViewControllerAnimationNone) { (success: Bool) -> Void in

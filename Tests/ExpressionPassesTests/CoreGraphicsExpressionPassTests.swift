@@ -255,7 +255,20 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                 .dot("offsetBy").call([
                     .labeled("dx", Expression.constant(1)),
                     .labeled("dy", Expression.constant(2))
-                    ])
+                ])
+        ); assertNotifiedChange()
+    }
+    
+    func testCGRectInset() {
+        assertTransformParsed(
+            expression: "CGRectInset(self.frame, 1, 2)",
+            into: Expression
+                .identifier("self")
+                .dot("frame")
+                .dot("insetBy").call([
+                    .labeled("dx", Expression.constant(1)),
+                    .labeled("dy", Expression.constant(2))
+                ])
         ); assertNotifiedChange()
     }
     
@@ -331,7 +344,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                         ])),
                        .labeled("transform",
                                 Expression.identifier("t"))
-                    ])
+                        ])
         ); assertNotifiedChange()
     }
     

@@ -152,6 +152,10 @@ extension CoreGraphicsExpressionPass {
         makeFuncTransform("CGRectOffset", swiftName: "offsetBy",
                           arguments: [.labeled("dx", .asIs), .labeled("dy", .asIs)],
                           firstArgIsInstance: true)
+        // CGRectInset(<r>, <x>, <y>) -> <r>.insetBy(dx: <x>, dy: <y>)
+        makeFuncTransform("CGRectInset", swiftName: "insetBy",
+                          arguments: [.labeled("dx", .asIs), .labeled("dy", .asIs)],
+                          firstArgIsInstance: true)
     }
     
     private func makeInstanceCall(_ name: String,
