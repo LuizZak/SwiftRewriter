@@ -131,24 +131,6 @@ public class IntentionCollector {
         traverser.traverse()
     }
     
-    private func visitTypedefNode(_ node: TypedefNode) {
-        guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
-            return
-        }
-        guard let type = node.type else {
-            return
-        }
-        guard let name = node.identifier?.name else {
-            return
-        }
-        
-        let intent = TypealiasIntention(fromType: type.type, named: name)
-        recordSourceHistory(intention: intent, node: node)
-        intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
-        
-        ctx.addTypealias(intent)
-    }
-    
     private func visitKeywordNode(_ node: KeywordNode) {
         // ivar list accessibility specification
         if let ctx = context.findContext(ofType: IVarListContext.self) {
@@ -165,6 +147,26 @@ public class IntentionCollector {
                 break
             }
         }
+    }
+    
+    // MARK: - Typedef
+    
+    private func visitTypedefNode(_ node: TypedefNode) {
+        guard let ctx = context.findContext(ofType: FileGenerationIntention.self) else {
+            return
+        }
+        guard let type = node.type else {
+            return
+        }
+        guard let name = node.identifier?.name else {
+            return
+        }
+        
+        let intent = TypealiasIntention(fromType: type.type, named: name)
+        recordSourceHistory(intention: intent, node: node)
+        intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+        
+        ctx.addTypealias(intent)
     }
     
     // MARK: - Global Variable
@@ -564,25 +566,35 @@ public class IntentionCollector {
     
     // MARK: - Struct declaration
     private func enterStructDeclarationNode(_ node: ObjcStructDeclaration) {
-        var nodeIdentifier: Identifier?
-        
+        var nodeIdentifiers: [Identifier] = []
         if let identifier = node.identifier {
-            nodeIdentifier = identifier
-        } else if let parentNode = node.parent as? TypedefNode {
-            nodeIdentifier = parentNode.identifier
+            nodeIdentifiers = [identifier]
+        }
+        if let parentNode = node.parent as? TypedefNode {
+            nodeIdentifiers.append(contentsOf: parentNode.childrenMatching(type: Identifier.self))
         }
         
-        guard let identifier = nodeIdentifier else {
+        guard let identifier = nodeIdentifiers.first else {
             return
         }
         
-        let node = StructGenerationIntention(typeName: identifier.name, source: node)
+        let fileIntent = context.findContext(ofType: FileGenerationIntention.self)
         
-        context
-            .findContext(ofType: FileGenerationIntention.self)?
-            .addType(node)
+        let structIntent = StructGenerationIntention(typeName: identifier.name, source: node)
+        recordSourceHistory(intention: structIntent, node: node)
         
-        context.pushContext(node)
+        fileIntent?.addType(structIntent)
+        
+        context.pushContext(structIntent)
+        
+        // Remaining identifiers are used as typealiases
+        for identifier in nodeIdentifiers.dropFirst() {
+            let alias = TypealiasIntention(fromType: .struct(structIntent.typeName),
+                                           named: identifier.name)
+            recordSourceHistory(intention: alias, node: identifier)
+            
+            fileIntent?.addTypealias(alias)
+        }
     }
     
     private func visitStructFieldNode(_ node: ObjcStructField) {
@@ -594,9 +606,11 @@ public class IntentionCollector {
         }
         
         let storage = ValueStorage(type: .void, ownership: .strong, isConstant: false)
-        let ivar =
-            InstanceVariableGenerationIntention(name: identifier.name,
-                                                storage: storage, source: node)
+        let ivar = InstanceVariableGenerationIntention(
+            name: identifier.name,
+            storage: storage,
+            source: node)
+        recordSourceHistory(intention: ivar, node: node)
         ctx.addInstanceVariable(ivar)
         
         delegate?.reportForLazyResolving(intention: ivar)
