@@ -35,6 +35,9 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     /// Block types may specify names, or not (in case of block literals).
     indirect case blockType(name: String, returnType: ObjcType, parameters: [ObjcType])
     
+    /// A fixed array type
+    indirect case fixedArray(ObjcType, length: Int)
+    
     /// Gets the plain string definition for this type.
     /// Always maps to valid objc type
     public var description: String {
@@ -68,6 +71,8 @@ public enum ObjcType: Equatable, CustomStringConvertible {
             return "\(specifiers.joined(separator: " ")) \(type.description)"
         case let .blockType(name, returnType, parameters):
             return "\(returnType)(^\(name))(\(parameters.map { $0.description }.joined(separator: ", ")))"
+        case let .fixedArray(type, length):
+            return "\(type)[\(length)]"
         }
     }
     
@@ -96,6 +101,9 @@ public enum ObjcType: Equatable, CustomStringConvertible {
         case let .blockType(name, returnType, parameters):
             return .blockType(name: name, returnType: returnType.normalized,
                               parameters: parameters.map { $0.normalized })
+            
+        case let .fixedArray(inner, length):
+            return .fixedArray(inner.normalized, length: length)
         default:
             return self
         }
@@ -104,7 +112,7 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     /// Returns true if this is a pointer type
     public var isPointer: Bool {
         switch self {
-        case .pointer, .id, .instancetype, .blockType:
+        case .pointer, .id, .instancetype, .blockType, .fixedArray:
             return true
         case .specified(_, let type):
             return type.isPointer

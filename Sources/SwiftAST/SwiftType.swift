@@ -144,8 +144,9 @@ indirect public enum SwiftType: Equatable {
     case protocolComposition([SwiftType])
     case block(returnType: SwiftType, parameters: [SwiftType])
     case metatype(for: SwiftType)
+    case tuple([SwiftType])
     
-    public static let void = SwiftType.typeName("Void")
+    public static let void = SwiftType.tuple([])
     public static let int = SwiftType.typeName("Int")
     public static let uint = SwiftType.typeName("UInt")
     public static let string = SwiftType.typeName("String")
@@ -201,6 +202,10 @@ extension SwiftType: CustomStringConvertible {
             return types.map { $0.descriptionWithParens }.joined(separator: " & ")
         case let .metatype(innerType):
             return innerType.descriptionWithParens + ".self"
+        case .tuple([]):
+            return "Void"
+        case let .tuple(inner):
+            return "(" + inner.map { $0.description }.joined(separator: ", ") + ")"
         }
     }
     

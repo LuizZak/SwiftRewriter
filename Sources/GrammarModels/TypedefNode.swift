@@ -28,3 +28,7 @@ public class BlockParametersNode: ASTNode, InitializableNode {
         super.init()
     }
 }
+
+public class TypeDeclaratorNode: ASTNode {
+    
+}

@@ -19,6 +19,8 @@ class DefaultTypeMapperTests: XCTestCase {
         expectSwift(.block(returnType: .int, parameters: [.int]), toConvertTo: "(Int) -> Int")
         expectSwift(.optional(.block(returnType: .int, parameters: [.int])), toConvertTo: "((Int) -> Int)?")
         expectSwift(.metatype(for: .int), toConvertTo: "Int.self")
+        expectSwift(.tuple([]), toConvertTo: "Void")
+        expectSwift(.tuple([.int, .int]), toConvertTo: "(Int, Int)")
     }
     
     func testConvertNSObjectSubclassPointersAsInstanceTypes() {
@@ -330,6 +332,11 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.specified(specifiers: ["__weak"], .qualified(.pointer(.struct("NSString")), qualifiers: ["const"])),
                withExplicitNullability: nil,
                toConvertTo: "String?")
+    }
+    
+    func testFixedArray() {
+        expect(.fixedArray(.struct("char"), length: 3),
+               toConvertTo: "(CChar, CChar, CChar)")
     }
 }
 

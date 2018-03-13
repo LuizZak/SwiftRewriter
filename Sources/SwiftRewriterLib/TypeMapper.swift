@@ -247,6 +247,12 @@ public class DefaultTypeMapper: TypeMapper {
             }
             
             return inner + ".self"
+        
+        case .tuple([]):
+            return "Void"
+            
+        case let .tuple(inner):
+            return "(" + inner.map(typeNameString).joined(separator: ", ") + ")"
         }
     }
     
@@ -283,6 +289,13 @@ public class DefaultTypeMapper: TypeMapper {
             
         case let .blockType(_, returnType, parameters):
             return swiftBlockType(forReturnType: returnType, parameters: parameters, context: context)
+            
+        case let .fixedArray(inner, length):
+            if length <= 0 {
+                return .void
+            }
+            
+            return swiftTuple(type: inner, count: length, context: context)
         }
     }
     
@@ -440,6 +453,18 @@ public class DefaultTypeMapper: TypeMapper {
                    parameters: parameters.map { swiftType(forObjcType: $0) })
         
         return swiftType(type: type, withNullability: context.nullability())
+    }
+    
+    private func swiftTuple(type: ObjcType, count: Int, context: TypeMappingContext) -> SwiftType {
+        return swiftTuple(types: .init(repeating: type, count: count), context: context)
+    }
+    
+    private func swiftTuple(types: [ObjcType], context: TypeMappingContext) -> SwiftType {
+        let types = types.map {
+            swiftType(forObjcType: $0, context: context)
+        }
+        
+        return .tuple(types)
     }
     
     private func isPointerOnly(types: [ObjcType]) -> Bool {
