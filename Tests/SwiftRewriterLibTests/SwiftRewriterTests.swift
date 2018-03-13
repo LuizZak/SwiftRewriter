@@ -1380,6 +1380,12 @@ class SwiftRewriterTests: XCTestCase {
         try assertObjcParse(
             objc: """
             @implementation A
+            - (instancetype)initWithThing:(A*)thing {
+                [super initWithThing:thing];
+            }
+            - (instancetype)initWithOtherThing:(A*)thing {
+                [super initWithThing:thing];
+            }
             - (void)a {
                 [super a];
             }
@@ -1394,6 +1400,14 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
+                @objc
+                override init(thing: A!) {
+                    super.init(thing: thing)
+                }
+                @objc
+                init(otherThing thing: A!) {
+                    super.init(thing: thing)
+                }
                 @objc
                 override func a() {
                     super.a()
