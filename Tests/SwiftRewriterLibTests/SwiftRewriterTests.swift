@@ -1052,6 +1052,29 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteAliasedTypedefStructWithPointers() throws {
+        try assertObjcParse(
+            objc: """
+            typedef struct a {
+                int b;
+            } *c;
+            """,
+            swift: """
+            typealias c = UnsafeMutablePointer<a>
+            
+            struct a {
+                var b: CInt
+                
+                init() {
+                    b = 0
+                }
+                init(b: CInt) {
+                    self.b = b
+                }
+            }
+            """)
+    }
+    
     func testRewriteFuncDeclaration() throws {
         try assertObjcParse(
             objc: """
