@@ -90,69 +90,55 @@ class InternalSwiftWriter {
         let out = file.outputTarget()
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         let classExtensions = fileIntent.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
+        let structs = fileIntent.typeIntentions.compactMap { $0 as? StructGenerationIntention }
         let protocols = fileIntent.protocolIntentions
-        var addSeparator = false
+        
+        /// Iterates a given list of items on a given block, appending an extra
+        /// empty line if the element count of the list of `> 0`.
+        func iterateWriting<T>(_ elements: [T], do block: (T) -> Void) {
+            for item in elements {
+                block(item)
+            }
+            
+            if !elements.isEmpty {
+                out.output(line: "")
+            }
+        }
         
         // Output imports
         outputImports(fileIntent.importDirectives, target: out)
         
         outputPreprocessorDirectives(fileIntent.preprocessorDirectives, target: out)
         
-        for typeali in fileIntent.typealiasIntentions {
+        iterateWriting(fileIntent.typealiasIntentions) { typeali in
             outputTypealias(typeali, target: out)
-            addSeparator = true
         }
         
-        if addSeparator {
-            out.output(line: "")
-            addSeparator = false
-        }
-        
-        for en in fileIntent.enumIntentions {
+        iterateWriting(fileIntent.enumIntentions) { en in
             outputEnum(en, target: out)
-            addSeparator = true
         }
         
-        if addSeparator {
-            out.output(line: "")
-            addSeparator = false
+        iterateWriting(structs) { str in
+            outputStruct(str, target: out)
         }
         
-        for varDef in fileIntent.globalVariableIntentions {
+        iterateWriting(fileIntent.globalVariableIntentions) { varDef in
             outputVariableDeclaration(varDef, target: out)
-            addSeparator = true
         }
         
-        if addSeparator {
-            out.output(line: "")
-            addSeparator = false
-        }
-        
-        for funcDef in fileIntent.globalFunctionIntentions {
+        iterateWriting(fileIntent.globalFunctionIntentions) { funcDef in
             outputFunctionDeclaration(funcDef, target: out)
-            addSeparator = true
         }
         
-        if addSeparator {
-            out.output(line: "")
-            addSeparator = false
-        }
-        
-        for prot in protocols {
+        iterateWriting(protocols) { prot in
             outputProtocol(prot, target: out)
-            addSeparator = true
         }
         
-        if addSeparator {
-            out.output(line: "")
-            addSeparator = false
-        }
-        
-        for cls in classes {
+        iterateWriting(classes) { cls in
             outputClass(cls, target: out)
         }
         
-        for cls in classExtensions {
+        iterateWriting(classExtensions) { cls in
             outputClassExtension(cls, target: out)
         }
         
@@ -235,6 +221,13 @@ class InternalSwiftWriter {
         }
         
         target.output(line: "}")
+    }
+    
+    func outputStruct(_ str: StructGenerationIntention, target: RewriterOutputTarget) {
+        target.outputInlineWithSpace("struct", style: .keyword)
+        target.outputInline(str.typeName, style: .typeName)
+        
+        outputTypeBodyCommon(str, target: target)
     }
     
     func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention,
@@ -328,7 +321,7 @@ class InternalSwiftWriter {
         target.outputInlineWithSpace("extension", style: .keyword)
         target.outputInline(cls.typeName, style: .typeName)
         
-        outputClassBodyCommon(cls, target: target)
+        outputTypeBodyCommon(cls, target: target)
     }
     
     private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
@@ -341,13 +334,13 @@ class InternalSwiftWriter {
         target.outputInlineWithSpace("class", style: .keyword)
         target.outputInline(cls.typeName, style: .typeName)
         
-        outputClassBodyCommon(cls, target: target)
+        outputTypeBodyCommon(cls, target: target)
     }
     
-    private func outputClassBodyCommon(_ cls: BaseClassIntention, target: RewriterOutputTarget) {
+    private func outputTypeBodyCommon(_ type: TypeGenerationIntention, target: RewriterOutputTarget) {
         // Figure out inheritance clauses
         var inheritances: [String] = []
-        if let cls = cls as? ClassGenerationIntention {
+        if let cls = type as? ClassGenerationIntention {
             if let sup = cls.superclassName {
                 inheritances.append(sup)
             } else if !options.omitObjcCompatibility {
@@ -356,7 +349,7 @@ class InternalSwiftWriter {
                 inheritances.append("NSObject")
             }
         }
-        inheritances.append(contentsOf: cls.protocols.map { p in p.protocolName })
+        inheritances.append(contentsOf: type.protocols.map { p in p.protocolName })
         
         if !inheritances.isEmpty {
             target.outputInline(": ")
@@ -375,31 +368,36 @@ class InternalSwiftWriter {
         target.outputInline("{")
         target.outputLineFeed()
         target.idented {
-            for ivar in cls.instanceVariables {
-                outputInstanceVar(ivar, target: target)
+            var hasFieldsOrProperties = false
+            if let ivarContainer = type as? InstanceVariableContainerIntention {
+                for ivar in ivarContainer.instanceVariables {
+                    outputInstanceVar(ivar, target: target)
+                    hasFieldsOrProperties = true
+                }
             }
-            for prop in cls.properties {
-                outputProperty(prop, selfType: cls, target: target)
+            for prop in type.properties {
+                outputProperty(prop, selfType: type, target: target)
+                hasFieldsOrProperties = true
             }
             
-            if (!cls.instanceVariables.isEmpty || !cls.properties.isEmpty) && !cls.methods.isEmpty {
+            if hasFieldsOrProperties && (!type.constructors.isEmpty || !type.methods.isEmpty) {
                 target.output(line: "")
             }
             
             // Output initializers
-            for ctor in cls.constructors {
-                outputInitMethod(ctor, selfType: cls, target: target)
+            for ctor in type.constructors {
+                outputInitMethod(ctor, selfType: type, target: target)
             }
             
-            for method in cls.methods {
+            for method in type.methods {
                 // Dealloc methods are treated differently
                 // TODO: Create a separate GenerationIntention entirely for dealloc
                 // methods and detect them during SwiftRewriter's parsing with
                 // IntentionPass's instead of postponing to here.
                 if method.signature.name == "dealloc" && method.signature.parameters.isEmpty {
-                    outputDeinit(method, selfType: cls, target: target)
+                    outputDeinit(method, selfType: type, target: target)
                 } else {
-                    outputMethod(method, selfType: cls, target: target)
+                    outputMethod(method, selfType: type, target: target)
                 }
             }
         }
@@ -604,7 +602,7 @@ class InternalSwiftWriter {
                                   target: RewriterOutputTarget) {
         outputHistory(for: initMethod, target: target)
         
-        if !options.omitObjcCompatibility {
+        if !options.omitObjcCompatibility && (selfType.kind == .class || selfType.kind == .protocol) {
             target.output(line: "@objc", style: .keyword)
         }
         target.outputIdentation()
@@ -615,8 +613,7 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
         
-        // Emit required "override" keyword
-        if initMethod.parent is ClassGenerationIntention && initMethod.parameters.isEmpty {
+        if initMethod.isOverride {
             target.outputInlineWithSpace("override", style: .keyword)
         }
         

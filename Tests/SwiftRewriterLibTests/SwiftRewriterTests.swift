@@ -441,6 +441,7 @@ class SwiftRewriterTests: XCTestCase {
                     self.thing()
                 }
             }
+            
             // MARK: -
             @objc
             extension MyClass: MyDelegate {
@@ -987,7 +988,6 @@ class SwiftRewriterTests: XCTestCase {
                     position = vector_float3()
                     color = packed_float4()
                 }
-                
                 init(position: vector_float3, color: packed_float4) {
                     self.position = position
                     self.color = color

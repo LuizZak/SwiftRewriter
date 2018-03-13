@@ -1,10 +1,10 @@
 /// An Objective-C `struct` typedef declaration.
-public class ObjcStructDeclaration: ASTNode, InitializableNode {
+public final class ObjcStructDeclaration: ASTNode, InitializableNode {
     public var fields: [ObjcStructField] {
         return childrenMatching()
     }
     
-    public var name: Identifier? {
+    public var identifier: Identifier? {
         return firstChild()
     }
     
@@ -13,15 +13,8 @@ public class ObjcStructDeclaration: ASTNode, InitializableNode {
     }
 }
 
-public class ObjcStructField: ASTNode, InitializableNode {
-    public var name: Identifier? {
-        return firstChild()
-    }
-    public var type: TypeNameNode? {
-        return firstChild()
-    }
-    
+public final class ObjcStructField: IVarDeclaration {
     public required init() {
-        super.init(location: .invalid, existsInSource: true)
+        super.init()
     }
 }

@@ -719,6 +719,7 @@ private class StructListener: ObjectiveCParserBaseListener {
         }
         
         let str = ObjcStructDeclaration()
+        str.sourceRuleContext = ctx
         
         if let identifier = ctx.identifier() {
             let identifier = Identifier(name: identifier.getText())
@@ -737,6 +738,7 @@ private class StructListener: ObjectiveCParserBaseListener {
             
             for (type, name) in zip(types, names) {
                 let field = ObjcStructField()
+                field.sourceRuleContext = fieldDeclaration
                 
                 let identifier = Identifier(name: name)
                 identifier.sourceRuleContext = ctx

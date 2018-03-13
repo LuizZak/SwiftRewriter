@@ -23,7 +23,7 @@ public class NodeCreationContext {
     
     /// Gets the current context node as a given node type.
     /// Returns nil, if `topmostNode` is nil or if it is not castable to `T`.
-    public func currentContextNode<T: ASTNodeValue>(as node: T.Type = T.self) -> T? {
+    public func currentContextNode<T: ASTNode>(as node: T.Type = T.self) -> T? {
         return topmostNode as? T
     }
     

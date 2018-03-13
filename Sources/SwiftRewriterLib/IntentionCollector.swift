@@ -44,6 +44,8 @@ public class IntentionCollector {
                 self.enterObjcClassImplementationNode(n)
             case let n as ObjcClassCategoryImplementation:
                 self.enterObjcClassCategoryImplementationNode(n)
+            case let n as ObjcStructDeclaration:
+                self.enterStructDeclarationNode(n)
             case let n as ProtocolDeclaration:
                 self.enterProtocolDeclarationNode(n)
             case let n as IVarsList:
@@ -77,6 +79,9 @@ public class IntentionCollector {
             case let n as SuperclassName:
                 self.visitObjcClassSuperclassName(n)
                 
+            case let n as ObjcStructField:
+                self.visitStructFieldNode(n)
+                
             case let n as IVarDeclaration:
                 self.visitObjcClassIVarDeclarationNode(n)
                 
@@ -108,6 +113,8 @@ public class IntentionCollector {
                 self.exitObjcClassImplementationNode(n)
             case let n as ObjcClassCategoryImplementation:
                 self.exitObjcClassCategoryImplementationNode(n)
+            case let n as ObjcStructDeclaration:
+                self.exitStructDeclarationNode(n)
             case let n as ProtocolDeclaration:
                 self.exitProtocolDeclarationNode(n)
             case let n as IVarsList:
@@ -555,6 +562,56 @@ public class IntentionCollector {
         context.popContext() // GlobalFunctionGenerationIntention
     }
     
+    // MARK: - Struct declaration
+    private func enterStructDeclarationNode(_ node: ObjcStructDeclaration) {
+        var nodeIdentifier: Identifier?
+        
+        if let identifier = node.identifier {
+            nodeIdentifier = identifier
+        } else if let parentNode = node.parent as? TypedefNode {
+            nodeIdentifier = parentNode.identifier
+        }
+        
+        guard let identifier = nodeIdentifier else {
+            return
+        }
+        
+        let node = StructGenerationIntention(typeName: identifier.name, source: node)
+        
+        context
+            .findContext(ofType: FileGenerationIntention.self)?
+            .addType(node)
+        
+        context.pushContext(node)
+    }
+    
+    private func visitStructFieldNode(_ node: ObjcStructField) {
+        guard let ctx = context.currentContext(as: StructGenerationIntention.self) else {
+            return
+        }
+        guard let identifier = node.identifier else {
+            return
+        }
+        
+        let storage = ValueStorage(type: .void, ownership: .strong, isConstant: false)
+        let ivar =
+            InstanceVariableGenerationIntention(name: identifier.name,
+                                                storage: storage, source: node)
+        ctx.addInstanceVariable(ivar)
+        
+        delegate?.reportForLazyResolving(intention: ivar)
+    }
+    
+    private func exitStructDeclarationNode(_ node: ObjcStructDeclaration) {
+        guard node.identifier != nil else {
+            return
+        }
+        
+        context.popContext() // ObjcStructDeclaration
+    }
+}
+
+extension IntentionCollector {
     private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
         guard let file = node.originalSource?.filePath, let rule = node.sourceRuleContext?.start else {
             return

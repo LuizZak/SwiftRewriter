@@ -361,8 +361,25 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
             return nil
         }
         
-        return children.map {
-            $0.getText()
-        }.joined(separator: " ")
+        var output = ""
+        
+        for (i, child) in children.enumerated() {
+            if i > 0 {
+                output += " "
+            }
+            
+            if let typeSpecifier = child as? Parser.TypeSpecifierContext {
+                if typeSpecifier.structOrUnionSpecifier() != nil {
+                    continue
+                }
+                if typeSpecifier.enumSpecifier() != nil {
+                    continue
+                }
+            }
+            
+            output += child.getText()
+        }
+        
+        return output
     }
 }

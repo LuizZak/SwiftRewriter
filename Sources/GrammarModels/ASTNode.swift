@@ -2,23 +2,8 @@ import Foundation
 import Antlr4
 import ObjcParserAntlr
 
-/// A protocol wrapping node types
-public protocol ASTNodeValue {
-    /// Location for this node
-    var location: SourceLocation { get }
-    
-    /// Trivia leading up to this node
-    var leadingTrivia: Trivia? { get }
-    
-    /// Trivia leading after this node
-    var trailingTrivia: Trivia? { get }
-    
-    /// Parent node value for this node
-    var parentNode: ASTNodeValue? { get }
-}
-
 /// Base node type
-open class ASTNode: ASTNodeValue {
+open class ASTNode {
     /// Location for this node
     public var location: SourceLocation
     
@@ -34,9 +19,6 @@ open class ASTNode: ASTNodeValue {
     
     /// Parent node for this node
     public weak var parent: ASTNode?
-    public var parentNode: ASTNodeValue? {
-        return parent
-    }
     
     /// Whether this node exists in the original source code or was synthesized
     /// (for syntax error correction etc.)
@@ -157,7 +139,7 @@ open class ASTNode: ASTNodeValue {
 }
 
 /// Describes a node with a parameterless `init()`
-public protocol InitializableNode: ASTNodeValue {
+public protocol InitializableNode {
     init()
 }
 

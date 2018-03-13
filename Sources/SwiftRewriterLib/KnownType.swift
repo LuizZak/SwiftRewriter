@@ -42,6 +42,8 @@ public enum KnownTypeKind {
     case `protocol`
     /// An enumeration type
     case `enum`
+    /// A struct type
+    case `struct`
 }
 
 /// Defines the known supertype of a `KnownType`

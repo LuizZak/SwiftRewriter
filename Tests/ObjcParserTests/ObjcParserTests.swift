@@ -320,9 +320,10 @@ class ObjcParserTests: XCTestCase {
         let defNode: TypedefNode? = node.firstChild()
         let structNode: ObjcStructDeclaration? = defNode?.firstChild()
         let fields = structNode?.childrenMatching(type: ObjcStructField.self)
+        
         XCTAssertNotNil(structNode)
         XCTAssertNotNil(fields?[0])
-        XCTAssertEqual(fields?[0].name?.name, "field")
+        XCTAssertEqual(fields?[0].identifier?.name, "field")
         XCTAssertEqual(fields?[0].type?.type, ObjcType.struct("int"))
     }
     
