@@ -442,8 +442,8 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     }
     
     public override func isClassInstanceType(_ typeName: String) -> Bool {
-        if intentions.typeIntentions().contains(where: { $0.typeName == typeName }) {
-            return true
+        if let type = intentions.typeIntentions().first(where: { $0.typeName == typeName }) {
+            return type.kind == .class || type.kind == .protocol
         }
         
         return super.isClassInstanceType(typeName)

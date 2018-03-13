@@ -68,6 +68,11 @@ public class FileGenerationIntention: Intention {
         return typeIntentions.compactMap { $0 as? EnumGenerationIntention }
     }
     
+    /// Gets the structs to create on this file.
+    public var structIntentions: [StructGenerationIntention] {
+        return typeIntentions.compactMap { $0 as? StructGenerationIntention }
+    }
+    
     /// Gets the typealias intentions to create on this file.
     public private(set) var typealiasIntentions: [TypealiasIntention] = []
     

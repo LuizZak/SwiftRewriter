@@ -64,6 +64,11 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                 impl.addTypealias(alias)
             }
             
+            header.structIntentions.forEach { alias in
+                header.removeTypes(where: { $0 === alias })
+                impl.addType(alias)
+            }
+            
             header.globalVariableIntentions.forEach { gvar in
                 header.removeGlobalVariables(where: { $0 === gvar })
                 

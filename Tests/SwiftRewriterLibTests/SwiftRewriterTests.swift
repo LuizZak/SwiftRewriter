@@ -977,7 +977,38 @@ class SwiftRewriterTests: XCTestCase {
             typedef struct {
                 vector_float3 position;
                 packed_float4 color;
+                int offset;
             } VertexObject;
+            """
+            , swift: """
+            struct VertexObject {
+                var position: vector_float3
+                var color: packed_float4
+                var offset: CInt
+                
+                init() {
+                    position = vector_float3()
+                    color = packed_float4()
+                    offset = 0
+                }
+                init(position: vector_float3, color: packed_float4, offset: CInt) {
+                    self.position = position
+                    self.color = color
+                    self.offset = offset
+                }
+            }
+            """)
+    }
+    
+    func testRewriterPointerToStructTypeDef() throws {
+        try assertObjcParse(
+            objc: """
+            typedef struct {
+                vector_float3 position;
+                packed_float4 color;
+            } VertexObject;
+
+            VertexObject *vertedObject;
             """
             , swift: """
             struct VertexObject {
@@ -993,6 +1024,8 @@ class SwiftRewriterTests: XCTestCase {
                     self.color = color
                 }
             }
+
+            var vertedObject: UnsafeMutablePointer<VertexObject>!
             """)
     }
     

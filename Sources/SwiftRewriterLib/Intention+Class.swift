@@ -41,6 +41,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         
         instanceVariables.append(intention)
         intention.parent = self
+        intention.type = self
     }
     
     public func removeInstanceVariable(named name: String) {
@@ -48,6 +49,7 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
             return
         }
         
+        instanceVariables[index].type = nil
         instanceVariables[index].parent = nil
         instanceVariables.remove(at: index)
     }

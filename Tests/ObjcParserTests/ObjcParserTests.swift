@@ -66,6 +66,11 @@ class ObjcParserTests: XCTestCase {
                 MyEnumValue1
             };
 
+            typedef struct {
+                int a;
+                int b;
+            } A;
+
             void aFunc(int a, int b, ...);
 
             void anotherFunc(int a, int b, ...) {

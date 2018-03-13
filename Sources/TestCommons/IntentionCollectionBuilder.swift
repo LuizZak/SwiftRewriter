@@ -181,6 +181,18 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func createStruct(
+        withName name: String,
+        initializer: (TypeBuilder<StructGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
+        
+        let structIntention = StructGenerationIntention(typeName: name)
+        
+        innerBuildTypeWithClosure(type: structIntention, initializer: initializer)
+        
+        return self
+    }
+    
+    @discardableResult
     public func addPreprocessorDirective(_ directive: String) -> FileIntentionBuilder {
         intention.preprocessorDirectives.append(directive)
         
@@ -347,7 +359,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     }
 }
 
-public extension TypeBuilder where T: BaseClassIntention {
+public extension TypeBuilder where T: InstanceVariableContainerIntention {
     @discardableResult
     public func createInstanceVariable(named name: String, type: SwiftType) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
@@ -357,7 +369,9 @@ public extension TypeBuilder where T: BaseClassIntention {
         
         return self
     }
-    
+}
+
+public extension TypeBuilder where T: BaseClassIntention {
     @discardableResult
     public func createConformance(protocolName: String) -> TypeBuilder {
         let prot = ProtocolInheritanceIntention(protocolName: protocolName)

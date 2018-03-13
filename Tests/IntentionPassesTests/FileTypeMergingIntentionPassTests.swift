@@ -510,6 +510,23 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files.first?.globalFunctionIntentions.count, 1)
     }
     
+    func testMovesStructsToImplementationWhenAvailable() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createStruct(withName: "a")
+                }.createFile(named: "A.m")
+                .build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let files = intentions.fileIntentions()
+        XCTAssertEqual(files.count, 1)
+        XCTAssertEqual(files.first?.sourcePath, "A.m")
+        XCTAssertEqual(files.first?.structIntentions.count, 1)
+    }
+    
     func testDontDuplicateGlobalFunctionsDeclarationsWhenMovingFromHeaderToImplementation() {
         let intentions =
             IntentionCollectionBuilder()

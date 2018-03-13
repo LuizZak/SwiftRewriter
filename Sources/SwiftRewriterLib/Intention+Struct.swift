@@ -15,6 +15,7 @@ public class StructGenerationIntention: TypeGenerationIntention, InstanceVariabl
         
         instanceVariables.append(intention)
         intention.parent = self
+        intention.type = self
     }
     
     public func removeInstanceVariable(named name: String) {
@@ -22,6 +23,7 @@ public class StructGenerationIntention: TypeGenerationIntention, InstanceVariabl
             return
         }
         
+        instanceVariables[index].type = nil
         instanceVariables[index].parent = nil
         instanceVariables.remove(at: index)
     }

@@ -490,7 +490,10 @@ class InternalSwiftWriter {
         target.outputInline(": ")
         target.outputInline(typeName, style: .typeName)
         
-        outputInitialZeroValueForType(ivar.type, target: target)
+        // Structs don't require init-to-zero
+        if ivar.type?.kind != .struct {
+            outputInitialZeroValueForType(ivar.type, target: target)
+        }
         
         target.outputLineFeed()
     }
