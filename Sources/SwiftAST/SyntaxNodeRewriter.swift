@@ -17,8 +17,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: An AssignmentExpression to visit
     /// - Returns: Result of visiting this assignment operation node
     open func visitAssignment(_ exp: AssignmentExpression) -> Expression {
-        exp.lhs = exp.lhs.accept(self)
-        exp.rhs = exp.rhs.accept(self)
+        exp.lhs = visitExpression(exp.lhs)
+        exp.rhs = visitExpression(exp.rhs)
         
         return exp
     }
@@ -28,8 +28,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A BinaryExpression to visit
     /// - Returns: Result of visiting this binary operation node
     open func visitBinary(_ exp: BinaryExpression) -> Expression {
-        exp.lhs = exp.lhs.accept(self)
-        exp.rhs = exp.rhs.accept(self)
+        exp.lhs = visitExpression(exp.lhs)
+        exp.rhs = visitExpression(exp.rhs)
         
         return exp
     }
@@ -39,7 +39,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A UnaryExpression to visit
     /// - Returns: Result of visiting this unary operation node
     open func visitUnary(_ exp: UnaryExpression) -> Expression {
-        exp.exp = exp.exp.accept(self)
+        exp.exp = visitExpression(exp.exp)
         
         return exp
     }
@@ -51,7 +51,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     public func visitSizeOf(_ exp: SizeOfExpression) -> Expression {
         switch exp.value {
         case .expression(let innerExp):
-            exp.value = .expression(innerExp.accept(self))
+            exp.value = .expression(visitExpression(innerExp))
         case .type: break
         }
         
@@ -63,7 +63,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A PrefixExpression to visit
     /// - Returns: Result of visiting this prefix operation node
     open func visitPrefix(_ exp: PrefixExpression) -> Expression {
-        exp.exp = exp.exp.accept(self)
+        exp.exp = visitExpression(exp.exp)
         
         return exp
     }
@@ -73,18 +73,18 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A PostfixExpression to visit
     /// - Returns: Result of visiting this postfix operation node
     open func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        exp.exp = exp.exp.accept(self)
+        exp.exp = visitExpression(exp.exp)
         
         let wasOptional = exp.op.hasOptionalAccess
         
         switch exp.op {
         case let fc as FunctionCallPostfix:
             exp.op = .functionCall(arguments: fc.arguments.map {
-                return FunctionArgument(label: $0.label, expression: $0.expression.accept(self))
+                return FunctionArgument(label: $0.label, expression: visitExpression($0.expression))
             })
             
         case let sub as SubscriptPostfix:
-            exp.op = .subscript(sub.expression.accept(self))
+            exp.op = .subscript(visitExpression(sub.expression))
             
         default:
             break
@@ -108,7 +108,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A ParensExpression to visit
     /// - Returns: Result of visiting this parenthesis node
     open func visitParens(_ exp: ParensExpression) -> Expression {
-        exp.exp = exp.exp.accept(self)
+        exp.exp = visitExpression(exp.exp)
         
         return exp
     }
@@ -126,7 +126,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A CastExpression to visit
     /// - Returns: Result of visiting this cast node
     open func visitCast(_ exp: CastExpression) -> Expression {
-        exp.exp = exp.exp.accept(self)
+        exp.exp = visitExpression(exp.exp)
         
         return exp
     }
@@ -147,7 +147,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting this dictionary literal node
     open func visitDictionary(_ exp: DictionaryLiteralExpression) -> Expression {
         exp.pairs = exp.pairs.map { pair in
-            ExpressionDictionaryPair(key: pair.key.accept(self), value: pair.value.accept(self))
+            ExpressionDictionaryPair(key: visitExpression(pair.key), value: visitExpression(pair.value))
         }
         
         return exp
@@ -158,7 +158,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A BlockLiteralExpression to visit
     /// - Returns: Result of visiting this block expression node
     open func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
-        _=exp.body.accept(self)
+        _=visitStatement(exp.body)
         
         return exp
     }
@@ -168,9 +168,9 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter exp: A TernaryExpression to visit
     /// - Returns: Result of visiting this ternary expression node
     open func visitTernary(_ exp: TernaryExpression) -> Expression {
-        exp.exp = exp.exp.accept(self)
-        exp.ifTrue = exp.ifTrue.accept(self)
-        exp.ifFalse = exp.ifFalse.accept(self)
+        exp.exp = visitExpression(exp.exp)
+        exp.ifTrue = visitExpression(exp.ifTrue)
+        exp.ifFalse = visitExpression(exp.ifFalse)
         
         return exp
     }
@@ -190,7 +190,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     open func visitPattern(_ ptn: Pattern) -> Pattern {
         switch ptn {
         case .expression(let exp):
-            return .expression(exp.accept(self))
+            return .expression(visitExpression(exp))
         case .tuple(let patterns):
             return .tuple(patterns.map(visitPattern))
         case .identifier:
@@ -229,9 +229,9 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: An IfStatement to visit
     /// - Returns: Result of visiting the `if` statement node
     open func visitIf(_ stmt: IfStatement) -> Statement {
-        stmt.exp = stmt.exp.accept(self)
-        _=stmt.body.accept(self)
-        _=stmt.elseBody?.accept(self)
+        stmt.exp = visitExpression(stmt.exp)
+        _=visitStatement(stmt.body)
+        _=stmt.elseBody.map(visitStatement)
         
         return stmt
     }
@@ -241,7 +241,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A SwitchStatement to visit
     /// - Returns: Result of visiting the `switch` statement node
     open func visitSwitch(_ stmt: SwitchStatement) -> Statement {
-        stmt.exp = stmt.exp.accept(self)
+        stmt.exp = visitExpression(stmt.exp)
         
         stmt.cases = stmt.cases.map {
             return SwitchCase(patterns: $0.patterns.map(visitPattern),
@@ -259,8 +259,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A WhileStatement to visit
     /// - Returns: Result of visiting the `while` statement node
     open func visitWhile(_ stmt: WhileStatement) -> Statement {
-        stmt.exp = stmt.exp.accept(self)
-        _=stmt.body.accept(self)
+        stmt.exp = visitExpression(stmt.exp)
+        _=visitStatement(stmt.body)
         
         return stmt
     }
@@ -271,8 +271,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Returns: Result of visiting the `for` node
     open func visitFor(_ stmt: ForStatement) -> Statement {
         stmt.pattern = visitPattern(stmt.pattern)
-        stmt.exp = stmt.exp.accept(self)
-        _=stmt.body.accept(self)
+        stmt.exp = visitExpression(stmt.exp)
+        _=visitStatement(stmt.body)
         
         return stmt
     }
@@ -282,7 +282,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A DoStatement to visit
     /// - Returns: Result of visiting the `do` statement
     open func visitDo(_ stmt: DoStatement) -> Statement {
-        _=stmt.body.accept(self)
+        _=visitStatement(stmt.body)
         
         return stmt
     }
@@ -292,7 +292,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A DeferStatement to visit
     /// - Returns: Result of visiting the `defer` statement
     open func visitDefer(_ stmt: DeferStatement) -> Statement {
-        _=stmt.body.accept(self)
+        _=visitStatement(stmt.body)
         
         return stmt
     }
@@ -302,7 +302,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A ReturnStatement to visit
     /// - Returns: Result of visiting the `return` statement
     open func visitReturn(_ stmt: ReturnStatement) -> Statement {
-        stmt.exp = stmt.exp?.accept(self)
+        stmt.exp = stmt.exp.map(visitExpression)
         
         return stmt
     }
@@ -340,7 +340,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     open func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         for i in 0..<stmt.decl.count {
             stmt.decl[i].initialization =
-                stmt.decl[i].initialization?.accept(self)
+                stmt.decl[i].initialization.map(visitExpression)
         }
         
         return stmt

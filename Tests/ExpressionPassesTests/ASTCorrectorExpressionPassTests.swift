@@ -11,13 +11,35 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         sut = ASTCorrectorExpressionPass()
     }
     
+    /// Tests the corrector uses information exposed on `Expression.expectedType`
+    /// to fix expressions expected to resolve as booleans
+    func testCorrectsExpectedBooleanBinaryExpressions() {
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = expMaker()
+        exp.resolvedType = .optional(.bool)
+        exp.expectedType = .bool
+        
+        assertTransform(
+            // a.b
+            expression: exp,
+            // a.b == true
+            into: expMaker().binary(op: .equals, rhs: .constant(true))
+        )
+    }
+    
     /// On general arbitrary boolean expressions (mostly binary expressions over
     /// logical operators, i.e. ||, &&, and unary !)
     func testCorrectsArbitraryBooleanExpressions() {
-        let lhs = Expression.identifier("a")
-        let rhs = Expression.identifier("b")
+        let lhsMaker = { Expression.identifier("a") }
+        let rhsMaker = { Expression.identifier("b") }
+        
+        let lhs = lhsMaker()
+        let rhs = rhsMaker()
         lhs.resolvedType = .optional(.bool)
+        lhs.expectedType = .bool
         rhs.resolvedType = .bool
+        lhs.expectedType = .bool
         
         let exp = lhs.binary(op: .and, rhs: rhs)
         
@@ -26,18 +48,23 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             // (a == true) && b
             into: Expression
-                .binary(lhs: .parens(lhs.binary(op: .equals, rhs: .constant(true))),
+                .binary(lhs: .parens(lhsMaker().binary(op: .equals, rhs: .constant(true))),
                         op: .and,
-                        rhs: rhs)
+                        rhs: rhsMaker())
         )
     }
     
     /// Also correct nil-style boolean expressions
     func testCorrectsArbitraryBooleanExpressionsWithNilChecks() {
-        let lhs = Expression.identifier("a")
-        let rhs = Expression.identifier("b")
+        let lhsMaker = { Expression.identifier("a") }
+        let rhsMaker = { Expression.identifier("b") }
+        
+        let lhs = lhsMaker()
+        let rhs = rhsMaker()
         lhs.resolvedType = .optional(.typeName("a"))
         rhs.resolvedType = .optional(.typeName("b"))
+        lhs.expectedType = .bool
+        rhs.expectedType = .bool
         
         let exp = lhs.binary(op: .and, rhs: rhs)
         
@@ -46,24 +73,27 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             // (a != nil) && (b != nil)
             into: Expression
-                .binary(lhs: .parens(lhs.binary(op: .unequals, rhs: .constant(.nil))),
+                .binary(lhs: .parens(lhsMaker().binary(op: .unequals, rhs: .constant(.nil))),
                         op: .and,
-                        rhs: .parens(rhs.binary(op: .unequals, rhs: .constant(.nil))))
+                        rhs: .parens(rhsMaker().binary(op: .unequals, rhs: .constant(.nil))))
         )
     }
     
     /// Also correct unary boolean checks
     func testCorrectsUnaryExpressions() {
-        let lhs = Expression.identifier("a")
-        lhs.resolvedType = .optional(.typeName("a"))
+        let expMaker = { Expression.identifier("a") }
         
-        let exp = Expression.unary(op: .negate, lhs)
+        let innerExp = expMaker()
+        innerExp.resolvedType = .optional(.typeName("a"))
+        innerExp.expectedType = .bool
+        
+        let exp = Expression.unary(op: .negate, innerExp)
         
         assertTransform(
             // !a
             expression: exp,
             // (a == nil)
-            into: .parens(lhs.binary(op: .equals, rhs: .constant(.nil)))
+            into: .parens(expMaker().binary(op: .equals, rhs: .constant(.nil)))
         )
     }
     
@@ -72,8 +102,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// On if statements, AST Corrector must try to correct the expression so that
     /// it results in a proper boolean statement.
     func testCorrectsIfStatementBooleanExpressions() {
-        let exp = Expression.identifier("a").dot("b")
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = expMaker()
         exp.resolvedType = .optional(.bool)
+        exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -81,7 +114,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (a.b) { }
             statement: stmt,
             // if (a.b == true) { }
-            into: Statement.if(exp.binary(op: .equals, rhs: .constant(true)),
+            into: Statement.if(expMaker().binary(op: .equals, rhs: .constant(true)),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -90,9 +123,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// On boolean expressions that are unary-reversed ("!<exp>"), we simply drop
     /// the unary operator and plug in an inequality to true
     func testCorrectsIfStatementNegatedBooleanExpressions() {
-        let exp = Expression.unary(op: .negate, Expression.identifier("a").dot("b"))
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = Expression.unary(op: .negate, expMaker())
         exp.exp.resolvedType = .optional(.bool)
-        exp.resolvedType = .bool
+        exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -100,7 +135,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (!a.b) { }
             statement: stmt,
             // if (a.b != true) { }
-            into: Statement.if(Expression.identifier("a").dot("b").binary(op: .unequals, rhs: .constant(true)),
+            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(true)),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -109,8 +144,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// In Objective-C, numbers can be used in place of an if expression statement,
     /// and the expression evaluates to true if the number is different from 0
     func testCorrectsIfStatementWithNumericExpression() {
-        let exp = Expression.identifier("num")
+        let expMaker = { Expression.identifier("num") }
+        
+        let exp = expMaker()
         exp.resolvedType = .int
+        exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -118,7 +156,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (num) { }
             statement: stmt,
             // if (num != 0) { }
-            into: Statement.if(exp.binary(op: .unequals, rhs: .constant(0)),
+            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(0)),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -126,9 +164,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     
     /// Negated numeric expressions simply compare as equals to zero.
     func testCorrectsIfStatementWithNegatedNumericExpression() {
-        let exp = Expression.unary(op: .negate, .identifier("num"))
+        let expMaker = { Expression.unary(op: .negate, .identifier("num")) }
+        
+        let exp = expMaker()
         exp.exp.resolvedType = .int
-        exp.resolvedType = .bool
+        exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -144,8 +184,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     
     /// Same as above, but testing an optional value instead.
     func testCorrectsIfStatementWithNullableNumericExpressions() {
-        let exp = Expression.identifier("num")
+        let expMaker = { Expression.identifier("num") }
+        
+        let exp = expMaker()
         exp.resolvedType = .optional(.implicitUnwrappedOptional(.int))
+        exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -153,7 +196,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (num) { }
             statement: stmt,
             // if (num != 0) { }
-            into: Statement.if(exp.binary(op: .unequals, rhs: .constant(0)),
+            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(0)),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -162,8 +205,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// For otherwise unknown optional expressions, replace check
     /// with an 'if-not-nil'-style check
     func testCorrectsIfStatementWithNullableValue() {
-        let exp = Expression.identifier("obj")
+        let expMaker = { Expression.identifier("obj") }
+        
+        let exp = expMaker()
         exp.resolvedType = .optional(.typeName("NSObject"))
+        exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -171,7 +217,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (obj) { }
             statement: stmt,
             // if (obj != nil) { }
-            into: Statement.if(exp.binary(op: .unequals, rhs: .constant(.nil)),
+            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(.nil)),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -180,9 +226,12 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// For otherwise unknown optional expressions, replace check
     /// with an 'if-nil'-style check
     func testCorrectsIfStatementWithNegatedNullableValue() {
-        let exp = Expression.unary(op: .negate, .identifier("obj"))
-        exp.resolvedType = .bool
+        let expMaker = { Expression.identifier("obj") }
+        
+        let exp = Expression.unary(op: .negate, expMaker())
         exp.exp.resolvedType = .optional(.typeName("NSObject"))
+        exp.expectedType = .bool
+        exp.exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -190,7 +239,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (!obj) { }
             statement: stmt,
             // if (obj == nil) { }
-            into: Statement.if(Expression.identifier("obj").binary(op: .equals, rhs: .constant(.nil)),
+            into: Statement.if(expMaker().binary(op: .equals, rhs: .constant(.nil)),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -198,7 +247,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     
     /// For unknown typed expressions, perform no attempts to correct.
     func testDontCorrectUnknownExpressions() {
-        let exp = Expression.identifier("a").dot("b")
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = expMaker()
+        exp.expectedType = .bool
         
         let stmt = Statement.if(exp, body: [], else: nil)
         
@@ -206,7 +258,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // if (a.b) { }
             statement: stmt,
             // if (a.b == true) { }
-            into: Statement.if(Expression.identifier("a").dot("b"),
+            into: Statement.if(expMaker(),
                                body: [],
                                else: nil)
         ); assertDidNotNotifyChange()
@@ -217,8 +269,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// Just like if statements, on while statements the AST Corrector must try
     /// to correct the expression so that it results in a proper boolean statement.
     func testCorrectsWhileStatementBooleanExpressions() {
-        let exp = Expression.identifier("a").dot("b")
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = expMaker()
         exp.resolvedType = .optional(.bool)
+        exp.expectedType = .bool
         
         let stmt = Statement.while(exp, body: [])
         
@@ -226,7 +281,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (a.b) { }
             statement: stmt,
             // while (a.b == true) { }
-            into: Statement.while(exp.binary(op: .equals, rhs: .constant(true)),
+            into: Statement.while(expMaker().binary(op: .equals, rhs: .constant(true)),
                                   body: [])
         ); assertNotifiedChange()
     }
@@ -234,8 +289,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// In Objective-C, numbers can be used in place of a while expression statement,
     /// and the expression evaluates to true if the number is different from 0
     func testCorrectsWhileStatementWithNumericExpression() {
-        let exp = Expression.identifier("num")
+        let expMaker = { Expression.identifier("num") }
+        
+        let exp = expMaker()
         exp.resolvedType = .int
+        exp.expectedType = .bool
         
         let stmt = Statement.while(exp, body: [])
         
@@ -243,15 +301,18 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (num) { }
             statement: stmt,
             // while (num != 0) { }
-            into: Statement.while(exp.binary(op: .unequals, rhs: .constant(0)),
+            into: Statement.while(expMaker().binary(op: .unequals, rhs: .constant(0)),
                                   body: [])
         ); assertNotifiedChange()
     }
     
     /// Same as above, but testing an optional value instead.
     func testCorrectswhileStatementWithNullableNumericExpressions() {
-        let exp = Expression.identifier("num")
+        let expMaker = { Expression.identifier("num") }
+        
+        let exp = expMaker()
         exp.resolvedType = .optional(.implicitUnwrappedOptional(.int))
+        exp.expectedType = .bool
         
         let stmt = Statement.while(exp, body: [])
         
@@ -259,7 +320,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (num) { }
             statement: stmt,
             // while (num != 0) { }
-            into: Statement.while(exp.binary(op: .unequals, rhs: .constant(0)),
+            into: Statement.while(expMaker().binary(op: .unequals, rhs: .constant(0)),
                                   body: [])
         ); assertNotifiedChange()
     }
@@ -267,8 +328,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// For otherwise unknown optional expressions, replace check
     /// with an 'while-not-nil'-style check
     func testCorrectswhileStatementWithNullableValue() {
-        let exp = Expression.identifier("obj")
+        let expMaker = { Expression.identifier("obj") }
+        
+        let exp = expMaker()
         exp.resolvedType = .optional(.typeName("NSObject"))
+        exp.expectedType = .bool
         
         let stmt = Statement.while(exp, body: [])
         
@@ -276,14 +340,17 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (obj) { }
             statement: stmt,
             // while (obj != nil) { }
-            into: Statement.while(exp.binary(op: .unequals, rhs: .constant(.nil)),
+            into: Statement.while(expMaker().binary(op: .unequals, rhs: .constant(.nil)),
                                   body: [])
         ); assertNotifiedChange()
     }
     
     /// For unknown typed expressions, perform no attempts to correct.
     func testDontCorrectUnknownExpressionsOnWhile() {
-        let exp = Expression.identifier("a").dot("b")
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = expMaker()
+        exp.expectedType = .bool
         
         let stmt = Statement.while(exp, body: [])
         
@@ -291,7 +358,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // while (a.b) { }
             statement: stmt,
             // while (a.b == true) { }
-            into: Statement.while(Expression.identifier("a").dot("b"),
+            into: Statement.while(expMaker(),
                                   body: [])
         ); assertDidNotNotifyChange()
     }

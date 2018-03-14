@@ -43,13 +43,13 @@ open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
     open func apply(on statement: Statement, context: SyntaxNodeRewriterPassContext) -> Statement {
         self.context = context
         
-        return statement.accept(self)
+        return visitStatement(statement)
     }
     
     open func apply(on expression: Expression, context: SyntaxNodeRewriterPassContext) -> Expression {
         self.context = context
         
-        return expression.accept(self)
+        return visitExpression(expression)
     }
     
     /// Notifies the context of this syntax rewriter that the rewriter has invoked

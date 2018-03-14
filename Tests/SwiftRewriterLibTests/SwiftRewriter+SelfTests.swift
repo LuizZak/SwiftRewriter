@@ -778,7 +778,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 }
             }
             """,
-             options: ASTWriterOptions(outputExpressionTypes: true))
+            options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
     /// Testa that local variables declared within blocks are scoped within

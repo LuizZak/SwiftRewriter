@@ -148,6 +148,13 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitUnary(_ exp: UnaryExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
+        switch exp.op.category {
+        case .logical:
+            exp.exp.expectedType = .bool
+        default:
+            break
+        }
+        
         _=super.visitUnary(exp)
         
         // Propagte error type
@@ -215,6 +222,15 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        switch exp.op.category {
+        case .logical:
+            exp.lhs.expectedType = .bool
+            exp.rhs.expectedType = .bool
+            
+        default:
+            break
+        }
         
         _=super.visitBinary(exp)
         
@@ -412,6 +428,18 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         return super.visitBlock(exp)
+    }
+    
+    public override func visitIf(_ stmt: IfStatement) -> Statement {
+        stmt.exp.expectedType = .bool
+        
+        return super.visitIf(stmt)
+    }
+    
+    public override func visitWhile(_ stmt: WhileStatement) -> Statement {
+        stmt.exp.expectedType = .bool
+        
+        return super.visitWhile(stmt)
     }
 }
 

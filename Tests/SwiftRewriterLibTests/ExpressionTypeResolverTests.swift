@@ -698,6 +698,47 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(at: \Expression.asPostfix?.functionCall?.arguments[0].expression, expectsType: .int)
     }
+    
+    /// Tests expressions on `if` statements have expectedType set to boolean
+    func testIfStatementSetsExpectedTypeOfExpressionsToBoolean() {
+        _=startScopedTest(with:
+            Statement.if(.constant(0), body: [], else: nil),
+                          sut: ExpressionTypeResolver())
+            .thenAssertExpression(at: \Statement.asIf?.exp, expectsType: .bool)
+    }
+    
+    /// Tests expressions on `while` statements have expectedType set to boolean
+    func testWhileStatementSetsExpectedTypeOfExpressionsToBoolean() {
+        _=startScopedTest(with:
+            Statement.while(.constant(0), body: []),
+                          sut: ExpressionTypeResolver())
+            .thenAssertExpression(at: \Statement.asWhile?.exp, expectsType: .bool)
+    }
+    
+    /// On logical binary operations (i.e. `lhs || rhs`, `lhs && rhs`, etc.),
+    /// expect the type resolver to mark both operands as expecting to be resolved
+    /// as boolean types.
+    func testLogicalBinaryExpressionSetsOperandsToBooleanExpectedTypes() {
+        _=startScopedTest(with: Expression.binary(lhs: .constant(0), op: .and, rhs: .constant(0)),
+                          sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(at: \Expression.asBinary?.lhs, expectsType: .bool)
+            .thenAssertExpression(at: \Expression.asBinary?.rhs, expectsType: .bool)
+        
+        _=startScopedTest(with: Expression.binary(lhs: .constant(0), op: .or, rhs: .constant(0)),
+                          sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(at: \Expression.asBinary?.lhs, expectsType: .bool)
+            .thenAssertExpression(at: \Expression.asBinary?.rhs, expectsType: .bool)
+    }
+    
+    /// Unary `!` operator must expect operand to be a boolean type
+    func testLogicalUnaryOperatorSetsOperandToBooleanExpectedType() {
+        _=startScopedTest(with: Expression.unary(op: .negate, .constant(0)),
+                          sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(at: \Expression.asUnary?.exp, expectsType: .bool)
+    }
 }
 
 // MARK: - Test Building Helpers
