@@ -14,9 +14,6 @@ public protocol ExpressionComponent {
 }
 
 open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringConvertible, CustomReflectable {
-    /// Custom metadata that can be associated with this expression node
-    public var metadata: [String: Any] = [:]
-    
     /// `true` if this expression sub-tree contains only literal-based sub-expressions.
     /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
     /// `.unary`, `.prefix`, `.parens`, and `.ternary` which only feature

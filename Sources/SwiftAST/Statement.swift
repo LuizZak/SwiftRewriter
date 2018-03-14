@@ -1,7 +1,4 @@
 open class Statement: SyntaxNode, Equatable {
-    /// Custom metadata that can be associated with this expression node
-    public var metadata: [String: Any] = [:]
-    
     /// Returns `true` if this statement resolve to an unconditional jump out
     /// of the current context.
     ///

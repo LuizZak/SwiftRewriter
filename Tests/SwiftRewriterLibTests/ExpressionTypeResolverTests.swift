@@ -645,6 +645,59 @@ class ExpressionTypeResolverTests: XCTestCase {
             .definingLocal(name: "value", type: .implicitUnwrappedOptional(.string))
             .thenAssertDefined(localNamed: "a", type: .implicitUnwrappedOptional(.string))
     }
+    
+    /// Tests that on an assignment expression, the right-hand-side of the expression
+    /// is set to expect the type from the left-hand-side.
+    func testAssignmentExpectedType() {
+        _=startScopedTest(with:
+            Expression.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(false)),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "a", type: .int)
+            .resolve()
+            .thenAssertExpression(at: \Expression.asAssignment?.rhs, expectsType: .int)
+    }
+    
+    /// Tests invoking a known selector function sets the parameters to the properly
+    /// expected types
+    func testFunctionParameterExpectedType() {
+        _=startScopedTest(with:
+            Expression.identifier("self").dot("a").call([.constant(false)]),
+                          sut: ExpressionTypeResolver())
+            .definingType(named: "A") { type in
+                type.addingMethod(withSignature:
+                        FunctionSignature(name: "a", parameters: [.init(label: "_", name: "a", type: .int)])
+                    ).build()
+            }
+            .definingIntrinsic(name: "self", type: .typeName("A"))
+            .resolve()
+            .thenAssertExpression(at: \Expression.asPostfix?.functionCall?.arguments[0].expression, expectsType: .int)
+    }
+    
+    /// Tests invoking a block sets the parameters to the properly expected
+    /// types
+    func testBlockParameterExpectedType() {
+        _=startScopedTest(with:
+            Expression.identifier("a").call([.constant(false)]),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "a", type: SwiftType.block(returnType: .void, parameters: [.int]))
+            .resolve()
+            .thenAssertExpression(at: \Expression.asPostfix?.functionCall?.arguments[0].expression, expectsType: .int)
+    }
+    
+    /// Tests invoking a constructor sets the parameters to the properly expected
+    /// types
+    func testConstructorParameterExpectedType() {
+        _=startScopedTest(with:
+            Expression.identifier("A").call([.constant(false)]),
+                          sut: ExpressionTypeResolver())
+            .definingType(named: "A", with: { builder -> KnownType in
+                builder
+                    .addingConstructor(withParameters: [.init(label: "_", name: "a", type: .int)])
+                    .build()
+            })
+            .resolve()
+            .thenAssertExpression(at: \Expression.asPostfix?.functionCall?.arguments[0].expression, expectsType: .int)
+    }
 }
 
 // MARK: - Test Building Helpers
@@ -672,5 +725,11 @@ private extension ExpressionTypeResolverTests {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(resolvedAs: type, file: file, line: line)
+    }
+    
+    func assertExpects(_ exp: Expression, expect type: SwiftType?, file: String = #file, line: Int = #line) {
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(expectsType: type, file: file, line: line)
     }
 }

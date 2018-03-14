@@ -737,4 +737,91 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    /// Tests that when resolving types of block expressions we expose the parameters
+    /// for the block as intrinsics as well
+    func testBlockInvocationArgumentIntrinsics() throws {
+        try assertObjcParse(
+            objc: """
+            typedef void(^_Nonnull Callback)(NSInteger);
+            
+            @interface MyClass
+            @property (nonnull) Callback callback;
+            @end
+            
+            @implementation MyClass
+            - (void)method {
+                self.callback = ^(NSInteger arg) {
+                    (arg);
+                };
+                // Test the intrinsic doesn't leak to outer scopes
+                (arg);
+            }
+            @end
+            """,
+            swift: """
+            typealias Callback = (Int) -> Void
+
+            @objc
+            class MyClass: NSObject {
+                @objc var callback: Callback
+                
+                @objc
+                func method() {
+                    // type: Callback
+                    self.callback = { (arg: Int) -> Void in
+                        // type: Int
+                        (arg)
+                    }
+                    // type: <<error type>>
+                    (arg)
+                }
+            }
+            """,
+             options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    /// Testa that local variables declared within blocks are scoped within
+    /// blocks only.
+    func testBlockInvocationRetainsDefinedLocalsWithinScope() throws {
+        try assertObjcParse(
+            objc: """
+            typedef void(^_Nonnull Callback)();
+            
+            @interface MyClass
+            @property (nonnull) Callback callback;
+            @end
+            
+            @implementation MyClass
+            - (void)method {
+                self.callback = ^() {
+                    NSInteger local;
+                    (local);
+                };
+                (local);
+            }
+            @end
+            """,
+            swift: """
+            typealias Callback = () -> Void
+
+            @objc
+            class MyClass: NSObject {
+                @objc var callback: Callback
+                
+                @objc
+                func method() {
+                    // type: Callback
+                    self.callback = { () -> Void in
+                        var local: Int
+                        // type: Int
+                        (local)
+                    }
+                    // type: <<error type>>
+                    (local)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

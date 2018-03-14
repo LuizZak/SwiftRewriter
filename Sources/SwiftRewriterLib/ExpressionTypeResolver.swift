@@ -33,7 +33,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public func resolveTypes(in statement: Statement) {
         // First, clear all variable definitions found, and their usages too.
         for node in SyntaxNodeSequence(statement: statement, inspectBlocks: true) {
-            if let scoped = node as? CodeScopeStatement {
+            if let scoped = node as? CodeScopeNode {
                 scoped.removeAllDefinitions()
             }
             if let ident = node as? IdentifierExpression {
@@ -199,7 +199,9 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitAssignment(_ exp: AssignmentExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
-        _=super.visitAssignment(exp)
+        exp.lhs = visitExpression(exp.lhs)
+        exp.rhs.expectedType = exp.lhs.resolvedType
+        exp.rhs = visitExpression(exp.rhs)
         
         // Propagte error type
         if exp.lhs.isErrorTyped || exp.rhs.isErrorTyped {
@@ -396,6 +398,21 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         return exp
     }
+    
+    public override func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        // Apply intrinsics
+        for param in exp.parameters {
+            exp.recordDefinition(
+                CodeDefinition(name: param.name,
+                               storage: ValueStorage(type: param.type, ownership: .strong, isConstant: true),
+                               intention: nil)
+            )
+        }
+        
+        return super.visitBlock(exp)
+    }
 }
 
 extension ExpressionTypeResolver {
@@ -549,21 +566,25 @@ private class MemberInvocationResolver {
             guard let metatype = extractMetatype(from: target) else {
                 return postfix.makeErrorTyped()
             }
-            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) != nil else {
+            guard let ctor = typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) else {
                 return postfix.makeErrorTyped()
             }
             
             postfix.resolvedType = metatype
+            
+            matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
             return postfix
         }
         // Direct type constuctor `MyClass([params])`
         if let target = postfix.exp.asIdentifier, let metatype = extractMetatype(from: target) {
-            guard typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) != nil else {
+            guard let ctor = typeSystem.constructor(withArgumentLabels: labels(in: arguments), in: metatype) else {
                 return postfix.makeErrorTyped()
             }
             
             postfix.resolvedType = metatype
+            
+            matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
             return postfix
         }
@@ -584,16 +605,33 @@ private class MemberInvocationResolver {
             postfix.exp.resolvedType = method.signature.swiftClosureType
             postfix.resolvedType = method.signature.returnType
             
+            matchParameterTypes(parameters: method.signature.parameters, callArguments: functionCall.arguments)
+            
             return postfix
         }
         // Local closure/global function type
         if let target = postfix.exp.asIdentifier,
             let type = target.resolvedType,
-            case .block(let ret, _) = type.deepUnwrapped {
+            case let .block(ret, args) = type.deepUnwrapped {
+            
             postfix.resolvedType = ret.withSameOptionalityAs(type)
+            
+            matchParameterTypes(types: args, callArguments: functionCall.arguments)
         }
         
         return postfix
+    }
+    
+    func matchParameterTypes(parameters: [ParameterSignature], callArguments: [FunctionArgument]) {
+        for (callArg, param) in zip(callArguments, parameters) {
+            callArg.expression.expectedType = param.type
+        }
+    }
+    
+    func matchParameterTypes(types: [SwiftType], callArguments: [FunctionArgument]) {
+        for (callArg, paramType) in zip(callArguments, types) {
+            callArg.expression.expectedType = paramType
+        }
     }
     
     func findType(for type: SwiftType) -> KnownType? {

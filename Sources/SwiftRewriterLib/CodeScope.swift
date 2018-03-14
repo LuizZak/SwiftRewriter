@@ -4,11 +4,11 @@ private let _codeScopeKey = "_codeScopeKey"
 private let _identifierDefinitionKey = "_identifierDefinitionKey"
 
 /// Protocol for statements that feature code scoping.
-public protocol CodeScopeStatement: CodeScope {
+public protocol CodeScopeNode: CodeScope {
     var definitions: CodeScope { get }
 }
 
-public extension CodeScopeStatement where Self: Statement {
+public extension CodeScopeNode where Self: SyntaxNode {
     public var definitions: CodeScope {
         if let scope = metadata[_codeScopeKey] as? CodeScope {
             return scope
@@ -43,11 +43,11 @@ public extension CodeScopeStatement where Self: Statement {
 public extension SyntaxNode {
     /// Finds the nearest definition scope in the hierarchy chain for this syntax
     /// node.
-    public var nearestScope: CodeScopeStatement? {
+    public var nearestScope: CodeScopeNode? {
         var parent: SyntaxNode? = self
         while let p = parent {
-            if let compound = p as? CompoundStatement {
-                return compound
+            if let scope = p as? CodeScopeNode {
+                return scope
             }
             
             parent = p.parent
@@ -58,13 +58,13 @@ public extension SyntaxNode {
     
     /// Finds the nearest definition scope in the hierarchy chain for this syntax
     /// node which is not `self`
-    internal var nearestScopeThatIsNotSelf: CodeScopeStatement? {
+    internal var nearestScopeThatIsNotSelf: CodeScopeNode? {
         var parent: SyntaxNode? = self
         while let p = parent {
             parent = p.parent
             
-            if p !== self, let compound = p as? CompoundStatement {
-                return compound
+            if p !== self, let scope = p as? CodeScopeNode {
+                return scope
             }
         }
         
@@ -72,7 +72,8 @@ public extension SyntaxNode {
     }
 }
 
-extension CompoundStatement: CodeScopeStatement { }
+extension CompoundStatement: CodeScopeNode { }
+extension BlockLiteralExpression: CodeScopeNode { }
 
 public protocol CodeScopeStack {
     func pushScope(_ context: Context)
