@@ -9,6 +9,24 @@ class DefaultTypeSystemTests: XCTestCase {
         sut = DefaultTypeSystem()
     }
     
+    func testDefaultValueForNumerics() {
+        XCTAssertEqual(sut.defaultValue(for: .int), .constant(0))
+        XCTAssertEqual(sut.defaultValue(for: .uint), .constant(0))
+        XCTAssertEqual(sut.defaultValue(for: .float), .constant(0.0))
+        XCTAssertEqual(sut.defaultValue(for: .double), .constant(0.0))
+    }
+    
+    func testDefaultValueForBool() {
+        XCTAssertEqual(sut.defaultValue(for: .bool), .constant(false))
+    }
+    
+    func testDefaultValueForOptionals() {
+        XCTAssertEqual(sut.defaultValue(for: .optional(.int)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.string)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.double)), .constant(.nil))
+        XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int))), .constant(.nil))
+    }
+    
     func testIsNumeric() {
         // 64-bits
         XCTAssert(sut.isNumeric(.typeName("Int64")))

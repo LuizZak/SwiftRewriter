@@ -589,14 +589,11 @@ class InternalSwiftWriter {
     
     // TODO: Maybe this should be extracted to an external `IntentionPass`?
     private func outputInitialZeroValueForType(_ type: SwiftType, target: RewriterOutputTarget) {
-        if typeSystem.isNumeric(type) {
-            target.outputInline(" = 0")
-        }
-        if type.isOptional {
-            target.outputInline(" = nil")
-        }
-        if type == .bool {
-            target.outputInline(" = false")
+        if let defaultValue = typeSystem.defaultValue(for: type) {
+            target.outputInline(" = ")
+            
+            let writer = SwiftASTWriter(options: options, typeMapper: typeMapper)
+            writer.write(expression: defaultValue, into: target)
         }
     }
     

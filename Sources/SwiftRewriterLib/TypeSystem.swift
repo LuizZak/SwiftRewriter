@@ -2,6 +2,10 @@ import SwiftAST
 
 /// A wrapper for querying the type system context for specific type knowledges
 public protocol TypeSystem {
+    /// Returns an expression representing the default value for a given Swift type.
+    /// Returns nil, in case no default values are known
+    func defaultValue(for type: SwiftType) -> Expression?
+    
     /// Returns `true` if `type` represents a numerical type (int, float, CGFloat, etc.).
     func isNumeric(_ type: SwiftType) -> Bool
     

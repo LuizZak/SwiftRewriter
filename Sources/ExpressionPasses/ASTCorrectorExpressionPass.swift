@@ -3,7 +3,18 @@ import SwiftAST
 
 public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
     public override func visitExpression(_ exp: Expression) -> Expression {
-        if exp.expectedType == .bool {
+        guard let expectedType = exp.expectedType, expectedType != exp.resolvedType else {
+            return super.visitExpression(exp)
+        }
+        
+        if context.typeSystem.isNumeric(expectedType) {
+            if let corrected = correctToNumeric(exp) {
+                notifyChange()
+                
+                return super.visitExpression(corrected)
+            }
+            
+        } else if expectedType == .bool {
             // Parenthesize depending on parent expression type to avoid issues
             // with operator precedence
             let shouldParenthesize = exp.parent is UnaryExpression || exp.parent is BinaryExpression
@@ -46,6 +57,28 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         }
 
         return exp
+    }
+    
+    func correctToNumeric(_ exp: Expression) -> Expression? {
+        guard let type = exp.resolvedType else {
+            return nil
+        }
+        
+        if type.isOptional && context.typeSystem.isNumeric(type.deepUnwrapped) {
+            guard let defaultExp = context.typeSystem.defaultValue(for: type.deepUnwrapped) else {
+                return nil
+            }
+            
+            let newExp = Expression.parens(exp.binary(op: .nullCoallesce, rhs: defaultExp))
+            newExp.expectedType = exp.expectedType
+            newExp.resolvedType = type.deepUnwrapped
+            
+            exp.expectedType = nil
+            
+            return newExp
+        }
+        
+        return nil
     }
     
     func correctToBoolean(_ exp: Expression) -> Expression? {

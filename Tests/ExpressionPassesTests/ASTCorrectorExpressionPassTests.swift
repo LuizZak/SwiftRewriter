@@ -11,6 +11,40 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         sut = ASTCorrectorExpressionPass()
     }
     
+    /// Tests the corrector applies an integer correction to automatically null-coallesce
+    /// into zero's (to match original Objective-C behavior)
+    func testCorrectNullableInteger() {
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = expMaker()
+        exp.resolvedType = .optional(.int)
+        exp.expectedType = .int
+        
+        assertTransform(
+            // a.b
+            expression: exp,
+            // (a.b ?? 0)
+            into: .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0)))
+        )
+    }
+    
+    /// Tests the corrector applies a floating-point correction to automatically
+    /// null-coallesce into zero's (to match original Objective-C behavior)
+    func testCorrectNullableFloatingPoint() {
+        let expMaker = { Expression.identifier("a").dot("b") }
+        
+        let exp = expMaker()
+        exp.resolvedType = .optional(.float)
+        exp.expectedType = .float
+        
+        assertTransform(
+            // a.b
+            expression: exp,
+            // (a.b ?? 0.0)
+            into: .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0.0)))
+        )
+    }
+    
     /// Tests the corrector uses information exposed on `Expression.expectedType`
     /// to fix expressions expected to resolve as booleans
     func testCorrectsExpectedBooleanBinaryExpressions() {

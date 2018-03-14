@@ -110,6 +110,20 @@ public class DefaultTypeSystem: TypeSystem {
         return false
     }
     
+    public func defaultValue(for type: SwiftType) -> Expression? {
+        if isNumeric(type) {
+            return isInteger(type) ? .constant(0) : .constant(0.0)
+        }
+        if type.isOptional {
+            return .constant(.nil)
+        }
+        if type == .bool {
+            return .constant(false)
+        }
+        
+        return nil
+    }
+    
     public func isNumeric(_ type: SwiftType) -> Bool {
         if isInteger(type) {
             return true
