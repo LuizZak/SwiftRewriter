@@ -1328,18 +1328,18 @@ class SwiftRewriterTests: XCTestCase {
                 private var _a: Bool = false
                 private var _b: Int = 0
                 private var _c: UInt = 0
-                private var _d: CFloat = 0
-                private var _e: CDouble = 0
-                private var _e: CGFloat = 0
+                private var _d: CFloat = 0.0
+                private var _e: CDouble = 0.0
+                private var _e: CGFloat = 0.0
                 private var _f: String! = nil
                 private var _g: E
                 private var _h: String
                 @objc var a: Bool = false
                 @objc var b: Int = 0
                 @objc var c: UInt = 0
-                @objc var d: CFloat = 0
-                @objc var e: CDouble = 0
-                @objc var e: CGFloat = 0
+                @objc var d: CFloat = 0.0
+                @objc var e: CDouble = 0.0
+                @objc var e: CGFloat = 0.0
                 @objc var f: String! = nil
                 @objc var g: E
                 @objc var h: String

@@ -121,7 +121,22 @@ public class DefaultTypeSystem: TypeSystem {
             return .constant(false)
         }
         
-        return nil
+        switch type {
+        case .typeName(let name):
+            guard let knownType = knownTypeWithName(name) else {
+                return nil
+            }
+            
+            // Structs with default constructors are default-initialized to its
+            // respective value.
+            if knownType.kind == .struct, constructor(withArgumentLabels: [], in: knownType) != nil {
+                return Expression.identifier(name).call()
+            }
+            
+            return nil
+        default:
+            return nil
+        }
     }
     
     public func isNumeric(_ type: SwiftType) -> Bool {

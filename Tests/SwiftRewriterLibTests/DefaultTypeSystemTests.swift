@@ -274,4 +274,43 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertNotNil(sut.method(withObjcSelector: FunctionSignature(name: "optionalImplemented"),
                                    static: false, includeOptional: false, in: cls))
     }
+    
+    func testDefaultValueForClassTypeIsAlwaysNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .class)
+                .addingConstructor()
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForProtocolTypeIsAlwaysNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .protocol)
+                .addingConstructor()
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForStructWithNoEmptyConstructorEvaluatesToNil() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .build()
+        sut.addType(str)
+        
+        XCTAssertNil(sut.defaultValue(for: .typeName("A")))
+    }
+    
+    func testDefaultValueForStructWithEmptyConstructor() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+            .addingConstructor()
+            .build()
+        sut.addType(str)
+        
+        XCTAssertEqual(sut.defaultValue(for: .typeName("A")), Expression.identifier("A").call())
+    }
 }
