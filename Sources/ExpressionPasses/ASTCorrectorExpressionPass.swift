@@ -32,6 +32,10 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
                 
                 return super.visitExpression(corrected)
             }
+        } else if let corrected = correctToDefaultValue(exp) {
+            notifyChange()
+            
+            return super.visitExpression(corrected)
         }
         
         return super.visitExpression(exp)
@@ -57,6 +61,29 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         }
 
         return exp
+    }
+    
+    func correctToDefaultValue(_ exp: Expression) -> Expression? {
+        guard let expectedType = exp.expectedType else {
+            return nil
+        }
+        guard expectedType == exp.resolvedType?.deepUnwrapped else {
+            return nil
+        }
+        guard let defValue = context.typeSystem.defaultValue(for: expectedType) else {
+            return nil
+        }
+        guard defValue.resolvedType?.isOptional == false else {
+            return nil
+        }
+        
+        exp.expectedType = nil
+        
+        let converted = exp.binary(op: .nullCoallesce, rhs: defValue)
+        converted.resolvedType = defValue.resolvedType
+        converted.expectedType = converted.resolvedType
+        
+        return .parens(converted)
     }
     
     func correctToNumeric(_ exp: Expression) -> Expression? {

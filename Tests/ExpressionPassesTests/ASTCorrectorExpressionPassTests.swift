@@ -396,4 +396,25 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                                   body: [])
         ); assertDidNotNotifyChange()
     }
+    
+    /// Tests correcting receiving nullable struct on a non-null struct context,
+    /// where the struct does feature a default empty constructor.
+    func testCorrectNonnullStructWithNullableStructValue() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .addingConstructor()
+                .build()
+        typeSystem.addType(str)
+        let expMaker = { Expression.identifier("a") }
+        let exp = expMaker()
+        exp.resolvedType = .optional(.typeName("A"))
+        exp.expectedType = .typeName("A")
+        
+        assertTransform(
+            // a
+            expression: exp,
+            // (a ?? A())
+            into: .parens(expMaker().binary(op: .nullCoallesce, rhs: Expression.identifier("A").call()))
+        ); assertNotifiedChange()
+    }
 }

@@ -112,13 +112,22 @@ public class DefaultTypeSystem: TypeSystem {
     
     public func defaultValue(for type: SwiftType) -> Expression? {
         if isNumeric(type) {
-            return isInteger(type) ? .constant(0) : .constant(0.0)
+            let exp: Expression = isInteger(type) ? .constant(0) : .constant(0.0)
+            exp.resolvedType = type
+            
+            return exp
         }
         if type.isOptional {
-            return .constant(.nil)
+            let exp = Expression.constant(.nil)
+            exp.resolvedType = type
+            
+            return exp
         }
         if type == .bool {
-            return .constant(false)
+            let exp = Expression.constant(false)
+            exp.resolvedType = type
+            
+            return exp
         }
         
         switch type {
@@ -130,7 +139,10 @@ public class DefaultTypeSystem: TypeSystem {
             // Structs with default constructors are default-initialized to its
             // respective value.
             if knownType.kind == .struct, constructor(withArgumentLabels: [], in: knownType) != nil {
-                return Expression.identifier(name).call()
+                let exp = Expression.identifier(name).call()
+                exp.resolvedType = type
+                
+                return exp
             }
             
             return nil
