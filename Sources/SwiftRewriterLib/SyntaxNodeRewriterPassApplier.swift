@@ -92,7 +92,9 @@ private class InternalSyntaxNodeApplier {
             
             // For setter, push intrinsic for the setter value
             intrinsics.recordDefinition(
-                CodeDefinition(name: set.valueIdentifier, type: property.type, intention: nil)
+                CodeDefinition(variableNamed: set.valueIdentifier,
+                               type: property.type,
+                               intention: nil)
             )
             
             applyOnFunctionBody(set.body)
@@ -177,19 +179,25 @@ private class InternalSyntaxNodeApplier {
                                  isConstant: true)
             }
             
-            intrinsics.recordDefinition(CodeDefinition(name: "self", storage: selfStorage, intention: type))
+            intrinsics.recordDefinition(
+                CodeDefinition(variableNamed: "self",
+                               storage: selfStorage,
+                               intention: type)
+            )
             
             // Record all known static properties visible
             if let knownType = typeSystem.knownTypeWithName(type.typeName) {
                 for prop in knownType.knownProperties where prop.isStatic == member.isStatic {
                     intrinsics.recordDefinition(
-                        CodeDefinition(name: prop.name, storage: prop.storage, intention: prop as? Intention)
+                        CodeDefinition(variableNamed: prop.name, storage: prop.storage,
+                                       intention: prop as? Intention)
                     )
                 }
                 
                 for field in knownType.knownFields where field.isStatic == member.isStatic {
                     intrinsics.recordDefinition(
-                        CodeDefinition(name: field.name, storage: field.storage, intention: field as? Intention)
+                        CodeDefinition(variableNamed: field.name, storage: field.storage,
+                                       intention: field as? Intention)
                     )
                 }
             }
@@ -199,7 +207,8 @@ private class InternalSyntaxNodeApplier {
         if let function = member as? FunctionIntention {
             for param in function.parameters {
                 intrinsics.recordDefinition(
-                    CodeDefinition(name: param.name, type: param.type, intention: function)
+                    CodeDefinition(variableNamed: param.name, type: param.type,
+                                   intention: function)
                 )
             }
         }

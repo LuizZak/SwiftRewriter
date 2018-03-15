@@ -63,7 +63,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             decl.initialization?.expectedType = type
             
-            let definition = CodeDefinition(name: decl.identifier,
+            let definition = CodeDefinition(variableNamed: decl.identifier,
                                             type: type,
                                             intention: nil)
             stmt.nearestScope?.recordDefinition(definition)
@@ -101,7 +101,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     func collectInPattern(_ pattern: Pattern, type: SwiftType, to scope: CodeScope) {
         switch pattern {
         case .identifier(let ident):
-            scope.recordDefinition(CodeDefinition(name: ident, type: type, intention: nil))
+            scope.recordDefinition(CodeDefinition(variableNamed: ident, type: type, intention: nil))
             break
         default:
             // Other (more complex) patterns are not (yet) supported!
@@ -423,7 +423,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         // Apply intrinsics
         for param in exp.parameters {
             exp.recordDefinition(
-                CodeDefinition(name: param.name,
+                CodeDefinition(variableNamed: param.name,
                                storage: ValueStorage(type: param.type, ownership: .strong, isConstant: true),
                                intention: nil)
             )

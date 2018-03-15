@@ -151,12 +151,14 @@ private class InternalTypeResolverInvoker {
             if member.isStatic {
                 // Class `self` points to metatype of the class
                 intrinsics.recordDefinition(
-                    CodeDefinition(name: "self", type: .metatype(for: selfType), intention: member)
+                    CodeDefinition(variableNamed: "self", type: .metatype(for: selfType),
+                                   intention: member)
                 )
             } else {
                 // Instance `self` points to the actual instance
                 intrinsics.recordDefinition(
-                    CodeDefinition(name: "self", type: selfType, intention: member)
+                    CodeDefinition(variableNamed: "self", type: selfType,
+                                   intention: member)
                 )
             }
         }
@@ -166,7 +168,7 @@ private class InternalTypeResolverInvoker {
             for global in intentionCollection.globalVariables() {
                 if global.isVisible(for: member) {
                     intrinsics.recordDefinition(
-                        CodeDefinition(name: global.name,
+                        CodeDefinition(variableNamed: global.name,
                                        storage: global.storage,
                                        intention: global)
                     )

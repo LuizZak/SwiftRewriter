@@ -137,36 +137,74 @@ public class DefaultCodeScope: CodeScope {
     }
 }
 
-/// Specifies a definition for a local variable of a function.
+/// Specifies a definition for a global function or variable, or a local variable
+/// of a function.
 public class CodeDefinition {
-    public var name: String
-    public var storage: ValueStorage
+    public var name: String {
+        get {
+            return kind.name
+        }
+        set {
+            kind.name = newValue
+        }
+    }
+    
+    public var kind: Kind
     
     /// An optionally associated intention value
     public var intention: Intention?
     
+    /// Gets the type signature for this definition.
+    /// In case this is a function definition, the type represents the closure
+    /// signature of the function.
     public var type: SwiftType {
-        return storage.type
+        switch kind {
+        case .variable(_, let storage):
+            return storage.type
+        case .function(let signature):
+            return signature.swiftClosureType
+        }
     }
     
-    public var isConstant: Bool {
-        return storage.isConstant
+    public convenience init(variableNamed name: String, type: SwiftType, intention: Intention?) {
+        self.init(variableNamed: name,
+                  storage: ValueStorage(type: type, ownership: .strong, isConstant: false),
+                  intention: intention)
     }
     
-    public var ownership: Ownership {
-        return storage.ownership
-    }
-    
-    public init(name: String, type: SwiftType, intention: Intention?) {
-        self.name = name
-        self.storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+    public init(variableNamed name: String, storage: ValueStorage, intention: Intention?) {
+        kind = .variable(name: name, storage: storage)
         self.intention = intention
     }
     
-    public init(name: String, storage: ValueStorage, intention: Intention?) {
-        self.name = name
-        self.storage = storage
+    public init(functionSignature: FunctionSignature, intention: Intention?) {
+        kind = .function(signature: functionSignature)
         self.intention = intention
+    }
+    
+    public enum Kind {
+        case variable(name: String, storage: ValueStorage)
+        case function(signature: FunctionSignature)
+        
+        public var name: String {
+            get {
+                switch self {
+                case .variable(let name, _):
+                    return name
+                case .function(let signature):
+                    return signature.name
+                }
+            }
+            set {
+                switch self {
+                case .variable(_, let storage):
+                    self = .variable(name: newValue, storage: storage)
+                case .function(var signature):
+                    signature.name = newValue
+                    self = .function(signature: signature)
+                }
+            }
+        }
     }
 }
 

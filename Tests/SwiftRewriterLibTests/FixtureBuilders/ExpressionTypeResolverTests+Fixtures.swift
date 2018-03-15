@@ -33,7 +33,7 @@ protocol ExpressionTestResolverTestFixture {
 
 extension ExpressionTestResolverTestFixture {
     func definingLocal(name: String, type: SwiftType) -> Self {
-        let definition = CodeDefinition(name: name, type: type, intention: nil)
+        let definition = CodeDefinition(variableNamed: name, type: type, intention: nil)
         
         return definingLocal(definition)
     }
@@ -45,7 +45,7 @@ extension ExpressionTestResolverTestFixture {
     }
     
     func definingIntrinsic(name: String, type: SwiftType) -> Self {
-        let definition = CodeDefinition(name: name, type: type, intention: nil)
+        let definition = CodeDefinition(variableNamed: name, type: type, intention: nil)
         
         return definingIntrinsic(definition)
     }
@@ -102,7 +102,8 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
-        func thenAssertDefined(localNamed name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(localNamed name: String, type: SwiftType,
+                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: .strong, isConstant: false)
             
@@ -115,7 +116,8 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the given scope.
         @discardableResult
-        func thenAssertDefined(in scope: CodeScopeNode, localNamed name: String, type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(in scope: CodeScopeNode, localNamed name: String,
+                               type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: .strong, isConstant: false)
                 
@@ -129,13 +131,16 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
-        func thenAssertDefined(localNamed name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
-            return thenAssertDefined(in: scope, localNamed: name, storage: storage, file: file, line: line)
+        func thenAssertDefined(localNamed name: String, storage: ValueStorage,
+                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+            return thenAssertDefined(in: scope, localNamed: name, storage: storage,
+                                     file: file, line: line)
         }
         
         /// Asserts a definition was created on the given scope.
         @discardableResult
-        func thenAssertDefined(in scope: CodeScopeNode, localNamed name: String, storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(in scope: CodeScopeNode, localNamed name: String,
+                               storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             // Make sure to apply definitions just before starting assertions
             if !applied {
                 sut.typeSystem = typeSystem
@@ -155,10 +160,20 @@ extension ExpressionTypeResolverTests {
                 return self
             }
             
-            if defined.storage != storage {
+            guard case .variable(_, let definedStorage) = defined.kind else {
                 testCase.recordFailure(withDescription: """
-                    Definition '\(name)' has different storage \(defined.storage) than \
-                    expected storage \(storage)
+                    Expected to find a variable local, but found \(defined.kind) \
+                    instead.
+                    """,
+                    inFile: file, atLine: line, expected: true)
+                
+                return self
+            }
+            
+            if definedStorage != storage {
+                testCase.recordFailure(withDescription: """
+                    Definition '\(name)' has different storage \(definedStorage) \
+                    than expected storage \(storage)
                     """,
                     inFile: file, atLine: line, expected: true)
             }
@@ -221,7 +236,8 @@ extension ExpressionTypeResolverTests {
             scope = CompoundStatement(statements: [.expression(expression)])
         }
         
-        init(testCase: XCTestCase, sut: ExpressionTypeResolver, expression: T, scope: CodeScopeNode) {
+        init(testCase: XCTestCase, sut: ExpressionTypeResolver, expression: T,
+             scope: CodeScopeNode) {
             self.testCase = testCase
             self.sut = sut
             self.expression = expression
@@ -252,7 +268,8 @@ extension ExpressionTypeResolverTests {
             
             /// Makes an assertion the initial expression resolved to a given type
             @discardableResult
-            func thenAssertExpression(resolvedAs type: SwiftType?, file: String = #file, line: Int = #line) -> Asserter {
+            func thenAssertExpression(resolvedAs type: SwiftType?, file: String = #file,
+                                      line: Int = #line) -> Asserter {
                 if expression.resolvedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve as \(type?.description ?? "nil"), \
@@ -267,7 +284,8 @@ extension ExpressionTypeResolverTests {
             /// Makes an assertion the initial expression was set to expect a given
             /// type
             @discardableResult
-            func thenAssertExpression(expectsType type: SwiftType?, file: String = #file, line: Int = #line) -> Asserter {
+            func thenAssertExpression(expectsType type: SwiftType?, file: String = #file,
+                                      line: Int = #line) -> Asserter {
                 if expression.expectedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
