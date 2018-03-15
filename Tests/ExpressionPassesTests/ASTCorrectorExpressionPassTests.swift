@@ -11,6 +11,26 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         sut = ASTCorrectorExpressionPass()
     }
     
+    /// Tests inserting null-coallesces on optional numeric types on the left
+    /// and right side of arithmetic operators
+    func testNullCoallesceOnArithmeticOperators() {
+        let expMaker = { Expression.identifier("a") }
+        
+        let exp = expMaker().binary(op: .add, rhs: Expression.identifier("b"))
+        exp.lhs.resolvedType = .optional(.int)
+        exp.rhs.resolvedType = .int
+        
+        assertTransform(
+            // a + b
+            expression: exp,
+            // (a ?? 0) + b
+            into:
+            Expression
+                .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0)))
+                .binary(op: .add, rhs: Expression.identifier("b"))
+        )
+    }
+    
     /// Tests that arithmetic comparisons (<=, <, >=, >) where lhs and rhs are
     /// optional numeric values are coerced into default values using zeroes.
     func testNullCoallesceOnArithmeticComparisions() {

@@ -65,7 +65,8 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
     
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         switch exp.op.category {
-        case .comparison where exp.op != .equals && exp.op != .unequals:
+        case .comparison where exp.op != .equals && exp.op != .unequals,
+             .arithmetic, .bitwise:
             // Mark left hand side and right hand side of comparison expressions
             // to expect the same base type, in case they are optionals of the
             // same type.
