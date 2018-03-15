@@ -17,10 +17,12 @@ public protocol TypeResolverInvoker {
 }
 
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
+    public var globals: GlobalDefinitions
     public var typeSystem: TypeSystem
     public var numThreads: Int
     
-    public init(typeSystem: TypeSystem, numThreads: Int = 8) {
+    public init(globals: GlobalDefinitions, typeSystem: TypeSystem, numThreads: Int = 8) {
+        self.globals = globals
         self.typeSystem = typeSystem
         self.numThreads = numThreads
     }
@@ -61,14 +63,16 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
                                    intrinsicVariables: EmptyCodeScope())
         typeResolver.ignoreResolvedExpressions = !forceResolve
         
-        return InternalTypeResolverInvoker(typeResolver: typeResolver)
+        return InternalTypeResolverInvoker(globals: globals.definitions, typeResolver: typeResolver)
     }
 }
 
 private class InternalTypeResolverInvoker {
+    var globals: [CodeDefinition] = []
     var typeResolver: ExpressionTypeResolver
     
-    init(typeResolver: ExpressionTypeResolver) {
+    init(globals: [CodeDefinition], typeResolver: ExpressionTypeResolver) {
+        self.globals = globals
         self.typeResolver = typeResolver
     }
     
@@ -168,6 +172,11 @@ private class InternalTypeResolverInvoker {
                     )
                 }
             }
+        }
+        
+        // Push global definitions
+        for global in globals {
+            intrinsics.recordDefinition(global)
         }
         
         typeResolver.intrinsicVariables = intrinsics

@@ -275,7 +275,10 @@ public class SwiftRewriter {
                                           typeSystem: typeSystem,
                                           numThreds: settings.numThreads)
         
-        let typeResolverInvoker = DefaultTypeResolverInvoker(typeSystem: typeSystem)
+        let globals = GlobalDefinitions()
+        
+        let typeResolverInvoker =
+            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem)
         
         if settings.verbose {
             print("Running intention passes...")
@@ -296,7 +299,15 @@ public class SwiftRewriter {
             [MandatoryIntentionPass()]
                 + intentionPassesSource.intentionPasses
         
+        // Register globals first
         for pass in intentionPasses {
+            pass.registerDefinitions(on: globals)
+        }
+        
+        // Execute passes
+        for pass in intentionPasses {
+            pass.registerDefinitions(on: globals)
+            
             autoreleasepool {
                 requiresResolve = false
                 

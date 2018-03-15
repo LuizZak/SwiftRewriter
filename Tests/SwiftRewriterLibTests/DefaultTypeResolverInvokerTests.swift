@@ -27,7 +27,9 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 }
                 .build()
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
-        let sut = DefaultTypeResolverInvoker(typeSystem: typeSystem)
+        let sut =
+            DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
+                                       typeSystem: typeSystem)
         let methodA = intentions.classIntentions()[0].methods[0]
         let methodB = intentions.classIntentions()[1].methods[0]
         
@@ -39,8 +41,10 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 .body.statements[0]
                 .asExpressions?
                 .expressions[0]
-                .resolvedType, .int)
+                .resolvedType
+            , .int)
         
-        XCTAssertEqual(methodB.functionBody?.body.statements[0].asExpressions?.expressions[0].resolvedType, .errorType)
+        XCTAssertEqual(methodB.functionBody?.body.statements[0].asExpressions?.expressions[0].resolvedType,
+                       .errorType)
     }
 }

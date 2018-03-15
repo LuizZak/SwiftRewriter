@@ -41,7 +41,8 @@ public class IntentionCollectionBuilder {
         if typeChecked {
             let system = IntentionCollectionTypeSystem(intentions: intentions)
             
-            let invoker = DefaultTypeResolverInvoker(typeSystem: system)
+            let invoker = DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
+                                                     typeSystem: system)
             
             invoker.resolveAllExpressionTypes(in: intentions, force: true)
         }
