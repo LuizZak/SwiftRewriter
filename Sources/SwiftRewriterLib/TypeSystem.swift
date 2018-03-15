@@ -38,6 +38,9 @@ public protocol TypeSystem {
     /// or Objective-C class/protocol, or a subclass implementer of one of them.
     func isClassInstanceType(_ type: SwiftType) -> Bool
     
+    /// Returns `true` if a given type is a known scalar type.
+    func isScalarType(_ type: SwiftType) -> Bool
+    
     /// Returns `true` if a type represented by a given type name is a subtype of
     /// another type.
     func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool

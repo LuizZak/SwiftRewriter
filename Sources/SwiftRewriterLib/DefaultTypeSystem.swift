@@ -5,12 +5,19 @@ import TypeDefinitions
 public class DefaultTypeSystem: TypeSystem {
     /// A singleton instance to a default type system.
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
-
+    
+    /// Type-aliases
+    var aliases: [String: String] = [:]
+    
     var types: [KnownType] = []
     var typesByName: [String: KnownType] = [:]
     
     public init() {
         registerInitialKnownTypes()
+    }
+    
+    func unaliased(_ type: String) -> String {
+        return aliases[type] ?? type
     }
     
     public func addType(_ type: KnownType) {
@@ -19,7 +26,7 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func typeExists(_ name: String) -> Bool {
-        return typesByName.keys.contains(name)
+        return typesByName.keys.contains(unaliased(name))
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
@@ -27,7 +34,7 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func knownTypeWithName(_ name: String) -> KnownType? {
-        return typesByName[name]
+        return typesByName[unaliased(name)]
     }
     
     public func composeTypeWithKnownTypes(_ typeNames: [String]) -> KnownType? {
@@ -54,7 +61,9 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
-        if TypeDefinitions.classesList.classes.contains(where: { $0.typeName == typeName }) {
+        let aliased = unaliased(typeName)
+        
+        if TypeDefinitions.classesList.classes.contains(where: { $0.typeName == aliased }) {
             return true
         }
         
@@ -76,7 +85,22 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
+    public func isScalarType(_ type: SwiftType) -> Bool {
+        if isNumeric(type) {
+            return true
+        }
+        
+        guard let knownType = findType(for: type) else {
+            return false
+        }
+        
+        return knownType.kind == .struct
+    }
+    
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
+        let typeName = unaliased(typeName)
+        let supertypeName = unaliased(supertypeName)
+        
         if typeName == supertypeName {
             return true
         }
@@ -394,6 +418,10 @@ public class DefaultTypeSystem: TypeSystem {
 }
 
 extension DefaultTypeSystem {
+    func registerAlias(alias: String, original: String) {
+        aliases[alias] = original
+    }
+    
     /// Initializes the default known types
     func registerInitialKnownTypes() {
         let nsObjectProtocol =

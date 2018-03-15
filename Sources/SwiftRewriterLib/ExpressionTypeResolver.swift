@@ -57,7 +57,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         for decl in stmt.decl {
             var type = decl.type
             
-            if typeSystem.isClassInstanceType(decl.type), let initValueType = decl.initialization?.resolvedType {
+            if !typeSystem.isScalarType(decl.type), let initValueType = decl.initialization?.resolvedType {
                 type = type.withSameOptionalityAs(initValueType)
             }
             
