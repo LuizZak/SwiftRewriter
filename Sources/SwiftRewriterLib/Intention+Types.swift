@@ -303,6 +303,10 @@ extension MemberGenerationIntention: KnownMember {
     public var ownerType: KnownType? {
         return type
     }
+    
+    public var memberType: SwiftType {
+        fatalError("Must be overriden by subtypes")
+    }
 }
 
 /// An intention to generate a property, either static/instance, computed/stored

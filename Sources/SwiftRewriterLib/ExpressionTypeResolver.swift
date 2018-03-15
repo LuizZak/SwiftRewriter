@@ -39,6 +39,9 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             if let ident = node as? IdentifierExpression {
                 ident.definition = nil
             }
+            if let postfix = node as? PostfixExpression {
+                postfix.op.returnType = nil
+            }
         }
         
         // Now visit the nodes
@@ -545,6 +548,8 @@ private class MemberInvocationResolver {
                 break
             }
             
+            sub.returnType = exp.resolvedType
+            
         case let fc as FunctionCallPostfix:
             return handleFunctionCall(postfix: exp, functionCall: fc)
             
@@ -556,6 +561,7 @@ private class MemberInvocationResolver {
             }
             
             exp.resolvedType = exp.exp.resolvedType
+            exp.op.returnType = exp.resolvedType
             
         case let member as MemberPostfix:
             // Propagate error type
@@ -571,10 +577,12 @@ private class MemberInvocationResolver {
                                                   includeOptional: true, in: innerType) {
                 member.memberDefinition = property
                 exp.resolvedType = property.storage.type
+                exp.op.returnType = exp.resolvedType
             } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype,
                                                    in: innerType) {
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
+                exp.op.returnType = exp.resolvedType
             } else {
                 return exp.makeErrorTyped()
             }
@@ -601,6 +609,7 @@ private class MemberInvocationResolver {
             }
             
             postfix.resolvedType = metatype
+            functionCall.returnType = postfix.resolvedType
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -613,6 +622,7 @@ private class MemberInvocationResolver {
             }
             
             postfix.resolvedType = metatype
+            functionCall.returnType = postfix.resolvedType
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -635,6 +645,8 @@ private class MemberInvocationResolver {
             postfix.exp.resolvedType = method.signature.swiftClosureType
             postfix.resolvedType = method.signature.returnType
             
+            functionCall.returnType = postfix.resolvedType
+            
             matchParameterTypes(parameters: method.signature.parameters, callArguments: functionCall.arguments)
             
             return postfix
@@ -645,6 +657,7 @@ private class MemberInvocationResolver {
             case let .block(ret, args) = type.deepUnwrapped {
             
             postfix.resolvedType = ret.withSameOptionalityAs(type)
+            functionCall.returnType = postfix.resolvedType
             
             matchParameterTypes(types: args, callArguments: functionCall.arguments)
         }
@@ -709,38 +722,43 @@ private class MemberInvocationResolver {
 }
 
 /// Provides a facility to analyze a postfix expression in left-to-right fashion.
-final class PostfixChainInverter {
+public final class PostfixChainInverter {
     private var expression: PostfixExpression
     
     public init(expression: PostfixExpression) {
         self.expression = expression
     }
     
-    public func collect() -> [Postfix] {
+    public func invert() -> [Postfix] {
         var stack: [SwiftAST.Postfix] = []
         
         var next: PostfixExpression? = expression
+        var last: Expression = expression
         
         while let current = next {
             stack.append(current.op)
             
+            last = current.exp
             next = current.exp.asPostfix
         }
         
         // Unwind and prepare stack
         var result: [Postfix] = []
         
-        result.append(.root(expression.exp))
+        result.append(.root(last))
         
         loop:
         while let pop = stack.popLast() {
             switch pop {
             case let op as MemberPostfix:
                 result.append(.member(op.name, original: op))
+                
             case let op as SubscriptPostfix:
                 result.append(.subscript(op.expression, original: op))
+                
             case let op as FunctionCallPostfix:
                 result.append(.call(op.arguments, original: op))
+                
             default:
                 break loop
             }
@@ -749,10 +767,37 @@ final class PostfixChainInverter {
         return result
     }
     
-    indirect enum Postfix {
+    public static func invert(expression: PostfixExpression) -> [Postfix] {
+        let inverter = PostfixChainInverter(expression: expression)
+        return inverter.invert()
+    }
+    
+    public enum Postfix {
         case root(Expression)
-        case member(String, original: SwiftAST.Postfix)
-        case `subscript`(Expression, original: SwiftAST.Postfix)
-        case call([FunctionArgument], original: SwiftAST.Postfix)
+        case member(String, original: MemberPostfix)
+        case `subscript`(Expression, original: SubscriptPostfix)
+        case call([FunctionArgument], original: FunctionCallPostfix)
+        
+        public var postfix: SwiftAST.Postfix? {
+            switch self {
+            case .root:
+                return nil
+            case .member(_, let original):
+                return original
+            case .call(_, let original):
+                return original
+            case .subscript(_, let original):
+                return original
+            }
+        }
+        
+        public var resolvedType: SwiftType? {
+            switch self {
+            case .root(let exp):
+                return exp.resolvedType
+            default:
+                return postfix?.returnType
+            }
+        }
     }
 }

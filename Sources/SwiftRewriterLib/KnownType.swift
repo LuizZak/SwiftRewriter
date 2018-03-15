@@ -111,6 +111,12 @@ public protocol KnownMember {
     
     /// Whether this member is a static (class) member
     var isStatic: Bool { get }
+
+    /// Gets the type for this member.
+    /// In case this is a property or field member, this is just the storage type
+    /// of the variable, and if this is a method member, this is the signature
+    /// of the method.
+    var memberType: SwiftType { get }
 }
 
 /// Describes a known method to the transpiler
@@ -154,5 +160,17 @@ public protocol KnownProtocolConformance {
 public extension KnownMethod {
     public var isStatic: Bool {
         return signature.isStatic
+    }
+}
+
+public extension KnownProperty {
+    public var memberType: SwiftType {
+        return storage.type
+    }
+}
+
+public extension KnownMethod {
+    public var memberType: SwiftType {
+        return signature.swiftClosureType
     }
 }

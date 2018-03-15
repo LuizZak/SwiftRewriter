@@ -1029,6 +1029,9 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         return []
     }
     
+    /// Resulting type for this postfix access
+    public var returnType: SwiftType?
+    
     fileprivate init() {
         
     }

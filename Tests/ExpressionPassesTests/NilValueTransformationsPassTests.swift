@@ -2,7 +2,7 @@ import ExpressionPasses
 import SwiftAST
 import TestCommons
 
-class NilValueTransformationsPasTests: ExpressionPassTestCase {
+class NilValueTransformationsPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
@@ -43,8 +43,11 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
         //   ^~~ b is (() -> Void)?
         let exp = Expression.identifier("a").dot("b").call()
         
-        exp.asPostfix?.exp.asPostfix?.resolvedType =
-            .optional(.block(returnType: .void, parameters: []))
+        exp.asPostfix?.exp.asPostfix?.resolvedType
+            = .optional(.block(returnType: .void, parameters: []))
+        
+        exp.asPostfix?.exp.asPostfix?.op.returnType
+            = .optional(.block(returnType: .void, parameters: []))
         
         assertTransform(
             // { a.b() }
@@ -59,6 +62,7 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
         let exp = Expression.identifier("a").dot("b")
         
         exp.asPostfix?.exp.resolvedType = .optional(.typeName("A"))
+        exp.asPostfix?.op.returnType = .optional(.typeName("A"))
         exp.resolvedType = .optional(.typeName("Int"))
         
         assertTransform(
@@ -74,7 +78,9 @@ class NilValueTransformationsPasTests: ExpressionPassTestCase {
         let exp = Expression.identifier("a").dot("b").dot("c")
         
         exp.asPostfix?.exp.asPostfix?.exp.resolvedType = .optional(.typeName("B"))
+        exp.asPostfix?.exp.asPostfix?.op.returnType = .typeName("B")
         exp.asPostfix?.exp.resolvedType = .optional(.typeName("A"))
+        exp.asPostfix?.op.returnType = .typeName("B")
         exp.resolvedType = .optional(.typeName("Int"))
         
         assertTransform(

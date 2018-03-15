@@ -48,27 +48,24 @@ public class NilValueTransformationsPass: SyntaxNodeRewriterPass {
     }
     
     override public func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        // Member access
-        guard exp.member != nil else {
+        // Work on rooted postfix expressions only
+        if exp.parent is PostfixExpression {
             return super.visitPostfix(exp)
         }
         
-        // Verify whether the member access is the access of yet another member
-        // access. If so, we need to take into consideration the type of that
-        // inner member, since Postfix expressions are left-associative.
-        if let inner = exp.exp.asPostfix {
-            if let innerMemberAccess = inner.member,
-                let innerMember = innerMemberAccess.memberDefinition as? KnownProperty,
-                case .optional = innerMember.storage.type {
-                exp.op.hasOptionalAccess = true
-                
-                notifyChange()
+        let accesses = PostfixChainInverter.invert(expression: exp)
+        
+        for (i, current) in accesses.enumerated().dropLast() {
+            let next = accesses[i + 1]
+            
+            // If from the current to the next access the result is nullable,
+            // mark the current postfix access as optional.
+            guard let type = current.resolvedType, let postfix = next.postfix else {
+                continue
             }
-        } else {
-            // Handle non-chained-postfix access cases, now.
-            if case .optional? = exp.exp.resolvedType {
-                exp.op.hasOptionalAccess = true
-                
+            
+            if type.isOptional && !type.isImplicitlyUnwrapped && postfix.hasOptionalAccess == false {
+                postfix.hasOptionalAccess = true
                 notifyChange()
             }
         }
