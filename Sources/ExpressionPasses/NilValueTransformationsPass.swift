@@ -49,7 +49,7 @@ public class NilValueTransformationsPass: SyntaxNodeRewriterPass {
     
     override public func visitPostfix(_ exp: PostfixExpression) -> Expression {
         // Work on rooted postfix expressions only
-        if exp.parent is PostfixExpression {
+        if let parent = exp.parent as? PostfixExpression, parent.exp === exp {
             return super.visitPostfix(exp)
         }
         

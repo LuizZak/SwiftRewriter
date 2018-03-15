@@ -123,7 +123,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
-    func testDontModifyExpressionsInsideOtherExpressions() {
+    func testModifyExpressionsInsideOtherExpressions() {
         // a(b())
         let exp = Expression
             .identifier("a").call([.unlabeled(.postfix(.identifier("b"), .functionCall()))])
@@ -134,16 +134,29 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         assertTransform(
             // { a(b()) }
             statement: .expression(exp),
-            // { a(b()) }
+            // { a(b?()) }
             into: .expression(
-                .postfix(.identifier("a"),
-                         .functionCall(arguments:
-                            [.unlabeled(.postfix(.identifier("b"),
-                                                .functionCall()))]
-                    )
-                )
+                Expression.identifier("a").call([.unlabeled(Expression.identifier("b").optional().call())])
             )
-        ); assertDidNotNotifyChange()
+        ); assertNotifiedChange()
+    }
+    
+    func testModifyChainedMemberAccessAndMethodCallsWithinParameters() {
+        // a(b.c())
+        let inner = Expression.identifier("b").dot("c").call()
+        inner.exp.asPostfix?.exp.resolvedType = .optional(.typeName("B"))
+        inner.exp.asPostfix?.op.returnType = .typeName("C")
+        
+        let exp = Expression.identifier("a").call([inner])
+        exp.op.returnType = .block(returnType: .void, parameters: [])
+        exp.subExpressions[0].resolvedType = .block(returnType: .void, parameters: [])
+        
+        assertTransform(
+            // { a(b.c()) }
+            statement: .expression(exp),
+            // { a(b?.c()) }
+            into: .expression(Expression.identifier("a").call([Expression.identifier("b").optional().dot("c").call()]))
+        ); assertNotifiedChange()
     }
     
     func testLookIntoBlockExpressionsForPotentialChanges() {

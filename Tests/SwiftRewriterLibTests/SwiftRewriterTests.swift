@@ -1558,4 +1558,48 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testOptionalInAssignmentLeftHandSide() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            @property (weak) B* b;
+            @end
+            @interface B
+            @property NSInteger c;
+            @end
+
+            @implementation A
+            - (void)method {
+                A *a;
+                self.b.c = 0;
+                a.b.c = 0;
+                [self takesExpression:a.b.c];
+            }
+            - (void)takesExpression:(NSInteger)a {
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class B: NSObject {
+                @objc var c: Int = 0
+            }
+            @objc
+            class A: NSObject {
+                @objc weak var b: B? = nil
+                
+                @objc
+                func method() {
+                    var a: A!
+                    self.b?.c = 0
+                    a.b?.c = 0
+                    self.takesExpression(a.b.c)
+                }
+                @objc
+                func takesExpression(_ a: Int) {
+                }
+            }
+            """)
+    }
 }
