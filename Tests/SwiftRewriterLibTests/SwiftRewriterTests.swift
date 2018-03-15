@@ -1469,7 +1469,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
-    
+
     func testCorrectsNullabilityOfMethodParameters() throws {
         try assertObjcParse(
             objc: """
@@ -1506,6 +1506,54 @@ class SwiftRewriterTests: XCTestCase {
                 }
                 @objc
                 func returnsInt() -> Int {
+                }
+            }
+            """)
+    }
+    
+    func testOptionalCoallesceNullableStructAccess() throws {
+        try assertObjcParse(
+            objc: """
+            typedef struct {
+                int a;
+            } A;
+            
+            @implementation B
+            - (A)a {
+            }
+            - (void)takesA:(A)a {
+            }
+            - (void)method {
+                B *_Nullable b;
+                
+                [self takesA:[b a]];
+            }
+            @end
+            """,
+            swift: """
+            struct A {
+                var a: CInt
+                
+                init() {
+                    a = 0
+                }
+                init(a: CInt) {
+                    self.a = a
+                }
+            }
+
+            @objc
+            class B: NSObject {
+                @objc
+                func a() -> A {
+                }
+                @objc
+                func takesA(_ a: A) {
+                }
+                @objc
+                func method() {
+                    var b: B?
+                    self.takesA(b.a())
                 }
             }
             """)

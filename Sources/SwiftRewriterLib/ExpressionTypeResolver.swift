@@ -707,3 +707,52 @@ private class MemberInvocationResolver {
                                  includeOptional: true, in: type)
     }
 }
+
+/// Provides a facility to analyze a postfix expression in left-to-right fashion.
+final class PostfixChainInverter {
+    private var expression: PostfixExpression
+    
+    public init(expression: PostfixExpression) {
+        self.expression = expression
+    }
+    
+    public func collect() -> [Postfix] {
+        var stack: [SwiftAST.Postfix] = []
+        
+        var next: PostfixExpression? = expression
+        
+        while let current = next {
+            stack.append(current.op)
+            
+            next = current.exp.asPostfix
+        }
+        
+        // Unwind and prepare stack
+        var result: [Postfix] = []
+        
+        result.append(.root(expression.exp))
+        
+        loop:
+        while let pop = stack.popLast() {
+            switch pop {
+            case let op as MemberPostfix:
+                result.append(.member(op.name, original: op))
+            case let op as SubscriptPostfix:
+                result.append(.subscript(op.expression, original: op))
+            case let op as FunctionCallPostfix:
+                result.append(.call(op.arguments, original: op))
+            default:
+                break loop
+            }
+        }
+        
+        return result
+    }
+    
+    indirect enum Postfix {
+        case root(Expression)
+        case member(String, original: SwiftAST.Postfix)
+        case `subscript`(Expression, original: SwiftAST.Postfix)
+        case call([FunctionArgument], original: SwiftAST.Postfix)
+    }
+}

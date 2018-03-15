@@ -1171,7 +1171,7 @@ public extension PostfixExpression {
 }
 
 
-/// A function argument kind
+/// A function argument kind from a function call expression
 public struct FunctionArgument: Equatable {
     public var label: String?
     public var expression: Expression
