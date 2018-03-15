@@ -30,6 +30,30 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         )
     }
     
+    /// Tests null-coallescing on deep nested binary expressions
+    func testNullCoallesceOnNestedArithmeticOperators() {
+        let lhsLhsMaker = { Expression.identifier("a") }
+        let lhsMaker = { Expression.identifier("b") }
+        
+        let exp = (lhsLhsMaker().binary(op: .add, rhs: lhsMaker())).binary(op: .add, rhs: Expression.identifier("c"))
+        exp.lhs.asBinary?.lhs.resolvedType = .optional(.int)
+        exp.lhs.asBinary?.rhs.resolvedType = .optional(.int)
+        
+        assertTransform(
+            // a + b + c
+            expression: exp,
+            // (a ?? 0) + (b ?? 0) + c
+            into:
+            Expression
+                .parens(
+                    lhsLhsMaker()
+                        .binary(op: .nullCoallesce, rhs: .constant(0))
+                )
+                .binary(op: .add, rhs: .parens(lhsMaker().binary(op: .nullCoallesce, rhs: .constant(0))))
+                .binary(op: .add, rhs: Expression.identifier("c"))
+        )
+    }
+    
     /// Tests that arithmetic comparisons (<=, <, >=, >) where lhs and rhs are
     /// optional numeric values are coerced into default values using zeroes.
     func testNullCoallesceOnArithmeticComparisions() {
