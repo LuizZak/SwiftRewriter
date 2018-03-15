@@ -690,7 +690,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
-    func testLocalVariableDeclarationInitializedTransmits() throws {
+    func testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSide() throws {
         try assertObjcParse(
             objc: """
             @interface MyClass

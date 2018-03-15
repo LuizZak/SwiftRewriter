@@ -646,6 +646,32 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertDefined(localNamed: "a", type: .implicitUnwrappedOptional(.string))
     }
     
+    func testVariableDeclarationDoesNotTransmitOptionalFromInitializerValueForStructTypes() {
+        _=startScopedTest(with:
+            Statement.variableDeclaration(identifier: "a",
+                                          type: .int,
+                                          initialization: Expression.identifier("value")),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .int)
+            .thenAssertDefined(localNamed: "a", type: .int)
+        
+        _=startScopedTest(with:
+            Statement.variableDeclaration(identifier: "a",
+                                          type: .int,
+                                          initialization: Expression.identifier("value")),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .optional(.int))
+            .thenAssertDefined(localNamed: "a", type: .int)
+        
+        _=startScopedTest(with:
+            Statement.variableDeclaration(identifier: "a",
+                                          type: .int,
+                                          initialization: Expression.identifier("value")),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "value", type: .implicitUnwrappedOptional(.int))
+            .thenAssertDefined(localNamed: "a", type: .int)
+    }
+    
     /// Tests that on an assignment expression, the right-hand-side of the expression
     /// is set to expect the type from the left-hand-side.
     func testAssignmentExpectedType() {

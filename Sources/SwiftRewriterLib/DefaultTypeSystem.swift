@@ -65,6 +65,17 @@ public class DefaultTypeSystem: TypeSystem {
         return false
     }
     
+    public func isClassInstanceType(_ type: SwiftType) -> Bool {
+        switch type.unwrapped {
+        case .typeName(let typeName), .generic(let typeName, _):
+            return isClassInstanceType(typeName)
+        case .protocolComposition:
+            return true
+        default:
+            return false
+        }
+    }
+    
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
         if typeName == supertypeName {
             return true
