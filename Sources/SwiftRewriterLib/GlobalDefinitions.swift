@@ -1,5 +1,9 @@
+// TODO: Figure out a way to support overloading of functions with different count
+// of parameters so we can support same function name with different parameter
+// count
+
 /// A storage for global definitions
-public class GlobalDefinitions {
+public class GlobalDefinitions: DefinitionsSource {
     internal(set) public var definitions: [CodeDefinition] = []
     
     public init() {
@@ -8,6 +12,14 @@ public class GlobalDefinitions {
     
     public func recordDefinition(_ definition: CodeDefinition) {
         definitions.append(definition)
+    }
+    
+    public func allDefinitions() -> [CodeDefinition] {
+        return definitions
+    }
+    
+    public func definition(named name: String) -> CodeDefinition? {
+        return definitions.first { $0.name == name }
     }
 }
 
