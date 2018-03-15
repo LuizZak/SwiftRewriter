@@ -6,7 +6,7 @@ class DefaultGlobalsProvidersSourceTests: XCTestCase {
         let sut = DefaultGlobalsProvidersSource()
         var providers = sut.globalsProviders.makeIterator()
         
-        XCTAssertEqual(sut.globalsProviders.count, 0)
-        XCTAssertNil(providers.next())
+        XCTAssertEqual(sut.globalsProviders.count, 1)
+        XCTAssert(providers.next() is CLibGlobalsProviders)
     }
 }
