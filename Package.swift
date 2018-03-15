@@ -52,6 +52,9 @@ let package = Package(
             name: "IntentionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils", "MiniLexer"]),
         .target(
+            name: "GlobalsProviders",
+            dependencies: ["SwiftRewriterLib", "SwiftAST"]),
+        .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils"]),
         .target(
@@ -62,7 +65,7 @@ let package = Package(
             dependencies: [
                 "SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility",
                 "ExpressionPasses", "Utils", "Console", "SourcePreprocessors",
-                "SwiftAST", "IntentionPasses", "MiniLexer"
+                "SwiftAST", "IntentionPasses", "MiniLexer", "GlobalsProviders"
             ]),
         .target(
             name: "TestCommons",
@@ -87,19 +90,23 @@ let package = Package(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",
                            "ObjcParser", "ExpressionPasses", "IntentionPasses",
-                           "TestCommons"]),
+                           "TestCommons", "GlobalsProviders"]),
         .testTarget(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",
                            "Antlr4", "ObjcParser", "ObjcParserAntlr",
-                           "IntentionPasses"]),
+                           "IntentionPasses", "GlobalsProviders"]),
         .testTarget(
             name: "SourcePreprocessorsTests",
             dependencies: ["SourcePreprocessors", "Utils", "SwiftRewriterLib",
-                           "IntentionPasses"]),
+                           "IntentionPasses", "GlobalsProviders"]),
         .testTarget(
             name: "IntentionPassesTests",
-            dependencies: ["GrammarModels", "SwiftRewriterLib", "IntentionPasses",
+            dependencies: ["SwiftAST", "GrammarModels", "SwiftRewriterLib",
+                           "IntentionPasses", "TestCommons", "GlobalsProviders"]),
+        .testTarget(
+            name: "GlobalsProvidersTests",
+            dependencies: ["SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
                            "TestCommons"])
     ]
 )

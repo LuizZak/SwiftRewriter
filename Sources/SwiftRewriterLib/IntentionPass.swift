@@ -5,14 +5,7 @@ import Utils
 /// A protocol for objects that perform passes through intentions collected and
 /// perform changes and optimizations on them.
 public protocol IntentionPass {
-    func registerDefinitions(on globals: GlobalDefinitions)
     func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext)
-}
-
-public extension IntentionPass {
-    public func registerDefinitions(on globals: GlobalDefinitions) {
-        
-    }
 }
 
 /// Context for an intention pass

@@ -3,6 +3,7 @@ import SwiftRewriterLib
 import ObjcParser
 import ExpressionPasses
 import IntentionPasses
+import GlobalsProviders
 
 class SingleFileTestBuilder {
     var test: XCTestCase
@@ -21,11 +22,10 @@ class SingleFileTestBuilder {
         let input = TestSingleInputProvider(code: objc)
         
         let sut = SwiftRewriter(input: input, output: output)
-        
         sut.writerOptions = options
-        
         sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
         sut.intentionPassesSource = DefaultIntentionPasses()
+        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
         
         do {
             try sut.rewrite()

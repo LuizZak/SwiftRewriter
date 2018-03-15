@@ -3,6 +3,7 @@ import ObjcParser
 import SwiftRewriterLib
 import ExpressionPasses
 import IntentionPasses
+import GlobalsProviders
 import Utils
 
 class MultiFileTestBuilder {
@@ -31,6 +32,7 @@ class MultiFileTestBuilder {
         sut.writerOptions = options
         sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
         sut.intentionPassesSource = DefaultIntentionPasses()
+        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
         
         do {
             try sut.rewrite()

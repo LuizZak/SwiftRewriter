@@ -49,6 +49,9 @@ public class SwiftRewriter {
     /// the output
     public var intentionPassesSource: IntentionPassSource
     
+    /// Provider for global variables
+    public var globalsProvidersSource: GlobalsProvidersSource
+    
     /// If true, `#include "file.h"` directives are resolved and the new unique
     /// files found during importing are included into the transpilation step.
     public var followIncludes: Bool = false
@@ -63,12 +66,14 @@ public class SwiftRewriter {
         self.init(input: input, output: output,
                   intentionPassesSource: ArrayIntentionPassSource(intentionPasses: []),
                   syntaxNodeRewriterSources: ArraySyntaxNodeRewriterPassSource(syntaxNodePasses: []),
+                  globalsProvidersSource: ArrayGlobalProvidersSource(globalsProviders: []),
                   settings: .default)
     }
     
     public init(input: InputSourcesProvider, output: WriterOutput,
                 intentionPassesSource: IntentionPassSource,
                 syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource,
+                globalsProvidersSource: GlobalsProvidersSource,
                 settings: Settings) {
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
@@ -76,6 +81,7 @@ public class SwiftRewriter {
         self.intentionCollection = IntentionCollection()
         self.intentionPassesSource = intentionPassesSource
         self.syntaxNodeRewriterSources = syntaxNodeRewriterSources
+        self.globalsProvidersSource = globalsProvidersSource
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         
@@ -300,14 +306,12 @@ public class SwiftRewriter {
                 + intentionPassesSource.intentionPasses
         
         // Register globals first
-        for pass in intentionPasses {
-            pass.registerDefinitions(on: globals)
+        for provider in globalsProvidersSource.globalsProviders {
+            provider.registerDefinitions(on: globals)
         }
         
         // Execute passes
         for pass in intentionPasses {
-            pass.registerDefinitions(on: globals)
-            
             autoreleasepool {
                 requiresResolve = false
                 

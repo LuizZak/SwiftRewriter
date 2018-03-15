@@ -3,6 +3,7 @@ import SwiftRewriterLib
 import ExpressionPasses
 import SourcePreprocessors
 import IntentionPasses
+import GlobalsProviders
 
 public enum Settings {
     /// Settings for the AST writer
@@ -34,6 +35,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
             SwiftRewriter(input: input, output: output,
                           intentionPassesSource: DefaultIntentionPasses(),
                           syntaxNodeRewriterSources: DefaultExpressionPasses(),
+                          globalsProvidersSource: DefaultGlobalsProvidersSource(),
                           settings: Settings.rewriter)
         
         converter.preprocessors.append(QuickSpecPreprocessor())
