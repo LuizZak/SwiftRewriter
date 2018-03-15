@@ -11,6 +11,26 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         sut = ASTCorrectorExpressionPass()
     }
     
+    /// Tests that arithmetic comparisons (<=, <, >=, >) where lhs and rhs are
+    /// optional numeric values are coerced into default values using zeroes.
+    func testNullCoallesceOnArithmeticComparisions() {
+        let expMaker = { Expression.identifier("a") }
+        
+        let exp = expMaker().binary(op: .lessThan, rhs: Expression.identifier("b"))
+        exp.lhs.resolvedType = .optional(.int)
+        exp.rhs.resolvedType = .int
+        
+        assertTransform(
+            // a < b
+            expression: exp,
+            // (a ?? 0) < b
+            into:
+            Expression
+                .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0)))
+                .binary(op: .lessThan, rhs: Expression.identifier("b"))
+        )
+    }
+    
     /// Tests the corrector applies an integer correction to automatically null-coallesce
     /// into zero's (to match original Objective-C behavior)
     func testCorrectNullableInteger() {

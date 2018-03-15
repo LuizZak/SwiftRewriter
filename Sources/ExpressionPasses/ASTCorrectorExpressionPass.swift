@@ -63,6 +63,28 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         return exp
     }
     
+    public override func visitBinary(_ exp: BinaryExpression) -> Expression {
+        switch exp.op.category {
+        case .comparison where exp.op != .equals && exp.op != .unequals:
+            // Mark left hand side and right hand side of comparison expressions
+            // to expect the same base type, in case they are optionals of the
+            // same type.
+            // This forces null-coallesces on both sides later on.
+            if exp.lhs.resolvedType?.deepUnwrapped == exp.rhs.resolvedType?.deepUnwrapped {
+                let type = exp.lhs.resolvedType?.deepUnwrapped
+                
+                exp.lhs.expectedType = type
+                exp.rhs.expectedType = type
+            }
+            
+            break
+        default:
+            break
+        }
+        
+        return super.visitBinary(exp)
+    }
+    
     func correctToDefaultValue(_ exp: Expression) -> Expression? {
         guard let expectedType = exp.expectedType else {
             return nil
