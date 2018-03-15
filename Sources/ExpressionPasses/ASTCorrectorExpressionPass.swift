@@ -68,14 +68,13 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         case .comparison where exp.op != .equals && exp.op != .unequals,
              .arithmetic, .bitwise:
             // Mark left hand side and right hand side of comparison expressions
-            // to expect the same base type, in case they are optionals of the
-            // same type.
-            // This forces null-coallesces on both sides later on.
-            if exp.lhs.resolvedType?.deepUnwrapped == exp.rhs.resolvedType?.deepUnwrapped {
-                let type = exp.lhs.resolvedType?.deepUnwrapped
-                
-                exp.lhs.expectedType = type
-                exp.rhs.expectedType = type
+            // to expect non-optional of numeric values, in case they are numeric
+            // themselves.
+            if let lhsType = exp.lhs.resolvedType?.unwrapped, context.typeSystem.isNumeric(lhsType) {
+                exp.lhs.expectedType = lhsType
+            }
+            if let rhsType = exp.rhs.resolvedType?.unwrapped, context.typeSystem.isNumeric(rhsType) {
+                exp.rhs.expectedType = rhsType
             }
             
             break

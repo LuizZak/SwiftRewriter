@@ -1469,4 +1469,45 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testCorrectsNullabilityOfMethodParameters() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            @property (nullable) A *a;
+            @property NSInteger b;
+            - (void)takesInt:(NSInteger)a;
+            - (NSInteger)returnsInt;
+            @end
+            @implementation A
+            - (void)method {
+                [self takesInt:a.b];
+                [self takesInt:[a returnsInt]];
+                [self takesInt:a.b + 0];
+                [self takesInt:[a returnsInt] + 0];
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var a: A? = nil
+                @objc var b: Int = 0
+                
+                @objc
+                func method() {
+                    self.takesInt((a?.b ?? 0))
+                    self.takesInt((a?.returnsInt() ?? 0))
+                    self.takesInt((a?.b ?? 0) + 0)
+                    self.takesInt((a?.returnsInt() ?? 0) + 0)
+                }
+                @objc
+                func takesInt(_ a: Int) {
+                }
+                @objc
+                func returnsInt() -> Int {
+                }
+            }
+            """)
+    }
 }

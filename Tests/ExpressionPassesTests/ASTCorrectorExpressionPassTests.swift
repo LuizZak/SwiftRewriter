@@ -18,7 +18,6 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         
         let exp = expMaker().binary(op: .add, rhs: Expression.identifier("b"))
         exp.lhs.resolvedType = .optional(.int)
-        exp.rhs.resolvedType = .int
         
         assertTransform(
             // a + b
