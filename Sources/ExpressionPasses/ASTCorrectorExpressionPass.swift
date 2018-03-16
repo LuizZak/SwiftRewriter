@@ -101,7 +101,7 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         
         exp.expectedType = nil
         
-        let converted = exp.binary(op: .nullCoallesce, rhs: defValue)
+        let converted = exp.binary(op: .nullCoalesce, rhs: defValue)
         converted.resolvedType = defValue.resolvedType
         converted.expectedType = converted.resolvedType
         
@@ -118,7 +118,7 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
                 return nil
             }
             
-            let newExp = Expression.parens(exp.binary(op: .nullCoallesce, rhs: defaultExp))
+            let newExp = Expression.parens(exp.binary(op: .nullCoalesce, rhs: defaultExp))
             newExp.expectedType = exp.expectedType
             newExp.resolvedType = type.deepUnwrapped
             

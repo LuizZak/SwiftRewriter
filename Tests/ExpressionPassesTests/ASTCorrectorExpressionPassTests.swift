@@ -11,9 +11,9 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         sut = ASTCorrectorExpressionPass()
     }
     
-    /// Tests inserting null-coallesces on optional numeric types on the left
+    /// Tests inserting null-coalesces on optional numeric types on the left
     /// and right side of arithmetic operators
-    func testNullCoallesceOnArithmeticOperators() {
+    func testNullCoalesceOnArithmeticOperators() {
         let expMaker = { Expression.identifier("a") }
         
         let exp = expMaker().binary(op: .add, rhs: Expression.identifier("b"))
@@ -25,13 +25,13 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // (a ?? 0) + b
             into:
             Expression
-                .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0)))
+                .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
                 .binary(op: .add, rhs: Expression.identifier("b"))
         )
     }
     
     /// Tests null-coallescing on deep nested binary expressions
-    func testNullCoallesceOnNestedArithmeticOperators() {
+    func testNullCoalesceOnNestedArithmeticOperators() {
         let lhsLhsMaker = { Expression.identifier("a") }
         let lhsMaker = { Expression.identifier("b") }
         
@@ -47,16 +47,16 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             Expression
                 .parens(
                     lhsLhsMaker()
-                        .binary(op: .nullCoallesce, rhs: .constant(0))
+                        .binary(op: .nullCoalesce, rhs: .constant(0))
                 )
-                .binary(op: .add, rhs: .parens(lhsMaker().binary(op: .nullCoallesce, rhs: .constant(0))))
+                .binary(op: .add, rhs: .parens(lhsMaker().binary(op: .nullCoalesce, rhs: .constant(0))))
                 .binary(op: .add, rhs: Expression.identifier("c"))
         )
     }
     
     /// Tests that arithmetic comparisons (<=, <, >=, >) where lhs and rhs are
     /// optional numeric values are coerced into default values using zeroes.
-    func testNullCoallesceOnArithmeticComparisions() {
+    func testNullCoalesceOnArithmeticComparisions() {
         let expMaker = { Expression.identifier("a") }
         
         let exp = expMaker().binary(op: .lessThan, rhs: Expression.identifier("b"))
@@ -69,12 +69,12 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // (a ?? 0) < b
             into:
             Expression
-                .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0)))
+                .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
                 .binary(op: .lessThan, rhs: Expression.identifier("b"))
         )
     }
     
-    /// Tests the corrector applies an integer correction to automatically null-coallesce
+    /// Tests the corrector applies an integer correction to automatically null-coalesce
     /// into zero's (to match original Objective-C behavior)
     func testCorrectNullableInteger() {
         let expMaker = { Expression.identifier("a").dot("b") }
@@ -87,12 +87,12 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // a.b
             expression: exp,
             // (a.b ?? 0)
-            into: .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0)))
+            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
         )
     }
     
     /// Tests the corrector applies a floating-point correction to automatically
-    /// null-coallesce into zero's (to match original Objective-C behavior)
+    /// null-coalesce into zero's (to match original Objective-C behavior)
     func testCorrectNullableFloatingPoint() {
         let expMaker = { Expression.identifier("a").dot("b") }
         
@@ -104,7 +104,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // a.b
             expression: exp,
             // (a.b ?? 0.0)
-            into: .parens(expMaker().binary(op: .nullCoallesce, rhs: .constant(0.0)))
+            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0.0)))
         )
     }
     
@@ -477,7 +477,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // a
             expression: exp,
             // (a ?? A())
-            into: .parens(expMaker().binary(op: .nullCoallesce, rhs: Expression.identifier("A").call()))
+            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("A").call()))
         ); assertNotifiedChange()
     }
 }

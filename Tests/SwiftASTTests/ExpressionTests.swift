@@ -79,9 +79,9 @@ class ExpressionTests: XCTestCase {
             "10 * 11")
     }
     
-    func testDescriptionNullCoallesce() {
+    func testDescriptionNullCoalesce() {
         XCTAssertEqual(
-            Expression.binary(lhs: .identifier("abc"), op: .nullCoallesce, rhs: .identifier("def")).description,
+            Expression.binary(lhs: .identifier("abc"), op: .nullCoalesce, rhs: .identifier("def")).description,
             "abc ?? def")
     }
     

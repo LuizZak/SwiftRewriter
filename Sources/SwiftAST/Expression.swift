@@ -1272,7 +1272,7 @@ public enum SwiftOperator: String {
     case equals = "=="
     case unequals = "!="
     
-    case nullCoallesce = "??"
+    case nullCoalesce = "??"
     
     case openRange = "..<"
     case closedRange = "..."
@@ -1304,9 +1304,9 @@ public enum SwiftOperator: String {
              .equals, .unequals:
             return .comparison
             
-        // Null-coallesce
-        case .nullCoallesce:
-            return .nullCoallesce
+        // Null-coalesce
+        case .nullCoalesce:
+            return .nullCoalesce
             
         // Range-making operators
         case .openRange, .closedRange:
@@ -1320,7 +1320,7 @@ public enum SwiftOperatorCategory: Equatable {
     case comparison
     case logical
     case bitwise
-    case nullCoallesce
+    case nullCoalesce
     case assignment
     case range
 }

@@ -272,7 +272,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             exp.resolvedType = exp.lhs.resolvedType
         
-        case .nullCoallesce where exp.lhs.resolvedType?.deepUnwrapped == exp.rhs.resolvedType?.deepUnwrapped:
+        case .nullCoalesce where exp.lhs.resolvedType?.deepUnwrapped == exp.rhs.resolvedType?.deepUnwrapped:
             // Return rhs' nullability
             exp.resolvedType = exp.rhs.resolvedType
         default:

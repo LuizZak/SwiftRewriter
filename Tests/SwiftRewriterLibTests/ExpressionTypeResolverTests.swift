@@ -155,21 +155,21 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .errorType)
     }
     
-    func testNullCoallesce() {
-        // Null-coallesce with non-null right-handside
+    func testNullCoalesce() {
+        // Null-coalesce with non-null right-handside
         assertResolve(.binary(lhs: makeAnOptional(.constant(1)),
-                              op: .nullCoallesce,
+                              op: .nullCoalesce,
                               rhs: .constant(1)),
                       expect: .int)
         
-        // Null-coallesce with nullable right-handside
+        // Null-coalesce with nullable right-handside
         assertResolve(.binary(lhs: makeAnOptional(.constant(1)),
-                              op: .nullCoallesce,
+                              op: .nullCoalesce,
                               rhs: makeAnOptional(.constant(1))),
                       expect: .optional(.int))
         
         // Nonnull type
-        assertResolve(.binary(lhs: .constant(1), op: .nullCoallesce, rhs: .constant(1)),
+        assertResolve(.binary(lhs: .constant(1), op: .nullCoalesce, rhs: .constant(1)),
                       expect: .int)
     }
     

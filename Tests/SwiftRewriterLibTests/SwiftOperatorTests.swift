@@ -39,8 +39,8 @@ class SwiftOperatorTests: XCTestCase {
         assert(.unequals, is: .comparison)
     }
     
-    func testOperatorCategoryNullCoallesce() {
-        assert(.nullCoallesce, is: .nullCoallesce)
+    func testOperatorCategoryNullCoalesce() {
+        assert(.nullCoalesce, is: .nullCoalesce)
     }
     
     func testOperatorCategoryRangeMaking() {

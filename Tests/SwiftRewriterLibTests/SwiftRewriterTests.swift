@@ -1104,7 +1104,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testAddNullCoallesceToCompletionBlockInvocationsDeepIntoBlockExpressions() throws {
+    func testAddNullCoalesceToCompletionBlockInvocationsDeepIntoBlockExpressions() throws {
         try assertObjcParse(
             objc: """
             @implementation A
@@ -1137,7 +1137,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testApplyNilCoallesceInDeeplyNestedExpressionsProperly() throws {
+    func testApplyNilCoalesceInDeeplyNestedExpressionsProperly() throws {
         try assertObjcParse(
             objc: """
             @implementation A
@@ -1511,7 +1511,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testOptionalCoallesceNullableStructAccess() throws {
+    func testOptionalCoalesceNullableStructAccess() throws {
         try assertObjcParse(
             objc: """
             typedef struct {

@@ -34,7 +34,7 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             if let ifTrue = ifTrue {
                 return .ternary(exp, true: ifTrue, false: ifFalse)
             } else {
-                return .binary(lhs: exp, op: .nullCoallesce, rhs: ifFalse)
+                return .binary(lhs: exp, op: .nullCoalesce, rhs: ifFalse)
             }
         }
         // Assignment expression

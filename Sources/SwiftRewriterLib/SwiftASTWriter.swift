@@ -780,7 +780,7 @@ private class StatementWriter: StatementVisitor {
         case .logical:
             return .bool
             
-        case .nullCoallesce, .range:
+        case .nullCoalesce, .range:
             return .other
         }
     }

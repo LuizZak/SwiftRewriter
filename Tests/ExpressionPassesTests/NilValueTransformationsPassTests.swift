@@ -249,7 +249,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                     .block(parameters: [],
                            return: .void,
                            body: [
-                            .expression(makeCallback(/* coallesced: */ false, /* argCount: */ 0))
+                            .expression(makeCallback(/* coalesced: */ false, /* argCount: */ 0))
                         ]))
                 ])
             .dot("then").call([
@@ -257,7 +257,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                     .block(parameters: [],
                            return: .void,
                            body: [
-                            .expression(makeCallback(/* coallesced: */ false, /* argCount: */ 1))
+                            .expression(makeCallback(/* coalesced: */ false, /* argCount: */ 1))
                         ]))
                 ])
             .dot("always").call([
@@ -265,7 +265,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                     .block(parameters: [],
                            return: .void,
                            body: [
-                            .expression(makeCallback(/* coallesced: */ false, /* argCount: */ 2))
+                            .expression(makeCallback(/* coalesced: */ false, /* argCount: */ 2))
                         ]))
                 ])
         
@@ -293,7 +293,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                         .block(parameters: [],
                                return: .void,
                                body: [
-                                .expression(makeCallback(/* coallesced: */ true, /* argCount: */ 0))
+                                .expression(makeCallback(/* coalesced: */ true, /* argCount: */ 0))
                             ]))
                     ])
                 .dot("then").call([
@@ -301,7 +301,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                         .block(parameters: [],
                                return: .void,
                                body: [
-                                .expression(makeCallback(/* coallesced: */ true, /* argCount: */ 1))
+                                .expression(makeCallback(/* coalesced: */ true, /* argCount: */ 1))
                             ]))
                     ])
                 .dot("always").call([
@@ -309,7 +309,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                         .block(parameters: [],
                                return: .void,
                                body: [
-                                .expression(makeCallback(/* coallesced: */ true, /* argCount: */ 2))
+                                .expression(makeCallback(/* coalesced: */ true, /* argCount: */ 2))
                             ]))
                     ])
         )
