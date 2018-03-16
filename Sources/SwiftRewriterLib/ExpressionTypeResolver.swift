@@ -617,7 +617,8 @@ private class MemberInvocationResolver {
             }
             
             postfix.resolvedType = metatype
-            functionCall.returnType = postfix.resolvedType
+            functionCall.returnType = metatype
+            functionCall.callableSignature = .block(returnType: metatype, parameters: ctor.parameters.map { $0.type })
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -630,7 +631,8 @@ private class MemberInvocationResolver {
             }
             
             postfix.resolvedType = metatype
-            functionCall.returnType = postfix.resolvedType
+            functionCall.returnType = metatype
+            functionCall.callableSignature = .block(returnType: metatype, parameters: ctor.parameters.map { $0.type })
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -653,7 +655,8 @@ private class MemberInvocationResolver {
             postfix.exp.resolvedType = method.signature.swiftClosureType
             postfix.resolvedType = method.signature.returnType
             
-            functionCall.returnType = postfix.resolvedType
+            functionCall.returnType = method.signature.returnType
+            functionCall.callableSignature = method.signature.swiftClosureType
             
             matchParameterTypes(parameters: method.signature.parameters, callArguments: functionCall.arguments)
             
@@ -666,6 +669,7 @@ private class MemberInvocationResolver {
             
             postfix.resolvedType = ret.withSameOptionalityAs(type)
             functionCall.returnType = postfix.resolvedType
+            functionCall.callableSignature = .block(returnType: ret, parameters: args)
             
             matchParameterTypes(types: args, callArguments: functionCall.arguments)
         }

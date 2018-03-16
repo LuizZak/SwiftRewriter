@@ -120,6 +120,16 @@ public class IfStatement: Statement {
         didSet { oldValue?.parent = nil; elseBody?.parent = self }
     }
     
+    /// If non-nil, the expression of this if statement must be resolved to a
+    /// pattern match over a given pattern.
+    ///
+    /// This is used to create if-let statements.
+    public var pattern: Pattern?
+    
+    public var isIfLet: Bool {
+        return pattern != nil
+    }
+    
     public override var children: [SyntaxNode] {
         if let elseBody = elseBody {
             return [exp, body, elseBody]
@@ -146,7 +156,7 @@ public class IfStatement: Statement {
     public override func isEqual(to other: Statement) -> Bool {
         switch other {
         case let rhs as IfStatement:
-            return exp == rhs.exp && body == rhs.body && elseBody == rhs.elseBody
+            return exp == rhs.exp && pattern == rhs.pattern && body == rhs.body && elseBody == rhs.elseBody
         default:
             return false
         }
@@ -663,6 +673,13 @@ public extension Statement {
                             else elseBody: CompoundStatement?) -> IfStatement {
         
         return IfStatement(exp: exp, body: body, elseBody: elseBody)
+    }
+    public static func ifLet(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement,
+                             else elseBody: CompoundStatement?) -> IfStatement {
+        let stmt = IfStatement(exp: exp, body: body, elseBody: elseBody)
+        stmt.pattern = pattern
+        
+        return stmt
     }
     public static func `while`(_ exp: Expression, body: CompoundStatement) -> WhileStatement {
         return WhileStatement(exp: exp, body: body)

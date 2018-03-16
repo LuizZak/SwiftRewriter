@@ -178,3 +178,11 @@ class ExpressionPassTestCase: XCTestCase {
                                              notifyChangedTree: block)
     }
 }
+
+extension Expression {
+    func typed(_ type: SwiftType) -> Self {
+        self.resolvedType = type
+        
+        return self
+    }
+}

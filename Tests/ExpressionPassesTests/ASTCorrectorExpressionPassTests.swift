@@ -480,4 +480,46 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             into: .parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("A").call()))
         ); assertNotifiedChange()
     }
+    
+    /// Tests that the corrector is capable of doing simple if-let generations
+    /// when a nullable value is passed to a non-null parameter of a function
+    /// call expression.
+    func testCorrectSimpleNullableValueInNonnullParameterToIfLet() {
+        let funcType = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+        
+        let exp =
+            Expression
+                .identifier("a").typed(funcType)
+                .call([Expression.identifier("b").typed(.optional(.typeName("A")))],
+                      callableSignature: funcType)
+        
+        assertTransform(
+            statement: Statement.expression(exp),
+            into: Statement.ifLet(
+                Pattern.identifier("b"), .identifier("b"),
+                body: [
+                    .expression(Expression.identifier("a").call([Expression.identifier("b")]))
+                ], else: nil)
+        ); assertNotifiedChange()
+    }
+    
+    /// Tests non-null arguments with nullable scalar types are not corrected to
+    /// an if-let, since this is dealt at another point in the AST corrector.
+    func testDontCorrectSimpleNullableValueInNonnullParameterToIfLetIfArgumentIsNullableScalarType() {
+        let funcType = SwiftType.block(returnType: .void, parameters: [.int])
+        
+        let exp =
+            Expression
+                .identifier("a").typed(funcType)
+                .call([Expression.identifier("b").dot("c").typed(.optional(.int))],
+                      callableSignature: funcType)
+        
+        assertTransform(
+            statement: Statement.expression(exp),
+            into: Statement.expression(Expression
+                .identifier("a").typed(funcType)
+                .call([Expression.identifier("b").dot("c").typed(.optional(.int))],
+                      callableSignature: funcType))
+        ); assertDidNotNotifyChange()
+    }
 }

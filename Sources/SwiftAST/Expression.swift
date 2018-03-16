@@ -1129,8 +1129,35 @@ public final class FunctionCallPostfix: Postfix {
         return arguments.map { $0.expression }
     }
     
+    /// A .block callable signature for this function call postfix.
+    public var callableSignature: SwiftType?
+    
     public init(arguments: [FunctionArgument]) {
         self.arguments = arguments
+    }
+    
+    /// Returns a new function call postfix with the arguments replaced to a given
+    /// arguments array, while keeping argument labels and resolved type information.
+    ///
+    /// The number of arguments passed must match the number of arguments present
+    /// in this function call postfix.
+    ///
+    /// - precondition: `expressions.count == self.arguments.count`
+    public func replacingArguments(_ expressions: [Expression]) -> FunctionCallPostfix {
+        precondition(expressions.count == arguments.count)
+        
+        let newArgs: [FunctionArgument] =
+            zip(arguments, expressions).map { tuple in
+                let (arg, exp) = tuple
+                
+                return FunctionArgument(label: arg.label, expression: exp)
+            }
+        
+        let new = FunctionCallPostfix(arguments: newArgs)
+        new.returnType = returnType
+        new.callableSignature = callableSignature
+        
+        return new
     }
     
     public override func isEqual(to other: Postfix) -> Bool {

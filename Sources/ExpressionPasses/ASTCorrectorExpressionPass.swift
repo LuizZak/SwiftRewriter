@@ -2,6 +2,74 @@ import SwiftRewriterLib
 import SwiftAST
 
 public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
+    private func varNameForExpression(_ exp: Expression) -> String? {
+        if let identifier = exp.asIdentifier {
+            return identifier.identifier
+        }
+        if let member = exp.asPostfix?.member {
+            return member.name
+        }
+        
+        return nil
+    }
+    
+    public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
+        // TODO: Deal with multiple expressions on a single line, maybe.
+        guard stmt.expressions.count == 1, let exp = stmt.expressions.first else {
+            return super.visitExpressions(stmt)
+        }
+        
+        guard let postfix = exp.asPostfix else {
+            return super.visitExpressions(stmt)
+        }
+        
+        // Apply potential if-let patterns to simple 1-parameter function calls
+        guard let functionCall = exp.asPostfix?.functionCall, functionCall.arguments.count == 1 else {
+            return super.visitExpressions(stmt)
+        }
+        guard case .block(_, let args)? = functionCall.callableSignature else {
+            return super.visitExpressions(stmt)
+        }
+        
+        let argument = functionCall.arguments[0].expression
+        
+        // Check the receiving argument is non-optional, but the argument's type
+        // in the expression is an optional (but not an implicitly unwrapped, since
+        // Swift takes care of unwrapping that automatically)
+        guard let resolvedType = argument.resolvedType, !args[0].isOptional
+            && resolvedType.isOptional == true
+            && argument.resolvedType?.isImplicitlyUnwrapped == false else {
+            return super.visitExpressions(stmt)
+        }
+        
+        // Scalars are dealt directly in another portion of the AST corrector.
+        guard !context.typeSystem.isScalarType(resolvedType.deepUnwrapped) else {
+            return super.visitExpressions(stmt)
+        }
+        
+        guard let name = varNameForExpression(argument) else {
+            return super.visitExpressions(stmt)
+        }
+        
+        // if let <name> = <arg0> {
+        //   func(<name>)
+        // }
+        let newOp = functionCall.replacingArguments([.identifier(name)])
+        postfix.op = newOp
+        
+        let stmt =
+            Statement.ifLet(
+                .identifier(name), argument,
+                body: [
+                    .expression(postfix)
+                ],
+                else: nil)
+        
+        notifyChange()
+        
+        return super.visitStatement(stmt)
+    }
+    
     public override func visitExpression(_ exp: Expression) -> Expression {
         guard let expectedType = exp.expectedType, expectedType != exp.resolvedType else {
             return super.visitExpression(exp)
