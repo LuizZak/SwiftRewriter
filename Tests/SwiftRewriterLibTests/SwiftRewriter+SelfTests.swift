@@ -721,7 +721,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     (local1)
                     // type: String
                     (local2)
-                    // type: String!
+                    // type: String?
                     (local3)
                 }
                 @objc
@@ -886,6 +886,66 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 }
                 @objc
                 func takesBlock(_ block: (() -> Void)!) {
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testAssignImplicitlyUnwrappedOptionalToLocalVariableEscalatesToOptional() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            - (A*)other;
+            @end
+            @implementation A
+            - (void)f1 {
+                A *a = [self other];
+                (a);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func f1() {
+                    var a = self.other()
+                    // type: A?
+                    (a)
+                }
+                @objc
+                func other() -> A! {
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testCreateNonOptionalLocalsWhenRHSInitializerIsNonOptional() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            - (nonnull A*)other;
+            @end
+            @implementation A
+            - (void)f1 {
+                A *a = [self other];
+                (a);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func f1() {
+                    var a = self.other()
+                    // type: A
+                    (a)
+                }
+                @objc
+                func other() -> A {
                 }
             }
             """,

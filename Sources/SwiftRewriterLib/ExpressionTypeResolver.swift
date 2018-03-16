@@ -62,6 +62,11 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             if !typeSystem.isScalarType(decl.type), let initValueType = decl.initialization?.resolvedType {
                 type = type.withSameOptionalityAs(initValueType)
+                
+                // Promote implicitly unwrapped optionals to full optionals
+                if initValueType.isImplicitlyUnwrapped {
+                    type = .optional(type.unwrapped)
+                }
             }
             
             decl.initialization?.expectedType = type

@@ -643,7 +643,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                                           initialization: Expression.identifier("value")),
                           sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .implicitUnwrappedOptional(.string))
-            .thenAssertDefined(localNamed: "a", type: .implicitUnwrappedOptional(.string))
+            .thenAssertDefined(localNamed: "a", type: .optional(.string))
     }
     
     func testVariableDeclarationDoesNotTransmitOptionalFromInitializerValueForStructTypes() {
