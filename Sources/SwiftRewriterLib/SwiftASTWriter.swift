@@ -444,6 +444,13 @@ private class StatementWriter: StatementVisitor {
             target.outputIdentation()
         }
         target.outputInlineWithSpace("if", style: .keyword)
+        
+        if let pattern = stmt.pattern {
+            target.outputInlineWithSpace("let", style: .keyword)
+            emitPattern(pattern)
+            target.outputInline(" = ")
+        }
+        
         emitExpr(stmt.exp)
         
         visitCompound(stmt.body, lineFeedAfter: stmt.elseBody == nil)

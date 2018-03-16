@@ -1602,4 +1602,42 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testAutomaticIfLetPatternSimple() throws {
+        try assertObjcParse(
+            objc: """
+            @interface B
+            @end
+            
+            @interface A
+            @property (nullable) B *b;
+            - (void)takesB:(nonnull B*)b;
+            @end
+
+            @implementation A
+            - (void)method {
+                [self takesB:self.b];
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class B: NSObject {
+            }
+            @objc
+            class A: NSObject {
+                @objc var b: B? = nil
+                
+                @objc
+                func method() {
+                    if let b = self.b {
+                        self.takesB(b)
+                    }
+                }
+                @objc
+                func takesB(_ b: B) {
+                }
+            }
+            """)
+    }
 }

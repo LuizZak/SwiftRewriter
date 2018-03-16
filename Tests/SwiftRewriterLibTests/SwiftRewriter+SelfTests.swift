@@ -594,7 +594,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func method() {
                     // type: B?
-                    self.b?.method().method()
+                    self.b?.method()?.method()
                 }
             }
             """,

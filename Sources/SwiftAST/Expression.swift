@@ -1088,6 +1088,13 @@ public final class SubscriptPostfix: Postfix {
         self.expression = expression
     }
     
+    public func replacingExpression(_ exp: Expression) -> SubscriptPostfix {
+        let sub = Postfix.subscript(exp)
+        sub.returnType = returnType
+        
+        return sub
+    }
+    
     public override func isEqual(to other: Postfix) -> Bool {
         switch other {
         case let rhs as SubscriptPostfix:

@@ -503,6 +503,27 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    /// Same as above, but as a member access
+    func testCorrectMemberAccessNullableValueInNonnullParameterToIfLet() {
+        let funcType = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+        
+        let exp =
+            Expression
+                .identifier("a").typed(funcType)
+                .call([Expression.identifier("b").dot("c").typed(.optional(.typeName("A")))],
+                      callableSignature: funcType)
+        
+        assertTransform(
+            statement: Statement.expression(exp),
+            into: Statement.ifLet(
+                Pattern.identifier("c"), Expression.identifier("b").dot("c"),
+                body: [
+                    .expression(Expression.identifier("a").call([Expression.identifier("c")]))
+                ], else: nil)
+        ); assertNotifiedChange()
+    }
+    
+    
     /// Tests non-null arguments with nullable scalar types are not corrected to
     /// an if-let, since this is dealt at another point in the AST corrector.
     func testDontCorrectSimpleNullableValueInNonnullParameterToIfLetIfArgumentIsNullableScalarType() {
