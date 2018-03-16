@@ -5,6 +5,37 @@ import SwiftAST
 
 class ExpressionTests: XCTestCase {
     
+    func testAssignParentFunctionCall() {
+        let expB = Expression.identifier("b")
+        let exp = Expression.identifier("a").call([expB])
+        
+        XCTAssert(expB.parent === exp)
+    }
+    
+    func testAssignParentSubscription() {
+        let expB = Expression.identifier("b")
+        let exp = Expression.identifier("a").sub(expB)
+        
+        XCTAssert(expB.parent === exp)
+    }
+    
+    func testAssignBlock() {
+        let stmt = Statement.break
+        let exp = Expression.block(parameters: [], return: .void, body: [stmt])
+        
+        XCTAssert(stmt.parent === exp.body)
+        XCTAssert(exp.body.parent === exp)
+    }
+    
+    func testAssignPostfixOperator() {
+        let expB = Expression.identifier("b")
+        let exp = Expression.identifier("a").call([expB])
+        
+        exp.op = .functionCall(arguments: [.unlabeled(expB)])
+        
+        XCTAssert(expB.parent === exp)
+    }
+    
     func testDescriptionExpressions() {
        XCTAssertEqual(
             Expression.postfix(.identifier("abc"), .subscript(.constant(.int(1)))).description,

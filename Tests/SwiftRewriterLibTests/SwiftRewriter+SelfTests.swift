@@ -824,4 +824,71 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testCapturingLocalsInBlocksFromOuterScopes() throws {
+        try assertObjcParse(
+            objc: """
+            typedef void(^_Nonnull Callback)();
+            void takesBlock(void(^block)());
+            
+            @interface MyClass
+            @property (nonnull) Callback callback;
+            @end
+            
+            @implementation MyClass
+            - (void)method {
+                NSInteger local;
+                self.callback = ^() {
+                    (local);
+                };
+                [self takesBlock:^() {
+                    (local);
+                }];
+                takesBlock(^{
+                    (local);
+                });
+                (local);
+            }
+            - (void)takesBlock:(void(^)())block {
+            }
+            @end
+            """,
+            swift: """
+            typealias Callback = () -> Void
+
+            func takesBlock(_ block: (() -> Void)!) {
+            }
+
+            @objc
+            class MyClass: NSObject {
+                @objc var callback: Callback
+                
+                @objc
+                func method() {
+                    var local: Int
+                    // type: Callback
+                    self.callback = { () -> Void in
+                        // type: Int
+                        (local)
+                    }
+                    // type: Void
+                    self.takesBlock { () -> Void in
+                        // type: <<error type>>
+                        (local)
+                    }
+                    // type: <nil>
+                    takesBlock { () -> Void in
+                        // type: <<error type>>
+                        (local)
+                    }
+                    // type: Int
+                    (local)
+                }
+                @objc
+                func takesBlock(_ block: (() -> Void)!) {
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

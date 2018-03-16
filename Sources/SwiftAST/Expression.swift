@@ -106,21 +106,13 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
 
 public class AssignmentExpression: Expression {
     public var lhs: Expression {
-        didSet {
-            guard oldValue !== lhs else { return }
-            
-            oldValue.parent = nil
-            lhs.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     public var op: SwiftOperator
     public var rhs: Expression {
-        didSet {
-            guard oldValue !== rhs else { return }
-            
-            oldValue.parent = nil
-            rhs.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     
     public override var subExpressions: [Expression] {
@@ -173,21 +165,13 @@ public extension Expression {
 
 public class BinaryExpression: Expression {
     public var lhs: Expression {
-        didSet {
-            guard oldValue !== lhs else { return }
-            
-            oldValue.parent = nil
-            lhs.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     public var op: SwiftOperator
     public var rhs: Expression {
-        didSet {
-            guard oldValue !== rhs else { return }
-            
-            oldValue.parent = nil
-            rhs.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     
     public override var subExpressions: [Expression] {
@@ -245,12 +229,8 @@ extension Expression {
 public class UnaryExpression: Expression {
     public var op: SwiftOperator
     public var exp: Expression {
-        didSet {
-            guard oldValue !== exp else { return }
-            
-            oldValue.parent = nil
-            exp.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     
     public override var subExpressions: [Expression] {
@@ -365,12 +345,8 @@ extension Expression {
 public class PrefixExpression: Expression {
     public var op: SwiftOperator
     public var exp: Expression {
-        didSet {
-            guard oldValue !== exp else { return }
-            
-            oldValue.parent = nil
-            exp.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     
     public override var subExpressions: [Expression] {
@@ -424,20 +400,12 @@ extension Expression {
 
 public class PostfixExpression: Expression {
     public var exp: Expression {
-        didSet {
-            guard oldValue !== exp else { return }
-            
-            oldValue.parent = nil
-            exp.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     public var op: Postfix {
-        didSet {
-            guard oldValue !== op else { return }
-            
-            oldValue.subExpressions.forEach { $0.parent = nil }
-            op.subExpressions.forEach { $0.parent = nil }
-        }
+        willSet { newValue.subExpressions.forEach { $0.parent = self } }
+        didSet { oldValue.subExpressions.forEach { $0.parent = nil } }
     }
     
     public override var subExpressions: [Expression] {
@@ -547,12 +515,8 @@ public extension Expression {
 
 public class ParensExpression: Expression {
     public var exp: Expression {
-        didSet {
-            guard oldValue !== exp else { return }
-            
-            oldValue.parent = nil
-            exp.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     
     public override var subExpressions: [Expression] {
@@ -647,12 +611,8 @@ public extension Expression {
 
 public class CastExpression: Expression {
     public var exp: Expression {
-        didSet {
-            guard oldValue !== exp else { return }
-            
-            oldValue.parent = nil
-            exp.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     public var type: SwiftType
     
@@ -702,10 +662,8 @@ public extension Expression {
 
 public class ArrayLiteralExpression: Expression {
     public var items: [Expression] {
-        didSet {
-            oldValue.forEach { $0.parent = nil }
-            items.forEach { $0.parent = self }
-        }
+        willSet { newValue.forEach { $0.parent = self } }
+        didSet { oldValue.forEach { $0.parent = nil } }
     }
     
     public override var subExpressions: [Expression] {
@@ -749,10 +707,8 @@ public extension Expression {
 
 public class DictionaryLiteralExpression: Expression {
     public var pairs: [ExpressionDictionaryPair] {
-        didSet {
-            oldValue.forEach { $0.key.parent = nil; $0.value.parent = nil }
-            pairs.forEach { $0.key.parent = self; $0.value.parent = self }
-        }
+        willSet { newValue.forEach { $0.key.parent = self; $0.value.parent = self } }
+        didSet { oldValue.forEach { $0.key.parent = nil; $0.value.parent = nil } }
     }
     
     public override var subExpressions: [Expression] {
@@ -800,28 +756,16 @@ public extension Expression {
 
 public class TernaryExpression: Expression {
     public var exp: Expression {
-        didSet {
-            guard oldValue !== exp else { return }
-            
-            oldValue.parent = nil
-            exp.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     public var ifTrue: Expression {
-        didSet {
-            guard oldValue !== ifTrue else { return }
-            
-            oldValue.parent = nil
-            ifTrue.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     public var ifFalse: Expression {
-        didSet {
-            guard oldValue !== ifFalse else { return }
-            
-            oldValue.parent = nil
-            ifTrue.parent = self
-        }
+        willSet { newValue.parent = self }
+        didSet { oldValue.parent = nil }
     }
     
     public override var subExpressions: [Expression] {
@@ -879,11 +823,11 @@ public class BlockLiteralExpression: Expression {
     public var parameters: [BlockParameter]
     public var returnType: SwiftType
     public var body: CompoundStatement {
+        willSet {
+            newValue.parent = self
+        }
         didSet {
-            guard oldValue !== body else { return }
-            
             oldValue.parent = nil
-            body.parent = self
         }
     }
     
