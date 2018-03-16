@@ -49,6 +49,9 @@ public class CLibGlobalsProviders: GlobalsProvider {
         
         add(function(name: "floorf", paramTypes: [cFloat], returnType: cFloat))
         add(function(name: "floor", paramTypes: [cDouble], returnType: cDouble))
+        
+        add(function(name: "fmodf", paramTypes: [cFloat, cFloat], returnType: cFloat))
+        add(function(name: "fmod", paramTypes: [cDouble, cDouble], returnType: cDouble))
     }
     
     func function(name: String, paramTypes: [SwiftType], returnType: SwiftType) -> CodeDefinition {

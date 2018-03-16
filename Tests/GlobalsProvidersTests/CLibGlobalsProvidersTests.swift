@@ -54,6 +54,9 @@ class CLibGlobalsProvidersTests: XCTestCase {
         
         assertDefined(function: "floorf", paramTypes: [cFloat], returnType: cFloat)
         assertDefined(function: "floor", paramTypes: [cDouble], returnType: cDouble)
+        
+        assertDefined(function: "fmodf", paramTypes: [cFloat, cFloat], returnType: cFloat)
+        assertDefined(function: "fmod", paramTypes: [cDouble, cDouble], returnType: cDouble)
     }
 }
 
