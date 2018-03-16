@@ -49,12 +49,12 @@ import SwiftAST
 final class StaticConstructorTransformer {
     let typeName: String
     let kind: Kind
-    let conversion: () -> Expression
+    let leading: () -> Expression
     
-    init(typeName: String, kind: Kind, conversion: @escaping () -> Expression) {
+    init(typeName: String, kind: Kind, leading: @escaping () -> Expression) {
         self.typeName = typeName
         self.kind = kind
-        self.conversion = conversion
+        self.leading = leading
     }
     
     func attemptApply(on postfix: PostfixExpression) -> Expression? {
@@ -67,7 +67,7 @@ final class StaticConstructorTransformer {
                     return nil
                 }
                 
-                return conversion()
+                return leading()
             }
             guard postfix.exp.asPostfix?.exp.asIdentifier?.identifier == typeName else {
                 return nil
@@ -79,7 +79,7 @@ final class StaticConstructorTransformer {
                 return nil
             }
             
-            return conversion()
+            return leading()
         case .method(let methodName, let args):
             let transformer =
                 FunctionInvocationTransformer(
@@ -94,7 +94,7 @@ final class StaticConstructorTransformer {
                 return nil
             }
             
-            let base = conversion()
+            let base = leading()
             
             return base.call(result.arguments)
         }

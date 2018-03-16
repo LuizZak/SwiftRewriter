@@ -231,4 +231,24 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
             into: Expression.identifier("UIFont").dot("Weight").dot("black")
         ); assertNotifiedChange()
     }
+    
+    func testUIColorStaticInitializer() {
+        assertTransform(
+            expression: Expression
+                .identifier("UIColor")
+                .dot("colorWithRed")
+                .call([
+                    FunctionArgument(label: nil, expression: .constant(1)),
+                    FunctionArgument(label: "green", expression: .constant(1)),
+                    FunctionArgument(label: "blue", expression: .constant(1)),
+                    FunctionArgument(label: "alpha", expression: .constant(1))
+                ]),
+            into: Expression.identifier("UIColor").call([
+                FunctionArgument(label: "red", expression: .constant(1)),
+                FunctionArgument(label: "green", expression: .constant(1)),
+                FunctionArgument(label: "blue", expression: .constant(1)),
+                FunctionArgument(label: "alpha", expression: .constant(1))
+                ])
+        )
+    }
 }

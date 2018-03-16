@@ -206,6 +206,23 @@ extension UIKitExpressionPass {
     }
     
     func makeFunctionTransformers() {
+        makeUIFontTransformers()
+        makeUIColorTransformes()
+    }
+    
+    func makeUIColorTransformes() {
+        makeInit(
+            typeName: "UIColor", method: "colorWithRed", convertInto: .identifier("UIColor"),
+            andCallWithArguments: [
+                .labeled("red", .asIs),
+                .labeled("green", .asIs),
+                .labeled("blue", .asIs),
+                .labeled("alpha", .asIs)
+            ]
+        )
+    }
+    
+    func makeUIFontTransformers() {
         // UIFont.systemFontOfSize() -> UIFont.systemFont(ofSize:)
         makeInit(
             typeName: "UIFont", method: "systemFontOfSize",

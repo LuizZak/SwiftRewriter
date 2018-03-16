@@ -58,11 +58,11 @@ public extension BaseExpressionPass {
             = StaticConstructorTransformer(
                 typeName: typeName,
                 kind: .property(property),
-                conversion: {
+                leading: {
                     let exp = convertInto()
                     exp.resolvedType = type
                     return exp
-            })
+                })
         
         staticConstructorTransformers.append(transformer)
     }
@@ -74,11 +74,11 @@ public extension BaseExpressionPass {
             = StaticConstructorTransformer(
                 typeName: typeName,
                 kind: .method(method, args),
-                conversion: {
+                leading: {
                     let exp = convertInto()
                     exp.resolvedType = type
                     return exp
-            })
+                })
         
         staticConstructorTransformers.append(transformer)
     }
