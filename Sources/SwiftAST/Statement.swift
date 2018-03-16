@@ -111,28 +111,13 @@ public extension Statement {
 
 public class IfStatement: Statement {
     public var exp: Expression {
-        willSet {
-            newValue.parent = self
-        }
-        didSet {
-            oldValue.parent = nil
-        }
+        didSet { oldValue.parent = nil; exp.parent = self }
     }
     public var body: CompoundStatement {
-        willSet {
-            newValue.parent = self
-        }
-        didSet {
-            oldValue.parent = nil
-        }
+        didSet { oldValue.parent = nil; body.parent = self }
     }
     public var elseBody: CompoundStatement? {
-        willSet {
-            newValue?.parent = self
-        }
-        didSet {
-            oldValue?.parent = nil
-        }
+        didSet { oldValue?.parent = nil; elseBody?.parent = self }
     }
     
     public override var children: [SyntaxNode] {

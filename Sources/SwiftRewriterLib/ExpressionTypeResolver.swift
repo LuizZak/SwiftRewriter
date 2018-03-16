@@ -487,7 +487,10 @@ private class MemberInvocationResolver {
         // If this type is a function call of a member access of, postpone the
         // resolving to the parent (function call) node, since we could possibly
         // end up performing an unnecessary type lookup here.
-        if op.asMember != nil, let parent = exp.parent as? PostfixExpression, parent.functionCall != nil {
+        if op.asMember != nil,
+            let parent = exp.parent as? PostfixExpression,
+            parent.functionCall != nil,
+            parent.exp == exp {
             return exp
         }
         

@@ -873,12 +873,12 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     }
                     // type: Void
                     self.takesBlock { () -> Void in
-                        // type: <<error type>>
+                        // type: Int
                         (local)
                     }
                     // type: <nil>
                     takesBlock { () -> Void in
-                        // type: <<error type>>
+                        // type: Int
                         (local)
                     }
                     // type: Int

@@ -1553,7 +1553,7 @@ class SwiftRewriterTests: XCTestCase {
                 @objc
                 func method() {
                     var b: B?
-                    self.takesA(b.a())
+                    self.takesA((b?.a() ?? A()))
                 }
             }
             """)
@@ -1594,7 +1594,7 @@ class SwiftRewriterTests: XCTestCase {
                     var a: A!
                     self.b?.c = 0
                     a.b?.c = 0
-                    self.takesExpression(a.b.c)
+                    self.takesExpression((a.b?.c ?? 0))
                 }
                 @objc
                 func takesExpression(_ a: Int) {
