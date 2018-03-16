@@ -30,4 +30,49 @@ class SyntaxNodeRewriterTests: XCTestCase {
         
         XCTAssertEqual(sut.visitStatement(makeNode()), makeNode())
     }
+    
+    /// Tests Postfix.returnType & FunctionCallPostfix.callableSignature metadata
+    /// information is kept when traversing a syntax tree  and visiting a function
+    /// call postfix node
+    func testRewriterKeepsFunctionCallPostfixInformation() {
+        let makeNode: () -> Expression = {
+            Expression
+                .identifier("a")
+                .call([.identifier("b")],
+                      type: .int,
+                      callableSignature: .block(returnType: .int, parameters: [.typeName("b")]))
+        }
+        let sut = SyntaxNodeRewriter()
+        
+        let result = sut.visitExpression(makeNode())
+        
+        XCTAssertEqual(result.asPostfix?.functionCall?.returnType, .int)
+        XCTAssertEqual(result.asPostfix?.functionCall?.callableSignature, .block(returnType: .int, parameters: [.typeName("b")]))
+    }
+    
+    /// Tests Postfix.returnType metadata information is kept when traversing a
+    /// syntax tree and visiting a subscription postfix node
+    func testRewriterKeepsSubscriptInformation() {
+        let makeNode: () -> Expression = {
+            Expression.identifier("a").sub(.identifier("b"), type: .int)
+        }
+        let sut = SyntaxNodeRewriter()
+        
+        let result = sut.visitExpression(makeNode())
+        
+        XCTAssertEqual(result.asPostfix?.subscription?.returnType, .int)
+    }
+    
+    /// Tests Postfix.returnType metadata information is kept when traversing a
+    /// syntax tree and visiting a member access postfix node
+    func testRewriterKeepsMemberInformation() {
+        let makeNode: () -> Expression = {
+            Expression.identifier("a").dot("b", type: .int)
+        }
+        let sut = SyntaxNodeRewriter()
+        
+        let result = sut.visitExpression(makeNode())
+        
+        XCTAssertEqual(result.asPostfix?.member?.returnType, .int)
+    }
 }
