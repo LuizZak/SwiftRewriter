@@ -452,7 +452,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                private var callback: (() -> Void)? = nil
+                private var callback: (() -> Void)?
                 
                 @objc
                 func f1() {
@@ -484,7 +484,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                private var callback: (() -> Void)? = nil
+                private var callback: (() -> Void)?
                 
                 @objc
                 func f1() {
@@ -513,7 +513,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                @objc var b: NSObject? = nil
+                @objc var b: NSObject?
                 
                 @objc
                 func method() {
@@ -551,7 +551,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                @objc var b: B? = nil
+                @objc var b: B?
                 
                 @objc
                 func method() {
@@ -589,7 +589,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                @objc var b: B? = nil
+                @objc var b: B?
                 
                 @objc
                 func method() {
@@ -627,7 +627,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
 
             @objc
             class A: NSObject {
-                @objc weak var b: B? = nil
+                @objc weak var b: B?
                 
                 @objc
                 func method() {
@@ -674,7 +674,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
 
             @objc
             class C: NSObject {
-                @objc var composed: (A & B)! = nil
+                @objc var composed: (A & B)!
                 
                 @objc
                 func method() {

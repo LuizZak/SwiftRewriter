@@ -107,7 +107,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                @objc weak var myClass: MyClass? = nil
+                @objc weak var myClass: MyClass?
             }
             """)
     }
@@ -122,7 +122,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                @objc static var myClass: MyClass! = nil
+                @objc static var myClass: MyClass!
             }
             """)
     }
@@ -150,13 +150,13 @@ class SwiftRewriterTests: XCTestCase {
                 @objc var someField: Bool = false
                 @objc var someOtherField: Int = 0
                 @objc var aRatherStringlyField: String
-                @objc var specifiedNull: String? = nil
+                @objc var specifiedNull: String?
                 @objc var nonNullWithQualifier: String
-                @objc var nonSpecifiedNull: String! = nil
-                @objc var idType: AnyObject! = nil
-                @objc weak var delegate: (MyDelegate & MyDataSource)? = nil
+                @objc var nonSpecifiedNull: String!
+                @objc var idType: AnyObject!
+                @objc weak var delegate: (MyDelegate & MyDataSource)?
                 @objc var tableWithDataSource: UITableView & UITableViewDataSource
-                @objc weak var weakViewWithDelegate: (UIView & UIDelegate)? = nil
+                @objc weak var weakViewWithDelegate: (UIView & UIDelegate)?
                 @objc unowned(unsafe) var assignProp: MyClass
             }
             """)
@@ -184,10 +184,10 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 @objc var nontypedArray: NSArray
-                @objc var nontypedArrayNull: NSArray? = nil
-                @objc var stringArray: [String]! = nil
+                @objc var nontypedArrayNull: NSArray?
+                @objc var stringArray: [String]!
                 @objc var clsArray: [SomeType]
-                @objc var clsArrayNull: [SomeType]? = nil
+                @objc var clsArrayNull: [SomeType]?
                 @objc var delegateable: SomeType & SomeDelegate
             }
             """)
@@ -206,8 +206,8 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var _myString: String! = nil
-                private weak var _delegate: AnyObject? = nil
+                private var _myString: String!
+                private weak var _delegate: AnyObject?
             }
             """)
     }
@@ -343,8 +343,8 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var _myString: String! = nil
-                weak var _delegate: AnyObject? = nil
+                private var _myString: String!
+                weak var _delegate: AnyObject?
                 public var _myInt: Int = 0
             }
             """)
@@ -636,8 +636,8 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 private var callback: (NSObject!) -> Void
-                private var anotherCallback: ((String) -> Void)! = nil
-                private var yetAnotherCallback: ((String) -> NSObject?)? = nil
+                private var anotherCallback: ((String) -> Void)!
+                private var yetAnotherCallback: ((String) -> NSObject?)?
             }
             """)
     }
@@ -654,7 +654,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var callback: (((() -> AnyObject!)?) -> Void)! = nil
+                private var callback: (((() -> AnyObject!)?) -> Void)!
             }
             """)
     }
@@ -863,7 +863,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             @objc
             class MyClass: NSObject {
-                @objc unowned(unsafe) var aClass: AClass! = nil
+                @objc unowned(unsafe) var aClass: AClass!
                 @objc var anInt: Int = 0
                 @objc var aProperInt: Int = 0
             }
@@ -966,7 +966,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                private var _u: RACSubject<[B]>! = nil
+                private var _u: RACSubject<[B]>!
             }
             """)
     }
@@ -1306,6 +1306,7 @@ class SwiftRewriterTests: XCTestCase {
                 NSString *_f;
                 E _g;
                 NSString *_Nonnull _h;
+                const NSString *_i;
             }
             @property BOOL a;
             @property NSInteger b;
@@ -1331,16 +1332,17 @@ class SwiftRewriterTests: XCTestCase {
                 private var _d: CFloat = 0.0
                 private var _e: CDouble = 0.0
                 private var _e: CGFloat = 0.0
-                private var _f: String! = nil
+                private var _f: String!
                 private var _g: E
                 private var _h: String
+                private let _i: String! = nil
                 @objc var a: Bool = false
                 @objc var b: Int = 0
                 @objc var c: UInt = 0
                 @objc var d: CFloat = 0.0
                 @objc var e: CDouble = 0.0
                 @objc var e: CGFloat = 0.0
-                @objc var f: String! = nil
+                @objc var f: String!
                 @objc var g: E
                 @objc var h: String
             }
@@ -1491,7 +1493,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class A: NSObject {
-                @objc var a: A? = nil
+                @objc var a: A?
                 @objc var b: Int = 0
                 
                 @objc
@@ -1587,7 +1589,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                @objc weak var b: B? = nil
+                @objc weak var b: B?
                 
                 @objc
                 func method() {
@@ -1626,7 +1628,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             @objc
             class A: NSObject {
-                @objc var b: B? = nil
+                @objc var b: B?
                 
                 @objc
                 func method() {

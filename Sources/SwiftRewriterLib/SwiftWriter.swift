@@ -492,7 +492,8 @@ class InternalSwiftWriter {
         
         // Structs don't require init-to-zero
         if ivar.type?.kind != .struct {
-            outputInitialZeroValueForType(ivar.type, target: target)
+            outputInitialZeroValueForType(ivar.type, isConstant: ivar.isConstant,
+                                          target: target)
         }
         
         target.outputLineFeed()
@@ -558,7 +559,7 @@ class InternalSwiftWriter {
         
         switch prop.mode {
         case .asField:
-            outputInitialZeroValueForType(prop.type, target: target)
+            outputInitialZeroValueForType(prop.type, isConstant: prop.isConstant, target: target)
             target.outputLineFeed()
         case .computed(let body):
             outputMethodBody(body, target: target)
@@ -588,7 +589,15 @@ class InternalSwiftWriter {
     }
     
     // TODO: Maybe this should be extracted to an external `IntentionPass`?
-    private func outputInitialZeroValueForType(_ type: SwiftType, target: RewriterOutputTarget) {
+    private func outputInitialZeroValueForType(_ type: SwiftType, isConstant: Bool, target: RewriterOutputTarget) {
+        // Don't emit `nil` values for non-constant fields, since Swift assumes
+        // the initial value of these values to be nil already.
+        // We need to emit `nil` in case of constants since 'let's don't do that
+        // implicit initialization
+        if type.isOptional && !isConstant {
+            return
+        }
+        
         if let defaultValue = typeSystem.defaultValue(for: type) {
             target.outputInline(" = ")
             
