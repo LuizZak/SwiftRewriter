@@ -130,7 +130,7 @@ private class InternalSyntaxNodeApplier {
     private func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
         autoreleasepool {
             // Resolve types before feeding into passes
-            typeResolver.resolveTypes(in: functionBody.body)
+            _=typeResolver.resolveTypes(in: functionBody.body)
             
             var didChangeTree = false
             let notifyChangedTree: () -> Void = {
@@ -150,7 +150,7 @@ private class InternalSyntaxNodeApplier {
                 if didChangeTree {
                     // After each apply to the body, we must re-type check the result
                     // before handing it off to the next pass.
-                    typeResolver.resolveTypes(in: functionBody.body)
+                    _=typeResolver.resolveTypes(in: functionBody.body)
                 }
             }
         }

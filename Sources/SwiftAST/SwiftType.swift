@@ -65,8 +65,7 @@ indirect public enum SwiftType: Equatable {
     }
     
     /// Returns `true` if this type represents a nominal type.
-    /// Blocks and meta-types are not considered nominal types, whereas any other
-    /// type is considered nominal.
+    /// Except for blocks and metatypes, all types are considered nominal types.
     public var isNominal: Bool {
         switch self {
         case .block, .metatype:

@@ -8,7 +8,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         let stmt = Statement.expression(.constant(1))
         
-        sut.resolveTypes(in: stmt)
+        _=sut.resolveTypes(in: stmt)
         
         XCTAssertEqual(stmt.asExpressions?.expressions[0].resolvedType, .int)
     }
@@ -684,7 +684,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     /// Tests invoking a known selector function sets the parameters to the properly
-    /// expected types
+    /// expected types.
     func testFunctionParameterExpectedType() {
         _=startScopedTest(with:
             Expression.identifier("self").dot("a").call([.constant(false)]),
@@ -700,7 +700,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     /// Tests invoking a block sets the parameters to the properly expected
-    /// types
+    /// types.
     func testBlockParameterExpectedType() {
         _=startScopedTest(with:
             Expression.identifier("a").call([.constant(false)]),
@@ -711,7 +711,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     /// Tests invoking a constructor sets the parameters to the properly expected
-    /// types
+    /// types.
     func testConstructorParameterExpectedType() {
         _=startScopedTest(with:
             Expression.identifier("A").call([.constant(false)]),
@@ -725,7 +725,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(at: \Expression.asPostfix?.functionCall?.arguments[0].expression, expectsType: .int)
     }
     
-    /// Tests expressions on `if` statements have expectedType set to boolean
+    /// Tests expressions on `if` statements have expectedType set to boolean.
     func testIfStatementSetsExpectedTypeOfExpressionsToBoolean() {
         _=startScopedTest(with:
             Statement.if(.constant(0), body: [], else: nil),
@@ -733,7 +733,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(at: \Statement.asIf?.exp, expectsType: .bool)
     }
     
-    /// Tests expressions on `while` statements have expectedType set to boolean
+    /// Tests expressions on `while` statements have expectedType set to boolean.
     func testWhileStatementSetsExpectedTypeOfExpressionsToBoolean() {
         _=startScopedTest(with:
             Statement.while(.constant(0), body: []),
@@ -758,12 +758,66 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(at: \Expression.asBinary?.rhs, expectsType: .bool)
     }
     
-    /// Unary `!` operator must expect operand to be a boolean type
+    /// Unary `!` operator must expect operand to be a boolean type.
     func testLogicalUnaryOperatorSetsOperandToBooleanExpectedType() {
         _=startScopedTest(with: Expression.unary(op: .negate, .constant(0)),
                           sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(at: \Expression.asUnary?.exp, expectsType: .bool)
+    }
+    
+    /// Tests that on contexts where the expected type of a block literal type is
+    /// set, try to infer the nullability of that block's parameters based on the
+    /// expected type signature.
+    func testPropagateBlockParameterNullabilityFromExpectedType() {
+        let exp =
+            Expression.block(
+                parameters: [BlockParameter(name: "a", type: .implicitUnwrappedOptional(.typeName("A")))],
+                return: .void,
+                body: [])
+        exp.expectedType = .block(returnType: .void, parameters: [.typeName("A")])
+        let sut = ExpressionTypeResolver()
+        
+        _=sut.resolveType(exp)
+        
+        XCTAssertEqual(exp.parameters[0].type, .typeName("A"))
+    }
+    
+    /// Tests propagation of expected block type to block expression doesn't alter
+    /// parameters that are not implicitly unwrapped optionals.
+    func testDontPropagateBlockParameterNullabilityFromExpectedTypeWhenNotImplicitlyUnwrapped() {
+        let exp =
+            Expression.block(
+                parameters: [BlockParameter(name: "a", type: .optional(.typeName("A")))],
+                return: .void,
+                body: [])
+        exp.expectedType = .block(returnType: .void, parameters: [.typeName("A")])
+        let sut = ExpressionTypeResolver()
+        
+        _=sut.resolveType(exp)
+        
+        XCTAssertEqual(exp.parameters[0].type, .optional(.typeName("A")))
+    }
+    
+    /// Tests propagation of expected block type to block expression doesn't alter
+    /// parameters when the count of parameters between the expression and its
+    /// expected block type mismatch.
+    func testDontPropagateBlockParameterNullabilityFromExpectedTypeWhenParameterCountMismatches() {
+        let exp =
+            Expression.block(
+                parameters: [BlockParameter(name: "a", type: .implicitUnwrappedOptional(.typeName("A")))],
+                return: .void,
+                body: [])
+        exp.expectedType =
+            .block(returnType: .void,
+                   parameters: [.typeName("A"),
+                                .typeName("B"),
+                                ])
+        let sut = ExpressionTypeResolver()
+        
+        _=sut.resolveType(exp)
+        
+        XCTAssertEqual(exp.parameters[0].type, .implicitUnwrappedOptional(.typeName("A")))
     }
 }
 

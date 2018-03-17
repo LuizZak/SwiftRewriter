@@ -112,7 +112,7 @@ private class InternalTypeResolverInvoker {
     
     func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
         // Resolve types before feeding into passes
-        typeResolver.resolveTypes(in: functionBody.body)
+        _=typeResolver.resolveTypes(in: functionBody.body)
     }
     
     func applyOnMethod(_ method: MethodGenerationIntention) {

@@ -30,7 +30,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     /// Invocates the resolution of all expressions on a given statement recursively.
-    public func resolveTypes(in statement: Statement) {
+    public func resolveTypes(in statement: Statement) -> Statement {
         // First, clear all variable definitions found, and their usages too.
         for node in SyntaxNodeSequence(statement: statement, inspectBlocks: true) {
             if let scoped = node as? CodeScopeNode {
@@ -45,12 +45,12 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         // Now visit the nodes
-        _=visitStatement(statement)
+        return visitStatement(statement)
     }
     
     /// Invocates the resolution of a given expression's type.
-    public func resolveType(_ exp: Expression) {
-        _=exp.accept(self)
+    public func resolveType(_ exp: Expression) -> Expression {
+        return exp.accept(self)
     }
     
     // MARK: - Definition Collection
@@ -85,7 +85,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         // Define loop variables
         if stmt.exp.resolvedType == nil {
-            resolveType(stmt.exp)
+            stmt.exp = resolveType(stmt.exp)
         }
         
         let iteratorType: SwiftType
@@ -427,6 +427,17 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     
     public override func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        // Adjust signatures of block parameters based on expected type
+        if case .block(_, let params)? = exp.expectedType, params.count == exp.parameters.count {
+            for (i, expectedType) in zip(0..<exp.parameters.count, params) {
+                let param = exp.parameters[i]
+                guard param.type.isImplicitlyUnwrapped else { continue }
+                guard param.type.deepUnwrapped == expectedType.deepUnwrapped else { continue }
+                
+                exp.parameters[i].type = expectedType
+            }
+        }
         
         // Apply intrinsics
         for param in exp.parameters {
