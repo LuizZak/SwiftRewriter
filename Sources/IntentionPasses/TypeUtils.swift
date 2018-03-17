@@ -52,6 +52,15 @@ func mergeTypesToMatchingImplementations(from source: FileGenerationIntention,
             source.removeTypes { type in remaining.contains { $0 === type } }
         }
     }
+    
+    // Merge global variables
+    for gvar in source.globalVariableIntentions {
+        guard let targetVar = target.globalVariableIntentions.first(where: { $0.name == gvar.name }) else {
+            continue
+        }
+        
+        mergeTypeNullability(gvar.type, &targetVar.storage.type)
+    }
 }
 
 /// Merges in duplicated types from @interface and @implementation's that match

@@ -389,6 +389,22 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // End of file A.swift
             """)
     }
+    
+    func testMergeNullabilityOfExternGlobals() {
+        assertThat()
+            .file(name: "A.h", """
+            NS_ASSUME_NONNULL_BEGIN
+            extern NSString *const kCPTableMenuViewReuseIdentifier;
+            NS_ASSUME_NONNULL_END
+            """)
+            .file(name: "A.m", """
+            NSString *const kCPTableMenuViewReuseIdentifier = @"cell";
+            """)
+            .translatesToSwift("""
+            let kCPTableMenuViewReuseIdentifier: String = "cell"
+            // End of file A.swift
+            """)
+    }
 }
 
 extension SwiftRewriter_MultiFilesTests {
