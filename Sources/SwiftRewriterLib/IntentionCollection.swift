@@ -43,6 +43,11 @@ public class IntentionCollection {
         return _intentions.flatMap { $0.protocolIntentions }
     }
     
+    /// Performs a full search of all typealias intended to be created on all files.
+    public func typealiasIntentions() -> [TypealiasIntention] {
+        return _intentions.flatMap { $0.typealiasIntentions }
+    }
+    
     public func intentionFor(fileNamed name: String) -> FileGenerationIntention? {
         return fileIntentions().first { $0.targetPath == name }
     }

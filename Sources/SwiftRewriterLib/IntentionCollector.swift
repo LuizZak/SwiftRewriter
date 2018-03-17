@@ -190,11 +190,15 @@ public class IntentionCollector {
             return
         }
         
-        let intent = TypealiasIntention(fromType: type.type, named: name)
+        let intent =
+            TypealiasIntention(originalObjcType: type.type, fromType: .void,
+                               named: name)
         recordSourceHistory(intention: intent, node: node)
         intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
         
         ctx.addTypealias(intent)
+        
+        delegate?.reportForLazyResolving(intention: intent)
     }
     
     // MARK: - Global Variable
@@ -609,12 +613,14 @@ public class IntentionCollector {
         
         // Remaining identifiers are used as typealiases
         for identifier in nodeIdentifiers.dropFirst() {
-            let alias = TypealiasIntention(fromType: .struct(structIntent.typeName),
-                                           named: identifier.name)
+            let alias = TypealiasIntention(originalObjcType: .struct(structIntent.typeName),
+                                           fromType: .void, named: identifier.name)
             alias.inNonnullContext = delegate?.isNodeInNonnullContext(identifier) ?? false
             recordSourceHistory(intention: alias, node: identifier)
             
             fileIntent?.addTypealias(alias)
+            
+            delegate?.reportForLazyResolving(intention: alias)
         }
     }
     

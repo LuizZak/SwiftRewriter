@@ -7,7 +7,7 @@ public class DefaultTypeSystem: TypeSystem {
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
     
     /// Type-aliases
-    var aliases: [String: String] = [:]
+    var aliases: [String: SwiftType] = [:]
     
     var types: [KnownType] = []
     var typesByName: [String: KnownType] = [:]
@@ -16,17 +16,17 @@ public class DefaultTypeSystem: TypeSystem {
         registerInitialKnownTypes()
     }
     
-    func unaliased(_ type: String) -> String {
-        return aliases[type] ?? type
-    }
-    
     public func addType(_ type: KnownType) {
         types.append(type)
         typesByName[type.typeName] = type
     }
     
     public func typeExists(_ name: String) -> Bool {
-        return typesByName.keys.contains(unaliased(name))
+        guard case .typeName(let name) = resolveAlias(in: name) else {
+            return false
+        }
+        
+        return typesByName.keys.contains(name)
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
@@ -34,7 +34,11 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func knownTypeWithName(_ name: String) -> KnownType? {
-        return typesByName[unaliased(name)]
+        guard case .typeName(let name) = resolveAlias(in: name) else {
+            return nil
+        }
+        
+        return typesByName[name]
     }
     
     public func composeTypeWithKnownTypes(_ typeNames: [String]) -> KnownType? {
@@ -61,7 +65,9 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
-        let aliased = unaliased(typeName)
+        guard case .typeName(let aliased) = resolveAlias(in: typeName) else {
+            return false
+        }
         
         if TypeDefinitions.classesList.classes.contains(where: { $0.typeName == aliased }) {
             return true
@@ -98,8 +104,12 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
-        let typeName = unaliased(typeName)
-        let supertypeName = unaliased(supertypeName)
+        guard case .typeName(let typeName) = resolveAlias(in: typeName) else {
+            return false
+        }
+        guard case .typeName(let supertypeName) = resolveAlias(in: supertypeName) else {
+            return false
+        }
         
         if typeName == supertypeName {
             return true
@@ -223,6 +233,51 @@ public class DefaultTypeSystem: TypeSystem {
             }
         default:
             return false
+        }
+    }
+    
+    public func addTypeAlias(name: String, target: SwiftType) {
+        aliases[name] = target
+    }
+    
+    public func resolveAlias(in typeName: String) -> SwiftType {
+        guard let type = aliases[typeName] else {
+            return .typeName(typeName)
+        }
+        
+        switch type {
+        case var .block(returnType, parameters):
+            if case .typeName(let retTypeName) = returnType {
+                returnType = resolveAlias(in: retTypeName)
+            }
+            
+            for (i, p) in parameters.enumerated() {
+                if case .typeName(let type) = p {
+                    parameters[i] = resolveAlias(in: type)
+                }
+            }
+            
+            return .block(returnType: returnType, parameters: parameters)
+        default:
+            return type
+        }
+    }
+    
+    public func resolveAlias(in type: SwiftType) -> SwiftType {
+        switch type.deepUnwrapped {
+        case .typeName(let name):
+            return resolveAlias(in: name).withSameOptionalityAs(type)
+            
+        case var .block(returnType, parameters):
+            returnType = resolveAlias(in: returnType)
+            
+            for (i, p) in parameters.enumerated() {
+                parameters[i] = resolveAlias(in: p)
+            }
+            
+            return .block(returnType: returnType, parameters: parameters)
+        default:
+            return type
         }
     }
     
@@ -418,10 +473,6 @@ public class DefaultTypeSystem: TypeSystem {
 }
 
 extension DefaultTypeSystem {
-    func registerAlias(alias: String, original: String) {
-        aliases[alias] = original
-    }
-    
     /// Initializes the default known types
     func registerInitialKnownTypes() {
         let nsObjectProtocol =
@@ -527,6 +578,16 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         return super.isClassInstanceType(typeName)
+    }
+    
+    public override func resolveAlias(in typeName: String) -> SwiftType {
+        for alias in intentions.typealiasIntentions() {
+            if alias.name == typeName {
+                return alias.fromType
+            }
+        }
+        
+        return super.resolveAlias(in: typeName)
     }
     
     public override func typeExists(_ name: String) -> Bool {

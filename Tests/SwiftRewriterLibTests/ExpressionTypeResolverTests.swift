@@ -74,6 +74,14 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .errorType) // Propagate error types
     }
     
+    func testCastWithTypeAlias() {
+        startScopedTest(with: Expression.cast(.constant("a"), type: .typeName("A")),
+                        sut: ExpressionTypeResolver())
+            .definingTypeAlias("A", type: .int)
+            .resolve()
+            .thenAssertExpression(resolvedAs: .optional(.int))
+    }
+    
     func testAssignment() {
         // From C11 Standard, section 6.5.16:
         // An assignment expression has the value of the left operand after the assignment
@@ -842,13 +850,15 @@ private extension ExpressionTypeResolverTests {
         return exp
     }
     
-    func assertResolve(_ exp: Expression, expect type: SwiftType?, file: String = #file, line: Int = #line) {
+    func assertResolve(_ exp: Expression, expect type: SwiftType?,
+                       file: String = #file, line: Int = #line) {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(resolvedAs: type, file: file, line: line)
     }
     
-    func assertExpects(_ exp: Expression, expect type: SwiftType?, file: String = #file, line: Int = #line) {
+    func assertExpects(_ exp: Expression, expect type: SwiftType?,
+                       file: String = #file, line: Int = #line) {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(expectsType: type, file: file, line: line)

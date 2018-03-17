@@ -172,19 +172,12 @@ class InternalSwiftWriter {
     }
     
     func outputTypealias(_ typeali: TypealiasIntention, target: RewriterOutputTarget) {
-        let nullability =
-            InternalSwiftWriter._typeNullability(inType: typeali.fromType)
-        
-        let ctx =
-            TypeMappingContext(explicitNullability: nullability,
-                               inNonnull: typeali.inNonnullContext)
-        
-        let typeName = typeMapper.typeNameString(for: typeali.fromType, context: ctx)
+        let typeName = typeMapper.typeNameString(for: typeali.fromType)
         
         // typealias <Type1> = <Type2>
         target.outputIdentation()
         target.outputInlineWithSpace("typealias", style: .keyword)
-        target.outputInline(typeali.named, style: .keyword)
+        target.outputInline(typeali.name, style: .keyword)
         target.outputInline(" = ")
         target.outputInline(typeName, style: .keyword)
         target.outputLineFeed()

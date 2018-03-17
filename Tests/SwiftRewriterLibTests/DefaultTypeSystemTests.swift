@@ -307,10 +307,31 @@ class DefaultTypeSystemTests: XCTestCase {
     func testDefaultValueForStructWithEmptyConstructor() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .struct)
-            .addingConstructor()
-            .build()
+                .addingConstructor()
+                .build()
         sut.addType(str)
         
         XCTAssertEqual(sut.defaultValue(for: .typeName("A")), Expression.identifier("A").call())
+    }
+    
+    func testAddTypeAlias() {
+        sut.addTypeAlias(name: "A", target: .block(returnType: .void, parameters: []))
+        
+        XCTAssertEqual(sut.resolveAlias(in: "A"), .block(returnType: .void, parameters: []))
+    }
+    
+    func testResolveAliasRecursive() {
+        sut.addTypeAlias(name: "B", target: .int)
+        sut.addTypeAlias(name: "A", target: .block(returnType: .void, parameters: [.typeName("B")]))
+        
+        XCTAssertEqual(sut.resolveAlias(in: "A"), .block(returnType: .void, parameters: [.int]))
+    }
+    
+    func testResolveAliasSwiftType() {
+        sut.addTypeAlias(name: "B", target: .int)
+        sut.addTypeAlias(name: "A", target: .block(returnType: .void, parameters: [.typeName("B")]))
+        
+        XCTAssertEqual(sut.resolveAlias(in: .block(returnType: .void, parameters: [.typeName("A")])),
+                       .block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
     }
 }

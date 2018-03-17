@@ -1678,4 +1678,37 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testPropagateNullabilityOfBlockArgumentsInTypealiasedBlock() throws {
+        try assertObjcParse(
+            objc: """
+            NS_ASSUME_NONNULL_BEGIN
+            typedef void(^block)(NSString*);
+            NS_ASSUME_NONNULL_END
+            
+            @implementation A
+            - (void)method {
+                [self takesBlock:^(NSString* a){
+                }];
+            }
+            - (void)takesBlock:(block)a {
+            }
+            @end
+            """,
+            swift: """
+            typealias block = (String) -> Void
+
+            @objc
+            class A: NSObject {
+                @objc
+                func method() {
+                    self.takesBlock { (a: String) -> Void in
+                    }
+                }
+                @objc
+                func takesBlock(_ a: block) {
+                }
+            }
+            """)
+    }
 }

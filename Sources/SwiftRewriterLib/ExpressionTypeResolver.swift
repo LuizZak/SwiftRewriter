@@ -69,7 +69,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 }
             }
             
-            decl.initialization?.expectedType = type
+            decl.initialization?.expectedType = expandAliases(in: type)
             
             let definition = CodeDefinition(variableNamed: decl.identifier,
                                             type: type,
@@ -202,13 +202,15 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             return exp.makeErrorTyped()
         }
         
+        let type = expandAliases(in: exp.type)
+        
         // Same-type casts always succeed
-        if exp.exp.resolvedType == exp.type {
-            exp.resolvedType = exp.type
+        if exp.exp.resolvedType == type {
+            exp.resolvedType = type
             return exp
         }
         
-        exp.resolvedType = .optional(exp.type)
+        exp.resolvedType = .optional(type)
         
         return exp
     }
@@ -217,7 +219,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         exp.lhs = visitExpression(exp.lhs)
-        exp.rhs.expectedType = exp.lhs.resolvedType
+        exp.rhs.expectedType = exp.lhs.resolvedType.map(expandAliases)
         exp.rhs = visitExpression(exp.rhs)
         
         // Propagte error type
@@ -469,6 +471,10 @@ extension ExpressionTypeResolver {
         return typeSystem.knownTypeWithName(typeName)
     }
     
+    func expandAliases(in type: SwiftType) -> SwiftType {
+        return typeSystem.resolveAlias(in: type)
+    }
+    
     func searchIdentifierDefinition(_ exp: IdentifierExpression) -> IdentifierExpression.Definition? {
         // Look into intrinsics first, since they always take precedence
         if let intrinsic = intrinsicVariables.definition(named: exp.identifier) {
@@ -513,7 +519,7 @@ private class MemberInvocationResolver {
         defer {
             // Elevate an implicitly-unwrapped optional access to an optional access
             if exp.op.hasOptionalAccess, case .implicitUnwrappedOptional(let inner)? = exp.resolvedType {
-                exp.resolvedType = .optional(inner)
+                exp.resolvedType = .optional(typeResolver.expandAliases(in: inner))
             }
         }
         
@@ -539,7 +545,7 @@ private class MemberInvocationResolver {
             // happen by inspecting `subscript`-able members on the KnownType.
             
             // Array<T> / Dictionary<T> resolving
-            switch expType {
+            switch typeResolver.expandAliases(in: expType) {
             case .generic("Array", let params) where params.count == 1:
                 // Can only subscript arrays with integers!
                 if subType != .int {
@@ -689,14 +695,12 @@ private class MemberInvocationResolver {
     }
     
     func matchParameterTypes(parameters: [ParameterSignature], callArguments: [FunctionArgument]) {
-        for (callArg, param) in zip(callArguments, parameters) {
-            callArg.expression.expectedType = param.type
-        }
+        matchParameterTypes(types: parameters.map { $0.type }, callArguments: callArguments)
     }
     
     func matchParameterTypes(types: [SwiftType], callArguments: [FunctionArgument]) {
         for (callArg, paramType) in zip(callArguments, types) {
-            callArg.expression.expectedType = paramType
+            callArg.expression.expectedType = typeResolver.expandAliases(in: paramType)
         }
     }
     

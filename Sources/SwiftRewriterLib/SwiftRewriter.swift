@@ -255,6 +255,18 @@ public class SwiftRewriter {
             case .extensionDecl(let ext):
                 let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
                 ext.typeName = typeName
+                
+            case .typealias(let typeali):
+                let nullability =
+                    InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
+                
+                let ctx =
+                    TypeMappingContext(explicitNullability: nullability,
+                                       inNonnull: typeali.inNonnullContext)
+                
+                typeali.fromType =
+                    typeMapper.swiftType(forObjcType: typeali.originalObjcType,
+                                         context: ctx)
             }
         }
     }
@@ -518,6 +530,9 @@ fileprivate extension SwiftRewriter {
             case let intention as ClassExtensionGenerationIntention:
                 lazyResolve.append(.extensionDecl(intention))
                 
+            case let intention as TypealiasIntention:
+                lazyResolve.append(.typealias(intention))
+                
             default:
                 fatalError("Cannot handle type resolving for intention of type \(type(of: intention))")
             }
@@ -576,6 +591,7 @@ private enum LazyTypeResolveItem {
     case globalFunc(GlobalFunctionGenerationIntention)
     case enumDecl(EnumGenerationIntention)
     case extensionDecl(ClassExtensionGenerationIntention)
+    case `typealias`(TypealiasIntention)
     
     /// Returns the base `FromSourceIntention`-typed value, which is the intention
     /// associated with every case.
@@ -594,6 +610,8 @@ private enum LazyTypeResolveItem {
         case .enumDecl(let i):
             return i
         case .extensionDecl(let i):
+            return i
+        case .typealias(let i):
             return i
         }
     }

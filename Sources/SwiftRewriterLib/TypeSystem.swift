@@ -51,6 +51,23 @@ public protocol TypeSystem {
     /// - Returns: The supertype of the given type.
     func supertype(of type: KnownType) -> KnownType?
     
+    /// Adds a typealias from a given nominal type to a target SwiftType.
+    /// Typealiases affect lookup of types by name via `knownTypeWithName` and
+    /// resolveAliases(in:).
+    func addTypeAlias(name: String, target: SwiftType)
+    
+    /// Resolves type aliases in a given type name, returning a resulting type
+    /// with all aliases expanded.
+    /// Returns a plain `.typeName` with the passed type name within, in case no
+    /// typealiases where found.
+    func resolveAlias(in typeName: String) -> SwiftType
+    
+    /// Resolves type aliases in a given type, returning a resulting type with
+    /// all aliases expanded.
+    /// Returns a plain `.typeName` with the passed type name within, in case no
+    /// typealiases where found.
+    func resolveAlias(in type: SwiftType) -> SwiftType
+    
     // MARK: Member searching methods - KnownType
     
     /// Gets a constructor matching a given argument label set on a given known type.
