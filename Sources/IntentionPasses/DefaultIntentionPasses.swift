@@ -10,7 +10,8 @@ public struct DefaultIntentionPasses: IntentionPassSource {
         PropertyMergeIntentionPass(),
         StoredPropertyToNominalTypesIntentionPass(),
         SwiftifyMethodSignaturesIntentionPass(),
-        ImportDirectiveIntentionPass()
+        ImportDirectiveIntentionPass(),
+        DetectNonnullReturnsIntentionPass()
     ]
     
     public init() {

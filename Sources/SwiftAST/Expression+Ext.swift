@@ -79,6 +79,14 @@ public extension ExpressionPostfixBuildable {
     }
 }
 
+extension Expression {
+    public func typed(_ type: SwiftType) -> Self {
+        resolvedType = type
+        
+        return self
+    }
+}
+
 extension Expression: ExpressionPostfixBuildable {
     public var expressionToBuild: Expression { return self }
     

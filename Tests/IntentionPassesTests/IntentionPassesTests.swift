@@ -10,7 +10,7 @@ class IntentionPassesTests: XCTestCase {
         // (could crash and abort tests halfway through)
         var intentsIterator = intents.makeIterator()
         
-        XCTAssertEqual(intents.count, 6)
+        XCTAssertEqual(intents.count, 7)
         
         XCTAssert(intentsIterator.next() is FileTypeMergingIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
@@ -18,6 +18,7 @@ class IntentionPassesTests: XCTestCase {
         XCTAssert(intentsIterator.next() is StoredPropertyToNominalTypesIntentionPass)
         XCTAssert(intentsIterator.next() is SwiftifyMethodSignaturesIntentionPass)
         XCTAssert(intentsIterator.next() is ImportDirectiveIntentionPass)
+        XCTAssert(intentsIterator.next() is DetectNonnullReturnsIntentionPass)
     }
 }
 
