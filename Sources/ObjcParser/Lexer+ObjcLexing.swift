@@ -5,9 +5,10 @@ extension Lexer {
     ///
     /// ```
     /// type_qualifier
-    ///         : 'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable'
-    ///         | 'nonnull' | 'nullable' | 'null_unspecified' | 'null_resettable'
-    ///         | '__weak' | '__strong' | '__kindof' | '__block' | '__unused';
+    ///         : 'extern' | 'static' | 'const' | 'volatile' | 'unsigned' | 'signed'
+    ///         | '_Nonnull' | '_Nullable' | 'nonnull' | 'nullable' | 'null_unspecified'
+    ///         | 'null_resettable' | '__weak' | '__strong' | '__kindof' | '__block'
+    ///         | '__unused';
     /// ```
     @inline(__always)
     public func lexTypeQualifier() throws -> Substring {
@@ -16,6 +17,8 @@ extension Lexer {
                 !lexer.advanceIf(equals: "static") &&
                 !lexer.advanceIf(equals: "const") &&
                 !lexer.advanceIf(equals: "volatile") &&
+                !lexer.advanceIf(equals: "signed") &&
+                !lexer.advanceIf(equals: "unsigned") &&
                 !lexer.advanceIf(equals: "_Nonnull") &&
                 !lexer.advanceIf(equals: "_Nullable") &&
                 !lexer.advanceIf(equals: "nonnull") &&
@@ -51,9 +54,10 @@ extension Lexer {
     ///
     /// ```
     /// type_qualifier
-    ///         : 'extern' | 'static' | 'const' | 'volatile' | '_Nonnull' | '_Nullable'
-    ///         | 'nonnull' | 'nullable' | 'null_unspecified' | 'null_resettable'
-    ///         | '__weak' | '__strong' | '__kindof' | '__block' | '__unused';
+    ///         : 'extern' | 'static' | 'const' | 'volatile' | 'unsigned' | 'signed'
+    ///         | '_Nonnull' | '_Nullable' | 'nonnull' | 'nullable' | 'null_unspecified'
+    ///         | 'null_resettable' | '__weak' | '__strong' | '__kindof' | '__block'
+    ///         | '__unused';
     /// ```
     public static func isTypeQualifier(_ string: String) -> Bool {
         return _typeQualifiers.contains(string)
@@ -71,8 +75,8 @@ extension Lexer {
     }
     
     private static let _typeQualifiers = [
-        "extern", "static", "const", "volatile", "_Nonnull", "_Nullable",
-        "nonnull", "nullable", "null_unspecified", "null_resettable", "__weak",
-        "__strong", "__kindof", "__block", "__unused"
+        "extern", "static", "const", "volatile", "unsigned", "signed", "_Nonnull",
+        "_Nullable", "nonnull", "nullable", "null_unspecified", "null_resettable",
+        "__weak", "__strong", "__kindof", "__block", "__unused"
     ]
 }

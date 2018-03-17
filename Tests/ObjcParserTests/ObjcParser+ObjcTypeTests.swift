@@ -15,6 +15,12 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
         try assertObjcTypeParse("_MyStruct", .struct("_MyStruct"))
     }
     
+    func testParseSignedAndUnsignedNumbers() throws {
+        try assertObjcTypeParse("unsigned long", .struct("unsigned long"))
+        try assertObjcTypeParse("signed long", .struct("signed long"))
+        try assertObjcTypeParse("unsigned long long long", .struct("unsigned long long"))
+    }
+    
     func testParsePointerQualifiers() throws {
         try assertObjcTypeParse("NSArray<NSString*>* _Nonnull",
                                 .qualified(.pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])), qualifiers: ["_Nonnull"]))

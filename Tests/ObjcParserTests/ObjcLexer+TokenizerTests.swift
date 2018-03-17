@@ -32,6 +32,8 @@ class ObjcLexer_TokenizerTests: XCTestCase {
         expect("static", toTokenizeAs: .typeQualifier)
         expect("const", toTokenizeAs: .typeQualifier)
         expect("volatile", toTokenizeAs: .typeQualifier)
+        expect("signed", toTokenizeAs: .typeQualifier)
+        expect("unsigned", toTokenizeAs: .typeQualifier)
         expect("_Nonnull", toTokenizeAs: .typeQualifier)
         expect("_Nullable", toTokenizeAs: .typeQualifier)
         expect("__weak", toTokenizeAs: .typeQualifier)

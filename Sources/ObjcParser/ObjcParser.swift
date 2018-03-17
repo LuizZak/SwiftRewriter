@@ -284,7 +284,18 @@ public class ObjcParser {
                 type = .id(protocols: [])
             }
         } else if lexer.tokenType(.identifier) {
-            let typeName = try lexer.consume(tokenType: .identifier).string
+            var typeName = try lexer.consume(tokenType: .identifier).string
+            
+            // 'long long' support
+            if typeName == "long" && lexer.tokenType(.identifier) && lexer.token().string == "long" {
+                typeName = try typeName + " " + lexer.consume(tokenType: .identifier).string
+            }
+            
+            // 'signed', 'unsigned' support
+            if specifiers == ["signed"] || specifiers == ["unsigned"] {
+                typeName = specifiers[0] + " \(typeName)"
+                specifiers.removeAll()
+            }
             
             // '<' : Generic type specifier
             if lexer.tokenType() == .operator(.lessThan) {
