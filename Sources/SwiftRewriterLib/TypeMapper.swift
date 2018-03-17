@@ -58,6 +58,10 @@ public struct TypeMappingContext {
     /// Is overriden by `alwaysNonnull`.
     public var explicitNullability: TypeNullability?
     
+    /// When mapping Objective-C's `instancetype` special type, this type is used
+    /// as the resulting type instead.
+    public var instanceTypeAlias: SwiftType?
+    
     public init(modifiers: PropertyAttributesList?, specifiers: [String] = [],
                 qualifiers: [String] = [], alwaysNonnull: Bool = false,
                 inNonnull: Bool = false) {
@@ -267,7 +271,14 @@ public class DefaultTypeMapper: TypeMapper {
             return .void
             
         case .instancetype:
-            return swiftType(type: .instancetype, withNullability: context.nullability())
+            let type: SwiftType
+            if let instanceType = context.instanceTypeAlias {
+                type = instanceType
+            } else {
+                type = .instancetype
+            }
+            
+            return swiftType(type: type, withNullability: context.nullability())
             
         case .struct(let str):
             return swiftType(forObjcStructType: str, context: context)

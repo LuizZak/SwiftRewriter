@@ -559,7 +559,9 @@ public class IntentionCollector {
             return
         }
         
-        let gen = SwiftMethodSignatureGen(typeMapper: mapper, inNonnullContext: context.inNonnullContext)
+        let gen = SwiftMethodSignatureGen(typeMapper: mapper,
+                                          inNonnullContext: context.inNonnullContext,
+                                          instanceTypeAlias: nil)
         let signature = gen.generateDefinitionSignature(from: node)
         
         let globalFunc = GlobalFunctionGenerationIntention(signature: signature, source: node)

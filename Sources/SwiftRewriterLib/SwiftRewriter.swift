@@ -216,10 +216,11 @@ public class SwiftRewriter {
             case let .method(method):
                 guard let node = method.typedSource else { continue }
                 
-                 (method.type?.typeName).map { SwiftType.typeName($0) }
+                let instancetype = (method.type?.typeName).map { SwiftType.typeName($0) }
                 
                 let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
-                                                      inNonnullContext: method.inNonnullContext)
+                                                      inNonnullContext: method.inNonnullContext,
+                                                      instanceTypeAlias: instancetype)
                 method.signature = signGen.generateDefinitionSignature(from: node)
                 
             case let .ivar(ivar):
@@ -247,7 +248,8 @@ public class SwiftRewriter {
                 guard let node = fn.typedSource else { continue }
                 
                 let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
-                                                      inNonnullContext: fn.inNonnullContext)
+                                                      inNonnullContext: fn.inNonnullContext,
+                                                      instanceTypeAlias: nil)
                 fn.signature = signGen.generateDefinitionSignature(from: node)
                 
             case .extensionDecl(let ext):

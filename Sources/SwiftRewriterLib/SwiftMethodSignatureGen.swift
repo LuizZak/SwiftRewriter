@@ -6,10 +6,12 @@ import SwiftAST
 public class SwiftMethodSignatureGen {
     private let typeMapper: TypeMapper
     private let inNonnullContext: Bool
+    private let instanceTypeAlias: SwiftType?
     
-    public init(typeMapper: TypeMapper, inNonnullContext: Bool) {
+    public init(typeMapper: TypeMapper, inNonnullContext: Bool, instanceTypeAlias: SwiftType? = nil) {
         self.typeMapper = typeMapper
         self.inNonnullContext = inNonnullContext
+        self.instanceTypeAlias = instanceTypeAlias
     }
     
     /// Generates a function definition from an objective-c signature to use as
@@ -38,9 +40,11 @@ public class SwiftMethodSignatureGen {
         }
         
         if let type = objcMethod.returnType?.type?.type {
+            var context = TypeMappingContext(explicitNullability: nullability)
+            context.instanceTypeAlias = instanceTypeAlias
+            
             let swiftType =
-                typeMapper.swiftType(forObjcType: type,
-                                     context: .init(explicitNullability: nullability))
+                typeMapper.swiftType(forObjcType: type, context: context)
             
             sign.returnType = swiftType
         }
@@ -57,8 +61,11 @@ public class SwiftMethodSignatureGen {
                               returnType: .void,
                               isStatic: false)
         
+        var context = TypeMappingContext.empty
+        context.instanceTypeAlias = instanceTypeAlias
+        
         if let returnType = function.returnType?.type {
-            let swiftType = typeMapper.swiftType(forObjcType: returnType, context: .empty)
+            let swiftType = typeMapper.swiftType(forObjcType: returnType, context: context)
             sign.returnType = swiftType
         }
         
@@ -71,7 +78,7 @@ public class SwiftMethodSignatureGen {
                     continue
                 }
                 
-                let swiftType = typeMapper.swiftType(forObjcType: type, context: .empty)
+                let swiftType = typeMapper.swiftType(forObjcType: type, context: context)
                 
                 let p = ParameterSignature(label: "_", name: name, type: swiftType)
                 sign.parameters.append(p)
@@ -110,9 +117,10 @@ public class SwiftMethodSignatureGen {
                 nullability = nullabilityFrom(specifiers: nullSpecs)
             }
             
-            let swiftType =
-                typeMapper.swiftType(forObjcType: type,
-                                     context: .init(explicitNullability: nullability))
+            var context = TypeMappingContext(explicitNullability: nullability)
+            context.instanceTypeAlias = instanceTypeAlias
+            
+            let swiftType = typeMapper.swiftType(forObjcType: type, context: context)
             
             let param = ParameterSignature(label: label, name: identifier, type: swiftType)
             
