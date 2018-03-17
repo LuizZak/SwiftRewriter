@@ -7,7 +7,25 @@ public class CoreGraphicsGlobalsProvider: BaseGlobalsProvider {
     }
     
     override func createTypes() {
+        createCGSize()
         createCGRect()
+    }
+    
+    func createCGSize() {
+        makeType(named: "CGSize", kind: .struct) { (type) -> (KnownType) in
+            type
+                // Statics
+                .property(named: "zero", type: .typeName("CGSize"), isStatic: true,
+                          accessor: .getter)
+                // Fields
+                .field(named: "width", type: .cgFloat)
+                .field(named: "height", type: .cgFloat)
+                .constructor()
+                .constructor(shortParameters: [
+                    ("width", type: .cgFloat), ("height", type: .cgFloat)
+                ])
+                .build()
+        }
     }
     
     func createCGRect() {

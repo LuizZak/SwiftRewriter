@@ -40,4 +40,17 @@ class CoreGraphicsGlobalsProviderTests: BaseGlobalsProviderTestCase {
             }
             """)
     }
+    
+    func testDefinedCGSize() {
+        assertDefined(typeName: "CGSize", signature: """
+            struct CGSize {
+                static var zero: CGSize { get }
+                var width: CGFloat
+                var height: CGFloat
+                
+                init()
+                init(width: CGFloat, height: CGFloat)
+            }
+            """)
+    }
 }

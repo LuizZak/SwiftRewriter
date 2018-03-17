@@ -31,7 +31,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func typeExists(_ name: String) -> Bool {
-        guard case .typeName(let name) = resolveAlias(in: name) else {
+        guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
             return false
         }
         
@@ -43,7 +43,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func knownTypeWithName(_ name: String) -> KnownType? {
-        guard case .typeName(let name) = resolveAlias(in: name) else {
+        guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
             return nil
         }
         
@@ -113,10 +113,10 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
-        guard case .typeName(let typeName) = resolveAlias(in: typeName) else {
+        guard let typeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
         }
-        guard case .typeName(let supertypeName) = resolveAlias(in: supertypeName) else {
+        guard let supertypeName = typeNameIn(swiftType: resolveAlias(in: supertypeName)) else {
             return false
         }
         
@@ -670,6 +670,11 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return type
         }
         
+        let aliased = resolveAlias(in: name)
+        guard let name = typeNameIn(swiftType: aliased) else {
+            return nil
+        }
+        
         if let cache = cache {
             if let match = cache.types[name] {
                 return match
@@ -816,7 +821,9 @@ private class LazyKnownType: KnownType {
             // Search supertypes known here
             switch type.supertype {
             case .typeName(let supertypeName)?:
-                supertype = typeSystem.knownTypeWithName(supertypeName).map { .knownType($0) }
+                supertype =
+                    typeSystem.knownTypeWithName(supertypeName).map { .knownType($0) }
+                        ?? .typeName(supertypeName)
             case .knownType?:
                 supertype = type.supertype
             default:
