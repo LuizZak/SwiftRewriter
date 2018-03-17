@@ -75,11 +75,6 @@ public extension SyntaxNode {
 extension CompoundStatement: CodeScopeNode { }
 extension BlockLiteralExpression: CodeScopeNode { }
 
-public protocol CodeScopeStack {
-    func pushScope(_ context: Context)
-    func popScope()
-}
-
 /// A no-op code scope to return when requesting code scope for statements that
 /// are not contained within a valid compound statement.
 class EmptyCodeScope: CodeScope {
