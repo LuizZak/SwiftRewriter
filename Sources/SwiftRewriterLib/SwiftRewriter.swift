@@ -85,8 +85,7 @@ public class SwiftRewriter {
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         
-        let context = TypeConstructionContext(typeSystem: typeSystem)
-        self.typeMapper = DefaultTypeMapper(context: context)
+        self.typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         self.settings = settings
     }
     
@@ -162,13 +161,7 @@ public class SwiftRewriter {
         
         for item in lazyParse {
             queue.addOperation {
-                let context = TypeConstructionContext(typeSystem: self.typeSystem)
-                context.pushContext(AssumeNonnullContext(isNonnullOn: false))
-                defer {
-                    context.popContext()
-                }
-                
-                let typeMapper = DefaultTypeMapper(context: context)
+                let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                 let state = SwiftRewriter._parserStatePool.pull()
                 let typeParser = TypeParsing(state: state)
                 defer {
@@ -176,8 +169,6 @@ public class SwiftRewriter {
                 }
                 
                 let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
-                
-                context.assumeNonnulContext?.isNonnullOn = item.fromSourceIntention.inNonnullContext
                 
                 switch item {
                 case .enumCase(let enCase):
@@ -209,12 +200,6 @@ public class SwiftRewriter {
     /// Evaluate all type signatures, now with the knowledge of all types present
     /// in the program.
     private func evaluateTypes() {
-        let context = TypeConstructionContext(typeSystem: typeSystem)
-        context.pushContext(AssumeNonnullContext(isNonnullOn: false))
-        defer {
-            context.popContext()
-        }
-        
         for item in lazyResolve {
             switch item {
             case let .property(prop):
@@ -225,14 +210,16 @@ public class SwiftRewriter {
                     TypeMappingContext(modifiers: node.attributesList,
                                        inNonnull: prop.inNonnullContext)
                 
-                prop.storage.type = typeMapper.swiftType(forObjcType: type, context: context)
+                prop.storage.type = typeMapper.swiftType(forObjcType: type,
+                                                         context: context)
                 
             case let .method(method):
                 guard let node = method.typedSource else { continue }
                 
-                context.assumeNonnulContext?.isNonnullOn = method.inNonnullContext
+                 (method.type?.typeName).map { SwiftType.typeName($0) }
                 
-                let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+                let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                                                      inNonnullContext: method.inNonnullContext)
                 method.signature = signGen.generateDefinitionSignature(from: node)
                 
             case let .ivar(ivar):
@@ -259,9 +246,8 @@ public class SwiftRewriter {
             case .globalFunc(let fn):
                 guard let node = fn.typedSource else { continue }
                 
-                context.assumeNonnulContext?.isNonnullOn = fn.inNonnullContext
-                
-                let signGen = SwiftMethodSignatureGen(context: context, typeMapper: typeMapper)
+                let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                                                      inNonnullContext: fn.inNonnullContext)
                 fn.signature = signGen.generateDefinitionSignature(from: node)
                 
             case .extensionDecl(let ext):
@@ -408,15 +394,14 @@ public class SwiftRewriter {
         let parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
         try parser.parse()
         
-        let typeSystem = DefaultTypeSystem.defaultTypeSystem
-        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: typeSystem))
+        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem.defaultTypeSystem)
         let typeParser = TypeParsing(state: state)
         
         let collectorDelegate =
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser,
                               nonnullTokenRanges: parser.nonnullMacroRegionsTokenRange)
         
-        let ctx = TypeConstructionContext(typeSystem: typeSystem)
+        let ctx = IntentionBuildingContext()
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives

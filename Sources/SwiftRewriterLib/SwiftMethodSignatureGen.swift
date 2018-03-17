@@ -4,12 +4,12 @@ import SwiftAST
 /// A helper class that can be used to generate a proper swift method signature
 /// from an Objective-C method signature.
 public class SwiftMethodSignatureGen {
-    private let context: TypeConstructionContext
     private let typeMapper: TypeMapper
+    private let inNonnullContext: Bool
     
-    public init(context: TypeConstructionContext, typeMapper: TypeMapper) {
-        self.context = context
+    public init(typeMapper: TypeMapper, inNonnullContext: Bool) {
         self.typeMapper = typeMapper
+        self.inNonnullContext = inNonnullContext
     }
     
     /// Generates a function definition from an objective-c signature to use as
@@ -121,8 +121,6 @@ public class SwiftMethodSignatureGen {
     }
     
     private func nullabilityFrom(specifiers: [NullabilitySpecifier]) -> TypeNullability? {
-        let inNonnullContext = context.isAssumeNonnullOn
-        
         guard let last = specifiers.last else {
             return inNonnullContext ? .nonnull : nil
         }

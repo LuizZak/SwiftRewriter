@@ -222,12 +222,11 @@ public class FoundationExpressionPass: BaseExpressionPass {
             return nil
         }
         // Can only convert known instance types
-        guard self.context.typeSystem.isClassInstanceType(exp.identifier) else {
+        guard context.typeSystem.isClassInstanceType(exp.identifier) else {
             return nil
         }
         
-        let context = TypeConstructionContext(typeSystem: self.context.typeSystem)
-        let mapper = DefaultTypeMapper(context: context)
+        let mapper = DefaultTypeMapper(typeSystem: context.typeSystem)
         
         let newType =
             mapper.swiftType(forObjcType: .pointer(.struct(ident)),

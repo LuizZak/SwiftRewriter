@@ -342,9 +342,8 @@ class DefaultTypeMapperTests: XCTestCase {
 
 extension DefaultTypeMapperTests {
     private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull,
-                        context: TypeConstructionContext = TypeConstructionContext(typeSystem: DefaultTypeSystem()),
                         toConvertTo expected: String, file: String = #file, line: Int = #line) {
-        let converted = typeMapperConvert(type, nullability: nullability, context: context)
+        let converted = typeMapperConvert(type, nullability: nullability, typeSystem: DefaultTypeSystem())
         
         if converted != expected {
             recordFailure(withDescription: """
@@ -356,9 +355,8 @@ extension DefaultTypeMapperTests {
     }
     
     private func expectSwift(_ type: SwiftType, toConvertTo expected: String,
-                             context: TypeConstructionContext = TypeConstructionContext(typeSystem: DefaultTypeSystem()),
                              file: String = #file, line: Int = #line) {
-        let converted = typeMapperConvert(type, context: context)
+        let converted = typeMapperConvert(type, typeSystem: DefaultTypeSystem())
         
         if converted != expected {
             recordFailure(withDescription: """
@@ -369,14 +367,14 @@ extension DefaultTypeMapperTests {
         }
     }
     
-    private func typeMapperConvert(_ type: SwiftType, context: TypeConstructionContext) -> String {
-        let mapper = DefaultTypeMapper(context: context)
+    private func typeMapperConvert(_ type: SwiftType, typeSystem: TypeSystem) -> String {
+        let mapper = DefaultTypeMapper(typeSystem: typeSystem)
         
         return mapper.typeNameString(for: type)
     }
     
-    private func typeMapperConvert(_ type: ObjcType, nullability: TypeNullability?, context: TypeConstructionContext) -> String {
-        let mapper = DefaultTypeMapper(context: context)
+    private func typeMapperConvert(_ type: ObjcType, nullability: TypeNullability?, typeSystem: TypeSystem) -> String {
+        let mapper = DefaultTypeMapper(typeSystem: typeSystem)
         
         var ctx: TypeMappingContext = .empty
         if let nul = nullability {

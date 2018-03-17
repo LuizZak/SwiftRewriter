@@ -257,7 +257,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                 readsAs expected: Statement,
                 file: String = #file,
                 line: Int = #line) {
-        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
         let typeParser = TypeParsing(state: SwiftStatementASTReaderTests._state)
         
         let sut = SwiftStatementASTReader(expressionReader: SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser))

@@ -214,8 +214,9 @@ class SwiftExprASTReaderTests: XCTestCase {
         )
     }
     
-    func assert(objcExpr: String, parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() }, readsAs expected: Expression, file: String = #file, line: Int = #line) {
-        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+    func assert(objcExpr: String, parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() },
+                readsAs expected: Expression, file: String = #file, line: Int = #line) {
+        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
         let typeParser = TypeParsing(state: SwiftExprASTReaderTests._state)
         let sut = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
         

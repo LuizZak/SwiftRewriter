@@ -130,7 +130,7 @@ class ExpressionPassTestCase: XCTestCase {
                 inFile: file, atLine: line, expected: true)
         }
         
-        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
         
         let reader = SwiftExprASTReader(typeMapper: typeMapper,
                                         typeParser: TypeParsing(state: ExpressionPassTestCase._state))
@@ -155,7 +155,7 @@ class ExpressionPassTestCase: XCTestCase {
                 inFile: file, atLine: line, expected: true)
         }
         
-        let typeMapper = DefaultTypeMapper(context: TypeConstructionContext(typeSystem: DefaultTypeSystem()))
+        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
         let typeParser = TypeParsing(state: ExpressionPassTestCase._state)
         
         let expReader = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)

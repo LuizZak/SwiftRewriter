@@ -179,10 +179,9 @@ class SwiftMethodSignatureGenTests: XCTestCase {
     }
     
     private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
-        let ctx = TypeConstructionContext(typeSystem: DefaultTypeSystem())
-        let mapper = DefaultTypeMapper(context: ctx)
+        let mapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
         
-        return SwiftMethodSignatureGen(context: ctx, typeMapper: mapper)
+        return SwiftMethodSignatureGen(typeMapper: mapper, inNonnullContext: false)
     }
     
     private func parseMethodSign(_ source: String, file: String = #file, line: Int = #line) -> MethodDefinition {

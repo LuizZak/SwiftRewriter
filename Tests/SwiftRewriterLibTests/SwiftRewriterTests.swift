@@ -1642,4 +1642,21 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testInstanceTypeOnStaticConstructor() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            + (instancetype)makeA;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                static func makeA() -> A! {
+                }
+            }
+            """)
+    }
 }

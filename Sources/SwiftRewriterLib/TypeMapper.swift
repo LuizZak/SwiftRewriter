@@ -195,10 +195,10 @@ public struct TypeMappingContext {
 }
 
 public class DefaultTypeMapper: TypeMapper {
-    let context: TypeConstructionContext
+    let typeSystem: TypeSystem
     
-    public init(context: TypeConstructionContext) {
-        self.context = context
+    public init(typeSystem: TypeSystem) {
+        self.typeSystem = typeSystem
     }
     
     public func typeNameString(for swiftType: SwiftType) -> String {
@@ -381,7 +381,7 @@ public class DefaultTypeMapper: TypeMapper {
             } else if let scalar = DefaultTypeMapper._scalarMappings[inner] {
                 // Pointers of scalar types are converted to 'UnsafeMutablePointer<TypeName>'
                 final = .generic("UnsafeMutablePointer", parameters: [scalar])
-            } else if self.context.typeSystem.isClassInstanceType(inner) || context.alwaysClass {
+            } else if typeSystem.isClassInstanceType(inner) || context.alwaysClass {
                 // Assume it's a class type here
                 final = .typeName(inner)
             } else {

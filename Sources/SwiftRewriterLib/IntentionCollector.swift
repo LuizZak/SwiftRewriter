@@ -10,14 +10,48 @@ public protocol IntentionCollectorDelegate: class {
     func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing
 }
 
+/// Represents a local context for constructing types with.
+public class IntentionBuildingContext {
+    var contexts: [Intention] = []
+    var inNonnullContext: Bool = false
+    var ivarAccessLevel: AccessLevel = .private
+    
+    public init() {
+        
+    }
+    
+    public func pushContext(_ intention: Intention) {
+        contexts.append(intention)
+    }
+    
+    /// Returns the latest context on the contexts stack that matches a given type.
+    ///
+    /// Searches from top-to-bottom, so the last context `T` that was pushed is
+    /// returned first.
+    public func findContext<T: Intention>(ofType type: T.Type = T.self) -> T? {
+        return contexts.reversed().first { $0 is T } as? T
+    }
+    
+    /// Returns the topmost context on the contexts stack casted to a specific type.
+    ///
+    /// If the topmost context is not T, nil is returned instead.
+    public func currentContext<T: Intention>(as type: T.Type = T.self) -> T? {
+        return contexts.last as? T
+    }
+    
+    public func popContext() {
+        contexts.removeLast()
+    }
+}
+
 /// Traverses a provided AST node, and produces intentions that are recorded by
 /// pushing and popping them as contexts on a delegate's context object.
 public class IntentionCollector {
     public weak var delegate: IntentionCollectorDelegate?
     
-    var context: TypeConstructionContext
+    var context: IntentionBuildingContext
     
-    public init(delegate: IntentionCollectorDelegate, context: TypeConstructionContext) {
+    public init(delegate: IntentionCollectorDelegate, context: IntentionBuildingContext) {
         self.delegate = delegate
         self.context = context
     }
@@ -31,9 +65,8 @@ public class IntentionCollector {
         let traverser = ASTTraverser(node: node, visitor: visitor)
         
         visitor.onEnterClosure = { node in
-            if let ctx = self.context.findContext(ofType: AssumeNonnullContext.self) {
-                ctx.isNonnullOn = self.delegate?.isNodeInNonnullContext(node) ?? false
-            }
+            self.context.inNonnullContext
+                = self.delegate?.isNodeInNonnullContext(node) ?? false
             
             switch node {
             case let n as ObjcClassInterface:
@@ -93,11 +126,11 @@ public class IntentionCollector {
                 
             case let n as Identifier
                 where n.name == "NS_ASSUME_NONNULL_BEGIN":
-                self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn = true
+                self.context.inNonnullContext = true
                 
             case let n as Identifier
                 where n.name == "NS_ASSUME_NONNULL_END":
-                self.context.findContext(ofType: AssumeNonnullContext.self)?.isNonnullOn = false
+                self.context.inNonnullContext = false
             default:
                 return
             }
@@ -117,8 +150,6 @@ public class IntentionCollector {
                 self.exitStructDeclarationNode(n)
             case let n as ProtocolDeclaration:
                 self.exitProtocolDeclarationNode(n)
-            case let n as IVarsList:
-                self.exitObjcClassIVarsListNode(n)
             case let n as ObjcEnumDeclaration:
                 self.exitObjcEnumDeclarationNode(n)
             case let n as FunctionDefinition:
@@ -132,20 +163,17 @@ public class IntentionCollector {
     }
     
     private func visitKeywordNode(_ node: KeywordNode) {
-        // ivar list accessibility specification
-        if let ctx = context.findContext(ofType: IVarListContext.self) {
-            switch node.keyword {
-            case .atPrivate:
-                ctx.accessLevel = .private
-            case .atPublic:
-                ctx.accessLevel = .public
-            case .atPackage:
-                ctx.accessLevel = .internal
-            case .atProtected:
-                ctx.accessLevel = .internal
-            default:
-                break
-            }
+        switch node.keyword {
+        case .atPrivate:
+            context.ivarAccessLevel = .private
+        case .atPublic:
+            context.ivarAccessLevel = .public
+        case .atPackage:
+            context.ivarAccessLevel = .internal
+        case .atProtected:
+            context.ivarAccessLevel = .internal
+        default:
+            break
         }
     }
     
@@ -380,14 +408,10 @@ public class IntentionCollector {
             return
         }
         
-        let localMapper =
-            DefaultTypeMapper(context:
-                TypeConstructionContext(typeSystem:
-                    DefaultTypeSystem.defaultTypeSystem
-                )
-        )
+        let localMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem.defaultTypeSystem)
         
-        let signGen = SwiftMethodSignatureGen(context: context, typeMapper: localMapper)
+        let signGen = SwiftMethodSignatureGen(typeMapper: localMapper,
+                                              inNonnullContext: context.inNonnullContext)
         let sign = signGen.generateDefinitionSignature(from: node)
         
         let method: MethodGenerationIntention
@@ -445,17 +469,15 @@ public class IntentionCollector {
     
     // MARK: - IVar Section
     private func enterObjcClassIVarsListNode(_ node: IVarsList) {
-        let ctx = IVarListContext(accessLevel: .private)
-        context.pushContext(ctx)
+        context.ivarAccessLevel = .private
     }
     
     private func visitObjcClassIVarDeclarationNode(_ node: IVarDeclaration) {
         guard let classCtx = context.findContext(ofType: BaseClassIntention.self) else {
             return
         }
-        let ivarCtx = context.findContext(ofType: IVarListContext.self)
         
-        let access = ivarCtx?.accessLevel ?? .private
+        let access = context.ivarAccessLevel
         
         let swiftType: SwiftType = .anyObject
         var ownership = Ownership.strong
@@ -477,10 +499,6 @@ public class IntentionCollector {
         classCtx.addInstanceVariable(ivar)
         
         delegate?.reportForLazyResolving(intention: ivar)
-    }
-    
-    private func exitObjcClassIVarsListNode(_ node: IVarsList) {
-        context.popContext() // InstanceVarContext
     }
     
     // MARK: - Enum Declaration
@@ -541,7 +559,7 @@ public class IntentionCollector {
             return
         }
         
-        let gen = SwiftMethodSignatureGen(context: context, typeMapper: mapper)
+        let gen = SwiftMethodSignatureGen(typeMapper: mapper, inNonnullContext: context.inNonnullContext)
         let signature = gen.generateDefinitionSignature(from: node)
         
         let globalFunc = GlobalFunctionGenerationIntention(signature: signature, source: node)
@@ -633,15 +651,5 @@ extension IntentionCollector {
         
         intention.history
             .recordCreation(description: "\(file) line \(rule.getLine()) column \(rule.getCharPositionInLine())")
-    }
-}
-
-/// Used while collecting instance variable intentions to assign proper accessibility
-/// annotations to them.
-private class IVarListContext: Context {
-    var accessLevel: AccessLevel
-    
-    init(accessLevel: AccessLevel = .private) {
-        self.accessLevel = accessLevel
     }
 }

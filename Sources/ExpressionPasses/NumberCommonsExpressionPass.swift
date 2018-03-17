@@ -10,9 +10,8 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
     public override func visitCast(_ exp: CastExpression) -> Expression {
         if context.typeSystem.isNumeric(exp.type) {
             let name =
-                DefaultTypeMapper(context:
-                    TypeConstructionContext(typeSystem: context.typeSystem)
-                ).typeNameString(for: exp.type)
+                DefaultTypeMapper(typeSystem: context.typeSystem)
+                    .typeNameString(for: exp.type)
             
             let newExp =
                 Expression

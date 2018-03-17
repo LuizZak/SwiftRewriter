@@ -14,7 +14,7 @@ class IntentionCollectorTests: XCTestCase {
         
         file = FileGenerationIntention(sourcePath: "A.m", targetPath: "A.swift")
         
-        let context = TypeConstructionContext(typeSystem: DefaultTypeSystem.defaultTypeSystem)
+        let context = IntentionBuildingContext()
         context.pushContext(file)
         
         delegate = TestCollectorDelegate(file: file)
@@ -54,11 +54,11 @@ class IntentionCollectorTests: XCTestCase {
 }
 
 private class TestCollectorDelegate: IntentionCollectorDelegate {
-    var context: TypeConstructionContext
+    var context: IntentionBuildingContext
     var intentions: IntentionCollection
     
     init(file: FileGenerationIntention) {
-        context = TypeConstructionContext(typeSystem: DefaultTypeSystem.defaultTypeSystem)
+        context = IntentionBuildingContext()
         intentions = IntentionCollection()
         intentions.addIntention(file)
         
@@ -79,12 +79,8 @@ private class TestCollectorDelegate: IntentionCollectorDelegate {
         
     }
     
-    func typeConstructionContext(for intentionCollector: IntentionCollector) -> TypeConstructionContext {
-        return context
-    }
-    
     func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
-        return DefaultTypeMapper(context: typeConstructionContext(for: intentionCollector))
+        return DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
     }
     
     func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {

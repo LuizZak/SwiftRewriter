@@ -157,47 +157,6 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
                                             isStatic: false)
         )
     }
-    
-    /// Tests automatic swiftification of `[NSTypeName typeNameWithThing:<x>]`-style
-    /// initializers.
-    /// This helps test mimicing of Swift's importer behavior.
-    func testSwiftifyStaticFactoryMethods() {
-        let sut = SwiftifyMethodSignaturesIntentionPass()
-        
-        testThat(typeName: "NSNumber", sut: sut)
-            .method(withObjcSignature: "+ (NSNumber*)numberWithBool:(BOOL)bool;")
-            .converts(toInitializer: "init(bool: Bool)")
-        
-        testThat(typeName: "NSNumber", sut: sut)
-            .method(withObjcSignature: "+ (NSNumber*)numberWithInteger:(NSInteger)integer;")
-            .converts(toInitializer: "init(integer: Int)")
-        
-        testThat(typeName: "UIAlertController", sut: sut)
-            .method(withObjcSignature: """
-                + (instancetype)alertControllerWithTitle:(nullable NSString *)title
-                                                 message:(nullable NSString *)message
-                                          preferredStyle:(UIAlertControllerStyle)preferredStyle;
-                """)
-            .converts(toInitializer: "init(title: String?, message: String?, preferredStyle: UIAlertControllerStyle)")
-        
-        testThat(typeName: "UIButton", sut: sut)
-            .method(withObjcSignature: "+ (instancetype)buttonWithType:(UIButtonType)buttonType;")
-            .converts(toInitializer: "init(type buttonType: UIButtonType)")
-        
-        testThat(typeName: "UIColor", sut: sut)
-            .method(withObjcSignature: "+ (UIColor *)colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha;")
-            .converts(toInitializer: "init(white: CGFloat, alpha: CGFloat)")
-        
-        testThat(typeName: "UIColor", sut: sut)
-            .method(withObjcSignature: "+ (UIColor *)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha;")
-            .converts(toInitializer: "init(red: CGFloat, green: CGFloat, blue: CGFloat, alpha: CGFloat)")
-        
-        /* TODO: Make this pass
-        testThat(typeName: "UIImage", sut: sut)
-            .method(withObjcSignature: "+ (nullable UIImage *)imageNamed:(NSString *)name;")
-            .converts(toInitializer: "init(named name: String!)")
-        */
-    }
 }
 
 private extension SwiftifyMethodSignaturesIntentionPassTests {
@@ -241,8 +200,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         let invoker =
             DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
                                        typeSystem: DefaultTypeSystem())
-        let ctx = TypeConstructionContext(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
-        let mapper = DefaultTypeMapper(context: ctx)
+        let mapper = DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
         let context =
             IntentionPassContext(typeSystem: DefaultTypeSystem(),
                                  typeMapper: mapper,
@@ -254,10 +212,9 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
     }
     
     private func createSwiftMethodSignatureGen() -> SwiftMethodSignatureGen {
-        let ctx = TypeConstructionContext(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
-        let mapper = DefaultTypeMapper(context: ctx)
+        let mapper = DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
         
-        return SwiftMethodSignatureGen(context: ctx, typeMapper: mapper)
+        return SwiftMethodSignatureGen(typeMapper: mapper, inNonnullContext: false)
     }
     
     private func parseMethodSign(_ source: String) -> MethodDefinition {
@@ -288,12 +245,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
             self.testCase = testCase
             self.intentions = intentions
             self.type = type
-            self.typeMapper =
-                DefaultTypeMapper(context:
-                    TypeConstructionContext(typeSystem:
-                        IntentionCollectionTypeSystem(intentions: intentions)
-                    )
-                )
+            self.typeMapper = DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
         }
         
         func converts(toInitializer parameters: [ParameterSignature], file: String = #file, line: Int = #line) {
