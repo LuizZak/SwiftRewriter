@@ -364,6 +364,34 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
     }
     
+    func testMergeNullabilityOfBlockTypes() {
+        assertThat()
+            .file(name: "A.h", """
+            NS_ASSUME_NONNULL_BEGIN
+            @interface A
+            - (void)method:(void(^)(NSString*))param;
+            @end
+            NS_ASSUME_NONNULL_END
+            """)
+            .file(name: "A.m", """
+            @implementation A
+            - (void)method:(void(^)(NSString*))param {
+            }
+            @end
+            """)
+            .translatesToSwift("""
+            @objc
+            class A: NSObject {
+                @objc
+                func method(_ param: (String) -> Void) {
+                }
+            }
+            // End of file A.swift
+            """)
+    }
+}
+
+extension SwiftRewriter_MultiFilesTests {
     private func assertThat() -> MultiFileTestBuilder {
         return MultiFileTestBuilder(test: self)
     }

@@ -174,6 +174,26 @@ indirect public enum SwiftType: Equatable {
     public static func dictionary(key: SwiftType, value: SwiftType) -> SwiftType {
         return .generic("Dictionary", parameters: [key, value])
     }
+    
+    /// Returns a type that is the same as the input, but with any .optional or
+    /// .implicitUnwrappedOptional types unwrapped to non optional, inclusing
+    /// block parameters.
+    ///
+    /// - Parameter type: The input type
+    /// - Returns: The deeply unwrapped version of the input type.
+    public static func asNonnullDeep(_ type: SwiftType) -> SwiftType {
+        var result = type.deepUnwrapped
+        
+        switch result {
+        case let .block(returnType, parameters):
+            result = .block(returnType: asNonnullDeep(returnType),
+                            parameters: parameters.map(asNonnullDeep))
+        default:
+            break
+        }
+        
+        return result
+    }
 }
 
 /// Defines the ownership of a variable storage

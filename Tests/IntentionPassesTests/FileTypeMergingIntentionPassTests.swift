@@ -549,10 +549,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
     
     func testMergeBlockParameterNullability() {
         let headerBlock: SwiftType
-            = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+            = .block(returnType: .void, parameters: [.typeName("A")])
         
         let implBlock: SwiftType
-            = SwiftType.block(returnType: .void, parameters: [.implicitUnwrappedOptional(.typeName("A"))])
+            = .implicitUnwrappedOptional(.block(returnType: .void, parameters: [.implicitUnwrappedOptional(.typeName("A"))]))
         
         let intentions =
             IntentionCollectionBuilder()

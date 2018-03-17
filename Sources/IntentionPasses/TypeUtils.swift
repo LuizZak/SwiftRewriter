@@ -386,7 +386,7 @@ func mergeSignatures(_ sign1: FunctionSignature,
 
 func mergeTypeNullability(_ type1: SwiftType, _ type2: inout SwiftType) {
     if !type1.isImplicitlyUnwrapped && type2.isImplicitlyUnwrapped {
-        if type1.deepUnwrapped == type2.deepUnwrapped {
+        if SwiftType.asNonnullDeep(type1) == SwiftType.asNonnullDeep(type2) {
             type2 = type1
         }
     }
