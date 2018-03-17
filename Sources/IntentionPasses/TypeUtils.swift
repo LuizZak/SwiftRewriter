@@ -371,24 +371,38 @@ func mergeSignatures(_ sign1: FunctionSignature,
                      _ sign2: FunctionSignature) -> FunctionSignature {
     var result = sign2
     
-    if !sign1.returnType.isImplicitlyUnwrapped && sign2.returnType.isImplicitlyUnwrapped {
-        if sign1.returnType.deepUnwrapped == sign2.returnType.deepUnwrapped {
-            result.returnType = sign1.returnType
-        }
-    }
+    mergeTypeNullability(sign1.returnType, &result.returnType)
     
     for (i, p1) in sign1.parameters.enumerated() {
-        if i >= sign2.parameters.count {
+        if i >= result.parameters.count {
             break
         }
         
-        let p2 = sign2.parameters[i]
-        if !p1.type.isImplicitlyUnwrapped && p2.type.isImplicitlyUnwrapped
-            && p1.type.deepUnwrapped == p2.type.deepUnwrapped {
-            
-            result.parameters[i].type = p1.type
-        }
+        mergeTypeNullability(p1.type, &result.parameters[i].type)
     }
     
     return result
+}
+
+func mergeTypeNullability(_ type1: SwiftType, _ type2: inout SwiftType) {
+    if !type1.isImplicitlyUnwrapped && type2.isImplicitlyUnwrapped {
+        if type1.deepUnwrapped == type2.deepUnwrapped {
+            type2 = type1
+        }
+    }
+    
+    // Merge block types
+    switch (type1, type2) {
+    case (let .block(t1Ret, t1Params), var .block(ret, params))
+        where t1Params.count == params.count:
+        mergeTypeNullability(t1Ret, &ret)
+        
+        for (i, p1) in t1Params.enumerated() {
+            mergeTypeNullability(p1, &params[i])
+        }
+        
+        type2 = .block(returnType: ret, parameters: params)
+    default:
+        break
+    }
 }

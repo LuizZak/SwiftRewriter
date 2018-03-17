@@ -546,4 +546,38 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files.first?.sourcePath, "A.m")
         XCTAssertEqual(files.first?.globalFunctionIntentions.count, 1)
     }
+    
+    func testMergeBlockParameterNullability() {
+        let headerBlock: SwiftType
+            = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+        
+        let implBlock: SwiftType
+            = SwiftType.block(returnType: .void, parameters: [.implicitUnwrappedOptional(.typeName("A"))])
+        
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { type in
+                        type.setAsInterfaceSource()
+                        type.createMethod(
+                            named: "a",
+                            parameters: [ParameterSignature(label: "_", name: "a", type: headerBlock)]
+                        )
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") { type in
+                        type.createMethod(
+                            named: "a",
+                            parameters: [ParameterSignature(label: "_", name: "a", type: implBlock)]
+                        )
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let cls = intentions.fileIntentions()[0].typeIntentions[0]
+        XCTAssertEqual(cls.methods[0].parameters[0].type,
+                       .block(returnType: .void, parameters: [.typeName("A")]))
+    }
 }
