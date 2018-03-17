@@ -155,6 +155,8 @@ public class SwiftRewriter {
             print("Parsing function bodies...")
         }
         
+        typeSystem.makeCache()
+        
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
@@ -194,6 +196,8 @@ public class SwiftRewriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+        
+        typeSystem.tearDownCache()
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present

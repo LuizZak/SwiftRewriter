@@ -29,6 +29,9 @@ public final class SwiftWriter {
     }
     
     public func execute() {
+        let intentionTypeSystem = typeSystem as? IntentionCollectionTypeSystem
+        intentionTypeSystem?.makeCache()
+        
         var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
         
@@ -61,6 +64,8 @@ public final class SwiftWriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+        
+        intentionTypeSystem?.tearDownCache()
     }
 }
 

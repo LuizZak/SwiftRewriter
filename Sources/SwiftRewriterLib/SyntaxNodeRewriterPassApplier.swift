@@ -15,6 +15,9 @@ public final class SyntaxNodeRewriterPassApplier {
     }
     
     public func apply(on intentions: IntentionCollection) {
+        let intentionTypeSystem = typeSystem as? IntentionCollectionTypeSystem
+        intentionTypeSystem?.makeCache()
+        
         // Apply expression passes in a multi-threaded context.
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreds
@@ -27,6 +30,8 @@ public final class SyntaxNodeRewriterPassApplier {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+        
+        intentionTypeSystem?.tearDownCache()
     }
     
     private func makeResolverInvoker() -> InternalSyntaxNodeApplier {
