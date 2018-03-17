@@ -611,6 +611,7 @@ public class IntentionCollector {
         for identifier in nodeIdentifiers.dropFirst() {
             let alias = TypealiasIntention(fromType: .struct(structIntent.typeName),
                                            named: identifier.name)
+            alias.inNonnullContext = delegate?.isNodeInNonnullContext(identifier) ?? false
             recordSourceHistory(intention: alias, node: identifier)
             
             fileIntent?.addTypealias(alias)

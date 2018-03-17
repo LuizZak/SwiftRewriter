@@ -588,6 +588,25 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testNSAssumeNonnullContextCollectionWorksWithCompilerDirectivesInFile() throws {
+        try assertObjcParse(
+            objc: """
+            //
+            // Text for padding
+            #import "A.h"
+            #import "B.h"
+            NS_ASSUME_NONNULL_BEGIN
+            typedef void(^errorBlock)(NSString *param);
+            NS_ASSUME_NONNULL_END
+            """,
+            swift: """
+            // Preprocessor directives found in file:
+            // #import "A.h"
+            // #import "B.h"
+            typealias errorBlock = (String) -> Void
+            """)
+    }
+    
     func testRewriteManyTypeliasSequentially() throws {
         try assertObjcParse(
             objc: """

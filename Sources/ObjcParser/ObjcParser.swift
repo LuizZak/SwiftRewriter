@@ -141,7 +141,7 @@ public class ObjcParser {
         
         let input = try parsePreprocessor()
         try parseMainChannel(input: input)
-        try parseNSAssumeNonnullChannel()
+        try parseNSAssumeNonnullChannel(input: input)
         
         // Go around the tree setting the source for the nodes
         let visitor = AnyASTVisitor(visit: { $0.originalSource = self.source })
@@ -183,7 +183,7 @@ public class ObjcParser {
         // known constructs
         let src = source.fetchSource()
         
-        let parserState = try self.mainParser ?? state.makeMainParser(input: input)
+        let parserState = try mainParser ?? state.makeMainParser(input: input)
         let parser = parserState.parser
         mainParser = parserState
         parser.addErrorListener(
@@ -234,12 +234,10 @@ public class ObjcParser {
         }
     }
     
-    private func parseNSAssumeNonnullChannel() throws {
+    private func parseNSAssumeNonnullChannel(input: String) throws {
         nonnullMacroRegionsTokenRange = []
         
-        let src = source.fetchSource()
-        
-        let tokens = try self.state.makeMainParser(input: src).tokens
+        let tokens = try state.makeMainParser(input: input).tokens
         try tokens.fill()
         
         let allTokens = tokens.getTokens()

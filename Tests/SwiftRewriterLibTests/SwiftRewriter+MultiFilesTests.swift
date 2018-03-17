@@ -343,6 +343,27 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
+    func testPreserversAssumesNonnullContextAfterMovingDeclarationsFromHeaderToImplementation() {
+        assertThat()
+            .file(name: "A.h", """
+            NS_ASSUME_NONNULL_BEGIN
+            typedef void(^errorBlock)(NSString *param);
+            NS_ASSUME_NONNULL_END
+            """)
+            .file(name: "A.m", """
+            @interface A
+            @end
+            """)
+            .translatesToSwift("""
+            typealias errorBlock = (String) -> Void
+
+            @objc
+            class A: NSObject {
+            }
+            // End of file A.swift
+            """)
+    }
+    
     private func assertThat() -> MultiFileTestBuilder {
         return MultiFileTestBuilder(test: self)
     }
