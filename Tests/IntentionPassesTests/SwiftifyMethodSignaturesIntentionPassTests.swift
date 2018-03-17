@@ -197,14 +197,13 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
     func method(withSignature signature: FunctionSignature) -> Asserter {
         type.addMethod(MethodGenerationIntention(signature: signature))
         
-        let invoker =
-            DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
-                                       typeSystem: DefaultTypeSystem())
-        let mapper = DefaultTypeMapper(typeSystem: IntentionCollectionTypeSystem(intentions: intentions))
-        let context =
-            IntentionPassContext(typeSystem: DefaultTypeSystem(),
-                                 typeMapper: mapper,
-                                 typeResolverInvoker: invoker)
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+        let invoker = DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
+                                                 typeSystem: typeSystem)
+        let mapper = DefaultTypeMapper(typeSystem: typeSystem)
+        let context = IntentionPassContext(typeSystem: DefaultTypeSystem(),
+                                           typeMapper: mapper,
+                                           typeResolverInvoker: invoker)
         
         sut.apply(on: intentions, context: context)
         

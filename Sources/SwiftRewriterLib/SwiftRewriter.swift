@@ -92,6 +92,7 @@ public class SwiftRewriter {
     public func rewrite() throws {
         defer {
             lazyResolve = []
+            typeSystem.reset()
         }
         
         try autoreleasepool {
@@ -114,10 +115,8 @@ public class SwiftRewriter {
         
         var outError: Error?
         let outErrorBarrier
-            = DispatchQueue(label: "br.com.swiftrewriter",
-                            qos: .default,
-                            attributes: .concurrent,
-                            autoreleaseFrequency: .inherit,
+            = DispatchQueue(label: "br.com.swiftrewriter", qos: .default,
+                            attributes: .concurrent, autoreleaseFrequency: .inherit,
                             target: nil)
         
         for (i, src) in sources.enumerated() {
@@ -308,6 +307,7 @@ public class SwiftRewriter {
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
             provider.registerDefinitions(on: globals)
+            provider.registerTypes(in: typeSystem)
         }
         
         // Execute passes

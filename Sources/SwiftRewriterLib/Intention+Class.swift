@@ -115,6 +115,10 @@ extension InstanceVariableGenerationIntention: KnownProperty {
         return []
     }
     
+    public var accessor: KnownPropertyAccessor {
+        return .getterAndSetter
+    }
+    
     public var optional: Bool {
         return false
     }

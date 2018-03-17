@@ -2,7 +2,7 @@ import SwiftAST
 import TypeDefinitions
 
 /// Standard type system implementation
-public class DefaultTypeSystem: TypeSystem {
+public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     /// A singleton instance to a default type system.
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
     
@@ -13,6 +13,15 @@ public class DefaultTypeSystem: TypeSystem {
     var typesByName: [String: KnownType] = [:]
     
     public init() {
+        registerInitialKnownTypes()
+    }
+    
+    /// Resets the storage of all known types and type aliases to the default
+    /// values.
+    public func reset() {
+        types.removeAll()
+        typesByName.removeAll()
+        aliases.removeAll()
         registerInitialKnownTypes()
     }
     
@@ -477,7 +486,7 @@ extension DefaultTypeSystem {
     func registerInitialKnownTypes() {
         let nsObjectProtocol =
             KnownTypeBuilder(typeName: "NSObjectProtocol", kind: .protocol)
-                .addingMethod(withSignature:
+                .method(withSignature:
                     FunctionSignature(name: "responds",
                                       parameters: [ParameterSignature(label: "to", name: "selector", type: .selector)],
                                       returnType: .bool,
@@ -487,8 +496,8 @@ extension DefaultTypeSystem {
         
         let nsObject =
             KnownTypeBuilder(typeName: "NSObject")
-                .addingConstructor()
-                .addingProtocolConformance(protocolName: "NSObjectProtocol")
+                .constructor()
+                .protocolConformance(protocolName: "NSObjectProtocol")
                 .build()
         
         let nsArray =
@@ -497,7 +506,7 @@ extension DefaultTypeSystem {
         
         let nsMutableArray =
             KnownTypeBuilder(typeName: "NSMutableArray", supertype: nsArray)
-                .addingMethod(withSignature:
+                .method(withSignature:
                     FunctionSignature(name: "addObject",
                                       parameters: [
                                         ParameterSignature(label: "_",
@@ -515,7 +524,7 @@ extension DefaultTypeSystem {
         
         let nsMutableDictionary =
             KnownTypeBuilder(typeName: "NSMutableDictionary", supertype: nsDictionary)
-                .addingMethod(withSignature:
+                .method(withSignature:
                     FunctionSignature(name: "setObject",
                                       parameters: [
                                         ParameterSignature(label: "_", name: "anObject", type: .anyObject),
@@ -544,7 +553,7 @@ extension DefaultTypeSystem {
         let nsMutableData = KnownTypeBuilder(typeName: "NSMutableData", supertype: nsData).build()
         let nsMutableString =
             KnownTypeBuilder(typeName: "NSMutableString", supertype: KnownSupertype.typeName("NSString"))
-                .addingConstructor()
+                .constructor()
                 .build()
         
         addType(nsDate)
@@ -565,11 +574,37 @@ extension DefaultTypeSystem {
 /// An extension over the default type system that enables using an intention
 /// collection to search for types
 public class IntentionCollectionTypeSystem: DefaultTypeSystem {
+    private var cache: Cache?
     public var intentions: IntentionCollection
     
     public init(intentions: IntentionCollection) {
         self.intentions = intentions
         super.init()
+    }
+    
+    func makeCache() {
+        var aliases: [String: SwiftType] = [:]
+        var types: [String: [TypeGenerationIntention]] = [:]
+        
+        for file in intentions.fileIntentions() {
+            for alias in file.typealiasIntentions {
+                aliases[alias.name] = alias.fromType
+            }
+        }
+        
+        for file in intentions.fileIntentions() {
+            for type in file.typeIntentions {
+                types[type.typeName, default: []].append(type)
+            }
+        }
+        
+        let lazyTypes = types.mapValues({ LazyKnownType(typeName: $0[0].typeName, typeSystem: self, types: $0) })
+        
+        cache = Cache(typeAliases: aliases, types: lazyTypes)
+    }
+    
+    func tearDownCache() {
+        cache = nil
     }
     
     public override func isClassInstanceType(_ typeName: String) -> Bool {
@@ -581,9 +616,17 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     }
     
     public override func resolveAlias(in typeName: String) -> SwiftType {
-        for alias in intentions.typealiasIntentions() {
-            if alias.name == typeName {
-                return alias.fromType
+        if let cache = cache {
+            if let alias = cache.typeAliases[typeName] {
+                return alias
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                for alias in file.typealiasIntentions {
+                    if alias.name == typeName {
+                        return alias.fromType
+                    }
+                }
             }
         }
         
@@ -595,9 +638,15 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return true
         }
         
-        for file in intentions.fileIntentions() {
-            if file.typeIntentions.contains(where: { $0.typeName == name }) {
+        if let cache = cache {
+            if cache.types.keys.contains(name) {
                 return true
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                if file.typeIntentions.contains(where: { $0.typeName == name }) {
+                    return true
+                }
             }
         }
         
@@ -619,6 +668,14 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     public override func knownTypeWithName(_ name: String) -> KnownType? {
         if let type = super.knownTypeWithName(name) {
             return type
+        }
+        
+        if let cache = cache {
+            if let match = cache.types[name] {
+                return match
+            }
+            
+            return nil
         }
         
         // Search in type intentions
@@ -649,10 +706,18 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
         }
         
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.typeName == typeName {
-                if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+        if let cache = cache {
+            if let match = cache.types[typeName] {
+                if let prop = match.knownProperties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
                     return prop
+                }
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                for type in file.typeIntentions where type.typeName == typeName {
+                    if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                        return prop
+                    }
                 }
             }
         }
@@ -665,10 +730,18 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return super.field(named: name, static: isStatic, in: type)
         }
         
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.typeName == typeName {
-                if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                    return prop
+        if let cache = cache {
+            if let match = cache.types[typeName] {
+                if let field = match.knownFields.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                    return field
+                }
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                for type in file.typeIntentions where type.typeName == typeName {
+                    if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                        return prop
+                    }
                 }
             }
         }
@@ -683,16 +756,41 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                                 includeOptional: includeOptional, in: type)
         }
         
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.typeName == typeName {
-                if let method = type.method(matchingSelector: selector), method.isStatic == isStatic {
+        if let cache = cache {
+            if let match = cache.types[typeName] {
+                if let method = method(matchingSelector: selector, in: match.knownMethods),
+                    method.isStatic == isStatic {
                     return method
+                }
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                for type in file.typeIntentions where type.typeName == typeName {
+                    if let method = type.method(matchingSelector: selector), method.isStatic == isStatic {
+                        return method
+                    }
                 }
             }
         }
         
         return super.method(withObjcSelector: selector, static: isStatic,
                             includeOptional: includeOptional, in: type)
+    }
+    
+    /// Finds a method on a given array of methods that matches a given
+    /// Objective-C selector signature.
+    ///
+    /// Ignores method variable names and types of return/parameters.
+    private func method(matchingSelector signature: FunctionSignature,
+                        in methods: [KnownMethod]) -> KnownMethod? {
+        return methods.first {
+            return $0.signature.matchesAsSelector(signature)
+        }
+    }
+    
+    private struct Cache {
+        var typeAliases: [String: SwiftType]
+        var types: [String: LazyKnownType]
     }
 }
 

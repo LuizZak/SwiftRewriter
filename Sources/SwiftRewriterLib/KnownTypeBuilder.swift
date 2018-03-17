@@ -3,6 +3,8 @@ import SwiftAST
 /// Helper known-type builder used to come up with default types and during testing
 /// as well
 public class KnownTypeBuilder {
+    public typealias ParameterTuple = (label: String, type: SwiftType)
+    
     private let type: DummyType
     
     public init(typeName: String, supertype: KnownSupertypeConvertible? = nil,
@@ -27,15 +29,25 @@ public class KnownTypeBuilder {
     }
     
     /// Adds a parameter-less constructor to this type
-    public func addingConstructor() -> KnownTypeBuilder {
+    public func constructor() -> KnownTypeBuilder {
         assert(!type.knownConstructors.contains { $0.parameters.isEmpty },
                "An empty constructor is already provided")
         
-        return addingConstructor(withParameters: [])
+        return constructor(withParameters: [])
     }
     
     /// Adds a new constructor to this type
-    public func addingConstructor(withParameters parameters: [ParameterSignature]) -> KnownTypeBuilder {
+    public func constructor(shortParameters shortParams: [ParameterTuple]) -> KnownTypeBuilder {
+        let parameters =
+            shortParams.map { tuple in
+                ParameterSignature(name: tuple.label, type: tuple.type)
+            }
+        
+        return constructor(withParameters: parameters)
+    }
+    
+    /// Adds a new constructor to this type
+    public func constructor(withParameters parameters: [ParameterSignature]) -> KnownTypeBuilder {
         let ctor = DummyConstructor(parameters: parameters)
         
         type.knownConstructors.append(ctor)
@@ -43,28 +55,26 @@ public class KnownTypeBuilder {
         return self
     }
     
-    /// Adds a void-returning, parameter-less instance method
-    public func addingVoidMethod(named name: String) -> KnownTypeBuilder {
-        let signature =
-            FunctionSignature(name: name, parameters: [])
-        
-        return addingMethod(withSignature: signature)
-    }
-    
-    /// Adds a parameter-less instance method with a given return type, and a flag
+    /// Adds an instance method with a given return type, and a flag
     /// specifying whether the method is an optional protocol conformance method
-    public func addingMethod(named name: String, returning returnType: SwiftType,
-                             optional: Bool = false) -> KnownTypeBuilder {
-        let signature =
-            FunctionSignature(name: name, parameters: [], returnType: returnType)
+    public func method(named name: String, shortParams: [ParameterTuple] = [],
+                       returning returnType: SwiftType = .void,
+                       optional: Bool = false) -> KnownTypeBuilder {
+        let parameters =
+            shortParams.map { tuple in
+                ParameterSignature(name: tuple.label, type: tuple.type)
+        }
         
-        return addingMethod(withSignature: signature, optional: optional)
+        let signature = FunctionSignature(name: name, parameters: parameters,
+                                          returnType: returnType)
+        
+        return method(withSignature: signature, optional: optional)
     }
     
     /// Adds a method with a given signature, and a flag specifying whether the
     /// method is an optional protocol conformance method
-    public func addingMethod(withSignature signature: FunctionSignature,
-                             optional: Bool = false) -> KnownTypeBuilder {
+    public func method(withSignature signature: FunctionSignature,
+                       optional: Bool = false) -> KnownTypeBuilder {
         // TODO: Verify whether we should match with Swift or Objective-C selector
         // rules here (Swift allows for overloads over parameter/return types).
         // Probably with a flag on the KnownTypeBuilder instance.
@@ -85,19 +95,19 @@ public class KnownTypeBuilder {
     /// Adds a strong property with no attributes with a given name and type, and
     /// a flag specifying whether the property is an optional protocol conformance
     /// property
-    public func addingProperty(named name: String, type: SwiftType, isStatic: Bool = false,
-                               optional: Bool = false) -> KnownTypeBuilder {
+    public func property(named name: String, type: SwiftType, isStatic: Bool = false,
+                         optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
-        return addingProperty(named: name, storage: storage, isStatic: isStatic,
-                              optional: optional)
+        return property(named: name, storage: storage, isStatic: isStatic,
+                              optional: optional, accessor: accessor)
     }
     
     /// Adds a property with no attributes with a given name and storage, and a
     /// flag specifying whether the property is an optional protocol conformance
     /// property
-    public func addingProperty(named name: String, storage: ValueStorage, isStatic: Bool = false,
-                               optional: Bool = false) -> KnownTypeBuilder {
+    public func property(named name: String, storage: ValueStorage, isStatic: Bool = false,
+                         optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
         // Check duplicates
         guard !type.knownProperties.contains(where: {
             $0.name == name && $0.storage == storage && $0.isStatic == isStatic
@@ -105,12 +115,9 @@ public class KnownTypeBuilder {
             return self
         }
         
-        let property = DummyProperty(ownerType: type,
-                                     name: name,
-                                     storage: storage,
-                                     attributes: [],
-                                     isStatic: isStatic,
-                                     optional: optional)
+        let property = DummyProperty(ownerType: type, name: name, storage: storage,
+                                     attributes: [], isStatic: isStatic,
+                                     optional: optional, accessor: accessor)
         
         type.knownProperties.append(property)
         
@@ -118,14 +125,15 @@ public class KnownTypeBuilder {
     }
     
     /// Adds a strong field with no attributes with a given name and type
-    public func addingField(named name: String, type: SwiftType) -> KnownTypeBuilder {
-        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+    public func field(named name: String, type: SwiftType, isConstant: Bool = false,
+                      isStatic: Bool = false) -> KnownTypeBuilder {
+        let storage = ValueStorage(type: type, ownership: .strong, isConstant: isConstant)
         
-        return addingField(named: name, storage: storage)
+        return field(named: name, storage: storage, isStatic: isStatic)
     }
     
     /// Adds a property with no attributes with a given name and storage
-    public func addingField(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
+    public func field(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
         // Check duplicates
         guard !type.knownFields.contains(where: {
             $0.name == name && $0.storage == storage && $0.isStatic == isStatic
@@ -133,19 +141,16 @@ public class KnownTypeBuilder {
             return self
         }
         
-        let property = DummyProperty(ownerType: type,
-                                     name: name,
-                                     storage: storage,
-                                     attributes: [],
-                                     isStatic: isStatic,
-                                     optional: false)
+        let property = DummyProperty(ownerType: type, name: name, storage: storage,
+                                     attributes: [], isStatic: isStatic,
+                                     optional: false, accessor: .getterAndSetter)
         
         type.knownFields.append(property)
         
         return self
     }
     
-    public func addingProtocolConformance(protocolName: String) -> KnownTypeBuilder {
+    public func protocolConformance(protocolName: String) -> KnownTypeBuilder {
         // Check duplicates
         guard !type.knownProtocolConformances.contains(where: { $0.protocolName == protocolName }) else {
             return self
@@ -201,6 +206,7 @@ private struct DummyProperty: KnownProperty {
     var attributes: [PropertyAttribute]
     var isStatic: Bool
     var optional: Bool
+    var accessor: KnownPropertyAccessor
 }
 
 private struct DummyProtocolConformance: KnownProtocolConformance {

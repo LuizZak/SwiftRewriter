@@ -292,7 +292,7 @@ extension TypeGenerationIntention: KnownType {
 /// An intention to generate a property or method on a type
 public class MemberGenerationIntention: FromSourceIntention {
     /// Type this member generation intention belongs to
-    public internal(set) var type: TypeGenerationIntention?
+    public internal(set) weak var type: TypeGenerationIntention?
     
     /// Returns whether this member is static (i.e. class member).
     /// Defaults to `false`, unless overriden by a subclass.
@@ -427,7 +427,14 @@ public class PropertyGenerationIntention: MemberGenerationIntention, Overridable
 }
 
 extension PropertyGenerationIntention: KnownProperty {
-    
+    public var accessor: KnownPropertyAccessor {
+        switch mode {
+        case .asField, .property:
+            return .getterAndSetter
+        case .computed:
+            return .getter
+        }
+    }
 }
 
 /// Specifies an attribute for a property

@@ -35,7 +35,7 @@ public protocol KnownType: KnownSupertypeConvertible {
 }
 
 /// The kind of a known type
-public enum KnownTypeKind {
+public enum KnownTypeKind: String {
     /// A concrete class type
     case `class`
     /// A protocol type
@@ -149,6 +149,15 @@ public protocol KnownProperty: KnownMember {
     
     /// True if this method is an optional protocol conformance property
     var optional: Bool { get }
+    
+    /// Gets the accessors for this property
+    var accessor: KnownPropertyAccessor { get }
+}
+
+/// Describes the getter/setter states of a property
+public enum KnownPropertyAccessor {
+    case getter
+    case getterAndSetter
 }
 
 /// Describes a known protocol conformance

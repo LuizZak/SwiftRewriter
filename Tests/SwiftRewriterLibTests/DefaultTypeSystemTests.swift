@@ -223,7 +223,7 @@ class DefaultTypeSystemTests: XCTestCase {
     }
     
     func testConstructorSearchesThroughSupertypes() {
-        let type1 = KnownTypeBuilder(typeName: "A").addingConstructor().build()
+        let type1 = KnownTypeBuilder(typeName: "A").constructor().build()
         let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()
         let type3 = KnownTypeBuilder(typeName: "C", supertype: type2).build()
         
@@ -237,7 +237,7 @@ class DefaultTypeSystemTests: XCTestCase {
     }
     
     func testConstructorSearchesTypeNamedSupertypes() {
-        let type1 = KnownTypeBuilder(typeName: "A").addingConstructor().build()
+        let type1 = KnownTypeBuilder(typeName: "A").constructor().build()
         let type2 = KnownTypeBuilder(typeName: "B", supertype: type1).build()
         let type3 = KnownTypeBuilder(typeName: "C", supertype: "B").build()
         
@@ -253,14 +253,14 @@ class DefaultTypeSystemTests: XCTestCase {
     func testMethodLookupIgnoresOptionalProtocolMethodsNotImplemented() {
         let prot =
             KnownTypeBuilder(typeName: "A", kind: .protocol)
-                .addingMethod(named: "nonOptional", returning: .void)
-                .addingMethod(named: "optional", returning: .void, optional: true)
-                .addingMethod(named: "optionalImplemented", returning: .void, optional: true)
+                .method(named: "nonOptional", returning: .void)
+                .method(named: "optional", returning: .void, optional: true)
+                .method(named: "optionalImplemented", returning: .void, optional: true)
                 .build()
         let cls =
             KnownTypeBuilder(typeName: "B")
-                .addingProtocolConformance(protocolName: "A")
-                .addingMethod(named: "optionalImplemented", returning: .void)
+                .protocolConformance(protocolName: "A")
+                .method(named: "optionalImplemented", returning: .void)
                 .build()
         sut.addType(prot)
         sut.addType(cls)
@@ -278,7 +278,7 @@ class DefaultTypeSystemTests: XCTestCase {
     func testDefaultValueForClassTypeIsAlwaysNil() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .class)
-                .addingConstructor()
+                .constructor()
                 .build()
         sut.addType(str)
         
@@ -288,7 +288,7 @@ class DefaultTypeSystemTests: XCTestCase {
     func testDefaultValueForProtocolTypeIsAlwaysNil() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .protocol)
-                .addingConstructor()
+                .constructor()
                 .build()
         sut.addType(str)
         
@@ -307,7 +307,7 @@ class DefaultTypeSystemTests: XCTestCase {
     func testDefaultValueForStructWithEmptyConstructor() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .struct)
-                .addingConstructor()
+                .constructor()
                 .build()
         sut.addType(str)
         

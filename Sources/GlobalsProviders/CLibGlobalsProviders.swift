@@ -6,16 +6,12 @@ private let cInt = SwiftType.typeName("CInt")
 private let cFloat = SwiftType.typeName("CFloat")
 private let cDouble = SwiftType.typeName("CDouble")
 
-public class CLibGlobalsProviders: GlobalsProvider {
-    public init() {
+public class CLibGlobalsProviders: BaseGlobalsProvider {
+    public override init() {
         
     }
     
-    public func registerDefinitions(on globals: GlobalDefinitions) {
-        let add: (CodeDefinition) -> Void = {
-            globals.recordDefinition($0)
-        }
-        
+    public override func createDefinitions() {
         add(function(name: "abs", paramTypes: [cInt], returnType: cInt))
         add(function(name: "fabsf", paramTypes: [cFloat], returnType: cFloat))
         add(function(name: "fabs", paramTypes: [cDouble], returnType: cDouble))
@@ -52,20 +48,5 @@ public class CLibGlobalsProviders: GlobalsProvider {
         
         add(function(name: "fmodf", paramTypes: [cFloat, cFloat], returnType: cFloat))
         add(function(name: "fmod", paramTypes: [cDouble, cDouble], returnType: cDouble))
-    }
-    
-    func function(name: String, paramTypes: [SwiftType], returnType: SwiftType) -> CodeDefinition {
-        let paramSignatures = paramTypes.enumerated().map { (arg) -> ParameterSignature in
-            let (i, type) = arg
-            return ParameterSignature(label: "_", name: "p\(i)", type: type)
-        }
-        
-        let signature =
-            FunctionSignature(name: name, parameters: paramSignatures,
-                              returnType: returnType, isStatic: false)
-        
-        let definition = CodeDefinition(functionSignature: signature, intention: nil)
-        
-        return definition
     }
 }

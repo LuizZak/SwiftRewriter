@@ -465,7 +465,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     func testCorrectNonnullStructWithNullableStructValue() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .struct)
-                .addingConstructor()
+                .constructor()
                 .build()
         typeSystem.addType(str)
         let expMaker = { Expression.identifier("a") }

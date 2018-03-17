@@ -366,7 +366,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "TypeName") { builder in
-                return builder.addingConstructor().build()
+                return builder.constructor().build()
             }
             .resolve()
             .thenAssertExpression(resolvedAs: .typeName("TypeName"))
@@ -441,7 +441,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .definingType(named: "A") { builder in
                 return
                     builder
-                        .addingProperty(named: "b", type: .int)
+                        .property(named: "b", type: .int)
                         .build()
             }
             .definingLocal(name: "a", type: .typeName("A"))
@@ -461,7 +461,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "A") { builder in
                 return
-                    builder.addingMethod(withSignature:
+                    builder.method(withSignature:
                         FunctionSignature(name: "aMethod",
                                           parameters: [
                                             ParameterSignature(label: "_", name: "arg0", type: .int),
@@ -481,8 +481,8 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         let Atype =
             KnownTypeBuilder(typeName: "A")
-                .addingConstructor()
-                .addingProperty(named: "a",
+                .constructor()
+                .property(named: "a",
                                 storage: ValueStorage(type: .int,
                                                       ownership: .strong,
                                                       isConstant: false),
@@ -515,7 +515,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .definingType(named: "A") { builder in
                 return
                     builder
-                        .addingProperty(named: "b", type: .int)
+                        .property(named: "b", type: .int)
                         .build()
             }
             .definingLocal(name: "a", type: .optional(.typeName("A")))
@@ -620,9 +620,9 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         _=startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "A") { builder in
-                builder.addingProperty(named: "b", type: .typeName("B")).build()
+                builder.property(named: "b", type: .typeName("B")).build()
             }.definingType(named: "B") { builder in
-                builder.addingProperty(named: "c", type: .int).build()
+                builder.property(named: "c", type: .int).build()
             }.definingLocal(name: "a", type: .optional(.typeName("A")))
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.int))
@@ -698,7 +698,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             Expression.identifier("self").dot("a").call([.constant(false)]),
                           sut: ExpressionTypeResolver())
             .definingType(named: "A") { type in
-                type.addingMethod(withSignature:
+                type.method(withSignature:
                         FunctionSignature(name: "a", parameters: [.init(label: "_", name: "a", type: .int)])
                     ).build()
             }
@@ -726,7 +726,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                           sut: ExpressionTypeResolver())
             .definingType(named: "A", with: { builder -> KnownType in
                 builder
-                    .addingConstructor(withParameters: [.init(label: "_", name: "a", type: .int)])
+                    .constructor(withParameters: [.init(label: "_", name: "a", type: .int)])
                     .build()
             })
             .resolve()

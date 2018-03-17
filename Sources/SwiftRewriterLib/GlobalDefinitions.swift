@@ -2,6 +2,11 @@
 // of parameters so we can support same function name with different parameter
 // count
 
+/// Base protocol for types that are used as target of type-creating objects
+public protocol KnownTypeSink {
+    func addType(_ type: KnownType)
+}
+
 /// A storage for global definitions
 public class GlobalDefinitions: DefinitionsSource {
     internal(set) public var definitions: [CodeDefinition] = []
@@ -32,6 +37,13 @@ public protocol GlobalsProvidersSource {
 /// scope
 public protocol GlobalsProvider {
     func registerDefinitions(on globals: GlobalDefinitions)
+    func registerTypes(in typeSink: KnownTypeSink)
+}
+
+public extension GlobalsProvider {
+    func registerTypes(in typeSink: KnownTypeSink) {
+        
+    }
 }
 
 /// Sources globals providers through an input array

@@ -6,12 +6,12 @@ class TypeFormatterTests: XCTestCase {
     func testAsStringMethodFromType() {
         let type =
             KnownTypeBuilder(typeName: "A")
-                .addingMethod(withSignature:
+                .method(withSignature:
                     FunctionSignature(name: "a",
                                       parameters: [ParameterSignature(label: "_", name: "a", type: .int)],
                                       returnType: .void,
                                       isStatic: false)
-        ).build()
+                ).build()
         
         XCTAssertEqual(
             "A.a(_ a: Int)",
@@ -22,12 +22,27 @@ class TypeFormatterTests: XCTestCase {
     func testAsStringPropertyFromType() {
         let type =
             KnownTypeBuilder(typeName: "A")
-                .addingProperty(named: "a", type: .int)
+                .property(named: "a", type: .int)
                 .build()
         
         XCTAssertEqual(
             "A.a: Int",
             TypeFormatter.asString(property: type.knownProperties[0], ofType: type)
+        )
+    }
+    
+    func testAsStringPropertyFromTypeWithTypeNameAndVarKeywordAndAccessors() {
+        let storage = ValueStorage(type: .int, ownership: .weak, isConstant: true)
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .property(named: "a", storage: storage, isStatic: false, optional: false)
+                .build()
+        
+        XCTAssertEqual(
+            "weak var A.a: Int { get set }",
+            TypeFormatter.asString(property: type.knownProperties[0], ofType: type,
+                                   withTypeName: true, includeVarKeyword: true,
+                                   includeAccessors: true)
         )
     }
     
@@ -87,5 +102,38 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1))
         XCTAssertEqual("(a b: Float)", TypeFormatter.asString(signature: sig2))
         XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3))
+    }
+    
+    func testAsStringKnownType() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .struct)
+            .constructor()
+            .constructor(shortParameters: [("a", .int), ("b", .int)])
+            .field(named: "readOnlyField", type: .string, isConstant: true)
+            .field(named: "field", type: .string)
+            .property(named: "prop", type: .optional(.nsArray))
+            .protocolConformance(protocolName: "Protocol")
+            .method(withSignature: FunctionSignature(
+                name: "methodA",
+                parameters: [
+                    ParameterSignature(label: "_", name: "c", type: .int)
+                ],
+                returnType: .string)
+            )
+            .build()
+        
+        let result = TypeFormatter.asString(knownType: type)
+        let expected = """
+            struct A: Protocol {
+                let readOnlyField: String
+                var field: String
+                var prop: NSArray? { get set }
+                
+                init()
+                init(a: Int, b: Int)
+                func methodA(_ c: Int) -> String
+            }
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
     }
 }

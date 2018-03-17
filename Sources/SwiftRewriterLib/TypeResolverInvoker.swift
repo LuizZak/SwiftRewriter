@@ -17,23 +17,26 @@ public protocol TypeResolverInvoker {
 }
 
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
-    public var globals: GlobalDefinitions
-    public var typeSystem: TypeSystem
-    public var numThreads: Int
+    var globals: GlobalDefinitions
+    var typeSystem: IntentionCollectionTypeSystem
+    var numThreads: Int
     
-    public init(globals: GlobalDefinitions, typeSystem: TypeSystem, numThreads: Int = 8) {
+    public init(globals: GlobalDefinitions, typeSystem: IntentionCollectionTypeSystem, numThreads: Int = 8) {
         self.globals = globals
         self.typeSystem = typeSystem
         self.numThreads = numThreads
     }
     
     public func resolveAllExpressionTypes(in intentions: IntentionCollection, force: Bool) {
+        typeSystem.makeCache()
+        
         // Make a file invoker for each file and execute resolving in parallel
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreads
         
         for file in intentions.fileIntentions() {
             let invoker = makeResolverInvoker(forceResolve: force)
+            invoker.collectGlobals(from: typeSystem.intentions)
             
             queue.addOperation {
                 invoker.applyOnFile(file)
@@ -41,16 +44,20 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+        
+        typeSystem.tearDownCache()
     }
     
     public func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool) {
         let invoker = makeResolverInvoker(forceResolve: force)
+        invoker.collectGlobals(from: typeSystem.intentions)
         
         invoker.applyOnMethod(method)
     }
     
     public func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool) {
         let invoker = makeResolverInvoker(forceResolve: force)
+        invoker.collectGlobals(from: typeSystem.intentions)
         
         invoker.applyOnProperty(property)
     }
@@ -69,14 +76,25 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
 
 private class InternalTypeResolverInvoker {
     var globals: [CodeDefinition] = []
+    var globalVars: [GlobalVariableGenerationIntention]
     var typeResolver: ExpressionTypeResolver
     
     init(globals: [CodeDefinition], typeResolver: ExpressionTypeResolver) {
         self.globals = globals
         self.typeResolver = typeResolver
+        
+        globalVars = []
+    }
+    
+    func collectGlobals(from intentions: IntentionCollection) {
+        for file in intentions.fileIntentions() {
+            globalVars.append(contentsOf: file.globalVariableIntentions)
+        }
     }
     
     func apply(on intentions: IntentionCollection) {
+        collectGlobals(from: intentions)
+        
         let files = intentions.fileIntentions()
         
         for file in files {
@@ -164,16 +182,12 @@ private class InternalTypeResolverInvoker {
         }
         
         // Push file-level global variables
-        if let intentionCollection = member.file?.intentionCollection {
-            for global in intentionCollection.globalVariables() {
-                if global.isVisible(for: member) {
-                    intrinsics.recordDefinition(
-                        CodeDefinition(variableNamed: global.name,
-                                       storage: global.storage,
-                                       intention: global)
-                    )
-                }
-            }
+        for global in globalVars where global.isVisible(for: member) {
+            intrinsics.recordDefinition(
+                CodeDefinition(variableNamed: global.name,
+                               storage: global.storage,
+                               intention: global)
+            )
         }
         
         // Push global definitions
