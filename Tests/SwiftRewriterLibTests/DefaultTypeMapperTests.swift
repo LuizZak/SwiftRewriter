@@ -104,6 +104,8 @@ class DefaultTypeMapperTests: XCTestCase {
         
         // C scalar types
         expect(.struct("char"), toConvertTo: "CChar")
+        expect(.struct("signed"), toConvertTo: "CInt")
+        expect(.struct("unsigned"), toConvertTo: "CUnsignedInt")
         expect(.struct("unsigned char"), toConvertTo: "CUnsignedChar")
         expect(.struct("unsigned short"), toConvertTo: "CUnsignedShort")
         expect(.struct("unsigned int"), toConvertTo: "CUnsignedInt")
@@ -123,6 +125,8 @@ class DefaultTypeMapperTests: XCTestCase {
         
         // Pointer of C scalar types
         expect(.pointer(.struct("char")), toConvertTo: "UnsafeMutablePointer<CChar>")
+        expect(.pointer(.struct("signed")), toConvertTo: "UnsafeMutablePointer<CInt>")
+        expect(.pointer(.struct("unsigned")), toConvertTo: "UnsafeMutablePointer<CUnsignedInt>")
         expect(.pointer(.struct("unsigned char")), toConvertTo: "UnsafeMutablePointer<CUnsignedChar>")
         expect(.pointer(.struct("unsigned short")), toConvertTo: "UnsafeMutablePointer<CUnsignedShort>")
         expect(.pointer(.struct("unsigned int")), toConvertTo: "UnsafeMutablePointer<CUnsignedInt>")

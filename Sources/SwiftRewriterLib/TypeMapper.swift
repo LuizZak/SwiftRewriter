@@ -498,6 +498,8 @@ public class DefaultTypeMapper: TypeMapper {
         
         // C scalar types
         "char": .typeName("CChar"),
+        "signed": .typeName("CInt"),
+        "unsigned": .typeName("CUnsignedInt"),
         "unsigned char": .typeName("CUnsignedChar"),
         "unsigned short": .typeName("CUnsignedShort"),
         "unsigned int": .typeName("CUnsignedInt"),
