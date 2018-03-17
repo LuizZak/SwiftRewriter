@@ -28,6 +28,20 @@ public class UIKitExpressionPass: BaseExpressionPass {
             
             return super.visitExpression(exp)
         }
+        if let exp = enumify(ident: exp.identifier,
+                             enumPrefix: "UITableViewCellSeparatorStyle",
+                             swiftEnumName: "UITableViewCellSeparatorStyle") {
+            notifyChange()
+            
+            return super.visitExpression(exp)
+        }
+        if let exp = enumify(ident: exp.identifier,
+                             enumPrefix: "UITableViewCellSelectionStyle",
+                             swiftEnumName: "UITableViewCellSelectionStyle") {
+            notifyChange()
+            
+            return super.visitExpression(exp)
+        }
         
         return super.visitIdentifier(exp)
     }
@@ -166,6 +180,18 @@ public class UIKitExpressionPass: BaseExpressionPass {
 
 extension UIKitExpressionPass {
     func makeEnumTransformers() {
+        makeNSTextAlignmentTransformers()
+        makeUIFontEnumTransformers()
+    }
+    
+    func makeFunctionTransformers() {
+        makeUIFontTransformers()
+        makeUIColorTransformes()
+    }
+}
+
+extension UIKitExpressionPass {
+    func makeNSTextAlignmentTransformers() {
         enumMappings["NSTextAlignmentLeft"] = {
             Expression.identifier("NSTextAlignment").dot("left")
         }
@@ -175,7 +201,9 @@ extension UIKitExpressionPass {
         enumMappings["NSTextAlignmentCenter"] = {
             Expression.identifier("NSTextAlignment").dot("center")
         }
-        
+    }
+    
+    func makeUIFontEnumTransformers() {
         enumMappings["UIFontWeightUltraLight"] = {
             Expression.identifier("UIFont").dot("Weight").dot("ultraLight")
         }
@@ -203,11 +231,6 @@ extension UIKitExpressionPass {
         enumMappings["UIFontWeightBlack"] = {
             Expression.identifier("UIFont").dot("Weight").dot("black")
         }
-    }
-    
-    func makeFunctionTransformers() {
-        makeUIFontTransformers()
-        makeUIColorTransformes()
     }
     
     func makeUIColorTransformes() {

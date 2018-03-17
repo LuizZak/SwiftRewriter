@@ -251,4 +251,43 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                 ])
         )
     }
+    
+    func testUITableViewCellSeparatorStyle() {
+        assertTransformParsed(
+            expression: "UITableViewCellSeparatorStyleNone",
+            into: Expression.identifier("UITableViewCellSeparatorStyle").dot("none")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UITableViewCellSeparatorStyleSingleEtched",
+            into: Expression.identifier("UITableViewCellSeparatorStyle").dot("singleEtched")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UITableViewCellSeparatorStyleSingleLineEtched",
+            into: Expression.identifier("UITableViewCellSeparatorStyle").dot("singleLineEtched")
+        ); assertNotifiedChange()
+    }
+    
+    func testUITableViewCellSelectionStyle() {
+        assertTransformParsed(
+            expression: "UITableViewCellSelectionStyleNone",
+            into: Expression.identifier("UITableViewCellSelectionStyle").dot("none")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UITableViewCellSelectionStyleBlue",
+            into: Expression.identifier("UITableViewCellSelectionStyle").dot("blue")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UITableViewCellSelectionStyleGray",
+            into: Expression.identifier("UITableViewCellSelectionStyle").dot("gray")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "UITableViewCellSelectionStyleDefault",
+            into: Expression.identifier("UITableViewCellSelectionStyle").dot("default")
+        ); assertNotifiedChange()
+    }
 }
