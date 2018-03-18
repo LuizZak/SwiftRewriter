@@ -35,6 +35,23 @@ class UIKitCorrectorIntentionPassTests: XCTestCase {
                convertsSignature: inputSignature, into: expectedSignature,
                onImplementersOfProtocol: "UITableViewDelegate")
     }
+    
+    func testUITableViewDataSource() {
+        let inputSignature =
+            FunctionSignature(name: "tableView", parameters: [
+                ParameterSignature(label: "_", name: "tableView", type: .typeName("UITableView")),
+                ParameterSignature(label: "cellForRowAtIndexPath", name: "indexPath", type: .typeName("IndexPath")),
+            ])
+        let expectedSignature =
+            FunctionSignature(name: "tableView", parameters: [
+                ParameterSignature(label: "_", name: "tableView", type: .typeName("UITableView")),
+                ParameterSignature(label: "cellForRowAt", name: "indexPath", type: .typeName("IndexPath"))
+            ])
+        
+        assert(sut: UIKitCorrectorIntentionPass(),
+               convertsSignature: inputSignature, into: expectedSignature,
+               onImplementersOfProtocol: "UITableViewDataSource")
+    }
 }
 
 extension UIKitCorrectorIntentionPassTests {

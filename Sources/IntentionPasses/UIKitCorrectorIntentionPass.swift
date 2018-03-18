@@ -14,6 +14,8 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
     
     func createConversions() {
         addConversion(.subtype("UIView"), fromKeywords: ["drawRect", nil], to: ["draw", nil])
+        
+        // UITableViewDelegate
         addConversions(
             .conformance(protocolName: "UITableViewDelegate"),
             keywordPairs: [
@@ -58,6 +60,23 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
                 (["indexPathForPreferredFocusedViewInTableView", nil], ["indexPathForPreferredFocusedView", "in"]),
                 (["tableView", nil, "shouldSpringLoadRowAtIndexPath", "withContext"], ["tableView", nil, "shouldSpringLoadRowAt", "with"]),
             ])
+        
+        // UITableViewDataSource
+        addConversions(
+            .conformance(protocolName: "UITableViewDataSource"),
+            keywordPairs: [
+                (["tableView", nil, "numberOfRowsInSection"], ["tableView", nil, "numberOfRowsInSection"]),
+                (["tableView", nil, "cellForRowAtIndexPath"], ["tableView", nil, "cellForRowAt"]),
+                (["numberOfSectionsInTableView", nil], ["numberOfSections", "in"]),
+                (["tableView", nil, "titleForHeaderInSection"], ["tableView", nil, "titleForHeaderInSection"]),
+                (["tableView", nil, "titleForFooterInSection"], ["tableView", nil, "titleForFooterInSection"]),
+                (["tableView", nil, "canEditRowAtIndexPath"], ["tableView", nil, "canEditRowAt"]),
+                (["tableView", nil, "canMoveRowAtIndexPath"], ["tableView", nil, "canMoveRowAt"]),
+                (["sectionIndexTitlesForTableView", nil], ["sectionIndexTitles", "for"]),
+                (["tableView", nil, "sectionForSectionIndexTitle", "atIndex"], ["tableView", nil, "sectionForSectionIndexTitle", "at"]),
+                (["tableView", nil, "commitEditingStyle", "forRowAtIndexPath"], ["tableView", nil, "commit", "forRowAt"]),
+                (["tableView", nil, "moveRowAtIndexPath", "toIndexPath"], ["tableView", nil, "moveRowAt", "to"])
+            ])
     }
     
     private func addConversion(_ relationship: SignatureConversion.Relationship,
@@ -94,6 +113,10 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
                 if !context.typeSystem.isType(type.typeName, conformingTo: protocolName) {
                     continue
                 }
+            }
+            
+            if !conversion.apply(to: &method.signature) {
+                continue
             }
             
             // Mark as override, in case of subtype relationship
