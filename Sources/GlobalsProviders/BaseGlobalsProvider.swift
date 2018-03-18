@@ -39,7 +39,8 @@ public class BaseGlobalsProvider: GlobalsProvider {
     }
     
     func makeType(named name: String, supertype: KnownSupertypeConvertible? = nil,
-                  kind: KnownTypeKind = .class, initializer: (KnownTypeBuilder) -> (KnownType)) {
+                  kind: KnownTypeKind = .class,
+                  initializer: (KnownTypeBuilder) -> (KnownType) = { $0.build() }) {
         
         let builder = KnownTypeBuilder(typeName: name, supertype: supertype, kind: kind)
         

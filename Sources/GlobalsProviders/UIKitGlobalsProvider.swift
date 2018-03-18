@@ -10,6 +10,7 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
     override func createTypes() {
         createUILayoutConstraintAxis()
         createUIView()
+        createUIWindow()
         createUITableViewCell()
         createUIScrollView()
         createUITableView()
@@ -655,6 +656,10 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                 )
                 .build()
         }
+    }
+    
+    func createUIWindow() {
+        makeType(named: "UIWindow", supertype: "UIView")
     }
     
     func createUIScrollView() {

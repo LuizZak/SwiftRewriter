@@ -171,6 +171,13 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
             """)
     }
     
+    func testDefinedUIWindow() {
+        assertDefined(typeName: "UIWindow", signature: """
+            class UIWindow: UIView {
+            }
+            """)
+    }
+    
     func testDefinedUITableViewCell() {
         assertDefined(typeName: "UITableViewCell", signature: """
             class UITableViewCell: UIView, UIGestureRecognizerDelegate {
