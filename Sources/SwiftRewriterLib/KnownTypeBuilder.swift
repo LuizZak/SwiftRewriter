@@ -59,7 +59,7 @@ public class KnownTypeBuilder {
     /// Adds an instance method with a given return type, and a flag
     /// specifying whether the method is an optional protocol conformance method
     public func method(named name: String, shortParams: [ParameterTuple] = [],
-                       returning returnType: SwiftType = .void,
+                       returning returnType: SwiftType = .void, isStatic: Bool = false,
                        optional: Bool = false) -> KnownTypeBuilder {
         let parameters =
             shortParams.map { tuple in
@@ -67,7 +67,8 @@ public class KnownTypeBuilder {
         }
         
         let signature = FunctionSignature(name: name, parameters: parameters,
-                                          returnType: returnType)
+                                          returnType: returnType,
+                                          isStatic: isStatic)
         
         return method(withSignature: signature, optional: optional)
     }

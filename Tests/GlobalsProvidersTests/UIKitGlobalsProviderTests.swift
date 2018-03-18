@@ -31,9 +31,10 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
     func testDefinedUIViewController() {
         assertDefined(typeName: "UIViewController", signature: """
             class UIViewController: UIResponder, NSCoding, UIAppearanceContainer, UITraitEnvironment, UIContentContainer, UIFocusEnvironment {
-                var view: UIView!
+                var view: UIView
                 
                 init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?)
+                func viewDidLoad()
                 func viewWillAppear(_ animated: Bool)
                 func viewDidAppear(_ animated: Bool)
                 func viewWillDisappear(_ animated: Bool)
@@ -56,6 +57,10 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
     func testDefinedUIView() {
         assertDefined(typeName: "UIView", signature: """
             class UIView: UIResponder, NSCoding, UIAppearance, UIAppearanceContainer, UIDynamicItem, UITraitEnvironment, UICoordinateSpace, UIFocusItem, CALayerDelegate {
+                static var areAnimationsEnabled: Bool { get }
+                static var inheritedAnimationDuration: TimeInterval { get }
+                static var layerClass: AnyClass { get }
+                static var requiresConstraintBasedLayout: Bool { get }
                 var alignmentRectInsets: UIEdgeInsets { get }
                 var alpha: CGFloat
                 var autoresizesSubviews: Bool
@@ -118,6 +123,32 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
                 var window: UIWindow? { get }
                 
                 init(frame: CGRect)
+                static func addKeyframe(withRelativeStartTime frameStartTime: Double, relativeDuration frameDuration: Double, animations: () -> Void)
+                static func animate(withDuration duration: TimeInterval, animations: () -> Void, completion: ((Bool) -> Void)?)
+                static func animate(withDuration duration: TimeInterval, animations: () -> Void)
+                static func animate(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
+                static func animate(withDuration duration: TimeInterval, delay: TimeInterval, usingSpringWithDamping dampingRatio: CGFloat, initialSpringVelocity velocity: CGFloat, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
+                static func animateKeyframes(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewKeyframeAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
+                static func beginAnimations(_ animationID: String?, context: UnsafeMutableRawPointer?)
+                static func commitAnimations()
+                static func perform(_ animation: UISystemAnimation, on views: [UIView], options: UIViewAnimationOptions, animations parallelAnimations: (() -> Void)?, completion: ((Bool) -> Void)?)
+                static func performWithoutAnimation(_ actionsWithoutAnimation: () -> Void)
+                static func setAnimationBeginsFromCurrentState(_ fromCurrentState: Bool)
+                static func setAnimationCurve(_ curve: UIViewAnimationCurve)
+                static func setAnimationDelay(_ delay: TimeInterval)
+                static func setAnimationDelegate(_ delegate: Any?)
+                static func setAnimationDidStop(_ selector: Selector?)
+                static func setAnimationDuration(_ duration: TimeInterval)
+                static func setAnimationRepeatAutoreverses(_ repeatAutoreverses: Bool)
+                static func setAnimationRepeatCount(_ repeatCount: Float)
+                static func setAnimationsEnabled(_ enabled: Bool)
+                static func setAnimationStart(_ startDate: Date)
+                static func setAnimationTransition(_ transition: UIViewAnimationTransition, for view: UIView, cache: Bool)
+                static func setAnimationWillStart(_ selector: Selector?)
+                static func transition(from fromView: UIView, to toView: UIView, duration: TimeInterval, options: UIViewAnimationOptions, completion: ((Bool) -> Void)?)
+                static func transition(with view: UIView, duration: TimeInterval, options: UIViewAnimationOptions, animations: (() -> Void)?, completion: ((Bool) -> Void)?)
+                static func userInterfaceLayoutDirection(for attribute: UISemanticContentAttribute) -> UIUserInterfaceLayoutDirection
+                static func userInterfaceLayoutDirection(for semanticContentAttribute: UISemanticContentAttribute, relativeTo layoutDirection: UIUserInterfaceLayoutDirection) -> UIUserInterfaceLayoutDirection
                 func addConstraint(_ constraint: NSLayoutConstraint)
                 func addConstraints(_ constraints: [NSLayoutConstraint])
                 func addGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer)

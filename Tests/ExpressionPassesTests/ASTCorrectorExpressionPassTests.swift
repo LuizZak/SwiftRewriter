@@ -239,6 +239,25 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testDontCorrectNonnullStructWithImplicitlyUnwrappedStructValue() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .constructor()
+                .build()
+        typeSystem.addType(str)
+        let expMaker = { Expression.identifier("a") }
+        let exp = expMaker()
+        exp.resolvedType = .implicitUnwrappedOptional(.typeName("A"))
+        exp.expectedType = .typeName("A")
+        
+        assertTransform(
+            // a
+            expression: exp,
+            // a
+            into: expMaker()
+        ); assertDidNotNotifyChange()
+    }
+    
     /// Tests that making an access such as `self.superview?.bounds.midX` actually
     /// resolves into a null-coalesce before the `midX` access.
     /// This mimics the original Objective-C behavior where such an expression
@@ -297,8 +316,34 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             // a.b.c
             expression: exp.dot("c"),
-            // (a.b ?? A()).c
+            // a.b.c
             into: expMaker().dot("c")
+        ); assertDidNotNotifyChange()
+    }
+    
+    /// Don't correct implicitly-unwrapped optional chains
+    func testDontCorrectPostfixAccessToNullableValueTypeWhenAccessIsImplicitlyUnwrapped() {
+        let str =
+            KnownTypeBuilder(typeName: "B", kind: .struct)
+                .constructor()
+                .build()
+        typeSystem.addType(str)
+        let expMaker = { Expression.identifier("a").dot("b") }
+        let exp = expMaker()
+        exp.exp.resolvedType = .implicitUnwrappedOptional(.typeName("A"))
+        exp.op.returnType = .typeName("B")
+        exp.resolvedType = .implicitUnwrappedOptional(.typeName("B"))
+        exp.expectedType = .typeName("B")
+        
+        assertTransform(
+            // a.b.c()
+            expression: exp
+                .dot("c", type: .block(returnType: .int, parameters: []))
+                .typed(.implicitUnwrappedOptional(.block(returnType: .int, parameters: [])))
+                .call([], callableSignature: .block(returnType: .int, parameters: []))
+                .typed(.implicitUnwrappedOptional(.int)),
+            // a.b.c()
+            into: expMaker().dot("c").call()
         ); assertDidNotNotifyChange()
     }
     
@@ -654,6 +699,31 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             statement: Statement.expression(exp),
             // a(b)
             into: Statement.expression(expMaker())
+        ); assertDidNotNotifyChange()
+    }
+    
+    /// Test we don't require correcting implicitly unwrapped optionals on the
+    /// rhs of an assignment
+    func testDontCorrectImplicitlyUnwrappedOptionalRightHandSideOnAssignment() {
+        let type = KnownTypeBuilder(typeName: "Value", kind: .struct)
+            .constructor()
+            .build()
+        typeSystem.addType(type)
+        let rhsMaker: () -> Expression = {
+            let e = Expression.identifier("self")
+                .dot("value", type: .implicitUnwrappedOptional(.typeName("Value")))
+            e.resolvedType = .implicitUnwrappedOptional(.typeName("Value"))
+            e.expectedType = .typeName("Value")
+            return e
+        }
+        let exp =
+            Expression.identifier("a").typed(.typeName("Value")).assignment(op: .assign, rhs: rhsMaker())
+        
+        assertTransform(
+            // a = self.value
+            statement: Statement.expression(exp),
+            // a = self.value
+            into: Statement.expression(Expression.identifier("a").assignment(op: .assign, rhs: rhsMaker()))
         ); assertDidNotNotifyChange()
     }
 }

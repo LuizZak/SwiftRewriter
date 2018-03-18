@@ -41,13 +41,14 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                     "UIContentContainer", "UIFocusEnvironment"
                 ])
                 // Properties
-                .property(named: "view", type: .implicitUnwrappedOptional("UIView"))
+                .property(named: "view", type: "UIView")
                 // Initializers
                 .constructor(withParameters: [
                     ParameterSignature(label: "nibName", name: "nibNameOrNil", type: .optional(.string)),
                     ParameterSignature(label: "bundle", name: "nibBundleOrNil", type: .optional("Bundle"))
                 ])
                 // Methods
+                .method(named: "viewDidLoad")
                 .method(withSignature:
                     FunctionSignature(
                         name: "viewWillAppear",
@@ -109,6 +110,13 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                     "UIDynamicItem", "UITraitEnvironment", "UICoordinateSpace",
                     "UIFocusItem", "CALayerDelegate"
                 ])
+            
+            type = type
+                // Static properties
+                .property(named: "areAnimationsEnabled", type: .bool, isStatic: true, accessor: .getter)
+                .property(named: "inheritedAnimationDuration", type: "TimeInterval", isStatic: true, accessor: .getter)
+                .property(named: "layerClass", type: "AnyClass", isStatic: true, accessor: .getter)
+                .property(named: "requiresConstraintBasedLayout", type: .bool, isStatic: true, accessor: .getter)
             
             type = type
                 // Properties
@@ -176,6 +184,276 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
             type = type
                 // Constructors
                 .constructor(shortParameters: [("frame", .typeName("CGRect"))])
+            
+            type = type
+                // Static methods
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "addKeyframe",
+                        parameters: [
+                            ParameterSignature(label: "withRelativeStartTime", name: "frameStartTime", type: .double),
+                            ParameterSignature(label: "relativeDuration", name: "frameDuration", type: .double),
+                            ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: []))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "animate",
+                        parameters: [
+                            ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
+                            ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "animate",
+                        parameters: [
+                            ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
+                            ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: []))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "animate",
+                        parameters: [
+                            ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
+                            ParameterSignature(name: "delay", type: "TimeInterval"),
+                            ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
+                            ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "animate",
+                        parameters: [
+                            ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
+                            ParameterSignature(name: "delay", type: "TimeInterval"),
+                            ParameterSignature(label: "usingSpringWithDamping", name: "dampingRatio", type: .cgFloat),
+                            ParameterSignature(label: "initialSpringVelocity", name: "velocity", type: .cgFloat),
+                            ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
+                            ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "animateKeyframes",
+                        parameters: [
+                            ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
+                            ParameterSignature(name: "delay", type: "TimeInterval"),
+                            ParameterSignature(name: "options", type: "UIViewKeyframeAnimationOptions"),
+                            ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "beginAnimations",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "animationID", type: .optional(.string)),
+                            ParameterSignature(name: "context", type: .optional("UnsafeMutableRawPointer"))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(named: "commitAnimations", isStatic: true)
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "perform",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "animation", type: "UISystemAnimation"),
+                            ParameterSignature(label: "on", name: "views", type: .array("UIView")),
+                            ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
+                            ParameterSignature(label: "animations", name: "parallelAnimations", type: .optional(.block(returnType: .void, parameters: []))),
+                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "performWithoutAnimation",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "actionsWithoutAnimation", type: .block(returnType: .void, parameters: []))
+                        ],
+                        isStatic: true
+                    )
+                )
+            
+            type = type
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationBeginsFromCurrentState",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "fromCurrentState", type: .bool)
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationCurve",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "curve", type: "UIViewAnimationCurve")
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationDelay",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "delay", type: "TimeInterval")
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationDelegate",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "delegate", type: .optional(.any))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationDidStop",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "selector", type: .optional("Selector"))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationDuration",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "duration", type: "TimeInterval")
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationRepeatAutoreverses",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "repeatAutoreverses", type: .bool)
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationRepeatCount",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "repeatCount", type: .float)
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationsEnabled",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "enabled", type: .bool)
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationStart",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "startDate", type: "Date")
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationTransition",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "transition", type: "UIViewAnimationTransition"),
+                            ParameterSignature(label: "for", name: "view", type: "UIView"),
+                            ParameterSignature(name: "cache", type: .bool)
+                        ],
+                        isStatic: true
+                    )
+                )
+                
+            type = type
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setAnimationWillStart",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "selector", type: .optional("Selector"))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "transition",
+                        parameters: [
+                            ParameterSignature(label: "from", name: "fromView", type: "UIView"),
+                            ParameterSignature(label: "to", name: "toView", type: "UIView"),
+                            ParameterSignature(name: "duration", type: "TimeInterval"),
+                            ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
+                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "transition",
+                        parameters: [
+                            ParameterSignature(label: "with", name: "view", type: "UIView"),
+                            ParameterSignature(name: "duration", type: "TimeInterval"),
+                            ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
+                            ParameterSignature(name: "animations", type: .optional(.block(returnType: .void, parameters: []))),
+                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ],
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "userInterfaceLayoutDirection",
+                        parameters: [
+                            ParameterSignature(label: "for", name: "attribute", type: "UISemanticContentAttribute")
+                        ],
+                        returnType: "UIUserInterfaceLayoutDirection",
+                        isStatic: true
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "userInterfaceLayoutDirection",
+                        parameters: [
+                            ParameterSignature(label: "for", name: "semanticContentAttribute", type: "UISemanticContentAttribute"),
+                            ParameterSignature(label: "relativeTo", name: "layoutDirection", type: "UIUserInterfaceLayoutDirection")
+                        ],
+                        returnType: "UIUserInterfaceLayoutDirection",
+                        isStatic: true
+                    )
+                )
             
             type = type
                 // Methods

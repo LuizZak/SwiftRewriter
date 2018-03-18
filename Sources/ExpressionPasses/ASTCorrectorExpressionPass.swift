@@ -175,7 +175,8 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
             
             let member = memberPostfix.exp
             
-            guard memberType.isOptional && context.typeSystem.isScalarType(memberType.deepUnwrapped) else {
+            guard memberType.isOptional && !memberType.isImplicitlyUnwrapped
+                && context.typeSystem.isScalarType(memberType.deepUnwrapped) else {
                 return super.visitPostfix(exp)
             }
             
@@ -213,6 +214,9 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
             return nil
         }
         guard expectedType == exp.resolvedType?.deepUnwrapped else {
+            return nil
+        }
+        guard exp.resolvedType?.isImplicitlyUnwrapped == false else {
             return nil
         }
         guard let defValue = context.typeSystem.defaultValue(for: expectedType) else {
