@@ -162,7 +162,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
         try assertSingleStatement(
             objc: "CGFloat x = [self offsetForDate:cell.startDate];",
-            swift: "var x = self.offsetForDate(cell.startDate)"
+            swift: "var x: CGFloat = self.offsetForDate(cell.startDate)"
         )
     }
     
@@ -227,13 +227,26 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: "var x: CDouble = 10 + 5.0"
         )
         
+        // Don't remove type signature from error-typed initializer expressions
+        try assertSingleStatement(
+            objc: "NSInteger x = nonExistant;",
+            swift: "var x: Int = nonExistant"
+        )
+        
         // Type expressions from non-literal sources are not needed as they can
         // be inferred
         try assertSingleStatement(
             objc: "CGFloat x = self.frame.size.width;",
             swift: "var x = self.frame.size.width"
         )
-        
+
+        // Initializers from expressions with non-literal operands should also
+        // omit type
+        try assertSingleStatement(
+            objc: "CGFloat x = self.frame.size.width - 1;",
+            swift: "var x = self.frame.size.width - 1"
+        )
+
         // No need to keep inferrence for Boolean or String types
         try assertSingleStatement(
             objc: "BOOL x = YES;",
@@ -858,7 +871,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     
     private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
-            @implementation MyClass
+            @implementation MyClass: UIView
             - (void)myMethod {
                 \(objc)
             }
@@ -866,7 +879,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """
         let swift = """
             @objc
-            class MyClass: NSObject {
+            class MyClass: UIView {
                 @objc
                 func myMethod() {
                     \(swift)

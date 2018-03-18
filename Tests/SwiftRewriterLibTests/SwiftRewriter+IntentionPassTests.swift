@@ -4,21 +4,25 @@ import IntentionPasses
 
 class SwiftRewriter_IntentionPassTests: XCTestCase {
     func testIntentionPassHasExpressionTypesPreResolved() throws {
+        class Globals: GlobalsProvider {
+            func registerDefinitions(on globals: GlobalDefinitions) {
+                
+            }
+            func registerTypes(in typeSink: KnownTypeSink) {
+                let type = KnownTypeBuilder(typeName: "TestType").build()
+                typeSink.addType(type)
+            }
+        }
         class Pass: IntentionPass {
             var isTypeChecked = false
             
             func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
                 isTypeChecked =
                     intentionCollection
-                        .classIntentions()
-                        .first!
-                        .methods[0]
-                        .functionBody!
-                        .body
-                        .statements[0]
-                        .asExpressions?
-                        .expressions[0]
-                        .resolvedType != nil
+                        .classIntentions().first!
+                        .methods[0].functionBody!.body
+                        .statements[0].asExpressions?
+                        .expressions[0].resolvedType != nil
             }
         }
         

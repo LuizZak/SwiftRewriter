@@ -32,7 +32,7 @@ class StringTests: XCTestCase {
         XCTAssertEqual(" ", " ".uppercasedFirstLetter)
     }
     
-    func testMarkDifference() {
+    func testMakeDifference() {
         let str1 = """
             Abcdef
             """
@@ -48,7 +48,7 @@ class StringTests: XCTestCase {
             """, result)
     }
     
-    func testMarkDifferenceBetweenLines() {
+    func testMakeDifferenceBetweenLines() {
         let str1 = """
             Abc
             Def
@@ -70,7 +70,7 @@ class StringTests: XCTestCase {
             """, result)
     }
     
-    func testMarkDifferenceBetweenEqualStrings() {
+    func testMakeDifferenceBetweenEqualStrings() {
         let str1 = """
             Abc
             Def
@@ -92,7 +92,7 @@ class StringTests: XCTestCase {
             """, result)
     }
     
-    func testMarkDifferenceBetweenStringsAtBeginning() {
+    func testMakeDifferenceBetweenStringsAtBeginning() {
         let str1 = """
             Abc
             """

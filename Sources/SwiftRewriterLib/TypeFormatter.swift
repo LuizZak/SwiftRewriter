@@ -34,7 +34,8 @@ public enum TypeFormatter {
             }
             let outputProperty: (KnownProperty) -> Void = {
                 o.output(line: asString(property: $0, ofType: type, withTypeName: false,
-                                        includeVarKeyword: true, includeAccessors: true))
+                                        includeVarKeyword: true,
+                                        includeAccessors: $0.accessor != .getterAndSetter))
             }
             
             let staticFields = type.knownFields.filter { $0.isStatic }
@@ -200,7 +201,7 @@ public enum TypeFormatter {
         result += asString(parameters: signature.parameters)
         
         if signature.returnType != .void {
-            result += " -> \(signature.returnType)"
+            result += " -> \(stringify(signature.returnType))"
         }
         
         return result

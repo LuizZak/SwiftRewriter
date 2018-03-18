@@ -44,10 +44,10 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
         
         // self.alloc.init() -> self.init()
         if alloc.exp.asIdentifier?.identifier == "self", case .metatype? = alloc.exp.resolvedType {
-            return .postfix(.postfix(alloc.exp, .member("init")), .functionCall(arguments: []))
+            return alloc.exp.dot("init").call()
         }
         
-        return .postfix(alloc.exp, .functionCall(arguments: []))
+        return alloc.exp.call()
     }
     
     /// Converts `[[Class alloc] initWithThing:[...]]` -> `Class(thing: [...])`
@@ -73,10 +73,10 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
         
         // self.alloc.init() -> self.init()
         if alloc.exp.asIdentifier?.identifier == "self", case .metatype? = alloc.exp.resolvedType {
-            return .postfix(.postfix(alloc.exp, .member("init")), .functionCall(arguments: newArgs))
+            return alloc.exp.dot("init").call(newArgs)
         }
         
-        return .postfix(.identifier(typeName), .functionCall(arguments: newArgs))
+        return Expression.identifier(typeName).call(newArgs)
     }
     
     /// Convert [super initWithThing:[...]] -> super.init(thing: [...])
@@ -95,7 +95,7 @@ public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
         
         let newArgs = swiftify(methodName: initName, arguments: args)
         
-        return .postfix(.postfix(.identifier("super"), .member("init")), .functionCall(arguments: newArgs))
+        return Expression.identifier("super").dot("init").call(newArgs)
     }
     
     func swiftify(methodName: String, arguments: [FunctionArgument]) -> [FunctionArgument] {

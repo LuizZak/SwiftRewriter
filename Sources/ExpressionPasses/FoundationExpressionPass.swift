@@ -103,8 +103,12 @@ public class FoundationExpressionPass: BaseExpressionPass {
             return nil
         }
         
-        guard postfix.exp.asIdentifier?.identifier == "NSString",
-            postfix.op.asMember?.name == "stringWithFormat",
+        guard let typename = postfix.exp.asIdentifier?.identifier else {
+            return nil
+        }
+        
+        guard (typename == "NSString" || typename == "NSMutableString")
+            && postfix.op.asMember?.name == "stringWithFormat",
             let args = exp.functionCall?.arguments, !args.isEmpty else {
             return nil
         }
@@ -113,7 +117,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
             .labeled("format", args[0].expression)
         ] + args.dropFirst()
         
-        exp.exp = .identifier("String")
+        exp.exp = .identifier(typename == "NSMutableString" ? "NSMutableString" : "String")
         exp.op = .functionCall(arguments: newArgs)
         
         exp.resolvedType = .string

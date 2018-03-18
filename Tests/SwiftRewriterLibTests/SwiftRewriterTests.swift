@@ -1234,7 +1234,7 @@ class SwiftRewriterTests: XCTestCase {
             class A: NSObject {
                 @objc
                 func recreatePath() {
-                    var top = startsAtTop ? 0 : circle.center.y
+                    var top: CGFloat = startsAtTop ? 0 : circle.center.y
                     var bottom = max(self.bounds.size.height, top)
                     if top == bottom {
                         shapeLayer.path = nil

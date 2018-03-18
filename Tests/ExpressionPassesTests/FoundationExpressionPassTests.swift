@@ -39,8 +39,6 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testNSStringWithFormat() {
-        
-        
         var res = assertTransformParsed(
             expression: "[NSString stringWithFormat:@\"%@\", self]",
             into: Expression
@@ -58,6 +56,20 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             into: Expression
                 .identifier("String")
                 .call([.labeled("format", .constant("%@"))])
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .string)
+    }
+    
+    func testNSMutableStringWithFormat() {
+        let res = assertTransformParsed(
+            expression: "[NSMutableString stringWithFormat:@\"%@\", self]",
+            into: Expression
+                .identifier("NSMutableString")
+                .call([
+                    .labeled("format", .constant("%@")),
+                    .unlabeled(.identifier("self"))
+                    ])
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .string)

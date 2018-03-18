@@ -46,6 +46,30 @@ class TypeFormatterTests: XCTestCase {
         )
     }
     
+    func testAsStringPropertyFromTypeWithArrayType() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .property(named: "a", type: .array(.int))
+                .build()
+        
+        XCTAssertEqual(
+            "A.a: [Int]",
+            TypeFormatter.asString(property: type.knownProperties[0], ofType: type)
+        )
+    }
+    
+    func testAsStringPropertyFromTypeWithOptionalArrayType() {
+        let type =
+            KnownTypeBuilder(typeName: "A")
+                .property(named: "a", type: .optional(.array(.int)))
+                .build()
+        
+        XCTAssertEqual(
+            "A.a: [Int]?",
+            TypeFormatter.asString(property: type.knownProperties[0], ofType: type)
+        )
+    }
+    
     func testAsStringFieldFromType() {
         let type =
             KnownTypeBuilder(typeName: "A")
@@ -111,6 +135,7 @@ class TypeFormatterTests: XCTestCase {
             .field(named: "readOnlyField", type: .string, isConstant: true)
             .field(named: "field", type: .string)
             .property(named: "prop", type: .optional(.nsArray))
+            .property(named: "readOnlyProp", type: "A", accessor: .getter)
             .protocolConformance(protocolName: "Protocol")
             .method(withSignature: FunctionSignature(
                 name: "methodA",
@@ -126,7 +151,8 @@ class TypeFormatterTests: XCTestCase {
             struct A: Protocol {
                 let readOnlyField: String
                 var field: String
-                var prop: NSArray? { get set }
+                var prop: NSArray?
+                var readOnlyProp: A { get }
                 
                 init()
                 init(a: Int, b: Int)

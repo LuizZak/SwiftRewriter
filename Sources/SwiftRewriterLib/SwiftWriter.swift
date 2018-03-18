@@ -13,7 +13,6 @@ public final class SwiftWriter {
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     var options: ASTWriterOptions
-    let astWriter: SwiftASTWriter
     let typeSystem: TypeSystem
     
     public init(intentions: IntentionCollection, options: ASTWriterOptions,
@@ -25,7 +24,6 @@ public final class SwiftWriter {
         self.output = output
         self.typeMapper = typeMapper
         self.typeSystem = typeSystem
-        astWriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
     }
     
     public func execute() {
@@ -87,7 +85,9 @@ class InternalSwiftWriter {
         self.output = output
         self.typeMapper = typeMapper
         self.typeSystem = typeSystem
-        astWriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
+        astWriter =
+            SwiftASTWriter(options: options, typeMapper: typeMapper,
+                           typeSystem: typeSystem)
     }
     
     func outputFile(_ fileIntent: FileGenerationIntention) {
@@ -261,7 +261,10 @@ class InternalSwiftWriter {
         if let expression = initVal?.expression {
             target.outputInline(" = ")
             
-            let rewriter = SwiftASTWriter(options: options, typeMapper: typeMapper)
+            let rewriter =
+                SwiftASTWriter(options: options, typeMapper: typeMapper,
+                               typeSystem: typeSystem)
+            
             rewriter.write(expression: expression, into: target)
         }
         
@@ -599,7 +602,9 @@ class InternalSwiftWriter {
         if let defaultValue = typeSystem.defaultValue(for: type) {
             target.outputInline(" = ")
             
-            let writer = SwiftASTWriter(options: options, typeMapper: typeMapper)
+            let writer =
+                SwiftASTWriter(options: options, typeMapper: typeMapper,
+                               typeSystem: typeSystem)
             writer.write(expression: defaultValue, into: target)
         }
     }

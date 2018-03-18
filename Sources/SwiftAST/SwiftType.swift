@@ -119,13 +119,14 @@ indirect public enum SwiftType: Equatable {
         return type.wrappingOther(self.deepUnwrapped)
     }
     
-    /// In case this type represents an optional value, returns a new optional type
-    /// with the same optionality as this type, but wrapping over a given type.
+    /// In case this type represents an optional value, returns a new optional
+    /// type with the same optionality as this type, but wrapping over a given
+    /// type.
     ///
     /// If this type is not optional, `type` is returned, instead.
     ///
     /// Lookup is deep, and returns the same optionality chain as this type's.
-    private func wrappingOther(_ type: SwiftType) -> SwiftType {
+    public func wrappingOther(_ type: SwiftType) -> SwiftType {
         switch self {
         case .optional(let inner):
             return .optional(inner.wrappingOther(type))
@@ -196,6 +197,12 @@ indirect public enum SwiftType: Equatable {
     }
 }
 
+extension SwiftType: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .typeName(value)
+    }
+}
+
 /// Defines the ownership of a variable storage
 public enum Ownership: String, Equatable {
     case strong
@@ -207,22 +214,36 @@ public enum Ownership: String, Equatable {
 extension SwiftType: CustomStringConvertible {
     public var description: String {
         switch self {
-        case let .block(returnType, parameters):
-            return "(" + parameters.map { $0.description }.joined(separator: ", ") + ") -> " + returnType.description
         case .typeName(let name):
             return name
+            
+        case let .block(returnType, parameters):
+            return "(" + parameters.map { $0.description }.joined(separator: ", ") + ") -> " + returnType.description
+            
         case .optional(let type):
             return type.descriptionWithParens + "?"
+            
         case .implicitUnwrappedOptional(let type):
             return type.descriptionWithParens + "!"
+            
+        case .generic("Array", let params) where params.count == 1:
+            return "[" + params[0].description + "]"
+            
+        case .generic("Dictionary", let params) where params.count == 2:
+            return "[\(params[0]): \(params[1])]"
+            
         case let .generic(type, parameters):
             return type + "<" + parameters.map { $0.description }.joined(separator: ", ") + ">"
+            
         case let .protocolComposition(types):
             return types.map { $0.descriptionWithParens }.joined(separator: " & ")
+            
         case let .metatype(innerType):
             return innerType.descriptionWithParens + ".self"
+            
         case .tuple([]):
             return "Void"
+            
         case let .tuple(inner):
             return "(" + inner.map { $0.description }.joined(separator: ", ") + ")"
         }

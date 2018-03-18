@@ -118,17 +118,30 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
     }
     
     public override func visitUnary(_ exp: UnaryExpression) -> Expression {
-        if exp.op.category != .logical {
+        switch exp.op.category {
+        case .logical:
+            exp.exp = super.visitExpression(exp.exp)
+            
+            if let exp = correctToBoolean(exp) {
+                notifyChange()
+                
+                return .parens(exp) // Parenthesize, just to be sure
+            }
+            
+            return exp
+        case .arithmetic:
+            exp.exp = super.visitExpression(exp.exp)
+            
+            if let newExp = correctToNumeric(exp.exp) {
+                notifyChange()
+                
+                return .unary(op: exp.op, newExp)
+            }
+            
+            return exp
+        default:
             return super.visitUnary(exp)
         }
-
-        exp.exp = super.visitExpression(exp.exp)
-
-        if let exp = correctToBoolean(exp) {
-            return .parens(exp) // Parenthesize, just to be sure
-        }
-
-        return exp
     }
     
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {

@@ -59,7 +59,8 @@ public class KnownTypeBuilder {
     /// specifying whether the method is an optional protocol conformance method
     public func method(named name: String, shortParams: [ParameterTuple] = [],
                        returning returnType: SwiftType = .void,
-                       optional: Bool = false) -> KnownTypeBuilder {
+                       optional: Bool = false,
+                       useSwiftSignatureMatching: Bool = false) -> KnownTypeBuilder {
         let parameters =
             shortParams.map { tuple in
                 ParameterSignature(name: tuple.label, type: tuple.type)
@@ -68,19 +69,20 @@ public class KnownTypeBuilder {
         let signature = FunctionSignature(name: name, parameters: parameters,
                                           returnType: returnType)
         
-        return method(withSignature: signature, optional: optional)
+        return method(withSignature: signature, optional: optional,
+                      useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Adds a method with a given signature, and a flag specifying whether the
     /// method is an optional protocol conformance method
     public func method(withSignature signature: FunctionSignature,
-                       optional: Bool = false) -> KnownTypeBuilder {
-        // TODO: Verify whether we should match with Swift or Objective-C selector
-        // rules here (Swift allows for overloads over parameter/return types).
-        // Probably with a flag on the KnownTypeBuilder instance.
-        
+                       optional: Bool = false, useSwiftSignatureMatching: Bool = false) -> KnownTypeBuilder {
         // Check duplicates
-        guard !type.knownMethods.contains(where: { $0.signature.matchesAsSelector(signature) }) else {
+        if useSwiftSignatureMatching {
+            if type.knownMethods.contains(where: { $0.signature.matchesAsSwiftFunction(signature) }) {
+                return self
+            }
+        } else if type.knownMethods.contains(where: { $0.signature.matchesAsSelector(signature) }) {
             return self
         }
         
@@ -95,9 +97,10 @@ public class KnownTypeBuilder {
     /// Adds a strong property with no attributes with a given name and type, and
     /// a flag specifying whether the property is an optional protocol conformance
     /// property
-    public func property(named name: String, type: SwiftType, isStatic: Bool = false,
-                         optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
-        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+    public func property(named name: String, type: SwiftType, ownership: Ownership = .strong,
+                         isStatic: Bool = false, optional: Bool = false,
+                         accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
+        let storage = ValueStorage(type: type, ownership: ownership, isConstant: false)
         
         return property(named: name, storage: storage, isStatic: isStatic,
                               optional: optional, accessor: accessor)

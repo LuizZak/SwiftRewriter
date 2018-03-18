@@ -312,6 +312,34 @@ public struct FunctionSignature: Equatable {
                                  isStatic: isStatic)
     }
     
+    /// Returns `true` iff `self` and `other` match using Swift signature matching
+    /// rules.
+    ///
+    /// No alias checking is performed, so parameters/returns with different type
+    /// names will always differ.
+    public func matchesAsSwiftFunction(_ other: FunctionSignature) -> Bool {
+        if name != other.name {
+            return false
+        }
+        if returnType != other.returnType {
+            return false
+        }
+        if parameters.count != other.parameters.count {
+            return false
+        }
+        
+        for (p1, p2) in zip(parameters, other.parameters) {
+            if p1.label != p2.label {
+                return false
+            }
+            if p1.type != p2.type {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
     /// Returns `true` iff `self` and `other` match using Objective-C signature
     /// matching rules.
     public func matchesAsSelector(_ other: FunctionSignature) -> Bool {

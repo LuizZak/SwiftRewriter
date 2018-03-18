@@ -44,8 +44,8 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
 }
 
 private class SignatureConversion {
-    var from: SelectorSignature
-    var to: SelectorSignature
+    let from: SelectorSignature
+    let to: SelectorSignature
     
     /// Creates a new `SignatureConversion` instance with a given source and target
     /// signatures to convert.

@@ -4,7 +4,8 @@ import SwiftRewriterLib
 public class DefaultGlobalsProvidersSource: GlobalsProvidersSource {
     public var globalsProviders: [GlobalsProvider] = [
         CLibGlobalsProviders(),
-        CoreGraphicsGlobalsProvider()
+        CoreGraphicsGlobalsProvider(),
+        UIKitGlobalsProvider()
     ]
     
     public init() {

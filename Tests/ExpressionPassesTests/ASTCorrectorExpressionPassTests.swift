@@ -27,7 +27,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             Expression
                 .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
                 .binary(op: .add, rhs: Expression.identifier("b"))
-        )
+        ); assertNotifiedChange()
     }
     
     /// Tests null-coallescing on deep nested binary expressions
@@ -51,7 +51,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 )
                 .binary(op: .add, rhs: .parens(lhsMaker().binary(op: .nullCoalesce, rhs: .constant(0))))
                 .binary(op: .add, rhs: Expression.identifier("c"))
-        )
+        ); assertNotifiedChange()
     }
     
     /// Tests that arithmetic comparisons (<=, <, >=, >) where lhs and rhs are
@@ -71,7 +71,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             Expression
                 .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
                 .binary(op: .lessThan, rhs: Expression.identifier("b"))
-        )
+        ); assertNotifiedChange()
     }
     
     /// Tests the corrector applies an integer correction to automatically null-coalesce
@@ -88,7 +88,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             // (a.b ?? 0)
             into: .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
-        )
+        ); assertNotifiedChange()
     }
     
     /// Tests the corrector applies a floating-point correction to automatically
@@ -122,7 +122,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             // a.b == true
             into: expMaker().binary(op: .equals, rhs: .constant(true))
-        )
+        ); assertNotifiedChange()
     }
     
     /// On general arbitrary boolean expressions (mostly binary expressions over
@@ -148,7 +148,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 .binary(lhs: .parens(lhsMaker().binary(op: .equals, rhs: .constant(true))),
                         op: .and,
                         rhs: rhsMaker())
-        )
+        ); assertNotifiedChange()
     }
     
     /// Also correct nil-style boolean expressions
@@ -173,11 +173,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 .binary(lhs: .parens(lhsMaker().binary(op: .unequals, rhs: .constant(.nil))),
                         op: .and,
                         rhs: .parens(rhsMaker().binary(op: .unequals, rhs: .constant(.nil))))
-        )
+        ); assertNotifiedChange()
     }
     
     /// Also correct unary boolean checks
-    func testCorrectsUnaryExpressions() {
+    func testCorrectsUnaryNegateExpressions() {
         let expMaker = { Expression.identifier("a") }
         
         let innerExp = expMaker()
@@ -191,7 +191,31 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             expression: exp,
             // (a == nil)
             into: .parens(expMaker().binary(op: .equals, rhs: .constant(.nil)))
-        )
+        ); assertNotifiedChange()
+    }
+    
+    /// Tests inserting null-coalesces on optional types contained in unary
+    /// expressions
+    func testCorrectUnaryArithmeticExpression() {
+        let expMaker = { Expression.identifier("a") }
+        
+        let innerExp = expMaker()
+        innerExp.resolvedType = .optional(.int)
+        innerExp.expectedType = .int
+        
+        let exp = Expression.unary(op: .subtract, innerExp)
+        
+        assertTransform(
+            // -a
+            expression: exp,
+            // -(a ?? 0)
+            into:
+            Expression.unary(
+                op: .subtract,
+                Expression
+                    .parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0)))
+            )
+        ); assertNotifiedChange()
     }
     
     // MARK: - If statement
@@ -494,7 +518,9 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                       callableSignature: funcType)
         
         assertTransform(
+            // a(b)
             statement: Statement.expression(exp),
+            // if let b = b { a(b) }
             into: Statement.ifLet(
                 Pattern.identifier("b"), .identifier("b"),
                 body: [
@@ -514,7 +540,9 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                       callableSignature: funcType)
         
         assertTransform(
+            // a(b.c)
             statement: Statement.expression(exp),
+            // if let c = b.c { a(c) }
             into: Statement.ifLet(
                 Pattern.identifier("c"), Expression.identifier("b").dot("c"),
                 body: [
@@ -536,11 +564,33 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                       callableSignature: funcType)
         
         assertTransform(
+            // a(b.c)
             statement: Statement.expression(exp),
+            // a(b.c)
             into: Statement.expression(Expression
                 .identifier("a").typed(funcType)
                 .call([Expression.identifier("b").dot("c").typed(.optional(.int))],
                       callableSignature: funcType))
+        ); assertDidNotNotifyChange()
+    }
+    
+    /// Make sure we don't correct passing a nullable value to a nullable parameter
+    func testDontCorrectNullableValuesPassedToNullableParameters() {
+        let funcType = SwiftType.block(returnType: .void, parameters: [.optional(.typeName("A"))])
+        let expMaker = {
+            Expression
+                .identifier("a").typed(funcType)
+                .call([Expression.identifier("b").typed(.optional(.typeName("A")))],
+                      callableSignature: funcType)
+        }
+        
+        let exp = expMaker()
+        
+        assertTransform(
+            // a(b)
+            statement: Statement.expression(exp),
+            // a(b)
+            into: Statement.expression(expMaker())
         ); assertDidNotNotifyChange()
     }
 }

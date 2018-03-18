@@ -293,6 +293,12 @@ public class SwiftRewriter {
             print("Running intention passes...")
         }
         
+        // Register globals first
+        for provider in globalsProvidersSource.globalsProviders {
+            provider.registerDefinitions(on: globals)
+            provider.registerTypes(in: typeSystem)
+        }
+        
         // Make a pre-type resolve before applying passes
         typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)
         
@@ -307,12 +313,6 @@ public class SwiftRewriter {
         let intentionPasses =
             [MandatoryIntentionPass()]
                 + intentionPassesSource.intentionPasses
-        
-        // Register globals first
-        for provider in globalsProvidersSource.globalsProviders {
-            provider.registerDefinitions(on: globals)
-            provider.registerTypes(in: typeSystem)
-        }
         
         // Execute passes
         for pass in intentionPasses {

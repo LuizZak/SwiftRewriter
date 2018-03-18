@@ -116,38 +116,38 @@ extension CoreGraphicsExpressionPass {
         // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>)
         // -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
         makeFuncTransform("UIEdgeInsetsMake", swiftName: "UIEdgeInsets",
-             arguments: [
-                .labeled("top", .asIs), .labeled("left", .asIs),
-                .labeled("bottom", .asIs), .labeled("right", .asIs)
-            ])
+                          arguments: [
+                            .labeled("top", .asIs), .labeled("left", .asIs),
+                            .labeled("bottom", .asIs), .labeled("right", .asIs)
+                          ])
         // CGointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
         makeFuncTransform("CGPointMake", swiftName: "CGPoint",
-             arguments: [
-                .labeled("x", .asIs), .labeled("y", .asIs)
-            ])
+                          arguments: [
+                            .labeled("x", .asIs), .labeled("y", .asIs)
+                          ])
         // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
         makeFuncTransform("CGRectMake", swiftName: "CGRect",
-             arguments: [
-                .labeled("x", .asIs), .labeled("y", .asIs),
-                .labeled("width", .asIs), .labeled("height", .asIs)
-            ])
+                          arguments: [
+                            .labeled("x", .asIs), .labeled("y", .asIs),
+                            .labeled("width", .asIs), .labeled("height", .asIs)
+                          ])
         // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
         makeFuncTransform("CGSizeMake", swiftName: "CGSize",
-             arguments: [
-                .labeled("width", .asIs), .labeled("height", .asIs)
-            ])
+                          arguments: [
+                            .labeled("width", .asIs), .labeled("height", .asIs)
+                          ])
         // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
-        makeFuncTransform("CGRectIntersectsRect", swiftName: "intersects", arguments: [.asIs],
-             firstArgIsInstance: true)
+        makeFuncTransform("CGRectIntersectsRect", swiftName: "intersects",
+                          arguments: [.asIs], firstArgIsInstance: true)
         // CGRectIntersection(<r1>, <r2>) -> <r1>.intersection(<r2>)
-        makeFuncTransform("CGRectIntersection", swiftName: "intersection", arguments: [.asIs],
-             firstArgIsInstance: true)
+        makeFuncTransform("CGRectIntersection", swiftName: "intersection",
+                          arguments: [.asIs], firstArgIsInstance: true)
         // CGRectContainsPoint(<r>, <p>) -> <r>.contains(<p>)
         makeFuncTransform("CGRectContainsPoint", swiftName: "contains", arguments: [.asIs],
-             firstArgIsInstance: true)
+                          firstArgIsInstance: true)
         // CGRectContainsRect(<r1>, <r2>) -> <r1>.contains(<r2>)
         makeFuncTransform("CGRectContainsRect", swiftName: "contains", arguments: [.asIs],
-             firstArgIsInstance: true)
+                          firstArgIsInstance: true)
         // CGRectOffset(<r>, <x>, <y>) -> <r>.offsetBy(dx: <x>, dy: <y>)
         makeFuncTransform("CGRectOffset", swiftName: "offsetBy",
                           arguments: [.labeled("dx", .asIs), .labeled("dy", .asIs)],
@@ -371,7 +371,8 @@ extension CoreGraphicsExpressionPass {
                         .labeled("endAngle", .asIs),
                         .labeled("clockwise",
                                  .transformed({ $0.binary(op: .equals, rhs: .constant(1)) },
-                                              .asIs))]
+                                              .asIs
+                            ))]
         )
 
         makeCGContextCall("CGContextAddArcToPoint", swiftName: "addArc",
@@ -505,19 +506,25 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextSetRGBFillColor", swiftName: "setFillColor",
-            arguments: [.labeled("red", .asIs), .labeled("green", .asIs), .labeled("blue", .asIs), .labeled("alpha", .asIs)]
+            arguments: [.labeled("red", .asIs), .labeled("green", .asIs),
+                        .labeled("blue", .asIs), .labeled("alpha", .asIs)]
         )
 
         makeCGContextCall("CGContextSetRGBStrokeColor", swiftName: "setStrokeColor",
-            arguments: [.labeled("red", .asIs), .labeled("green", .asIs), .labeled("blue", .asIs), .labeled("alpha", .asIs)]
+            arguments: [.labeled("red", .asIs), .labeled("green", .asIs),
+                        .labeled("blue", .asIs), .labeled("alpha", .asIs)]
         )
 
         makeCGContextCall("CGContextSetCMYKFillColor", swiftName: "setFillColor",
-            arguments: [.labeled("cyan", .asIs), .labeled("magenta", .asIs), .labeled("yellow", .asIs), .labeled("black", .asIs), .labeled("alpha", .asIs)]
+            arguments: [.labeled("cyan", .asIs), .labeled("magenta", .asIs),
+                        .labeled("yellow", .asIs), .labeled("black", .asIs),
+                        .labeled("alpha", .asIs)]
         )
 
         makeCGContextCall("CGContextSetCMYKStrokeColor", swiftName: "setStrokeColor",
-            arguments: [.labeled("cyan", .asIs), .labeled("magenta", .asIs), .labeled("yellow", .asIs), .labeled("black", .asIs), .labeled("alpha", .asIs)]
+            arguments: [.labeled("cyan", .asIs), .labeled("magenta", .asIs),
+                        .labeled("yellow", .asIs), .labeled("black", .asIs),
+                        .labeled("alpha", .asIs)]
         )
 
         makeCGContextCall("CGContextSetRenderingIntent", swiftName: "setRenderingIntent",

@@ -6,8 +6,9 @@ class DefaultGlobalsProvidersSourceTests: XCTestCase {
         let sut = DefaultGlobalsProvidersSource()
         var providers = sut.globalsProviders.makeIterator()
         
-        XCTAssertEqual(sut.globalsProviders.count, 2)
+        XCTAssertEqual(sut.globalsProviders.count, 3)
         XCTAssert(providers.next() is CLibGlobalsProviders)
         XCTAssert(providers.next() is CoreGraphicsGlobalsProvider)
+        XCTAssert(providers.next() is UIKitGlobalsProvider)
     }
 }

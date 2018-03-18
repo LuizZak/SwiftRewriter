@@ -70,19 +70,27 @@ class SwiftASTReader {
 class SwiftASTWriter {
     let options: ASTWriterOptions
     let typeMapper: TypeMapper
+    let typeSystem: TypeSystem
     
-    init(options: ASTWriterOptions, typeMapper: TypeMapper) {
+    init(options: ASTWriterOptions, typeMapper: TypeMapper, typeSystem: TypeSystem) {
         self.options = options
         self.typeMapper = typeMapper
+        self.typeSystem = typeSystem
     }
     
     public func write(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
-        let rewriter = StatementWriter(options: options, target: target, typeMapper: typeMapper)
+        let rewriter =
+            StatementWriter(options: options, target: target, typeMapper: typeMapper,
+                            typeSystem: typeSystem)
+        
         rewriter.visitStatement(compoundStatement)
     }
     
     public func write(expression: Expression, into target: RewriterOutputTarget) {
-        let rewriter = ExpressionWriter(options: options, target: target, typeMapper: typeMapper)
+        let rewriter =
+            ExpressionWriter(options: options, target: target, typeMapper: typeMapper,
+                             typeSystem: typeSystem)
+        
         rewriter.rewrite(expression)
     }
     
@@ -106,17 +114,19 @@ class SwiftASTWriter {
 }
 
 private class ExpressionWriter: ExpressionVisitor {
-    
     typealias ExprResult = Void
     
     let options: ASTWriterOptions
     let target: RewriterOutputTarget
     let typeMapper: TypeMapper
+    let typeSystem: TypeSystem
     
-    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper) {
+    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper,
+         typeSystem: TypeSystem) {
         self.options = options
         self.target = target
         self.typeMapper = typeMapper
+        self.typeSystem = typeSystem
     }
     
     func rewrite(_ expression: Expression) {
@@ -329,7 +339,9 @@ private class ExpressionWriter: ExpressionVisitor {
         let returnType = exp.returnType
         let body = exp.body
         
-        let visitor = StatementWriter(options: options, target: target, typeMapper: typeMapper)
+        let visitor =
+            StatementWriter(options: options, target: target, typeMapper: typeMapper,
+                            typeSystem: typeSystem)
         
         // Print signature
         target.outputInline("{ ")
@@ -394,11 +406,14 @@ private class StatementWriter: StatementVisitor {
     let options: ASTWriterOptions
     let target: RewriterOutputTarget
     let typeMapper: TypeMapper
+    let typeSystem: TypeSystem
     
-    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper) {
+    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper,
+         typeSystem: TypeSystem) {
         self.options = options
         self.target = target
         self.typeMapper = typeMapper
+        self.typeSystem = typeSystem
     }
     
     func visitStatement(_ statement: Statement) {
@@ -606,7 +621,7 @@ private class StatementWriter: StatementVisitor {
             let shouldEmitType =
                 declaration
                     .initialization
-                    .map(shouldEmitTypeSignature(forInitVal:))
+                    .map { shouldEmitTypeSignature(forInitVal: $0, varType: declaration.type) }
                     ?? true
             
             if shouldEmitType {
@@ -669,11 +684,18 @@ private class StatementWriter: StatementVisitor {
     }
     
     private func emitExpr(_ exp: Expression) {
-        let rewriter = ExpressionWriter(options: options, target: target, typeMapper: typeMapper)
+        let rewriter =
+            ExpressionWriter(options: options, target: target, typeMapper: typeMapper,
+                             typeSystem: typeSystem)
+        
         rewriter.rewrite(exp)
     }
     
-    private func shouldEmitTypeSignature(forInitVal exp: Expression) -> Bool {
+    private func shouldEmitTypeSignature(forInitVal exp: Expression, varType: SwiftType) -> Bool {
+        if exp.isErrorTyped && typeSystem.isNumeric(varType) {
+            return true
+        }
+        
         if !exp.isLiteralExpression {
             return false
         }
