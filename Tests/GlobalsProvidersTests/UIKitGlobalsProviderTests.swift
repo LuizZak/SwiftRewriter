@@ -28,6 +28,22 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
         assertDefined(variable: "UILayoutFittingExpandedSize", type: "CGSize")
     }
     
+    func testDefinedUIViewController() {
+        assertDefined(typeName: "UIViewController", signature: """
+            class UIViewController: UIResponder, NSCoding, UIAppearanceContainer, UITraitEnvironment, UIContentContainer, UIFocusEnvironment {
+                var view: UIView!
+                
+                init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?)
+                func viewWillAppear(_ animated: Bool)
+                func viewDidAppear(_ animated: Bool)
+                func viewWillDisappear(_ animated: Bool)
+                func viewDidDisappear(_ animated: Bool)
+                func viewWillLayoutSubviews()
+                func viewDidLayoutSubviews()
+            }
+            """)
+    }
+    
     func testDefinedUILayoutConstraintAxis() {
         assertDefined(typeName: "UILayoutConstraintAxis", signature: """
             enum UILayoutConstraintAxis: Int {

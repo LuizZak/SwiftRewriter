@@ -8,6 +8,7 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     override func createTypes() {
+        createUIViewController()
         createUILayoutConstraintAxis()
         createUIView()
         createUIWindow()
@@ -29,6 +30,60 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
         add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
                            storage: ValueStorage.constant(ofType: "CGSize"),
                            intention: nil))
+    }
+    
+    func createUIViewController() {
+        makeType(named: "UIViewController", supertype: "UIResponder") { type -> KnownType in
+            type
+                // Protocol conformances
+                .protocolConformances(protocolNames: [
+                    "NSCoding", "UIAppearanceContainer", "UITraitEnvironment",
+                    "UIContentContainer", "UIFocusEnvironment"
+                ])
+                // Properties
+                .property(named: "view", type: .implicitUnwrappedOptional("UIView"))
+                // Initializers
+                .constructor(withParameters: [
+                    ParameterSignature(label: "nibName", name: "nibNameOrNil", type: .optional(.string)),
+                    ParameterSignature(label: "bundle", name: "nibBundleOrNil", type: .optional("Bundle"))
+                ])
+                // Methods
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "viewWillAppear",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "viewDidAppear",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "viewWillDisappear",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "viewDidDisappear",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                        ]
+                    )
+                )
+                .method(named: "viewWillLayoutSubviews")
+                .method(named: "viewDidLayoutSubviews")
+                .build()
+        }
     }
     
     func createUILayoutConstraintAxis() {
