@@ -2,7 +2,7 @@ import SwiftAST
 import SwiftRewriterLib
 
 public class ClassVisitingIntentionPass: IntentionPass {
-    private var context: IntentionPassContext!
+    internal var context: IntentionPassContext!
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         self.context = context

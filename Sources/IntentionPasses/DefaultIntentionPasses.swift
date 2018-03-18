@@ -11,6 +11,7 @@ public struct DefaultIntentionPasses: IntentionPassSource {
         StoredPropertyToNominalTypesIntentionPass(),
         SwiftifyMethodSignaturesIntentionPass(),
         ImportDirectiveIntentionPass(),
+        UIKitCorrectorIntentionPass(),
         DetectNonnullReturnsIntentionPass()
     ]
     

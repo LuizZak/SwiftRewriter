@@ -19,7 +19,6 @@ public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
     }
     
     override func applyOnMethod(_ method: MethodGenerationIntention) {
-        // Can't work on overrides
         guard !method.isOverride else {
             return
         }

@@ -233,6 +233,12 @@ public class MemberBuilder<T: MemberGenerationIntention> {
     }
 }
 
+public extension MemberBuilder where T: OverridableMemberGenerationIntention {
+    public func setIsOverride(_ isOverride: Bool) {
+        targetMember.isOverride = isOverride
+    }
+}
+
 public extension MemberBuilder where T: MethodGenerationIntention {
     @discardableResult
     public func setBody(_ body: CompoundStatement) -> MemberBuilder {
@@ -383,6 +389,15 @@ public extension TypeBuilder where T: BaseClassIntention {
     public func createConformance(protocolName: String) -> TypeBuilder {
         let prot = ProtocolInheritanceIntention(protocolName: protocolName)
         targetType.addProtocol(prot)
+        
+        return self
+    }
+}
+
+public extension TypeBuilder where T: ClassGenerationIntention {
+    @discardableResult
+    public func inherit(from className: String) -> TypeBuilder {
+        targetType.superclassName = className
         
         return self
     }
