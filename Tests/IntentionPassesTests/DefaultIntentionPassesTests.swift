@@ -26,7 +26,8 @@ class DefaultIntentionPassesTests: XCTestCase {
 // Helper method for constructing intention pass contexts for tests
 func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
     let system = IntentionCollectionTypeSystem(intentions: intentions)
-    let invoker = DefaultTypeResolverInvoker(globals: GlobalDefinitions(), typeSystem: system)
+    let invoker = DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
+                                             typeSystem: system, numThreads: 8)
     let typeMapper = DefaultTypeMapper(typeSystem: system)
     
     return IntentionPassContext(typeSystem: system, typeMapper: typeMapper, typeResolverInvoker: invoker)

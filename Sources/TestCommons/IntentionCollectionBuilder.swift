@@ -42,7 +42,8 @@ public class IntentionCollectionBuilder {
             let system = IntentionCollectionTypeSystem(intentions: intentions)
             
             let invoker = DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
-                                                     typeSystem: system)
+                                                     typeSystem: system,
+                                                     numThreads: 8)
             
             invoker.resolveAllExpressionTypes(in: intentions, force: true)
         }

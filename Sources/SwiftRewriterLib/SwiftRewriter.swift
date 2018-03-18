@@ -287,7 +287,8 @@ public class SwiftRewriter {
         let globals = GlobalDefinitions()
         
         let typeResolverInvoker =
-            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem)
+            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
+                                       numThreads: settings.numThreads)
         
         if settings.verbose {
             print("Running intention passes...")

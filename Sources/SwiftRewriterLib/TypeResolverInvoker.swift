@@ -21,7 +21,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     var typeSystem: IntentionCollectionTypeSystem
     var numThreads: Int
     
-    public init(globals: GlobalDefinitions, typeSystem: IntentionCollectionTypeSystem, numThreads: Int = 8) {
+    public init(globals: GlobalDefinitions, typeSystem: IntentionCollectionTypeSystem, numThreads: Int) {
         self.globals = globals
         self.typeSystem = typeSystem
         self.numThreads = numThreads

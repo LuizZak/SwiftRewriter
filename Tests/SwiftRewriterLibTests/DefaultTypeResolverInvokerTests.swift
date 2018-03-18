@@ -29,7 +29,7 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
         let sut =
             DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
-                                       typeSystem: typeSystem)
+                                       typeSystem: typeSystem, numThreads: 8)
         let methodA = intentions.classIntentions()[0].methods[0]
         let methodB = intentions.classIntentions()[1].methods[0]
         

@@ -70,7 +70,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         
         // TODO: Expose a new protocol `KnownTypeComposition` to help expose
         // the type structure better, and get rid of this `typeName` hack-ish thing.
-        return LazyKnownType(typeName: typeNames.joined(separator: " & "), typeSystem: self, types: types)
+        return CompoundKnownType(typeName: typeNames.joined(separator: " & "), typeSystem: self, types: types)
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
@@ -604,9 +604,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             }
         }
         
-        let lazyTypes = types.mapValues({ LazyKnownType(typeName: $0[0].typeName, typeSystem: self, types: $0) })
+        let compoundTypes = types.mapValues({ CompoundKnownType(typeName: $0[0].typeName, typeSystem: self, types: $0) })
         
-        cache = Cache(typeAliases: aliases, types: lazyTypes)
+        cache = Cache(typeAliases: aliases, types: compoundTypes)
     }
     
     func tearDownCache() {
@@ -706,7 +706,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return types.first
         }
         
-        return LazyKnownType(typeName: name, typeSystem: self, types: Array(types))
+        return CompoundKnownType(typeName: name, typeSystem: self, types: Array(types))
     }
     
     // MARK: Shortcuts for member searching
@@ -801,32 +801,48 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     
     private struct Cache {
         var typeAliases: [String: SwiftType]
-        var types: [String: LazyKnownType]
+        var types: [String: CompoundKnownType]
     }
 }
 
-/// A lazily-resolved compound known type that computes the value of each its
-/// properties on demand.
-private class LazyKnownType: KnownType {
+/// A compound known type whose members are computed at creation time as aggregated
+/// members of all types.
+private class CompoundKnownType: KnownType {
     private var types: [KnownType]
     
     var typeName: String
-    var typeSystem: TypeSystem
     
-    lazy var kind: KnownTypeKind = {
-        return types[0].kind
-    }()
+    var kind: KnownTypeKind
+    var knownTraits: [String: Any]
+    var origin: String
+    var supertype: KnownSupertype?
+    var knownConstructors: [KnownConstructor]
+    var knownMethods: [KnownMethod]
+    var knownProperties: [KnownProperty]
+    var knownFields: [KnownProperty]
+    var knownProtocolConformances: [KnownProtocolConformance]
     
-    lazy var knownTraits: [String: Any] = {
-        return types.reduce([:], { $0.merging($1.knownTraits, uniquingKeysWith: { $1 }) })
-    }()
-    
-    lazy var origin: String = {
-        return types[0].origin
-    }()
-    
-    lazy var supertype: KnownSupertype? = {
-        var supertype: KnownSupertype?
+    init(typeName: String, typeSystem: TypeSystem, types: [KnownType]) {
+        self.typeName = typeName
+        self.types = types
+        
+        knownTraits = types.reduce([:], { $0.merging($1.knownTraits, uniquingKeysWith: { $1 }) })
+        knownConstructors = []
+        knownMethods = []
+        knownProperties = []
+        knownFields = []
+        knownProtocolConformances = []
+        for type in types {
+            knownConstructors.append(contentsOf: type.knownConstructors)
+            knownMethods.append(contentsOf: type.knownMethods)
+            knownProperties.append(contentsOf: type.knownProperties)
+            knownFields.append(contentsOf: type.knownFields)
+            knownProtocolConformances.append(contentsOf: type.knownProtocolConformances)
+        }
+        
+        kind = types[0].kind
+        origin = types[0].origin
+        
         for type in types {
             // Search supertypes known here
             switch type.supertype {
@@ -840,58 +856,5 @@ private class LazyKnownType: KnownType {
                 break
             }
         }
-        
-        return supertype
-    }()
-    
-    lazy var knownConstructors: [KnownConstructor] = {
-        var data: [KnownConstructor] = []
-        data.reserveCapacity(types.count)
-        for type in types {
-            data.append(contentsOf: type.knownConstructors)
-        }
-        return data
-    }()
-    
-    lazy var knownMethods: [KnownMethod] = {
-        var data: [KnownMethod] = []
-        data.reserveCapacity(types.count)
-        for type in types {
-            data.append(contentsOf: type.knownMethods)
-        }
-        return data
-    }()
-    
-    lazy var knownProperties: [KnownProperty] = {
-        var data: [KnownProperty] = []
-        data.reserveCapacity(types.count)
-        for type in types {
-            data.append(contentsOf: type.knownProperties)
-        }
-        return data
-    }()
-    
-    lazy var knownFields: [KnownProperty] = {
-        var data: [KnownProperty] = []
-        data.reserveCapacity(types.count)
-        for type in types {
-            data.append(contentsOf: type.knownFields)
-        }
-        return data
-    }()
-    
-    lazy var knownProtocolConformances: [KnownProtocolConformance] = {
-        var data: [KnownProtocolConformance] = []
-        data.reserveCapacity(types.count)
-        for type in types {
-            data.append(contentsOf: type.knownProtocolConformances)
-        }
-        return data
-    }()
-    
-    init(typeName: String, typeSystem: TypeSystem, types: [KnownType]) {
-        self.typeName = typeName
-        self.typeSystem = typeSystem
-        self.types = types
     }
 }
