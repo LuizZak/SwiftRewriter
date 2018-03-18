@@ -124,6 +124,21 @@ class MandatoryIntentionPass: IntentionPass {
             }
         }
         
+        // Check supertypes for overrides
+        if let supertype = context.typeSystem.supertype(of: type) {
+            for method in type.methods {
+                let superMethod
+                    = context.typeSystem.method(withObjcSelector: method.selector,
+                                                static: method.isStatic,
+                                                includeOptional: false,
+                                                in: supertype)
+                
+                if superMethod != nil {
+                    method.isOverride = true
+                }
+            }
+        }
+        
         // Other overrides
         for method in type.methods {
             guard let body = method.body else {

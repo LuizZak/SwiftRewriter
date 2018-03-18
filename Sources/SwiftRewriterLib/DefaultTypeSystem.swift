@@ -329,10 +329,10 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         }
     }
     
-    public func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
+    public func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
                        includeOptional: Bool, in type: KnownType) -> KnownMethod? {
         if let method = type.knownMethods.first(where: {
-            $0.signature.matchesAsSelector(selector)
+            $0.signature.asSelector == selector
                 && $0.isStatic == isStatic
                 && (includeOptional || !$0.optional)
         }) {
@@ -451,7 +451,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         return conformance(toProtocolName: name, in: knownType)
     }
     
-    public func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
+    public func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
                        includeOptional: Bool, in type: SwiftType) -> KnownMethod? {
         guard let knownType = self.findType(for: type) else {
             return nil
@@ -754,7 +754,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         return super.field(named: name, static: isStatic, in: type)
     }
     
-    public override func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
+    public override func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
                                 includeOptional: Bool, in type: SwiftType) -> KnownMethod? {
         guard let typeName = typeNameIn(swiftType: type) else {
             return super.method(withObjcSelector: selector, static: isStatic,
@@ -786,10 +786,10 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     /// Objective-C selector signature.
     ///
     /// Ignores method variable names and types of return/parameters.
-    private func method(matchingSelector signature: FunctionSignature,
+    private func method(matchingSelector selector: SelectorSignature,
                         in methods: [KnownMethod]) -> KnownMethod? {
         return methods.first {
-            return $0.signature.matchesAsSelector(signature)
+            return $0.signature.asSelector == selector
         }
     }
     

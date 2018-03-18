@@ -254,9 +254,9 @@ public class TypeGenerationIntention: FromSourceIntention {
     /// signature.
     ///
     /// Ignores method variable names and types of return/parameters.
-    public func method(matchingSelector signature: FunctionSignature) -> MethodGenerationIntention? {
+    public func method(matchingSelector selector: SelectorSignature) -> MethodGenerationIntention? {
         return methods.first {
-            return $0.signature.matchesAsSelector(signature)
+            return $0.signature.asSelector == selector
         }
     }
 }

@@ -731,19 +731,11 @@ private class MemberInvocationResolver {
     }
     
     func method(isStatic: Bool, memberName: String, arguments: [FunctionArgument], in type: SwiftType) -> KnownMethod? {
-        // Create function signature
-        let parameters =
-            labels(in: arguments).map { lbl in
-                ParameterSignature.init(label: lbl, name: "", type: .void)
-        }
+        let selector
+            = SelectorSignature(isStatic: isStatic,
+                                keywords: [memberName] + arguments.map { $0.label })
         
-        let signature =
-            FunctionSignature(name: memberName,
-                              parameters: parameters,
-                              returnType: .void,
-                              isStatic: isStatic)
-        
-        return typeSystem.method(withObjcSelector: signature, static: isStatic,
+        return typeSystem.method(withObjcSelector: selector, static: isStatic,
                                  includeOptional: true, in: type)
     }
 }

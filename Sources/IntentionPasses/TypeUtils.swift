@@ -247,7 +247,7 @@ func mergeMethodSignatures(from first: KnownType,
                            into second: TypeGenerationIntention,
                            skipCreatingOptionalMethods: Bool = true) {
     for knownMethod in first.knownMethods {
-        if let existing = second.method(matchingSelector: knownMethod.signature) {
+        if let existing = second.method(matchingSelector: knownMethod.signature.asSelector) {
             mergeMethods(knownMethod, into: existing)
         } else {
             if skipCreatingOptionalMethods && knownMethod.optional {

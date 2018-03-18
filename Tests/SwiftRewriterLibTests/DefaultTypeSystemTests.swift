@@ -95,11 +95,8 @@ class DefaultTypeSystemTests: XCTestCase {
         
         // NSObjectProtocol methods
         XCTAssertNotNil(
-            sut.method(withObjcSelector: FunctionSignature(name: "responds",
-                                                           parameters: [
-                                                            ParameterSignature(label: "to",
-                                                                               name: "selector",
-                                                                               type: .selector)]),
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false,
+                                                           keywords: ["responds", "to"]),
                        static: false,
                        includeOptional: true,
                        in: type)
@@ -265,13 +262,13 @@ class DefaultTypeSystemTests: XCTestCase {
         sut.addType(prot)
         sut.addType(cls)
         
-        XCTAssertNotNil(sut.method(withObjcSelector: FunctionSignature(name: "nonOptional"),
+        XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["nonOptional"]),
                                    static: false, includeOptional: false, in: cls))
-        XCTAssertNil(sut.method(withObjcSelector: FunctionSignature(name: "optional"),
+        XCTAssertNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optional"]),
                                 static: false, includeOptional: false, in: cls))
-        XCTAssertNotNil(sut.method(withObjcSelector: FunctionSignature(name: "optional"),
+        XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optional"]),
                                 static: false, includeOptional: true, in: cls))
-        XCTAssertNotNil(sut.method(withObjcSelector: FunctionSignature(name: "optionalImplemented"),
+        XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optionalImplemented"]),
                                    static: false, includeOptional: false, in: cls))
     }
     

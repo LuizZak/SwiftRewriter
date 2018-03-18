@@ -265,8 +265,12 @@ public protocol FunctionIntention: Intention {
 /// Represents an Objective-C selector signature.
 public struct SelectorSignature: Equatable {
     public var isStatic: Bool
+    public var keywords: [String?]
     
-    public var keywords: [String?] = []
+    public init(isStatic: Bool, keywords: [String?]) {
+        self.isStatic = isStatic
+        self.keywords = keywords
+    }
 }
 
 /// Signature for a function intention

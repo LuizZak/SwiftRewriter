@@ -1490,6 +1490,61 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    /// Test methods are marked as overrideusing type lookup of supertypes as well
+    func testMarksOverrideBasedOnTypeLookup() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            - (void)method;
+            @end
+            @interface B: A
+            - (void)method;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func method() {
+                }
+            }
+            @objc
+            class B: A {
+                @objc
+                override func method() {
+                }
+            }
+            """)
+    }
+    
+    /// Test the override detection doesn't confuse protocol implementations with
+    /// overrides
+    func testDontMarkProtocolImplementationsAsOverride() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol A
+            - (void)method;
+            @end
+            @interface B: NSObject <A>
+            - (void)method;
+            @end
+            """,
+            swift: """
+            @objc
+            protocol A: NSObjectProtocol {
+                @objc
+                func method()
+            }
+            
+            @objc
+            class B: NSObject, A {
+                @objc
+                func method() {
+                }
+            }
+            """)
+    }
 
     func testCorrectsNullabilityOfMethodParameters() throws {
         try assertObjcParse(

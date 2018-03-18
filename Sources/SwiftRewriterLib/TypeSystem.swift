@@ -79,7 +79,7 @@ public protocol TypeSystem {
     /// Searches for a method with a given Objective-C equivalent selector, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
-    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
+    func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
                 includeOptional: Bool, in type: KnownType) -> KnownMethod?
     
     /// Gets a property with a given name on a given known type, also specifying
@@ -102,7 +102,7 @@ public protocol TypeSystem {
     /// Searches for a method with a given Objective-C equivalent selector, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
-    func method(withObjcSelector selector: FunctionSignature, static isStatic: Bool,
+    func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
                 includeOptional: Bool, in type: SwiftType) -> KnownMethod?
     
     /// Gets a property with a given name on a given known type, also specifying

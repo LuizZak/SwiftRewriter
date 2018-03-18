@@ -53,4 +53,17 @@ class CoreGraphicsGlobalsProviderTests: BaseGlobalsProviderTestCase {
             }
             """)
     }
+    
+    func testDefinedCGPoint() {
+        assertDefined(typeName: "CGPoint", signature: """
+            struct CGPoint {
+                static var zero: CGPoint { get }
+                var x: CGFloat
+                var y: CGFloat
+                
+                init()
+                init(x: CGFloat, y: CGFloat)
+            }
+            """)
+    }
 }
