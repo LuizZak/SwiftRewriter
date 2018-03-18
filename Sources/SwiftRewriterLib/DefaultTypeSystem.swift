@@ -112,6 +112,24 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         return knownType.kind == .struct
     }
     
+    public func isType(_ typeName: String, conformingTo protocolName: String) -> Bool {
+        guard let typeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
+            return false
+        }
+        guard let protocolName = typeNameIn(swiftType: resolveAlias(in: protocolName)) else {
+            return false
+        }
+        if typeName == protocolName {
+            return true
+        }
+        
+        guard let type = knownTypeWithName(typeName) else {
+            return false
+        }
+        
+        return conformance(toProtocolName: protocolName, in: type) != nil
+    }
+    
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
         guard let typeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
@@ -324,9 +342,26 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         }
         
         // Search on supertypes
-        return supertype(of: type).flatMap {
+        let supertypeConformance = supertype(of: type).flatMap {
             conformance(toProtocolName: name, in: $0)
         }
+        
+        if let supertypeConformance = supertypeConformance {
+            return supertypeConformance
+        }
+        
+        // Search on protocols
+        for prot in type.knownProtocolConformances {
+            guard let type = knownTypeWithName(prot.protocolName) else {
+                continue
+            }
+            
+            if let conformance = conformance(toProtocolName: name, in: type) {
+                return conformance
+            }
+        }
+        
+        return nil
     }
     
     public func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,

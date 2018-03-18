@@ -16,13 +16,62 @@ class UIKitCorrectorIntentionPassTests: XCTestCase {
                markAsOverride: true,
                onSubclassesOf: "UIView")
     }
+    
+    func testUITableViewDelegate() {
+        let inputSignature =
+            FunctionSignature(name: "tableView", parameters: [
+                ParameterSignature(label: "_", name: "tableView", type: .typeName("UITableView")),
+                ParameterSignature(label: "willDisplayCell", name: "cell", type: .typeName("UITableViewCell")),
+                ParameterSignature(label: "forRowAtIndexPath", name: "indexPath", type: .typeName("IndexPath"))
+            ])
+        let expectedSignature =
+            FunctionSignature(name: "tableView", parameters: [
+                ParameterSignature(label: "_", name: "tableView", type: .typeName("UITableView")),
+                ParameterSignature(label: "willDisplay", name: "cell", type: .typeName("UITableViewCell")),
+                ParameterSignature(label: "forRowAt", name: "indexPath", type: .typeName("IndexPath"))
+            ])
+        
+        assert(sut: UIKitCorrectorIntentionPass(),
+               convertsSignature: inputSignature, into: expectedSignature,
+               onImplementersOfProtocol: "UITableViewDelegate")
+    }
 }
 
 extension UIKitCorrectorIntentionPassTests {
-    func assert(sut: UIKitCorrectorIntentionPass, convertsSignature signature: FunctionSignature,
-                into expected: FunctionSignature, markAsOverride: Bool, onSubclassesOf subclassOf: String,
-                file: String = #file, line: Int = #line) {
+    fileprivate func assertSignature(_ intentions: IntentionCollection,
+                                     _ expected: FunctionSignature,
+                                     _ signature: FunctionSignature,
+                                     _ markAsOverride: Bool,
+                                     _ file: String, _ line: Int) {
         let format = { TypeFormatter.asString(signature: $0, includeName: true, includeFuncKeyword: true) }
+        let type = intentions.fileIntentions()[0].typeIntentions[0]
+        let method = type.methods[0]
+        let result = method.signature
+        
+        if result != expected {
+            
+            recordFailure(withDescription: """
+                Expected to convert signature
+                \(format(signature))
+                into
+                \(format(expected))
+                but converted to
+                \(format(result))
+                """
+                , inFile: file, atLine: line, expected: true)
+        }
+        if markAsOverride && !method.isOverride {
+            recordFailure(withDescription: "Expected to mark method \(format(result)) as override",
+                inFile: file, atLine: line, expected: true)
+        }
+    }
+    
+    func assert(sut: UIKitCorrectorIntentionPass,
+                convertsSignature signature: FunctionSignature,
+                into expected: FunctionSignature,
+                markAsOverride: Bool,
+                onSubclassesOf subclassOf: String,
+                file: String = #file, line: Int = #line) {
         
         let intentions = IntentionCollectionBuilder()
             .createFileWithClass(named: "A") { type in
@@ -32,21 +81,23 @@ extension UIKitCorrectorIntentionPassTests {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        let type = intentions.fileIntentions()[0].typeIntentions[0]
-        let method = type.methods[0]
-        let result = method.signature
+        assertSignature(intentions, expected, signature, markAsOverride, file, line)
+    }
+    
+    func assert(sut: UIKitCorrectorIntentionPass,
+                convertsSignature signature: FunctionSignature,
+                into expected: FunctionSignature,
+                onImplementersOfProtocol protocolName: String,
+                file: String = #file, line: Int = #line) {
         
-        if result != expected {
-            
-            recordFailure(withDescription: """
-                Expected to convert signature \(format(signature)) into \(format(expected)) \
-                but converted to \(format(result))
-                """
-                , inFile: file, atLine: line, expected: true)
-        }
-        if markAsOverride && !method.isOverride {
-            recordFailure(withDescription: "Expected to mark method \(format(result)) as override",
-                          inFile: file, atLine: line, expected: true)
-        }
+        let intentions = IntentionCollectionBuilder()
+            .createFileWithClass(named: "A") { type in
+                type.createConformance(protocolName: protocolName)
+                    .createMethod(signature)
+            }.build()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        assertSignature(intentions, expected, signature, false, file, line)
     }
 }

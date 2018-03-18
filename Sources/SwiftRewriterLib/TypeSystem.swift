@@ -41,6 +41,11 @@ public protocol TypeSystem {
     /// Returns `true` if a given type is a known scalar type.
     func isScalarType(_ type: SwiftType) -> Bool
     
+    /// Returns `true` if a type with a given name conforms to a protocol with
+    /// a given name, either by directly or indirectly conforming to the protocol
+    /// via superclasses and other protocols.
+    func isType(_ typeName: String, conformingTo protocolName: String) -> Bool
+    
     /// Returns `true` if a type represented by a given type name is a subtype of
     /// another type.
     func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool

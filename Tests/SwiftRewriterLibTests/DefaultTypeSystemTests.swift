@@ -339,4 +339,38 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.resolveAlias(in: .block(returnType: .void, parameters: [.typeName("A")])),
                        .block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
     }
+    
+    func testIsTypeConformingToProtocol() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
+        let z = KnownTypeBuilder(typeName: "Z").build()
+        sut.addType(p)
+        sut.addType(q)
+        sut.addType(z)
+        
+        XCTAssert(sut.isType("Q", conformingTo: "P"))
+        XCTAssertFalse(sut.isType("Z", conformingTo: "P"))
+    }
+    
+    func testIsTypeConformingToProtocolSupertypeLookup() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
+        let z = KnownTypeBuilder(typeName: "Z", supertype: "Q").build()
+        sut.addType(p)
+        sut.addType(q)
+        sut.addType(z)
+        
+        XCTAssert(sut.isType("Z", conformingTo: "P"))
+    }
+    
+    func testIsTypeConformingToProtocolIndirectProtocolLookup() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(protocolName: "P").build()
+        let z = KnownTypeBuilder(typeName: "Z").protocolConformance(protocolName: "Q").build()
+        sut.addType(p)
+        sut.addType(q)
+        sut.addType(z)
+        
+        XCTAssert(sut.isType("Z", conformingTo: "P"))
+    }
 }

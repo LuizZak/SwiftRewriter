@@ -4,6 +4,10 @@ import SwiftRewriterLib
 public class ClassVisitingIntentionPass: IntentionPass {
     internal var context: IntentionPassContext!
     
+    func notifyChange() {
+        context.notifyChange()
+    }
+    
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         self.context = context
         

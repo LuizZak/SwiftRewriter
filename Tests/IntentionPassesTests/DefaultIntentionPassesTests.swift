@@ -30,5 +30,6 @@ func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
                                              typeSystem: system, numThreads: 8)
     let typeMapper = DefaultTypeMapper(typeSystem: system)
     
-    return IntentionPassContext(typeSystem: system, typeMapper: typeMapper, typeResolverInvoker: invoker)
+    return IntentionPassContext(typeSystem: system, typeMapper: typeMapper,
+                                typeResolverInvoker: invoker)
 }
