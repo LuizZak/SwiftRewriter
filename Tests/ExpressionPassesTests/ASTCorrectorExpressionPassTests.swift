@@ -30,7 +30,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
-    /// Tests null-coallescing on deep nested binary expressions
+    /// Tests null-coalescing on deep nested binary expressions
     func testNullCoalesceOnNestedArithmeticOperators() {
         let lhsLhsMaker = { Expression.identifier("a") }
         let lhsMaker = { Expression.identifier("b") }
@@ -218,6 +218,89 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    /// Tests correcting receiving nullable struct on a non-null struct context,
+    /// where the struct does feature a default empty constructor.
+    func testCorrectNonnullStructWithNullableStructValue() {
+        let str =
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .constructor()
+                .build()
+        typeSystem.addType(str)
+        let expMaker = { Expression.identifier("a") }
+        let exp = expMaker()
+        exp.resolvedType = .optional(.typeName("A"))
+        exp.expectedType = .typeName("A")
+        
+        assertTransform(
+            // a
+            expression: exp,
+            // (a ?? A())
+            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("A").call()))
+        ); assertNotifiedChange()
+    }
+    
+    /// Tests that making an access such as `self.superview?.bounds.midX` actually
+    /// resolves into a null-coalesce before the `midX` access.
+    /// This mimics the original Objective-C behavior where such an expression
+    /// would be written as `CGRectGetMidX(self.superview.bounds)`, with the method
+    /// always being invoked.
+    ///
+    /// It is generally safe to do this since in Objective-C, apart from conversions
+    /// like above where struct-based functions are top-level and always execute,
+    /// nullability is propagated such that invoking members in nil pointers result
+    /// in zero'd returns, but accessing zero'd structs has no semantic impact in
+    /// the resulting value than if it was a non-zero struct from a return value
+    /// of a non-nil pointer.
+    func testCorrectPostfixAccessToNullableValueType() {
+        let str =
+            KnownTypeBuilder(typeName: "B", kind: .struct)
+                .constructor()
+                .build()
+        typeSystem.addType(str)
+        let expMaker = { Expression.identifier("a").optional().dot("b") }
+        let exp = expMaker()
+        exp.exp.resolvedType = .optional(.typeName("A"))
+        exp.op.returnType = .typeName("B")
+        exp.resolvedType = .optional(.typeName("B"))
+        exp.expectedType = .typeName("B")
+        
+        let res = assertTransform(
+            // a?.b.c()
+            expression: exp
+                .dot("c", type: .block(returnType: .int, parameters: [])).typed(.optional(.block(returnType: .int, parameters: [])))
+                .call([], callableSignature: .block(returnType: .int, parameters: [])).typed(.optional(.int)),
+            // (a?.b ?? B()).c()
+            into:
+            Expression
+                .parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("B").call()))
+                .dot("c").call()
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .int)
+    }
+    
+    /// No need to correct accesses when the access is a plain member access over
+    /// the struct's value. This can be corrected later on.
+    func testDontCorrectPostfixAccessToNullableValueTypeWhenAccessIsMemberOnly() {
+        let str =
+            KnownTypeBuilder(typeName: "B", kind: .struct)
+                .constructor()
+                .build()
+        typeSystem.addType(str)
+        let expMaker = { Expression.identifier("a").dot("b") }
+        let exp = expMaker()
+        exp.exp.resolvedType = .optional(.typeName("A"))
+        exp.op.returnType = .typeName("B")
+        exp.resolvedType = .optional(.typeName("B"))
+        
+        assertTransform(
+            // a.b.c
+            expression: exp.dot("c"),
+            // (a.b ?? A()).c
+            into: expMaker().dot("c")
+        ); assertDidNotNotifyChange()
+    }
+    
     // MARK: - If statement
     
     /// On if statements, AST Corrector must try to correct the expression so that
@@ -253,10 +336,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let stmt = Statement.if(exp, body: [], else: nil)
         
         assertTransform(
-            // if (!a.b) { }
+            // if !a.b { }
             statement: stmt,
             // if (a.b != true) { }
-            into: Statement.if(expMaker().binary(op: .unequals, rhs: .constant(true)),
+            into: Statement.if(.parens(expMaker().binary(op: .unequals, rhs: .constant(true))),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -294,10 +377,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let stmt = Statement.if(exp, body: [], else: nil)
         
         assertTransform(
-            // if (!num) { }
+            // if !num { }
             statement: stmt,
             // if (num == 0) { }
-            into: Statement.if(Expression.identifier("num").binary(op: .equals, rhs: .constant(0)),
+            into: Statement.if(.parens(Expression.identifier("num").binary(op: .equals, rhs: .constant(0))),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -357,10 +440,10 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let stmt = Statement.if(exp, body: [], else: nil)
         
         assertTransform(
-            // if (!obj) { }
+            // if !obj { }
             statement: stmt,
             // if (obj == nil) { }
-            into: Statement.if(expMaker().binary(op: .equals, rhs: .constant(.nil)),
+            into: Statement.if(.parens(expMaker().binary(op: .equals, rhs: .constant(.nil))),
                                body: [],
                                else: nil)
         ); assertNotifiedChange()
@@ -482,27 +565,6 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             into: Statement.while(expMaker(),
                                   body: [])
         ); assertDidNotNotifyChange()
-    }
-    
-    /// Tests correcting receiving nullable struct on a non-null struct context,
-    /// where the struct does feature a default empty constructor.
-    func testCorrectNonnullStructWithNullableStructValue() {
-        let str =
-            KnownTypeBuilder(typeName: "A", kind: .struct)
-                .constructor()
-                .build()
-        typeSystem.addType(str)
-        let expMaker = { Expression.identifier("a") }
-        let exp = expMaker()
-        exp.resolvedType = .optional(.typeName("A"))
-        exp.expectedType = .typeName("A")
-        
-        assertTransform(
-            // a
-            expression: exp,
-            // (a ?? A())
-            into: .parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("A").call()))
-        ); assertNotifiedChange()
     }
     
     /// Tests that the corrector is capable of doing simple if-let generations

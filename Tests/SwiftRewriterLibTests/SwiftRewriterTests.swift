@@ -1766,4 +1766,33 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testNullCoalesceInChainedValueTypePostfix() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            @property CGRect bounds;
+            @property (weak) A *parent;
+            @end
+            @implementation A
+            - (void)method {
+                CGRectInset(self.bounds, 1, 2);
+                self.bounds = CGRectInset(self.parent.bounds, 1, 2);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var bounds: CGRect = CGRect()
+                @objc weak var parent: A?
+                
+                @objc
+                func method() {
+                    self.bounds.insetBy(dx: 1, dy: 2)
+                    self.bounds = (self.parent?.bounds ?? CGRect()).insetBy(dx: 1, dy: 2)
+                }
+            }
+            """)
+    }
 }

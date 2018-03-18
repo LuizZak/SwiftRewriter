@@ -75,6 +75,8 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
             return super.visitExpression(exp)
         }
         
+        let exp = super.visitExpression(exp)
+        
         if context.typeSystem.isNumeric(expectedType) {
             if let corrected = correctToNumeric(exp) {
                 notifyChange()
@@ -164,6 +166,40 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         }
         
         return super.visitBinary(exp)
+    }
+    
+    public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        // Get <value>.<member>(<call>) postfix values
+        if exp.op.asFuntionCall != nil, let memberPostfix = exp.exp.asPostfix,
+            let memberType = memberPostfix.exp.resolvedType {
+            
+            let member = memberPostfix.exp
+            
+            guard memberType.isOptional && context.typeSystem.isScalarType(memberType.deepUnwrapped) else {
+                return super.visitPostfix(exp)
+            }
+            
+            guard let initValue = context.typeSystem.defaultValue(for: memberType.deepUnwrapped) else {
+                return super.visitPostfix(exp)
+            }
+            
+            var res: Expression = Expression.parens(member.binary(op: .nullCoalesce, rhs: initValue))
+            res.resolvedType = memberType.deepUnwrapped
+            
+            res = Expression.postfix(res, memberPostfix.op)
+            
+            res.resolvedType = memberPostfix.resolvedType
+            
+            res = Expression.postfix(res, exp.op)
+            
+            res.resolvedType = exp.resolvedType?.deepUnwrapped
+            
+            notifyChange()
+            
+            return super.visitExpression(res)
+        }
+        
+        return super.visitPostfix(exp)
     }
     
     func correctToDefaultValue(_ exp: Expression) -> Expression? {
