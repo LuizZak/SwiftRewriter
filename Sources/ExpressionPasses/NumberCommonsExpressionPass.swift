@@ -28,8 +28,8 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
     
     // Converts `floorf`, `roundf`, `ceilf` to simply `floor`, `round`, `ceil`.
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        if let ident = exp.exp.asIdentifier?.identifier {
-            if exp.functionCall?.arguments.count == 1 {
+        if let ident = exp.exp.asIdentifier?.identifier, let call = exp.functionCall {
+            if call.arguments.count == 1 {
                 let matchers: [String: String] = [
                     "floorf": "floor",
                     "ceilf": "ceil",
@@ -39,11 +39,13 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
                 
                 if let match = matchers[ident] {
                     exp.exp.asIdentifier?.identifier = match
+                    call.arguments[0].expression.expectedType = .float
+                    
                     notifyChange()
                 }
             }
             
-            if exp.functionCall?.arguments.count == 2 {
+            if call.arguments.count == 2 {
                 let matchers: [String: String] = [
                     "MAX": "max",
                     "MIN": "min"
@@ -51,11 +53,37 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
                 
                 if let match = matchers[ident] {
                     exp.exp.asIdentifier?.identifier = match
+                    
+                    setExpectedTypesForParameters(call.subExpressions)
+                    
                     notifyChange()
                 }
             }
         }
         
         return super.visitPostfix(exp)
+    }
+    
+    /// Given a set of parameters, assigns the proper expected types of the parameters
+    /// based on the common resolved types of non-error-typed parameter expressions.
+    private func setExpectedTypesForParameters(_ params: [Expression]) {
+        var type: SwiftType?
+        
+        for p in params where !p.isErrorTyped {
+            guard let t = type else {
+                type = p.resolvedType
+                continue
+            }
+            
+            if let resolvedType = p.resolvedType, t.unwrapped != resolvedType.unwrapped {
+                return
+            }
+        }
+        
+        if let type = type {
+            for p in params {
+                p.expectedType = type
+            }
+        }
     }
 }

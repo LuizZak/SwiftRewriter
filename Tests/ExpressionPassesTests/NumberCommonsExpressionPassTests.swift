@@ -35,36 +35,54 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testConvertFloatMethods() {
-        assertTransform(
+        var res = assertTransform(
             expression: Expression.identifier("floorf").call([.constant(1)]),
             into: Expression.identifier("floor").call([.constant(1)])
         ); assertNotifiedChange()
         
-        assertTransform(
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType,
+                       .float)
+        
+        res = assertTransform(
             expression: Expression.identifier("ceilf").call([.constant(1)]),
             into: Expression.identifier("ceil").call([.constant(1)])
         ); assertNotifiedChange()
         
-        assertTransform(
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType,
+                       .float)
+        
+        res = assertTransform(
             expression: Expression.identifier("roundf").call([.constant(1)]),
             into: Expression.identifier("round").call([.constant(1)])
         ); assertNotifiedChange()
         
-        assertTransform(
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType,
+                       .float)
+        
+        res = assertTransform(
             expression: Expression.identifier("fabs").call([.constant(1)]),
             into: Expression.identifier("abs").call([.constant(1)])
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType,
+                       .float)
     }
     
     func testConvertMacros() {
-        assertTransform(
-            expression: Expression.identifier("MIN").call([.constant(1), .constant(2)]),
+        var res = assertTransform(
+            expression: Expression.identifier("MIN").call([Expression.constant(1).typed(.float), .constant(2)]),
             into: Expression.identifier("min").call([.constant(1), .constant(2)])
         ); assertNotifiedChange()
         
-        assertTransform(
-            expression: Expression.identifier("MAX").call([.constant(1), .constant(2)]),
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType, .float)
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[1].expectedType, .float)
+        
+        res = assertTransform(
+            expression: Expression.identifier("MAX").call([.constant(1), Expression.constant(2).typed(.float)]),
             into: Expression.identifier("max").call([.constant(1), .constant(2)])
         ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType, .float)
+        XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[1].expectedType, .float)
     }
 }
