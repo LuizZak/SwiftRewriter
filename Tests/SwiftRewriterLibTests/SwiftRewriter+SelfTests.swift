@@ -22,7 +22,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func method() {
                     // type: MyClass
-                    (self)
+                    self
                 }
             }
             """,
@@ -60,22 +60,22 @@ class SwiftRewriter_SelfTests: XCTestCase {
             class MyClass: NSObject {
                 @objc static var a: Bool {
                     // type: MyClass.self
-                    (self)
+                    self
                 }
                 @objc var b: Bool {
                     // type: MyClass
-                    (self)
+                    self
                 }
                 
                 @objc
                 static func classMethod() {
                     // type: MyClass.self
-                    (self)
+                    self
                 }
                 @objc
                 func instanceMethod() {
                     // type: MyClass
-                    (self)
+                    self
                 }
             }
             """,
@@ -105,12 +105,12 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc var value: Bool {
                     get {
                         // type: MyClass
-                        (self)
+                        self
                         return false
                     }
                     set {
                         // type: MyClass
-                        (self)
+                        self
                     }
                 }
             }
@@ -275,7 +275,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 init(value: Int) {
                     // type: Int
-                    (value)
+                    value
                 }
             }
             """,
@@ -307,7 +307,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     }
                     set(value) {
                         // type: Bool
-                        (value)
+                        value
                     }
                 }
             }
@@ -340,7 +340,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     }
                     set {
                         // type: Bool
-                        (newValue)
+                        newValue
                     }
                 }
             }
@@ -374,9 +374,9 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func f1() {
                     // type: Bool
-                    (self.value)
+                    self.value
                     // type: Int
-                    (self.field)
+                    self.field
                 }
             }
             """,
@@ -398,7 +398,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func f1(_ value: A!) {
                     // type: A!
-                    (value)
+                    value
                 }
             }
             """,
@@ -427,7 +427,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func f1(_ value: A!) {
                     // type: Int
-                    (value.prop)
+                    value.prop
                 }
             }
             """,
@@ -679,11 +679,11 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 @objc
                 func method() {
                     // type: (A & B)!
-                    (self.composed)
+                    self.composed
                     // type: Bool?
-                    (self.composed.a)
+                    self.composed.a
                     // type: Int?
-                    (self.composed.b)
+                    self.composed.b
                 }
             }
             """,
@@ -718,11 +718,11 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     var local2 = self.nonOptional()
                     var local3 = self.unspecifiedOptional()
                     // type: String?
-                    (local1)
+                    local1
                     // type: String
-                    (local2)
+                    local2
                     // type: String?
-                    (local3)
+                    local3
                 }
                 @objc
                 func optional() -> String? {
@@ -771,10 +771,10 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     // type: Callback
                     self.callback = { (arg: Int) -> Void in
                         // type: Int
-                        (arg)
+                        arg
                     }
                     // type: <<error type>>
-                    (arg)
+                    arg
                 }
             }
             """,
@@ -815,10 +815,10 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     self.callback = { () -> Void in
                         var local: Int
                         // type: Int
-                        (local)
+                        local
                     }
                     // type: <<error type>>
-                    (local)
+                    local
                 }
             }
             """,
@@ -869,20 +869,20 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     // type: Callback
                     self.callback = { () -> Void in
                         // type: Int
-                        (local)
+                        local
                     }
                     // type: Void
                     self.takesBlock { () -> Void in
                         // type: Int
-                        (local)
+                        local
                     }
                     // type: <nil>
                     takesBlock { () -> Void in
                         // type: Int
-                        (local)
+                        local
                     }
                     // type: Int
-                    (local)
+                    local
                 }
                 @objc
                 func takesBlock(_ block: (() -> Void)!) {
@@ -912,7 +912,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 func f1() {
                     var a = self.other()
                     // type: A?
-                    (a)
+                    a
                 }
                 @objc
                 func other() -> A! {
@@ -942,7 +942,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 func f1() {
                     var a = self.other()
                     // type: A
-                    (a)
+                    a
                 }
                 @objc
                 func other() -> A {

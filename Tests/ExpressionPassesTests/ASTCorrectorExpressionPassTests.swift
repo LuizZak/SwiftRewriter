@@ -277,6 +277,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .int)
+        XCTAssertEqual(res.asPostfix?.exp.resolvedType, .block(returnType: .int, parameters: []))
     }
     
     /// No need to correct accesses when the access is a plain member access over

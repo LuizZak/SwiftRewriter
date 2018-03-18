@@ -1090,6 +1090,7 @@ public final class SubscriptPostfix: Postfix {
     
     public func replacingExpression(_ exp: Expression) -> SubscriptPostfix {
         let sub = Postfix.subscript(exp)
+        sub.hasOptionalAccess = hasOptionalAccess
         sub.returnType = returnType
         
         return sub
@@ -1161,6 +1162,7 @@ public final class FunctionCallPostfix: Postfix {
             }
         
         let new = FunctionCallPostfix(arguments: newArgs)
+        new.hasOptionalAccess = hasOptionalAccess
         new.returnType = returnType
         new.callableSignature = callableSignature
         

@@ -3,6 +3,17 @@ import SwiftAST
 
 /// Simplifies AST structures that may be unnecessarily complex.
 public class ASTSimplifier: SyntaxNodeRewriterPass {
+    public override func visitBaseExpression(_ exp: Expression) -> Expression {
+        // Drop parens from base expressions
+        if let parens = exp.asParens {
+            notifyChange()
+            
+            return visitBaseExpression(parens.exp)
+        }
+        
+        return super.visitBaseExpression(exp)
+    }
+    
     public override func visitCompound(_ stmt: CompoundStatement) -> Statement {
         guard stmt.statements.count == 1, let doStmt = stmt.statements[0].asDoStatement else {
             return super.visitCompound(stmt)

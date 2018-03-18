@@ -4,17 +4,19 @@ import ExpressionPasses
 class DefaultExpressionPassesTests: XCTestCase {
     func testDefaultExpressionPasses() {
         let source = DefaultExpressionPasses()
+        var passes = source.syntaxNodePasses.makeIterator()
         
-        XCTAssertEqual(source.syntaxNodePasses.count, 9)
+        XCTAssertEqual(source.syntaxNodePasses.count, 10)
         
-        XCTAssert(source.syntaxNodePasses[0] == ASTSimplifier.self)
-        XCTAssert(source.syntaxNodePasses[1] == AllocInitExpressionPass.self)
-        XCTAssert(source.syntaxNodePasses[2] == CoreGraphicsExpressionPass.self)
-        XCTAssert(source.syntaxNodePasses[3] == FoundationExpressionPass.self)
-        XCTAssert(source.syntaxNodePasses[4] == UIKitExpressionPass.self)
-        XCTAssert(source.syntaxNodePasses[5] == NilValueTransformationsPass.self)
-        XCTAssert(source.syntaxNodePasses[6] == NumberCommonsExpressionPass.self)
-        XCTAssert(source.syntaxNodePasses[7] == ASTCorrectorExpressionPass.self)
-        XCTAssert(source.syntaxNodePasses[8] == EnumRewriterExpressionPass.self)
+        XCTAssert(passes.next() == ASTSimplifier.self)
+        XCTAssert(passes.next() == AllocInitExpressionPass.self)
+        XCTAssert(passes.next() == CoreGraphicsExpressionPass.self)
+        XCTAssert(passes.next() == FoundationExpressionPass.self)
+        XCTAssert(passes.next() == UIKitExpressionPass.self)
+        XCTAssert(passes.next() == NilValueTransformationsPass.self)
+        XCTAssert(passes.next() == NumberCommonsExpressionPass.self)
+        XCTAssert(passes.next() == ASTCorrectorExpressionPass.self)
+        XCTAssert(passes.next() == EnumRewriterExpressionPass.self)
+        XCTAssert(passes.next() == ASTSimplifier.self)
     }
 }

@@ -1279,7 +1279,7 @@ class SwiftRewriterTests: XCTestCase {
             class A: NSObject {
                 @objc
                 func method() {
-                    (MyEnum.MyEnumCase)
+                    MyEnum.MyEnumCase
                 }
             }
             """)
@@ -1572,8 +1572,8 @@ class SwiftRewriterTests: XCTestCase {
                 
                 @objc
                 func method() {
-                    self.takesInt((a?.b ?? 0))
-                    self.takesInt((a?.returnsInt() ?? 0))
+                    self.takesInt(a?.b ?? 0)
+                    self.takesInt(a?.returnsInt() ?? 0)
                     self.takesInt((a?.b ?? 0) + 0)
                     self.takesInt((a?.returnsInt() ?? 0) + 0)
                 }
@@ -1629,7 +1629,7 @@ class SwiftRewriterTests: XCTestCase {
                 @objc
                 func method() {
                     var b: B?
-                    self.takesA((b?.a() ?? A()))
+                    self.takesA(b?.a() ?? A())
                 }
             }
             """)
@@ -1670,7 +1670,7 @@ class SwiftRewriterTests: XCTestCase {
                     var a: A!
                     self.b?.c = 0
                     a.b?.c = 0
-                    self.takesExpression((a.b?.c ?? 0))
+                    self.takesExpression(a.b?.c ?? 0)
                 }
                 @objc
                 func takesExpression(_ a: Int) {

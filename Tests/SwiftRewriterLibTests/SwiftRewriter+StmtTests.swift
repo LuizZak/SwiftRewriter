@@ -25,7 +25,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     func testTranslateParenthesizedExpression() throws {
         try assertSingleStatement(
             objc: "((10 + 26) * (15 + 15));",
-            swift: "((10 + 26) * (15 + 15))"
+            swift: "(10 + 26) * (15 + 15)"
         )
     }
     
@@ -285,7 +285,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     func testEmitTypeCast() throws {
         try assertSingleStatement(
             objc: "((UIButtonType)aThing);",
-            swift: "(aThing as? UIButtonType)"
+            swift: "aThing as? UIButtonType"
         )
         
         try assertSingleStatement(

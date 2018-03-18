@@ -27,9 +27,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .expression(.identifier("a"))
                 ]
             )
-        )
-        
-        assertNotifiedChange()
+        ); assertNotifiedChange()
     }
     
     func testDoesNotSimplifyDoWithinCompoundWithExtraStatements() {
@@ -53,9 +51,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 .expression(.identifier("b"))
                 ]
             )
-        )
-        
-        assertDidNotNotifyChange()
+        ); assertDidNotNotifyChange()
     }
     
     // MARK: - Test-not-nil-then-invoke block patterns
@@ -72,9 +68,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 .expression(
                     Expression.identifier("block").optional().call()
                 )
-        )
-        
-        assertNotifiedChange()
+        ); assertNotifiedChange()
         
         // W/out braces
         assertTransformParsed(
@@ -86,9 +80,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                 .expression(
                     Expression.identifier("block").optional().call()
                 )
-        )
-        
-        assertNotifiedChange()
+        ); assertNotifiedChange()
     }
     
     func testDoNotSimplifyNonBlockCheckConstructs() {
@@ -106,9 +98,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     body: [
                         .expression(Expression.identifier("value").dot("member").call())
                     ], else: nil)
-        )
-        
-        assertDidNotNotifyChange()
+        ); assertDidNotNotifyChange()
     }
     
     func testDontAlterTestThenInvokeBlockOnIfWithElse() {
@@ -128,8 +118,116 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     ], else: [
                         .expression(Expression.identifier("stmt").call())
                     ])
-        )
-        
-        assertDidNotNotifyChange()
+        ); assertDidNotNotifyChange()
     }
+    
+    // MARK: - Redundant Parenthesis Removal
+    
+    /// Test simplification of redundant parenthesis on expressions
+    func testSimplifyParenthesis() {
+        assertTransform(
+            // (0)
+            expression: .parens(.constant(0)),
+            // 0
+            into: .constant(0)
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisDeep() {
+        assertTransform(
+            // (((0)))
+            expression: .parens(.parens(.parens(.constant(0)))),
+            // 0
+            into: .constant(0)
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInFunctionArguments() {
+        assertTransform(
+            // a((0))
+            expression: Expression.identifier("a").call([.parens(.constant(0))]),
+            // a(0)
+            into: Expression.identifier("a").call([.constant(0)])
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInSubscriptionExpression() {
+        assertTransform(
+            // a[(0)]
+            expression: Expression.identifier("a").sub(.parens(.constant(0))),
+            // a[0]
+            into: Expression.identifier("a").sub(.constant(0))
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInTopLevelExpression() {
+        assertTransform(
+            // { (a) }
+            statement: Statement.expression(.parens(.constant(0))),
+            // { a }
+            into: Statement.expression(.constant(0))
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInIfExpression() {
+        assertTransform(
+            // if (a) { }
+            statement: Statement.if(.parens(.constant(0)), body: [], else: nil),
+            // if a { }
+            into: Statement.if(.constant(0), body: [], else: nil)
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInWhileExpression() {
+        assertTransform(
+            // while (a) { }
+            statement: Statement.while(.parens(.constant(0)), body: []),
+            // while a { }
+            into: Statement.while(.constant(0), body: [])
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInForExpression() {
+        assertTransform(
+            // for a in (0) { }
+            statement: Statement.for(.identifier("a"), .parens(.constant(0)), body: []),
+            // for a in 0 { }
+            into: Statement.for(.identifier("a"), .constant(0), body: [])
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInSwitchExpression() {
+        assertTransform(
+            // switch (0) { }
+            statement: Statement.switch(.parens(.constant(0)), cases: [], default: nil),
+            // switch 0 { }
+            into: Statement.switch(.constant(0), cases: [], default: nil)
+        ); assertNotifiedChange()
+    }
+    
+    func testSimplifyParenthesisInSwitchCaseExpressions() {
+        assertTransform(
+            // switch 0 { case (0): }
+            statement: Statement
+                .switch(.constant(0),
+                        cases: [SwitchCase(patterns: [.expression(.parens(.constant(0)))], statements: [])],
+                        default: nil),
+            // switch 0 { case 0: }
+            into: Statement
+                .switch(.constant(0),
+                        cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [])],
+                        default: nil)
+        ); assertNotifiedChange()
+    }
+    
+    func testDontSimplifyParenthesisInBinaryExpression() {
+        assertTransform(
+            // (0) + 1
+            expression: Expression.parens(.constant(0)).binary(op: .add, rhs: .constant(1)),
+            // (0) + 1
+            into: Expression.parens(.constant(0)).binary(op: .add, rhs: .constant(1))
+        ); assertDidNotNotifyChange()
+    }
+    
+    // MARK: -
 }

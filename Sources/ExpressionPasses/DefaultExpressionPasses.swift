@@ -10,7 +10,9 @@ public class DefaultExpressionPasses: SyntaxNodeRewriterPassSource {
         NilValueTransformationsPass.self,
         NumberCommonsExpressionPass.self,
         ASTCorrectorExpressionPass.self,
-        EnumRewriterExpressionPass.self
+        EnumRewriterExpressionPass.self,
+        // Do a last simplification pass after all other passes
+        ASTSimplifier.self
     ]
     
     public init() {

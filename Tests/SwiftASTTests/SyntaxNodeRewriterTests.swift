@@ -38,6 +38,7 @@ class SyntaxNodeRewriterTests: XCTestCase {
         let makeNode: () -> Expression = {
             Expression
                 .identifier("a")
+                .optional()
                 .call([.identifier("b")],
                       type: .int,
                       callableSignature: .block(returnType: .int, parameters: [.typeName("b")]))
@@ -46,6 +47,7 @@ class SyntaxNodeRewriterTests: XCTestCase {
         
         let result = sut.visitExpression(makeNode())
         
+        XCTAssert(result.asPostfix?.op.hasOptionalAccess == true)
         XCTAssertEqual(result.asPostfix?.functionCall?.returnType, .int)
         XCTAssertEqual(result.asPostfix?.functionCall?.callableSignature, .block(returnType: .int, parameters: [.typeName("b")]))
     }
@@ -54,25 +56,27 @@ class SyntaxNodeRewriterTests: XCTestCase {
     /// syntax tree and visiting a subscription postfix node
     func testRewriterKeepsSubscriptInformation() {
         let makeNode: () -> Expression = {
-            Expression.identifier("a").sub(.identifier("b"), type: .int)
+            Expression.identifier("a").optional().sub(.identifier("b"), type: .int)
         }
         let sut = SyntaxNodeRewriter()
         
         let result = sut.visitExpression(makeNode())
         
         XCTAssertEqual(result.asPostfix?.subscription?.returnType, .int)
+        XCTAssert(result.asPostfix?.op.hasOptionalAccess == true)
     }
     
     /// Tests Postfix.returnType metadata information is kept when traversing a
     /// syntax tree and visiting a member access postfix node
     func testRewriterKeepsMemberInformation() {
         let makeNode: () -> Expression = {
-            Expression.identifier("a").dot("b", type: .int)
+            Expression.identifier("a").optional().dot("b", type: .int)
         }
         let sut = SyntaxNodeRewriter()
         
         let result = sut.visitExpression(makeNode())
         
         XCTAssertEqual(result.asPostfix?.member?.returnType, .int)
+        XCTAssert(result.asPostfix?.op.hasOptionalAccess == true)
     }
 }

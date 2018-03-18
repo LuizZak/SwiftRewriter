@@ -48,7 +48,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     ///
     /// - Parameter exp: A SizeOfExpression to visit
     /// - Returns: Result of visiting the sizeof expression node
-    public func visitSizeOf(_ exp: SizeOfExpression) -> Expression {
+    open func visitSizeOf(_ exp: SizeOfExpression) -> Expression {
         switch exp.value {
         case .expression(let innerExp):
             exp.value = .expression(visitExpression(innerExp))

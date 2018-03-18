@@ -183,6 +183,8 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
                 return super.visitPostfix(exp)
             }
             
+            exp.asPostfix?.exp.asPostfix?.exp.expectedType = nil
+            
             var res: Expression = Expression.parens(member.binary(op: .nullCoalesce, rhs: initValue))
             res.resolvedType = memberType.deepUnwrapped
             
@@ -190,9 +192,13 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
             
             res.resolvedType = memberPostfix.resolvedType
             
+            res.asPostfix?.op.returnType = res.asPostfix?.op.returnType?.unwrapped
+            
             res = Expression.postfix(res, exp.op)
             
-            res.resolvedType = exp.resolvedType?.deepUnwrapped
+            res.resolvedType = exp.resolvedType?.unwrapped
+            res.asPostfix?.exp.resolvedType = res.asPostfix?.exp.resolvedType?.unwrapped
+            res.asPostfix?.exp.asPostfix?.exp.expectedType = nil
             
             notifyChange()
             
