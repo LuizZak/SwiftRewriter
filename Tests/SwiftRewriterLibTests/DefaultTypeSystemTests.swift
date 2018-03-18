@@ -101,6 +101,14 @@ class DefaultTypeSystemTests: XCTestCase {
                        includeOptional: true,
                        in: type)
         )
+        XCTAssertNotNil(
+            sut.method(withObjcSelector:
+                SelectorSignature(isStatic: false,
+                                  keywords: ["isEqual", nil]),
+                       static: false,
+                       includeOptional: true,
+                       in: type)
+        )
     }
     
     func testNSArrayDefinition() {

@@ -492,6 +492,12 @@ extension DefaultTypeSystem {
                                       returnType: .bool,
                                       isStatic: false)
                 )
+                .method(withSignature:
+                    FunctionSignature(name: "isEqual",
+                                      parameters: [ParameterSignature(label: "_", name: "object", type: .anyObject)],
+                                      returnType: .bool,
+                                      isStatic: false)
+                )
                 .build()
         
         let nsObject =
