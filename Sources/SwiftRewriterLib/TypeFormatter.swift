@@ -9,20 +9,22 @@ public enum TypeFormatter {
         
         o.outputInline("\(type.kind.rawValue) \(type.typeName)")
         
-        if type.supertype != nil || !type.knownProtocolConformances.isEmpty {
-            o.outputInline(": ")
-            
-            var typeNames: [String] = []
-            if let supertype = type.supertype {
-                typeNames.append(supertype.asTypeName)
-            }
-            
-            for conformance in type.knownProtocolConformances {
-                typeNames.append(conformance.protocolName)
-            }
-            
-            o.outputInline(typeNames.joined(separator: ", "))
+        var inheritances: [String] = []
+        
+        if let supertype = type.supertype {
+            inheritances.append(supertype.asTypeName)
         }
+        if let rawValue = type.knownTrait(KnownTypeTraits.enumRawValue) {
+            inheritances.append(stringify(rawValue))
+        }
+        for conformance in type.knownProtocolConformances {
+            inheritances.append(conformance.protocolName)
+        }
+        
+        if !inheritances.isEmpty {
+            o.outputInline(": \(inheritances.joined(separator: ", "))")
+        }
+        
         o.outputInline(" {")
         o.outputLineFeed()
         
@@ -33,9 +35,13 @@ public enum TypeFormatter {
                                         includeVarKeyword: true))
             }
             let outputProperty: (KnownProperty) -> Void = {
-                o.output(line: asString(property: $0, ofType: type, withTypeName: false,
-                                        includeVarKeyword: true,
-                                        includeAccessors: $0.accessor != .getterAndSetter))
+                if $0 is EnumCaseGenerationIntention {
+                    o.output(line: "case \($0.name)")
+                } else {
+                    o.output(line: asString(property: $0, ofType: type, withTypeName: false,
+                                            includeVarKeyword: true,
+                                            includeAccessors: $0.accessor != .getterAndSetter))
+                }
             }
             
             let staticFields = type.knownFields.filter { $0.isStatic }

@@ -18,6 +18,9 @@ public protocol KnownType: KnownSupertypeConvertible {
     /// The kind of this known type
     var kind: KnownTypeKind { get }
     
+    /// Gets a set of known type traits for this type
+    var knownTraits: [String: Any] { get set }
+    
     /// Gets an array of all known constructors for this type
     var knownConstructors: [KnownConstructor] { get }
     
@@ -32,6 +35,12 @@ public protocol KnownType: KnownSupertypeConvertible {
     
     /// Gets an array of all known protocol conformances for this type
     var knownProtocolConformances: [KnownProtocolConformance] { get }
+    
+    /// Gets a known type trait from this type
+    func knownTrait<T>(_ trait: KnownTypeTrait<T>) -> T?
+    
+    /// Sets a known type trait with a given value for this type
+    mutating func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T)
 }
 
 /// The kind of a known type
@@ -181,5 +190,28 @@ public extension KnownProperty {
 public extension KnownMethod {
     public var memberType: SwiftType {
         return signature.swiftClosureType
+    }
+}
+
+/// Represents a type trait
+public struct KnownTypeTrait<T> {
+    public var name: String
+    
+    public init(name: String) {
+        self.name = name
+    }
+}
+
+public enum KnownTypeTraits {
+    public static let enumRawValue = KnownTypeTrait<SwiftType>(name: "enumRawValue")
+}
+
+public extension KnownType {
+    public func knownTrait<T>(_ trait: KnownTypeTrait<T>) -> T? {
+        return knownTraits[trait.name] as? T
+    }
+    
+    public mutating func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
+        knownTraits[trait.name] = value
     }
 }

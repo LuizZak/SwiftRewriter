@@ -13,4 +13,8 @@ public struct ValueStorage: Equatable {
         self.ownership = ownership
         self.isConstant = isConstant
     }
+    
+    public static func constant(ofType type: SwiftType) -> ValueStorage {
+        return ValueStorage(type: type, ownership: .strong, isConstant: true)
+    }
 }

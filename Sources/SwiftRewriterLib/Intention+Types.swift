@@ -119,6 +119,8 @@ public class TypeGenerationIntention: FromSourceIntention {
         return []
     }
     
+    public var knownTraits: [String: Any] = [:]
+    
     public var kind: KnownTypeKind {
         return .class
     }
@@ -286,6 +288,10 @@ extension TypeGenerationIntention: KnownType {
     }
     public var knownProtocolConformances: [KnownProtocolConformance] {
         return protocols
+    }
+    
+    public func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
+        knownTraits[trait.name] = value
     }
 }
 

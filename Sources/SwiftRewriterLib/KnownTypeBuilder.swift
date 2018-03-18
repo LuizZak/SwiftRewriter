@@ -6,6 +6,7 @@ public class KnownTypeBuilder {
     public typealias ParameterTuple = (label: String, type: SwiftType)
     
     private let type: DummyType
+    public var useSwiftSignatureMatching: Bool = false
     
     public init(typeName: String, supertype: KnownSupertypeConvertible? = nil,
                 kind: KnownTypeKind = .class, file: String = #file,
@@ -59,8 +60,7 @@ public class KnownTypeBuilder {
     /// specifying whether the method is an optional protocol conformance method
     public func method(named name: String, shortParams: [ParameterTuple] = [],
                        returning returnType: SwiftType = .void,
-                       optional: Bool = false,
-                       useSwiftSignatureMatching: Bool = false) -> KnownTypeBuilder {
+                       optional: Bool = false) -> KnownTypeBuilder {
         let parameters =
             shortParams.map { tuple in
                 ParameterSignature(name: tuple.label, type: tuple.type)
@@ -69,14 +69,13 @@ public class KnownTypeBuilder {
         let signature = FunctionSignature(name: name, parameters: parameters,
                                           returnType: returnType)
         
-        return method(withSignature: signature, optional: optional,
-                      useSwiftSignatureMatching: useSwiftSignatureMatching)
+        return method(withSignature: signature, optional: optional)
     }
     
     /// Adds a method with a given signature, and a flag specifying whether the
     /// method is an optional protocol conformance method
     public func method(withSignature signature: FunctionSignature,
-                       optional: Bool = false, useSwiftSignatureMatching: Bool = false) -> KnownTypeBuilder {
+                       optional: Bool = false) -> KnownTypeBuilder {
         // Check duplicates
         if useSwiftSignatureMatching {
             if type.knownMethods.contains(where: { $0.signature.matchesAsSwiftFunction(signature) }) {
@@ -166,6 +165,32 @@ public class KnownTypeBuilder {
         return self
     }
     
+    public func protocolConformances(protocolNames: [String]) -> KnownTypeBuilder {
+        for prot in protocolNames {
+            _=protocolConformance(protocolName: prot)
+        }
+        
+        return self
+    }
+    
+    public func enumRawValue(type: SwiftType) -> KnownTypeBuilder {
+        precondition(self.type.kind == .enum)
+        
+        self.type.setKnownTrait(KnownTypeTraits.enumRawValue, value: type)
+        
+        return self
+    }
+    
+    public func enumCase(named: String, rawValue: Expression? = nil) -> KnownTypeBuilder {
+        precondition(type.kind == .enum)
+        
+        let cs = EnumCaseGenerationIntention(name: named, expression: rawValue)
+        cs.storage.type = .typeName(type.typeName)
+        type.knownProperties.append(cs)
+        
+        return self
+    }
+    
     /// Returns the constructed KnownType instance from this builder, with all
     /// methods and properties associated with `with[...]()` method calls.
     public func build() -> KnownType {
@@ -177,6 +202,7 @@ private class DummyType: KnownType {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
+    var knownTraits: [String: Any] = [:]
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []
@@ -188,6 +214,10 @@ private class DummyType: KnownType {
         self.origin = "Synthesized type"
         self.typeName = typeName
         self.supertype = supertype?.asKnownSupertype
+    }
+    
+    func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
+        knownTraits[trait.name] = value
     }
 }
 

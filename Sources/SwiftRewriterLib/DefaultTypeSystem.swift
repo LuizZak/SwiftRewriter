@@ -811,6 +811,10 @@ private class LazyKnownType: KnownType {
         return types[0].kind
     }()
     
+    lazy var knownTraits: [String: Any] = {
+        return types.reduce([:], { $0.merging($1.knownTraits, uniquingKeysWith: { $1 }) })
+    }()
+    
     lazy var origin: String = {
         return types[0].origin
     }()

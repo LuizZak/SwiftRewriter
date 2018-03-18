@@ -8,6 +8,7 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     override func createTypes() {
+        createUILayoutConstraintAxis()
         createUIView()
         createUITableViewCell()
         createUIScrollView()
@@ -17,28 +18,559 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
     override func createDefinitions() {
         add(function(name: "UIGraphicsGetCurrentContext", paramTypes: [],
                      returnType: .optional(.typeName("CGContext"))))
+        
+        add(CodeDefinition(variableNamed: "UIViewNoIntrinsicMetric",
+                           storage: ValueStorage.constant(ofType: .cgFloat),
+                           intention: nil))
+        add(CodeDefinition(variableNamed: "UILayoutFittingCompressedSize",
+                           storage: ValueStorage.constant(ofType: "CGSize"),
+                           intention: nil))
+        add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
+                           storage: ValueStorage.constant(ofType: "CGSize"),
+                           intention: nil))
+    }
+    
+    func createUILayoutConstraintAxis() {
+        makeType(named: "UILayoutConstraintAxis", kind: .enum) { type -> KnownType in
+            type
+                .enumRawValue(type: .int)
+                .enumCase(named: "horizontal", rawValue: .constant(0))
+                .enumCase(named: "vertical", rawValue: .constant(1))
+                .build()
+        }
     }
     
     func createUIView() {
         makeType(named: "UIView", supertype: "UIResponder") { type -> KnownType in
-            type
-                // Fields
-                .field(named: "tag", type: .int)
-                .field(named: "isUserInteractionEnabled", type: .bool)
+            var type = type
+            
+            type.useSwiftSignatureMatching = true
+            
+            type = type
+                // Protocol conformances
+                .protocolConformances(protocolNames: [
+                    "NSCoding", "UIAppearance", "UIAppearanceContainer",
+                    "UIDynamicItem", "UITraitEnvironment", "UICoordinateSpace",
+                    "UIFocusItem", "CALayerDelegate"
+                ])
+            
+            type = type
                 // Properties
-                .property(named: "frame", type: .typeName("CGRect"))
-                .property(named: "bounds", type: .typeName("CGRect"))
-                .property(named: "layer", type: .typeName("CALayer"), accessor: .getter)
+                .property(named: "alignmentRectInsets", type: "UIEdgeInsets", accessor: .getter)
+                .property(named: "alpha", type: .cgFloat)
+                .property(named: "autoresizesSubviews", type: .bool)
+                .property(named: "autoresizingMask", type: "UIViewAutoresizing")
+                .property(named: "backgroundColor", type: .optional("UIColor"))
+                .property(named: "bottomAnchor", type: "NSLayoutYAxisAnchor", accessor: .getter)
+                .property(named: "bounds", type: "CGRect")
+                .property(named: "canBecomeFocused", type: .bool, accessor: .getter)
+                .property(named: "center", type: "CGPoint")
+                .property(named: "centerXAnchor", type: "NSLayoutXAxisAnchor", accessor: .getter)
+                .property(named: "centerYAnchor", type: "NSLayoutYAxisAnchor", accessor: .getter)
+                .property(named: "clearsContextBeforeDrawing", type: .bool)
+                .property(named: "clipsToBounds", type: .bool)
+                .property(named: "constraints", type: .array("NSLayoutConstraint"), accessor: .getter)
+                .property(named: "contentMode", type: "UIViewContentMode")
+                .property(named: "contentScaleFactor", type: .cgFloat)
+                .property(named: "directionalLayoutMargins", type: "NSDirectionalEdgeInsets")
+                .property(named: "effectiveUserInterfaceLayoutDirection", type: "UIUserInterfaceLayoutDirection", accessor: .getter)
+                .property(named: "firstBaselineAnchor", type: "NSLayoutYAxisAnchor", accessor: .getter)
+                .property(named: "forFirstBaselineLayout", type: "UIView", accessor: .getter)
+                .property(named: "forLastBaselineLayout", type: "UIView", accessor: .getter)
+                .property(named: "frame", type: "CGRect")
+                .property(named: "gestureRecognizers", type: .optional(.array("UIGestureRecognizer")))
+                .property(named: "hasAmbiguousLayout", type: .bool, accessor: .getter)
+                .property(named: "heightAnchor", type: "NSLayoutDimension", accessor: .getter)
+                .property(named: "insetsLayoutMarginsFromSafeArea", type: .bool)
+                .property(named: "intrinsicContentSize", type: "CGSize", accessor: .getter)
+                .property(named: "isExclusiveTouch", type: .bool)
+                .property(named: "isFocused", type: .bool, accessor: .getter)
+                .property(named: "isHidden", type: .bool)
+                .property(named: "isMultipleTouchEnabled", type: .bool)
+                .property(named: "isOpaque", type: .bool)
+                .property(named: "isUserInteractionEnabled", type: .bool)
+                .property(named: "lastBaselineAnchor", type: "NSLayoutYAxisAnchor", accessor: .getter)
+                .property(named: "layer", type: "CALayer", accessor: .getter)
+                .property(named: "layoutGuides", type: .array("UILayoutGuide"), accessor: .getter)
+                .property(named: "layoutMargins", type: "UIEdgeInsets")
+                .property(named: "layoutMarginsGuide", type: "UILayoutGuide", accessor: .getter)
+                .property(named: "leadingAnchor", type: "NSLayoutXAxisAnchor", accessor: .getter)
+                .property(named: "leftAnchor", type: "NSLayoutXAxisAnchor", accessor: .getter)
+                .property(named: "mask", type: .optional("UIView"))
+                .property(named: "motionEffects", type: .array("UIMotionEffect"))
+                .property(named: "preservesSuperviewLayoutMargins", type: .bool)
+                .property(named: "readableContentGuide", type: "UILayoutGuide", accessor: .getter)
+                .property(named: "restorationIdentifier", type: .optional("String"))
+                .property(named: "rightAnchor", type: "NSLayoutXAxisAnchor", accessor: .getter)
+                .property(named: "safeAreaInsets", type: "UIEdgeInsets", accessor: .getter)
+                .property(named: "safeAreaLayoutGuide", type: "UILayoutGuide", accessor: .getter)
+                .property(named: "semanticContentAttribute", type: "UISemanticContentAttribute")
+                .property(named: "subviews", type: .array("UIView"), accessor: .getter)
+                .property(named: "superview", type: .optional("UIView"), accessor: .getter)
+                .property(named: "tag", type: .int)
+                .property(named: "tintAdjustmentMode", type: "UIViewTintAdjustmentMode")
+                .property(named: "tintColor", type: .implicitUnwrappedOptional("UIColor"))
+                .property(named: "topAnchor", type: "NSLayoutYAxisAnchor", accessor: .getter)
+                .property(named: "trailingAnchor", type: "NSLayoutXAxisAnchor", accessor: .getter)
+                .property(named: "transform", type: "CGAffineTransform")
+                .property(named: "translatesAutoresizingMaskIntoConstraints", type: .bool)
+                .property(named: "widthAnchor", type: "NSLayoutDimension", accessor: .getter)
+                .property(named: "window", type: .optional("UIWindow"), accessor: .getter)
+                
+            type = type
                 // Constructors
                 .constructor(shortParameters: [("frame", .typeName("CGRect"))])
+            
+            type = type
                 // Methods
                 .method(withSignature:
-                    FunctionSignature(name: "draw", parameters: [
-                        ParameterSignature(label: "_", name: "rect", type: .typeName("CGRect"))
-                    ])
+                    FunctionSignature(
+                        name: "addConstraint",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "constraint", type: "NSLayoutConstraint")
+                        ]
+                    )
                 )
-                .build()
-            }
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "addConstraints",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "constraints", type: .array("NSLayoutConstraint"))
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "addGestureRecognizer",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "gestureRecognizer", type: "UIGestureRecognizer")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "addLayoutGuide",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "layoutGuide", type: "UILayoutGuide")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "addMotionEffect",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "effect", type: "UIMotionEffect")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "addSubview",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "view", type: "UIView")
+                        ]
+                    )
+                )
+
+            type = type
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "alignmentRect",
+                        parameters: [
+                            ParameterSignature(label: "forFrame", name: "frame", type: "CGRect")
+                        ],
+                        returnType: "CGRect"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "bringSubview",
+                        parameters: [
+                            ParameterSignature(label: "toFront", name: "view", type: "UIView")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "constraintsAffectingLayout",
+                        parameters: [
+                            ParameterSignature(label: "for", name: "axis", type: "UILayoutConstraintAxis")
+                        ],
+                        returnType: "[NSLayoutConstraint]"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "contentCompressionResistancePriority",
+                        parameters: [
+                            ParameterSignature(label: "for", name: "axis", type: "UILayoutConstraintAxis")
+                        ],
+                        returnType: "UILayoutPriority"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "contentHuggingPriority",
+                        parameters: [
+                            ParameterSignature(label: "for", name: "axis", type: "UILayoutConstraintAxis")
+                        ],
+                        returnType: "UILayoutPriority"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "convert",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "point", type: "CGPoint"),
+                            ParameterSignature(label: "from", name: "view", type: .optional("UIView"))
+                        ],
+                        returnType: "CGPoint"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "convert",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "point", type: "CGPoint"),
+                            ParameterSignature(label: "to", name: "view", type: .optional("UIView"))
+                        ],
+                        returnType: "CGPoint"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "convert",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "rect", type: "CGRect"),
+                            ParameterSignature(label: "from", name: "view", type: .optional("UIView"))
+                        ],
+                        returnType: "CGRect"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "convert",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "rect", type: "CGRect"),
+                            ParameterSignature(label: "to", name: "view", type: .optional("UIView"))
+                        ],
+                        returnType: "CGRect"
+                    )
+                )
+
+            type = type
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "decodeRestorableState",
+                        parameters: [
+                            ParameterSignature(label: "with", name: "coder", type: "NSCoder")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "didAddSubview",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "subview", type: "UIView")
+                        ]
+                    )
+                )
+                .method(named: "didMoveToSuperview")
+                .method(named: "didMoveToWindow")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "draw",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "rect", type: "CGRect")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "drawHierarchy",
+                        parameters: [
+                            ParameterSignature(label: "in", name: "rect", type: "CGRect"),
+                            ParameterSignature(label: "afterScreenUpdates", name: "afterUpdates", type: .bool)
+                        ],
+                        returnType: .bool
+                    )
+                )
+
+            type = type
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "encodeRestorableState",
+                        parameters: [
+                            ParameterSignature(label: "with", name: "coder", type: "NSCoder")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "exchangeSubview",
+                        parameters: [
+                            ParameterSignature(label: "at", name: "index1", type: .int),
+                            ParameterSignature(label: "withSubviewAt", name: "index2", type: .int)
+                        ]
+                    )
+                )
+                .method(named: "exerciseAmbiguityInLayout")
+                .method(named: "forBaselineLayout", returning: "UIView")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "frame",
+                        parameters: [
+                            ParameterSignature(label: "forAlignmentRect", name: "alignmentRect", type: "CGRect")
+                        ],
+                        returnType: "CGRect"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "gestureRecognizerShouldBegin",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "gestureRecognizer", type: "UIGestureRecognizer")
+                        ],
+                        returnType: .bool
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "hitTest",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "point", type: "CGPoint"),
+                            ParameterSignature(label: "with", name: "event", type: .optional("UIEvent"))
+                        ],
+                        returnType: .optional("UIView")
+                    )
+                )
+
+            type = type
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "insertSubview",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "view", type: "UIView"),
+                            ParameterSignature(label: "aboveSubview", name: "siblingSubview", type: "UIView")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "insertSubview",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "view", type: "UIView"),
+                            ParameterSignature(label: "at", name: "index", type: .int)
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "insertSubview",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "view", type: "UIView"),
+                            ParameterSignature(label: "belowSubview", name: "siblingSubview", type: "UIView")
+                        ]
+                    )
+                )
+                .method(named: "invalidateIntrinsicContentSize")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "isDescendant",
+                        parameters: [
+                            ParameterSignature(label: "of", name: "view", type: "UIView")
+                        ],
+                        returnType: .bool
+                    )
+                )
+                .method(named: "layoutIfNeeded")
+                .method(named: "layoutMarginsDidChange")
+                .method(named: "layoutSubviews")
+                .method(named: "needsUpdateConstraints", returning: .bool)
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "point",
+                        parameters: [
+                            ParameterSignature(label: "inside", name: "point", type: "CGPoint"),
+                            ParameterSignature(label: "with", name: "event", type: .optional("UIEvent"))
+                        ],
+                        returnType: .bool
+                    )
+                )
+
+            type = type
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "removeConstraint",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "constraint", type: "NSLayoutConstraint")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "removeConstraints",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "constraints", type: .array("NSLayoutConstraint"))
+                        ]
+                    )
+                )
+                .method(named: "removeFromSuperview")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "removeGestureRecognizer",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "gestureRecognizer", type: "UIGestureRecognizer")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "removeLayoutGuide",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "layoutGuide", type: "UILayoutGuide")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "removeMotionEffect",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "effect", type: "UIMotionEffect")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "resizableSnapshotView",
+                        parameters: [
+                            ParameterSignature(label: "from", name: "rect", type: "CGRect"),
+                            ParameterSignature(label: "afterScreenUpdates", name: "afterUpdates", type: .bool),
+                            ParameterSignature(label: "withCapInsets", name: "capInsets", type: "UIEdgeInsets")
+                        ],
+                        returnType: .optional("UIView")
+                    )
+                )
+
+            type = type
+                .method(named: "safeAreaInsetsDidChange")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "sendSubview",
+                        parameters: [
+                            ParameterSignature(label: "toBack", name: "view", type: "UIView")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setContentCompressionResistancePriority",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "priority", type: "UILayoutPriority"),
+                            ParameterSignature(label: "for", name: "axis", type: "UILayoutConstraintAxis")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setContentHuggingPriority",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "priority", type: "UILayoutPriority"),
+                            ParameterSignature(label: "for", name: "axis", type: "UILayoutConstraintAxis")
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "setNeedsDisplay",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "rect", type: "CGRect")
+                        ]
+                    )
+                )
+                .method(named: "setNeedsDisplay")
+                .method(named: "setNeedsLayout")
+                .method(named: "setNeedsUpdateConstraints")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "sizeThatFits",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "size", type: "CGSize")
+                        ],
+                        returnType: "CGSize"
+                    )
+                )
+                .method(named: "sizeToFit")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "snapshotView",
+                        parameters: [
+                            ParameterSignature(label: "afterScreenUpdates", name: "afterUpdates", type: .bool)
+                        ],
+                        returnType: .optional("UIView")
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "systemLayoutSizeFitting",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "targetSize", type: "CGSize"),
+                            ParameterSignature(label: "withHorizontalFittingPriority", name: "horizontalFittingPriority", type: "UILayoutPriority"),
+                            ParameterSignature(name: "verticalFittingPriority", type: "UILayoutPriority")
+                        ],
+                        returnType: "CGSize"
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "systemLayoutSizeFitting",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "targetSize", type: "CGSize")
+                        ],
+                        returnType: "CGSize"
+                    )
+                )
+
+            type = type
+                .method(named: "tintColorDidChange")
+                .method(named: "updateConstraints")
+                .method(named: "updateConstraintsIfNeeded")
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "viewWithTag",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "tag", type: .int)
+                        ],
+                        returnType: .optional("UIView")
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "willMove",
+                        parameters: [
+                            ParameterSignature(label: "toSuperview", name: "newSuperview", type: .optional("UIView"))
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "willMove",
+                        parameters: [
+                            ParameterSignature(label: "toWindow", name: "newWindow", type: .optional("UIWindow"))
+                        ]
+                    )
+                )
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "willRemoveSubview",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "subview", type: "UIView")
+                        ]
+                    )
+                )
+            
+            return type.build()
+        }
     }
     
     func createUITableViewCell() {
@@ -231,6 +763,8 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
     func createUITableView() {
         makeType(named: "UITableView", supertype: "UIScrollView") { type -> KnownType in
             var type = type
+            
+            type.useSwiftSignatureMatching = true
             
             type = type
                 // Properties
@@ -488,8 +1022,7 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                             ParameterSignature(label: "forCellReuseIdentifier",
                                                name: "identifier", type: .string)
                         ]
-                    ),
-                        useSwiftSignatureMatching: true
+                    )
                 )
                 .method(withSignature:
                     FunctionSignature(
@@ -498,8 +1031,7 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                             ParameterSignature(label: "forHeaderFooterViewReuseIdentifier",
                                                name: "identifier", type: .string)
                         ]
-                    ),
-                        useSwiftSignatureMatching: true
+                    )
                 )
                 .method(named: "reloadData")
                 .method(withSignature:

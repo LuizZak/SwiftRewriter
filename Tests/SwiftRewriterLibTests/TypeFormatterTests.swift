@@ -162,4 +162,22 @@ class TypeFormatterTests: XCTestCase {
         
         XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
     }
+    
+    func testAsStringKnownTypeEnum() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .enum)
+            .enumRawValue(type: .int)
+            .enumCase(named: "a")
+            .enumCase(named: "b", rawValue: .constant(1))
+            .build()
+        
+        let result = TypeFormatter.asString(knownType: type)
+        let expected = """
+            enum A: Int {
+                case a
+                case b
+            }
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
 }

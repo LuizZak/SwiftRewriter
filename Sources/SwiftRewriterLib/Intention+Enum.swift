@@ -21,6 +21,8 @@ public class EnumGenerationIntention: TypeGenerationIntention {
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.rawValueType = rawValueType
         super.init(typeName: typeName, accessLevel: accessLevel, source: source)
+        
+        setKnownTrait(KnownTypeTraits.enumRawValue, value: rawValueType)
     }
     
     public func addCase(_ enumCase: EnumCaseGenerationIntention) {

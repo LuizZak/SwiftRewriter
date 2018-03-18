@@ -16,17 +16,157 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
                       returnType: .optional(.typeName("CGContext")))
     }
     
+    func testDefinedUIViewNoIntrinsicMetric() {
+        assertDefined(variable: "UIViewNoIntrinsicMetric", type: .cgFloat)
+    }
+    
+    func testDefinedUILayoutFittingCompressedSize() {
+        assertDefined(variable: "UILayoutFittingCompressedSize", type: "CGSize")
+    }
+    
+    func testDefinedUILayoutFittingExpandedSize() {
+        assertDefined(variable: "UILayoutFittingExpandedSize", type: "CGSize")
+    }
+    
+    func testDefinedUILayoutConstraintAxis() {
+        assertDefined(typeName: "UILayoutConstraintAxis", signature: """
+            enum UILayoutConstraintAxis: Int {
+                case horizontal
+                case vertical
+            }
+            """)
+    }
+    
     func testDefinedUIView() {
         assertDefined(typeName: "UIView", signature: """
-            class UIView: UIResponder {
-                var tag: Int
-                var isUserInteractionEnabled: Bool
-                var frame: CGRect
+            class UIView: UIResponder, NSCoding, UIAppearance, UIAppearanceContainer, UIDynamicItem, UITraitEnvironment, UICoordinateSpace, UIFocusItem, CALayerDelegate {
+                var alignmentRectInsets: UIEdgeInsets { get }
+                var alpha: CGFloat
+                var autoresizesSubviews: Bool
+                var autoresizingMask: UIViewAutoresizing
+                var backgroundColor: UIColor?
+                var bottomAnchor: NSLayoutYAxisAnchor { get }
                 var bounds: CGRect
+                var canBecomeFocused: Bool { get }
+                var center: CGPoint
+                var centerXAnchor: NSLayoutXAxisAnchor { get }
+                var centerYAnchor: NSLayoutYAxisAnchor { get }
+                var clearsContextBeforeDrawing: Bool
+                var clipsToBounds: Bool
+                var constraints: [NSLayoutConstraint] { get }
+                var contentMode: UIViewContentMode
+                var contentScaleFactor: CGFloat
+                var directionalLayoutMargins: NSDirectionalEdgeInsets
+                var effectiveUserInterfaceLayoutDirection: UIUserInterfaceLayoutDirection { get }
+                var firstBaselineAnchor: NSLayoutYAxisAnchor { get }
+                var forFirstBaselineLayout: UIView { get }
+                var forLastBaselineLayout: UIView { get }
+                var frame: CGRect
+                var gestureRecognizers: [UIGestureRecognizer]?
+                var hasAmbiguousLayout: Bool { get }
+                var heightAnchor: NSLayoutDimension { get }
+                var insetsLayoutMarginsFromSafeArea: Bool
+                var intrinsicContentSize: CGSize { get }
+                var isExclusiveTouch: Bool
+                var isFocused: Bool { get }
+                var isHidden: Bool
+                var isMultipleTouchEnabled: Bool
+                var isOpaque: Bool
+                var isUserInteractionEnabled: Bool
+                var lastBaselineAnchor: NSLayoutYAxisAnchor { get }
                 var layer: CALayer { get }
+                var layoutGuides: [UILayoutGuide] { get }
+                var layoutMargins: UIEdgeInsets
+                var layoutMarginsGuide: UILayoutGuide { get }
+                var leadingAnchor: NSLayoutXAxisAnchor { get }
+                var leftAnchor: NSLayoutXAxisAnchor { get }
+                var mask: UIView?
+                var motionEffects: [UIMotionEffect]
+                var preservesSuperviewLayoutMargins: Bool
+                var readableContentGuide: UILayoutGuide { get }
+                var restorationIdentifier: String?
+                var rightAnchor: NSLayoutXAxisAnchor { get }
+                var safeAreaInsets: UIEdgeInsets { get }
+                var safeAreaLayoutGuide: UILayoutGuide { get }
+                var semanticContentAttribute: UISemanticContentAttribute
+                var subviews: [UIView] { get }
+                var superview: UIView? { get }
+                var tag: Int
+                var tintAdjustmentMode: UIViewTintAdjustmentMode
+                var tintColor: UIColor!
+                var topAnchor: NSLayoutYAxisAnchor { get }
+                var trailingAnchor: NSLayoutXAxisAnchor { get }
+                var transform: CGAffineTransform
+                var translatesAutoresizingMaskIntoConstraints: Bool
+                var widthAnchor: NSLayoutDimension { get }
+                var window: UIWindow? { get }
                 
                 init(frame: CGRect)
+                func addConstraint(_ constraint: NSLayoutConstraint)
+                func addConstraints(_ constraints: [NSLayoutConstraint])
+                func addGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer)
+                func addLayoutGuide(_ layoutGuide: UILayoutGuide)
+                func addMotionEffect(_ effect: UIMotionEffect)
+                func addSubview(_ view: UIView)
+                func alignmentRect(forFrame frame: CGRect) -> CGRect
+                func bringSubview(toFront view: UIView)
+                func constraintsAffectingLayout(for axis: UILayoutConstraintAxis) -> [NSLayoutConstraint]
+                func contentCompressionResistancePriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
+                func contentHuggingPriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
+                func convert(_ point: CGPoint, from view: UIView?) -> CGPoint
+                func convert(_ point: CGPoint, to view: UIView?) -> CGPoint
+                func convert(_ rect: CGRect, from view: UIView?) -> CGRect
+                func convert(_ rect: CGRect, to view: UIView?) -> CGRect
+                func decodeRestorableState(with coder: NSCoder)
+                func didAddSubview(_ subview: UIView)
+                func didMoveToSuperview()
+                func didMoveToWindow()
                 func draw(_ rect: CGRect)
+                func drawHierarchy(in rect: CGRect, afterScreenUpdates afterUpdates: Bool) -> Bool
+                func encodeRestorableState(with coder: NSCoder)
+                func exchangeSubview(at index1: Int, withSubviewAt index2: Int)
+                func exerciseAmbiguityInLayout()
+                func forBaselineLayout() -> UIView
+                func frame(forAlignmentRect alignmentRect: CGRect) -> CGRect
+                func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool
+                func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView?
+                func insertSubview(_ view: UIView, aboveSubview siblingSubview: UIView)
+                func insertSubview(_ view: UIView, at index: Int)
+                func insertSubview(_ view: UIView, belowSubview siblingSubview: UIView)
+                func invalidateIntrinsicContentSize()
+                func isDescendant(of view: UIView) -> Bool
+                func layoutIfNeeded()
+                func layoutMarginsDidChange()
+                func layoutSubviews()
+                func needsUpdateConstraints() -> Bool
+                func point(inside point: CGPoint, with event: UIEvent?) -> Bool
+                func removeConstraint(_ constraint: NSLayoutConstraint)
+                func removeConstraints(_ constraints: [NSLayoutConstraint])
+                func removeFromSuperview()
+                func removeGestureRecognizer(_ gestureRecognizer: UIGestureRecognizer)
+                func removeLayoutGuide(_ layoutGuide: UILayoutGuide)
+                func removeMotionEffect(_ effect: UIMotionEffect)
+                func resizableSnapshotView(from rect: CGRect, afterScreenUpdates afterUpdates: Bool, withCapInsets capInsets: UIEdgeInsets) -> UIView?
+                func safeAreaInsetsDidChange()
+                func sendSubview(toBack view: UIView)
+                func setContentCompressionResistancePriority(_ priority: UILayoutPriority, for axis: UILayoutConstraintAxis)
+                func setContentHuggingPriority(_ priority: UILayoutPriority, for axis: UILayoutConstraintAxis)
+                func setNeedsDisplay(_ rect: CGRect)
+                func setNeedsDisplay()
+                func setNeedsLayout()
+                func setNeedsUpdateConstraints()
+                func sizeThatFits(_ size: CGSize) -> CGSize
+                func sizeToFit()
+                func snapshotView(afterScreenUpdates afterUpdates: Bool) -> UIView?
+                func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize
+                func systemLayoutSizeFitting(_ targetSize: CGSize) -> CGSize
+                func tintColorDidChange()
+                func updateConstraints()
+                func updateConstraintsIfNeeded()
+                func viewWithTag(_ tag: Int) -> UIView?
+                func willMove(toSuperview newSuperview: UIView?)
+                func willMove(toWindow newWindow: UIWindow?)
+                func willRemoveSubview(_ subview: UIView)
             }
             """)
     }
