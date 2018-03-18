@@ -684,7 +684,7 @@ private class MemberInvocationResolver {
             let type = target.resolvedType,
             case let .block(ret, args) = type.deepUnwrapped {
             
-            postfix.resolvedType = ret.withSameOptionalityAs(type)
+            postfix.resolvedType = type.wrappingOther(ret)
             functionCall.returnType = postfix.resolvedType
             functionCall.callableSignature = .block(returnType: ret, parameters: args)
             

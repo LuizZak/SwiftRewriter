@@ -827,6 +827,16 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         XCTAssertEqual(exp.parameters[0].type, .implicitUnwrappedOptional(.typeName("A")))
     }
+    
+    /// Tests proper deduction of optionality from an invocation of a function
+    /// that returns an optional type
+    func testOptionalReturnTypeFromCodeDefinition() {
+        startScopedTest(with: Expression.identifier("a").call(),
+                        sut: ExpressionTypeResolver())
+            .definingLocal(CodeDefinition(functionSignature: FunctionSignature(name: "a", returnType: .optional(.string)), intention: nil))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .optional(.string))
+    }
 }
 
 // MARK: - Test Building Helpers
