@@ -35,7 +35,7 @@ public enum TypeFormatter {
                                         includeVarKeyword: true))
             }
             let outputProperty: (KnownProperty) -> Void = {
-                if $0 is EnumCaseGenerationIntention {
+                if $0.isEnumCase {
                     o.output(line: "case \($0.name)")
                 } else {
                     o.output(line: asString(property: $0, ofType: type, withTypeName: false,

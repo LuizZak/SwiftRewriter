@@ -5,19 +5,14 @@ import SwiftRewriterLib
 /// Represents a type that, as well as having a full type signature, describes
 /// information for converting invocations and implementations of methods on implementers
 /// and expression call sites.
-open class CompoundedMappingType {
-    public var signatureMappings: [SignatureMapper] = []
+public class CompoundedMappingType {
+    public let signatureMappings: [SignatureMapper]
     
     var knownType: KnownType
     
-    public init(knownType: KnownType) {
+    public init(knownType: KnownType, signatureMappings: [SignatureMapper]) {
         self.knownType = knownType
-        
-        createSignatureMappings()
-    }
-    
-    open func createSignatureMappings() {
-        
+        self.signatureMappings = signatureMappings
     }
 }
 
@@ -34,7 +29,7 @@ extension CompoundedMappingType: KnownType {
     public var kind: KnownTypeKind {
         return knownType.kind
     }
-    public var knownTraits: [String : Any] {
+    public var knownTraits: [String : Codable] {
         get {
             return knownType.knownTraits
         }

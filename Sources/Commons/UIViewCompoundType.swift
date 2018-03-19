@@ -2,7 +2,22 @@ import SwiftAST
 import SwiftRewriterLib
 
 public class UIViewCompoundType {
-    public func create() -> CompoundedMappingType {
+    public static func create() -> CompoundedMappingType {
+        let mappings = createMappings()
+        let type = createType()
+        
+        return CompoundedMappingType(knownType: type, signatureMappings: mappings)
+    }
+    
+    static func createMappings() -> [SignatureMapper] {
+        let mappings = SignatureMapperBuilder()
+        
+        return mappings
+            .mapKeywords(from: ["drawRect", nil], to: ["rect", nil])
+            .build()
+    }
+    
+    static func createType() -> KnownType {
         var type = KnownTypeBuilder(typeName: "UIView", supertype: "NSObject")
         
         type.useSwiftSignatureMatching = true
@@ -807,6 +822,6 @@ public class UIViewCompoundType {
                 )
             )
         
-        return CompoundedMappingType(knownType: type.build())
+        return type.build()
     }
 }

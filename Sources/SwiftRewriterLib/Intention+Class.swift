@@ -122,6 +122,10 @@ extension InstanceVariableGenerationIntention: KnownProperty {
     public var optional: Bool {
         return false
     }
+    
+    public var isEnumCase: Bool {
+        return false
+    }
 }
 
 /// Specifies an intention for a member that can be overriden by subtypes

@@ -257,3 +257,112 @@ extension SwiftType: CustomStringConvertible {
         return self.description
     }
 }
+
+extension SwiftType: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let flag = try container.decode(SwiftTypeCase.self, forKey: .kind)
+        
+        switch flag {
+        case .typeName:
+            let name = try container.decode(String.self, forKey: .field0)
+            
+            self = .typeName(name)
+            
+        case .optional:
+            let inner = try container.decode(SwiftType.self, forKey: .field0)
+            
+            self = .optional(inner)
+            
+        case .implicitUnwrappedOptional:
+            let inner = try container.decode(SwiftType.self, forKey: .field0)
+
+            self = .implicitUnwrappedOptional(inner)
+            
+        case .generic:
+            let name = try container.decode(String.self, forKey: .field0)
+            let params = try container.decode([SwiftType].self, forKey: .field1)
+            
+            self = .generic(name, parameters: params)
+            
+        case .protocolComposition:
+            let types = try container.decode([SwiftType].self, forKey: .field0)
+            
+            self = .protocolComposition(types)
+            
+        case .block:
+            let returnType = try container.decode(SwiftType.self, forKey: .field0)
+            let params = try container.decode([SwiftType].self, forKey: .field1)
+            
+            self = .block(returnType: returnType, parameters: params)
+            
+        case .metatype:
+            let inner = try container.decode(SwiftType.self, forKey: .field0)
+            
+            self = .metatype(for: inner)
+            
+        case .tuple:
+            let types = try container.decode([SwiftType].self, forKey: .field0)
+            
+            self = .tuple(types)
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .typeName(let name):
+            try container.encode(SwiftTypeCase.typeName, forKey: .kind)
+            try container.encode(name, forKey: .field0)
+            
+        case .optional(let inner):
+            try container.encode(SwiftTypeCase.optional, forKey: .kind)
+            try container.encode(inner, forKey: .field0)
+            
+        case .implicitUnwrappedOptional(let inner):
+            try container.encode(SwiftTypeCase.implicitUnwrappedOptional, forKey: .kind)
+            try container.encode(inner, forKey: .field0)
+            
+        case let .generic(name, params):
+            try container.encode(SwiftTypeCase.generic, forKey: .kind)
+            try container.encode(name, forKey: .field0)
+            try container.encode(params, forKey: .field1)
+            
+        case .protocolComposition(let types):
+            try container.encode(SwiftTypeCase.protocolComposition, forKey: .kind)
+            try container.encode(types, forKey: .field0)
+            
+        case let .block(returnType, params):
+            try container.encode(SwiftTypeCase.block, forKey: .kind)
+            try container.encode(returnType, forKey: .field0)
+            try container.encode(params, forKey: .field1)
+            
+        case let .metatype(inner):
+            try container.encode(SwiftTypeCase.metatype, forKey: .kind)
+            try container.encode(inner, forKey: .field0)
+            
+        case let .tuple(types):
+            try container.encode(SwiftTypeCase.tuple, forKey: .kind)
+            try container.encode(types, forKey: .field0)
+        }
+    }
+    
+    private enum CodingKeys: CodingKey {
+        case kind
+        case field0
+        case field1
+    }
+    
+    private enum SwiftTypeCase: String, Codable {
+        case typeName
+        case optional
+        case implicitUnwrappedOptional
+        case generic
+        case protocolComposition
+        case block
+        case metatype
+        case tuple
+    }
+}

@@ -262,8 +262,39 @@ public protocol FunctionIntention: Intention {
     var functionBody: FunctionBodyIntention? { get }
 }
 
+/// Defines a protocol for a value storage intention.
+public protocol ValueStorageIntention: Intention {
+    var name: String { get }
+    var storage: ValueStorage { get }
+}
+
+public extension ValueStorageIntention {
+    public var type: SwiftType {
+        return storage.type
+    }
+    
+    public var ownership: Ownership {
+        return storage.ownership
+    }
+    
+    public var isConstant: Bool {
+        return storage.isConstant
+    }
+}
+
+public extension FunctionCallPostfix {
+    /// Generates an Objective-C selector from this function call united with
+    /// a given method name.
+    public func selectorWith(methodName: String) -> SelectorSignature {
+        let selectors: [String?]
+            = [methodName] + arguments.map { $0.label }
+        
+        return SelectorSignature(isStatic: false, keywords: selectors)
+    }
+}
+
 /// Represents an Objective-C selector signature.
-public struct SelectorSignature: Equatable {
+public struct SelectorSignature: Equatable, Codable {
     public var isStatic: Bool
     public var keywords: [String?]
     
@@ -274,7 +305,7 @@ public struct SelectorSignature: Equatable {
 }
 
 /// Signature for a function intention
-public struct FunctionSignature: Equatable {
+public struct FunctionSignature: Equatable, Codable {
     public var isStatic: Bool
     public var name: String
     public var returnType: SwiftType
@@ -356,18 +387,7 @@ public struct FunctionSignature: Equatable {
     }
 }
 
-public extension FunctionCallPostfix {
-    /// Generates an Objective-C selector from this function call united with
-    /// a given method name.
-    public func selectorWith(methodName: String) -> SelectorSignature {
-        let selectors: [String?]
-            = [methodName] + arguments.map { $0.label }
-        
-        return SelectorSignature(isStatic: false, keywords: selectors)
-    }
-}
-
-public struct ParameterSignature: Equatable {
+public struct ParameterSignature: Equatable, Codable {
     public var label: String
     public var name: String
     public var type: SwiftType
@@ -385,22 +405,3 @@ public struct ParameterSignature: Equatable {
     }
 }
 
-/// Defines a protocol for a value storage intention.
-public protocol ValueStorageIntention: Intention {
-    var name: String { get }
-    var storage: ValueStorage { get }
-}
-
-public extension ValueStorageIntention {
-    public var type: SwiftType {
-        return storage.type
-    }
-    
-    public var ownership: Ownership {
-        return storage.ownership
-    }
-    
-    public var isConstant: Bool {
-        return storage.isConstant
-    }
-}

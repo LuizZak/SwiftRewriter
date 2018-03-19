@@ -1,3 +1,4 @@
+import Foundation
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
@@ -19,7 +20,7 @@ public protocol KnownType: KnownSupertypeConvertible {
     var kind: KnownTypeKind { get }
     
     /// Gets a set of known type traits for this type
-    var knownTraits: [String: Any] { get set }
+    var knownTraits: [String: Codable] { get set }
     
     /// Gets an array of all known constructors for this type
     var knownConstructors: [KnownConstructor] { get }
@@ -54,6 +55,42 @@ public enum KnownTypeKind: String {
     /// A struct type
     case `struct`
 }
+
+/// Defines a reference to a known type.
+///
+/// - knownType: A concrete known type reference.
+/// - typeName: The type that is referenced by a loose type name.
+public enum KnownTypeReference {
+    case knownType(KnownType)
+    case typeName(String)
+    
+    public init(_ type: KnownSupertypeConvertible) {
+        self = .typeName(type.asKnownSupertype.asTypeName)
+    }
+    
+    public var asTypeName: String {
+        switch self {
+        case .knownType(let type):
+            return type.typeName
+        case .typeName(let name):
+            return name
+        }
+    }
+    
+    public var asKnownType: KnownType? {
+        switch self {
+        case .knownType(let type):
+            return type
+        case .typeName:
+            return nil
+        }
+    }
+    
+    public var asKnownSupertype: KnownSupertype {
+        return .typeName(asTypeName)
+    }
+}
+
 
 /// Defines the known supertype of a `KnownType`
 ///
@@ -161,10 +198,13 @@ public protocol KnownProperty: KnownMember {
     
     /// Gets the accessors for this property
     var accessor: KnownPropertyAccessor { get }
+    
+    /// `true` if this property actually represents an enumeration case.
+    var isEnumCase: Bool { get }
 }
 
 /// Describes the getter/setter states of a property
-public enum KnownPropertyAccessor {
+public enum KnownPropertyAccessor: String {
     case getter
     case getterAndSetter
 }
@@ -194,11 +234,78 @@ public extension KnownMethod {
 }
 
 /// Represents a type trait
-public struct KnownTypeTrait<T> {
+public struct KnownTypeTrait<T: Codable> {
     public var name: String
     
     public init(name: String) {
         self.name = name
+    }
+}
+
+public final class KnownTypeTraitEncoder {
+    public static func encode<C: KeyedEncodingContainerProtocol>
+        (_ knownTraits: [String: Codable], in container: inout C, forKey key: C.Key) throws {
+        
+        var traits: [Trait] = []
+        
+        for (name, value) in knownTraits {
+            switch value {
+            case let val as SwiftType:
+                let trait = Trait(name: name, trait: .swiftType(val))
+                traits.append(trait)
+            default:
+                fatalError("Cannot encode trait type \(type(of: value))")
+            }
+        }
+        
+        try container.encode(traits, forKey: key)
+    }
+    
+    public static func decode<C: KeyedDecodingContainerProtocol>
+        (in container: inout C, forKey key: C.Key) throws -> [String: Codable] {
+        let traits: [Trait] = try container.decode([Trait].self, forKey: key)
+        
+        return Dictionary(grouping: traits, by: { $0.name })
+    }
+    
+    private struct Trait: Codable {
+        var name: String
+        var trait: TraitType
+    }
+    
+    private enum TraitType: Codable {
+        case swiftType(SwiftType)
+        
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            switch try container.decode(Int.self, forKey: .flag) {
+            case 0:
+               self = .swiftType(try container.decode(SwiftType.self, forKey: .field))
+            default:
+                let message = """
+                    Unknown TraitType flag. Maybe data was encoded using a \
+                    different version of SwiftRewriter?
+                    """
+                throw DecodingError.dataCorruptedError(forKey: .flag, in: container,
+                                                       debugDescription: message)
+            }
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            switch self {
+            case .swiftType(let type):
+                try container.encode(0, forKey: .flag)
+                try container.encode(type, forKey: .field)
+            }
+        }
+        
+        private enum CodingKeys: Int, CodingKey {
+            case flag
+            case field
+        }
     }
 }
 

@@ -5,13 +5,13 @@ import SwiftAST
 public struct KnownTypeBuilder {
     public typealias ParameterTuple = (label: String, type: SwiftType)
     
-    private let type: DummyBuildingType
+    private var type: BuildingKnownType
     public var useSwiftSignatureMatching: Bool = false
     
     public init(typeName: String, supertype: KnownSupertypeConvertible? = nil,
                 kind: KnownTypeKind = .class, file: String = #file,
                 line: Int = #line) {
-        var type = DummyBuildingType(typeName: typeName, supertype: supertype)
+        var type = BuildingKnownType(typeName: typeName, supertype: supertype)
         
         type.kind = kind
         type.origin = "Synthesized with \(KnownTypeBuilder.self) at \(file) line \(line)"
@@ -19,23 +19,23 @@ public struct KnownTypeBuilder {
         self.type = type
     }
     
-    private init(type: DummyBuildingType, useSwiftSignatureMatching: Bool) {
+    private init(type: BuildingKnownType, useSwiftSignatureMatching: Bool) {
         self.type = type
         self.useSwiftSignatureMatching = useSwiftSignatureMatching
     }
     
     /// Sets the supertype of the type being constructed on this known type builder
     public func settingSupertype(_ supertype: KnownSupertypeConvertible?) -> KnownTypeBuilder {
-        var type = self.type
-        type.supertype = supertype?.asKnownSupertype
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        var new = clone()
+        new.type.supertype = supertype?.asKnownSupertype
+        return new
     }
     
     /// Sets the kind of the type being built
     public func settingKind(_ kind: KnownTypeKind) -> KnownTypeBuilder {
-        var type = self.type
-        type.kind = kind
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        var new = clone()
+        new.type.kind = kind
+        return new
     }
     
     /// Adds a parameter-less constructor to this type
@@ -58,12 +58,12 @@ public struct KnownTypeBuilder {
     
     /// Adds a new constructor to this type
     public func constructor(withParameters parameters: [ParameterSignature]) -> KnownTypeBuilder {
-        var type = self.type
-        let ctor = DummyConstructor(parameters: parameters)
+        var new = clone()
+        let ctor = BuildingKnownConstructor(parameters: parameters)
         
-        type.knownConstructors.append(ctor)
+        new.type.constructors.append(ctor)
         
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        return new
     }
     
     /// Adds an instance method with a given return type, and a flag
@@ -71,6 +71,7 @@ public struct KnownTypeBuilder {
     public func method(named name: String, shortParams: [ParameterTuple] = [],
                        returning returnType: SwiftType = .void, isStatic: Bool = false,
                        optional: Bool = false) -> KnownTypeBuilder {
+        
         let parameters =
             shortParams.map { tuple in
                 ParameterSignature(name: tuple.label, type: tuple.type)
@@ -87,7 +88,8 @@ public struct KnownTypeBuilder {
     /// method is an optional protocol conformance method
     public func method(withSignature signature: FunctionSignature,
                        optional: Bool = false) -> KnownTypeBuilder {
-        var type = self.type
+        
+        var new = clone()
         
         // Check duplicates
         if useSwiftSignatureMatching {
@@ -98,12 +100,12 @@ public struct KnownTypeBuilder {
             return self
         }
         
-        let method = DummyMethod(ownerType: type, body: nil, signature: signature,
-                                 optional: optional)
+        let method = BuildingKnownMethod(ownerType: type, body: nil, signature: signature,
+                                         optional: optional)
         
-        type.knownMethods.append(method)
+        new.type.methods.append(method)
         
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        return new
     }
     
     /// Adds a strong property with no attributes with a given name and type, and
@@ -112,10 +114,11 @@ public struct KnownTypeBuilder {
     public func property(named name: String, type: SwiftType, ownership: Ownership = .strong,
                          isStatic: Bool = false, optional: Bool = false,
                          accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
+        
         let storage = ValueStorage(type: type, ownership: ownership, isConstant: false)
         
         return property(named: name, storage: storage, isStatic: isStatic,
-                              optional: optional, accessor: accessor)
+                        optional: optional, accessor: accessor)
     }
     
     /// Adds a property with no attributes with a given name and storage, and a
@@ -123,7 +126,8 @@ public struct KnownTypeBuilder {
     /// property
     public func property(named name: String, storage: ValueStorage, isStatic: Bool = false,
                          optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
-        var type = self.type
+        
+        var new = clone()
         
         // Check duplicates
         guard !type.knownProperties.contains(where: {
@@ -132,18 +136,21 @@ public struct KnownTypeBuilder {
             return self
         }
         
-        let property = DummyProperty(ownerType: type, name: name, storage: storage,
-                                     attributes: [], isStatic: isStatic,
-                                     optional: optional, accessor: accessor)
+        let property =
+            BuildingKnownProperty(ownerType: type, name: name, storage: storage,
+                                  attributes: [], isStatic: isStatic,
+                                  optional: optional, accessor: accessor,
+                                  isEnumCase: false)
         
-        type.knownProperties.append(property)
+        new.type.properties.append(property)
         
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        return new
     }
     
     /// Adds a strong field with no attributes with a given name and type
     public func field(named name: String, type: SwiftType, isConstant: Bool = false,
                       isStatic: Bool = false) -> KnownTypeBuilder {
+        
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: isConstant)
         
         return field(named: name, storage: storage, isStatic: isStatic)
@@ -151,7 +158,8 @@ public struct KnownTypeBuilder {
     
     /// Adds a property with no attributes with a given name and storage
     public func field(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
-        var type = self.type
+        
+        var new = clone()
         
         // Check duplicates
         guard !type.knownFields.contains(where: {
@@ -160,28 +168,30 @@ public struct KnownTypeBuilder {
             return self
         }
         
-        let property = DummyProperty(ownerType: type, name: name, storage: storage,
-                                     attributes: [], isStatic: isStatic,
-                                     optional: false, accessor: .getterAndSetter)
+        let property =
+            BuildingKnownProperty(ownerType: type, name: name, storage: storage,
+                                  attributes: [], isStatic: isStatic,
+                                  optional: false, accessor: .getterAndSetter,
+                                  isEnumCase: false)
         
-        type.knownFields.append(property)
+        new.type.fields.append(property)
         
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        return new
     }
     
     public func protocolConformance(protocolName: String) -> KnownTypeBuilder {
-        var type = self.type
+        var new = clone()
         
         // Check duplicates
         guard !type.knownProtocolConformances.contains(where: { $0.protocolName == protocolName }) else {
             return self
         }
         
-        let conformance = DummyProtocolConformance(protocolName: protocolName)
+        let conformance = BuildingKnownProtocolConformance(protocolName: protocolName)
         
-        type.knownProtocolConformances.append(conformance)
+        new.type.protocols.append(conformance)
         
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        return new
     }
     
     public func protocolConformances(protocolNames: [String]) -> KnownTypeBuilder {
@@ -194,23 +204,34 @@ public struct KnownTypeBuilder {
     }
     
     public func enumRawValue(type rawValueType: SwiftType) -> KnownTypeBuilder {
-        var type = self.type
+        var new = clone()
         precondition(type.kind == .enum)
         
-        type.setKnownTrait(KnownTypeTraits.enumRawValue, value: rawValueType)
+        new.type.setKnownTrait(KnownTypeTraits.enumRawValue, value: rawValueType)
         
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        return new
     }
     
-    public func enumCase(named: String, rawValue: Expression? = nil) -> KnownTypeBuilder {
-        var type = self.type
+    public func enumCase(named name: String, rawValue: Expression? = nil) -> KnownTypeBuilder {
+        var new = clone()
         
         precondition(type.kind == .enum)
         
-        let cs = EnumCaseGenerationIntention(name: named, expression: rawValue)
-        cs.storage.type = .typeName(type.typeName)
-        type.knownProperties.append(cs)
+        let storage =
+            ValueStorage(type: .typeName(type.typeName), ownership: .strong,
+                         isConstant: true)
         
+        let cs =
+            BuildingKnownProperty(ownerType: type, name: name, storage: storage,
+                                  attributes: [], isStatic: true, optional: false,
+                                  accessor: .getter, isEnumCase: true)
+        
+        new.type.properties.append(cs)
+        
+        return new
+    }
+    
+    func clone() -> KnownTypeBuilder {
         return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
@@ -225,7 +246,7 @@ private class DummyType: KnownType {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
-    var knownTraits: [String: Any] = [:]
+    var knownTraits: [String: Codable] = [:]
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []
@@ -233,7 +254,7 @@ private class DummyType: KnownType {
     var knownProtocolConformances: [KnownProtocolConformance] = []
     var supertype: KnownSupertype?
     
-    init(type: DummyBuildingType) {
+    init(type: BuildingKnownType) {
         origin = type.origin
         typeName = type.typeName
         kind = type.kind
@@ -257,16 +278,16 @@ private class DummyType: KnownType {
     }
 }
 
-private struct DummyBuildingType: KnownType {
+private struct BuildingKnownType {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
-    var knownTraits: [String: Any] = [:]
-    var knownConstructors: [KnownConstructor] = []
-    var knownMethods: [KnownMethod] = []
-    var knownProperties: [KnownProperty] = []
-    var knownFields: [KnownProperty] = []
-    var knownProtocolConformances: [KnownProtocolConformance] = []
+    var traits: [String: Codable] = [:]
+    var constructors: [BuildingKnownConstructor] = []
+    var methods: [BuildingKnownMethod] = []
+    var properties: [BuildingKnownProperty] = []
+    var fields: [BuildingKnownProperty] = []
+    var protocols: [BuildingKnownProtocolConformance] = []
     var supertype: KnownSupertype?
     
     init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
@@ -274,24 +295,50 @@ private struct DummyBuildingType: KnownType {
         self.typeName = typeName
         self.supertype = supertype?.asKnownSupertype
     }
+}
+
+extension BuildingKnownType: KnownType {
+    var knownTraits: [String: Codable] {
+        get {
+            return traits
+        }
+        set {
+            traits = newValue
+        }
+    }
+    var knownConstructors: [KnownConstructor] {
+        return constructors
+    }
+    var knownMethods: [KnownMethod] {
+        return methods
+    }
+    var knownProperties: [KnownProperty] {
+        return properties
+    }
+    var knownFields: [KnownProperty] {
+        return fields
+    }
+    var knownProtocolConformances: [KnownProtocolConformance] {
+        return protocols
+    }
     
     mutating func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
         knownTraits[trait.name] = value
     }
 }
 
-private struct DummyConstructor: KnownConstructor {
+private struct BuildingKnownConstructor: KnownConstructor {
     var parameters: [ParameterSignature]
 }
 
-private struct DummyMethod: KnownMethod {
+private struct BuildingKnownMethod: KnownMethod {
     var ownerType: KnownType?
     var body: KnownMethodBody?
     var signature: FunctionSignature
     var optional: Bool
 }
 
-private struct DummyProperty: KnownProperty {
+private struct BuildingKnownProperty: KnownProperty {
     var ownerType: KnownType?
     var name: String
     var storage: ValueStorage
@@ -299,8 +346,9 @@ private struct DummyProperty: KnownProperty {
     var isStatic: Bool
     var optional: Bool
     var accessor: KnownPropertyAccessor
+    var isEnumCase: Bool
 }
 
-private struct DummyProtocolConformance: KnownProtocolConformance {
+private struct BuildingKnownProtocolConformance: KnownProtocolConformance {
     var protocolName: String
 }

@@ -41,3 +41,41 @@ public class SignatureMapper {
         return true
     }
 }
+
+public struct SignatureMapperBuilder {
+    private var mappings: [SignatureMapper] = []
+    
+    public func map(from: SelectorSignature, to: SelectorSignature) -> SignatureMapperBuilder {
+        var new = clone()
+        new.mappings.append(SignatureMapper(from: from, to: to))
+        
+        return new
+    }
+    
+    public func map(signature: SignatureMapper) -> SignatureMapperBuilder {
+        var new = clone()
+        new.mappings.append(signature)
+        
+        return new
+    }
+    
+    public func mapKeywords(from fromKeywords: [String?], to toKeywords: [String?],
+                            isStatic: Bool = false) -> SignatureMapperBuilder {
+        var new = clone()
+        
+        let signFrom = SelectorSignature(isStatic: isStatic, keywords: fromKeywords)
+        let signTo = SelectorSignature(isStatic: isStatic, keywords: toKeywords)
+        
+        new.mappings.append(SignatureMapper(from: signFrom, to: signTo))
+        
+        return new
+    }
+    
+    public func build() -> [SignatureMapper] {
+        return mappings
+    }
+    
+    private func clone() -> SignatureMapperBuilder {
+        return self
+    }
+}

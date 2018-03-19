@@ -39,6 +39,10 @@ public class EnumCaseGenerationIntention: PropertyGenerationIntention {
         return true // Enum cases are always static
     }
     
+    public override var isEnumCase: Bool {
+        return true
+    }
+    
     public init(name: String, expression: Expression?,
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.expression = expression

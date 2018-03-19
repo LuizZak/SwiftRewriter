@@ -24,4 +24,13 @@ class SwiftTypeTests: XCTestCase {
             .optional(.implicitUnwrappedOptional(.int))
         )
     }
+    
+    func testEncode() throws {
+        let type = SwiftType.block(returnType: .void, parameters: [.array(.string)])
+        
+        let encoded = try JSONEncoder().encode(type)
+        let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
+        
+        XCTAssertEqual(type, decoded)
+    }
 }

@@ -119,7 +119,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         return []
     }
     
-    public var knownTraits: [String: Any] = [:]
+    public var knownTraits: [String: Codable] = [:]
     
     public var kind: KnownTypeKind {
         return .class
@@ -384,6 +384,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, Overridable
         return false
     }
     
+    public var isEnumCase: Bool {
+        return false
+    }
+    
     public var name: String
     public var storage: ValueStorage
     public var mode: Mode = .asField
@@ -444,10 +448,48 @@ extension PropertyGenerationIntention: KnownProperty {
 }
 
 /// Specifies an attribute for a property
-public enum PropertyAttribute {
+public enum PropertyAttribute: Codable {
     case attribute(String)
     case setterName(String)
     case getterName(String)
+    
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        
+        let flag = try container.decode(Int.self)
+        
+        switch flag {
+        case 0:
+            self = .attribute(try container.decode(String.self))
+        case 1:
+            self = .setterName(try container.decode(String.self))
+        case 2:
+            self = .getterName(try container.decode(String.self))
+        default:
+            let message = """
+                Unknown PropertyAttribute flag \(flag). Maybe data was encoded \
+                using a different version of SwiftRewriter?
+                """
+            
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: message)
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.unkeyedContainer()
+        
+        switch self {
+        case .attribute(let name):
+            try container.encode(0)
+            try container.encode(name)
+        case .setterName(let name):
+            try container.encode(1)
+            try container.encode(name)
+        case .getterName(let name):
+            try container.encode(2)
+            try container.encode(name)
+        }
+    }
     
     public var rawString: String {
         switch self {
