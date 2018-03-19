@@ -12,6 +12,7 @@ public struct DefaultIntentionPasses: IntentionPassSource {
         SwiftifyMethodSignaturesIntentionPass(),
         ImportDirectiveIntentionPass(),
         UIKitCorrectorIntentionPass(),
+        ProtocolNullabilityPropagationToConformersIntentionPass(),
         DetectNonnullReturnsIntentionPass()
     ]
     

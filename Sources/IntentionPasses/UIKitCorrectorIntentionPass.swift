@@ -4,6 +4,8 @@ import SwiftRewriterLib
 /// Makes correction for signatures of subclasses and conformeds of known UIKit
 /// classes and protocols
 public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
+    private var historyTag = "\(UIKitCorrectorIntentionPass.self)"
+    
     private var conversions: [SignatureConversion] = []
     
     public override init() {
@@ -90,26 +92,43 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
         }
         
         for conversion in conversions where conversion.canApply(to: method.signature) {
+            let isProtocol: Bool
             // Check relationship matches
             switch conversion.relationship {
             case .subtype(let typeName):
                 if !context.typeSystem.isType(type.typeName, subtypeOf: typeName) {
                     continue
                 }
+                
+                isProtocol = false
             case .conformance(let protocolName):
                 if !context.typeSystem.isType(type.typeName, conformingTo: protocolName) {
                     continue
                 }
+                
+                isProtocol = true
             }
+            
+            let oldSignature = method.signature
             
             if !conversion.apply(to: &method.signature) {
                 continue
             }
             
             // Mark as override, in case of subtype relationship
-            if case .subtype = conversion.relationship {
+            if isProtocol {
                 method.isOverride = true
             }
+            
+            let typeName = conversion.relationship.typeName
+            method.history.recordChange(
+                tag: historyTag,
+                description: """
+                Replaced signature of \(isProtocol ? "implementer" : "override") method \
+                of \(typeName).\(TypeFormatter.asString(signature: method.signature, includeName: true)) \
+                from old signature \(typeName).\(TypeFormatter.asString(signature: oldSignature, includeName: true)).
+                """
+            )
             
             notifyChange()
             
@@ -161,5 +180,12 @@ private class SignatureConversion {
     enum Relationship {
         case subtype(String)
         case conformance(protocolName: String)
+        
+        var typeName: String {
+            switch self {
+            case .subtype(let type), .conformance(let type):
+                return type
+            }
+        }
     }
 }
