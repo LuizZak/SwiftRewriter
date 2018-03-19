@@ -2,31 +2,40 @@ import SwiftAST
 
 /// Helper known-type builder used to come up with default types and during testing
 /// as well
-public class KnownTypeBuilder {
+public struct KnownTypeBuilder {
     public typealias ParameterTuple = (label: String, type: SwiftType)
     
-    private let type: DummyType
+    private let type: DummyBuildingType
     public var useSwiftSignatureMatching: Bool = false
     
     public init(typeName: String, supertype: KnownSupertypeConvertible? = nil,
                 kind: KnownTypeKind = .class, file: String = #file,
                 line: Int = #line) {
-        type = DummyType(typeName: typeName, supertype: supertype)
+        var type = DummyBuildingType(typeName: typeName, supertype: supertype)
         
         type.kind = kind
         type.origin = "Synthesized with \(KnownTypeBuilder.self) at \(file) line \(line)"
+        
+        self.type = type
+    }
+    
+    private init(type: DummyBuildingType, useSwiftSignatureMatching: Bool) {
+        self.type = type
+        self.useSwiftSignatureMatching = useSwiftSignatureMatching
     }
     
     /// Sets the supertype of the type being constructed on this known type builder
     public func settingSupertype(_ supertype: KnownSupertypeConvertible?) -> KnownTypeBuilder {
+        var type = self.type
         type.supertype = supertype?.asKnownSupertype
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Sets the kind of the type being built
     public func settingKind(_ kind: KnownTypeKind) -> KnownTypeBuilder {
+        var type = self.type
         type.kind = kind
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Adds a parameter-less constructor to this type
@@ -49,11 +58,12 @@ public class KnownTypeBuilder {
     
     /// Adds a new constructor to this type
     public func constructor(withParameters parameters: [ParameterSignature]) -> KnownTypeBuilder {
+        var type = self.type
         let ctor = DummyConstructor(parameters: parameters)
         
         type.knownConstructors.append(ctor)
         
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Adds an instance method with a given return type, and a flag
@@ -77,6 +87,8 @@ public class KnownTypeBuilder {
     /// method is an optional protocol conformance method
     public func method(withSignature signature: FunctionSignature,
                        optional: Bool = false) -> KnownTypeBuilder {
+        var type = self.type
+        
         // Check duplicates
         if useSwiftSignatureMatching {
             if type.knownMethods.contains(where: { $0.signature.matchesAsSwiftFunction(signature) }) {
@@ -91,7 +103,7 @@ public class KnownTypeBuilder {
         
         type.knownMethods.append(method)
         
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Adds a strong property with no attributes with a given name and type, and
@@ -111,6 +123,8 @@ public class KnownTypeBuilder {
     /// property
     public func property(named name: String, storage: ValueStorage, isStatic: Bool = false,
                          optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
+        var type = self.type
+        
         // Check duplicates
         guard !type.knownProperties.contains(where: {
             $0.name == name && $0.storage == storage && $0.isStatic == isStatic
@@ -124,7 +138,7 @@ public class KnownTypeBuilder {
         
         type.knownProperties.append(property)
         
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Adds a strong field with no attributes with a given name and type
@@ -137,6 +151,8 @@ public class KnownTypeBuilder {
     
     /// Adds a property with no attributes with a given name and storage
     public func field(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
+        var type = self.type
+        
         // Check duplicates
         guard !type.knownFields.contains(where: {
             $0.name == name && $0.storage == storage && $0.isStatic == isStatic
@@ -150,10 +166,12 @@ public class KnownTypeBuilder {
         
         type.knownFields.append(property)
         
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     public func protocolConformance(protocolName: String) -> KnownTypeBuilder {
+        var type = self.type
+        
         // Check duplicates
         guard !type.knownProtocolConformances.contains(where: { $0.protocolName == protocolName }) else {
             return self
@@ -163,43 +181,83 @@ public class KnownTypeBuilder {
         
         type.knownProtocolConformances.append(conformance)
         
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     public func protocolConformances(protocolNames: [String]) -> KnownTypeBuilder {
+        var result = self
         for prot in protocolNames {
-            _=protocolConformance(protocolName: prot)
+            result = result.protocolConformance(protocolName: prot)
         }
         
-        return self
+        return result
     }
     
-    public func enumRawValue(type: SwiftType) -> KnownTypeBuilder {
-        precondition(self.type.kind == .enum)
+    public func enumRawValue(type rawValueType: SwiftType) -> KnownTypeBuilder {
+        var type = self.type
+        precondition(type.kind == .enum)
         
-        self.type.setKnownTrait(KnownTypeTraits.enumRawValue, value: type)
+        type.setKnownTrait(KnownTypeTraits.enumRawValue, value: rawValueType)
         
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     public func enumCase(named: String, rawValue: Expression? = nil) -> KnownTypeBuilder {
+        var type = self.type
+        
         precondition(type.kind == .enum)
         
         let cs = EnumCaseGenerationIntention(name: named, expression: rawValue)
         cs.storage.type = .typeName(type.typeName)
         type.knownProperties.append(cs)
         
-        return self
+        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Returns the constructed KnownType instance from this builder, with all
     /// methods and properties associated with `with[...]()` method calls.
     public func build() -> KnownType {
-        return type
+        return DummyType(type: type)
     }
 }
 
 private class DummyType: KnownType {
+    var origin: String
+    var typeName: String
+    var kind: KnownTypeKind = .class
+    var knownTraits: [String: Any] = [:]
+    var knownConstructors: [KnownConstructor] = []
+    var knownMethods: [KnownMethod] = []
+    var knownProperties: [KnownProperty] = []
+    var knownFields: [KnownProperty] = []
+    var knownProtocolConformances: [KnownProtocolConformance] = []
+    var supertype: KnownSupertype?
+    
+    init(type: DummyBuildingType) {
+        origin = type.origin
+        typeName = type.typeName
+        kind = type.kind
+        knownTraits = type.knownTraits
+        knownConstructors = type.knownConstructors
+        knownMethods = type.knownMethods
+        knownProperties = type.knownProperties
+        knownFields = type.knownFields
+        knownProtocolConformances = type.knownProtocolConformances
+        supertype = type.supertype
+    }
+    
+    init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
+        self.origin = "Synthesized type"
+        self.typeName = typeName
+        self.supertype = supertype?.asKnownSupertype
+    }
+    
+    func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
+        knownTraits[trait.name] = value
+    }
+}
+
+private struct DummyBuildingType: KnownType {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
@@ -217,7 +275,7 @@ private class DummyType: KnownType {
         self.supertype = supertype?.asKnownSupertype
     }
     
-    func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
+    mutating func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
         knownTraits[trait.name] = value
     }
 }

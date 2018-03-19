@@ -116,7 +116,7 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
             }
             
             // Mark as override, in case of subtype relationship
-            if isProtocol {
+            if !isProtocol {
                 method.isOverride = true
             }
             

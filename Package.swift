@@ -49,6 +49,9 @@ let package = Package(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils"]),
         .target(
+            name: "Commons",
+            dependencies: ["SwiftAST", "SwiftRewriterLib"]),
+        .target(
             name: "IntentionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils", "MiniLexer"]),
         .target(
@@ -91,6 +94,9 @@ let package = Package(
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",
                            "ObjcParser", "ExpressionPasses", "IntentionPasses",
                            "TestCommons", "GlobalsProviders"]),
+        .testTarget(
+            name: "CommonsTests",
+            dependencies: ["SwiftAST", "SwiftRewriterLib"]),
         .testTarget(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",
