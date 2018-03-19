@@ -11,10 +11,10 @@ Xcode Version 9.3 beta (9Q98q) & Swift 4.1
 From the working directory execute as follow:
 
 ```bash
-swift run -c=release SwiftRewriter -colorize /path/to/MyClass.h /path/to/MyClass.m
+swift run -c=release SwiftRewriter --colorize files /path/to/MyClass.h /path/to/MyClass.m
 ```
 
-###### Ommit `-colorize` to produce a clean string proper for saving to a file
+###### Ommit `--colorize` to produce a clean string proper for saving to a file
 
 The program should output the contents of the files you pass into the standard output.
 
@@ -42,10 +42,12 @@ MyClass.m:
 SwiftRewriter will output the given Swift code:
 
 ```swift
+@objc
 class MyClass: NSObject {
-    var name: String
-    var surname: String
+    @objc var name: String
+    @objc var surname: String
     
+    @objc
     func printMyName() {
         NSLog("%@ %@", self.name, self.surname)
     }
