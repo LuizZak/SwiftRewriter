@@ -145,6 +145,7 @@ indirect public enum SwiftType: Equatable {
     case block(returnType: SwiftType, parameters: [SwiftType])
     case metatype(for: SwiftType)
     case tuple([SwiftType])
+    case nested(SwiftType, SwiftType)
     
     public static let void = SwiftType.tuple([])
     public static let int = SwiftType.typeName("Int")
@@ -246,6 +247,9 @@ extension SwiftType: CustomStringConvertible {
             
         case let .tuple(inner):
             return "(" + inner.map { $0.description }.joined(separator: ", ") + ")"
+            
+        case let .nested(outer, inner):
+            return "\(outer).\(inner)"
         }
     }
     
@@ -306,6 +310,12 @@ extension SwiftType: Codable {
             let types = try container.decode([SwiftType].self, forKey: .field0)
             
             self = .tuple(types)
+            
+        case .nested:
+            let outer = try container.decode(SwiftType.self, forKey: .field0)
+            let inner = try container.decode(SwiftType.self, forKey: .field1)
+            
+            self = .nested(outer, inner)
         }
     }
     
@@ -346,6 +356,11 @@ extension SwiftType: Codable {
         case let .tuple(types):
             try container.encode(SwiftTypeCase.tuple, forKey: .kind)
             try container.encode(types, forKey: .field0)
+            
+        case let .nested(outer, inner):
+            try container.encode(SwiftTypeCase.nested, forKey: .kind)
+            try container.encode(outer, forKey: .field0)
+            try container.encode(inner, forKey: .field1)
         }
     }
     
@@ -364,5 +379,6 @@ extension SwiftType: Codable {
         case block
         case metatype
         case tuple
+        case nested
     }
 }

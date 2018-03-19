@@ -257,6 +257,9 @@ public class DefaultTypeMapper: TypeMapper {
             
         case let .tuple(inner):
             return "(" + inner.map(typeNameString).joined(separator: ", ") + ")"
+            
+        case let .nested(outer, inner):
+            return typeNameString(for: outer) + "." + typeNameString(for: inner)
         }
     }
     
