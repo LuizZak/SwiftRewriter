@@ -69,7 +69,11 @@ class SwiftTypeParserTests: XCTestCase {
     }
     
     func testParseGenericTypeWithTupleType() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "Type<(A, B))>"),
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "Type<(A, B)>"),
                            SwiftType.generic("Type", parameters: [.tuple(["A", "B"])]))
+    }
+    
+    func testParseExtraCharacterMessage() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "Type<(A, B))>"))
     }
 }
