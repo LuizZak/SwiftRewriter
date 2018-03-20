@@ -38,7 +38,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
         XCTAssertEqual(
             res.asPostfix?.member?
                 .memberDefinition?
-                .ownerType?.typeName, enumName)
+                .ownerType?.asTypeName, enumName)
         XCTAssertEqual(res.asPostfix?.exp.asIdentifier?.definition?.typeName, enumName)
         XCTAssertEqual(res.asPostfix?.exp.asIdentifier?.resolvedType, .metatype(for: .typeName(enumName)))
     }

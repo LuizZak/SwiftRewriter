@@ -264,110 +264,144 @@ extension SwiftType: CustomStringConvertible {
 
 extension SwiftType: Codable {
     public init(from decoder: Decoder) throws {
+        // Attempt read type name
+        do {
+            let container = try decoder.singleValueContainer()
+            self = .typeName(try container.decode(String.self))
+            return
+        } catch {
+            
+        }
+        // Attempt read tuple types
+        do {
+            let container = try decoder.singleValueContainer()
+            self = .tuple(try container.decode([SwiftType].self))
+            return
+        } catch {
+            
+        }
+        
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         let flag = try container.decode(SwiftTypeCase.self, forKey: .kind)
         
         switch flag {
         case .typeName:
-            let name = try container.decode(String.self, forKey: .field0)
+            let name = try container.decode(String.self, forKey: .name)
             
             self = .typeName(name)
             
         case .optional:
-            let inner = try container.decode(SwiftType.self, forKey: .field0)
+            let inner = try container.decode(SwiftType.self, forKey: .type)
             
             self = .optional(inner)
             
         case .implicitUnwrappedOptional:
-            let inner = try container.decode(SwiftType.self, forKey: .field0)
+            let inner = try container.decode(SwiftType.self, forKey: .type)
 
             self = .implicitUnwrappedOptional(inner)
             
         case .generic:
-            let name = try container.decode(String.self, forKey: .field0)
-            let params = try container.decode([SwiftType].self, forKey: .field1)
+            let name = try container.decode(String.self, forKey: .name)
+            let params = try container.decode([SwiftType].self, forKey: .params)
             
             self = .generic(name, parameters: params)
             
         case .protocolComposition:
-            let types = try container.decode([SwiftType].self, forKey: .field0)
+            let types = try container.decode([SwiftType].self, forKey: .types)
             
             self = .protocolComposition(types)
             
         case .block:
-            let returnType = try container.decode(SwiftType.self, forKey: .field0)
-            let params = try container.decode([SwiftType].self, forKey: .field1)
+            let returnType = try container.decode(SwiftType.self, forKey: .return)
+            let params = try container.decode([SwiftType].self, forKey: .params)
             
             self = .block(returnType: returnType, parameters: params)
             
         case .metatype:
-            let inner = try container.decode(SwiftType.self, forKey: .field0)
+            let inner = try container.decode(SwiftType.self, forKey: .type)
             
             self = .metatype(for: inner)
             
         case .tuple:
-            let types = try container.decode([SwiftType].self, forKey: .field0)
+            let types = try container.decode([SwiftType].self, forKey: .types)
             
             self = .tuple(types)
             
         case .nested:
-            let outer = try container.decode(SwiftType.self, forKey: .field0)
-            let inner = try container.decode(SwiftType.self, forKey: .field1)
+            let outer = try container.decode(SwiftType.self, forKey: .base)
+            let inner = try container.decode(SwiftType.self, forKey: .type)
             
             self = .nested(outer, inner)
         }
     }
     
     public func encode(to encoder: Encoder) throws {
+        if case .typeName(let typeName) = self {
+            var container = encoder.singleValueContainer()
+            try container.encode(typeName)
+            return
+        }
+        if case .tuple(let types) = self {
+            var container = encoder.singleValueContainer()
+            try container.encode(types)
+            return
+        }
+        
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         switch self {
         case .typeName(let name):
             try container.encode(SwiftTypeCase.typeName, forKey: .kind)
-            try container.encode(name, forKey: .field0)
+            try container.encode(name, forKey: .name)
             
         case .optional(let inner):
             try container.encode(SwiftTypeCase.optional, forKey: .kind)
-            try container.encode(inner, forKey: .field0)
+            try container.encode(inner, forKey: .type)
             
         case .implicitUnwrappedOptional(let inner):
             try container.encode(SwiftTypeCase.implicitUnwrappedOptional, forKey: .kind)
-            try container.encode(inner, forKey: .field0)
+            try container.encode(inner, forKey: .type)
             
         case let .generic(name, params):
             try container.encode(SwiftTypeCase.generic, forKey: .kind)
-            try container.encode(name, forKey: .field0)
-            try container.encode(params, forKey: .field1)
+            try container.encode(name, forKey: .name)
+            try container.encode(params, forKey: .params)
             
         case .protocolComposition(let types):
             try container.encode(SwiftTypeCase.protocolComposition, forKey: .kind)
-            try container.encode(types, forKey: .field0)
+            try container.encode(types, forKey: .types)
             
         case let .block(returnType, params):
             try container.encode(SwiftTypeCase.block, forKey: .kind)
-            try container.encode(returnType, forKey: .field0)
-            try container.encode(params, forKey: .field1)
+            try container.encode(returnType, forKey: .return)
+            try container.encode(params, forKey: .params)
             
         case let .metatype(inner):
             try container.encode(SwiftTypeCase.metatype, forKey: .kind)
-            try container.encode(inner, forKey: .field0)
+            try container.encode(inner, forKey: .type)
             
         case let .tuple(types):
             try container.encode(SwiftTypeCase.tuple, forKey: .kind)
-            try container.encode(types, forKey: .field0)
+            try container.encode(types, forKey: .types)
             
         case let .nested(outer, inner):
             try container.encode(SwiftTypeCase.nested, forKey: .kind)
-            try container.encode(outer, forKey: .field0)
-            try container.encode(inner, forKey: .field1)
+            try container.encode(outer, forKey: .base)
+            try container.encode(inner, forKey: .type)
         }
     }
     
-    private enum CodingKeys: CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case kind
-        case field0
-        case field1
+        case `return`
+        case params
+        case key
+        case value
+        case type
+        case name
+        case types
+        case base
     }
     
     private enum SwiftTypeCase: String, Codable {
