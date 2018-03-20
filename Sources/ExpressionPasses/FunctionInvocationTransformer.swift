@@ -8,8 +8,8 @@ import SwiftAST
 ///
 /// ```
 /// FunctionInvocationTransformer(
-///     name: "CGPointMake",
-///     swiftName: "CGPoint",
+///     objcFunctionName: "CGPointMake",
+///     toSwiftFunction: "CGPoint",
 ///     firstArgumentBecomesInstance: false,
 ///     arguments: [
 ///         .labeled("x", .asIs),
@@ -28,8 +28,8 @@ import SwiftAST
 /// moving arguments around:
 /// ```
 /// FunctionInvocationTransformer(
-///     name: "CGPathMoveToPoint",
-///     swiftName: "move",
+///     objcFunctionName: "CGPathMoveToPoint",
+///     toSwiftFunction: "move",
 ///     firstArgumentBecomesInstance: true,
 ///     arguments: [
 ///         .labeled("to",
@@ -52,19 +52,12 @@ import SwiftAST
 /// it is not neccessary to map all arguments of the original call into the target
 /// call.
 public final class FunctionInvocationTransformer {
-    public let name: String
-    public let swiftName: String
-    
-    /// Strategy to apply to each argument in the call.
-    public let arguments: [ArgumentStrategy]
+    public let objcFunctionName: String
+    public let destinationMember: Kind
     
     /// The number of arguments this function signature transformer needs, exactly,
     /// in order to be fulfilled.
     public let requiredArgumentCount: Int
-    
-    /// Whether to convert the first argument of the call into a target instance,
-    /// such that the free function call becomes a method call.
-    public let firstArgIsInstance: Bool
     
     /// Initializes a new function transformer instance.
     ///
@@ -76,18 +69,39 @@ public final class FunctionInvocationTransformer {
     /// of the call into a target instance, such that the free function call becomes
     /// a method call.
     ///   - arguments: Strategy to apply to each argument in the call.
-    public init(name: String, swiftName: String, firstArgumentBecomesInstance: Bool, arguments: [ArgumentStrategy]) {
-        self.name = name
-        self.swiftName = swiftName
-        self.arguments = arguments
-        self.firstArgIsInstance = firstArgumentBecomesInstance
+    public init(fromObjcFunctionName: String, destinationMember: Kind) {
+        self.objcFunctionName = fromObjcFunctionName
+        self.destinationMember = destinationMember
         
-        requiredArgumentCount =
-            arguments.requiredArgumentCount() + (firstArgIsInstance ? 1 : 0)
+        switch destinationMember {
+        case let .method(_, firstArgumentBecomesInstance, arguments):
+            requiredArgumentCount =
+                arguments.requiredArgumentCount() + (firstArgumentBecomesInstance ? 1 : 0)
+        case .property:
+            requiredArgumentCount = 1
+        }
+    }
+    
+    public convenience init(objcFunctionName: String,
+                            toSwiftFunction swiftName: String,
+                            firstArgumentBecomesInstance: Bool,
+                            arguments: [ArgumentStrategy]) {
+        
+        self.init(fromObjcFunctionName: objcFunctionName,
+                  destinationMember: .method(swiftName,
+                                             firstArgumentBecomesInstance: firstArgumentBecomesInstance,
+                                             arguments))
+    }
+    
+    public convenience init(objcFunctionName: String,
+                            toSwiftProperty swiftName: String) {
+        
+        self.init(fromObjcFunctionName: objcFunctionName,
+                  destinationMember: .property(swiftName))
     }
     
     public func canApply(to postfix: PostfixExpression) -> Bool {
-        guard postfix.exp.asIdentifier?.identifier == name else {
+        guard postfix.exp.asIdentifier?.identifier == objcFunctionName else {
             return false
         }
         guard let functionCall = postfix.functionCall else {
@@ -102,7 +116,7 @@ public final class FunctionInvocationTransformer {
     }
     
     public func attemptApply(on postfix: PostfixExpression) -> Expression? {
-        guard postfix.exp.asIdentifier?.identifier == name else {
+        guard postfix.exp.asIdentifier?.identifier == objcFunctionName else {
             return nil
         }
         guard let functionCall = postfix.functionCall else {
@@ -112,30 +126,48 @@ public final class FunctionInvocationTransformer {
             return nil
         }
         
-        guard let result = attemptApply(on: functionCall) else {
-            return nil
-        }
-        
-        // Construct a new postfix operation with the result
-        if firstArgIsInstance {
-            let exp =
-                functionCall
-                    .arguments[0]
-                    .expression
-                    .dot(swiftName)
-                    .call(result.arguments)
+        switch destinationMember {
+        case .property(let name):
+            let exp = functionCall.arguments[0].expression.dot(name)
+            exp.resolvedType = postfix.resolvedType
+            
+            if functionCall.arguments.count != 1 {
+                return nil
+            }
+            
+            let base = functionCall.arguments[0].expression
+            
+            return base.dot(name)
+            
+        case let .method(name, firstArgIsInstance, args):
+            guard let result = attemptApply(on: functionCall, name: name,
+                                            firstArgIsInstance: firstArgIsInstance,
+                                            args: args) else {
+                return nil
+            }
+            
+            // Construct a new postfix operation with the result
+            if firstArgIsInstance {
+                let exp =
+                    functionCall
+                        .arguments[0]
+                        .expression
+                        .dot(name)
+                        .call(result.arguments)
+                exp.resolvedType = postfix.resolvedType
+                
+                return exp
+            }
+            
+            let exp = Expression.identifier(destinationMember.memberName).call(result.arguments)
             exp.resolvedType = postfix.resolvedType
             
             return exp
         }
-        
-        let exp = Expression.identifier(swiftName).call(result.arguments)
-        exp.resolvedType = postfix.resolvedType
-        
-        return exp
     }
     
-    public func attemptApply(on functionCall: FunctionCallPostfix) -> FunctionCallPostfix? {
+    public func attemptApply(on functionCall: FunctionCallPostfix,
+                             name: String, firstArgIsInstance: Bool, args: [ArgumentStrategy]) -> FunctionCallPostfix? {
         if functionCall.arguments.count != requiredArgumentCount {
             return nil
         }
@@ -194,8 +226,8 @@ public final class FunctionInvocationTransformer {
         }
         
         var i = 0
-        while i < self.arguments.count {
-            let arg = self.arguments[i]
+        while i < args.count {
+            let arg = args[i]
             if let res = handleArg(i: i, argument: arg) {
                 result.append(res)
                 
@@ -265,6 +297,23 @@ public final class FunctionInvocationTransformer {
                 return max(index1, index2)
             case .labeled(_, let inner), .omitIf(_, let inner), .transformed(_, let inner):
                 return inner.maxArgumentReferenced
+            }
+        }
+    }
+    
+    public enum Kind {
+        case property(String)
+        
+        ///   - firstArgumentBecomesInstance: Whether to convert the first argument
+        /// of the call into a target instance, such that the free function call becomes
+        /// a method call.
+        ///   - arguments: Strategy to apply to each argument in the call.
+        case method(String, firstArgumentBecomesInstance: Bool, [FunctionInvocationTransformer.ArgumentStrategy])
+        
+        public var memberName: String {
+            switch self {
+            case .property(let name), .method(let name, _, _):
+                return name
             }
         }
     }

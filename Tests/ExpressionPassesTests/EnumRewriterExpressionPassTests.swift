@@ -14,12 +14,14 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
     func testReplaceEnum() {
         let en =
             KnownTypeBuilder(typeName: "Enum", supertype: nil, kind: .enum)
-                .property(named: "Enum_Case1", type: .int, isStatic: true)
+                .enumCase(named: "Enum_Case1")
                 .build()
         typeSystem.addType(en)
         
         assertTransform(
+            // Enum_Case1
             expression: Expression.identifier("Enum_Case1").makeErrorTyped(),
+            // Enum.Enum_Case1
             into: Expression.identifier("Enum").dot("Enum_Case1")
         )
     }
@@ -29,7 +31,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
         
         let en =
             KnownTypeBuilder(typeName: enumName, supertype: nil, kind: .enum)
-                .property(named: "Enum_Case1", type: .int, isStatic: true)
+                .enumCase(named: "Enum_Case1")
                 .build()
         typeSystem.addType(en)
         
@@ -49,7 +51,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
     func testDontApplyTransformationOnIdentifierWithDefinition() {
         let en =
             KnownTypeBuilder(typeName: "Enum", supertype: nil, kind: .enum)
-                .property(named: "Enum_Case1", type: .int, isStatic: true)
+                .enumCase(named: "Enum_Case1")
                 .build()
         typeSystem.addType(en)
         
@@ -57,7 +59,9 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
         exp.resolvedType = .int
         
         assertTransform(
+            // Enum_Case1
             expression: exp,
+            // Enum_Case1
             into: .identifier("Enum_Case1")
         )
     }

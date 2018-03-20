@@ -83,11 +83,12 @@ final class StaticConstructorTransformer {
         case .method(let methodName, let args):
             let transformer =
                 FunctionInvocationTransformer(
-                    name: "", swiftName: "",
+                    objcFunctionName: "", toSwiftFunction: "",
                     firstArgumentBecomesInstance: false,
                     arguments: args)
             
-            guard let call = postfix.functionCall, let result = transformer.attemptApply(on: call) else {
+            guard let call = postfix.functionCall,
+                let result = transformer.attemptApply(on: call, name: "", firstArgIsInstance: false, args: args) else {
                 return nil
             }
             guard let inner = postfix.exp.asPostfix, inner.member?.name == methodName else {

@@ -166,7 +166,8 @@ extension CoreGraphicsExpressionPass {
             .omitIf(matches: .constant(.nil), .labeled("transform", .fromArgIndex(0)))
         
         let transformer =
-            FunctionInvocationTransformer(name: name, swiftName: swiftName,
+            FunctionInvocationTransformer(objcFunctionName: name,
+                                          toSwiftFunction: swiftName,
                                           firstArgumentBecomesInstance: true,
                                           arguments: arguments + [transform])
         
@@ -177,7 +178,8 @@ extension CoreGraphicsExpressionPass {
                                    swiftName: String,
                                    arguments: [FunctionInvocationTransformer.ArgumentStrategy] = []) {
         let transformer =
-            FunctionInvocationTransformer(name: name, swiftName: swiftName,
+            FunctionInvocationTransformer(objcFunctionName: name,
+                                          toSwiftFunction: swiftName,
                                           firstArgumentBecomesInstance: true,
                                           arguments: arguments)
         

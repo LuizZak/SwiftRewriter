@@ -88,7 +88,8 @@ public extension BaseExpressionPass {
                            arguments: [FunctionInvocationTransformer.ArgumentStrategy],
                            firstArgIsInstance: Bool = false) {
         let transformer =
-            FunctionInvocationTransformer(name: name, swiftName: swiftName,
+            FunctionInvocationTransformer(objcFunctionName: name,
+                                          toSwiftFunction: swiftName,
                                           firstArgumentBecomesInstance: firstArgIsInstance,
                                           arguments: arguments)
         transformers.append(transformer)

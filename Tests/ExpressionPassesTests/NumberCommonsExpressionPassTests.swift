@@ -14,7 +14,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
         let exp = Expression.constant(1).casted(to: .float)
         
         assertTransform(
+            // 1 as? Float
             expression: exp,
+            // Float(1)
             into: Expression
                 .identifier("Float")
                 .call([.unlabeled(.constant(1))])
@@ -27,7 +29,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
         let exp = Expression.constant(1).casted(to: .typeName("ffloaty"))
         
         assertTransform(
+            // 1 as? ffloaty
             expression: exp,
+            // 1 as? ffloaty
             into: Expression.constant(1).casted(to: .typeName("ffloaty"))
         )
         
@@ -36,7 +40,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
     
     func testConvertFloatMethods() {
         var res = assertTransform(
+            // floorf(1)
             expression: Expression.identifier("floorf").call([.constant(1)]),
+            // floor(1)
             into: Expression.identifier("floor").call([.constant(1)])
         ); assertNotifiedChange()
         
@@ -44,7 +50,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
                        .float)
         
         res = assertTransform(
+            // ceilf(1)
             expression: Expression.identifier("ceilf").call([.constant(1)]),
+            // ceil(1)
             into: Expression.identifier("ceil").call([.constant(1)])
         ); assertNotifiedChange()
         
@@ -52,7 +60,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
                        .float)
         
         res = assertTransform(
+            // roundf(1)
             expression: Expression.identifier("roundf").call([.constant(1)]),
+            // round(1)
             into: Expression.identifier("round").call([.constant(1)])
         ); assertNotifiedChange()
         
@@ -60,7 +70,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
                        .float)
         
         res = assertTransform(
+            // fabs(1)
             expression: Expression.identifier("fabs").call([.constant(1)]),
+            // abs(1)
             into: Expression.identifier("abs").call([.constant(1)])
         ); assertNotifiedChange()
         
@@ -70,7 +82,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
     
     func testConvertMacros() {
         var res = assertTransform(
+            // MIN(1, 2)
             expression: Expression.identifier("MIN").call([Expression.constant(1).typed(.float), .constant(2)]),
+            // min(1, 2)
             into: Expression.identifier("min").call([.constant(1), .constant(2)])
         ); assertNotifiedChange()
         
@@ -78,7 +92,9 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[1].expectedType, .float)
         
         res = assertTransform(
+            // MAX(1, 2)
             expression: Expression.identifier("MAX").call([.constant(1), Expression.constant(2).typed(.float)]),
+            // max(1, 2)
             into: Expression.identifier("max").call([.constant(1), .constant(2)])
         ); assertNotifiedChange()
         

@@ -12,27 +12,41 @@ import ExpressionPasses
 
 class FunctionInvocationTransformerTests: XCTestCase {
     func testRequiredArgumentCount() {
-        let sutNonInstance = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: false,
-            arguments: [.asIs, .asIs]
-        )
-        let sutInstance = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: true,
-            arguments: [.asIs, .asIs]
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: false,
+                arguments: [.asIs, .asIs]
+            )
+        
+        XCTAssertEqual(sut.requiredArgumentCount, 2)
+    }
+    
+    /// Test that first argument as instance requires an extra argument on call
+    /// site
+    func testRequiredArgumentCountWithFirstArgumentBecomesInstance() {
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: true,
+                arguments: [.asIs, .asIs]
         )
         
-        XCTAssertEqual(sutNonInstance.requiredArgumentCount, 2)
-        XCTAssertEqual(sutInstance.requiredArgumentCount, 3) // first-arg as instance requires an extra argument on call site
+        XCTAssertEqual(sut.requiredArgumentCount, 3)
     }
     
     func testTransformsTargetZeroArgumentCall() {
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: true,
-            arguments: []
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: true,
+                arguments: []
+            )
         
         XCTAssertEqual(
+            // objc(a)
             sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a")])),
+            // a.swift()
             Expression.identifier("a").dot("swift").call())
     }
     
@@ -40,14 +54,18 @@ class FunctionInvocationTransformerTests: XCTestCase {
     /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
     /// actual number of target arguments.
     func testRequiredArgumentCountFromArgIndexInference() {
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: false,
-            arguments: [.fromArgIndex(0), .fromArgIndex(1)]
-        )
-        let sutSkippingSecondArg = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: false,
-            arguments: [.fromArgIndex(0), .fromArgIndex(3)]
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: false,
+                arguments: [.fromArgIndex(0), .fromArgIndex(1)]
+            )
+        let sutSkippingSecondArg =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: false,
+                arguments: [.fromArgIndex(0), .fromArgIndex(3)]
+            )
         
         XCTAssertEqual(sut.requiredArgumentCount, 2)
         XCTAssertEqual(sutSkippingSecondArg.requiredArgumentCount, 3)
@@ -57,16 +75,18 @@ class FunctionInvocationTransformerTests: XCTestCase {
     /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
     /// actual number of target arguments.
     func testRequiredArgumentCounWithFirstArgumentIsInstanceInference() {
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift",
-            firstArgumentBecomesInstance: true,
-            arguments: [.asIs, .asIs]
-        )
-        let sutSkippingSecondArg = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift",
-            firstArgumentBecomesInstance: true,
-            arguments: [.asIs, .asIs]
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: true,
+                arguments: [.asIs, .asIs]
+            )
+        let sutSkippingSecondArg =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: true,
+                arguments: [.asIs, .asIs]
+            )
         
         XCTAssertEqual(sut.requiredArgumentCount, 3)
         XCTAssertEqual(sutSkippingSecondArg.requiredArgumentCount, 3)
@@ -76,26 +96,30 @@ class FunctionInvocationTransformerTests: XCTestCase {
     /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
     /// actual number of target arguments.
     func testRequiredArgumentCountFromArgIndexWithFirstArgumentIsInstanceInference() {
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift",
-            firstArgumentBecomesInstance: true,
-            arguments: [.fromArgIndex(0), .fromArgIndex(1)]
-        )
-        let sutSkippingSecondArg = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift",
-            firstArgumentBecomesInstance: true,
-            arguments: [.fromArgIndex(0), .fromArgIndex(3)]
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: true,
+                arguments: [.fromArgIndex(0), .fromArgIndex(1)]
+            )
+        let sutSkippingSecondArg =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: true,
+                arguments: [.fromArgIndex(0), .fromArgIndex(3)]
+            )
         
         XCTAssertEqual(sut.requiredArgumentCount, 3)
         XCTAssertEqual(sutSkippingSecondArg.requiredArgumentCount, 4)
     }
     
     func testAsIs() {
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: false,
-            arguments: [.asIs, .asIs]
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: false,
+                arguments: [.asIs, .asIs]
+            )
         
         let exp = Expression.identifier("objc").call([.identifier("argA"), .identifier("argB")])
         
@@ -106,10 +130,12 @@ class FunctionInvocationTransformerTests: XCTestCase {
     func testFromArgIndex() {
         // Use the .fromArgIndex argument creation strategy to flip the two arguments
         // of a function invocation
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: false,
-            arguments: [.fromArgIndex(1), .fromArgIndex(0)]
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: false,
+                arguments: [.fromArgIndex(1), .fromArgIndex(0)]
+            )
         
         let exp = Expression.identifier("objc").call([.identifier("argA"), .identifier("argB")])
         
@@ -118,20 +144,22 @@ class FunctionInvocationTransformerTests: XCTestCase {
     }
     
     func testOmitIf() {
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: false,
-            arguments: [
-                .omitIf(matches: .identifier("A"), .asIs)
-            ]
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: false,
+                arguments: [
+                    .omitIf(matches: .identifier("A"), .asIs)
+                ]
+            )
         
         let exp1 = Expression.identifier("objc").call([
             .identifier("A")
-            ])
+        ])
         
         let exp2 = Expression.identifier("objc").call([
             .identifier("B")
-            ])
+        ])
         
         XCTAssertEqual(sut.attemptApply(on: exp1), Expression.identifier("swift").call())
         XCTAssertEqual(sut.attemptApply(on: exp2), Expression.identifier("swift").call([.identifier("B")]))
@@ -141,10 +169,12 @@ class FunctionInvocationTransformerTests: XCTestCase {
     /// argument count of a call site does not match its required argument count
     /// exactly.
     func testDontApplyIfNotMatchingArgCount() {
-        let sut = FunctionInvocationTransformer(
-            name: "objc", swiftName: "swift", firstArgumentBecomesInstance: false,
-            arguments: [.asIs, .asIs]
-        )
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc", toSwiftFunction: "swift",
+                firstArgumentBecomesInstance: false,
+                arguments: [.asIs, .asIs]
+            )
         
         let tooFew =
             Expression
@@ -173,11 +203,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
     func testTransformCGPointMake() {
         let sut =
             FunctionInvocationTransformer(
-                name: "CGPointMake",
-                swiftName: "CGPoint",
+                objcFunctionName: "CGPointMake", toSwiftFunction: "CGPoint",
                 firstArgumentBecomesInstance: false,
                 arguments: [.labeled("x", .asIs), .labeled("y", .asIs)]
-        )
+            )
         
         let exp =
             Expression
@@ -199,11 +228,10 @@ class FunctionInvocationTransformerTests: XCTestCase {
     func testTransformFirstArgumentIsInstance() {
         let sut =
             FunctionInvocationTransformer(
-                name: "CGRectContainsRect",
-                swiftName: "contains",
+                objcFunctionName: "CGRectContainsRect", toSwiftFunction: "contains",
                 firstArgumentBecomesInstance: true,
                 arguments: [.asIs]
-        )
+            )
         
         let exp =
             Expression
@@ -218,5 +246,19 @@ class FunctionInvocationTransformerTests: XCTestCase {
                         .dot("contains")
                         .call([.identifier("b")])
         )
+    }
+    
+    func testTransformToPropertyGetter() {
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc",
+                toSwiftProperty: "swift"
+            )
+        
+        XCTAssertEqual(
+            // objc(a)
+            sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a")])),
+            // a.swift
+            Expression.identifier("a").dot("swift"))
     }
 }
