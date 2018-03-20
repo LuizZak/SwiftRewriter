@@ -593,7 +593,7 @@ extension DefaultTypeSystem {
         let nsData = KnownTypeBuilder(typeName: "NSData", supertype: nsObject).build()
         let nsMutableData = KnownTypeBuilder(typeName: "NSMutableData", supertype: nsData).build()
         let nsMutableString =
-            KnownTypeBuilder(typeName: "NSMutableString", supertype: KnownSupertype.typeName("NSString"))
+            KnownTypeBuilder(typeName: "NSMutableString", supertype: KnownTypeReference.typeName("NSString"))
                 .constructor()
                 .build()
         
@@ -850,7 +850,7 @@ private class CompoundKnownType: KnownType {
     var kind: KnownTypeKind
     var knownTraits: [String: Codable]
     var origin: String
-    var supertype: KnownSupertype?
+    var supertype: KnownTypeReference?
     var knownConstructors: [KnownConstructor]
     var knownMethods: [KnownMethod]
     var knownProperties: [KnownProperty]

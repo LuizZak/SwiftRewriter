@@ -1,3 +1,4 @@
+import Foundation
 import SwiftAST
 
 /// Helper known-type builder used to come up with default types and during testing
@@ -8,10 +9,45 @@ public struct KnownTypeBuilder {
     private var type: BuildingKnownType
     public var useSwiftSignatureMatching: Bool = false
     
-    public init(typeName: String, supertype: KnownSupertypeConvertible? = nil,
+    public init(from existingType: KnownType, file: String = #file, line: Int = #line) {
+        var type =
+            BuildingKnownType(typeName: existingType.typeName,
+                              supertype: (existingType.supertype?.asTypeName).map(KnownTypeReference.typeName))
+        
+        type.kind = existingType.kind
+        type.origin = "Cloned from existing type with \(KnownTypeBuilder.self) at \(file) line \(line)"
+        
+        self.type = type
+        
+        for ctor in existingType.knownConstructors {
+            self = self.constructor(withParameters: ctor.parameters)
+        }
+        
+        for field in existingType.knownFields {
+            self = self.field(named: field.name, storage: field.storage, isStatic: field.isStatic)
+        }
+        for method in existingType.knownMethods {
+            self = self.method(withSignature: method.signature, optional: method.optional)
+        }
+        for prop in existingType.knownProperties {
+            self =
+                self.property(named: prop.name, storage: prop.storage,
+                              isStatic: prop.isStatic, optional: prop.optional,
+                              accessor: prop.accessor, attributes: prop.attributes,
+                              isEnumCase: prop.isEnumCase)
+        }
+        for prot in existingType.knownProtocolConformances {
+            self = self.protocolConformance(protocolName: prot.protocolName)
+        }
+        self.type.traits = existingType.knownTraits
+    }
+    
+    public init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil,
                 kind: KnownTypeKind = .class, file: String = #file,
                 line: Int = #line) {
-        var type = BuildingKnownType(typeName: typeName, supertype: supertype)
+        var type =
+            BuildingKnownType(typeName: typeName,
+                              supertype: supertype?.asKnownTypeReference)
         
         type.kind = kind
         type.origin = "Synthesized with \(KnownTypeBuilder.self) at \(file) line \(line)"
@@ -25,9 +61,9 @@ public struct KnownTypeBuilder {
     }
     
     /// Sets the supertype of the type being constructed on this known type builder
-    public func settingSupertype(_ supertype: KnownSupertypeConvertible?) -> KnownTypeBuilder {
+    public func settingSupertype(_ supertype: KnownTypeReferenceConvertible?) -> KnownTypeBuilder {
         var new = clone()
-        new.type.supertype = supertype?.asKnownSupertype
+        new.type.supertype = supertype?.asKnownTypeReference
         return new
     }
     
@@ -100,7 +136,8 @@ public struct KnownTypeBuilder {
             return self
         }
         
-        let method = BuildingKnownMethod(ownerType: type, body: nil, signature: signature,
+        let method = BuildingKnownMethod(ownerType: type.asKnownTypeReference,
+                                         body: nil, signature: signature,
                                          optional: optional)
         
         new.type.methods.append(method)
@@ -125,7 +162,8 @@ public struct KnownTypeBuilder {
     /// flag specifying whether the property is an optional protocol conformance
     /// property
     public func property(named name: String, storage: ValueStorage, isStatic: Bool = false,
-                         optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
+                         optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter,
+                         attributes: [PropertyAttribute] = [], isEnumCase: Bool = false) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -137,10 +175,10 @@ public struct KnownTypeBuilder {
         }
         
         let property =
-            BuildingKnownProperty(ownerType: type, name: name, storage: storage,
-                                  attributes: [], isStatic: isStatic,
-                                  optional: optional, accessor: accessor,
-                                  isEnumCase: false)
+            BuildingKnownProperty(ownerType: type.asKnownTypeReference, name: name,
+                                  storage: storage, attributes: attributes,
+                                  isStatic: isStatic, optional: optional,
+                                  accessor: accessor, isEnumCase: isEnumCase)
         
         new.type.properties.append(property)
         
@@ -169,10 +207,10 @@ public struct KnownTypeBuilder {
         }
         
         let property =
-            BuildingKnownProperty(ownerType: type, name: name, storage: storage,
-                                  attributes: [], isStatic: isStatic,
-                                  optional: false, accessor: .getterAndSetter,
-                                  isEnumCase: false)
+            BuildingKnownProperty(ownerType: type.asKnownTypeReference,
+                                  name: name, storage: storage, attributes: [],
+                                  isStatic: isStatic, optional: false,
+                                  accessor: .getterAndSetter, isEnumCase: false)
         
         new.type.fields.append(property)
         
@@ -222,9 +260,9 @@ public struct KnownTypeBuilder {
                          isConstant: true)
         
         let cs =
-            BuildingKnownProperty(ownerType: type, name: name, storage: storage,
-                                  attributes: [], isStatic: true, optional: false,
-                                  accessor: .getter, isEnumCase: true)
+            BuildingKnownProperty(ownerType: type.asKnownTypeReference, name: name,
+                                  storage: storage, attributes: [], isStatic: true,
+                                  optional: false, accessor: .getter, isEnumCase: true)
         
         new.type.properties.append(cs)
         
@@ -240,6 +278,26 @@ public struct KnownTypeBuilder {
     public func build() -> KnownType {
         return DummyType(type: type)
     }
+    
+    /// Encodes the type represented by this known type builder
+    ///
+    /// - Returns: A data representation of the type being built which can be later
+    /// deserialized back into a buildable type with `KnownTypeBuilder.decode(from:)`.
+    /// - Throws: Any error thrown during the decoding process.
+    public func encode() throws -> Data {
+        let encoder = JSONEncoder()
+        return try encoder.encode(type)
+    }
+    
+    /// Decodes the type to be built by this type builder from a given serialized
+    /// data which resulted from a call to `KnownTypeBuilder.encode()`.
+    ///
+    /// - Parameter data: A data object produced by a call to `KnownTypeBuilder.encode()`.
+    /// - Throws: Any error thrown during the decoding process.
+    public mutating func decode(from data: Data) throws {
+        let decoder = JSONDecoder()
+        type = try decoder.decode(BuildingKnownType.self, from: data)
+    }
 }
 
 private class DummyType: KnownType {
@@ -252,7 +310,7 @@ private class DummyType: KnownType {
     var knownProperties: [KnownProperty] = []
     var knownFields: [KnownProperty] = []
     var knownProtocolConformances: [KnownProtocolConformance] = []
-    var supertype: KnownSupertype?
+    var supertype: KnownTypeReference?
     
     init(type: BuildingKnownType) {
         origin = type.origin
@@ -267,10 +325,10 @@ private class DummyType: KnownType {
         supertype = type.supertype
     }
     
-    init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
+    init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil) {
         self.origin = "Synthesized type"
         self.typeName = typeName
-        self.supertype = supertype?.asKnownSupertype
+        self.supertype = supertype?.asKnownTypeReference
     }
     
     func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
@@ -278,7 +336,7 @@ private class DummyType: KnownType {
     }
 }
 
-private struct BuildingKnownType {
+private struct BuildingKnownType: Codable {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
@@ -288,12 +346,55 @@ private struct BuildingKnownType {
     var properties: [BuildingKnownProperty] = []
     var fields: [BuildingKnownProperty] = []
     var protocols: [BuildingKnownProtocolConformance] = []
-    var supertype: KnownSupertype?
+    var supertype: KnownTypeReference?
     
-    init(typeName: String, supertype: KnownSupertypeConvertible? = nil) {
+    init(typeName: String, supertype: KnownTypeReference? = nil) {
         self.origin = "Synthesized type"
         self.typeName = typeName
-        self.supertype = supertype?.asKnownSupertype
+        self.supertype = supertype
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try origin = container.decode(String.self, forKey: .origin)
+        try typeName = container.decode(String.self, forKey: .typeName)
+        try kind = container.decode(KnownTypeKind.self, forKey: .kind)
+        try traits = KnownTypeTraitEncoder.decode(in: container, forKey: .traits)
+        try constructors = container.decode([BuildingKnownConstructor].self, forKey: .constructors)
+        try methods = container.decode([BuildingKnownMethod].self, forKey: .methods)
+        try properties = container.decode([BuildingKnownProperty].self, forKey: .properties)
+        try fields = container.decode([BuildingKnownProperty].self, forKey: .fields)
+        try protocols = container.decode([BuildingKnownProtocolConformance].self, forKey: .protocols)
+        try supertype = container.decodeIfPresent(KnownTypeReference.self, forKey: .supertype)
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try KnownTypeTraitEncoder.encode(traits, in: &container, forKey: .traits)
+        try container.encode(origin, forKey: .origin)
+        try container.encode(typeName, forKey: .typeName)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(constructors, forKey: .constructors)
+        try container.encode(methods, forKey: .methods)
+        try container.encode(properties, forKey: .properties)
+        try container.encode(fields, forKey: .fields)
+        try container.encode(protocols, forKey: .protocols)
+        try container.encode(supertype, forKey: .supertype)
+    }
+    
+    enum CodingKeys: CodingKey {
+        case origin
+        case typeName
+        case kind
+        case traits
+        case constructors
+        case methods
+        case properties
+        case fields
+        case protocols
+        case supertype
     }
 }
 
@@ -327,19 +428,25 @@ extension BuildingKnownType: KnownType {
     }
 }
 
-private struct BuildingKnownConstructor: KnownConstructor {
+private struct BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
 }
 
-private struct BuildingKnownMethod: KnownMethod {
-    var ownerType: KnownType?
+private struct BuildingKnownMethod: KnownMethod, Codable {
+    var ownerType: KnownTypeReference?
     var body: KnownMethodBody?
     var signature: FunctionSignature
     var optional: Bool
+    
+    public enum CodingKeys: String, CodingKey {
+        case ownerType
+        case signature
+        case optional
+    }
 }
 
-private struct BuildingKnownProperty: KnownProperty {
-    var ownerType: KnownType?
+private struct BuildingKnownProperty: KnownProperty, Codable {
+    var ownerType: KnownTypeReference?
     var name: String
     var storage: ValueStorage
     var attributes: [PropertyAttribute]
@@ -349,6 +456,6 @@ private struct BuildingKnownProperty: KnownProperty {
     var isEnumCase: Bool
 }
 
-private struct BuildingKnownProtocolConformance: KnownProtocolConformance {
+private struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {
     var protocolName: String
 }

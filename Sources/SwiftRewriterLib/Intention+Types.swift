@@ -99,7 +99,7 @@ public class FromSourceIntention: NonNullScopedIntention {
 public class TypeGenerationIntention: FromSourceIntention {
     public var typeName: String
     
-    public var supertype: KnownSupertype? {
+    public var supertype: KnownTypeReference? {
         return nil
     }
     
@@ -306,8 +306,8 @@ public class MemberGenerationIntention: FromSourceIntention {
 }
 
 extension MemberGenerationIntention: KnownMember {
-    public var ownerType: KnownType? {
-        return type
+    public var ownerType: KnownTypeReference? {
+        return type?.asKnownTypeReference
     }
     
     public var memberType: SwiftType {
@@ -448,7 +448,7 @@ extension PropertyGenerationIntention: KnownProperty {
 }
 
 /// Specifies an attribute for a property
-public enum PropertyAttribute: Codable {
+public enum PropertyAttribute: Equatable, Codable {
     case attribute(String)
     case setterName(String)
     case getterName(String)

@@ -2,7 +2,7 @@ import Foundation
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
-public protocol KnownType: KnownSupertypeConvertible {
+public protocol KnownType: KnownTypeReferenceConvertible {
     /// A string that specifies the origin of this known type.
     /// This should be implemented by conformes by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
@@ -11,7 +11,7 @@ public protocol KnownType: KnownSupertypeConvertible {
     var origin: String { get }
     
     /// The supertype for this known type, if any.
-    var supertype: KnownSupertype? { get }
+    var supertype: KnownTypeReference? { get }
     
     /// Name for this known type
     var typeName: String { get }
@@ -45,7 +45,7 @@ public protocol KnownType: KnownSupertypeConvertible {
 }
 
 /// The kind of a known type
-public enum KnownTypeKind: String {
+public enum KnownTypeKind: String, Codable {
     /// A concrete class type
     case `class`
     /// A protocol type
@@ -60,12 +60,12 @@ public enum KnownTypeKind: String {
 ///
 /// - knownType: A concrete known type reference.
 /// - typeName: The type that is referenced by a loose type name.
-public enum KnownTypeReference {
+public enum KnownTypeReference: KnownTypeReferenceConvertible {
     case knownType(KnownType)
     case typeName(String)
     
-    public init(_ type: KnownSupertypeConvertible) {
-        self = .typeName(type.asKnownSupertype.asTypeName)
+    public init(_ type: KnownTypeReferenceConvertible) {
+        self = .typeName(type.asKnownTypeReference.asTypeName)
     }
     
     public var asTypeName: String {
@@ -86,60 +86,24 @@ public enum KnownTypeReference {
         }
     }
     
-    public var asKnownSupertype: KnownSupertype {
+    public var asKnownTypeReference: KnownTypeReference {
         return .typeName(asTypeName)
     }
 }
 
-
-/// Defines the known supertype of a `KnownType`
-///
-/// - knownType: A concrete known type reference
-/// - typeName: The supertype that is referenced by a loose type name
-public enum KnownSupertype: KnownSupertypeConvertible {
-    case knownType(KnownType)
-    case typeName(String)
-    
-    public init(_ type: KnownSupertypeConvertible) {
-        self = type.asKnownSupertype
-    }
-    
-    public var asTypeName: String {
-        switch self {
-        case .knownType(let type):
-            return type.typeName
-        case .typeName(let name):
-            return name
-        }
-    }
-    
-    public var asKnownType: KnownType? {
-        switch self {
-        case .knownType(let type):
-            return type
-        case .typeName:
-            return nil
-        }
-    }
-    
-    public var asKnownSupertype: KnownSupertype {
-        return self
-    }
+public protocol KnownTypeReferenceConvertible {
+    var asKnownTypeReference: KnownTypeReference { get }
 }
 
-public protocol KnownSupertypeConvertible {
-    var asKnownSupertype: KnownSupertype { get }
-}
-
-extension String: KnownSupertypeConvertible {
-    public var asKnownSupertype: KnownSupertype {
+extension String: KnownTypeReferenceConvertible {
+    public var asKnownTypeReference: KnownTypeReference {
         return .typeName(self)
     }
 }
 
 /// Default implementations
 public extension KnownType {
-    public var asKnownSupertype: KnownSupertype {
+    public var asKnownTypeReference: KnownTypeReference {
         return .knownType(self)
     }
 }
@@ -153,7 +117,7 @@ public protocol KnownConstructor {
 /// Describes a known member of a type
 public protocol KnownMember {
     /// The owner type for this known member
-    var ownerType: KnownType? { get }
+    var ownerType: KnownTypeReference? { get }
     
     /// Whether this member is a static (class) member
     var isStatic: Bool { get }
@@ -204,7 +168,7 @@ public protocol KnownProperty: KnownMember {
 }
 
 /// Describes the getter/setter states of a property
-public enum KnownPropertyAccessor: String {
+public enum KnownPropertyAccessor: String, Codable {
     case getter
     case getterAndSetter
 }
@@ -262,7 +226,7 @@ public final class KnownTypeTraitEncoder {
     }
     
     public static func decode<C: KeyedDecodingContainerProtocol>
-        (in container: inout C, forKey key: C.Key) throws -> [String: Codable] {
+        (in container: C, forKey key: C.Key) throws -> [String: Codable] {
         let traits: [Trait] = try container.decode([Trait].self, forKey: key)
         
         return Dictionary(grouping: traits, by: { $0.name })

@@ -20,7 +20,7 @@ extension CompoundedMappingType: KnownType {
     public var origin: String {
         return knownType.origin
     }
-    public var supertype: KnownSupertype? {
+    public var supertype: KnownTypeReference? {
         return knownType.supertype
     }
     public var typeName: String {

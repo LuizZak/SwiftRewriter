@@ -38,7 +38,7 @@ public class BaseGlobalsProvider: GlobalsProvider {
         types.append(type)
     }
     
-    func makeType(named name: String, supertype: KnownSupertypeConvertible? = nil,
+    func makeType(named name: String, supertype: KnownTypeReferenceConvertible? = nil,
                   kind: KnownTypeKind = .class,
                   initializer: (KnownTypeBuilder) -> (KnownType) = { $0.build() }) {
         

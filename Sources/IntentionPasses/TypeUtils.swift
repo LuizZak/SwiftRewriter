@@ -322,7 +322,7 @@ func mergeMethods(_ source: KnownMethod,
         
         target.functionBody?.history.recordCreation(description: "Merged from existing type body")
         
-        if let type = source.ownerType {
+        if let type = source.ownerType?.asKnownType {
             target.history
                 .recordChange(
                     tag: historyTag,

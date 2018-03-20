@@ -63,9 +63,9 @@ public class ClassGenerationIntention: BaseClassIntention {
         return super.isEmptyType
     }
     
-    public override var supertype: KnownSupertype? {
+    public override var supertype: KnownTypeReference? {
         if let superclassName = superclassName {
-            return KnownSupertype.typeName(superclassName)
+            return KnownTypeReference.typeName(superclassName)
         }
         
         return nil

@@ -1,5 +1,6 @@
 import XCTest
 import GlobalsProviders
+import SwiftRewriterLib
 
 class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
     override func setUp() {

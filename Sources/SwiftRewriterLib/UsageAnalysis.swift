@@ -40,7 +40,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
                     continue
                 }
                 
-                if expMethod.ownerType?.typeName == method.ownerType?.typeName {
+                if expMethod.ownerType?.asTypeName == method.ownerType?.asTypeName {
                     let usage = MemberUsage(function: typeMethod, expression: exp)
                     
                     usages.append(usage)
@@ -74,7 +74,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
                     continue
                 }
                 
-                if expProperty.ownerType?.typeName == property.ownerType?.typeName {
+                if expProperty.ownerType?.asTypeName == property.ownerType?.asTypeName {
                     let usage = MemberUsage(function: typeMethod, expression: exp)
                     
                     usages.append(usage)
