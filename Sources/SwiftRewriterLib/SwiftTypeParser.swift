@@ -5,11 +5,12 @@ import MiniLexer
 public class SwiftTypeParser {
     /// Parses a Swift type from a given type string
     public static func parse(from string: String) throws -> SwiftType {
-        let lexer = Lexer(input: string)
+        let lexer = TokenizerLexer<SwiftTypeToken>(input: string)
         
         return try parseType(lexer)
     }
     
+    /// Swift type grammar
     ///
     /// ```
     /// swift-type
@@ -79,50 +80,208 @@ public class SwiftTypeParser {
     ///
     /// digit : [0-9]
     /// ```
-    private static func parseType(_ lexer: Lexer) throws -> SwiftType {
-        let identifier = (.letter | "_") .. (.letter | "_" | .digit)+
+    private static func parseType(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        if lexer.hasNextToken(.identifier) {
+            return try parseTypeIdentifier(lexer)
+        }
         
+        if lexer.hasNextToken(.openBrace) {
+            return try parseArrayOrDictionary(lexer)
+        }
         
+        if lexer.hasNextToken(.openParens) {
+            return try parseTupleOrBlock(lexer)
+        }
+        
+        throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+    }
+    
+    private static func parseTypeIdentifier(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        guard let identifier = lexer.consumeToken(.identifier) else {
+            throw Error.invalidType
+        }
+        
+        // Attempt a generic type parse
+        let type = try verifyGenericTrailing(after: String(identifier.value), lexer: lexer)
+        
+        return try verifyTrailing(after: type, lexer: lexer)
+    }
+    
+    private static func parseArrayOrDictionary(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        try lexer.advance(over: .openBrace)
+        
+        let type1 = try parseType(lexer)
+        var type2: SwiftType?
+        
+        if lexer.hasNextToken(.colon) {
+            lexer.consumeToken(.colon)
+            
+            type2 = try parseType(lexer)
+        }
+        
+        try lexer.advance(over: .closeBrace)
+        
+        if let type2 = type2 {
+            return try verifyTrailing(after: .dictionary(key: type1, value: type2), lexer: lexer)
+        }
+        
+        return try verifyTrailing(after: .array(type1), lexer: lexer)
+    }
+    
+    private static func parseTupleOrBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        // When we find a parenthesis, try a block first...
+        var backtracker = lexer.backtracker()
+        do {
+            let asBlock = try parseBlock(lexer)
+            return try verifyTrailing(after: asBlock, lexer: lexer)
+        } catch {
+            backtracker.backtrack()
+        }
+        
+        // ...and a tuple last
+        backtracker = lexer.backtracker()
+        do {
+            let tuple = try parseTuple(lexer)
+            return try verifyTrailing(after: tuple, lexer: lexer)
+        } catch {
+            backtracker.backtrack()
+        }
         
         throw Error.invalidType
     }
     
-    private static func parseBlock(_ lexer: Lexer) throws -> (returnType: SwiftType, parameters: [SwiftType]) {
-        var returnType: SwiftType
-        var parameters: [SwiftType] = []
+    private static func parseTuple(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        var types: [SwiftType] = []
         
-        lexer.skipWhitespace()
-        try lexer.advance(expectingCurrent: "(")
-        lexer.skipWhitespace()
+        try lexer.advance(over: .openParens)
         
         var afterComma = false
-        while !lexer.safeIsNextChar(equalTo: "(") {
-            parameters.append(try parseType(lexer))
-            lexer.skipWhitespace()
+        while !lexer.hasNextToken(.closeParens) {
+            afterComma = false
             
-            if lexer.advanceIf(equals: ",") {
-                lexer.skipWhitespace()
-                
+            // Check if we're handling a label
+            let hasLabel: Bool = lexer.backtracking {
+                return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
+            }
+            
+            if hasLabel {
+                lexer.consumeToken(.identifier)
+                lexer.consumeToken(.colon)
+            }
+            
+            types.append(try parseType(lexer))
+            
+            if lexer.hasNextToken(.comma) {
+                try lexer.advance(over: .comma)
                 afterComma = true
+            } else if !lexer.hasNextToken(.closeParens) {
+                throw Error.invalidType
             }
         }
         
-        try lexer.advance(expectingCurrent: ")")
-        lexer.skipWhitespace()
+        try lexer.advance(over: .closeParens)
         
-        if !lexer.advanceIf(equals: "->") {
+        if afterComma {
             throw Error.invalidType
         }
         
-        lexer.skipWhitespace()
+        // Simplify tuple types with a single inner type
+        if types.count == 1 {
+            return types[0]
+        }
+        
+        return .tuple(types)
+    }
+    
+    private static func parseBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        var returnType: SwiftType
+        var parameters: [SwiftType] = []
+        
+        try lexer.advance(over: .openParens)
+        
+        var afterComma = false
+        while !lexer.hasNextToken(.closeParens) {
+            afterComma = false
+            
+            // Check if we're handling a label
+            let hasSingleLabel: Bool = lexer.backtracking {
+                return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
+            }
+            let hasDoubleLabel: Bool = lexer.backtracking {
+                return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
+            }
+            
+            if hasSingleLabel {
+                lexer.consumeToken(.identifier)
+                lexer.consumeToken(.colon)
+            } else if hasDoubleLabel {
+                lexer.consumeToken(.identifier)
+                lexer.consumeToken(.identifier)
+                lexer.consumeToken(.colon)
+            }
+            
+            parameters.append(try parseType(lexer))
+            
+            if lexer.consumeToken(.comma) != nil {
+                afterComma = true
+            } else if !lexer.hasNextToken(.closeParens) {
+                throw Error.invalidType
+            }
+        }
+        
+        if afterComma {
+            throw Error.invalidType
+        }
+        
+        try lexer.advance(over: .closeParens)
+        try lexer.advance(over: .functionArrow)
         
         returnType = try parseType(lexer)
         
-        return (returnType, parameters)
+        return .block(returnType: returnType, parameters: parameters)
     }
     
-    public enum Error: Swift.Error {
+    private static func verifyGenericTrailing(after typeName: String, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        guard lexer.consumeToken(.openBracket) != nil else {
+            return SwiftType.typeName(typeName)
+        }
+        
+        var types: [SwiftType] = []
+        
+        repeat {
+            types.append(try parseType(lexer))
+            
+            if lexer.consumeToken(.closeBracket) != nil {
+                break
+            }
+        } while !lexer.isEof
+        
+        return SwiftType.generic(typeName, parameters: types)
+    }
+    
+    private static func verifyTrailing(after type: SwiftType, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        if lexer.consumeToken(.questionMark) != nil {
+            return try verifyTrailing(after: .optional(type), lexer: lexer)
+        }
+        if lexer.consumeToken(.exclamationMark) != nil {
+            return try verifyTrailing(after: .implicitUnwrappedOptional(type), lexer: lexer)
+        }
+        
+        return type
+    }
+    
+    public enum Error: Swift.Error, CustomStringConvertible {
         case invalidType
+        case unexpectedToken(SwiftTypeToken)
+        
+        public var description: String {
+            switch self {
+            case .invalidType:
+                return "Invalid Swift type signature"
+            case .unexpectedToken(let token):
+                return "Unexpected token \(token)"
+            }
+        }
     }
 }
 
@@ -141,89 +300,315 @@ private extension Lexer {
 }
 
 private class TokenizerLexer<T: TokenType> {
+    private var hasReadFirstToken = false
+    private var available: [Token] = []
+    
     let lexer: Lexer
-    private var hasStarted = false
-    private var current = Token(value: "", tokenType: T.eofToken())
+    
+    var isEof: Bool {
+        return available == [Token(value: "", tokenType: T.eofToken)]
+    }
     
     public init(lexer: Lexer) {
         self.lexer = lexer
     }
     
-    public convenience init(string: String) {
-        self.init(lexer: Lexer(input: string))
+    public convenience init(input: String) {
+        self.init(lexer: Lexer(input: input))
     }
     
-    public func nextToken() -> Token? {
-        guaranteeRead()
+    public func nextTokens() -> [Token] {
+        ensureReadFirstToken()
         
-        return current
+        return available
     }
     
-    public func token(_ type: T) -> Bool {
-        guaranteeRead()
-        
-        return current.tokenType == type
-    }
-    
-    private func guaranteeRead() {
-        if hasStarted {
-            return
+    public func advance(over tokenType: T) throws {
+        if !available.contains(where: { $0.tokenType == tokenType }) {
+            let l = tokenType.length(in: lexer)
+            let msg = try lexer.withTemporaryIndex { try lexer.consumeLength(l) }
+            throw LexerError.syntaxError("Missing expected token '\(msg)'")
         }
+        
+        try tokenType.advance(in: lexer)
         
         readToken()
     }
     
-    private func readToken() {
-        if lexer.isEof() {
-            current =
-                Token(value: "",
-                      tokenType: T.eofToken())
-            return
-        }
+    public func hasNextToken(_ type: T) -> Bool {
+        ensureReadFirstToken()
         
-        let start = lexer.inputIndex
-        
-        guard let token = T.parseToken(lexer: lexer) else {
-            return
-        }
-        
-        current = Token(value: String(lexer.inputString[start..<lexer.inputIndex]),
-                        tokenType: token)
+        return available.contains { $0.tokenType == type }
     }
     
-    public struct Token {
-        var value: String
-        var tokenType: T
-    }
-}
-
-public protocol TokenType: Equatable {
-    static func eofToken() -> Self
-    static func parseToken(lexer: Lexer) -> Self?
-}
-
-public enum SwiftTypeTokens: TokenType {
-    case openParens
-    case closeParens
-    case identifier
-    case eof
-    
-    public static func eofToken() -> SwiftTypeTokens {
-        return .eof
-    }
-    
-    public static func parseToken(lexer: Lexer) -> SwiftTypeTokens? {
-        if lexer.safeIsNextChar(equalTo: "(") {
-            _=lexer.safeAdvance()
-            return .openParens
-        }
-        
-        if lexer.safeIsNextChar(equalTo: ")") {
-            _=lexer.safeAdvance()
-            return .closeParens
+    @discardableResult
+    public func consumeToken(_ type: T) -> Token? {
+        if let token = self.token(type) {
+            try? type.advance(in: lexer)
+            readToken()
+            
+            return token
         }
         
         return nil
     }
+    
+    public func token(_ type: T) -> Token? {
+        ensureReadFirstToken()
+        
+        return available.first { $0.tokenType == type }
+    }
+    
+    private func ensureReadFirstToken() {
+        if hasReadFirstToken {
+            return
+        }
+        
+        hasReadFirstToken = true
+        readToken()
+    }
+    
+    private func readToken() {
+        lexer.skipWhitespace()
+        
+        // Check all available tokens
+        let possible = lexer.withTemporaryIndex { T.possibleTokens(at: lexer) }
+        
+        available = possible.filter { $0 != T.eofToken }.map {
+            let length = $0.length(in: lexer)
+            let endIndex = lexer.inputString.index(lexer.inputIndex, offsetBy: length)
+            
+            return Token(value: lexer.inputString[lexer.inputIndex..<endIndex], tokenType: $0)
+        }
+        
+        if available.count == 0 {
+            available = [Token(value: "", tokenType: T.eofToken)]
+        }
+    }
+    
+    public func backtracker() -> Backtrack {
+        ensureReadFirstToken()
+        
+        return Backtrack(lexer: self)
+    }
+    
+    public func backtracking<U>(do block: () throws -> (U)) rethrows -> U {
+        let backtrack = backtracker()
+        defer {
+            backtrack.backtrack()
+        }
+        
+        return try block()
+    }
+    
+    public struct Token: Equatable {
+        var value: Substring
+        var tokenType: T
+    }
+    
+    public class Backtrack {
+        let lexer: TokenizerLexer
+        let index: Lexer.Index
+        let tokens: [Token]
+        var didBacktrack: Bool
+        
+        init(lexer: TokenizerLexer) {
+            self.lexer = lexer
+            self.index = lexer.lexer.inputIndex
+            tokens = lexer.available
+            didBacktrack = false
+        }
+        
+        func backtrack() {
+            if didBacktrack {
+                return
+            }
+            
+            lexer.lexer.inputIndex = index
+            lexer.available = tokens
+            didBacktrack = true
+        }
+    }
 }
 
+/// A protocol for tokens that can be consumed serially with a `TokenizerLexer`.
+public protocol TokenType: Equatable {
+    /// Gets the token that represents the end-of-file of an input string.
+    /// It is important that this token is unique since the usage of this token
+    /// delimits the end of the input sequence on a tokenizer lexer.
+    static var eofToken: Self { get }
+    
+    /// Returns an array of all possible tokens that can be read from the lexer
+    /// at its given point.
+    ///
+    /// It is not required for tokens to return the state of the lexer to the
+    /// previous state prior to the calling of this method.
+    static func possibleTokens(at lexer: Lexer) -> [Self]
+    
+    /// Requests the length of this token type when applied to a given lexer.
+    /// If this token cannot be possibly consumed from the lexer, conformers must
+    /// return `0`.
+    ///
+    /// It is not required for tokens to return the state of the lexer to the
+    /// previous state prior to the calling of this method.
+    func length(in lexer: Lexer) -> Int
+    
+    /// Advances the lexer passed in by whatever length this token takes in the
+    /// input stream.
+    func advance(in lexer: Lexer) throws
+}
+
+public enum SwiftTypeToken: TokenType {
+    private static let identifierLexer = (.letter | "_") + (.letter | "_" | .digit)*
+    
+    public static var eofToken: SwiftTypeToken = .eof
+    
+    /// Character '('
+    case openParens
+    /// Character ')'
+    case closeParens
+    /// Character '.'
+    case period
+    /// Function arrow chars '->'
+    case functionArrow
+    /// An identifier token
+    case identifier
+    /// Character '?'
+    case questionMark
+    /// Character '!'
+    case exclamationMark
+    /// Character ';'
+    case colon
+    /// Character '&'
+    case ampersand
+    /// Character '['
+    case openBrace
+    /// Character ']'
+    case closeBrace
+    /// Character '<'
+    case openBracket
+    /// Character '>'
+    case closeBracket
+    /// Character ','
+    case comma
+    /// End-of-file character
+    case eof
+    
+    public func length(in lexer: Lexer) -> Int {
+        switch self {
+        case .openParens, .closeParens, .period, .questionMark, .exclamationMark,
+             .colon, .ampersand, .openBrace, .closeBrace, .openBracket,
+             .closeBracket, .comma:
+            return 1
+        case .functionArrow:
+            return 2
+        case .identifier:
+            return SwiftTypeToken.identifierLexer.maximumLength(in: lexer) ?? 0
+        case .eof:
+            return 0
+        }
+    }
+    
+    public func advance(in lexer: Lexer) throws {
+        let l = length(in: lexer)
+        if l == 0 {
+            return
+        }
+        
+        try lexer.advanceLength(l)
+    }
+    
+    public static func possibleTokens(at lexer: Lexer) -> [SwiftTypeToken] {
+        do {
+            let next = try lexer.peek()
+            
+            // Single character tokens
+            switch next {
+            case "(":
+                return [.openParens]
+            case ")":
+                return [.closeParens]
+            case ".":
+                return [.period]
+            case "?":
+                return [.questionMark]
+            case "!":
+                return [.exclamationMark]
+            case ":":
+                return [.colon]
+            case "&":
+                return [.ampersand]
+            case "[":
+                return [.openBrace]
+            case "]":
+                return [.closeBrace]
+            case "<":
+                return [.openBracket]
+            case ">":
+                return [.closeBracket]
+            case ",":
+                return [.comma]
+            case "-":
+                if try lexer.peekForward() == ">" {
+                    try lexer.advanceLength(2)
+                    
+                    return [.functionArrow]
+                }
+            default:
+                break
+            }
+            
+            var possible: [SwiftTypeToken] = []
+            
+            // Identifier
+            if identifierLexer.passes(in: lexer) {
+                possible.append(.identifier)
+            }
+            
+            return possible
+        } catch {
+            return []
+        }
+    }
+}
+
+extension GrammarRule {
+    /// Returns the maximal length this grammar rule can consume from a given lexer,
+    /// if successful.
+    ///
+    /// Returns nil, if an error ocurred while consuming the rule.
+    func maximumLength(in lexer: Lexer) -> Int? {
+        do {
+            let start = lexer.inputIndex
+            
+            let end: Lexer.Index = try lexer.withTemporaryIndex {
+                try stepThroughApplying(on: lexer)
+                return lexer.inputIndex
+            }
+            
+            return lexer.inputString.distance(from: start, to: end)
+        } catch {
+            return nil
+        }
+    }
+    
+    /// Returns `true` if this grammar rule validates effectively when applied on
+    /// a given lexer.
+    ///
+    /// Gives a better guarantee than using `canConsume(from:)` since that method
+    /// does a cheaper validation of whether an initial consumption attempt can
+    /// be performed without immediate failures.
+    ///
+    /// This method returns the lexer to the previous state before returning.
+    func passes(in lexer: Lexer) -> Bool {
+        do {
+            _=try lexer.withTemporaryIndex {
+                try stepThroughApplying(on: lexer)
+            }
+            
+            return true
+        } catch {
+            return false
+        }
+    }
+}
