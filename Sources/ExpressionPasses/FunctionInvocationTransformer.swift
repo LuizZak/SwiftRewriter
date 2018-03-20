@@ -53,23 +53,14 @@ import SwiftAST
 /// call.
 public final class FunctionInvocationTransformer {
     public let objcFunctionName: String
-    public let destinationMember: Kind
+    public let destinationMember: Target
     
     /// The number of arguments this function signature transformer needs, exactly,
     /// in order to be fulfilled.
     public let requiredArgumentCount: Int
     
-    /// Initializes a new function transformer instance.
-    ///
-    /// - Parameters:
-    ///   - name: Name of free function to match with this converter.
-    ///   - swiftName: Name of resulting swift function to transform matching
-    /// free-function calls into.
-    ///   - firstArgumentBecomesInstance: Whether to convert the first argument
-    /// of the call into a target instance, such that the free function call becomes
-    /// a method call.
-    ///   - arguments: Strategy to apply to each argument in the call.
-    public init(fromObjcFunctionName: String, destinationMember: Kind) {
+    
+    public init(fromObjcFunctionName: String, destinationMember: Target) {
         self.objcFunctionName = fromObjcFunctionName
         self.destinationMember = destinationMember
         
@@ -77,11 +68,23 @@ public final class FunctionInvocationTransformer {
         case let .method(_, firstArgumentBecomesInstance, arguments):
             requiredArgumentCount =
                 arguments.requiredArgumentCount() + (firstArgumentBecomesInstance ? 1 : 0)
-        case .property:
+        case .propertyGetter:
             requiredArgumentCount = 1
+        case .propertySetter:
+            requiredArgumentCount = 2
         }
     }
     
+    /// Initializes a new function transformer instance.
+    ///
+    /// - Parameters:
+    ///   - objcFunctionName: Name of free function to match with this converter.
+    ///   - swiftName: Name of resulting swift function to transform matching
+    /// free-function calls into.
+    ///   - firstArgumentBecomesInstance: Whether to convert the first argument
+    /// of the call into a target instance, such that the free function call becomes
+    /// a method call.
+    ///   - arguments: Strategy to apply to each argument in the call.
     public convenience init(objcFunctionName: String,
                             toSwiftFunction swiftName: String,
                             firstArgumentBecomesInstance: Bool,
@@ -93,11 +96,32 @@ public final class FunctionInvocationTransformer {
                                              arguments))
     }
     
+    /// Initializes a new function transformer instance that can modify Foundation
+    /// style getter global functions into property getters.
+    ///
+    /// - Parameters:
+    ///   - objcFunctionName: The function name to look for to transform.
+    ///   - swiftProperty: The target swift property name to transform the getter
+    /// into.
     public convenience init(objcFunctionName: String,
-                            toSwiftProperty swiftName: String) {
+                            toSwiftPropertyGetter swiftProperty: String) {
         
         self.init(fromObjcFunctionName: objcFunctionName,
-                  destinationMember: .property(swiftName))
+                  destinationMember: .propertyGetter(swiftProperty))
+    }
+    
+    /// Initializes a new function transformer instance that can modify Foundation
+    /// style setter global functions into property assignments.
+    ///
+    /// - Parameters:
+    ///   - objcFunctionName: The function name to look for to transform.
+    ///   - swiftProperty: The target swift property name to transform the setter
+    /// into.
+    public convenience init(objcFunctionName: String,
+                            toSwiftPropertySetter swiftProperty: String) {
+        
+        self.init(fromObjcFunctionName: objcFunctionName,
+                  destinationMember: .propertySetter(swiftProperty))
     }
     
     public func canApply(to postfix: PostfixExpression) -> Bool {
@@ -127,17 +151,22 @@ public final class FunctionInvocationTransformer {
         }
         
         switch destinationMember {
-        case .property(let name):
-            let exp = functionCall.arguments[0].expression.dot(name)
-            exp.resolvedType = postfix.resolvedType
-            
+        case .propertyGetter(let name):
             if functionCall.arguments.count != 1 {
                 return nil
             }
             
-            let base = functionCall.arguments[0].expression
+            return functionCall.arguments[0].expression.dot(name).typed(postfix.resolvedType)
             
-            return base.dot(name)
+        case .propertySetter(let name):
+            if functionCall.arguments.count != 2 {
+                return nil
+            }
+            
+            let exp = functionCall.arguments[0].expression.dot(name)
+            exp.resolvedType = postfix.resolvedType
+            
+            return exp.assignment(op: .assign, rhs: functionCall.arguments[1].expression)
             
         case let .method(name, firstArgIsInstance, args):
             guard let result = attemptApply(on: functionCall, name: name,
@@ -146,14 +175,12 @@ public final class FunctionInvocationTransformer {
                 return nil
             }
             
-            // Construct a new postfix operation with the result
+            // Construct a new postfix operation with the function's first
+            // argument
             if firstArgIsInstance {
                 let exp =
-                    functionCall
-                        .arguments[0]
-                        .expression
-                        .dot(name)
-                        .call(result.arguments)
+                    functionCall.arguments[0]
+                        .expression.dot(name).call(result.arguments)
                 exp.resolvedType = postfix.resolvedType
                 
                 return exp
@@ -167,7 +194,8 @@ public final class FunctionInvocationTransformer {
     }
     
     public func attemptApply(on functionCall: FunctionCallPostfix,
-                             name: String, firstArgIsInstance: Bool, args: [ArgumentStrategy]) -> FunctionCallPostfix? {
+                             name: String, firstArgIsInstance: Bool,
+                             args: [ArgumentStrategy]) -> FunctionCallPostfix? {
         if functionCall.arguments.count != requiredArgumentCount {
             return nil
         }
@@ -301,8 +329,10 @@ public final class FunctionInvocationTransformer {
         }
     }
     
-    public enum Kind {
-        case property(String)
+    public enum Target {
+        case propertyGetter(String)
+        
+        case propertySetter(String)
         
         ///   - firstArgumentBecomesInstance: Whether to convert the first argument
         /// of the call into a target instance, such that the free function call becomes
@@ -312,7 +342,8 @@ public final class FunctionInvocationTransformer {
         
         public var memberName: String {
             switch self {
-            case .property(let name), .method(let name, _, _):
+            case .propertyGetter(let name), .propertySetter(let name),
+                 .method(let name, _, _):
                 return name
             }
         }

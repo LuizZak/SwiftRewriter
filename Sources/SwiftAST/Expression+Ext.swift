@@ -80,7 +80,7 @@ public extension ExpressionPostfixBuildable {
 }
 
 extension Expression {
-    public func typed(_ type: SwiftType) -> Self {
+    public func typed(_ type: SwiftType?) -> Self {
         resolvedType = type
         
         return self

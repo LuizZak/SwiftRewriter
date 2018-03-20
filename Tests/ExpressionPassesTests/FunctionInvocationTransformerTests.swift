@@ -252,7 +252,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
         let sut =
             FunctionInvocationTransformer(
                 objcFunctionName: "objc",
-                toSwiftProperty: "swift"
+                toSwiftPropertyGetter: "swift"
             )
         
         XCTAssertEqual(
@@ -260,5 +260,19 @@ class FunctionInvocationTransformerTests: XCTestCase {
             sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a")])),
             // a.swift
             Expression.identifier("a").dot("swift"))
+    }
+    
+    func testTransformToPropertySetter() {
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc",
+                toSwiftPropertySetter: "swift"
+            )
+        
+        XCTAssertEqual(
+            // objc(a, b)
+            sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a"), .identifier("b")])),
+            // a.swift = b
+            Expression.identifier("a").dot("swift").assignment(op: .assign, rhs: .identifier("b")))
     }
 }
