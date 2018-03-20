@@ -98,7 +98,7 @@ public class SwiftTypeParser {
     
     private static func parseTypeIdentifier(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         guard let identifier = lexer.consumeToken(.identifier) else {
-            throw Error.invalidType
+            throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
         }
         
         // Attempt a generic type parse
@@ -175,14 +175,14 @@ public class SwiftTypeParser {
                 try lexer.advance(over: .comma)
                 afterComma = true
             } else if !lexer.hasNextToken(.closeParens) {
-                throw Error.invalidType
+                throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
             }
         }
         
         try lexer.advance(over: .closeParens)
         
         if afterComma {
-            throw Error.invalidType
+            throw Error.expectedTypeName
         }
         
         // Simplify tuple types with a single inner type
@@ -203,21 +203,38 @@ public class SwiftTypeParser {
         while !lexer.hasNextToken(.closeParens) {
             afterComma = false
             
-            // Check if we're handling a label
-            let hasSingleLabel: Bool = lexer.backtracking {
-                return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
-            }
-            let hasDoubleLabel: Bool = lexer.backtracking {
-                return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
+            // Inout label
+            var handledInout = false
+            if lexer.consumeToken(.inout) != nil {
+                handledInout = true
             }
             
-            if hasSingleLabel {
-                lexer.consumeToken(.identifier)
-                lexer.consumeToken(.colon)
-            } else if hasDoubleLabel {
-                lexer.consumeToken(.identifier)
-                lexer.consumeToken(.identifier)
-                lexer.consumeToken(.colon)
+            // If we see an 'inout', skip identifiers and force a parameter type
+            // to be read
+            if !handledInout {
+                // Check if we're handling a label
+                let hasSingleLabel: Bool = lexer.backtracking {
+                    return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
+                }
+                let hasDoubleLabel: Bool = lexer.backtracking {
+                    return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
+                }
+                
+                if hasSingleLabel {
+                    lexer.consumeToken(.identifier)
+                    lexer.consumeToken(.colon)
+                } else if hasDoubleLabel {
+                    lexer.consumeToken(.identifier)
+                    lexer.consumeToken(.identifier)
+                    lexer.consumeToken(.colon)
+                }
+            }
+            
+            // Inout label
+            if lexer.consumeToken(.inout) != nil {
+                if handledInout {
+                    throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+                }
             }
             
             parameters.append(try parseType(lexer))
@@ -225,12 +242,12 @@ public class SwiftTypeParser {
             if lexer.consumeToken(.comma) != nil {
                 afterComma = true
             } else if !lexer.hasNextToken(.closeParens) {
-                throw Error.invalidType
+                throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
             }
         }
         
         if afterComma {
-            throw Error.invalidType
+            throw Error.expectedTypeName
         }
         
         try lexer.advance(over: .closeParens)
@@ -272,12 +289,15 @@ public class SwiftTypeParser {
     
     public enum Error: Swift.Error, CustomStringConvertible {
         case invalidType
+        case expectedTypeName
         case unexpectedToken(SwiftTypeToken)
         
         public var description: String {
             switch self {
             case .invalidType:
                 return "Invalid Swift type signature"
+            case .expectedTypeName:
+                return "Expected type name"
             case .unexpectedToken(let token):
                 return "Unexpected token \(token)"
             }
@@ -473,6 +493,8 @@ public enum SwiftTypeToken: TokenType {
     case functionArrow
     /// An identifier token
     case identifier
+    /// An 'inout' keyword
+    case `inout`
     /// Character '?'
     case questionMark
     /// Character '!'
@@ -502,6 +524,8 @@ public enum SwiftTypeToken: TokenType {
             return 1
         case .functionArrow:
             return 2
+        case .inout:
+            return "inout".count
         case .identifier:
             return SwiftTypeToken.identifierLexer.maximumLength(in: lexer) ?? 0
         case .eof:
@@ -558,14 +582,19 @@ public enum SwiftTypeToken: TokenType {
                 break
             }
             
-            var possible: [SwiftTypeToken] = []
-            
             // Identifier
             if identifierLexer.passes(in: lexer) {
-                possible.append(.identifier)
+                // Check it's not actually an `inout` keyword
+                let ident = try lexer.withTemporaryIndex { try identifierLexer.consume(from: lexer) }
+                
+                if ident == "inout" {
+                    return [.inout]
+                } else {
+                    return [.identifier]
+                }
             }
             
-            return possible
+            return []
         } catch {
             return []
         }

@@ -18,6 +18,11 @@ class SwiftTypeParserTests: XCTestCase {
                            SwiftType.implicitUnwrappedOptional(.optional(.typeName("Type"))))
     }
     
+    func testParseEmptyTuple() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "()"),
+                           SwiftType.void)
+    }
+    
     func testParseTupleType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(Type1, Type2)"),
                            SwiftType.tuple([.typeName("Type1"), .typeName("Type2")]))
@@ -38,9 +43,24 @@ class SwiftTypeParserTests: XCTestCase {
                            SwiftType.block(returnType: .typeName("Type2"), parameters: [.typeName("Type1")]))
     }
     
-    func testParseBlockWithSignatures() throws {
+    func testParseBlockWithParameterLabels() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(_ param: Type1, param2: Type2) -> Type2"),
                            SwiftType.block(returnType: .typeName("Type2"), parameters: [.typeName("Type1"), .typeName("Type2")]))
+    }
+    
+    func testParseBlockArgumentWithInOut() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(inout Type1) -> Type2"),
+                           SwiftType.block(returnType: .typeName("Type2"), parameters: [.typeName("Type1")]))
+    }
+    
+    func testParseBlockArgumentWithInOutAndParameterName() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(name: inout Type1) -> Type2"),
+                           SwiftType.block(returnType: .typeName("Type2"), parameters: [.typeName("Type1")]))
+    }
+    
+    func testParseBlockArgumentWithInOutAndParameterNameAndLabel() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(label name: inout Type1) -> Type2"),
+                           SwiftType.block(returnType: .typeName("Type2"), parameters: [.typeName("Type1")]))
     }
     
     func testParseArray() throws {
@@ -73,7 +93,20 @@ class SwiftTypeParserTests: XCTestCase {
                            SwiftType.generic("Type", parameters: [.tuple(["A", "B"])]))
     }
     
+    func testParseBlockTypeTakingBlockType() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
     func testParseExtraCharacterMessage() throws {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "Type<(A, B))>"))
+    }
+    
+    func testCannotUseInoutAsParameterName() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(inout: Type1) -> Type2"))
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(label inout: Type1) -> Type2"))
+    }
+    func testCannotUseInoutAsParameterLabel() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(inout name: Type1) -> Type2"))
     }
 }
