@@ -9,7 +9,9 @@ disabled_rules:
 opt_in_rules:
   - empty_count
 excluded:
-  - ObjcParserAntlr
+  - Sources/ObjcParserAntlr
+  - Tests
+  - .build
 
 force_cast: warning
 force_try: warning

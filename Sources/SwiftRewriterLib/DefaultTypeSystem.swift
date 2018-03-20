@@ -639,7 +639,10 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             }
         }
         
-        let compoundTypes = types.mapValues({ CompoundKnownType(typeName: $0[0].typeName, typeSystem: self, types: $0) })
+        let compoundTypes =
+            types.mapValues({
+                CompoundKnownType(typeName: $0[0].typeName, typeSystem: self, types: $0)
+            })
         
         cache = Cache(typeAliases: aliases, types: compoundTypes)
     }
@@ -663,10 +666,8 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             }
         } else {
             for file in intentions.fileIntentions() {
-                for alias in file.typealiasIntentions {
-                    if alias.name == typeName {
-                        return alias.fromType
-                    }
+                for alias in file.typealiasIntentions where alias.name == typeName {
+                    return alias.fromType
                 }
             }
         }

@@ -576,19 +576,7 @@ extension CoreGraphicsExpressionPass {
         makeCGContextCall("CGContextSetCharacterSpacing", swiftName: "setCharacterSpacing",
             arguments: [.asIs]
         )
-
-        // makeCGContextCall("CGContextSetTextPosition", swiftName: "setTextPosition",
-        //     arguments: "(CGFloat x, CGFloat y);"
-        // )
-
-        // makeCGContextCall("CGContextGetTextPosition", swiftName: "getTextPosition")
-
-        // makeCGContextCall("CGContextSetTextMatrix", swiftName: "setTextMatrix",
-        //     arguments: "(CGAffineTransform t);"
-        // )
-
-        // makeCGContextCall("CGContextGetTextMatrix", swiftName: "getTextMatrix")
-
+        
         makeCGContextCall("CGContextSetTextDrawingMode", swiftName: "setTextDrawingMode",
             arguments: [.asIs]
         )
@@ -721,6 +709,18 @@ extension CoreGraphicsExpressionPass {
         makeCGContextCall("CGContextDrawPDFDocument", swiftName: "drawPDFDocument",
             arguments: "(CGRect rect, CGPDFDocumentRef document, int page);"
         )
+        
+        makeCGContextCall("CGContextSetTextPosition", swiftName: "setTextPosition",
+            arguments: "(CGFloat x, CGFloat y);"
+        )
+        
+        makeCGContextCall("CGContextGetTextPosition", swiftName: "getTextPosition")
+        
+        makeCGContextCall("CGContextSetTextMatrix", swiftName: "setTextMatrix",
+            arguments: "(CGAffineTransform t);"
+        )
+        
+        makeCGContextCall("CGContextGetTextMatrix", swiftName: "getTextMatrix")
         */
     }
 }

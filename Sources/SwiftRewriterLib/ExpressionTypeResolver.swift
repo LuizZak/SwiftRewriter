@@ -110,7 +110,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         switch pattern {
         case .identifier(let ident):
             scope.recordDefinition(CodeDefinition(variableNamed: ident, type: type, intention: nil))
-            break
         default:
             // Other (more complex) patterns are not (yet) supported!
             break
@@ -383,11 +382,9 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         // Check if all items match type-wise
-        for item in exp.items {
-            if item.resolvedType != firstType {
-                exp.resolvedType = .nsArray
-                return exp
-            }
+        for item in exp.items where item.resolvedType != firstType {
+            exp.resolvedType = .nsArray
+            return exp
         }
         
         exp.resolvedType = .array(firstType)

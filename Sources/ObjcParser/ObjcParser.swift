@@ -122,7 +122,7 @@ public class ObjcParser {
     }
     
     func withTemporaryContext<T: ASTNode & InitializableNode>(
-        nodeType: T.Type = T.self, do action: () throws -> ()) rethrows -> T {
+        nodeType: T.Type = T.self, do action: () throws -> Void) rethrows -> T {
         
         let node = context.pushContext(nodeType: nodeType)
         defer {

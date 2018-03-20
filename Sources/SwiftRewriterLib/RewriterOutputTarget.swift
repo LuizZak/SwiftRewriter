@@ -53,7 +53,7 @@ public protocol RewriterOutputTarget: class {
     
     /// Performs a series of operations while idented, decreasing the identation
     /// automatically after.
-    func idented(perform block: () -> ())
+    func idented(perform block: () -> Void)
     
     /// Called after the entire output operation is finished on this rewriter.
     /// Used to allow post-printing operations to be performed, like string trimming
@@ -88,7 +88,7 @@ public extension RewriterOutputTarget {
         outputInline(" ")
     }
     
-    func idented(perform block: () -> ()) {
+    func idented(perform block: () -> Void) {
         increaseIdentation()
         block()
         decreaseIdentation()

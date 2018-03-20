@@ -41,25 +41,28 @@ let package = Package(
             dependencies: ["ObjcParserAntlr"]),
         .target(
             name: "ObjcParser",
-            dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer", "TypeLexing"]),
+            dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer",
+                           "TypeLexing"]),
         .target(
             name: "SwiftAST",
             dependencies: ["GrammarModels"]),
         .target(
             name: "SwiftRewriterLib",
-            dependencies: ["GrammarModels", "SwiftAST", "ObjcParser", "TypeDefinitions", "Utils"]),
+            dependencies: ["GrammarModels", "SwiftAST", "ObjcParser",
+                           "TypeDefinitions", "Utils"]),
         .target(
             name: "Commons",
             dependencies: ["SwiftAST", "SwiftRewriterLib"]),
         .target(
             name: "IntentionPasses",
-            dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils", "MiniLexer"]),
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
+                           "MiniLexer"]),
         .target(
             name: "GlobalsProviders",
-            dependencies: ["SwiftRewriterLib", "SwiftAST"]),
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons"]),
         .target(
             name: "ExpressionPasses",
-            dependencies: ["SwiftRewriterLib", "SwiftAST", "Utils"]),
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["SwiftRewriterLib", "Utils", "MiniLexer"]),
@@ -68,7 +71,8 @@ let package = Package(
             dependencies: [
                 "SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility",
                 "ExpressionPasses", "Utils", "Console", "SourcePreprocessors",
-                "SwiftAST", "IntentionPasses", "MiniLexer", "GlobalsProviders"
+                "SwiftAST", "IntentionPasses", "MiniLexer", "GlobalsProviders",
+                "Commons"
             ]),
         .target(
             name: "TestCommons",

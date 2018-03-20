@@ -159,8 +159,6 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
             if let rhsType = exp.rhs.resolvedType?.unwrapped, context.typeSystem.isNumeric(rhsType) {
                 exp.rhs.expectedType = rhsType
             }
-            
-            break
         default:
             break
         }
