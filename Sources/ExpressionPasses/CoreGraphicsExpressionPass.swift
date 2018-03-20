@@ -273,6 +273,8 @@ extension CoreGraphicsExpressionPass {
             Expression.identifier("CGPoint").call([.labeled("x", x), .labeled("y", y)])
         }
         
+        // Methods
+        
         makeCGContextCall("CGContextSaveGState", swiftName: "saveGState")
 
         makeCGContextCall("CGContextRestoreGState", swiftName: "restoreGState")
@@ -681,7 +683,45 @@ extension CoreGraphicsExpressionPass {
         makeCGContextCall("CGContextConvertRectToUserSpace", swiftName: "convertToUserSpace",
             arguments: [.asIs]
         )
-
+        
+        // Properties
+        
+        makeFuncTransform(
+            getter: "CGContextGetTextPosition",
+            setter: "CGContextSetTextPosition",
+            intoPropertyNamed: "textPosition",
+            setterTransformer: .mergingArguments(arg0: 0, arg1: 1, toCGPoint)
+        )
+        
+        makeFuncTransform(
+            getter: "CGContextGetTextMatrix",
+            setter: "CGContextSetTextMatrix",
+            intoPropertyNamed: "textMatrix"
+        )
+        
+        makeFuncTransform(
+            getter: "CGContextGetTextMatrix",
+            setter: "CGContextSetTextMatrix",
+            intoPropertyNamed: "textMatrix"
+        )
+        
+        makeFuncTransform(
+            getter: "CGContextGetInterpolationQuality",
+            setter: "CGContextSetInterpolationQuality",
+            intoPropertyNamed: "interpolationQuality"
+        )
+        
+        // Read-only properties
+        
+        makeFuncTransform("CGContextGetCTM",                getterName: "ctm")
+        makeFuncTransform("CGContextCopyPath",              getterName: "path")
+        makeFuncTransform("CGContextIsPathEmpty",           getterName: "isPathEmpty")
+        makeFuncTransform("CGContextGetPathCurrentPoint",   getterName: "currentPointOfPath")
+        makeFuncTransform("CGContextGetClipBoundingBox",    getterName: "boundingBoxOfClipPath")
+        makeFuncTransform("CGContextGetPathBoundingBox",    getterName: "boundingBoxOfPath")
+        makeFuncTransform("CGContextGetUserSpaceToDeviceSpaceTransform",
+                          getterName: "userSpaceToDeviceSpaceTransform")
+        
         // TODO: Support these extra operations
         /*
         makeCGContextCall("CGContextSelectFont", swiftName: "selectFont",
@@ -711,18 +751,6 @@ extension CoreGraphicsExpressionPass {
         makeCGContextCall("CGContextDrawPDFDocument", swiftName: "drawPDFDocument",
             arguments: "(CGRect rect, CGPDFDocumentRef document, int page);"
         )
-        
-        makeCGContextCall("CGContextSetTextPosition", swiftName: "setTextPosition",
-            arguments: "(CGFloat x, CGFloat y);"
-        )
-        
-        makeCGContextCall("CGContextGetTextPosition", swiftName: "getTextPosition")
-        
-        makeCGContextCall("CGContextSetTextMatrix", swiftName: "setTextMatrix",
-            arguments: "(CGAffineTransform t);"
-        )
-        
-        makeCGContextCall("CGContextGetTextMatrix", swiftName: "getTextMatrix")
         */
     }
 }

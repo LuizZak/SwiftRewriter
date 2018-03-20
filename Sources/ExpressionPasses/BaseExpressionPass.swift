@@ -3,6 +3,8 @@ import Utils
 import SwiftAST
 
 public class BaseExpressionPass: SyntaxNodeRewriterPass {
+    public typealias ArgumentStrategy = FunctionInvocationTransformer.ArgumentStrategy
+    
     var staticConstructorTransformers: [StaticConstructorTransformer] = []
     var transformers: [FunctionInvocationTransformer] = []
     var enumMappings: [String: () -> Expression] = [:]
@@ -54,6 +56,7 @@ public class BaseExpressionPass: SyntaxNodeRewriterPass {
 public extension BaseExpressionPass {
     func makeInit(typeName: String, property: String, convertInto: @autoclosure @escaping () -> Expression,
                   andTypeAs type: SwiftType? = nil) {
+        
         let transformer
             = StaticConstructorTransformer(
                 typeName: typeName,
@@ -70,6 +73,7 @@ public extension BaseExpressionPass {
     func makeInit(typeName: String, method: String, convertInto: @autoclosure @escaping () -> Expression,
                   andCallWithArguments args: [FunctionInvocationTransformer.ArgumentStrategy],
                   andTypeAs type: SwiftType? = nil) {
+        
         let transformer
             = StaticConstructorTransformer(
                 typeName: typeName,
@@ -85,13 +89,39 @@ public extension BaseExpressionPass {
     
     func makeFuncTransform(_ name: String,
                            swiftName: String,
-                           arguments: [FunctionInvocationTransformer.ArgumentStrategy],
+                           arguments: [ArgumentStrategy],
                            firstArgIsInstance: Bool = false) {
+        
         let transformer =
             FunctionInvocationTransformer(objcFunctionName: name,
                                           toSwiftFunction: swiftName,
                                           firstArgumentBecomesInstance: firstArgIsInstance,
                                           arguments: arguments)
+        
         transformers.append(transformer)
+    }
+    
+    func makeFuncTransform(_ name: String, getterName: String) {
+        let transformer =
+            FunctionInvocationTransformer(objcFunctionName: name,
+                                          toSwiftPropertyGetter: getterName)
+        
+        transformers.append(transformer)
+    }
+    
+    func makeFuncTransform(_ name: String, setterName: String,
+                           argumentTransformer: ArgumentStrategy) {
+        let transformer =
+            FunctionInvocationTransformer(objcFunctionName: name,
+                                          toSwiftPropertyGetter: setterName)
+        
+        transformers.append(transformer)
+    }
+    
+    func makeFuncTransform(getter: String, setter: String,
+                           intoPropertyNamed swiftName: String,
+                           setterTransformer: ArgumentStrategy = .asIs) {
+        makeFuncTransform(getter, getterName: swiftName)
+        makeFuncTransform(setter, setterName: swiftName, argumentTransformer: setterTransformer)
     }
 }

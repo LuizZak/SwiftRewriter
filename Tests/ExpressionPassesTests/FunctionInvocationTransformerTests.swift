@@ -266,7 +266,8 @@ class FunctionInvocationTransformerTests: XCTestCase {
         let sut =
             FunctionInvocationTransformer(
                 objcFunctionName: "objc",
-                toSwiftPropertySetter: "swift"
+                toSwiftPropertySetter: "swift",
+                argumentTransformer: .asIs
             )
         
         XCTAssertEqual(
@@ -274,5 +275,41 @@ class FunctionInvocationTransformerTests: XCTestCase {
             sut.attemptApply(on: Expression.identifier("objc").call([.identifier("a"), .identifier("b")])),
             // a.swift = b
             Expression.identifier("a").dot("swift").assignment(op: .assign, rhs: .identifier("b")))
+    }
+    
+    func testTransformToPropertySetterTransformer() {
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc",
+                toSwiftPropertySetter: "swift",
+                argumentTransformer: .mergingArguments(arg0: 0, arg1: 1, { $0.binary(op: .add, rhs: $1) })
+        )
+        
+        XCTAssertEqual(
+            // objc(a, b, c)
+            sut.attemptApply(on:
+                Expression
+                    .identifier("objc")
+                    .call([.identifier("a"), .identifier("b"), .identifier("c")])),
+            // a.swift = b + c
+            Expression
+                .identifier("a").dot("swift")
+                .assignment(op: .assign, rhs: Expression.identifier("b").binary(op: .add, rhs: .identifier("c"))))
+    }
+    
+    func testTransformToPropertySetterTransformerBailsIfNotEnoughArguments() {
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "objc",
+                toSwiftPropertySetter: "swift",
+                argumentTransformer: .mergingArguments(arg0: 0, arg1: 1, { $0.binary(op: .add, rhs: $1) })
+        )
+        
+        XCTAssertNil(
+            // objc(a, b)
+            sut.attemptApply(on:
+                Expression
+                    .identifier("objc")
+                    .call([.identifier("a"), .identifier("b")])))
     }
 }

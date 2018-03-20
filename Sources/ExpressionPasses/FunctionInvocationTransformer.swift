@@ -90,10 +90,12 @@ public final class FunctionInvocationTransformer {
                             firstArgumentBecomesInstance: Bool,
                             arguments: [ArgumentStrategy]) {
         
-        self.init(fromObjcFunctionName: objcFunctionName,
-                  destinationMember: .method(swiftName,
-                                             firstArgumentBecomesInstance: firstArgumentBecomesInstance,
-                                             arguments))
+        let target =
+            Target.method(swiftName,
+                          firstArgumentBecomesInstance: firstArgumentBecomesInstance,
+                          arguments)
+        
+        self.init(fromObjcFunctionName: objcFunctionName, destinationMember: target)
     }
     
     /// Initializes a new function transformer instance that can modify Foundation
@@ -117,11 +119,18 @@ public final class FunctionInvocationTransformer {
     ///   - objcFunctionName: The function name to look for to transform.
     ///   - swiftProperty: The target swift property name to transform the setter
     /// into.
+    ///   - argumentTransformer: An argument strategy that can be used to transform
+    /// the remaining arguments from the function into the final value on the right
+    /// side of the assignment expression.
     public convenience init(objcFunctionName: String,
-                            toSwiftPropertySetter swiftProperty: String) {
+                            toSwiftPropertySetter swiftProperty: String,
+                            argumentTransformer: ArgumentStrategy) {
         
-        self.init(fromObjcFunctionName: objcFunctionName,
-                  destinationMember: .propertySetter(swiftProperty))
+        let target =
+            Target.propertySetter(swiftProperty,
+                                  argumentTransformer: argumentTransformer)
+        
+        self.init(fromObjcFunctionName: objcFunctionName, destinationMember: target)
     }
     
     public func canApply(to postfix: PostfixExpression) -> Bool {
@@ -158,16 +167,21 @@ public final class FunctionInvocationTransformer {
             
             return functionCall.arguments[0].expression.dot(name).typed(postfix.resolvedType)
             
-        case .propertySetter(let name):
-            if functionCall.arguments.count != 2 {
+        case let .propertySetter(name, transformer):
+            if functionCall.arguments.count != 1 + transformer.argumentConsumeCount {
+                return nil
+            }
+            
+            let arguments = Array(functionCall.arguments.dropFirst())
+            
+            guard let rhs = transformer.transform(argumentIndex: 0, arguments: arguments) else {
                 return nil
             }
             
             let exp = functionCall.arguments[0].expression.dot(name)
             exp.resolvedType = postfix.resolvedType
             
-            return exp.assignment(op: .assign, rhs: functionCall.arguments[1].expression)
-            
+            return exp.assignment(op: .assign, rhs: rhs.expression)
         case let .method(name, firstArgIsInstance, args):
             guard let result = attemptApply(on: functionCall, name: name,
                                             firstArgIsInstance: firstArgIsInstance,
@@ -200,63 +214,16 @@ public final class FunctionInvocationTransformer {
             return nil
         }
         
-        var arguments = firstArgIsInstance
+        let arguments = firstArgIsInstance
             ? Array(functionCall.arguments.dropFirst())
             : functionCall.arguments
         
         var result: [FunctionArgument] = []
         
-        func handleArg(i: Int, argument: ArgumentStrategy) -> FunctionArgument? {
-            switch argument {
-            case .asIs:
-                return arguments[i]
-            case let .mergingArguments(arg0, arg1, merger):
-                let arg =
-                    FunctionArgument(
-                        label: nil,
-                        expression: merger(arguments[arg0].expression,
-                                           arguments[arg1].expression)
-                )
-                
-                return arg
-                
-            case let .fixed(maker):
-                return FunctionArgument(label: nil, expression: maker())
-                
-            case let .transformed(transform, strat):
-                if var arg = handleArg(i: i, argument: strat) {
-                    arg.expression = transform(arg.expression)
-                    return arg
-                }
-                
-                return nil
-                
-            case .fromArgIndex(let index):
-                return arguments[index]
-                
-            case let .omitIf(matches: exp, strat):
-                guard let result = handleArg(i: i, argument: strat) else {
-                    return nil
-                }
-                
-                if result.expression == exp {
-                    return nil
-                }
-                
-                return result
-            case let .labeled(label, strat):
-                if let arg = handleArg(i: i, argument: strat) {
-                    return .labeled(label, arg.expression)
-                }
-                
-                return nil
-            }
-        }
-        
         var i = 0
         while i < args.count {
             let arg = args[i]
-            if let res = handleArg(i: i, argument: arg) {
+            if let res = arg.transform(argumentIndex: i, arguments: arguments) {
                 result.append(res)
                 
                 if case .mergingArguments = arg {
@@ -327,22 +294,82 @@ public final class FunctionInvocationTransformer {
                 return inner.maxArgumentReferenced
             }
         }
+        
+        /// Applies the transformation dictated by this argument transformer onto
+        /// a given argument index from an argument list.
+        ///
+        /// Result is nil, in case the argument strategy resulted in omitting the
+        /// argument expression.
+        ///
+        /// - Parameters:
+        ///   - index: Absolute index into `arguments` to apply this argument
+        /// transformer to.
+        ///   - arguments: Complete array of arguments to use when references to
+        /// argument indices are needed.
+        /// - Returns: Resulting function argument, or `nil`, in case the argument
+        /// was omitted
+        func transform(argumentIndex index: Int, arguments: [FunctionArgument]) -> FunctionArgument? {
+            switch self {
+            case .asIs:
+                return arguments[index]
+            case let .mergingArguments(arg0, arg1, merger):
+                let arg =
+                    FunctionArgument(
+                        label: nil,
+                        expression: merger(arguments[arg0].expression,
+                                           arguments[arg1].expression)
+                )
+                
+                return arg
+                
+            case let .fixed(maker):
+                return FunctionArgument(label: nil, expression: maker())
+                
+            case let .transformed(transform, strat):
+                if var arg = strat.transform(argumentIndex: index, arguments: arguments) {
+                    arg.expression = transform(arg.expression)
+                    return arg
+                }
+                
+                return nil
+                
+            case .fromArgIndex(let index):
+                return arguments[index]
+                
+            case let .omitIf(matches: exp, strat):
+                guard let result = strat.transform(argumentIndex: index, arguments: arguments) else {
+                    return nil
+                }
+                
+                if result.expression == exp {
+                    return nil
+                }
+                
+                return result
+            case let .labeled(label, strat):
+                if let arg = strat.transform(argumentIndex: index, arguments: arguments) {
+                    return .labeled(label, arg.expression)
+                }
+                
+                return nil
+            }
+        }
     }
     
     public enum Target {
         case propertyGetter(String)
         
-        case propertySetter(String)
+        case propertySetter(String, argumentTransformer: ArgumentStrategy)
         
         ///   - firstArgumentBecomesInstance: Whether to convert the first argument
-        /// of the call into a target instance, such that the free function call becomes
-        /// a method call.
+        /// of the call into a target instance, such that the free function call
+        /// becomes a method call.
         ///   - arguments: Strategy to apply to each argument in the call.
         case method(String, firstArgumentBecomesInstance: Bool, [FunctionInvocationTransformer.ArgumentStrategy])
         
         public var memberName: String {
             switch self {
-            case .propertyGetter(let name), .propertySetter(let name),
+            case .propertyGetter(let name), .propertySetter(let name, _),
                  .method(let name, _, _):
                 return name
             }
