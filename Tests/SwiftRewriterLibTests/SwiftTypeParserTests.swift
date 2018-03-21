@@ -88,6 +88,21 @@ class SwiftTypeParserTests: XCTestCase {
                            SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
     }
     
+    func testParseBlockTypeWithParameterAnnotationAfterParameterName() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(name: @escaping () -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
+    func testParseBlockTypeWithParameterAnnotationAfterParameterLabel() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(_ label: @escaping () -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
+    func testParseBlockTypeWithParameterAnnotationAfterInout() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(inout @escaping () -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
     func testParseBlockTypeWithParameterAnnotationWithParenthesis() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(@escaping(abc) () -> ()) -> ()"),
                            SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))

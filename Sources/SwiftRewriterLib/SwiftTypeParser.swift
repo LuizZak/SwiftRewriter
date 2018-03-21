@@ -313,13 +313,13 @@ public class SwiftTypeParser {
             // Inout label
             var expectsType = false
             
+            if lexer.consumeToken(.inout) != nil {
+                expectsType = true
+            }
+            
             if lexer.hasNextToken(.at) {
                 expectsType = true
                 try verifyAndSkipAnnotations()
-            }
-            
-            if lexer.consumeToken(.inout) != nil {
-                expectsType = true
             }
             
             // If we see an 'inout', skip identifiers and force a parameter type
