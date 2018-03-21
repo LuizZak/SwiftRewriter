@@ -2,6 +2,125 @@ import XCTest
 import SwiftAST
 
 class SwiftTypeTests: XCTestCase {
+    func testDescriptionTypeName() {
+        XCTAssertEqual(SwiftType.typeName("A").description,
+                       "A")
+    }
+    
+    func testDescriptionGeneric() {
+        XCTAssertEqual(SwiftType.generic("A", parameters: []).description, // This is actually an invalid type state, but we test it for consistency purposes.
+                       "A<>")
+        XCTAssertEqual(SwiftType.generic("A", parameters: [.typeName("B")]).description,
+                       "A<B>")
+        XCTAssertEqual(SwiftType.generic("A", parameters: [.typeName("B"), .typeName("C")]).description,
+                       "A<B, C>")
+    }
+    
+    func testDescriptionProtocolComposition() {
+        XCTAssertEqual(SwiftType.protocolComposition([]).description, // This is actually an invalid type state, but we test it for consistency purposes.
+                       "")
+        XCTAssertEqual(SwiftType.protocolComposition([.typeName("A")]).description,
+                       "A")
+        XCTAssertEqual(SwiftType.protocolComposition([.typeName("A"), .typeName("B")]).description,
+                       "A & B")
+        XCTAssertEqual(SwiftType.protocolComposition([.typeName("A"), .typeName("B"), .typeName("C")]).description,
+                       "A & B & C")
+    }
+    
+    func testDescriptionNestedType() {
+        XCTAssertEqual(SwiftType.nested(.typeName("A"), .typeName("B")).description,
+                       "A.B")
+        XCTAssertEqual(SwiftType.nested(.generic("A", parameters: [.typeName("B")]), .typeName("C")).description,
+                       "A<B>.C")
+        XCTAssertEqual(SwiftType.nested(.nested(.typeName("A"), .typeName("B")), .typeName("C")).description,
+                       "A.B.C")
+    }
+    
+    func testDescriptionMetadata() {
+        XCTAssertEqual(SwiftType.metatype(for: .typeName("A")).description,
+                       "A.Type")
+        XCTAssertEqual(SwiftType.metatype(for: SwiftType.metatype(for: .typeName("A"))).description,
+                       "A.Type.Type")
+    }
+    
+    func testDescriptionTupleType() {
+        XCTAssertEqual(SwiftType.tuple([]).description,
+                       "Void")
+        XCTAssertEqual(SwiftType.tuple([.typeName("A")]).description,
+                       "(A)")
+        XCTAssertEqual(SwiftType.tuple([.typeName("A"), .typeName("B")]).description,
+                       "(A, B)")
+        XCTAssertEqual(SwiftType.tuple([.typeName("A"), .typeName("B"), .typeName("C")]).description,
+                       "(A, B, C)")
+    }
+    
+    func testDescriptionBlockType() {
+        XCTAssertEqual(SwiftType.block(returnType: .void, parameters: []).description,
+                       "() -> Void")
+    }
+    
+    func testDescriptionBlockTypeWithReturnType() {
+        XCTAssertEqual(SwiftType.block(returnType: .typeName("A"), parameters: []).description,
+                       "() -> A")
+    }
+    
+    func testDescriptionBlockTypeWithParameters() {
+        XCTAssertEqual(SwiftType.block(returnType: .void, parameters: [.typeName("A")]).description,
+                       "(A) -> Void")
+        XCTAssertEqual(SwiftType.block(returnType: .void, parameters: [.typeName("A"), .typeName("B")]).description,
+                       "(A, B) -> Void")
+    }
+    
+    func testDescriptionBlockFull() {
+        XCTAssertEqual(SwiftType.block(returnType: .typeName("A"), parameters: [.typeName("B"), .typeName("C")]).description,
+                       "(B, C) -> A")
+    }
+    
+    func testDescriptionOptionalWithTypeName() {
+        XCTAssertEqual(SwiftType.optional(.typeName("A")).description,
+                       "A?")
+    }
+    
+    func testDescriptionOptionalWithProtocolCompositionType() {
+        XCTAssertEqual(SwiftType.optional(.protocolComposition([.typeName("A"), .typeName("B")])).description,
+                       "(A & B)?")
+    }
+    
+    func testDescriptionOptionalWithTupleType() {
+        XCTAssertEqual(SwiftType.optional(.tuple([.typeName("A"), .typeName("B")])).description,
+                       "(A, B)?")
+    }
+    
+    func testDescriptionOptionalWithBlockTupleType() {
+        XCTAssertEqual(SwiftType.optional(.block(returnType: .void, parameters: [.typeName("A"), .typeName("B")])).description,
+                       "((A, B) -> Void)?")
+    }
+    
+    func testDescriptionOptionalWithGenericType() {
+        XCTAssertEqual(SwiftType.optional(.generic("A", parameters: [.typeName("B"), .typeName("C")])).description,
+                       "A<B, C>?")
+    }
+    
+    func testDescriptionOptionalWithNestedType() {
+        XCTAssertEqual(SwiftType.optional(.nested(.typeName("A"), .typeName("B"))).description,
+                       "A.B?")
+    }
+    
+    func testDescriptionOptionalWithOptionalType() {
+        XCTAssertEqual(SwiftType.optional(.optional(.typeName("A"))).description,
+                       "A??")
+    }
+    
+    func testDescriptionImplicitOptionalWithOptionalType() {
+        XCTAssertEqual(SwiftType.implicitUnwrappedOptional(.optional(.typeName("A"))).description,
+                       "A?!")
+    }
+    
+    func testDescriptionImplicitOptionalWithTypeName() {
+        XCTAssertEqual(SwiftType.implicitUnwrappedOptional(.typeName("A")).description,
+                       "A!")
+    }
+    
     func testWithSameOptionalityAs() {
         XCTAssertEqual(
             SwiftType.int.withSameOptionalityAs(.any),
