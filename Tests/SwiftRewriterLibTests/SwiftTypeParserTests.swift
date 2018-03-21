@@ -149,6 +149,13 @@ class SwiftTypeParserTests: XCTestCase {
                                                           .typeName("TypeC")]))
     }
     
+    func testProtocolCompositionGrouped() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(Type1.Type2 & Type3.Type4) & Type5.Type6"),
+                           SwiftType.protocolComposition([.nested(.typeName("Type1"), .typeName("Type2")),
+                                                          .nested(.typeName("Type3"), .typeName("Type4")),
+                                                          .nested(.typeName("Type5"), .typeName("Type6"))]))
+    }
+    
     func testVoidParsesAsTypeAliasOfEmptyTuple() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Void"),
                            SwiftType.tuple([]))
@@ -234,7 +241,7 @@ class SwiftTypePermutator {
     
     private func composable() -> SwiftType {
         if chanceFromProbability() {
-            let types = randomProduceArray(biasToEmpty: 0.3) { branchProbably(damp: $0)?.composable() }
+            let types = randomProduceArray(biasToEmpty: 0.1) { branchProbably(damp: $0)?.composable() }
             
             if types.count == 1 {
                 return types[0]
