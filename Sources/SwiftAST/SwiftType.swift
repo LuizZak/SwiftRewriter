@@ -14,14 +14,31 @@ indirect public enum SwiftType: Equatable {
     /// Returns a normalized version of this type, getting rid of redundancies.
     public var normalized: SwiftType {
         switch self {
-        case .tuple(let values) where values.count == 1:
-            return values[0]
+        // Normalizations
         case .protocolComposition(let comp) where comp.count == 1:
-            return comp[0]
+            return comp[0].normalized
         case let .generic(name, params) where params.isEmpty:
             return .typeName(name)
-        case .metatype(.metatype(let inner)):
+        case .tuple(let values) where values.count == 1:
+            return values[0].normalized
+            
+        // Nested normalizations
+        case .protocolComposition(let subtypes):
+            return .protocolComposition(subtypes.map { $0.normalized })
+        case let .generic(name, subtypes):
+            return .generic(name, parameters: subtypes.map { $0.normalized })
+        case .tuple(let subtypes):
+            return .tuple(subtypes.map { $0.normalized })
+        case let .block(returnType, parameters):
+            return .block(returnType: returnType.normalized, parameters: parameters.map({ $0.normalized }))
+        case .metatype(let inner):
             return .metatype(for: inner.normalized)
+        case .optional(let inner):
+            return .optional(inner.normalized)
+        case .implicitUnwrappedOptional(let inner):
+            return .implicitUnwrappedOptional(inner.normalized)
+        case .nested(let base, let type):
+            return .nested(base.normalized, type.normalized)
         default:
             return self
         }

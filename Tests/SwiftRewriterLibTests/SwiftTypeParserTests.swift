@@ -172,15 +172,20 @@ class SwiftTypeParserTests: XCTestCase {
     }
     
     func testRandomTypeParsing() throws {
-        for i in 0..<1000 {
+        for i in 0..<100 {
             let type = SwiftTypePermutator.permutate(seed: 127 * i + i).normalized
             let typeString = type.description
             
             do {
                 let parsed = try SwiftTypeParser.parse(from: typeString).normalized
                 
-                XCTAssertEqual(type, parsed)
+                XCTAssertEqual(type, parsed, "iteration \(i)")
                 if type != parsed {
+                    let coder = JSONEncoder()
+                    let data = try coder.encode(type)
+                    let str = String(data: data, encoding: .utf8)!
+                    print(str)
+                    
                     break
                 }
             } catch {
@@ -190,12 +195,12 @@ class SwiftTypeParserTests: XCTestCase {
                 XCTFail("Failed on type \(typeString): \(error)\n\nSerialized type:\n\(str)")
                 return
             }
-            
-            break
         }
     }
 }
 
+/// Creates randomized SwiftType instances, supporting recursive nested type
+/// signatures like Generics and Block/Tuple types.
 class SwiftTypePermutator {
     
     public static func permutate(seed: Int) -> SwiftType {
