@@ -104,8 +104,30 @@ class SwiftTypeParserTests: XCTestCase {
     }
     
     func testProtocolMetatypeOfIdentifier() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "TypeA.Type"),
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "TypeA.Protocol"),
                            SwiftType.metatype(for: "TypeA"))
+    }
+    
+    func testMetatypeOfOptionalType() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "TypeA?.Type"),
+                           SwiftType.metatype(for: .optional("TypeA")))
+    }
+    
+    func testMetatypeOfOptionalTypeWithinTupleType() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(TypeA?).Type"),
+                           SwiftType.metatype(for: .optional("TypeA")))
+    }
+    
+    func testParseProtocolComposition() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "TypeA & TypeB"),
+                           SwiftType.protocolComposition(["TypeA", "TypeB"]))
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "TypeA & TypeB & TypeC"),
+                           SwiftType.protocolComposition(["TypeA", "TypeB", "TypeC"]))
+    }
+    
+    func testVoidParsesAsTypeAliasOfEmptyTuple() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "Void"),
+                           SwiftType.tuple([]))
     }
     
     func testParseExtraCharacterMessage() throws {
@@ -119,5 +141,9 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testCannotUseInoutAsParameterLabel() throws {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(inout name: Type1) -> Type2"))
+    }
+    
+    func testParseProtocolCompositionInBlockArgument() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(TypeA & TypeB) -> )"))
     }
 }

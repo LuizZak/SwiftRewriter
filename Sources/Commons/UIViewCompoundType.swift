@@ -1,12 +1,16 @@
 import SwiftAST
 import SwiftRewriterLib
 
-public class UIViewCompoundType {
-    public static func create() -> CompoundedMappingType {
+public enum UIViewCompoundType {
+    private static var singleton: CompoundedMappingType = {
         let mappings = createMappings()
         let type = createType()
         
         return CompoundedMappingType(knownType: type, signatureMappings: mappings)
+    }()
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
     }
     
     static func createMappings() -> [SignatureMapper] {
@@ -18,7 +22,7 @@ public class UIViewCompoundType {
     }
     
     static func createType() -> KnownType {
-        var type = KnownTypeBuilder(typeName: "UIView", supertype: "NSObject")
+        var type = KnownTypeBuilder(typeName: "UIView", supertype: "UIResponder")
         
         type.useSwiftSignatureMatching = true
         

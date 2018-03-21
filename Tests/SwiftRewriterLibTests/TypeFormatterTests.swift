@@ -81,7 +81,7 @@ class TypeFormatterTests: XCTestCase {
                 storage: ValueStorage(type: .int,
                                       ownership: .strong,
                                       isConstant: false)
-        )
+            )
         
         XCTAssertEqual(
             "A.a: Int",

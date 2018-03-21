@@ -88,7 +88,14 @@ public class SwiftTypeParser {
         let type: SwiftType
         
         if lexer.hasNextToken(.identifier) {
-            type = try parseTypeIdentifier(lexer)
+            let ident = try parseTypeIdentifier(lexer)
+            
+            // Protocol type composition
+            if lexer.hasNextToken(.ampersand) {
+                type = try verifyProtocolCompositionTrailing(after: ident, lexer: lexer)
+            } else {
+                type = ident
+            }
         } else if lexer.hasNextToken(.openBrace) {
             type = try parseArrayOrDictionary(lexer)
         } else if lexer.hasNextToken(.openParens) {
@@ -111,17 +118,39 @@ public class SwiftTypeParser {
     /// generic-argument-clause
     ///     : '<' swift-type (',' swift-type)* '>'
     /// ```
-    private static func parseTypeIdentifier(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+    private static func parseTypeIdentifier(_ lexer: TokenizerLexer<SwiftTypeToken>, chainedAfter parentType: SwiftType? = nil) throws -> SwiftType {
         guard let identifier = lexer.consumeToken(.identifier) else {
             throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
         }
         
+        // Type-alias 'Void' into an empty tuple (SwiftType.void)
+        if identifier.value == "Void" {
+            if parentType != nil {
+                throw Error.invalidType
+            }
+            
+            return .void
+        }
+        
         // Attempt a generic type parse
-        let type = try verifyGenericArgumentsTrailing(after: String(identifier.value), lexer: lexer)
+        var type = try verifyGenericArgumentsTrailing(after: String(identifier.value), lexer: lexer)
         
         // Chained access to sub-types
+        let backtracker = lexer.backtracker()
         if lexer.consumeToken(.period) != nil {
+            // Backtrack out of this method, in case it's actually a metatype
+            // trailing
+            if let identifier = lexer.consumeToken(.identifier)?.value,
+                identifier == "Type" || identifier == "Protocol" {
+                backtracker.backtrack()
+                return type
+            }
             
+            type = try parseTypeIdentifier(lexer, chainedAfter: type)
+        }
+        
+        if let parentType = parentType {
+            type = .nested(parentType, type)
         }
         
         return type
@@ -133,10 +162,15 @@ public class SwiftTypeParser {
     /// protocol-composition
     ///     : type-identifier '&' type-identifier ('&' type-identifier)* ;
     /// ```
-    private static func verifyProtocolCompositionTrailing(after type: SwiftType, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+    private static func verifyProtocolCompositionTrailing(after type: SwiftType,
+                                                          lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        var types = [type]
         
+        while lexer.consumeToken(.ampersand) != nil {
+            types.append(try parseTypeIdentifier(lexer))
+        }
         
-        return type
+        return .protocolComposition(types)
     }
     
     /// Parses a generic argument clause.
@@ -193,91 +227,17 @@ public class SwiftTypeParser {
         return .array(type1)
     }
     
-    /// Parses a tuple or block type from a lexer
+    /// Parses a tuple or block type
     ///
     /// ```
     /// tuple
     ///     : '(' tuple-element (',' tuple-element)* ')' ;
     ///
-    /// block
-    ///     : '(' block-argument-list ')' '->' swift-type ;
-    /// ```
-    private static func parseTupleOrBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
-        // When we find a parenthesis, try a block first...
-        var backtracker = lexer.backtracker()
-        do {
-            return try parseBlock(lexer)
-        } catch {
-            backtracker.backtrack()
-        }
-        
-        // ...and a tuple last
-        backtracker = lexer.backtracker()
-        do {
-            return try parseTuple(lexer)
-        } catch {
-            backtracker.backtrack()
-        }
-        
-        throw Error.invalidType
-    }
-    
-    /// Parses a tuple type
-    ///
-    /// ```
-    /// tuple
-    ///     : '(' tuple-element (',' tuple-element)* ')' ;
     /// tuple-element
     ///     : swift-type
     ///     | identifier ':' swift-type
     ///     ;
-    /// ```
-    private static func parseTuple(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
-        var types: [SwiftType] = []
-        
-        try lexer.advance(over: .openParens)
-        
-        var afterComma = false
-        while !lexer.hasNextToken(.closeParens) {
-            afterComma = false
-            
-            // Check if we're handling a label
-            let hasLabel: Bool = lexer.backtracking {
-                return (lexer.consumeToken(.identifier) != nil && lexer.consumeToken(.colon) != nil)
-            }
-            
-            if hasLabel {
-                lexer.consumeToken(.identifier)
-                lexer.consumeToken(.colon)
-            }
-            
-            types.append(try parseType(lexer))
-            
-            if lexer.hasNextToken(.comma) {
-                try lexer.advance(over: .comma)
-                afterComma = true
-            } else if !lexer.hasNextToken(.closeParens) {
-                throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
-            }
-        }
-        
-        try lexer.advance(over: .closeParens)
-        
-        if afterComma {
-            throw Error.expectedTypeName
-        }
-        
-        // Simplify tuple types with a single inner type
-        if types.count == 1 {
-            return types[0]
-        }
-        
-        return .tuple(types)
-    }
-    
-    /// Parses a block type
     ///
-    /// ```
     /// block
     ///     : '(' block-argument-list ')' '->' swift-type ;
     ///
@@ -292,7 +252,7 @@ public class SwiftTypeParser {
     ///     | identifier
     ///     ;
     /// ```
-    private static func parseBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+    private static func parseTupleOrBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         var returnType: SwiftType
         var parameters: [SwiftType] = []
         
@@ -350,15 +310,34 @@ public class SwiftTypeParser {
         }
         
         try lexer.advance(over: .closeParens)
-        try lexer.advance(over: .functionArrow)
         
-        returnType = try parseType(lexer)
+        // Is a block
+        if lexer.consumeToken(.functionArrow) != nil {
+            returnType = try parseType(lexer)
+            
+            return .block(returnType: returnType, parameters: parameters)
+        }
         
-        return .block(returnType: returnType, parameters: parameters)
+        // Is a tuple
+        if parameters.count == 1 {
+            return parameters[0]
+        }
+        
+        return .tuple(parameters)
     }
     
     private static func verifyTrailing(after type: SwiftType, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         // Meta-type
+        if lexer.consumeToken(.period) != nil {
+            guard let ident = lexer.consumeToken(.identifier)?.value else {
+                throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+            }
+            if ident != "Type" && ident != "Protocol" {
+                throw Error.expectedMetatype
+            }
+            
+            return try verifyTrailing(after: .metatype(for: type), lexer: lexer)
+        }
         
         // Optional
         if lexer.consumeToken(.questionMark) != nil {
@@ -376,6 +355,7 @@ public class SwiftTypeParser {
     public enum Error: Swift.Error, CustomStringConvertible {
         case invalidType
         case expectedTypeName
+        case expectedMetatype
         case unexpectedToken(SwiftTypeToken)
         
         public var description: String {
@@ -384,6 +364,8 @@ public class SwiftTypeParser {
                 return "Invalid Swift type signature"
             case .expectedTypeName:
                 return "Expected type name"
+            case .expectedMetatype:
+                return "Expected .Type or .Protocol metatype"
             case .unexpectedToken(let token):
                 return "Unexpected token \(token)"
             }
@@ -516,7 +498,7 @@ private class TokenizerLexer<T: TokenType> {
         let lexer: TokenizerLexer
         let index: Lexer.Index
         let tokens: [Token]
-        var didBacktrack: Bool
+        private var didBacktrack: Bool
         
         init(lexer: TokenizerLexer) {
             self.lexer = lexer
