@@ -59,7 +59,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             @objc
             class MyClass: NSObject {
                 @objc static var a: Bool {
-                    // type: MyClass.self
+                    // type: MyClass.Type
                     self
                 }
                 @objc var b: Bool {
@@ -69,7 +69,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 
                 @objc
                 static func classMethod() {
-                    // type: MyClass.self
+                    // type: MyClass.Type
                     self
                 }
                 @objc
