@@ -78,6 +78,37 @@ class SwiftTypeParserTests: XCTestCase {
                                            parameters: [.typeName("Type1")]))
     }
     
+    func testParseOptionalBlock() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ())?"),
+                           SwiftType.optional(.block(returnType: .void, parameters: [])))
+    }
+    
+    func testParseBlockTypeWithParameterAnnotation() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(@escaping () -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
+    func testParseBlockTypeWithParameterAnnotationWithParenthesis() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(@escaping(abc) () -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
+    func testParseBlockTypeWithMultipleParameterAnnotations() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(@autoclosure @escaping () -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
+    /// Variadic parameters are converted into array-types.
+    func testParseBlockTypeWithVariadicParameterEllipsis() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(Int...) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.array(.int)]))
+    }
+    
+    func testParseBlockTypeTakingBlockType() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ()) -> ()"),
+                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+    }
+    
     func testParseArray() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "[Type1]"),
                            SwiftType.array(.typeName("Type1")))
@@ -87,11 +118,6 @@ class SwiftTypeParserTests: XCTestCase {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "[Type1: Type2]"),
                            SwiftType.dictionary(key: .typeName("Type1"),
                                                 value: .typeName("Type2")))
-    }
-    
-    func testParseOptionalBlock() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ())?"),
-                           SwiftType.optional(.block(returnType: .void, parameters: [])))
     }
     
     func testParseGenericType() throws {
@@ -107,11 +133,6 @@ class SwiftTypeParserTests: XCTestCase {
     func testParseGenericTypeWithTupleType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Type<(A, B)>"),
                            SwiftType.generic("Type", parameters: [.tuple([.typeName("A"), .typeName("B")])]))
-    }
-    
-    func testParseBlockTypeTakingBlockType() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
     }
     
     func testMetatypeOfIdentifier() throws {
@@ -168,6 +189,8 @@ class SwiftTypeParserTests: XCTestCase {
                            SwiftType.tuple([]))
     }
     
+    // MARK: Error cases
+    
     func testProtocolCompositionWithBlockOnRightSideError() throws {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "Type1.Type2 & (Type3.Type4 & Type5.Type6) -> Void"))
     }
@@ -189,6 +212,8 @@ class SwiftTypeParserTests: XCTestCase {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(TypeA & TypeB) -> )"))
     }
     
+    // MARK: - Prodecural tests
+    
     /// Tests randomized type constructs that are valid
     func testRandomValidTypeParsing() throws {
         func encoded(_ type: SwiftType) -> String {
@@ -198,7 +223,9 @@ class SwiftTypeParserTests: XCTestCase {
         }
         
         for i in 0..<100 {
-            let type = SwiftTypePermutator.permutate(seed: 127 * i + i, damp: 0.99).normalized
+            let seed = 127 * i + i
+            
+            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.9999).normalized
             let typeString = type.description
             
             do {
@@ -224,12 +251,12 @@ class SwiftTypeParserTests: XCTestCase {
         }
     }
     
-    /// Chaotic test where random sections of an input string are sliced and fed
-    /// to the parser to test for crashers
+    /// Chaos test where random sections of an input string are sliced and fed
+    /// to the parser to test for possibility of crashers
     func testRandomTypeParsingStability() {
         for i in 0..<100 {
             let seed = 127 * i * i
-            let mt = MersenneTwister(seed: UInt32(seed))
+            let mt = MersenneTwister(seed: UInt32(seed % Int(UInt32.max)))
             
             let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.99).normalized
             var typeString = type.description
@@ -259,7 +286,7 @@ class SwiftTypeParserTests: XCTestCase {
 class SwiftTypePermutator {
     
     public static func permutate(seed: Int, damp: Double = 0.2) -> SwiftType {
-        let mersenne = MersenneTwister(seed: UInt32(seed))
+        let mersenne = MersenneTwister(seed: UInt32(seed % Int(UInt32.max)))
         let context = Context(mersenne: mersenne)
         
         return SwiftTypePermutator(probability: 1, damp: damp, context: context).swiftType() ?? .void
