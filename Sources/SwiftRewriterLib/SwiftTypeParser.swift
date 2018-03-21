@@ -27,30 +27,20 @@ public class SwiftTypeParser {
     ///
     /// tuple
     ///     : '(' tuple-element (',' tuple-element)* ')' ;
+    ///
     /// tuple-element
     ///     : swift-type
     ///     | identifier ':' swift-type
     ///     ;
     ///
-    /// array
-    ///     : '[' type ']' ;
-    ///
     /// block
     ///     : '(' block-argument-list ')' '->' swift-type ;
     ///
-    /// optional
-    ///     : swift-type '?' ;
+    /// array
+    ///     : '[' type ']' ;
     ///
-    /// implicitly-unwrapped-optional
-    ///     : swift-type '!' ;
-    ///
-    /// protocol-composition
-    ///     : swift-type '&' swift-type ('&' swift-type)* ;
-    ///
-    /// meta-type
-    ///     : swift-type '.' 'Type'
-    ///     | swift-type '.' 'Protocol'
-    ///     ;
+    /// dictionary
+    ///     : '[' type ':' type ']' ;
     ///
     /// type-identifier
     ///     : identifier generic-argument-clause?
@@ -60,12 +50,26 @@ public class SwiftTypeParser {
     /// generic-argument-clause
     ///     : '<' swift-type (',' swift-type)* '>'
     ///
+    /// optional
+    ///     : swift-type '?' ;
+    ///
+    /// implicitly-unwrapped-optional
+    ///     : swift-type '!' ;
+    ///
+    /// protocol-composition
+    ///     : type-identifier '&' type-identifier ('&' type-identifier)* ;
+    ///
+    /// meta-type
+    ///     : swift-type '.' 'Type'
+    ///     | swift-type '.' 'Protocol'
+    ///     ;
+    ///
     /// -- Block
     /// block-argument-list
     ///     : block-argument (',' block-argument)* ;
     ///
     /// block-argument
-    ///     : (argument-label identifier? ':') swift-type ;
+    ///     : (argument-label identifier? ':') 'inout'? swift-type ;
     ///
     /// argument-label
     ///     : '_'
@@ -81,32 +85,93 @@ public class SwiftTypeParser {
     /// digit : [0-9]
     /// ```
     private static func parseType(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        let type: SwiftType
+        
         if lexer.hasNextToken(.identifier) {
-            return try parseTypeIdentifier(lexer)
+            type = try parseTypeIdentifier(lexer)
+        } else if lexer.hasNextToken(.openBrace) {
+            type = try parseArrayOrDictionary(lexer)
+        } else if lexer.hasNextToken(.openParens) {
+            type = try parseTupleOrBlock(lexer)
+        } else {
+            throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
         }
         
-        if lexer.hasNextToken(.openBrace) {
-            return try parseArrayOrDictionary(lexer)
-        }
-        
-        if lexer.hasNextToken(.openParens) {
-            return try parseTupleOrBlock(lexer)
-        }
-        
-        throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+        return try verifyTrailing(after: type, lexer: lexer)
     }
     
+    /// Parses an identifier type.
+    ///
+    /// ```
+    /// type-identifier
+    ///     : identifier generic-argument-clause?
+    ///     | identifier generic-argument-clause? '.' type-identifier
+    ///     ;
+    ///
+    /// generic-argument-clause
+    ///     : '<' swift-type (',' swift-type)* '>'
+    /// ```
     private static func parseTypeIdentifier(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         guard let identifier = lexer.consumeToken(.identifier) else {
             throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
         }
         
         // Attempt a generic type parse
-        let type = try verifyGenericTrailing(after: String(identifier.value), lexer: lexer)
+        let type = try verifyGenericArgumentsTrailing(after: String(identifier.value), lexer: lexer)
         
-        return try verifyTrailing(after: type, lexer: lexer)
+        // Chained access to sub-types
+        if lexer.consumeToken(.period) != nil {
+            
+        }
+        
+        return type
     }
     
+    /// Parses a protocol composition for an identifier type.
+    ///
+    /// ```
+    /// protocol-composition
+    ///     : type-identifier '&' type-identifier ('&' type-identifier)* ;
+    /// ```
+    private static func verifyProtocolCompositionTrailing(after type: SwiftType, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        
+        
+        return type
+    }
+    
+    /// Parses a generic argument clause.
+    ///
+    /// ```
+    /// generic-argument-clause
+    ///     : '<' swift-type (',' swift-type)* '>'
+    /// ```
+    private static func verifyGenericArgumentsTrailing(after typeName: String, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        guard lexer.consumeToken(.openBracket) != nil else {
+            return SwiftType.typeName(typeName)
+        }
+        
+        var types: [SwiftType] = []
+        
+        repeat {
+            types.append(try parseType(lexer))
+            
+            if lexer.consumeToken(.closeBracket) != nil {
+                break
+            }
+        } while !lexer.isEof
+        
+        return SwiftType.generic(typeName, parameters: types)
+    }
+    
+    /// Parses an array or dictionary type.
+    ///
+    /// ```
+    /// array
+    ///     : '[' type ']' ;
+    ///
+    /// dictionary
+    ///     : '[' type ':' type ']' ;
+    /// ```
     private static func parseArrayOrDictionary(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         try lexer.advance(over: .openBrace)
         
@@ -122,18 +187,26 @@ public class SwiftTypeParser {
         try lexer.advance(over: .closeBrace)
         
         if let type2 = type2 {
-            return try verifyTrailing(after: .dictionary(key: type1, value: type2), lexer: lexer)
+            return .dictionary(key: type1, value: type2)
         }
         
-        return try verifyTrailing(after: .array(type1), lexer: lexer)
+        return .array(type1)
     }
     
+    /// Parses a tuple or block type from a lexer
+    ///
+    /// ```
+    /// tuple
+    ///     : '(' tuple-element (',' tuple-element)* ')' ;
+    ///
+    /// block
+    ///     : '(' block-argument-list ')' '->' swift-type ;
+    /// ```
     private static func parseTupleOrBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         // When we find a parenthesis, try a block first...
         var backtracker = lexer.backtracker()
         do {
-            let asBlock = try parseBlock(lexer)
-            return try verifyTrailing(after: asBlock, lexer: lexer)
+            return try parseBlock(lexer)
         } catch {
             backtracker.backtrack()
         }
@@ -141,8 +214,7 @@ public class SwiftTypeParser {
         // ...and a tuple last
         backtracker = lexer.backtracker()
         do {
-            let tuple = try parseTuple(lexer)
-            return try verifyTrailing(after: tuple, lexer: lexer)
+            return try parseTuple(lexer)
         } catch {
             backtracker.backtrack()
         }
@@ -150,6 +222,16 @@ public class SwiftTypeParser {
         throw Error.invalidType
     }
     
+    /// Parses a tuple type
+    ///
+    /// ```
+    /// tuple
+    ///     : '(' tuple-element (',' tuple-element)* ')' ;
+    /// tuple-element
+    ///     : swift-type
+    ///     | identifier ':' swift-type
+    ///     ;
+    /// ```
     private static func parseTuple(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         var types: [SwiftType] = []
         
@@ -193,6 +275,23 @@ public class SwiftTypeParser {
         return .tuple(types)
     }
     
+    /// Parses a block type
+    ///
+    /// ```
+    /// block
+    ///     : '(' block-argument-list ')' '->' swift-type ;
+    ///
+    /// block-argument-list
+    ///     : block-argument (',' block-argument)* ;
+    ///
+    /// block-argument
+    ///     : (argument-label identifier? ':') swift-type ;
+    ///
+    /// argument-label
+    ///     : '_'
+    ///     | identifier
+    ///     ;
+    /// ```
     private static func parseBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         var returnType: SwiftType
         var parameters: [SwiftType] = []
@@ -258,28 +357,15 @@ public class SwiftTypeParser {
         return .block(returnType: returnType, parameters: parameters)
     }
     
-    private static func verifyGenericTrailing(after typeName: String, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
-        guard lexer.consumeToken(.openBracket) != nil else {
-            return SwiftType.typeName(typeName)
-        }
-        
-        var types: [SwiftType] = []
-        
-        repeat {
-            types.append(try parseType(lexer))
-            
-            if lexer.consumeToken(.closeBracket) != nil {
-                break
-            }
-        } while !lexer.isEof
-        
-        return SwiftType.generic(typeName, parameters: types)
-    }
-    
     private static func verifyTrailing(after type: SwiftType, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        // Meta-type
+        
+        // Optional
         if lexer.consumeToken(.questionMark) != nil {
             return try verifyTrailing(after: .optional(type), lexer: lexer)
         }
+        
+        // Implicitly unwrapped optional
         if lexer.consumeToken(.exclamationMark) != nil {
             return try verifyTrailing(after: .implicitUnwrappedOptional(type), lexer: lexer)
         }
