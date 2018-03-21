@@ -111,7 +111,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testEncodeSingleTypeTuple() throws {
-        let type = SwiftType.tuple([.int])
+        let type = SwiftType.tuple([.int, .string])
         
         let encoded = try JSONEncoder().encode(type)
         let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
@@ -135,5 +135,21 @@ class SwiftTypeTests: XCTestCase {
         let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
         
         XCTAssertEqual(type, decoded)
+    }
+    
+    func testEncodeAsNested() throws {
+        struct Test: Codable {
+            var type: SwiftType
+        }
+        
+        let test =
+            Test(type:
+                SwiftType.tuple([.block(returnType: .implicitUnwrappedOptional(.protocolComposition([.typeName("A"), .typeName("B")])),
+                                        parameters: [.generic("C", parameters: [.optional(.nested(.typeName("D"), .generic("E", parameters: [.typeName("D")])))])])]).normalized)
+        
+        let encoded = try JSONEncoder().encode(test)
+        let decoded = try JSONDecoder().decode(Test.self, from: encoded)
+        
+        XCTAssertEqual(test.type, decoded.type)
     }
 }

@@ -1,4 +1,3 @@
-import SwiftAST
 import MiniLexer
 
 /// Support for parsing of Swift type signatures into `SwiftType` structures.
@@ -196,7 +195,9 @@ public class SwiftTypeParser {
     /// generic-argument-clause
     ///     : '<' swift-type (',' swift-type)* '>'
     /// ```
-    private static func verifyGenericArgumentsTrailing(after typeName: String, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+    private static func verifyGenericArgumentsTrailing(
+        after typeName: String, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        
         guard lexer.consumeToken(.openBracket) != nil else {
             return SwiftType.typeName(typeName)
         }

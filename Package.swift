@@ -45,7 +45,7 @@ let package = Package(
                            "TypeLexing"]),
         .target(
             name: "SwiftAST",
-            dependencies: ["GrammarModels"]),
+            dependencies: ["GrammarModels", "MiniLexer"]),
         .target(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser",
