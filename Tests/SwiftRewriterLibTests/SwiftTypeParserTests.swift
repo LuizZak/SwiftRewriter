@@ -150,7 +150,14 @@ class SwiftTypeParserTests: XCTestCase {
     }
     
     func testProtocolCompositionGrouped() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(Type1.Type2 & Type3.Type4) & Type5.Type6"),
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "(Type1.Type2 & Type3.Type4) & Type5.Type6").normalized,
+                           SwiftType.protocolComposition([.nested(.typeName("Type1"), .typeName("Type2")),
+                                                          .nested(.typeName("Type3"), .typeName("Type4")),
+                                                          .nested(.typeName("Type5"), .typeName("Type6"))]))
+    }
+    
+    func testProtocolCompositionGroupedOnRightSide() throws {
+        try XCTAssertEqual(SwiftTypeParser.parse(from: "Type1.Type2 & (Type3.Type4 & Type5.Type6)").normalized,
                            SwiftType.protocolComposition([.nested(.typeName("Type1"), .typeName("Type2")),
                                                           .nested(.typeName("Type3"), .typeName("Type4")),
                                                           .nested(.typeName("Type5"), .typeName("Type6"))]))
@@ -159,6 +166,10 @@ class SwiftTypeParserTests: XCTestCase {
     func testVoidParsesAsTypeAliasOfEmptyTuple() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Void"),
                            SwiftType.tuple([]))
+    }
+    
+    func testProtocolCompositionWithBlockOnRightSideError() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "Type1.Type2 & (Type3.Type4 & Type5.Type6) -> Void"))
     }
     
     func testParseExtraCharacterMessage() throws {
@@ -178,9 +189,16 @@ class SwiftTypeParserTests: XCTestCase {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(TypeA & TypeB) -> )"))
     }
     
-    func testRandomTypeParsing() throws {
+    /// Tests randomized type constructs that are valid
+    func testRandomValidTypeParsing() throws {
+        func encoded(_ type: SwiftType) -> String {
+            let coder = JSONEncoder()
+            let data = try! coder.encode(type)
+            return String(data: data, encoding: .utf8)!
+        }
+        
         for i in 0..<100 {
-            let type = SwiftTypePermutator.permutate(seed: 127 * i + i).normalized
+            let type = SwiftTypePermutator.permutate(seed: 127 * i + i, damp: 0.99).normalized
             let typeString = type.description
             
             do {
@@ -188,19 +206,49 @@ class SwiftTypeParserTests: XCTestCase {
                 
                 XCTAssertEqual(type, parsed, "iteration \(i)")
                 if type != parsed {
-                    let coder = JSONEncoder()
-                    let data = try coder.encode(type)
-                    let str = String(data: data, encoding: .utf8)!
-                    print(str)
-                    
+                    print("""
+                        Encoded input type:
+                        
+                        \(encoded(type))
+                        
+                        Encoded parsed type:
+                        
+                        \(encoded(parsed))
+                        """)
                     break
                 }
             } catch {
-                let coder = JSONEncoder()
-                let data = try coder.encode(type)
-                let str = String(data: data, encoding: .utf8)!
-                XCTFail("Failed on type \(typeString): \(error)\n\nSerialized type:\n\(str)")
+                XCTFail("Failed on type \(typeString): \(error)\n\nSerialized type:\n\(encoded(type))")
                 return
+            }
+        }
+    }
+    
+    /// Chaotic test where random sections of an input string are sliced and fed
+    /// to the parser to test for crashers
+    func testRandomTypeParsingStability() {
+        for i in 0..<100 {
+            let seed = 127 * i * i
+            let mt = MersenneTwister(seed: UInt32(seed))
+            
+            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.99).normalized
+            var typeString = type.description
+            
+            // Slice off the string
+            let p1 = mt.randomInt() % (typeString.count)
+            let p2 = mt.randomInt() % (typeString.count)
+            
+            let start = min(p1, p2)
+            let end = max(p1, p2)
+            let startIndex = typeString.index(typeString.startIndex, offsetBy: start)
+            let endIndex = typeString.index(typeString.startIndex, offsetBy: end)
+            
+            typeString = String(typeString[..<startIndex] + typeString[endIndex...])
+            
+            do {
+                _=try SwiftTypeParser.parse(from: typeString)
+            } catch {
+                // Ok!
             }
         }
     }
@@ -210,22 +258,31 @@ class SwiftTypeParserTests: XCTestCase {
 /// signatures like Generics and Block/Tuple types.
 class SwiftTypePermutator {
     
-    public static func permutate(seed: Int) -> SwiftType {
+    public static func permutate(seed: Int, damp: Double = 0.2) -> SwiftType {
         let mersenne = MersenneTwister(seed: UInt32(seed))
         let context = Context(mersenne: mersenne)
         
-        return SwiftTypePermutator(probability: 1, context: context).swiftType() ?? .void
+        return SwiftTypePermutator(probability: 1, damp: damp, context: context).swiftType() ?? .void
     }
     
     /// Probability, from 0-1, that calling `swiftType()` will generate a non-nil
     /// return.
     private let probability: Double
     
+    /// Damping factor for growth.
+    /// The farther from 0, the higher the likelihood of converging at a small
+    /// type.
+    ///
+    /// Values at 1 can diverge to infinity, while values closer to 0 will result
+    /// in shorter types.
+    private let damp: Double
+    
     /// Shared mutable context for all child permutators
     private let context: Context
     
-    private init(probability: Double, context: Context) {
+    private init(probability: Double, damp: Double, context: Context) {
         self.probability = probability
+        self.damp = damp
         self.context = context
     }
     
@@ -234,14 +291,20 @@ class SwiftTypePermutator {
             return nil
         }
         
-        let res: SwiftType? = oneOf(composable, tuple, block, { nil })
+        if probability == 1 {
+            return addTrailingTypeMaybe(oneOf(composable, tuple, block))
+        }
+        
+        let res: SwiftType? = oneOf(biasLeft: 1 - probability, { nil }, composable, tuple, block)
         
         return res.map(addTrailingTypeMaybe)
     }
     
     private func composable() -> SwiftType {
         if chanceFromProbability() {
-            let types = randomProduceArray(biasToEmpty: 0.1) { branchProbably(damp: $0)?.composable() }
+            let types = randomProduceArray(biasToEmpty: 1 - probability) {
+                branchProbably(dampModifier: $0)?.composable()
+            }
             
             if types.count == 1 {
                 return types[0]
@@ -251,6 +314,10 @@ class SwiftTypePermutator {
             }
             
             return .protocolComposition(types)
+        }
+        
+        if chanceFromProbability() {
+            return SwiftType.nested(nestable(), nestable())
         }
         
         return nestable()
@@ -304,7 +371,7 @@ class SwiftTypePermutator {
     }
     
     private func randomTypes() -> [SwiftType] {
-        return randomProduceArray { branch(damp: $0).swiftType() }
+        return randomProduceArray { branch(dampModifier: $0).swiftType() }
     }
     
     private func randomProduceArray<T>(biasToEmpty: Double = 0, _ producer: (Double) -> T?) -> [T] {
@@ -333,20 +400,22 @@ class SwiftTypePermutator {
         return generators[min(generators.count - 1, index)]()
     }
     
-    private func randomSubtype(damp: Double = 0.8) -> SwiftType? {
-        return branch(damp: damp).swiftType()
+    private func randomSubtype(dampModifier: Double = 1) -> SwiftType? {
+        return branch(dampModifier: damp * dampModifier).swiftType()
     }
     
-    private func branch(damp: Double = 0.8) -> SwiftTypePermutator {
+    private func branch(dampModifier: Double = 1) -> SwiftTypePermutator {
         return
             SwiftTypePermutator(probability: probability * min(1, max(0, damp)),
+                                damp: damp * dampModifier,
                                 context: context)
     }
     
-    private func branchProbably(damp: Double = 0.8) -> SwiftTypePermutator? {
+    private func branchProbably(dampModifier: Double = 0.8) -> SwiftTypePermutator? {
         if chanceNormal(bellow: probability * damp) {
             return
                 SwiftTypePermutator(probability: probability * min(1, max(0, damp)),
+                                    damp: dampModifier * damp,
                                     context: context)
         }
         

@@ -55,6 +55,10 @@ final public class MersenneTwister {
         return y
     }
     
+    public func randomInt() -> Int {
+        return Int(random())
+    }
+    
     /// Puts the twist in Mersenne Twister.
     ///
     private func twist() {

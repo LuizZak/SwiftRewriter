@@ -15,12 +15,48 @@ indirect public enum SwiftType: Equatable {
     public var normalized: SwiftType {
         switch self {
         // Normalizations
+            
+        // Protocol compositions of a single type should be decomposed into the
+        // singular type
         case .protocolComposition(let comp) where comp.count == 1:
             return comp[0].normalized
+            
+        // Protocol compositions with directly nested protocol compositions should
+        // be unwrapped into a single composed protocol composition
+        case .protocolComposition(let inner) where inner.contains(where: { $0.isProtocolComposition }):
+            let normalizedInner = inner.flatMap { type -> [SwiftType] in
+                switch type {
+                case .protocolComposition(let inner):
+                    return inner.map { $0.normalized }
+                default:
+                    return [type]
+                }
+            }
+            
+            return SwiftType.protocolComposition(normalizedInner).normalized
+            
+        // Generic types with no parameters should be made non-generic
         case let .generic(name, params) where params.isEmpty:
             return .typeName(name)
+            
+        // Tuples of one type should be unwrapped as the single type
         case .tuple(let values) where values.count == 1:
             return values[0].normalized
+            
+        // Nested type non-normalization
+        case let .nested(.nested(nll, nlr), .nested(nrl, nrr)):
+            return
+                SwiftType.nested(
+                    SwiftType.nested(
+                        SwiftType.nested(
+                            nll.normalized, nlr.normalized),
+                        nrl).normalized,
+                    nrr).normalized
+            
+        // Nested type normalization
+        case let .nested(nonNested, .nested(nl, nr)):
+            return SwiftType.nested(SwiftType.nested(nonNested, nl).normalized,
+                                    nr.normalized).normalized
             
         // Nested normalizations
         case .protocolComposition(let subtypes):
@@ -84,13 +120,35 @@ indirect public enum SwiftType: Equatable {
     }
     
     /// Returns `true` if this type represents a nominal type.
-    /// Except for blocks and metatypes, all types are considered nominal types.
+    /// Except for blocks, metatypes and tuples, all types are considered nominal
+    /// types.
     public var isNominal: Bool {
         switch self {
-        case .block, .metatype:
+        case .block, .metatype, .tuple:
             return false
         default:
             return true
+        }
+    }
+    
+    /// Returns `true` iff this SwiftType is a `.protocolComposition` case.
+    public var isProtocolComposition: Bool {
+        switch self {
+        case .protocolComposition:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    /// Returns `true` if this type is a `.typeName`, a `.genericTypeName`, or a
+    /// `.protocolComposition` type.
+    public var isProtocolComposable: Bool {
+        switch self {
+        case .typeName, .generic, .protocolComposition:
+            return true
+        default:
+            return false
         }
     }
     

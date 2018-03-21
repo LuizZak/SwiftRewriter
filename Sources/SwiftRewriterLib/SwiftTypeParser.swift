@@ -92,7 +92,7 @@ public class SwiftTypeParser {
             
             // Protocol type composition
             if lexer.hasNextToken(.ampersand) {
-                type = try verifyProtocolCompositionTrailing(after: ident, lexer: lexer)
+                type = try verifyProtocolCompositionTrailing(after: [ident], lexer: lexer)
             } else {
                 type = ident
             }
@@ -161,12 +161,28 @@ public class SwiftTypeParser {
     /// protocol-composition
     ///     : type-identifier '&' type-identifier ('&' type-identifier)* ;
     /// ```
-    private static func verifyProtocolCompositionTrailing(after type: SwiftType,
+    private static func verifyProtocolCompositionTrailing(after types: [SwiftType],
                                                           lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
-        var types = [type]
+        var types = types
         
         while lexer.consumeToken(.ampersand) != nil {
-            types.append(try parseTypeIdentifier(lexer))
+            // If we find a parenthesis, unwrap the tuple (if it's a tuple) and
+            // check if all its inner types are nominal, then it's a composable
+            // type.
+            if lexer.hasNextToken(.openParens) {
+                let toParens = lexer.backtracker()
+                
+                let type = try parseType(lexer)
+                if !type.isProtocolComposable {
+                    toParens.backtrack()
+                    
+                    throw notProtocolComposableError(type: type, lexer: lexer)
+                } else {
+                    types.append(type)
+                }
+            } else {
+                types.append(try parseTypeIdentifier(lexer))
+            }
         }
         
         return .protocolComposition(types)
@@ -320,14 +336,24 @@ public class SwiftTypeParser {
         
         try lexer.advance(over: .closeParens)
         
-        // Is a block
+        // It's a block if if features a function arrow afterwards...
         if lexer.consumeToken(.functionArrow) != nil {
             returnType = try parseType(lexer)
             
             return .block(returnType: returnType, parameters: parameters)
         }
         
-        // Is a tuple
+        // ...otherwise it is a tuple
+        
+        // Check for protocol compositions (types must be all nominal)
+        if lexer.hasNextToken(.ampersand) {
+            if let notComposable = parameters.first(where: { !$0.isProtocolComposable }) {
+                throw notProtocolComposableError(type: notComposable, lexer: lexer)
+            }
+            
+            return try verifyProtocolCompositionTrailing(after: parameters, lexer: lexer)
+        }
+        
         if parameters.count == 1 {
             return parameters[0]
         }
@@ -376,6 +402,13 @@ public class SwiftTypeParser {
         return .unexpectedToken(lexer.nextTokens()[0].tokenType, index)
     }
     
+    private static func notProtocolComposableError(
+        type: SwiftType, lexer: TokenizerLexer<SwiftTypeToken>) -> Error {
+        
+        let index = indexOn(lexer: lexer)
+        return .notProtocolComposable(type, index)
+    }
+    
     private static func indexOn(lexer: TokenizerLexer<SwiftTypeToken>) -> Int {
         let input = lexer.lexer.inputString
         return input.distance(from: input.startIndex, to: lexer.lexer.inputIndex)
@@ -385,6 +418,7 @@ public class SwiftTypeParser {
         case invalidType
         case expectedTypeName(Int)
         case expectedMetatype(Int)
+        case notProtocolComposable(SwiftType, Int)
         case unexpectedToken(SwiftTypeToken, Int)
         
         public var description: String {
@@ -395,6 +429,8 @@ public class SwiftTypeParser {
                 return "Expected type name at column \(offset + 1)"
             case .expectedMetatype(let offset):
                 return "Expected .Type or .Protocol metatype at column \(offset + 1)"
+            case let .notProtocolComposable(type, offset):
+                return "Found protocol composition, but type \(type) is not composable on composition '&' at column \(offset + 1)"
             case let .unexpectedToken(token, offset):
                 return "Unexpected token \(token) at column \(offset + 1)"
             }
