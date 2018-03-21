@@ -14,6 +14,8 @@ indirect public enum SwiftType: Equatable {
     /// Returns a normalized version of this type, getting rid of redundancies.
     public var normalized: SwiftType {
         switch self {
+        case .tuple(let values) where values.count == 1:
+            return values[0]
         case .protocolComposition(let comp) where comp.count == 1:
             return comp[0]
         case let .generic(name, params) where params.isEmpty:
@@ -240,7 +242,7 @@ extension SwiftType: CustomStringConvertible {
             return types.map { $0.descriptionWithParens }.joined(separator: " & ")
             
         case let .metatype(innerType):
-            return innerType.descriptionWithParens + ".self"
+            return innerType.descriptionWithParens + ".Type"
             
         case .tuple([]):
             return "Void"

@@ -101,7 +101,7 @@ public class SwiftTypeParser {
         } else if lexer.hasNextToken(.openParens) {
             type = try parseTupleOrBlock(lexer)
         } else {
-            throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+            throw unexpectedTokenError(lexer: lexer)
         }
         
         return try verifyTrailing(after: type, lexer: lexer)
@@ -120,7 +120,7 @@ public class SwiftTypeParser {
     /// ```
     private static func parseTypeIdentifier(_ lexer: TokenizerLexer<SwiftTypeToken>, chainedAfter parentType: SwiftType? = nil) throws -> SwiftType {
         guard let identifier = lexer.consumeToken(.identifier) else {
-            throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+            throw unexpectedTokenError(lexer: lexer)
         }
         
         // Type-alias 'Void' into an empty tuple (SwiftType.void)
@@ -136,21 +136,20 @@ public class SwiftTypeParser {
         var type = try verifyGenericArgumentsTrailing(after: String(identifier.value), lexer: lexer)
         
         // Chained access to sub-types
-        let backtracker = lexer.backtracker()
+        let periodBT = lexer.backtracker()
         if lexer.consumeToken(.period) != nil {
             // Backtrack out of this method, in case it's actually a metatype
             // trailing
+            let identBT = lexer.backtracker()
             if let identifier = lexer.consumeToken(.identifier)?.value,
                 identifier == "Type" || identifier == "Protocol" {
-                backtracker.backtrack()
+                periodBT.backtrack()
                 return type
             }
             
-            type = try parseTypeIdentifier(lexer, chainedAfter: type)
-        }
-        
-        if let parentType = parentType {
-            type = .nested(parentType, type)
+            identBT.backtrack()
+            
+            type = .nested(type, try parseTypeIdentifier(lexer, chainedAfter: type))
         }
         
         return type
@@ -184,15 +183,25 @@ public class SwiftTypeParser {
             return SwiftType.typeName(typeName)
         }
         
+        var afterComma = false
         var types: [SwiftType] = []
         
         repeat {
+            afterComma = false
+            
             types.append(try parseType(lexer))
             
-            if lexer.consumeToken(.closeBracket) != nil {
-                break
+            if lexer.consumeToken(.comma) != nil {
+                afterComma = true
+                continue
             }
+            try lexer.advance(over: .closeBracket)
+            break
         } while !lexer.isEof
+        
+        if afterComma {
+            throw expectedTypeNameError(lexer: lexer)
+        }
         
         return SwiftType.generic(typeName, parameters: types)
     }
@@ -292,7 +301,7 @@ public class SwiftTypeParser {
             // Inout label
             if lexer.consumeToken(.inout) != nil {
                 if handledInout {
-                    throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+                    throw unexpectedTokenError(lexer: lexer)
                 }
             }
             
@@ -301,12 +310,12 @@ public class SwiftTypeParser {
             if lexer.consumeToken(.comma) != nil {
                 afterComma = true
             } else if !lexer.hasNextToken(.closeParens) {
-                throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+                throw unexpectedTokenError(lexer: lexer)
             }
         }
         
         if afterComma {
-            throw Error.expectedTypeName
+            throw expectedTypeNameError(lexer: lexer)
         }
         
         try lexer.advance(over: .closeParens)
@@ -330,10 +339,10 @@ public class SwiftTypeParser {
         // Meta-type
         if lexer.consumeToken(.period) != nil {
             guard let ident = lexer.consumeToken(.identifier)?.value else {
-                throw Error.unexpectedToken(lexer.nextTokens()[0].tokenType)
+                throw unexpectedTokenError(lexer: lexer)
             }
             if ident != "Type" && ident != "Protocol" {
-                throw Error.expectedMetatype
+                throw expectedMetatypeError(lexer: lexer)
             }
             
             return try verifyTrailing(after: .metatype(for: type), lexer: lexer)
@@ -352,22 +361,42 @@ public class SwiftTypeParser {
         return type
     }
     
+    private static func expectedMetatypeError(lexer: TokenizerLexer<SwiftTypeToken>) -> Error {
+        let index = indexOn(lexer: lexer)
+        return .expectedMetatype(index)
+    }
+    
+    private static func expectedTypeNameError(lexer: TokenizerLexer<SwiftTypeToken>) -> Error {
+        let index = indexOn(lexer: lexer)
+        return .expectedTypeName(index)
+    }
+    
+    private static func unexpectedTokenError(lexer: TokenizerLexer<SwiftTypeToken>) -> Error {
+        let index = indexOn(lexer: lexer)
+        return .unexpectedToken(lexer.nextTokens()[0].tokenType, index)
+    }
+    
+    private static func indexOn(lexer: TokenizerLexer<SwiftTypeToken>) -> Int {
+        let input = lexer.lexer.inputString
+        return input.distance(from: input.startIndex, to: lexer.lexer.inputIndex)
+    }
+    
     public enum Error: Swift.Error, CustomStringConvertible {
         case invalidType
-        case expectedTypeName
-        case expectedMetatype
-        case unexpectedToken(SwiftTypeToken)
+        case expectedTypeName(Int)
+        case expectedMetatype(Int)
+        case unexpectedToken(SwiftTypeToken, Int)
         
         public var description: String {
             switch self {
             case .invalidType:
                 return "Invalid Swift type signature"
-            case .expectedTypeName:
-                return "Expected type name"
-            case .expectedMetatype:
-                return "Expected .Type or .Protocol metatype"
-            case .unexpectedToken(let token):
-                return "Unexpected token \(token)"
+            case .expectedTypeName(let offset):
+                return "Expected type name at column \(offset + 1)"
+            case .expectedMetatype(let offset):
+                return "Expected .Type or .Protocol metatype at column \(offset + 1)"
+            case let .unexpectedToken(token, offset):
+                return "Unexpected token \(token) at column \(offset + 1)"
             }
         }
     }
