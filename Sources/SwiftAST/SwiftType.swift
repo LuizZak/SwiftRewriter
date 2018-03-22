@@ -1,5 +1,17 @@
 /// Represents a Swift type
 indirect public enum SwiftType: Equatable {
+    case typeName(String)
+    case optional(SwiftType)
+    case implicitUnwrappedOptional(SwiftType)
+    case generic(String, parameters: [SwiftType])
+    case protocolComposition([SwiftType])
+    case block(returnType: SwiftType, parameters: [SwiftType])
+    case metatype(for: SwiftType)
+    case tuple([SwiftType])
+    case nested(SwiftType, SwiftType)
+}
+
+public extension SwiftType {
     public var requiresParens: Bool {
         switch self {
         case .protocolComposition(let types) where types.count > 1:
@@ -215,16 +227,6 @@ indirect public enum SwiftType: Equatable {
         }
     }
     
-    case typeName(String)
-    case optional(SwiftType)
-    case implicitUnwrappedOptional(SwiftType)
-    case generic(String, parameters: [SwiftType])
-    case protocolComposition([SwiftType])
-    case block(returnType: SwiftType, parameters: [SwiftType])
-    case metatype(for: SwiftType)
-    case tuple([SwiftType])
-    case nested(SwiftType, SwiftType)
-    
     public static let void = SwiftType.tuple([])
     public static let int = SwiftType.typeName("Int")
     public static let uint = SwiftType.typeName("UInt")
@@ -280,14 +282,6 @@ extension SwiftType: ExpressibleByStringLiteral {
     public init(stringLiteral value: String) {
         self = .typeName(value)
     }
-}
-
-/// Defines the ownership of a variable storage
-public enum Ownership: String, Equatable, Codable {
-    case strong
-    case weak
-    case unownedSafe = "unowned(safe)"
-    case unownedUnsafe = "unowned(unsafe)"
 }
 
 extension SwiftType: CustomStringConvertible {
