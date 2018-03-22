@@ -218,7 +218,7 @@ public class DefaultTypeMapper: TypeMapper {
             
         case .optional(let type):
             var typeName = typeNameString(for: type)
-            if type.requiresParens {
+            if type.requiresTrailingParens {
                 typeName = "(" + typeName + ")"
             }
             
@@ -226,7 +226,7 @@ public class DefaultTypeMapper: TypeMapper {
             
         case .implicitUnwrappedOptional(let type):
             var typeName = typeNameString(for: type)
-            if type.requiresParens {
+            if type.requiresTrailingParens {
                 typeName = "(" + typeName + ")"
             }
             
@@ -237,7 +237,7 @@ public class DefaultTypeMapper: TypeMapper {
             
         case let .metatype(type):
             let inner = typeNameString(for: type)
-            if type.requiresParens {
+            if type.requiresTrailingParens {
                 return "(" + inner + ").self"
             }
             

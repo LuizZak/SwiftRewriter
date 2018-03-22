@@ -34,7 +34,20 @@ public typealias NestedSwiftType = TwoOrMore<NominalSwiftType>
 public typealias GenericArgumentSwiftType = OneOrMore<SwiftType>
 
 public extension SwiftType {
-    public var requiresParens: Bool {
+    /// If this Swift type is a nominal typename, returns the inner type name as
+    /// a string, otherwise returns nil.
+    public var typeName: String? {
+        switch self {
+        case .nominal(.typeName(let name)):
+            return name
+        default:
+            return nil
+        }
+    }
+    
+    /// Whether this type requires trailing parenthesis when this type is used
+    /// within an optional or metatype.
+    public var requiresTrailingParens: Bool {
         switch self {
         case .protocolComposition, .block:
             return true
@@ -292,7 +305,7 @@ extension SwiftType: CustomStringConvertible {
     }
     
     private var descriptionWithParens: String {
-        if requiresParens {
+        if requiresTrailingParens {
             return "(\(self))"
         }
         

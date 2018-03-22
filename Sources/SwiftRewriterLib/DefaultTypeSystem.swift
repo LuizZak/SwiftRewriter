@@ -74,7 +74,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
-        guard case .nominal(.typeName(let aliased)) = resolveAlias(in: typeName) else {
+        guard let aliased = resolveAlias(in: typeName).typeName else {
             return false
         }
         
@@ -274,12 +274,12 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         
         switch type {
         case var .block(returnType, parameters):
-            if case .nominal(.typeName(let retTypeName)) = returnType {
+            if let retTypeName = returnType.typeName {
                 returnType = resolveAlias(in: retTypeName)
             }
             
             for (i, p) in parameters.enumerated() {
-                if case .nominal(.typeName(let type)) = p {
+                if let type = p.typeName {
                     parameters[i] = resolveAlias(in: type)
                 }
             }
