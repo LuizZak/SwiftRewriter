@@ -66,7 +66,8 @@ indirect public enum SwiftType: Equatable {
         case .tuple(let subtypes):
             return .tuple(subtypes.map { $0.normalized })
         case let .block(returnType, parameters):
-            return .block(returnType: returnType.normalized, parameters: parameters.map({ $0.normalized }))
+            return .block(returnType: returnType.normalized,
+                          parameters: parameters.map({ $0.normalized }))
         case .metatype(let inner):
             return .metatype(for: inner.normalized)
         case .optional(let inner):

@@ -106,6 +106,11 @@ class SwiftTypeTests: XCTestCase {
                        "A.B?")
     }
     
+    func testDescriptionOptionalWithProtocolComposition() {
+        XCTAssertEqual(SwiftType.optional(.protocolComposition([.typeName("A"), .typeName("B")])).description,
+                       "(A & B)?")
+    }
+    
     func testDescriptionOptionalWithOptionalType() {
         XCTAssertEqual(SwiftType.optional(.optional(.typeName("A"))).description,
                        "A??")
@@ -119,6 +124,16 @@ class SwiftTypeTests: XCTestCase {
     func testDescriptionImplicitOptionalWithTypeName() {
         XCTAssertEqual(SwiftType.implicitUnwrappedOptional(.typeName("A")).description,
                        "A!")
+    }
+    
+    func testDescriptionArrayType() {
+        XCTAssertEqual(SwiftType.array(.typeName("A")).description,
+                       "[A]")
+    }
+    
+    func testDescriptionDictionaryType() {
+        XCTAssertEqual(SwiftType.dictionary(key: .typeName("A"), value: .typeName("B")).description,
+                       "[A: B]")
     }
     
     func testWithSameOptionalityAs() {
