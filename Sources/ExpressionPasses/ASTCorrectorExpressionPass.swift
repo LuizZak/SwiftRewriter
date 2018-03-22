@@ -284,7 +284,7 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
                 
             // <nullable> -> <nullable> != nil
             // <nullable> -> <nullable> == nil (negated)
-            case .optional(.typeName):
+            case .optional(.nominal(.typeName)):
                 exp.expectedType = nil
                 
                 let outer = exp.binary(op: negated ? .equals : .unequals, rhs: .constant(.nil))

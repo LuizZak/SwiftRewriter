@@ -91,11 +91,11 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         let iteratorType: SwiftType
         
         switch stmt.exp.resolvedType {
-        case .generic("Array", let args)? where args.count == 1:
-            iteratorType = args[0]
+        case .nominal(.generic("Array", let args))? where Array(args).count == 1:
+            iteratorType = Array(args)[0]
             
         // Sub-types of array iterate as .anyObject
-        case .typeName(let typeName)? where typeSystem.isType(typeName, subtypeOf: "NSArray"):
+        case .nominal(.typeName(let typeName))? where typeSystem.isType(typeName, subtypeOf: "NSArray"):
             iteratorType = .anyObject
         default:
             iteratorType = .errorType
@@ -543,19 +543,19 @@ private class MemberInvocationResolver {
             
             // Array<T> / Dictionary<T> resolving
             switch typeResolver.expandAliases(in: expType) {
-            case .generic("Array", let params) where params.count == 1:
+            case .nominal(.generic("Array", let params)) where Array(params).count == 1:
                 // Can only subscript arrays with integers!
                 if subType != .int {
                     return exp.makeErrorTyped()
                 }
                 
-                exp.resolvedType = params[0]
+                exp.resolvedType = Array(params)[0]
                 
-            case .generic("Dictionary", let params) where params.count == 2:
-                exp.resolvedType = .optional(params[1])
+            case .nominal(.generic("Dictionary", let params)) where Array(params).count == 2:
+                exp.resolvedType = .optional(Array(params)[1])
                 
             // Sub-types of NSArray index as .anyObject
-            case .typeName(let typeName) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
+            case .nominal(.typeName(let typeName)) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
                 if subType != .int {
                     return exp.makeErrorTyped()
                 }
@@ -563,7 +563,7 @@ private class MemberInvocationResolver {
                 exp.resolvedType = .anyObject
                 
             // Sub-types of NSDictionary index as .anyObject
-            case .typeName(let typeName) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
+            case .nominal(.typeName(let typeName)) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
                 exp.resolvedType = .optional(.anyObject)
                 
             default:

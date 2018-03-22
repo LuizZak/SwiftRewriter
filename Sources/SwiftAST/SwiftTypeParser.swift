@@ -6,7 +6,13 @@ public class SwiftTypeParser {
     public static func parse(from string: String) throws -> SwiftType {
         let lexer = TokenizerLexer<SwiftTypeToken>(input: string)
         
-        return try parseType(lexer)
+        let result = try parseType(lexer)
+        
+        if !lexer.isEof {
+            throw unexpectedTokenError(lexer: lexer)
+        }
+        
+        return result
     }
     
     /// Swift type grammar
@@ -87,13 +93,38 @@ public class SwiftTypeParser {
         let type: SwiftType
         
         if lexer.hasNextToken(.identifier) {
-            let ident = try parseTypeIdentifier(lexer)
+            let ident = try parseNominalType(lexer)
             
-            // Protocol type composition
-            if lexer.hasNextToken(.ampersand) {
-                type = try verifyProtocolCompositionTrailing(after: [ident], lexer: lexer)
+            // Void type
+            if ident == .typeName("Void") {
+                type = .void
+            } else if lexer.hasNextToken(.ampersand) {
+                // Protocol type composition
+                type = .protocolComposition(try verifyProtocolCompositionTrailing(after: [ident], lexer: lexer))
+            } else if lexer.hasNextToken(.period) {
+                // Verify meta-type access
+                var isMetatypeAccess = false
+                
+                let periodBT = lexer.backtracker()
+                if lexer.consumeToken(.period) != nil {
+                    // Backtrack out of this method, in case it's actually a metatype
+                    // trailing
+                    if let identifier = lexer.consumeToken(.identifier)?.value,
+                        identifier == "Type" || identifier == "Protocol" {
+                        isMetatypeAccess = true
+                    }
+                    
+                    periodBT.backtrack()
+                }
+                
+                // Nested type
+                if !isMetatypeAccess {
+                    type = .nested(try parseNestedType(lexer, after: ident))
+                } else {
+                    type = .nominal(ident)
+                }
             } else {
-                type = ident
+                type = .nominal(ident)
             }
         } else if lexer.hasNextToken(.openBrace) {
             type = try parseArrayOrDictionary(lexer)
@@ -106,7 +137,7 @@ public class SwiftTypeParser {
         return try verifyTrailing(after: type, lexer: lexer)
     }
     
-    /// Parses an identifier type.
+    /// Parses a nominal identifier type.
     ///
     /// ```
     /// type-identifier
@@ -117,43 +148,42 @@ public class SwiftTypeParser {
     /// generic-argument-clause
     ///     : '<' swift-type (',' swift-type)* '>'
     /// ```
-    private static func parseTypeIdentifier(_ lexer: TokenizerLexer<SwiftTypeToken>,
-                                            chainedAfter parentType: SwiftType? = nil) throws -> SwiftType {
+    private static func parseNominalType(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> NominalSwiftType {
         
         guard let identifier = lexer.consumeToken(.identifier) else {
             throw unexpectedTokenError(lexer: lexer)
         }
         
-        // Type-alias 'Void' into an empty tuple (SwiftType.void)
-        if identifier.value == "Void" {
-            if parentType != nil {
-                throw Error.invalidType
-            }
-            
-            return .void
-        }
-        
         // Attempt a generic type parse
-        var type = try verifyGenericArgumentsTrailing(after: String(identifier.value), lexer: lexer)
-        
-        // Chained access to sub-types
-        let periodBT = lexer.backtracker()
-        if lexer.consumeToken(.period) != nil {
-            // Backtrack out of this method, in case it's actually a metatype
-            // trailing
-            let identBT = lexer.backtracker()
-            if let identifier = lexer.consumeToken(.identifier)?.value,
-                identifier == "Type" || identifier == "Protocol" {
-                periodBT.backtrack()
-                return type
-            }
-            
-            identBT.backtrack()
-            
-            type = .nested(type, try parseTypeIdentifier(lexer, chainedAfter: type))
-        }
+        let type = try verifyGenericArgumentsTrailing(after: String(identifier.value), lexer: lexer)
         
         return type
+    }
+    
+    private static func parseNestedType(_ lexer: TokenizerLexer<SwiftTypeToken>, after base: NominalSwiftType) throws -> NestedSwiftType {
+        var types = [base]
+        
+        repeat {
+            let periodBT = lexer.backtracker()
+            
+            try lexer.advance(over: .period)
+            
+            do {
+                let identBT = lexer.backtracker()
+                let ident = lexer.consumeToken(.identifier)?.value
+                if ident == "Type" || ident == "Protocol" {
+                    periodBT.backtrack()
+                    break
+                }
+                
+                identBT.backtrack()
+            }
+            
+            let next = try parseNominalType(lexer)
+            types.append(next)
+        } while lexer.hasNextToken(.period)
+        
+        return NestedSwiftType.fromCollection(types)
     }
     
     /// Parses a protocol composition for an identifier type.
@@ -162,8 +192,8 @@ public class SwiftTypeParser {
     /// protocol-composition
     ///     : type-identifier '&' type-identifier ('&' type-identifier)* ;
     /// ```
-    private static func verifyProtocolCompositionTrailing(after types: [SwiftType],
-                                                          lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+    private static func verifyProtocolCompositionTrailing(after types: [NominalSwiftType],
+                                                          lexer: TokenizerLexer<SwiftTypeToken>) throws -> ProtocolCompositionSwiftType {
         var types = types
         
         while lexer.consumeToken(.ampersand) != nil {
@@ -174,19 +204,22 @@ public class SwiftTypeParser {
                 let toParens = lexer.backtracker()
                 
                 let type = try parseType(lexer)
-                if !type.isProtocolComposable {
+                switch type {
+                case .nominal(let nominal):
+                    types.append(nominal)
+                case .protocolComposition(let list):
+                    types.append(contentsOf: list)
+                default:
                     toParens.backtrack()
                     
                     throw notProtocolComposableError(type: type, lexer: lexer)
-                } else {
-                    types.append(type)
                 }
             } else {
-                types.append(try parseTypeIdentifier(lexer))
+                types.append(try parseNominalType(lexer))
             }
         }
         
-        return .protocolComposition(types)
+        return .fromCollection(types)
     }
     
     /// Parses a generic argument clause.
@@ -196,10 +229,10 @@ public class SwiftTypeParser {
     ///     : '<' swift-type (',' swift-type)* '>'
     /// ```
     private static func verifyGenericArgumentsTrailing(
-        after typeName: String, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
+        after typeName: String, lexer: TokenizerLexer<SwiftTypeToken>) throws -> NominalSwiftType {
         
         guard lexer.consumeToken(.openBracket) != nil else {
-            return SwiftType.typeName(typeName)
+            return .typeName(typeName)
         }
         
         var afterComma = false
@@ -222,7 +255,7 @@ public class SwiftTypeParser {
             throw expectedTypeNameError(lexer: lexer)
         }
         
-        return SwiftType.generic(typeName, parameters: types)
+        return .generic(typeName, parameters: .fromCollection(types))
     }
     
     /// Parses an array or dictionary type.
@@ -398,18 +431,28 @@ public class SwiftTypeParser {
         
         // Check for protocol compositions (types must be all nominal)
         if lexer.hasNextToken(.ampersand) {
-            if let notComposable = parameters.first(where: { !$0.isProtocolComposable }) {
-                throw notProtocolComposableError(type: notComposable, lexer: lexer)
+            if parameters.count != 1 {
+                throw unexpectedTokenError(lexer: lexer)
+            }
+            switch parameters[0] {
+            case .nominal(let nominal):
+                return try .protocolComposition(verifyProtocolCompositionTrailing(after: [nominal], lexer: lexer))
+            case .protocolComposition(let composition):
+                return try .protocolComposition(verifyProtocolCompositionTrailing(after: Array(composition), lexer: lexer))
             }
             
-            return try verifyProtocolCompositionTrailing(after: parameters, lexer: lexer)
+            throw unexpectedTokenError(lexer: lexer)
+        }
+        
+        if parameters.isEmpty {
+            return .tuple(.empty)
         }
         
         if parameters.count == 1 {
             return parameters[0]
         }
         
-        return .tuple(parameters)
+        return .tuple(TupleSwiftType.types(.fromCollection(parameters)))
     }
     
     private static func verifyTrailing(after type: SwiftType, lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {

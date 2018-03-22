@@ -8,8 +8,6 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testDescriptionGeneric() {
-        XCTAssertEqual(SwiftType.generic("A", parameters: []).description, // This is actually an invalid type state, but we test it for consistency purposes.
-                       "A<>")
         XCTAssertEqual(SwiftType.generic("A", parameters: [.typeName("B")]).description,
                        "A<B>")
         XCTAssertEqual(SwiftType.generic("A", parameters: [.typeName("B"), .typeName("C")]).description,
@@ -17,10 +15,14 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testDescriptionProtocolComposition() {
-        XCTAssertEqual(SwiftType.protocolComposition([]).description, // This is actually an invalid type state, but we test it for consistency purposes.
-                       "")
-        XCTAssertEqual(SwiftType.protocolComposition([.typeName("A")]).description,
-                       "A")
+        // These are not valid and will crash, since protocol compositions require
+        // two or more nominal types.
+        //
+        // XCTAssertEqual(SwiftType.protocolComposition([]).description,
+        //                "")
+        //
+        // XCTAssertEqual(SwiftType.protocolComposition([.typeName("A")]).description,
+        //                "A")
         XCTAssertEqual(SwiftType.protocolComposition([.typeName("A"), .typeName("B")]).description,
                        "A & B")
         XCTAssertEqual(SwiftType.protocolComposition([.typeName("A"), .typeName("B"), .typeName("C")]).description,
@@ -28,29 +30,34 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testDescriptionNestedType() {
-        XCTAssertEqual(SwiftType.nested(.typeName("A"), .typeName("B")).description,
+        XCTAssertEqual(SwiftType.nested([.typeName("A"), .typeName("B")]).description,
                        "A.B")
-        XCTAssertEqual(SwiftType.nested(.generic("A", parameters: [.typeName("B")]), .typeName("C")).description,
+        XCTAssertEqual(SwiftType.nested([.generic("A", parameters: [.typeName("B")]), .typeName("C")]).description,
                        "A<B>.C")
-        XCTAssertEqual(SwiftType.nested(.nested(.typeName("A"), .typeName("B")), .typeName("C")).description,
+        XCTAssertEqual(SwiftType.nested([.typeName("A"), .typeName("B"), .typeName("C")]).description,
                        "A.B.C")
     }
     
     func testDescriptionMetadata() {
         XCTAssertEqual(SwiftType.metatype(for: .typeName("A")).description,
                        "A.Type")
-        XCTAssertEqual(SwiftType.metatype(for: SwiftType.metatype(for: .typeName("A"))).description,
+        XCTAssertEqual(SwiftType.metatype(for: .metatype(for: .typeName("A"))).description,
                        "A.Type.Type")
     }
     
     func testDescriptionTupleType() {
-        XCTAssertEqual(SwiftType.tuple([]).description,
+        XCTAssertEqual(SwiftType.tuple(.empty).description,
                        "Void")
-        XCTAssertEqual(SwiftType.tuple([.typeName("A")]).description,
-                       "(A)")
-        XCTAssertEqual(SwiftType.tuple([.typeName("A"), .typeName("B")]).description,
+        
+        // This is not valid and will crash, since tuples require either 0, or
+        // two or more types
+        //
+        // XCTAssertEqual(SwiftType.tuple([.typeName("A")]).description,
+        //                "(A)")
+        
+        XCTAssertEqual(SwiftType.tuple(.types([.typeName("A"), .typeName("B")])).description,
                        "(A, B)")
-        XCTAssertEqual(SwiftType.tuple([.typeName("A"), .typeName("B"), .typeName("C")]).description,
+        XCTAssertEqual(SwiftType.tuple(.types([.typeName("A"), .typeName("B"), .typeName("C")])).description,
                        "(A, B, C)")
     }
     
@@ -87,7 +94,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testDescriptionOptionalWithTupleType() {
-        XCTAssertEqual(SwiftType.optional(.tuple([.typeName("A"), .typeName("B")])).description,
+        XCTAssertEqual(SwiftType.optional(.tuple(.types([.typeName("A"), .typeName("B")]))).description,
                        "(A, B)?")
     }
     
@@ -97,12 +104,12 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testDescriptionOptionalWithGenericType() {
-        XCTAssertEqual(SwiftType.optional(.generic("A", parameters: [.typeName("B"), .typeName("C")])).description,
+        XCTAssertEqual(SwiftType.optional(.generic("A", parameters: .fromCollection([.typeName("B"), .typeName("C")]))).description,
                        "A<B, C>?")
     }
     
     func testDescriptionOptionalWithNestedType() {
-        XCTAssertEqual(SwiftType.optional(.nested(.typeName("A"), .typeName("B"))).description,
+        XCTAssertEqual(SwiftType.optional(.nested([.typeName("A"), .typeName("B")])).description,
                        "A.B?")
     }
     
@@ -159,73 +166,6 @@ class SwiftTypeTests: XCTestCase {
         )
     }
     
-    /// Normalizing a nested protocol composition within a protocol composition
-    /// (i.e. `(Type1 & Type2) & Type3` should result in a single unnested protocol
-    /// composition with all types (`Type1 & Type2 & Type3`)
-    func testNormalizeProtocolCompositionWithinProtocolComposition() {
-        let compositionWithinComposition =
-            SwiftType
-                .protocolComposition([
-                    .protocolComposition([.typeName("A"), .typeName("B")]),
-                    .typeName("C")
-                ])
-        
-        XCTAssertEqual(
-            compositionWithinComposition.normalized,
-            SwiftType.protocolComposition([.typeName("A"), .typeName("B"), .typeName("C")])
-        )
-    }
-    
-    /// Normalization of protocol composition by flattening inner protocol compositions
-    /// types must be done at any arbitrary depth
-    func testNormalizeProtocolCompositionWithinProtocolCompositionAtArbitraryDepth() {
-        let compositionWithinComposition =
-            SwiftType
-                .protocolComposition([
-                    .protocolComposition([
-                        .typeName("A"),
-                        .protocolComposition([
-                            .typeName("B"),
-                            .typeName("C")
-                            ])
-                        ]),
-                    .typeName("D")
-                    ])
-        
-        XCTAssertEqual(
-            compositionWithinComposition.normalized,
-            SwiftType.protocolComposition([.typeName("A"), .typeName("B"), .typeName("C"), .typeName("D")])
-        )
-    }
-    
-    /// Normalizing a nested-nested SwiftType should result in a left-most rebase
-    /// where the base types are completely to the left of the enumeration tree.
-    func testNormalizeNestedSwiftTypesToRebaseAtLeft() {
-        let nestedNestedType =
-            SwiftType.nested(.typeName("A"),
-                             .nested(.typeName("B"), .typeName("C")))
-        
-        let nestedNestedNormalizedType =
-            SwiftType.nested(.nested(.typeName("A"), .typeName("B")),
-                             .typeName("C"))
-        
-        XCTAssertEqual(nestedNestedType.normalized, nestedNestedNormalizedType)
-    }
-    
-    /// Normalization of nested types by rotating left must occur at an arbitrary
-    /// nesting depth
-    func testNormalizeNestedSwiftTypesToRebaseAtLeftDeep() {
-        let nestedNestedType =
-            SwiftType.nested(.nested(.typeName("A"), .typeName("B")),
-                             .nested(.typeName("C"), .typeName("D")))
-        
-        let nestedNestedNormalizedType =
-            SwiftType.nested(.nested(.nested(.typeName("A"), .typeName("B")), .typeName("C")),
-                             .typeName("D"))
-        
-        XCTAssertEqual(nestedNestedType.normalized, nestedNestedNormalizedType)
-    }
-    
     func testEncode() throws {
         let type = SwiftType.block(returnType: .void, parameters: [.array(.string)])
         
@@ -236,7 +176,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testEncodeEmptyTuple() throws {
-        let type = SwiftType.tuple([])
+        let type = SwiftType.tuple(.empty)
         
         let encoded = try JSONEncoder().encode(type)
         let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
@@ -245,7 +185,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testEncodeSingleTypeTuple() throws {
-        let type = SwiftType.tuple([.int, .string])
+        let type = SwiftType.tuple(.types([.int, .string]))
         
         let encoded = try JSONEncoder().encode(type)
         let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
@@ -254,7 +194,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testEncodeTwoTypedTuple() throws {
-        let type = SwiftType.tuple([.int, .string])
+        let type = SwiftType.tuple(.types([.int, .string]))
         
         let encoded = try JSONEncoder().encode(type)
         let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
@@ -263,7 +203,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testEncodeNAryTypedTuple() throws {
-        let type = SwiftType.tuple([.int, .string, .float, .double, .any])
+        let type = SwiftType.tuple(.types([.int, .string, .float, .double, .any]))
         
         let encoded = try JSONEncoder().encode(type)
         let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
@@ -277,9 +217,8 @@ class SwiftTypeTests: XCTestCase {
         }
         
         let test =
-            Test(type:
-                SwiftType.tuple([.block(returnType: .implicitUnwrappedOptional(.protocolComposition([.typeName("A"), .typeName("B")])),
-                                        parameters: [.generic("C", parameters: [.optional(.nested(.typeName("D"), .generic("E", parameters: [.typeName("D")])))])])]).normalized)
+            Test(type: .block(returnType: .implicitUnwrappedOptional(.protocolComposition([.typeName("A"), .typeName("B")])),
+                              parameters: [.generic("C", parameters: [.optional(.nested([.typeName("D"), .generic("E", parameters: [.typeName("D")])]))])]))
         
         let encoded = try JSONEncoder().encode(test)
         let decoded = try JSONDecoder().decode(Test.self, from: encoded)

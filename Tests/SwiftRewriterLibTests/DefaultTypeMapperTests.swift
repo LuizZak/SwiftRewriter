@@ -19,8 +19,8 @@ class DefaultTypeMapperTests: XCTestCase {
         expectSwift(.block(returnType: .int, parameters: [.int]), toConvertTo: "(Int) -> Int")
         expectSwift(.optional(.block(returnType: .int, parameters: [.int])), toConvertTo: "((Int) -> Int)?")
         expectSwift(.metatype(for: .int), toConvertTo: "Int.self")
-        expectSwift(.tuple([]), toConvertTo: "Void")
-        expectSwift(.tuple([.int, .int]), toConvertTo: "(Int, Int)")
+        expectSwift(.tuple(.empty), toConvertTo: "Void")
+        expectSwift(.tuple(.types([.int, .int])), toConvertTo: "(Int, Int)")
     }
     
     func testConvertNSObjectSubclassPointersAsInstanceTypes() {

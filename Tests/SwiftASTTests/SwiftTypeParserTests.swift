@@ -11,17 +11,17 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testParseOptionalIdentifierType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Type?"),
-                           SwiftType.optional("Type"))
+                           SwiftType.optional(.typeName("Type")))
     }
     
     func testParseOptionalImplicitlyUnwrappedOptionalIdentifierType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Type?!"),
-                           SwiftType.implicitUnwrappedOptional(.optional("Type")))
+                           SwiftType.implicitUnwrappedOptional(.optional(.typeName("Type"))))
     }
     
     func testNestedType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Type1.Type2"),
-                           SwiftType.nested(.typeName("Type1"), .typeName("Type2")))
+                           SwiftType.nested([.typeName("Type1"), .typeName("Type2")]))
     }
     
     func testParseEmptyTuple() throws {
@@ -31,20 +31,20 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testParseTupleType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(Type1, Type2)"),
-                           SwiftType.tuple([.typeName("Type1"),
-                                            .typeName("Type2")]))
+                           SwiftType.tuple(.types([.typeName("Type1"),
+                                            .typeName("Type2")])))
     }
     
     func testParseTupleInTupleType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "((Type1, Type2), (Type3, Type4))"),
-                           SwiftType.tuple([.tuple([.typeName("Type1"), .typeName("Type2")]),
-                                            .tuple([.typeName("Type3"), .typeName("Type4")])]))
+                           SwiftType.tuple(.types([.tuple(.types([.typeName("Type1"), .typeName("Type2")])),
+                                            .tuple(.types([.typeName("Type3"), .typeName("Type4")]))])))
     }
     
     func testParseTupleTypeWithLabels() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(label1: Type1, label2: Type2)"),
-                           SwiftType.tuple([.typeName("Type1"),
-                                            .typeName("Type2")]))
+                           SwiftType.tuple(.types([.typeName("Type1"),
+                                                   .typeName("Type2")])))
     }
     
     func testParseBlockType() throws {
@@ -147,7 +147,7 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testParseGenericTypeWithTupleType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Type<(A, B)>"),
-                           SwiftType.generic("Type", parameters: [.tuple([.typeName("A"), .typeName("B")])]))
+                           SwiftType.generic("Type", parameters: [.tuple(.types([.typeName("A"), .typeName("B")]))]))
     }
     
     func testMetatypeOfIdentifier() throws {
@@ -162,7 +162,7 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testMetatypeOfNestedIdentifier() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "TypeA.TypeB.Type"),
-                           SwiftType.metatype(for: SwiftType.nested(.typeName("TypeA"), .typeName("TypeB"))))
+                           SwiftType.metatype(for: SwiftType.nested([.typeName("TypeA"), .typeName("TypeB")])))
     }
     
     func testMetatypeOfOptionalType() throws {
@@ -185,23 +185,9 @@ class SwiftTypeParserTests: XCTestCase {
                                                           .typeName("TypeC")]))
     }
     
-    func testProtocolCompositionGrouped() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "(Type1.Type2 & Type3.Type4) & Type5.Type6").normalized,
-                           SwiftType.protocolComposition([.nested(.typeName("Type1"), .typeName("Type2")),
-                                                          .nested(.typeName("Type3"), .typeName("Type4")),
-                                                          .nested(.typeName("Type5"), .typeName("Type6"))]))
-    }
-    
-    func testProtocolCompositionGroupedOnRightSide() throws {
-        try XCTAssertEqual(SwiftTypeParser.parse(from: "Type1.Type2 & (Type3.Type4 & Type5.Type6)").normalized,
-                           SwiftType.protocolComposition([.nested(.typeName("Type1"), .typeName("Type2")),
-                                                          .nested(.typeName("Type3"), .typeName("Type4")),
-                                                          .nested(.typeName("Type5"), .typeName("Type6"))]))
-    }
-    
     func testVoidParsesAsTypeAliasOfEmptyTuple() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Void"),
-                           SwiftType.tuple([]))
+                           SwiftType.tuple(.empty))
     }
     
     // MARK: Error cases
@@ -240,11 +226,11 @@ class SwiftTypeParserTests: XCTestCase {
         for i in 0..<100 {
             let seed = 127 * i + i
             
-            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.9999).normalized
+            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.9999)
             let typeString = type.description
             
             do {
-                let parsed = try SwiftTypeParser.parse(from: typeString).normalized
+                let parsed = try SwiftTypeParser.parse(from: typeString)
                 
                 XCTAssertEqual(type, parsed, "iteration \(i)")
                 if type != parsed {
@@ -273,7 +259,7 @@ class SwiftTypeParserTests: XCTestCase {
             let seed = 127 * i * i
             let mt = MersenneTwister(seed: UInt32(seed % Int(UInt32.max)))
             
-            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.99).normalized
+            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.99)
             var typeString = type.description
             
             // Slice off the string
@@ -334,67 +320,66 @@ class SwiftTypePermutator {
         }
         
         if probability == 1 {
-            return addTrailingTypeMaybe(oneOf(composable, tuple, block))
+            return addTrailingTypeMaybe(oneOf(nominal, tuple, block))
         }
         
-        let res: SwiftType? = oneOf(biasLeft: 1 - probability, { nil }, composable, tuple, block)
+        let res: SwiftType? = oneOf(biasLeft: 1 - probability, { nil }, self.nominal, tuple, block)
         
         return res.map(addTrailingTypeMaybe)
     }
     
-    private func composable() -> SwiftType {
+    private func nominal() -> SwiftType {
         if chanceFromProbability() {
             let types = randomProduceArray(biasToEmpty: 1 - probability) {
-                branchProbably(dampModifier: $0)?.composable()
+                branchProbably(dampModifier: $0)?.nestable()
             }
             
             if types.count == 1 {
-                return types[0]
+                return .nominal(types[0])
             }
             if types.count == 0 {
-                return nestable()
+                return .nominal(identifier())
             }
             
-            return .protocolComposition(types)
+            return .protocolComposition(.fromCollection(types))
         }
         
         if chanceFromProbability() {
-            return SwiftType.nested(nestable(), nestable())
+            return SwiftType.nested([nestable(), nestable()])
         }
         
-        return nestable()
+        return .nominal(nestable())
     }
     
-    private func nestable() -> SwiftType {
+    private func nestable() -> NominalSwiftType {
         let base = oneOf(biasLeft: 1 - probability, identifier, generic)
-        let sub = oneOf(biasLeft: 1 - probability, identifier, generic)
         
-        return SwiftType.nested(base, sub)
+        return base
     }
     
-    private func identifier() -> SwiftType {
+    private func identifier() -> NominalSwiftType {
         return .typeName(randomTypeName())
     }
     
     private func tuple() -> SwiftType {
-        return .tuple(randomTypes())
+        return .tuple(.types(.fromCollection(randomTypes(min: 2))))
     }
     
     private func block() -> SwiftType {
         // Produce tuple for parameters
-        let params = randomTypes()
+        let params = randomTypes(min: 0)
         let ret = randomSubtype() ?? .void
         
         return SwiftType.block(returnType: ret, parameters: params)
     }
     
-    private func generic() -> SwiftType {
-        let params = randomTypes()
+    private func generic() -> NominalSwiftType {
+        let params = randomTypes(min: 1)
         if params.count == 0 {
             return .typeName(randomTypeName())
         }
         
-        return .generic(randomTypeName(), parameters: params)
+        return .generic(randomTypeName(), parameters: .fromCollection(params))
     }
     
     private func addTrailingTypeMaybe(_ type: SwiftType) -> SwiftType {
@@ -412,8 +397,14 @@ class SwiftTypePermutator {
         return "Type\(context.counter)"
     }
     
-    private func randomTypes() -> [SwiftType] {
-        return randomProduceArray { branch(dampModifier: $0).swiftType() }
+    private func randomTypes(min: Int) -> [SwiftType] {
+        var produced = randomProduceArray { branch(dampModifier: $0).swiftType() }
+        
+        while produced.count < min {
+            produced.append(branch(dampModifier: 1 * damp).swiftType() ?? nominal())
+        }
+        
+        return produced
     }
     
     private func randomProduceArray<T>(biasToEmpty: Double = 0, _ producer: (Double) -> T?) -> [T] {

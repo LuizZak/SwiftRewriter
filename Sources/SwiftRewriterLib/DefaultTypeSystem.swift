@@ -74,7 +74,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
-        guard case .typeName(let aliased) = resolveAlias(in: typeName) else {
+        guard case .nominal(.typeName(let aliased)) = resolveAlias(in: typeName) else {
             return false
         }
         
@@ -91,7 +91,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     
     public func isClassInstanceType(_ type: SwiftType) -> Bool {
         switch type.unwrapped {
-        case .typeName(let typeName), .generic(let typeName, _):
+        case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
             return isClassInstanceType(typeName)
         case .protocolComposition:
             return true
@@ -203,7 +203,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         }
         
         switch type {
-        case .typeName(let name):
+        case .nominal(.typeName(let name)):
             guard let knownType = knownTypeWithName(name) else {
                 return nil
             }
@@ -244,7 +244,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         switch type {
         case .int, .uint:
             return true
-        case .typeName(let name):
+        case .nominal(.typeName(let name)):
             switch name {
             // Swift integer types
             case "Int", "Int64", "Int32", "Int16", "Int8", "UInt", "UInt64", "UInt32",
@@ -274,12 +274,12 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         
         switch type {
         case var .block(returnType, parameters):
-            if case .typeName(let retTypeName) = returnType {
+            if case .nominal(.typeName(let retTypeName)) = returnType {
                 returnType = resolveAlias(in: retTypeName)
             }
             
             for (i, p) in parameters.enumerated() {
-                if case .typeName(let type) = p {
+                if case .nominal(.typeName(let type)) = p {
                     parameters[i] = resolveAlias(in: type)
                 }
             }
@@ -292,7 +292,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     
     public func resolveAlias(in type: SwiftType) -> SwiftType {
         switch type.deepUnwrapped {
-        case .typeName(let name):
+        case .nominal(.typeName(let name)):
             return resolveAlias(in: name).withSameOptionalityAs(type)
             
         case var .block(returnType, parameters):
@@ -422,10 +422,10 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func findType(for swiftType: SwiftType) -> KnownType? {
-        let swiftType = swiftType.normalized.deepUnwrapped
+        let swiftType = swiftType.deepUnwrapped
         
         switch swiftType {
-        case .typeName(let typeName):
+        case .nominal(.typeName(let typeName)):
             return knownTypeWithName(typeName)
             
         // Meta-types recurse on themselves
@@ -433,7 +433,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
             let type = inner.deepUnwrapped
             
             switch type {
-            case .typeName(let name):
+            case .nominal(.typeName(let name)):
                 return knownTypeWithName(name)
             default:
                 return findType(for: type)
@@ -449,10 +449,10 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     fileprivate func typeNameIn(swiftType: SwiftType) -> String? {
-        let swiftType = swiftType.normalized.deepUnwrapped
+        let swiftType = swiftType.deepUnwrapped
         
         switch swiftType {
-        case .typeName(let typeName):
+        case .nominal(.typeName(let typeName)):
             return typeName
             
         // Meta-types recurse on themselves
@@ -460,7 +460,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
             let type = inner.deepUnwrapped
             
             switch type {
-            case .typeName(let name):
+            case .nominal(.typeName(let name)):
                 return name
             default:
                 return typeNameIn(swiftType: type)

@@ -213,8 +213,8 @@ public class DefaultTypeMapper: TypeMapper {
                     + ") -> "
                     + typeNameString(for: returnType)
             
-        case .typeName(let name):
-            return name
+        case .nominal(let nominal):
+            return typeNameString(for: nominal)
             
         case .optional(let type):
             var typeName = typeNameString(for: type)
@@ -232,17 +232,8 @@ public class DefaultTypeMapper: TypeMapper {
             
             return typeName + "!"
             
-        // Simplify known generic types
-        case .generic("Array", let parameters) where parameters.count == 1:
-            return "[" + typeNameString(for: parameters[0]) + "]"
-        case .generic("Dictionary", let parameters) where parameters.count == 2:
-            return "[" + typeNameString(for: parameters[0]) + ": " + typeNameString(for: parameters[1]) + "]"
-            
-        case let .generic(type, parameters):
-            return type + "<" + parameters.map(typeNameString(for:)).joined(separator: ", ") + ">"
-            
         case let .protocolComposition(types):
-            return types.map(typeNameString(for:)).joined(separator: " & ")
+            return Array(types).map(typeNameString(for:)).joined(separator: " & ")
             
         case let .metatype(type):
             let inner = typeNameString(for: type)
@@ -252,14 +243,31 @@ public class DefaultTypeMapper: TypeMapper {
             
             return inner + ".self"
         
-        case .tuple([]):
+        case .tuple(.empty):
             return "Void"
             
-        case let .tuple(inner):
+        case .tuple(.types(let inner)):
             return "(" + inner.map(typeNameString).joined(separator: ", ") + ")"
             
-        case let .nested(outer, inner):
-            return typeNameString(for: outer) + "." + typeNameString(for: inner)
+        case let .nested(types):
+            return types.map { typeNameString(for: $0) }.joined(separator: ".")
+        }
+    }
+    
+    public func typeNameString(for nominal: NominalSwiftType) -> String {
+        switch nominal {
+        case .typeName(let name):
+            return name
+            
+        // Simplify known generic types
+        case .generic("Array", let parameters) where Array(parameters).count == 1:
+            return "[" + typeNameString(for: Array(parameters)[0]) + "]"
+        case .generic("Dictionary", let parameters) where Array(parameters).count == 2:
+            let parameters = Array(parameters)
+            return "[" + typeNameString(for: parameters[0]) + ": " + typeNameString(for: parameters[1]) + "]"
+            
+        case let .generic(type, parameters):
+            return type + "<" + parameters.map(typeNameString(for:)).joined(separator: ", ") + ">"
         }
     }
     
@@ -327,8 +335,10 @@ public class DefaultTypeMapper: TypeMapper {
         
         if protocols.isEmpty {
             type = .anyObject
+        } else if protocols.count == 1 {
+            type = .typeName(protocols[0])
         } else {
-            type = .protocolComposition(protocols.map { .typeName($0) })
+            type = .protocolComposition(.fromCollection(protocols.map { .typeName($0) }))
         }
         
         return swiftType(type: type, withNullability: context.nullability())
@@ -380,9 +390,25 @@ public class DefaultTypeMapper: TypeMapper {
             }
         
         if isPointerOnly(types: parameters) {
-            return .generic(name, parameters: types)
+            return .generic(name, parameters: .fromCollection(types))
         } else {
-            return .protocolComposition([.typeName(name)] + types)
+            var foundNonNominal = false
+            let nominalTypes =
+                types.map { type -> NominalSwiftType in
+                    switch type {
+                    case .nominal(let nominal):
+                        return nominal
+                    default:
+                        foundNonNominal = true
+                        return .typeName("Type")
+                    }
+                }
+            
+            if foundNonNominal {
+                return .generic(name, parameters: .fromCollection(types))
+            }
+            
+            return .protocolComposition(.fromCollection([.typeName(name)] + nominalTypes))
         }
     }
     
@@ -480,7 +506,7 @@ public class DefaultTypeMapper: TypeMapper {
             swiftType(forObjcType: $0, context: context)
         }
         
-        return .tuple(types)
+        return .tuple(.types(.fromCollection(types)))
     }
     
     private func isPointerOnly(types: [ObjcType]) -> Bool {

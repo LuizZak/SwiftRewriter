@@ -69,7 +69,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
     /// Corrects boolean getters `.hidden` -> `.isHidden`, `.editable` -> `.isEditable`, etc.
     func convertBooleanGetters(_ exp: PostfixExpression) -> Expression? {
         // Make sure we're handling a UIView subclass here
-        guard case .typeName(let typeName)? = exp.exp.resolvedType?.deepUnwrapped else {
+        guard case .nominal(.typeName(let typeName))? = exp.exp.resolvedType?.deepUnwrapped else {
             return nil
         }
         guard let member = exp.member else {

@@ -1,95 +1,45 @@
-/// Represents a Swift type
+/// Represents a Swift type structure
 indirect public enum SwiftType: Equatable {
-    case typeName(String)
-    case optional(SwiftType)
-    case implicitUnwrappedOptional(SwiftType)
-    case generic(String, parameters: [SwiftType])
-    case protocolComposition([SwiftType])
+    case nested(NestedSwiftType)
+    case nominal(NominalSwiftType)
+    case protocolComposition(ProtocolCompositionSwiftType)
+    case tuple(TupleSwiftType)
     case block(returnType: SwiftType, parameters: [SwiftType])
     case metatype(for: SwiftType)
-    case tuple([SwiftType])
-    case nested(SwiftType, SwiftType)
+    case optional(SwiftType)
+    case implicitUnwrappedOptional(SwiftType)
 }
+
+extension SwiftType: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .nominal(.typeName(value))
+    }
+}
+
+/// A nominal Swift type, which is either a plain typename or a generic type.
+public enum NominalSwiftType: Equatable {
+    case typeName(String)
+    case generic(String, parameters: GenericArgumentSwiftType)
+}
+
+/// A tuple swift type, which either represents an empty tuple or two or more
+/// Swift types.
+public enum TupleSwiftType: Equatable {
+    case types(TwoOrMore<SwiftType>)
+    case empty
+}
+
+public typealias ProtocolCompositionSwiftType = TwoOrMore<NominalSwiftType>
+public typealias NestedSwiftType = TwoOrMore<NominalSwiftType>
+public typealias GenericArgumentSwiftType = OneOrMore<SwiftType>
 
 public extension SwiftType {
     public var requiresParens: Bool {
         switch self {
-        case .protocolComposition(let types) where types.count > 1:
-            return true
-        case .block:
+        case .protocolComposition, .block:
             return true
         default:
             return false
-        }
-    }
-    
-    /// Returns a normalized version of this type, getting rid of redundancies.
-    public var normalized: SwiftType {
-        switch self {
-        // Normalizations
-            
-        // Protocol compositions of a single type should be decomposed into the
-        // singular type
-        case .protocolComposition(let comp) where comp.count == 1:
-            return comp[0].normalized
-            
-        // Protocol compositions with directly nested protocol compositions should
-        // be unwrapped into a single composed protocol composition
-        case .protocolComposition(let inner) where inner.contains(where: { $0.isProtocolComposition }):
-            let normalizedInner = inner.flatMap { type -> [SwiftType] in
-                switch type {
-                case .protocolComposition(let inner):
-                    return inner.map { $0.normalized }
-                default:
-                    return [type]
-                }
-            }
-            
-            return SwiftType.protocolComposition(normalizedInner).normalized
-            
-        // Generic types with no parameters should be made non-generic
-        case let .generic(name, params) where params.isEmpty:
-            return .typeName(name)
-            
-        // Tuples of one type should be unwrapped as the single type
-        case .tuple(let values) where values.count == 1:
-            return values[0].normalized
-            
-        // Nested type non-normalization
-        case let .nested(.nested(nll, nlr), .nested(nrl, nrr)):
-            return
-                SwiftType.nested(
-                    SwiftType.nested(
-                        SwiftType.nested(
-                            nll.normalized, nlr.normalized),
-                        nrl).normalized,
-                    nrr).normalized
-            
-        // Nested type normalization
-        case let .nested(nonNested, .nested(nl, nr)):
-            return SwiftType.nested(SwiftType.nested(nonNested, nl).normalized,
-                                    nr.normalized).normalized
-            
-        // Nested normalizations
-        case .protocolComposition(let subtypes):
-            return .protocolComposition(subtypes.map { $0.normalized })
-        case let .generic(name, subtypes):
-            return .generic(name, parameters: subtypes.map { $0.normalized })
-        case .tuple(let subtypes):
-            return .tuple(subtypes.map { $0.normalized })
-        case let .block(returnType, parameters):
-            return .block(returnType: returnType.normalized,
-                          parameters: parameters.map({ $0.normalized }))
-        case .metatype(let inner):
-            return .metatype(for: inner.normalized)
-        case .optional(let inner):
-            return .optional(inner.normalized)
-        case .implicitUnwrappedOptional(let inner):
-            return .implicitUnwrappedOptional(inner.normalized)
-        case .nested(let base, let type):
-            return .nested(base.normalized, type.normalized)
-        default:
-            return self
         }
     }
     
@@ -158,7 +108,7 @@ public extension SwiftType {
     /// `.protocolComposition` type.
     public var isProtocolComposable: Bool {
         switch self {
-        case .typeName, .generic, .protocolComposition:
+        case .nominal(.typeName), .nominal(.generic), .protocolComposition:
             return true
         default:
             return false
@@ -227,7 +177,7 @@ public extension SwiftType {
         }
     }
     
-    public static let void = SwiftType.tuple([])
+    public static let void = SwiftType.tuple(.empty)
     public static let int = SwiftType.typeName("Int")
     public static let uint = SwiftType.typeName("UInt")
     public static let string = SwiftType.typeName("String")
@@ -250,11 +200,19 @@ public extension SwiftType {
     public static let errorType = SwiftType.typeName("<<error type>>")
     
     public static func array(_ type: SwiftType) -> SwiftType {
-        return .generic("Array", parameters: [type])
+        return .nominal(.generic("Array", parameters: .tail(type)))
     }
     
     public static func dictionary(key: SwiftType, value: SwiftType) -> SwiftType {
-        return .generic("Dictionary", parameters: [key, value])
+        return .nominal(.generic("Dictionary", parameters: .list(key, .tail(value))))
+    }
+    
+    public static func typeName(_ name: String) -> SwiftType {
+        return .nominal(.typeName(name))
+    }
+    
+    public static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
+        return .nominal(.generic(name, parameters: parameters))
     }
     
     /// Returns a type that is the same as the input, but with any .optional or
@@ -278,17 +236,34 @@ public extension SwiftType {
     }
 }
 
-extension SwiftType: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        self = .typeName(value)
+extension NominalSwiftType: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .typeName(let name):
+            return name
+            
+        case let .generic(name, params):
+            let params = Array(params)
+            
+            switch name {
+            case "Array" where params.count == 1:
+                return "[" + params[0].description + "]"
+                
+            case "Dictionary" where params.count == 2:
+                return "[\(params[0]): \(params[1])]"
+                
+            default:
+                return name + "<" + params.map { $0.description }.joined(separator: ", ") + ">"
+            }
+        }
     }
 }
 
 extension SwiftType: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .typeName(let name):
-            return name
+        case .nominal(let type):
+            return type.description
             
         case let .block(returnType, parameters):
             return "(" + parameters.map { $0.description }.joined(separator: ", ") + ") -> " + returnType.description
@@ -299,29 +274,20 @@ extension SwiftType: CustomStringConvertible {
         case .implicitUnwrappedOptional(let type):
             return type.descriptionWithParens + "!"
             
-        case .generic("Array", let params) where params.count == 1:
-            return "[" + params[0].description + "]"
-            
-        case .generic("Dictionary", let params) where params.count == 2:
-            return "[\(params[0]): \(params[1])]"
-            
-        case let .generic(type, parameters):
-            return type + "<" + parameters.map { $0.description }.joined(separator: ", ") + ">"
-            
         case let .protocolComposition(types):
-            return types.map { $0.descriptionWithParens }.joined(separator: " & ")
+            return types.map { $0.description }.joined(separator: " & ")
             
         case let .metatype(innerType):
             return innerType.descriptionWithParens + ".Type"
             
-        case .tuple([]):
+        case .tuple(.empty):
             return "Void"
             
-        case let .tuple(inner):
+        case let .tuple(.types(inner)):
             return "(" + inner.map { $0.description }.joined(separator: ", ") + ")"
             
-        case let .nested(outer, inner):
-            return "\(outer).\(inner)"
+        case .nested(let items):
+            return items.map { $0.description }.joined(separator: ".")
         }
     }
     
@@ -334,6 +300,7 @@ extension SwiftType: CustomStringConvertible {
     }
 }
 
+// MARK: - Codable compliance
 extension SwiftType: Codable {
     public init(from decoder: Decoder) throws {
         let string: String
@@ -361,5 +328,188 @@ extension SwiftType: Codable {
     
     private enum CodingKeys: String, CodingKey {
         case type
+    }
+}
+
+// MARK: - Building structures
+
+/// An enum representing a list of zero or more chained items
+public enum ZeroOrMore<T: Equatable>: Equatable {
+    indirect case list(T, ZeroOrMore)
+    case tail
+    
+    /// Creates a ZeroOrMore enum list with a given sequence.
+    public static func fromSequence<S: Sequence>(_ sequence: S) -> ZeroOrMore where S.Element == T {
+        var current = ZeroOrMore.tail
+        
+        for item in sequence.reversed() {
+            current = .list(item, current)
+        }
+        
+        return current
+    }
+}
+
+/// An enum representing a list of one or more chained items
+public enum OneOrMore<T: Equatable>: Equatable {
+    indirect case list(T, OneOrMore)
+    case tail(T)
+    
+    /// Creates a OneOrMore enum list with a given collection.
+    /// The collection must have at least one element.
+    ///
+    /// - precondition: Collection is not empty
+    public static func fromCollection<C>(_ collection: C) -> OneOrMore where C: BidirectionalCollection, C.Element == T {
+        precondition(!collection.isEmpty)
+        
+        var current = OneOrMore.tail(collection.last!)
+        
+        for item in collection.dropLast().reversed() {
+            current = .list(item, current)
+        }
+        
+        return current
+    }
+}
+
+/// An enum representing a list of two or more chained items
+public enum TwoOrMore<T: Equatable>: Equatable {
+    indirect case list(T, TwoOrMore)
+    case tail(T, T)
+    
+    /// Creates a TwoOrMore enum list with a given collection.
+    /// The collection must have at least two elements.
+    ///
+    /// - precondition: `collection.count >= 2`
+    public static func fromCollection<C>(_ collection: C) -> TwoOrMore where C: BidirectionalCollection, C.Element == T, C.Index == Int {
+        precondition(collection.count >= 2)
+        
+        var current = TwoOrMore.tail(collection[collection.count - 2], collection[collection.count - 1])
+        
+        for item in collection.dropLast(2).reversed() {
+            current = .list(item, current)
+        }
+        
+        return current
+    }
+}
+
+// MARK: Sequence protocol conformances
+
+extension ZeroOrMore: Sequence {
+    public func makeIterator() -> Iterator {
+        return Iterator(current: self)
+    }
+    
+    public struct Iterator: IteratorProtocol {
+        private var current: ZeroOrMore
+        
+        init(current: ZeroOrMore) {
+            self.current = current
+        }
+        
+        public mutating func next() -> T? {
+            switch current {
+            case let .list(item, next):
+                current = next
+                
+                return item
+            case .tail:
+                return nil
+            }
+        }
+    }
+}
+
+extension OneOrMore: Sequence {
+    public func makeIterator() -> Iterator {
+        return Iterator(current: self)
+    }
+    
+    public struct Iterator: IteratorProtocol {
+        private var current: OneOrMore?
+        
+        init(current: OneOrMore?) {
+            self.current = current
+        }
+        
+        public mutating func next() -> T? {
+            switch current {
+            case let .list(item, next)?:
+                current = next
+                
+                return item
+            case .tail(let item)?:
+                current = nil
+                
+                return item
+            case nil:
+                return nil
+            }
+        }
+    }
+}
+
+extension TwoOrMore: Sequence {
+    public func makeIterator() -> Iterator {
+        return Iterator(current: self)
+    }
+    
+    public struct Iterator: IteratorProtocol {
+        private var current: TwoOrMore?
+        private var rem: T?
+        
+        init(current: TwoOrMore?) {
+            self.current = current
+        }
+        
+        public mutating func next() -> T? {
+            switch current {
+            case let .list(item, next)?:
+                current = next
+                
+                return item
+            case .tail(let item, let next)?:
+                current = nil
+                
+                rem = next
+                
+                return item
+            case nil:
+                defer {
+                    rem = nil
+                }
+                
+                return rem
+            }
+        }
+    }
+}
+
+// MARK: Array initialization
+
+extension ZeroOrMore: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: T...) {
+        self = .fromSequence(elements)
+    }
+}
+
+extension OneOrMore: ExpressibleByArrayLiteral {
+    /// Initializes a OneOrMore list with a given array of items.
+    ///
+    /// - Parameter elements: Elements to create the array out of.
+    /// - precondition: At least one array element must be provided
+    public init(arrayLiteral elements: T...) {
+        self = .fromCollection(elements)
+    }
+}
+
+extension TwoOrMore: ExpressibleByArrayLiteral {
+    /// Initializes a TwoOrMore list with a given array of items.
+    ///
+    /// - Parameter elements: Elements to create the list out of.
+    /// - precondition: At least two array elements must be provided.
+    public init(arrayLiteral elements: T...) {
+        self = .fromCollection(elements)
     }
 }
