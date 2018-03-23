@@ -36,6 +36,26 @@ public enum TokenType: Equatable {
     case `operator`(Operator)
 }
 
+public extension TokenType {
+    public var isTypeQualifier: Bool {
+        switch self {
+        case .typeQualifier:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public var isIdentifier: Bool {
+        switch self {
+        case .identifier:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
 /// Describes an operator across one or two operands
 public enum Operator: String {
     case add = "+"
