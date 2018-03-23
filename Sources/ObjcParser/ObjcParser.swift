@@ -339,7 +339,7 @@ public class ObjcParser {
         return type
     }
     
-    func parseTokenNode(_ tokenType: GrammarModels.TokenType,
+    func parseTokenNode(_ tokenType: TokenType,
                         onMissing message: String? = nil,
                         addToContext: Bool = true) throws {
         
@@ -383,7 +383,7 @@ public class ObjcParser {
     /// - Returns: An array of items returned by `itemParser` for each successful
     /// parse performed.
     internal func _parseCommaSeparatedList<T>(
-        braces openBrace: GrammarModels.TokenType, _ closeBrace: GrammarModels.TokenType,
+        braces openBrace: TokenType, _ closeBrace: TokenType,
         addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
         
         do {
