@@ -10,12 +10,8 @@ import GrammarModels
 @testable import ObjcParser
 
 class ObjcLexer_TokenizerTests: XCTestCase {
-    var autoSkipComments = true
-    
     override func setUp() {
         super.setUp()
-        
-        autoSkipComments = true
     }
     
     func testTokenizeIdentifiers() {
@@ -159,8 +155,6 @@ extension ObjcLexer_TokenizerTests {
     
     private func makeLexer(_ string: String) -> ObjcLexer {
         let lexer = ObjcLexer(source: StringCodeSource(source: string))
-        lexer.autoSkipComments = autoSkipComments
-        
         return lexer
     }
     

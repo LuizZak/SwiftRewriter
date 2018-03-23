@@ -17,10 +17,6 @@ public class ObjcLexer {
     internal(set) public var currentToken = Token(type: .eof, string: "",
                                                   location: .invalid)
     
-    /// Whether to automatically skip over single/multi-comment tokens.
-    /// Defaults to true.
-    public var autoSkipComments: Bool = true
-    
     /// Gets a value specifying whether the current token is pointing to the end
     /// of the valid source string.
     ///
@@ -49,7 +45,7 @@ public class ObjcLexer {
     /// Attempts to consume a given token, failing with an error if the operation
     /// fails.
     /// After reading, the current token is advanced to the next.
-    public func consume(tokenType: TokenType) throws -> Token {
+    public func consume(tokenType: GrammarModels.TokenType) throws -> Token {
         if self.tokenType() != tokenType {
             throw Error.unexpectedToken(received: self.tokenType(), expected: tokenType, at: location())
         }
@@ -58,12 +54,12 @@ public class ObjcLexer {
     }
     
     /// Gets the token type for the current token
-    public func tokenType() -> TokenType {
+    public func tokenType() -> GrammarModels.TokenType {
         return token().type
     }
     
     /// Returns whether the token type for the current token matches a given one
-    public func tokenType(_ tok: TokenType) -> Bool {
+    public func tokenType(_ tok: GrammarModels.TokenType) -> Bool {
         return tokenType() == tok
     }
     
@@ -216,7 +212,7 @@ public class ObjcLexer {
     
     private func attemptReadSpecialChar() throws -> Bool {
         let range = startRange()
-        let type: TokenType
+        let type: GrammarModels.TokenType
         var length = 1
         
         switch try lexer.peek() {
@@ -331,7 +327,7 @@ public class ObjcLexer {
     }
     
     public enum Error: Swift.Error, CustomStringConvertible {
-        case unexpectedToken(received: TokenType, expected: TokenType, at: SourceLocation)
+        case unexpectedToken(received: GrammarModels.TokenType, expected: GrammarModels.TokenType, at: SourceLocation)
         
         public var description: String {
             switch self {

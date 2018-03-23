@@ -339,7 +339,10 @@ public class ObjcParser {
         return type
     }
     
-    func parseTokenNode(_ tokenType: TokenType, onMissing message: String? = nil, addToContext: Bool = true) throws {
+    func parseTokenNode(_ tokenType: GrammarModels.TokenType,
+                        onMissing message: String? = nil,
+                        addToContext: Bool = true) throws {
+        
         let range = startRange()
         
         let tok = try lexer.consume(tokenType: tokenType)
@@ -377,7 +380,7 @@ public class ObjcParser {
     /// - Returns: An array of items returned by `itemParser` for each successful
     /// parse performed.
     internal func _parseCommaSeparatedList<T>(
-        braces openBrace: TokenType, _ closeBrace: TokenType,
+        braces openBrace: GrammarModels.TokenType, _ closeBrace: GrammarModels.TokenType,
         addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
         
         do {
