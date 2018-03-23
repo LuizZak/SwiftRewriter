@@ -8,6 +8,48 @@
 import MiniLexer
 import GrammarModels
 
+extension TokenType: TokenProtocol {
+    public static var eofToken: TokenType {
+        return .eof
+    }
+    
+    public func length(in lexer: Lexer) -> Int {
+        switch self {
+        case .unknown, .eof:
+            return 0
+        case .at, .colon, .openBrace, .closeBrace, .openParens, .closeParens,
+             .openSquareBracket, .closeSquareBracket, .comma, .period, .semicolon:
+            return 1
+        case .id:
+            return 2
+        case .ellipsis:
+            return 3
+        case .operator(let op):
+            return op.rawValue.count
+        case .floatLiteral(let str), .stringLiteral(let str), .hexLiteral(let str),
+             .octalLiteral(let str), .decimalLiteral(let str), .identifier(let str),
+             .typeQualifier(let str):
+            return str.count
+        case .keyword(let kw):
+            return kw.rawValue.count
+        }
+    }
+    
+    public func advance(in lexer: Lexer) throws {
+        let l = length(in: lexer)
+        
+        if l <= 0 {
+            return
+        }
+        
+        try lexer.advanceLength(l)
+    }
+    
+    public var tokenString: String {
+        return self.tokenString
+    }
+}
+
 public class ObjcLexer {
     var lexer: Lexer
     var source: CodeSource
@@ -157,10 +199,12 @@ public class ObjcLexer {
     private func readIdentifierToken() throws {
         let range = startRange()
         let ident = try lexer.lexIdentifier()
-        var type = TokenType.identifier
+        var type: TokenType
         
         if ident == "id" {
             type = .id
+        } else {
+            type = .identifier(String(ident))
         }
         
         currentToken =
@@ -171,9 +215,9 @@ public class ObjcLexer {
         let range = startRange()
         
         do {
-            _=try lexer.lexTypeQualifier()
+            let qualifier = try lexer.lexTypeQualifier()
             currentToken =
-                Token(type: .typeQualifier, string: range.makeString(),
+                Token(type: .typeQualifier(String(qualifier)), string: range.makeString(),
                       location: range.makeLocation())
             
             return true
