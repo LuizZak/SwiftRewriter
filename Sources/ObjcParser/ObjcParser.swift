@@ -265,12 +265,12 @@ public class ObjcParser {
         var type: ObjcType
         
         var specifiers: [String] = []
-        while lexer.tokenType(.typeQualifier) {
-            let spec = lexer.nextToken().string
-            specifiers.append(spec)
+        while lexer.tokenType(matches: { $0.isTypeQualifier }) {
+            let spec = lexer.nextToken().value
+            specifiers.append(String(spec))
         }
         
-        if lexer.tokenType(.id) {
+        if lexer.tokenType(is: .id) {
             lexer.skipToken()
             
             // '<' : Protocol list
@@ -278,17 +278,17 @@ public class ObjcParser {
                 let types =
                     _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
                                              addTokensToContext: false,
-                                             itemParser: { try lexer.consume(tokenType: .identifier) })
-                type = .id(protocols: types.map { String($0.string) })
+                                             itemParser: { try lexer.advance(matching: { $0.isIdentifier }) })
+                type = .id(protocols: types.map { String($0.value) })
             } else {
                 type = .id(protocols: [])
             }
-        } else if lexer.tokenType(.identifier) {
-            var typeName = try lexer.consume(tokenType: .identifier).string
+        } else if lexer.tokenType(matches: { $0.isIdentifier }) {
+            var typeName: String = String(try lexer.advance(matching: { $0.isIdentifier }).value)
             
             // 'long long' support
-            if typeName == "long" && lexer.tokenType(.identifier) && lexer.token().string == "long" {
-                typeName = try typeName + " " + lexer.consume(tokenType: .identifier).string
+            if typeName == "long" && lexer.tokenType(matches: { $0.isIdentifier }) && lexer.token().value == "long" {
+                typeName = String(try typeName + " " + lexer.advance(matching: { $0.isIdentifier }).value)
             }
             
             // 'signed', 'unsigned' support
@@ -309,7 +309,7 @@ public class ObjcParser {
             } else {
                 type = .struct(typeName)
             }
-        } else if lexer.tokenType(.keyword(.void)) {
+        } else if lexer.tokenType(is: .keyword(.void)) {
             lexer.skipToken()
             type = .void
         } else {
@@ -317,16 +317,16 @@ public class ObjcParser {
         }
         
         // '*' : Pointer
-        if lexer.tokenType(.operator(.multiply)) {
+        if lexer.tokenType(is: .operator(.multiply)) {
             lexer.skipToken()
             type = .pointer(type)
         }
         
         // Type qualifier
         var qualifiers: [String] = []
-        while lexer.tokenType(.typeQualifier) {
-            let qual = lexer.nextToken().string
-            qualifiers.append(qual)
+        while lexer.tokenType(matches: { $0.isTypeQualifier }) {
+            let qual = lexer.nextToken().value
+            qualifiers.append(String(qual))
         }
         
         if !qualifiers.isEmpty {
@@ -345,10 +345,13 @@ public class ObjcParser {
         
         let range = startRange()
         
-        let tok = try lexer.consume(tokenType: tokenType)
+        let tok = try lexer.advance(over: tokenType)
         
         if addToContext {
-            let node = TokenNode(token: tok, location: range.makeLocation())
+            let token = Token(type: tok.tokenType, string: String(tok.value),
+                              location: range.makeLocation())
+            
+            let node = TokenNode(token: token, location: range.makeLocation())
             
             context.addChildNode(node)
         }
@@ -399,15 +402,15 @@ public class ObjcParser {
                 let item = try itemParser()
                 items.append(item)
             } catch {
-                lexer.advance(until: { $0.type == .comma || $0.type == closeBrace })
+                lexer.advance(until: { $0.tokenType == .comma || $0.tokenType == closeBrace })
             }
             
             // Comma separator / close brace
             do {
-                if lexer.tokenType(.comma) {
+                if lexer.tokenType(is: .comma) {
                     try parseTokenNode(.comma, addToContext: addTokensToContext)
                     expectsItem = true
-                } else if lexer.tokenType(closeBrace) {
+                } else if lexer.tokenType(is: closeBrace) {
                     break
                 } else {
                     // Should match either comma or closing brace!

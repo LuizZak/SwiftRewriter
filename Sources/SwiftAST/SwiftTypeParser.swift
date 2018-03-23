@@ -92,16 +92,16 @@ public class SwiftTypeParser {
     private static func parseType(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         let type: SwiftType
         
-        if lexer.isToken(.identifier) {
+        if lexer.tokenType(is: .identifier) {
             let ident = try parseNominalType(lexer)
             
             // Void type
             if ident == .typeName("Void") {
                 type = .void
-            } else if lexer.isToken(.ampersand) {
+            } else if lexer.tokenType(is: .ampersand) {
                 // Protocol type composition
                 type = .protocolComposition(try verifyProtocolCompositionTrailing(after: [ident], lexer: lexer))
-            } else if lexer.isToken(.period) {
+            } else if lexer.tokenType(is: .period) {
                 // Verify meta-type access
                 var isMetatypeAccess = false
                 
@@ -126,9 +126,9 @@ public class SwiftTypeParser {
             } else {
                 type = .nominal(ident)
             }
-        } else if lexer.isToken(.openBrace) {
+        } else if lexer.tokenType(is: .openBrace) {
             type = try parseArrayOrDictionary(lexer)
-        } else if lexer.isToken(.openParens) {
+        } else if lexer.tokenType(is: .openParens) {
             type = try parseTupleOrBlock(lexer)
         } else {
             throw unexpectedTokenError(lexer: lexer)
@@ -182,7 +182,7 @@ public class SwiftTypeParser {
             
             let next = try parseNominalType(lexer)
             types.append(next)
-        } while lexer.isToken(.period)
+        } while lexer.tokenType(is: .period)
         
         return NestedSwiftType.fromCollection(types)
     }
@@ -202,7 +202,7 @@ public class SwiftTypeParser {
             // If we find a parenthesis, unwrap the tuple (if it's a tuple) and
             // check if all its inner types are nominal, then it's a composable
             // type.
-            if lexer.isToken(.openParens) {
+            if lexer.tokenType(is: .openParens) {
                 let toParens = lexer.backtracker()
                 
                 let type = try parseType(lexer)
@@ -275,7 +275,7 @@ public class SwiftTypeParser {
         let type1 = try parseType(lexer)
         var type2: SwiftType?
         
-        if lexer.isToken(.colon) {
+        if lexer.tokenType(is: .colon) {
             lexer.consumeToken(ifTypeIs: .colon)
             
             type2 = try parseType(lexer)
@@ -324,7 +324,7 @@ public class SwiftTypeParser {
             try lexer.advance(over: .identifier)
             
             if lexer.lexer.safeIsNextChar(equalTo: "(") && lexer.consumeToken(ifTypeIs: .openParens) != nil {
-                while !lexer.isEof && !lexer.isToken(.closeParens) {
+                while !lexer.isEof && !lexer.tokenType(is: .closeParens) {
                     try lexer.advance(over: lexer.token().tokenType)
                 }
                 
@@ -343,7 +343,7 @@ public class SwiftTypeParser {
         var expectsBlock = false
         
         var afterComma = false
-        while !lexer.isToken(.closeParens) {
+        while !lexer.tokenType(is: .closeParens) {
             afterComma = false
             
             // Inout label
@@ -353,7 +353,7 @@ public class SwiftTypeParser {
                 expectsType = true
             }
             
-            if lexer.isToken(.at) {
+            if lexer.tokenType(is: .at) {
                 expectsType = true
                 try verifyAndSkipAnnotations()
             }
@@ -380,7 +380,7 @@ public class SwiftTypeParser {
             }
             
             // Attributes
-            if lexer.isToken(.at) {
+            if lexer.tokenType(is: .at) {
                 if expectsType {
                     throw unexpectedTokenError(lexer: lexer)
                 }
@@ -409,7 +409,7 @@ public class SwiftTypeParser {
             
             if lexer.consumeToken(ifTypeIs: .comma) != nil {
                 afterComma = true
-            } else if !lexer.isToken(.closeParens) {
+            } else if !lexer.tokenType(is: .closeParens) {
                 throw unexpectedTokenError(lexer: lexer)
             }
         }
@@ -432,7 +432,7 @@ public class SwiftTypeParser {
         // ...otherwise it is a tuple
         
         // Check for protocol compositions (types must be all nominal)
-        if lexer.isToken(.ampersand) {
+        if lexer.tokenType(is: .ampersand) {
             if parameters.count != 1 {
                 throw unexpectedTokenError(lexer: lexer)
             }
