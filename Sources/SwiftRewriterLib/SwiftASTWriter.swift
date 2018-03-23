@@ -700,6 +700,17 @@ private class StatementWriter: StatementVisitor {
             return false
         }
         
+        if let type = exp.resolvedType {
+            switch type {
+            case .int, .float:
+                return true
+            case .optional, .implicitUnwrappedOptional:
+                return true
+            default:
+                break
+            }
+        }
+        
         switch deduceType(from: exp) {
         case .int, .float, .nil:
             return true

@@ -52,7 +52,7 @@ let package = Package(
                            "TypeDefinitions", "Utils"]),
         .target(
             name: "Commons",
-            dependencies: ["SwiftAST", "SwiftRewriterLib"]),
+            dependencies: ["SwiftAST", "SwiftRewriterLib", "Utils"]),
         .target(
             name: "IntentionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
@@ -100,7 +100,7 @@ let package = Package(
                            "TestCommons", "GlobalsProviders"]),
         .testTarget(
             name: "CommonsTests",
-            dependencies: ["SwiftAST", "SwiftRewriterLib"]),
+            dependencies: ["Commons", "SwiftAST", "SwiftRewriterLib"]),
         .testTarget(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",

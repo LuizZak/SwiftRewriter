@@ -82,6 +82,13 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         }
     }
     
+    func assertDefined(typeName: String, file: String = #file, line: Int = #line) {
+        if !types.types.contains(where: { $0.typeName == typeName }) {
+            recordFailure(withDescription: "Expected to find type \(typeName)",
+                          inFile: file, atLine: line, expected: true)
+        }
+    }
+    
     func assertDefined(typeName: String, signature: String,
                        file: String = #file, line: Int = #line) {
         guard let type = types.types.first(where: { $0.typeName == typeName }) else {

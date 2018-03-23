@@ -590,7 +590,9 @@ class InternalSwiftWriter {
     }
     
     // TODO: Maybe this should be extracted to an external `IntentionPass`?
-    private func outputInitialZeroValueForType(_ type: SwiftType, isConstant: Bool, target: RewriterOutputTarget) {
+    private func outputInitialZeroValueForType(_ type: SwiftType, isConstant: Bool,
+                                               target: RewriterOutputTarget) {
+        
         // Don't emit `nil` values for non-constant fields, since Swift assumes
         // the initial value of these values to be nil already.
         // We need to emit `nil` in case of constants since 'let's don't do that
