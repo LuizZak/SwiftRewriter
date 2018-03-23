@@ -193,8 +193,9 @@ public class SwiftTypeParser {
     /// protocol-composition
     ///     : type-identifier '&' type-identifier ('&' type-identifier)* ;
     /// ```
-    private static func verifyProtocolCompositionTrailing(after types: [NominalSwiftType],
-                                                          lexer: TokenizerLexer<SwiftTypeToken>) throws -> ProtocolCompositionSwiftType {
+    private static func verifyProtocolCompositionTrailing(
+        after types: [NominalSwiftType], lexer: TokenizerLexer<SwiftTypeToken>) throws -> ProtocolCompositionSwiftType {
+        
         var types = types
         
         while lexer.consumeToken(.ampersand) != nil {
