@@ -169,6 +169,7 @@ public class SwiftTypeParser {
             try lexer.advance(over: .period)
             
             do {
+                // Check if the nesting is not actually a metatype access
                 let identBT = lexer.backtracker()
                 let ident = lexer.consumeToken(.identifier)?.value
                 if ident == "Type" || ident == "Protocol" {
@@ -434,14 +435,13 @@ public class SwiftTypeParser {
             if parameters.count != 1 {
                 throw unexpectedTokenError(lexer: lexer)
             }
+            
             switch parameters[0] {
             case .nominal(let nominal):
                 return try .protocolComposition(verifyProtocolCompositionTrailing(after: [nominal], lexer: lexer))
             case .protocolComposition(let composition):
                 return try .protocolComposition(verifyProtocolCompositionTrailing(after: Array(composition), lexer: lexer))
             }
-            
-            throw unexpectedTokenError(lexer: lexer)
         }
         
         if parameters.isEmpty {
