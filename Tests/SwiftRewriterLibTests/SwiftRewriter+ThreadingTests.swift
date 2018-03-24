@@ -14,8 +14,8 @@ class SwiftRewriter_ThreadingTests: XCTestCase {
     func testMultithreading() {
         var builder = MultiFileTestBuilder(test: self)
         
-        for _ in 0..<25 {
-            builder = produceNextClassFiles(classCount: 15, in: builder)
+        for _ in 0..<16 {
+            builder = produceNextClassFiles(classCount: 10, in: builder)
         }
         
         builder.compile()
