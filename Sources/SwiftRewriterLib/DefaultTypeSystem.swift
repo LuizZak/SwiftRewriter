@@ -74,7 +74,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
-        guard let aliased = resolveAlias(in: typeName).typeName else {
+        guard let aliased = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
         }
         
@@ -148,9 +148,9 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         
         // Direct supertype name fetching
         switch type.supertype {
-        case .some(.typeName(let tn)) where tn == supertypeName:
+        case .typeName(let tn)? where tn == supertypeName:
             return true
-        case .some(.knownType(let kt)):
+        case .knownType(let kt)?:
             return isType(kt.typeName, subtypeOf: supertypeName)
         default:
             break
@@ -690,7 +690,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     }
     
     public override func isClassInstanceType(_ typeName: String) -> Bool {
-        guard let aliased = resolveAlias(in: typeName).typeName else {
+        guard let aliased = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
         }
         
