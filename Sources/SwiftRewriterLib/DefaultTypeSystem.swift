@@ -490,7 +490,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         let swiftType = swiftType.deepUnwrapped
         
         switch swiftType {
-        case .nominal(.typeName(let typeName)):
+        case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
             return typeName
             
         // Meta-types recurse on themselves
@@ -690,8 +690,20 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     }
     
     public override func isClassInstanceType(_ typeName: String) -> Bool {
-        if let type = intentions.typeIntentions().first(where: { $0.typeName == typeName }) {
-            return type.kind == .class || type.kind == .protocol
+        guard let aliased = resolveAlias(in: typeName).typeName else {
+            return false
+        }
+        
+        if let cache = cache {
+            if let type = cache.types[aliased] {
+                return type.kind == .class || type.kind == .protocol
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                if let type = file.typeIntentions.first(where: { $0.typeName == aliased }) {
+                    return type.kind == .class || type.kind == .protocol
+                }
+            }
         }
         
         return super.isClassInstanceType(typeName)
@@ -736,9 +748,15 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     public override func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
         var types = super.knownTypes(ofKind: kind)
         
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.kind == kind {
+        if let cache = cache {
+            for type in cache.types.values where type.kind == kind {
                 types.append(type)
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                for type in file.typeIntentions where type.kind == kind {
+                    types.append(type)
+                }
             }
         }
         
@@ -797,12 +815,14 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                     return prop
                 }
             }
-        } else {
-            for file in intentions.fileIntentions() {
-                for type in file.typeIntentions where type.typeName == typeName {
-                    if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                        return prop
-                    }
+            
+            return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
+        }
+        
+        for file in intentions.fileIntentions() {
+            for type in file.typeIntentions where type.typeName == typeName {
+                if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                    return prop
                 }
             }
         }
@@ -821,12 +841,14 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                     return field
                 }
             }
-        } else {
-            for file in intentions.fileIntentions() {
-                for type in file.typeIntentions where type.typeName == typeName {
-                    if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                        return prop
-                    }
+            
+            return super.field(named: name, static: isStatic, in: type)
+        }
+        
+        for file in intentions.fileIntentions() {
+            for type in file.typeIntentions where type.typeName == typeName {
+                if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                    return prop
                 }
             }
         }
@@ -848,12 +870,15 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                     return method
                 }
             }
-        } else {
-            for file in intentions.fileIntentions() {
-                for type in file.typeIntentions where type.typeName == typeName {
-                    if let method = type.method(matchingSelector: selector), method.isStatic == isStatic {
-                        return method
-                    }
+            
+            return super.method(withObjcSelector: selector, static: isStatic,
+                                includeOptional: includeOptional, in: type)
+        }
+        
+        for file in intentions.fileIntentions() {
+            for type in file.typeIntentions where type.typeName == typeName {
+                if let method = type.method(matchingSelector: selector), method.isStatic == isStatic {
+                    return method
                 }
             }
         }

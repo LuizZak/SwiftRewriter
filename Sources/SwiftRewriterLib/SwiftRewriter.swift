@@ -156,6 +156,9 @@ public class SwiftRewriter {
         }
         
         typeSystem.makeCache()
+        defer {
+            typeSystem.tearDownCache()
+        }
         
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
@@ -196,82 +199,98 @@ public class SwiftRewriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
-        
-        typeSystem.tearDownCache()
     }
     
     /// Evaluate all type signatures, now with the knowledge of all types present
     /// in the program.
     private func evaluateTypes() {
+        if settings.verbose {
+            print("Resolving member types...")
+        }
+        
+        typeSystem.makeCache()
+        defer {
+            typeSystem.tearDownCache()
+        }
+        
+        let typeMapper = self.typeMapper
+        
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
+        
         for item in lazyResolve {
-            switch item {
-            case let .property(prop):
-                guard let node = prop.propertySource else { continue }
-                guard let type = node.type?.type else { continue }
-                
-                let context =
-                    TypeMappingContext(modifiers: node.attributesList,
-                                       inNonnull: prop.inNonnullContext)
-                
-                prop.storage.type = typeMapper.swiftType(forObjcType: type,
-                                                         context: context)
-                
-            case let .method(method):
-                guard let node = method.typedSource else { continue }
-                
-                let instancetype = (method.type?.typeName).map { SwiftType.typeName($0) }
-                
-                let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
-                                                      inNonnullContext: method.inNonnullContext,
-                                                      instanceTypeAlias: instancetype)
-                method.signature = signGen.generateDefinitionSignature(from: node)
-                
-            case let .ivar(ivar):
-                guard let node = ivar.typedSource else { continue }
-                guard let type = node.type?.type else { continue }
-                
-                ivar.storage.type =
-                    typeMapper.swiftType(forObjcType: type,
-                                         context: .init(inNonnull: ivar.inNonnullContext))
-                
-            case let .globalVar(gvar):
-                guard let node = gvar.variableSource else { continue }
-                guard let type = node.type?.type else { continue }
-                
-                gvar.storage.type =
-                    typeMapper.swiftType(forObjcType: type,
-                                         context: .init(inNonnull: gvar.inNonnullContext))
-                
-            case let .enumDecl(en):
-                guard let type = en.typedSource?.type else { return }
-                
-                en.rawValueType = typeMapper.swiftType(forObjcType: type.type, context: .alwaysNonnull)
-                
-            case .globalFunc(let fn):
-                guard let node = fn.typedSource else { continue }
-                
-                let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
-                                                      inNonnullContext: fn.inNonnullContext,
-                                                      instanceTypeAlias: nil)
-                fn.signature = signGen.generateDefinitionSignature(from: node)
-                
-            case .extensionDecl(let ext):
-                let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
-                ext.typeName = typeName
-                
-            case .typealias(let typeali):
-                let nullability =
-                    InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
-                
-                let ctx =
-                    TypeMappingContext(explicitNullability: nullability,
-                                       inNonnull: typeali.inNonnullContext)
-                
-                typeali.fromType =
-                    typeMapper.swiftType(forObjcType: typeali.originalObjcType,
-                                         context: ctx)
+            queue.addOperation {
+                switch item {
+                case let .property(prop):
+                    guard let node = prop.propertySource else { return }
+                    guard let type = node.type?.type else { return }
+                    
+                    let context =
+                        TypeMappingContext(modifiers: node.attributesList,
+                                           inNonnull: prop.inNonnullContext)
+                    
+                    prop.storage.type = typeMapper.swiftType(forObjcType: type,
+                                                             context: context)
+                    
+                case let .method(method):
+                    guard let node = method.typedSource else { return }
+                    
+                    let instancetype = (method.type?.typeName).map { SwiftType.typeName($0) }
+                    
+                    let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                                                          inNonnullContext: method.inNonnullContext,
+                                                          instanceTypeAlias: instancetype)
+                    method.signature = signGen.generateDefinitionSignature(from: node)
+                    
+                case let .ivar(ivar):
+                    guard let node = ivar.typedSource else { return }
+                    guard let type = node.type?.type else { return }
+                    
+                    ivar.storage.type =
+                        typeMapper.swiftType(forObjcType: type,
+                                             context: .init(inNonnull: ivar.inNonnullContext))
+                    
+                case let .globalVar(gvar):
+                    guard let node = gvar.variableSource else { return }
+                    guard let type = node.type?.type else { return }
+                    
+                    gvar.storage.type =
+                        typeMapper.swiftType(forObjcType: type,
+                                             context: .init(inNonnull: gvar.inNonnullContext))
+                    
+                case let .enumDecl(en):
+                    guard let type = en.typedSource?.type else { return }
+                    
+                    en.rawValueType = typeMapper.swiftType(forObjcType: type.type, context: .alwaysNonnull)
+                    
+                case .globalFunc(let fn):
+                    guard let node = fn.typedSource else { return }
+                    
+                    let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                                                          inNonnullContext: fn.inNonnullContext,
+                                                          instanceTypeAlias: nil)
+                    fn.signature = signGen.generateDefinitionSignature(from: node)
+                    
+                case .extensionDecl(let ext):
+                    let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
+                    ext.typeName = typeName
+                    
+                case .typealias(let typeali):
+                    let nullability =
+                        InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
+                    
+                    let ctx =
+                        TypeMappingContext(explicitNullability: nullability,
+                                           inNonnull: typeali.inNonnullContext)
+                    
+                    typeali.fromType =
+                        typeMapper.swiftType(forObjcType: typeali.originalObjcType,
+                                             context: ctx)
+                }
             }
         }
+        
+        queue.waitUntilAllOperationsAreFinished()
     }
     
     private func performIntentionPasses() {
