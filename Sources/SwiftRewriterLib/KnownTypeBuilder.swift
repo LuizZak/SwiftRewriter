@@ -273,8 +273,7 @@ public struct KnownTypeBuilder {
         return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
-    /// Returns the constructed KnownType instance from this builder, with all
-    /// methods and properties associated with `with[...]()` method calls.
+    /// Returns the constructed KnownType instance from this builder.
     public func build() -> KnownType {
         return DummyType(type: type)
     }

@@ -188,7 +188,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         }
         
         switch type {
-        case "Bool":
+        case "Bool", "ObjCBool":
             return .boolean
         case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
             return .float

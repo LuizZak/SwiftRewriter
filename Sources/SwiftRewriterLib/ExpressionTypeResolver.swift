@@ -143,7 +143,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             } else {
                 exp.resolvedType = .int
             }
-            
         case .string:
             exp.resolvedType = .string
             

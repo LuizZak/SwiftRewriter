@@ -374,7 +374,10 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.isType("Z", conformingTo: "P"))
     }
     
-    func testTypeCategory() {
+    func testTypeCategoryPrimitives() {
+        XCTAssertEqual(sut.category(forType: "Bool"), .boolean)
+        XCTAssertEqual(sut.category(forType: "ObjCBool"), .boolean)
+        
         XCTAssertEqual(sut.category(forType: "Float"), .float)
         XCTAssertEqual(sut.category(forType: "CFloat"), .float)
         XCTAssertEqual(sut.category(forType: "Double"), .float)
@@ -382,6 +385,7 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.category(forType: "CGFloat"), .float)
         XCTAssertEqual(sut.category(forType: "Float80"), .float)
         
+        XCTAssertEqual(sut.category(forType: "CBool"), .integer)
         XCTAssertEqual(sut.category(forType: "Int64"), .integer)
         XCTAssertEqual(sut.category(forType: "UInt64"), .integer)
         XCTAssertEqual(sut.category(forType: "CLongLong"), .integer)
@@ -402,5 +406,21 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.category(forType: "UInt8"), .integer)
         XCTAssertEqual(sut.category(forType: "CChar"), .integer)
         XCTAssertEqual(sut.category(forType: "CUnsignedChar"), .integer)
+    }
+    
+    func testTypeCategoryNonPrimitives() {
+        let structType = KnownTypeBuilder(typeName: "A", kind: .struct).build()
+        let classType = KnownTypeBuilder(typeName: "B", kind: .class).build()
+        let protocolType = KnownTypeBuilder(typeName: "C", kind: .protocol).build()
+        let enumType = KnownTypeBuilder(typeName: "D", kind: .enum).build()
+        sut.addType(structType)
+        sut.addType(classType)
+        sut.addType(protocolType)
+        sut.addType(enumType)
+        
+        XCTAssertEqual(sut.category(forType: structType.typeName), .struct)
+        XCTAssertEqual(sut.category(forType: classType.typeName), .class)
+        XCTAssertEqual(sut.category(forType: protocolType.typeName), .protocol)
+        XCTAssertEqual(sut.category(forType: enumType.typeName), .enum)
     }
 }
