@@ -20,6 +20,39 @@ class MultiFileTestBuilder {
         return self
     }
     
+    // TODO: Merge these two methods so we can get rid of the duplication while
+    // building the same rewriter structure every time.
+    
+    /// Executes a compilation step
+    func compile(expectsErrors: Bool = false, options: ASTWriterOptions = .default,
+                 file: String = #file, line: Int = #line) {
+        
+        let inputs = files.map(TestInputSource.init)
+        
+        let output = TestWriterOutput()
+        let input = TestMultiInputProvider(inputs: inputs)
+        
+        let sut = SwiftRewriter(input: input, output: output)
+        sut.writerOptions = options
+        sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
+        sut.intentionPassesSource = DefaultIntentionPasses()
+        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        
+        do {
+            try sut.rewrite()
+            
+            if !expectsErrors && sut.diagnostics.errors.count != 0 {
+                test.recordFailure(
+                    withDescription: "Unexpected error(s) converting code: \(sut.diagnostics.errors.description)",
+                    inFile: file, atLine: line, expected: true)
+            }
+        } catch {
+            test.recordFailure(
+                withDescription: "Unexpected error(s) converting code: \(error)",
+                inFile: file, atLine: line, expected: true)
+        }
+    }
+    
     /// Assertion execution point
     @discardableResult
     func translatesToSwift(_ expectedSwift: String, expectsErrors: Bool = false, options: ASTWriterOptions = .default, file: String = #file, line: Int = #line) -> MultiFileTestBuilder {
@@ -57,7 +90,7 @@ class MultiFileTestBuilder {
             }
             
             if !expectsErrors && sut.diagnostics.errors.count != 0 {
-                test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(sut.diagnostics.errors.description)",
+                test.recordFailure(withDescription: "Unexpected error(s) converting code: \(sut.diagnostics.errors.description)",
                                    inFile: file, atLine: line, expected: true)
             }
             
@@ -65,7 +98,7 @@ class MultiFileTestBuilder {
             sut.diagnostics.printDiagnostics(to: &errorsOutput)
             errors = errorsOutput.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
-            test.recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
+            test.recordFailure(withDescription: "Unexpected error(s) converting code: \(error)",
                                inFile: file, atLine: line, expected: true)
         }
         
