@@ -387,10 +387,12 @@ class ObjcParserTests: XCTestCase {
             @interface A
             + (void)func __attribute__((no_return));
             @end
+            /*
             @implementation A
             + (void)func __attribute__((annotate("oclint:suppress[high cyclomatic complexity]"), annotate("oclint:suppress[long line]"), annotate("oclint:suppress[collapsible if statements]"))) {
             }
             @end
+            */
             """)
     }
 }

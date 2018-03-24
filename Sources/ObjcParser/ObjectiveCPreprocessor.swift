@@ -28,7 +28,7 @@ import ObjcParserAntlr
 /**
  * Created by ikochurkin on 28.07.2016.
  */
-class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
+class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     typealias Parser = ObjectiveCPreprocessorParser
     
     private var _conditions: [Bool] = []
@@ -42,7 +42,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         _tokensStream = commonTokenStream
     }
     
-    public func visitObjectiveCDocument(_ ctx: Parser.ObjectiveCDocumentContext) -> String? {
+    public override func visitObjectiveCDocument(_ ctx: Parser.ObjectiveCDocumentContext) -> String? {
         var result = ""
         
         for text in ctx.text() {
@@ -52,7 +52,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         return result
     }
     
-    public func visitText(_ context: Parser.TextContext) -> String? {
+    public override func visitText(_ context: Parser.TextContext) -> String? {
         var result = context.getText()
         var directive = false
         if let direct = context.directive() {
@@ -72,11 +72,11 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         return result
     }
     
-    public func visitPreprocessorImport(_ context: Parser.PreprocessorImportContext) -> String? {
+    public override func visitPreprocessorImport(_ context: Parser.PreprocessorImportContext) -> String? {
         return isCompiledText().description
     }
     
-    public func visitPreprocessorConditional(_ context: Parser.PreprocessorConditionalContext) -> String? {
+    public override func visitPreprocessorConditional(_ context: Parser.PreprocessorConditionalContext) -> String? {
         if context.IF() != nil {
             let exprResult = context.preprocessor_expression()?.accept(self) == "true"
             _conditions.append(exprResult)
@@ -96,7 +96,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         }
     }
     
-    public func visitPreprocessorDef(_ context: Parser.PreprocessorDefContext) -> String? {
+    public override func visitPreprocessorDef(_ context: Parser.PreprocessorDefContext) -> String? {
         let conditionalSymbolText = context.CONDITIONAL_SYMBOL()?.getText() ?? ""
         
         if context.IFDEF() != nil || context.IFNDEF() != nil {
@@ -114,19 +114,19 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         }
     }
     
-    public func visitPreprocessorPragma(_ context: Parser.PreprocessorPragmaContext) -> String? {
+    public override func visitPreprocessorPragma(_ context: Parser.PreprocessorPragmaContext) -> String? {
         return isCompiledText().description
     }
     
-    public func visitPreprocessorError(_ context: Parser.PreprocessorErrorContext) -> String? {
+    public override func visitPreprocessorError(_ context: Parser.PreprocessorErrorContext) -> String? {
         return isCompiledText().description
     }
     
-    public func visitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> String? {
+    public override func visitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> String? {
         return isCompiledText().description
     }
     
-    public func visitPreprocessorDefine(_ context: Parser.PreprocessorDefineContext) -> String? {
+    public override func visitPreprocessorDefine(_ context: Parser.PreprocessorDefineContext) -> String? {
         if isCompiledText() {
             var str = ""
             
@@ -142,7 +142,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         return isCompiledText().description
     }
     
-    public func visitPreprocessorConstant(_ context: Parser.PreprocessorConstantContext) -> String? {
+    public override func visitPreprocessorConstant(_ context: Parser.PreprocessorConstantContext) -> String? {
         if context.TRUE() != nil || context.FALSE() != nil {
             return (context.TRUE() != nil).description
         } else {
@@ -150,7 +150,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         }
     }
     
-    public func visitPreprocessorConditionalSymbol(_ context: Parser.PreprocessorConditionalSymbolContext) -> String? {
+    public override func visitPreprocessorConditionalSymbol(_ context: Parser.PreprocessorConditionalSymbolContext) -> String? {
         guard let text = context.CONDITIONAL_SYMBOL()?.getText() else {
             return false.description
         }
@@ -162,11 +162,11 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         }
     }
     
-    public func visitPreprocessorParenthesis(_ context: Parser.PreprocessorParenthesisContext) -> String? {
+    public override func visitPreprocessorParenthesis(_ context: Parser.PreprocessorParenthesisContext) -> String? {
         return context.preprocessor_expression()?.accept(self)
     }
     
-    public func visitPreprocessorNot(_ context: Parser.PreprocessorNotContext) -> String? {
+    public override func visitPreprocessorNot(_ context: Parser.PreprocessorNotContext) -> String? {
         guard let value = context.preprocessor_expression()?.accept(self) else {
             return false.description
         }
@@ -174,7 +174,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         return value == "true" ? "false" : "true"
     }
     
-    public func visitPreprocessorBinary(_ context: Parser.PreprocessorBinaryContext) -> String? {
+    public override func visitPreprocessorBinary(_ context: Parser.PreprocessorBinaryContext) -> String? {
         let expr1Result = context.preprocessor_expression(0)?.accept(self)
         let expr2Result = context.preprocessor_expression(1)?.accept(self)
         
@@ -213,7 +213,7 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserVisitor<String> {
         return result.description
     }
     
-    public func visitPreprocessorDefined(_ context: Parser.PreprocessorDefinedContext) -> String? {
+    public override func visitPreprocessorDefined(_ context: Parser.PreprocessorDefinedContext) -> String? {
         guard let text = context.CONDITIONAL_SYMBOL()?.getText() else {
             return "false"
         }
