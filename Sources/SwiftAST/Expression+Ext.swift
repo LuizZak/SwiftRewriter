@@ -85,6 +85,12 @@ extension Expression {
         
         return self
     }
+    
+    public func typed(expected: SwiftType?) -> Self {
+        expectedType = expected
+        
+        return self
+    }
 }
 
 extension Expression: ExpressionPostfixBuildable {

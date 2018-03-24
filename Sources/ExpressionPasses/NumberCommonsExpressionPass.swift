@@ -5,6 +5,20 @@ import SwiftRewriterLib
 /// `as?` casts, and does other conversions such as usage of `floorf`/`ceilf`/etc.
 /// functions on general floating-point types.
 public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
+    public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
+        return super.visitVariableDeclarations(stmt)
+    }
+    
+    public override func visitExpression(_ exp: Expression) -> Expression {
+        if let cast = applyNumericalCast(to: exp) {
+            notifyChange()
+            
+            return super.visitPostfix(cast)
+        }
+        
+        return super.visitExpression(exp)
+    }
+    
     // Converts `<number> as? Float` -> `Float(<number>)`,
     // `<number> as? CInt` -> `CInt(<number>)`, etc.
     public override func visitCast(_ exp: CastExpression) -> Expression {
@@ -62,6 +76,29 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
         }
         
         return super.visitPostfix(exp)
+    }
+    
+    private func applyNumericalCast(to exp: Expression) -> PostfixExpression? {
+        if exp.isLiteralExpression {
+            return nil
+        }
+        
+        // Actual type -> expected type
+        if let actual = exp.resolvedType, let expected = exp.expectedType,
+            let typeName = expected.typeName, typeSystem.isNumeric(actual)
+            && typeSystem.isNumeric(expected) && actual != expected {
+            
+            let cast = Expression
+                .identifier(typeName)
+                .typed(.metatype(for: expected))
+                .call([exp.typed(expected: nil)])
+                .typed(expected)
+                .typed(expected: expected)
+            
+            return cast
+        }
+        
+        return nil
     }
     
     /// Given a set of parameters, assigns the proper expected types of the parameters

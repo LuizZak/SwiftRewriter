@@ -373,4 +373,34 @@ class DefaultTypeSystemTests: XCTestCase {
         
         XCTAssert(sut.isType("Z", conformingTo: "P"))
     }
+    
+    func testTypeCategory() {
+        XCTAssertEqual(sut.category(forType: "Float"), .float)
+        XCTAssertEqual(sut.category(forType: "CFloat"), .float)
+        XCTAssertEqual(sut.category(forType: "Double"), .float)
+        XCTAssertEqual(sut.category(forType: "CDouble"), .float)
+        XCTAssertEqual(sut.category(forType: "CGFloat"), .float)
+        XCTAssertEqual(sut.category(forType: "Float80"), .float)
+        
+        XCTAssertEqual(sut.category(forType: "Int64"), .integer)
+        XCTAssertEqual(sut.category(forType: "UInt64"), .integer)
+        XCTAssertEqual(sut.category(forType: "CLongLong"), .integer)
+        XCTAssertEqual(sut.category(forType: "CUnsignedLongLong"), .integer)
+        XCTAssertEqual(sut.category(forType: "Int"), .integer)
+        XCTAssertEqual(sut.category(forType: "UInt"), .integer)
+        XCTAssertEqual(sut.category(forType: "Int32"), .integer)
+        XCTAssertEqual(sut.category(forType: "UInt32"), .integer)
+        XCTAssertEqual(sut.category(forType: "CInt"), .integer)
+        XCTAssertEqual(sut.category(forType: "CUnsignedInt"), .integer)
+        XCTAssertEqual(sut.category(forType: "CChar32"), .integer)
+        XCTAssertEqual(sut.category(forType: "Int16"), .integer)
+        XCTAssertEqual(sut.category(forType: "UInt16"), .integer)
+        XCTAssertEqual(sut.category(forType: "CShort"), .integer)
+        XCTAssertEqual(sut.category(forType: "CUnsignedShort"), .integer)
+        XCTAssertEqual(sut.category(forType: "CChar16"), .integer)
+        XCTAssertEqual(sut.category(forType: "Int8"), .integer)
+        XCTAssertEqual(sut.category(forType: "UInt8"), .integer)
+        XCTAssertEqual(sut.category(forType: "CChar"), .integer)
+        XCTAssertEqual(sut.category(forType: "CUnsignedChar"), .integer)
+    }
 }

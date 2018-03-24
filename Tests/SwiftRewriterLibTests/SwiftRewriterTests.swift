@@ -1795,4 +1795,38 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testApplyCastOnNumericalVariableDeclarationInits() throws {
+        try assertObjcParse(
+            objc: """
+            @interface B
+            @property CGFloat value;
+            @end
+            
+            @interface A
+            @property (nullable) B *b;
+            @end
+            
+            @implementation A
+            - (void)method {
+                NSInteger local = self.b.value / self.b.value;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class B: NSObject {
+                @objc var value: CGFloat = 0.0
+            }
+            @objc
+            class A: NSObject {
+                @objc var b: B?
+                
+                @objc
+                func method() {
+                    var local = Int((self.b?.value ?? 0.0) / (self.b?.value ?? 0.0))
+                }
+            }
+            """)
+    }
 }

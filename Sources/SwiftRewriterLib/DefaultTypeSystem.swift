@@ -182,6 +182,44 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         return false
     }
     
+    public func category(forType type: String) -> TypeCategory {
+        if isInteger(.typeName(type)) {
+            return .integer
+        }
+        
+        switch type {
+        case "Bool":
+            return .boolean
+        case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
+            return .float
+        default:
+            break
+        }
+        
+        if let type = self.knownTypeWithName(type) {
+            switch type.kind {
+            case .class:
+                return .class
+            case .enum:
+                return .enum
+            case .protocol:
+                return .protocol
+            case .struct:
+                return .struct
+            }
+        }
+        
+        return .unknown
+    }
+    
+    public func category(forType type: SwiftType) -> TypeCategory {
+        guard let typeName = typeNameIn(swiftType: type) else {
+            return .unknown
+        }
+        
+        return category(forType: typeName)
+    }
+    
     public func defaultValue(for type: SwiftType) -> Expression? {
         if isNumeric(type) {
             let exp: Expression = isInteger(type) ? .constant(0) : .constant(0.0)

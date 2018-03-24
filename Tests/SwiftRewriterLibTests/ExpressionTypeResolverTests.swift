@@ -837,6 +837,41 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.string))
     }
+    
+    /// Tests resolving expressions like `(object?.width ?? 0.0)`
+    func testResolveNullCoalesceOptionalsIntoConstantNumbers() {
+        startScopedTest(with: Expression.identifier("a").optional().dot("width").binary(op: .nullCoalesce, rhs: .constant(0.0)),
+                        sut: ExpressionTypeResolver())
+            .definingType(named: "A", with: { type -> KnownType in
+                type
+                    .property(named: "width", type: .cgFloat)
+                    .build()
+            })
+            .definingLocal(name: "a", type: .optional(.typeName("A")))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .cgFloat)
+    }
+    
+    /// Tests resolving expressions like `(object?.inner ?? nil)`
+    func testResolveNullCoalesceOptionalsWithOptionalObjects() {
+        startScopedTest(with: Expression.identifier("a").optional().dot("inner").binary(op: .nullCoalesce, rhs: .constant(.nil)),
+                        sut: ExpressionTypeResolver())
+            .definingType(named: "A", with: { type -> KnownType in
+                type
+                    .property(named: "inner", type: .optional(.typeName("A")))
+                    .build()
+            })
+            .definingLocal(name: "a", type: .optional(.typeName("A")))
+            .resolve()
+            .thenAssertExpression(resolvedAs: .optional(.typeName("A")))
+    }
+    
+    func testResolveNilConstantBasedOnExpectedType() {
+        assertResolve(
+            Expression.constant(.nil).typed(expected: .optional("NSObject")),
+            expect: .optional("NSObject")
+        )
+    }
 }
 
 // MARK: - Test Building Helpers

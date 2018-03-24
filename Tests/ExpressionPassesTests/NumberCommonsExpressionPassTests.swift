@@ -101,4 +101,33 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType, .float)
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[1].expectedType, .float)
     }
+    
+    // MARK: - Numerical casts
+    
+    func testConvertNumericTypesWithDifferentExpectedTypesWithCasts() {
+        assertTransform(
+            // a
+            expression: Expression.identifier("a").typed(.int).typed(expected: .float),
+            // Float(a)
+            into: Expression.identifier("Float").call([.identifier("a")])
+        ); assertNotifiedChange()
+    }
+    
+    func testDontConvertLiteralExpresions() {
+        assertTransform(
+            // 1
+            expression: Expression.constant(1).typed(.int).typed(expected: .float),
+            // 1
+            into: Expression.constant(1)
+        ); assertDidNotNotifyChange()
+    }
+    
+    func testConvertVariableDeclarations() {
+        assertTransform(
+            // a = b
+            statement: .variableDeclaration(identifier: "a", type: .int, initialization: Expression.identifier("b").typed(.float).typed(expected: .int)),
+            // a = Int(b)
+            into: .variableDeclaration(identifier: "a", type: .int, initialization: Expression.identifier("Int").call([.identifier("b")]))
+        ); assertNotifiedChange()
+    }
 }

@@ -35,6 +35,9 @@ public struct SyntaxNodeRewriterPassContext {
 /// to source code before it is output on files.
 open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
     public var context: SyntaxNodeRewriterPassContext = .empty
+    public var typeSystem: TypeSystem {
+        return context.typeSystem
+    }
     
     public override required init() {
         

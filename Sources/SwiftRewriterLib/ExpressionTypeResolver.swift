@@ -138,15 +138,37 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         switch exp.constant {
         case .int, .hexadecimal, .octal, .binary:
-            exp.resolvedType = .int
+            if let expected = exp.expectedType, typeSystem.category(forType: expected) == .integer {
+                exp.resolvedType = expected
+            } else {
+                exp.resolvedType = .int
+            }
+            
         case .string:
             exp.resolvedType = .string
+            
         case .float:
-            exp.resolvedType = .float
+            if let expected = exp.expectedType, typeSystem.category(forType: expected) == .float {
+                exp.resolvedType = expected
+            } else {
+                exp.resolvedType = .float
+            }
         case .boolean:
             exp.resolvedType = .bool
         case .nil:
             exp.resolvedType = .optional(.anyObject)
+            
+            if let expectedType = exp.expectedType {
+                switch expectedType {
+                case .optional, .implicitUnwrappedOptional:
+                    exp.resolvedType = exp.expectedType
+                    break
+                default:
+                    if !typeSystem.isScalarType(expectedType) {
+                        exp.resolvedType = .optional(expectedType)
+                    }
+                }
+            }
         case .rawConstant:
             exp.resolvedType = .any
         }
@@ -234,16 +256,21 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
+        exp.lhs = visitExpression(exp.lhs)
+        
         switch exp.op.category {
         case .logical:
             exp.lhs.expectedType = .bool
             exp.rhs.expectedType = .bool
             
+        case .nullCoalesce:
+            exp.rhs.expectedType = exp.lhs.resolvedType?.deepUnwrapped
+            
         default:
             break
         }
         
-        _=super.visitBinary(exp)
+        exp.rhs = visitExpression(exp.rhs)
         
         // Propagte error type
         if exp.lhs.isErrorTyped || exp.rhs.isErrorTyped {

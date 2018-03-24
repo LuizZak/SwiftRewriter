@@ -50,6 +50,12 @@ public protocol TypeSystem {
     /// another type.
     func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool
     
+    /// Returns the category for a given type.
+    func category(forType type: SwiftType) -> TypeCategory
+    
+    /// Returns the category for a given type name.
+    func category(forType type: String) -> TypeCategory
+    
     /// Gets the supertype of a given type on this type system.
     ///
     /// - Parameter type: A known type with available supertype information.
@@ -118,4 +124,16 @@ public protocol TypeSystem {
     
     /// Gets an instance field with a given name on a given known type.
     func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty?
+}
+
+public enum TypeCategory {
+    case integer
+    case float
+    case boolean
+    case void
+    case `struct`
+    case `protocol`
+    case `enum`
+    case `class`
+    case unknown
 }
