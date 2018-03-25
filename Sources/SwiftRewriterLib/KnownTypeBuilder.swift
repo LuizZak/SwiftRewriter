@@ -245,7 +245,7 @@ public struct KnownTypeBuilder {
         var new = clone()
         precondition(type.kind == .enum)
         
-        new.type.setKnownTrait(KnownTypeTraits.enumRawValue, value: rawValueType)
+        new.type.setKnownTrait(KnownTypeTraits.enumRawValue, value: .swiftType(rawValueType))
         
         return new
     }
@@ -303,7 +303,7 @@ private class DummyType: KnownType {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
-    var knownTraits: [String: Codable] = [:]
+    var knownTraits: [String: TraitType] = [:]
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
     var knownProperties: [KnownProperty] = []
@@ -330,8 +330,8 @@ private class DummyType: KnownType {
         self.supertype = supertype?.asKnownTypeReference
     }
     
-    func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
-        knownTraits[trait.name] = value
+    func setKnownTrait(_ traitName: String, value: TraitType) {
+        knownTraits[traitName] = value
     }
 }
 
@@ -339,7 +339,7 @@ private struct BuildingKnownType: Codable {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
-    var traits: [String: Codable] = [:]
+    var traits: [String: TraitType] = [:]
     var constructors: [BuildingKnownConstructor] = []
     var methods: [BuildingKnownMethod] = []
     var properties: [BuildingKnownProperty] = []
@@ -352,53 +352,10 @@ private struct BuildingKnownType: Codable {
         self.typeName = typeName
         self.supertype = supertype
     }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        try origin = container.decode(String.self, forKey: .origin)
-        try typeName = container.decode(String.self, forKey: .typeName)
-        try kind = container.decode(KnownTypeKind.self, forKey: .kind)
-        try traits = KnownTypeTraitEncoder.decode(in: container, forKey: .traits)
-        try constructors = container.decode([BuildingKnownConstructor].self, forKey: .constructors)
-        try methods = container.decode([BuildingKnownMethod].self, forKey: .methods)
-        try properties = container.decode([BuildingKnownProperty].self, forKey: .properties)
-        try fields = container.decode([BuildingKnownProperty].self, forKey: .fields)
-        try protocols = container.decode([BuildingKnownProtocolConformance].self, forKey: .protocols)
-        try supertype = container.decodeIfPresent(KnownTypeReference.self, forKey: .supertype)
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        
-        try KnownTypeTraitEncoder.encode(traits, in: &container, forKey: .traits)
-        try container.encode(origin, forKey: .origin)
-        try container.encode(typeName, forKey: .typeName)
-        try container.encode(kind, forKey: .kind)
-        try container.encode(constructors, forKey: .constructors)
-        try container.encode(methods, forKey: .methods)
-        try container.encode(properties, forKey: .properties)
-        try container.encode(fields, forKey: .fields)
-        try container.encode(protocols, forKey: .protocols)
-        try container.encode(supertype, forKey: .supertype)
-    }
-    
-    enum CodingKeys: CodingKey {
-        case origin
-        case typeName
-        case kind
-        case traits
-        case constructors
-        case methods
-        case properties
-        case fields
-        case protocols
-        case supertype
-    }
 }
 
 extension BuildingKnownType: KnownType {
-    var knownTraits: [String: Codable] {
+    var knownTraits: [String: TraitType] {
         get {
             return traits
         }
@@ -422,8 +379,8 @@ extension BuildingKnownType: KnownType {
         return protocols
     }
     
-    mutating func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
-        knownTraits[trait.name] = value
+    mutating func setKnownTrait(_ traitName: String, value: TraitType) {
+        knownTraits[traitName] = value
     }
 }
 

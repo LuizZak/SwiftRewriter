@@ -951,7 +951,7 @@ private class CompoundKnownType: KnownType {
     var typeName: String
     
     var kind: KnownTypeKind
-    var knownTraits: [String: Codable]
+    var knownTraits: [String: TraitType]
     var origin: String
     var supertype: KnownTypeReference?
     var knownConstructors: [KnownConstructor]

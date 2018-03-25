@@ -22,7 +22,7 @@ public class EnumGenerationIntention: TypeGenerationIntention {
         self.rawValueType = rawValueType
         super.init(typeName: typeName, accessLevel: accessLevel, source: source)
         
-        setKnownTrait(KnownTypeTraits.enumRawValue, value: rawValueType)
+        setKnownTrait(KnownTypeTraits.enumRawValue, value: TraitType.swiftType(rawValueType))
     }
     
     public func addCase(_ enumCase: EnumCaseGenerationIntention) {

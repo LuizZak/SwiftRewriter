@@ -29,7 +29,7 @@ extension CompoundedMappingType: KnownType {
     public var kind: KnownTypeKind {
         return knownType.kind
     }
-    public var knownTraits: [String : Codable] {
+    public var knownTraits: [String : TraitType] {
         get {
             return knownType.knownTraits
         }

@@ -237,7 +237,14 @@ public enum TypeFormatter {
         return result + ")"
     }
     
-    static func stringify(_ type: SwiftType) -> String {
+    private static func stringify(_ trait: TraitType) -> String {
+        switch trait {
+        case .swiftType(let type):
+            return stringify(type)
+        }
+    }
+    
+    private static func stringify(_ type: SwiftType) -> String {
         return type.description
     }
 }

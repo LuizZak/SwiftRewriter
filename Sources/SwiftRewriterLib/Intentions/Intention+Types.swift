@@ -119,7 +119,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         return []
     }
     
-    public var knownTraits: [String: Codable] = [:]
+    public var knownTraits: [String: TraitType] = [:]
     
     public var kind: KnownTypeKind {
         return .class
@@ -290,8 +290,8 @@ extension TypeGenerationIntention: KnownType {
         return protocols
     }
     
-    public func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
-        knownTraits[trait.name] = value
+    public func setKnownTrait(_ traitName: String, value: TraitType) {
+        knownTraits[traitName] = value
     }
 }
 

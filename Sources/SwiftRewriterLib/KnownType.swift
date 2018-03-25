@@ -20,7 +20,7 @@ public protocol KnownType: KnownTypeReferenceConvertible {
     var kind: KnownTypeKind { get }
     
     /// Gets a set of known type traits for this type
-    var knownTraits: [String: Codable] { get set }
+    var knownTraits: [String: TraitType] { get set }
     
     /// Gets an array of all known constructors for this type
     var knownConstructors: [KnownConstructor] { get }
@@ -38,10 +38,10 @@ public protocol KnownType: KnownTypeReferenceConvertible {
     var knownProtocolConformances: [KnownProtocolConformance] { get }
     
     /// Gets a known type trait from this type
-    func knownTrait<T>(_ trait: KnownTypeTrait<T>) -> T?
+    func knownTrait(_ traitName: String) -> TraitType?
     
     /// Sets a known type trait with a given value for this type
-    mutating func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T)
+    mutating func setKnownTrait(_ traitName: String, value: TraitType)
 }
 
 /// The kind of a known type
@@ -197,92 +197,51 @@ public extension KnownMethod {
     }
 }
 
-/// Represents a type trait
-public struct KnownTypeTrait<T: Codable> {
-    public var name: String
-    
-    public init(name: String) {
-        self.name = name
-    }
-}
-
-public final class KnownTypeTraitEncoder {
-    public static func encode<C: KeyedEncodingContainerProtocol>
-        (_ knownTraits: [String: Codable], in container: inout C, forKey key: C.Key) throws {
-        
-        var traits: [Trait] = []
-        
-        for (name, value) in knownTraits {
-            switch value {
-            case let val as SwiftType:
-                let trait = Trait(name: name, trait: .swiftType(val))
-                traits.append(trait)
-            default:
-                fatalError("Cannot encode trait type \(type(of: value))")
-            }
-        }
-        
-        try container.encode(traits, forKey: key)
-    }
-    
-    public static func decode<C: KeyedDecodingContainerProtocol>
-        (in container: C, forKey key: C.Key) throws -> [String: Codable] {
-        let traits: [Trait] = try container.decode([Trait].self, forKey: key)
-        
-        return Dictionary(grouping: traits, by: { $0.name })
-    }
-    
-    private struct Trait: Codable {
-        var name: String
-        var trait: TraitType
-    }
-    
-    private enum TraitType: Codable {
-        case swiftType(SwiftType)
-        
-        init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            
-            switch try container.decode(Int.self, forKey: .flag) {
-            case 0:
-               self = .swiftType(try container.decode(SwiftType.self, forKey: .field))
-            default:
-                let message = """
-                    Unknown TraitType flag. Maybe data was encoded using a \
-                    different version of SwiftRewriter?
-                    """
-                throw DecodingError.dataCorruptedError(forKey: .flag, in: container,
-                                                       debugDescription: message)
-            }
-        }
-        
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            
-            switch self {
-            case .swiftType(let type):
-                try container.encode(0, forKey: .flag)
-                try container.encode(type, forKey: .field)
-            }
-        }
-        
-        private enum CodingKeys: Int, CodingKey {
-            case flag
-            case field
-        }
-    }
-}
-
 public enum KnownTypeTraits {
-    public static let enumRawValue = KnownTypeTrait<SwiftType>(name: "enumRawValue")
+    public static let enumRawValue = "enumRawValue"
 }
 
 public extension KnownType {
-    public func knownTrait<T>(_ trait: KnownTypeTrait<T>) -> T? {
-        return knownTraits[trait.name] as? T
+    public func knownTrait(_ traitName: String) -> TraitType? {
+        return knownTraits[traitName]
     }
     
-    public mutating func setKnownTrait<T>(_ trait: KnownTypeTrait<T>, value: T) {
-        knownTraits[trait.name] = value
+    public mutating func setKnownTrait(_ traitName: String, value: TraitType) {
+        knownTraits[traitName] = value
+    }
+}
+
+public enum TraitType: Codable {
+    case swiftType(SwiftType)
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        switch try container.decode(Int.self, forKey: .flag) {
+        case 0:
+            self = .swiftType(try container.decode(SwiftType.self, forKey: .field))
+        default:
+            let message = """
+                    Unknown TraitType flag. Maybe data was encoded using a \
+                    different version of SwiftRewriter?
+                    """
+            throw DecodingError.dataCorruptedError(forKey: .flag, in: container,
+                                                   debugDescription: message)
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .swiftType(let type):
+            try container.encode(0, forKey: .flag)
+            try container.encode(type, forKey: .field)
+        }
+    }
+    
+    private enum CodingKeys: Int, CodingKey {
+        case flag
+        case field
     }
 }

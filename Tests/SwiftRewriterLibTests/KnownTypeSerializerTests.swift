@@ -37,4 +37,31 @@ class KnownTypeSerializerTests: XCTestCase {
             \(result.makeDifferenceMarkString(against: expected))
             """)
     }
+    
+    func testSerializeEnumType() throws {
+        let type =
+            KnownTypeBuilder(typeName: "A", kind: .enum)
+                .enumRawValue(type: .int)
+                .enumCase(named: "a")
+                .build()
+        let expected = TypeFormatter.asString(knownType: type)
+        
+        let data = try KnownTypeSerializer.serialize(type: type)
+        let resultType = try KnownTypeSerializer.deserialize(from: data)
+        
+        let result = TypeFormatter.asString(knownType: resultType)
+        
+        XCTAssertEqual(
+            expected, result,
+            """
+            Failed to re-generate expected type signature:
+            Expected:
+            
+            \(expected)
+            
+            Result:
+            
+            \(result.makeDifferenceMarkString(against: expected))
+            """)
+    }
 }
