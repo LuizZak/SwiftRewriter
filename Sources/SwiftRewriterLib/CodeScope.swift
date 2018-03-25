@@ -35,6 +35,10 @@ public extension CodeScopeNode where Self: SyntaxNode {
         definitions.recordDefinition(definition)
     }
     
+    public func recordDefinitions(_ definitions: [CodeDefinition]) {
+        self.definitions.recordDefinitions(definitions)
+    }
+    
     public func removeAllDefinitions() {
         definitions.removeAllDefinitions()
     }
@@ -84,12 +88,9 @@ class EmptyCodeScope: CodeScope {
     func allDefinitions() -> [CodeDefinition] {
         return []
     }
-    func recordDefinition(_ definition: CodeDefinition) {
-        
-    }
-    func removeAllDefinitions() {
-        
-    }
+    func recordDefinition(_ definition: CodeDefinition) { }
+    func recordDefinitions(_ definitions: [CodeDefinition]) { }
+    func removeAllDefinitions() { }
 }
 
 /// An object that can provide definitions for a type resolver
@@ -104,6 +105,7 @@ public protocol DefinitionsSource {
 /// Is used only during statement rewriting phase.
 public protocol CodeScope: DefinitionsSource {
     func recordDefinition(_ definition: CodeDefinition)
+    func recordDefinitions(_ definitions: [CodeDefinition])
     func removeAllDefinitions()
 }
 
@@ -125,6 +127,10 @@ public class DefaultCodeScope: CodeScope {
     
     public func recordDefinition(_ definition: CodeDefinition) {
         definitions.append(definition)
+    }
+    
+    public func recordDefinitions(_ definitions: [CodeDefinition]) {
+        self.definitions.append(contentsOf: definitions)
     }
     
     public func removeAllDefinitions() {

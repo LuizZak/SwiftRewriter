@@ -191,9 +191,7 @@ private class InternalTypeResolverInvoker {
         }
         
         // Push global definitions
-        for global in globals {
-            intrinsics.recordDefinition(global)
-        }
+        intrinsics.recordDefinitions(globals)
         
         typeResolver.intrinsicVariables = intrinsics
     }
