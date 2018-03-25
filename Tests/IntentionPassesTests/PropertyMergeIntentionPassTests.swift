@@ -43,7 +43,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createProperty(named: "a", type: .int)
                         .createMethod(named: "setA", parameters: [
                             ParameterSignature(label: "_", name: "a", type: .int)
-                            ])
+                        ])
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -89,7 +89,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         }
     }
     
-    func testMergeCategories() {
+    func testMergeInCategories() {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A") { file in
@@ -126,7 +126,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createMethod(named: "a", returnType: .int)
                         .createMethod(named: "setA", parameters: [
                             ParameterSignature(label: "_", name: "a", type: .int)
-                            ])
+                        ])
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -155,7 +155,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createVoidMethod(named: "b") { method in
                             method.setBody([
                                 .expression(.assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1)))
-                                ])
+                            ])
                         }
                 }.build()
         let cls = intentions.classIntentions()[0]
@@ -269,7 +269,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                                                 op: .assign,
                                                 rhs: .constant(1)))
                                 ])
-                    }
+                        }
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -300,9 +300,9 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             method.setBody([
                                 .variableDeclarations([
                                     StatementVariableDeclaration(identifier: "_a", type: .int)
-                                    ]),
+                                ]),
                                 .expression(.assignment(lhs: .identifier("_a"), op: .assign, rhs: .constant(1)))
-                                ])
+                            ])
                     }
                 }.build()
         let cls = intentions.classIntentions()[0]

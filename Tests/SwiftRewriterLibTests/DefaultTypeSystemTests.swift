@@ -117,7 +117,7 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
+        XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSArray's default parameterless constructor")
     }
@@ -128,7 +128,7 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSArray")
+        XCTAssertEqual(type.supertype?.asTypeName, "NSArray")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSMutableArray's default parameterless constructor")
     }
@@ -139,7 +139,7 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
+        XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSDictionary's default parameterless constructor")
     }
@@ -150,9 +150,31 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSDictionary")
+        XCTAssertEqual(type.supertype?.asTypeName, "NSDictionary")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSMutableDictionary's default parameterless constructor")
+    }
+    
+    func testNSSetDefinition() {
+        guard let type = sut.knownTypeWithName("NSSet") else {
+            XCTFail("Expected NSSet to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
+                        "Missing NSSet's default parameterless constructor")
+    }
+    
+    func testNSMutableSetDefinition() {
+        guard let type = sut.knownTypeWithName("NSMutableSet") else {
+            XCTFail("Expected NSMutableSet to be present")
+            return
+        }
+        
+        XCTAssertEqual(type.supertype?.asTypeName, "NSSet")
+        XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
+                        "Missing NSMutableSet's default parameterless constructor")
     }
     
     func testNSDateDefinition() {
@@ -161,7 +183,7 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
+        XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSDate's default parameterless constructor")
     }
@@ -172,7 +194,7 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSObject")
+        XCTAssertEqual(type.supertype?.asTypeName, "NSObject")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSData's default parameterless constructor")
     }
@@ -183,7 +205,7 @@ class DefaultTypeSystemTests: XCTestCase {
             return
         }
         
-        XCTAssertEqual(type.supertype?.asKnownType?.typeName, "NSData")
+        XCTAssertEqual(type.supertype?.asTypeName, "NSData")
         XCTAssertNotNil(sut.constructor(withArgumentLabels: [], in: type),
                         "Missing NSMutableData's default parameterless constructor")
     }
@@ -422,5 +444,24 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.category(forType: classType.typeName), .class)
         XCTAssertEqual(sut.category(forType: protocolType.typeName), .protocol)
         XCTAssertEqual(sut.category(forType: enumType.typeName), .enum)
+    }
+    
+    func testIsClassInstanceType() {
+        let classType = KnownTypeBuilder(typeName: "A", kind: .class).build()
+        let protocolType = KnownTypeBuilder(typeName: "B", kind: .protocol).build()
+        let structType = KnownTypeBuilder(typeName: "C", kind: .struct).build()
+        let enumType = KnownTypeBuilder(typeName: "D", kind: .enum).build()
+        sut.addType(classType)
+        sut.addType(protocolType)
+        sut.addType(structType)
+        sut.addType(enumType)
+        
+        XCTAssert(sut.isClassInstanceType(.typeName("NSObject")))
+        XCTAssert(sut.isClassInstanceType(.typeName("NSSet")))
+        XCTAssert(sut.isClassInstanceType(.typeName("NSArray")))
+        XCTAssert(sut.isClassInstanceType(classType.typeName))
+        XCTAssert(sut.isClassInstanceType(protocolType.typeName))
+        XCTAssertFalse(sut.isClassInstanceType(structType.typeName))
+        XCTAssertFalse(sut.isClassInstanceType(enumType.typeName))
     }
 }

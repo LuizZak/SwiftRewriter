@@ -106,6 +106,9 @@ public class IntentionCollector {
             case let n as PropertyDefinition:
                 self.visitPropertyDefinitionNode(n)
                 
+            case let n as PropertySynthesizeItem:
+                self.visitPropertySynthesizeItemNode(n)
+                
             case let n as ProtocolReferenceList:
                 self.visitObjcClassProtocolReferenceListNode(n)
                 
@@ -348,8 +351,7 @@ public class IntentionCollector {
         }
     }
     
-    // MARK: -
-    
+    // MARK: - Property definition
     private func visitPropertyDefinitionNode(_ node: PropertyDefinition) {
         guard let ctx = context.findContext(ofType: TypeGenerationIntention.self) else {
             return
@@ -404,6 +406,27 @@ public class IntentionCollector {
             
             delegate?.reportForLazyResolving(intention: prop)
         }
+    }
+    
+    // MARK: - Property Implementation
+    private func visitPropertySynthesizeItemNode(_ node: PropertySynthesizeItem) {
+        guard let ctx = context.findContext(ofType: BaseClassIntention.self) else {
+            return
+        }
+        
+        guard let propertyName = node.propertyName else {
+            return
+        }
+        
+        let ivarName = node.instanceVarName?.name ?? propertyName.name
+        
+        let intent =
+            PropertySynthesizationIntention(
+                propertyName: propertyName.name, ivarName: ivarName, isExplicit: true)
+        
+        recordSourceHistory(intention: intent, node: node)
+        
+        ctx.addSynthesization(intent)
     }
     
     // MARK: - Method Declaration

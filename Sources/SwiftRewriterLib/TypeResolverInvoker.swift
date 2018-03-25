@@ -36,7 +36,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         
         for file in intentions.fileIntentions() {
             let invoker = makeResolverInvoker(forceResolve: force)
-            invoker.collectGlobals(from: typeSystem.intentions)
+            invoker.collectGlobalVariables()
             
             queue.addOperation {
                 invoker.applyOnFile(file)
@@ -50,14 +50,14 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     public func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool) {
         let invoker = makeResolverInvoker(forceResolve: force)
-        invoker.collectGlobals(from: typeSystem.intentions)
+        invoker.collectGlobalVariables()
         
         invoker.applyOnMethod(method)
     }
     
     public func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool) {
         let invoker = makeResolverInvoker(forceResolve: force)
-        invoker.collectGlobals(from: typeSystem.intentions)
+        invoker.collectGlobalVariables()
         
         invoker.applyOnProperty(property)
     }
@@ -70,34 +70,53 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
                                    intrinsicVariables: EmptyCodeScope())
         typeResolver.ignoreResolvedExpressions = !forceResolve
         
-        return InternalTypeResolverInvoker(globals: globals.definitions, typeResolver: typeResolver)
+        return InternalTypeResolverInvoker(globals: globals,
+                                           intentions: typeSystem.intentions,
+                                           typeResolver: typeResolver,
+                                           typeSystem: typeSystem)
     }
 }
 
 private class InternalTypeResolverInvoker {
-    var globals: [CodeDefinition] = []
-    var globalVars: [GlobalVariableGenerationIntention]
+    var globals: DefinitionsSource
+    var globalVariables: [GlobalVariableGenerationIntention] = []
+    var intentions: IntentionCollection
     var typeResolver: ExpressionTypeResolver
+    var intrinsicsBuilder: TypeResolverIntrinsicsBuilder
     
-    init(globals: [CodeDefinition], typeResolver: ExpressionTypeResolver) {
-        self.globals = globals
-        self.typeResolver = typeResolver
+    init(globals: DefinitionsSource,
+         intentions: IntentionCollection,
+         typeResolver: ExpressionTypeResolver,
+         typeSystem: TypeSystem) {
         
-        globalVars = []
+        intrinsicsBuilder =
+            TypeResolverIntrinsicsBuilder(
+                typeResolver: typeResolver,
+                globals: globals,
+                globalVariables: [],
+                typeSystem: typeSystem)
+        
+        self.globals = globals
+        self.intentions = intentions
+        self.typeResolver = typeResolver
     }
     
-    func collectGlobals(from intentions: IntentionCollection) {
+    func collectGlobalVariables() {
+        var globalVariables: [GlobalVariableGenerationIntention] = []
+        
         for file in intentions.fileIntentions() {
-            globalVars.append(contentsOf: file.globalVariableIntentions)
+            for global in file.globalVariableIntentions {
+                globalVariables.append(global)
+            }
         }
+        
+        intrinsicsBuilder.globalVariables = globalVariables
     }
     
     func apply(on intentions: IntentionCollection) {
-        collectGlobals(from: intentions)
+        collectGlobalVariables()
         
-        let files = intentions.fileIntentions()
-        
-        for file in files {
+        for file in intentions.fileIntentions() {
             applyOnFile(file)
         }
     }
@@ -134,18 +153,18 @@ private class InternalTypeResolverInvoker {
     }
     
     func applyOnMethod(_ method: MethodGenerationIntention) {
-        setupIntrinsics(forMember: method)
+        intrinsicsBuilder.setupIntrinsics(forMember: method)
         defer {
-            tearDownIntrinsics()
+            intrinsicsBuilder.teardownIntrinsics()
         }
         
         applyOnFunction(method)
     }
     
     func applyOnProperty(_ property: PropertyGenerationIntention) {
-        setupIntrinsics(forMember: property)
+        intrinsicsBuilder.setupIntrinsics(forMember: property)
         defer {
-            tearDownIntrinsics()
+            intrinsicsBuilder.teardownIntrinsics()
         }
         
         switch property.mode {
@@ -153,52 +172,12 @@ private class InternalTypeResolverInvoker {
             applyOnFunctionBody(intent)
         case let .property(get, set):
             applyOnFunctionBody(get)
+            
+            intrinsicsBuilder.addSetterIntrinsics(setter: set, type: property.type)
+            
             applyOnFunctionBody(set.body)
         case .asField:
             break
         }
-    }
-    
-    private func setupIntrinsics(forMember member: MemberGenerationIntention) {
-        let intrinsics = DefaultCodeScope()
-        
-        // Push `self` intrinsic member variable
-        if let type = member.type {
-            let selfType = SwiftType.typeName(type.typeName)
-            
-            if member.isStatic {
-                // Class `self` points to metatype of the class
-                intrinsics.recordDefinition(
-                    CodeDefinition(variableNamed: "self", type: .metatype(for: selfType),
-                                   intention: member)
-                )
-            } else {
-                // Instance `self` points to the actual instance
-                intrinsics.recordDefinition(
-                    CodeDefinition(variableNamed: "self", type: selfType,
-                                   intention: member)
-                )
-            }
-        }
-        
-        // Push file-level global variables
-        for global in globalVars where global.isVisible(for: member) {
-            intrinsics.recordDefinition(
-                CodeDefinition(variableNamed: global.name,
-                               storage: global.storage,
-                               intention: global)
-            )
-        }
-        
-        // Push global definitions
-        intrinsics.recordDefinitions(globals)
-        
-        typeResolver.intrinsicVariables = intrinsics
-    }
-    
-    /// Always call this before returning from a method that calls
-    /// `setupIntrinsics(forMember:)`
-    private func tearDownIntrinsics() {
-        typeResolver.intrinsicVariables = EmptyCodeScope()
     }
 }

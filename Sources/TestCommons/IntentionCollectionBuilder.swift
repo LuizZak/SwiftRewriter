@@ -207,7 +207,7 @@ public class FileIntentionBuilder {
         return self
     }
     
-    private func innerBuildTypeWithClosure<T: TypeGenerationIntention>(type: T, initializer: (TypeBuilder<T>) -> Void) {
+    private func innerBuildTypeWithClosure<T>(type: T, initializer: (TypeBuilder<T>) -> Void) where T: TypeGenerationIntention {
         let builder = TypeBuilder(targetType: type)
         initializer(builder)
         intention.addType(builder.build())
@@ -241,6 +241,15 @@ public extension MemberBuilder where T: OverridableMemberGenerationIntention {
 }
 
 public extension MemberBuilder where T: MethodGenerationIntention {
+    @discardableResult
+    public func addParameter(name: String, type: SwiftType) -> MemberBuilder {
+        targetMember.signature.parameters.append(
+            ParameterSignature(label: name, name: name, type: type)
+        )
+        
+        return self
+    }
+    
     @discardableResult
     public func setBody(_ body: CompoundStatement) -> MemberBuilder {
         targetMember.functionBody = FunctionBodyIntention(body: body)

@@ -299,7 +299,7 @@ class ObjcParserTests: XCTestCase {
             """)
         
         let interface: ObjcClassInterface? = node.firstChild()
-        let implementation: ObjcClassInterface? = node.firstChild()
+        let implementation: ObjcClassImplementation? = node.firstChild()
         XCTAssert(interface!.methods[0].isClassMethod)
         XCTAssert(implementation!.methods[0].isClassMethod)
     }
@@ -312,7 +312,24 @@ class ObjcParserTests: XCTestCase {
         
         let prot: ProtocolDeclaration? = node.firstChild()
         XCTAssertNotNil(prot?.protocolList)
-        XCTAssertNotNil(prot?.protocolList?.protocols.first?.name, "B")
+        XCTAssertEqual(prot?.protocolList?.protocols.first?.name, "B")
+    }
+    
+    func testParseSynthesizeDeclaration() {
+        let node = parserTest("""
+            @implementation A
+            @synthesize a, b = c;
+            @end
+            """)
+        
+        let implementation: ObjcClassImplementation? = node.firstChild()
+        let synth = implementation?.propertyImplementations.first?.list?.synthesizations
+        XCTAssertNotNil(implementation?.propertyImplementations)
+        XCTAssertNotNil(synth?.first)
+        XCTAssertEqual(synth?.first?.propertyName?.name, "a")
+        XCTAssertNil(synth?.first?.instanceVarName)
+        XCTAssertEqual(synth?.last?.propertyName?.name, "b")
+        XCTAssertEqual(synth?.last?.instanceVarName?.name, "c")
     }
     
     func testParseStructDeclaration() {

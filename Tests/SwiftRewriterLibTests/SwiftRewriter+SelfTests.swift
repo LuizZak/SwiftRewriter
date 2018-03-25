@@ -282,6 +282,27 @@ class SwiftRewriter_SelfTests: XCTestCase {
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
+    func testIntrinsicsFromMethodParameter() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)method:(NSInteger)value {
+                (value);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func method(_ value: Int) {
+                    // type: Int
+                    value
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
     func testIntrinsicsForSetterCustomNewValueName() throws {
         try assertObjcParse(
             objc: """

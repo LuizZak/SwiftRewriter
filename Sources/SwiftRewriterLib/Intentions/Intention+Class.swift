@@ -1,4 +1,5 @@
 import GrammarModels
+import SwiftAST
 
 /// An intention for a type that can contain instance variables
 public protocol InstanceVariableContainerIntention: Intention {
@@ -7,11 +8,16 @@ public protocol InstanceVariableContainerIntention: Intention {
     func addInstanceVariable(_ intention: InstanceVariableGenerationIntention)
     func hasInstanceVariable(named name: String) -> Bool
     func removeInstanceVariable(named name: String)
+    func instanceVariable(named name: String) -> InstanceVariableGenerationIntention?
 }
 
 public extension InstanceVariableContainerIntention {
     public func hasInstanceVariable(named name: String) -> Bool {
         return instanceVariables.contains(where: { $0.name == name })
+    }
+    
+    public func instanceVariable(named name: String) -> InstanceVariableGenerationIntention? {
+        return instanceVariables.first(where: { $0.name == name })
     }
 }
 
@@ -25,10 +31,12 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
     }
     
     public override var isEmptyType: Bool {
-        return super.isEmptyType && instanceVariables.isEmpty
+        return super.isEmptyType && instanceVariables.isEmpty && synthesizations.isEmpty
     }
     
     private(set) public var instanceVariables: [InstanceVariableGenerationIntention] = []
+    
+    private(set) public var synthesizations: [PropertySynthesizationIntention] = []
     
     public override var knownFields: [KnownProperty] {
         return instanceVariables
@@ -52,6 +60,24 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         instanceVariables[index].type = nil
         instanceVariables[index].parent = nil
         instanceVariables.remove(at: index)
+    }
+    
+    public func addSynthesization(_ intention: PropertySynthesizationIntention) {
+        if let parent = intention.parent as? BaseClassIntention {
+            parent.removeSynthesization(intention)
+        }
+        
+        synthesizations.append(intention)
+        intention.parent = self
+    }
+    
+    public func removeSynthesization(_ intention: PropertySynthesizationIntention) {
+        guard let index = synthesizations.index(where: { $0 === intention }) else {
+            return
+        }
+        
+        synthesizations[index].parent = nil
+        synthesizations.remove(at: index)
     }
 }
 
@@ -101,6 +127,10 @@ public class InstanceVariableGenerationIntention: MemberGenerationIntention, Val
     
     public var name: String
     public var storage: ValueStorage
+    
+    public override var memberType: SwiftType {
+        return type
+    }
     
     public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {

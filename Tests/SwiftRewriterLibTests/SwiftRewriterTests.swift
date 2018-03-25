@@ -1829,4 +1829,197 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testFunctionParameterTakesPrecedenceOverPropertyDuringDefinitionLookup() throws {
+        try assertObjcParse(
+            objc: """
+            @interface B
+            @property CGFloat value;
+            @end
+            
+            @interface A
+            @property (nullable) B *b;
+            - (void)takesF:(CGFloat)value;
+            @end
+            
+            @implementation A
+            - (void)method:(nonnull B*)b {
+                [self takesF:b.value];
+            }
+            - (void)takesF:(CGFloat)value {
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class B: NSObject {
+                @objc var value: CGFloat = 0.0
+            }
+            @objc
+            class A: NSObject {
+                @objc var b: B?
+                
+                @objc
+                func method(_ b: B) {
+                    self.takesF(b.value)
+                }
+                @objc
+                func takesF(_ value: CGFloat) {
+                }
+            }
+            """)
+    }
+    
+    func testFloorMethodRecastingIssue() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property CGFloat b;
+            @end
+            
+            @implementation A
+            - (void)method {
+                BOOL changedY = fabs(self.b - self.b) > FLT_EPSILON;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var b: CGFloat = 0.0
+                
+                @objc
+                func method() {
+                    var changedY = fabs(self.b - self.b) > FLT_EPSILON
+                }
+            }
+            """)
+    }
+    
+    func testRewriterSynthesizesBackingFieldOnReadonlyPropertyIfAnUsageIsDetected() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property (readonly) NSInteger a;
+            @end
+            
+            @implementation A
+            - (void)method {
+                self->_a = 0;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var _a: Int = 0
+                @objc var a: Int {
+                    return self._a
+                }
+                
+                @objc
+                func method() {
+                    self._a = 0
+                }
+            }
+            """)
+    }
+    
+    func testSynthesizePropertyBackingField() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property NSInteger a;
+            @end
+            
+            @implementation A
+            @synthesize a = b;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var b: Int = 0
+                @objc var a: Int {
+                    get {
+                        return b
+                    }
+                    set {
+                        b = newValue
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testSynthesizeReadonlyPropertyBackingField() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property (readonly) NSInteger a;
+            @end
+            
+            @implementation A
+            @synthesize a = b;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var b: Int = 0
+                @objc var a: Int {
+                    return b
+                }
+            }
+            """)
+    }
+    
+    func testSynthesizeReadonlyPropertyOnExistingIVar() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            {
+                NSInteger b;
+            }
+            @property NSInteger a;
+            @end
+            
+            @implementation A
+            @synthesize a = b;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var b: Int = 0
+                @objc var a: Int {
+                    get {
+                        return b
+                    }
+                    set {
+                        b = newValue
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testCollapsePropertySynthesisWhenPropertyAndBackingFieldMatchTypesAndName() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property NSInteger a;
+            @end
+            
+            @implementation A
+            @synthesize a;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var a: Int = 0
+            }
+            """)
+    }
 }

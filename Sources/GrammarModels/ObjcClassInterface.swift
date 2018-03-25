@@ -33,6 +33,8 @@ public extension ObjcClassInterface {
     }
 }
 
+// MARK: - Subnodes
+
 public class SuperclassName: Identifier {
     
 }
@@ -60,7 +62,6 @@ public class IVarDeclaration: ASTNode, InitializableNode {
     }
 }
 
-// MARK: - Subnodes
 public class ProtocolReferenceList: ASTNode, InitializableNode {
     public var protocols: [ProtocolName] {
         return childrenMatching()

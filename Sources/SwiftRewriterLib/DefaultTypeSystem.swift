@@ -1,10 +1,14 @@
 import SwiftAST
 import TypeDefinitions
+import Utils
 
 /// Standard type system implementation
 public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     /// A singleton instance to a default type system.
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
+    
+    private var baseClassTypesByName: [String: ClassType] = [:]
+    private var initializedCache = false
     
     /// Type-aliases
     var aliases: [String: SwiftType] = [:]
@@ -82,8 +86,8 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
             return true
         }
         
-        if knownTypeWithName(typeName) != nil {
-            return true
+        if let type = knownTypeWithName(typeName) {
+            return type.kind == .class || type.kind == .protocol
         }
         
         return false
@@ -550,7 +554,20 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     private func classTypeDefinition(name: String) -> ClassType? {
-        return TypeDefinitions.classesList.classes.first(where: { $0.typeName == name })
+        return synchronized(self) {
+            if !initializedCache {
+                baseClassTypesByName =
+                    TypeDefinitions
+                        .classesList
+                        .classes
+                        .groupBy({ $0.typeName })
+                        .mapValues { $0[0] }
+                
+                initializedCache = true
+            }
+            
+            return baseClassTypesByName[name]
+        }
     }
 }
 
@@ -586,13 +603,15 @@ extension DefaultTypeSystem {
         let nsMutableArray =
             KnownTypeBuilder(typeName: "NSMutableArray", supertype: nsArray)
                 .method(withSignature:
-                    FunctionSignature(name: "addObject",
-                                      parameters: [
-                                        ParameterSignature(label: "_",
-                                                           name: "object",
-                                                           type: .anyObject)],
-                                      returnType: .void,
-                                      isStatic: false
+                    FunctionSignature(
+                        name: "addObject",
+                        parameters: [
+                            ParameterSignature(label: "_",
+                                               name: "object",
+                                               type: .anyObject)
+                        ],
+                        returnType: .void,
+                        isStatic: false
                     )
                 )
                 .build()
@@ -604,12 +623,30 @@ extension DefaultTypeSystem {
         let nsMutableDictionary =
             KnownTypeBuilder(typeName: "NSMutableDictionary", supertype: nsDictionary)
                 .method(withSignature:
-                    FunctionSignature(name: "setObject",
-                                      parameters: [
-                                        ParameterSignature(label: "_", name: "anObject", type: .anyObject),
-                                        ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)],
-                                      returnType: .void,
-                                      isStatic: false
+                    FunctionSignature(
+                        name: "setObject",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "anObject", type: .anyObject),
+                            ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)
+                        ],
+                        returnType: .void,
+                        isStatic: false
+                    )
+                )
+                .build()
+        
+        let nsSet =
+            KnownTypeBuilder(typeName: "NSSet", supertype: nsObject)
+                .build()
+        
+        let nsMutableSet =
+            KnownTypeBuilder(typeName: "NSMutableSet", supertype: nsSet)
+                .method(withSignature:
+                    FunctionSignature(
+                        name: "add",
+                        parameters: [
+                            ParameterSignature(label: "_", name: "object", type: .anyObject)
+                        ]
                     )
                 )
                 .build()
@@ -620,6 +657,8 @@ extension DefaultTypeSystem {
         addType(nsMutableArray)
         addType(nsDictionary)
         addType(nsMutableDictionary)
+        addType(nsSet)
+        addType(nsMutableSet)
         
         // Foundation types
         registerFoundation(nsObject: nsObject)

@@ -303,15 +303,15 @@ public class MemberGenerationIntention: FromSourceIntention {
     /// Returns whether this member is static (i.e. class member).
     /// Defaults to `false`, unless overriden by a subclass.
     public var isStatic: Bool { return false }
+    
+    public var memberType: SwiftType {
+        fatalError("Must be overriden by subtypes")
+    }
 }
 
 extension MemberGenerationIntention: KnownMember {
     public var ownerType: KnownTypeReference? {
         return type?.asKnownTypeReference
-    }
-    
-    public var memberType: SwiftType {
-        fatalError("Must be overriden by subtypes")
     }
 }
 
@@ -386,6 +386,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, Overridable
     
     public var isEnumCase: Bool {
         return false
+    }
+    
+    public override var memberType: SwiftType {
+        return type
     }
     
     public var name: String

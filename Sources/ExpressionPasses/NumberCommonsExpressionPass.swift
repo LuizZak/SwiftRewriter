@@ -48,12 +48,21 @@ public class NumberCommonsExpressionPass: SyntaxNodeRewriterPass {
                     "floorf": "floor",
                     "ceilf": "ceil",
                     "roundf": "round",
-                    "fabs": "abs"
+                    "fabs": "fabs"
                 ]
                 
                 if let match = matchers[ident] {
                     exp.exp.asIdentifier?.identifier = match
-                    call.arguments[0].expression.expectedType = .float
+                    
+                    if let type = call.arguments[0].expression.resolvedType {
+                        if typeSystem.category(forType: type) == .float {
+                            call.arguments[0].expression.expectedType = type
+                        } else {
+                            call.arguments[0].expression.expectedType = .float
+                        }
+                    } else {
+                        call.arguments[0].expression.expectedType = .float
+                    }
                     
                     notifyChange()
                 }

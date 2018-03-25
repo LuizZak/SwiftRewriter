@@ -14,6 +14,8 @@ public class ASTSimplifier: SyntaxNodeRewriterPass {
         return super.visitBaseExpression(exp)
     }
     
+    /// Simplify `do` statements that are the only statement within a compound
+    /// statement context.
     public override func visitCompound(_ stmt: CompoundStatement) -> Statement {
         guard stmt.statements.count == 1, let doStmt = stmt.statements[0].asDoStatement else {
             return super.visitCompound(stmt)

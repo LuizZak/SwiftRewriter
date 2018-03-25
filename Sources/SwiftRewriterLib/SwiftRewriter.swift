@@ -298,11 +298,6 @@ public class SwiftRewriter {
             [MandatorySyntaxNodePass.self]
                 + syntaxNodeRewriterSources.syntaxNodePasses
         
-        let applier =
-            SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
-                                          typeSystem: typeSystem,
-                                          numThreds: settings.numThreads)
-        
         let globals = GlobalDefinitions()
         
         let typeResolverInvoker =
@@ -331,8 +326,9 @@ public class SwiftRewriter {
                                  notifyChange: { requiresResolve = true })
         
         let intentionPasses =
-            [MandatoryIntentionPass()]
+            [MandatoryIntentionPass(phase: .beforeOtherIntentions)]
                 + intentionPassesSource.intentionPasses
+                + [MandatoryIntentionPass(phase: .afterOtherIntentions)]
         
         // Execute passes
         for pass in intentionPasses {
@@ -352,6 +348,12 @@ public class SwiftRewriter {
         if settings.verbose {
             print("Running syntax passes...")
         }
+        
+        let applier =
+            SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
+                                          typeSystem: typeSystem,
+                                          globals: globals,
+                                          numThreds: settings.numThreads)
         
         applier.apply(on: intentionCollection)
     }

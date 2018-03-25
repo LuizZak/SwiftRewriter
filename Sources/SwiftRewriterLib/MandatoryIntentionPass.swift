@@ -7,6 +7,18 @@ import SwiftAST
 class MandatoryIntentionPass: IntentionPass {
     var context: IntentionPassContext!
     
+    /// Signals whether this mandatory intention pass is being applied before or
+    /// after other intention passes supplied.
+    ///
+    /// It is required to run a starting and ending mandatory pass to make sure
+    /// all required work has been done to generate proper valid intentions for
+    /// things such as method overrides and property backing field synthesization.
+    var phase: IntentionPassPhase
+    
+    init(phase: IntentionPassPhase) {
+        self.phase = phase
+    }
+    
     func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         self.context = context
         
@@ -25,6 +37,10 @@ class MandatoryIntentionPass: IntentionPass {
         // Override detection
         if type.kind == .class {
             applyOverrideDetection(type)
+            
+            if let type = type as? BaseClassIntention {
+                applySynthesizatonExpansion(on: type)
+            }
         }
         if let type = type as? StructGenerationIntention {
             applyStructInitializer(type)
@@ -32,6 +48,10 @@ class MandatoryIntentionPass: IntentionPass {
     }
     
     private func applyStructInitializer(_ type: StructGenerationIntention) {
+        guard phase == .beforeOtherIntentions else {
+            return
+        }
+        
         guard type.constructors.isEmpty else {
             return
         }
@@ -114,6 +134,10 @@ class MandatoryIntentionPass: IntentionPass {
     }
     
     private func applyOverrideDetection(_ type: TypeGenerationIntention) {
+        guard phase == .beforeOtherIntentions else {
+            return
+        }
+        
         // Init method override (always an override in case of plain `init`)
         if let initMethod
             = type.constructors.first(where: { $0.parameters.isEmpty })
@@ -174,5 +198,71 @@ class MandatoryIntentionPass: IntentionPass {
                 }
             }
         }
+    }
+    
+    private func applySynthesizatonExpansion(on type: BaseClassIntention) {
+        guard phase == .afterOtherIntentions else {
+            return
+        }
+        
+        // TODO: Apply history tracking to these changes
+        
+        for synth in type.synthesizations {
+            guard let prop = type.properties.first(where: { $0.name == synth.propertyName }) else {
+                continue
+            }
+            
+            // Ignore generating backing fields if the backing field is actually
+            // just a copy of the property.
+            if synth.propertyName == synth.ivarName {
+                guard let ivar = type.instanceVariable(named: synth.ivarName) else {
+                    continue
+                }
+                // Allow synthesis, if member types are different
+                if ivar.memberType == prop.memberType {
+                    continue
+                }
+            }
+            
+            // Synthesize ivar
+            if !type.hasInstanceVariable(named: synth.ivarName) {
+                let storage = ValueStorage(type: prop.type,
+                                           ownership: prop.ownership,
+                                           isConstant: false)
+                
+                let intent =
+                    InstanceVariableGenerationIntention(name: synth.ivarName,
+                                                        storage: storage,
+                                                        accessLevel: .private)
+                
+                type.addInstanceVariable(intent)
+            }
+            
+            // Apply computed property field getter and setter
+            let getterBody = FunctionBodyIntention(body: [
+                .return(Expression.identifier(synth.ivarName).typed(prop.type))
+            ])
+            
+            if prop.isReadOnly && prop.getter == nil {
+                prop.mode = .computed(getterBody)
+            } else if prop.getter == nil && prop.setter == nil {
+                let setterBody = FunctionBodyIntention(body: [
+                    .expression(
+                        Expression
+                            .identifier(synth.ivarName).typed(prop.type)
+                            .assignment(op: .assign, rhs: Expression.identifier("newValue").typed(prop.type)))
+                ])
+                
+                prop.mode =
+                    .property(get: getterBody,
+                              set: .init(valueIdentifier: "newValue",
+                                         body: setterBody))
+            }
+        }
+    }
+    
+    enum IntentionPassPhase {
+        case beforeOtherIntentions
+        case afterOtherIntentions
     }
 }

@@ -72,8 +72,8 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
         res = assertTransform(
             // fabs(1)
             expression: Expression.identifier("fabs").call([.constant(1)]),
-            // abs(1)
-            into: Expression.identifier("abs").call([.constant(1)])
+            // fabs(1)
+            into: Expression.identifier("fabs").call([.constant(1)])
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.asPostfix?.functionCall?.subExpressions[0].expectedType,

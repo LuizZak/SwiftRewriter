@@ -66,6 +66,9 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.EnumDeclarationContext.self, nodeType: ObjcEnumDeclaration.self)
         mapper.addRuleMap(rule: ObjectiveCParser.FunctionDeclarationContext.self, nodeType: FunctionDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.FunctionDefinitionContext.self, nodeType: FunctionDefinition.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.PropertyImplementationContext.self, nodeType: PropertyImplementation.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.PropertySynthesizeListContext.self, nodeType: PropertySynthesizeList.self)
+        mapper.addRuleMap(rule: ObjectiveCParser.PropertySynthesizeItemContext.self, nodeType: PropertySynthesizeItem.self)
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -340,13 +343,27 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     override func exitGenericTypeSpecifier(_ ctx: ObjectiveCParser.GenericTypeSpecifierContext) {
-        mapper.popTemporaryException()
+        mapper.popTemporaryException() // ObjectiveCParser.ProtocolListContext
     }
     
     override func enterNullabilitySpecifier(_ ctx: ObjectiveCParser.NullabilitySpecifierContext) {
         let spec = NullabilitySpecifier(name: ctx.getText())
         spec.sourceRuleContext = ctx
         context.addChildNode(spec)
+    }
+    
+    // MARM: - Property implementaiton
+    override func enterPropertySynthesizeItem(_ ctx: ObjectiveCParser.PropertySynthesizeItemContext) {
+        guard let node = context.currentContextNode(as: PropertySynthesizeItem.self) else {
+            return
+        }
+        
+        if let propIdentifier = ctx.identifier(0) {
+            node.addChild(makeIdentifier(propIdentifier))
+        }
+        if let ivarIdentifier = ctx.identifier(1) {
+            node.addChild(makeIdentifier(ivarIdentifier))
+        }
     }
     
     // MARK: - Method Declaration
@@ -392,14 +409,12 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 let node = Identifier(name: ctx.getText())
                 node.sourceRuleContext = ctx
                 return node
-        }
+            }
         
         let ident =
             ctx.identifier().map { ctx -> Identifier in
-                let node = Identifier(name: ctx.getText())
-                node.sourceRuleContext = ctx
-                return node
-        }
+                return makeIdentifier(ctx)
+            }
         
         if let ident = selectorIdent {
             node.addChild(ident)
@@ -434,9 +449,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 continue
             }
             
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            typedefNode.addChild(identifierNode)
+            typedefNode.addChild(makeIdentifier(identifier))
         }
     }
     
@@ -467,9 +480,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 continue
             }
             
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            typedefNode.addChild(identifierNode)
+            typedefNode.addChild(makeIdentifier(identifier))
             
             let typeNameNode = TypeNameNode(type: type)
             typeNameNode.sourceRuleContext = typeDeclarator
@@ -491,9 +502,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         enumNode.isOptionSet = enumSpecifier.NS_OPTIONS() != nil
         
         if let identifier = enumSpecifier.identifier(isObjcEnum ? 0 : 1) {
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            enumNode.addChild(identifierNode)
+            enumNode.addChild(makeIdentifier(identifier))
         }
     }
     
@@ -565,9 +574,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         if let identifier = ctx.identifier() {
-            let identifierNode = Identifier(name: identifier.getText())
-            identifierNode.sourceRuleContext = identifier
-            function.addChild(identifierNode)
+            function.addChild(makeIdentifier(identifier))
         }
         
         // Parameter list
@@ -618,7 +625,11 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
     }
     
-    // MARK: - Struct
+    private func makeIdentifier(_ context: ObjectiveCParser.IdentifierContext) -> Identifier {
+        let ident = Identifier(name: context.getText())
+        ident.sourceRuleContext = context
+        return ident
+    }
 }
 
 private class GlobalVariableListener: ObjectiveCParserBaseListener {

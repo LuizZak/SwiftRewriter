@@ -7,11 +7,17 @@ public final class SyntaxNodeRewriterPassApplier {
     public var passes: [SyntaxNodeRewriterPass.Type]
     public var typeSystem: TypeSystem
     public var numThreds: Int
+    public var globals: GlobalDefinitions
     
-    public init(passes: [SyntaxNodeRewriterPass.Type], typeSystem: TypeSystem, numThreds: Int = 8) {
+    public init(passes: [SyntaxNodeRewriterPass.Type],
+                typeSystem: TypeSystem,
+                globals: GlobalDefinitions,
+                numThreds: Int = 8) {
+        
         self.passes = passes
         self.typeSystem = typeSystem
         self.numThreds = numThreds
+        self.globals = globals
     }
     
     public func apply(on intentions: IntentionCollection) {
@@ -43,17 +49,29 @@ public final class SyntaxNodeRewriterPassApplier {
         let passes = self.passes.map { $0.init() }
         
         return InternalSyntaxNodeApplier(passes: passes, typeSystem: typeSystem,
-                                         typeResolver: typeResolver)
+                                         typeResolver: typeResolver, globals: globals)
     }
 }
 
 // MARK: Invoker instance
 private class InternalSyntaxNodeApplier {
-    public var passes: [SyntaxNodeRewriterPass]
-    public var typeSystem: TypeSystem
-    public var typeResolver: ExpressionTypeResolver
+    var passes: [SyntaxNodeRewriterPass]
+    var typeSystem: TypeSystem
+    var typeResolver: ExpressionTypeResolver
+    var intrinsicsBuilder: TypeResolverIntrinsicsBuilder
     
-    public init(passes: [SyntaxNodeRewriterPass], typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver) {
+    init(passes: [SyntaxNodeRewriterPass],
+         typeSystem: TypeSystem,
+         typeResolver: ExpressionTypeResolver,
+         globals: DefinitionsSource) {
+        
+        intrinsicsBuilder =
+            TypeResolverIntrinsicsBuilder(
+                typeResolver: typeResolver,
+                globals: globals,
+                globalVariables: [],
+                typeSystem: typeSystem)
+        
         self.passes = passes
         self.typeSystem = typeSystem
         self.typeResolver = typeResolver
@@ -84,9 +102,9 @@ private class InternalSyntaxNodeApplier {
     }
     
     private func applyOnProperty(_ property: PropertyGenerationIntention) {
-        let intrinsics = setupIntrinsics(forMember: property)
+        intrinsicsBuilder.setupIntrinsics(forMember: property)
         defer {
-            tearDownIntrinsics()
+            intrinsicsBuilder.teardownIntrinsics()
         }
         
         switch property.mode {
@@ -95,12 +113,7 @@ private class InternalSyntaxNodeApplier {
         case let .property(get, set):
             applyOnFunctionBody(get)
             
-            // For setter, push intrinsic for the setter value
-            intrinsics.recordDefinition(
-                CodeDefinition(variableNamed: set.valueIdentifier,
-                               type: property.type,
-                               intention: nil)
-            )
+            intrinsicsBuilder.addSetterIntrinsics(setter: set, type: property.type)
             
             applyOnFunctionBody(set.body)
         case .asField:
@@ -109,18 +122,18 @@ private class InternalSyntaxNodeApplier {
     }
     
     private func applyOnInitializer(_ ctor: InitGenerationIntention) {
-        setupIntrinsics(forMember: ctor)
+        intrinsicsBuilder.setupIntrinsics(forMember: ctor)
         defer {
-            tearDownIntrinsics()
+            intrinsicsBuilder.teardownIntrinsics()
         }
         
         applyOnFunction(ctor)
     }
     
     private func applyOnMethod(_ method: MethodGenerationIntention) {
-        setupIntrinsics(forMember: method)
+        intrinsicsBuilder.setupIntrinsics(forMember: method)
         defer {
-            tearDownIntrinsics()
+            intrinsicsBuilder.teardownIntrinsics()
         }
         
         applyOnFunction(method)
@@ -159,73 +172,5 @@ private class InternalSyntaxNodeApplier {
                 }
             }
         }
-    }
-    
-    @discardableResult
-    private func setupIntrinsics(forMember member: MemberGenerationIntention) -> DefaultCodeScope {
-        let intrinsics = DefaultCodeScope()
-        
-        // Push `self` intrinsic member variable, as well as all properties visible
-        if let type = member.type {
-            let selfType = SwiftType.typeName(type.typeName)
-            let selfStorage: ValueStorage
-            
-            if member.isStatic {
-                // Class `self` points to metatype of the class
-                selfStorage =
-                    ValueStorage(type: .metatype(for: selfType),
-                                 ownership: .strong,
-                                 isConstant: true)
-            } else {
-                // Instance `self` points to the actual instance
-                selfStorage =
-                    ValueStorage(type: selfType,
-                                 ownership: .strong,
-                                 isConstant: true)
-            }
-            
-            intrinsics.recordDefinition(
-                CodeDefinition(variableNamed: "self",
-                               storage: selfStorage,
-                               intention: type)
-            )
-            
-            // Record all known static properties visible
-            if let knownType = typeSystem.knownTypeWithName(type.typeName) {
-                for prop in knownType.knownProperties where prop.isStatic == member.isStatic {
-                    intrinsics.recordDefinition(
-                        CodeDefinition(variableNamed: prop.name, storage: prop.storage,
-                                       intention: prop as? Intention)
-                    )
-                }
-                
-                for field in knownType.knownFields where field.isStatic == member.isStatic {
-                    intrinsics.recordDefinition(
-                        CodeDefinition(variableNamed: field.name, storage: field.storage,
-                                       intention: field as? Intention)
-                    )
-                }
-            }
-        }
-        
-        // Push function parameters as intrinsics, if member is a method type
-        if let function = member as? FunctionIntention {
-            for param in function.parameters {
-                intrinsics.recordDefinition(
-                    CodeDefinition(variableNamed: param.name, type: param.type,
-                                   intention: function)
-                )
-            }
-        }
-        
-        typeResolver.intrinsicVariables = intrinsics
-        
-        return intrinsics
-    }
-    
-    /// Always call this before returning from a method that calls
-    /// `setupIntrinsics(forMember:)`
-    private func tearDownIntrinsics() {
-        typeResolver.intrinsicVariables = EmptyCodeScope()
     }
 }

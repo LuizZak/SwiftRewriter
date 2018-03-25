@@ -109,16 +109,50 @@ public protocol CodeScope: DefinitionsSource {
     func removeAllDefinitions()
 }
 
+/// A definitions source composed of individual definition sources composed as
+/// a single definition source.
+public class CompoundDefinitionsSource: DefinitionsSource {
+    private var sources: [DefinitionsSource]
+    
+    public init() {
+        sources = []
+    }
+    
+    public init(sources: [DefinitionsSource]) {
+        self.sources = sources
+    }
+    
+    public func addSource(_ definitionSource: DefinitionsSource) {
+        sources.append(definitionSource)
+    }
+    
+    public func definition(named name: String) -> CodeDefinition? {
+        for source in sources {
+            if let def = source.definition(named: name) {
+                return def
+            }
+        }
+        
+        return nil
+    }
+    
+    public func allDefinitions() -> [CodeDefinition] {
+        return sources.flatMap { $0.allDefinitions() }
+    }
+}
+
 /// A default implementation of a code scope
-public class DefaultCodeScope: CodeScope {
+public final class DefaultCodeScope: CodeScope {
+    private var definitionsByName: [String: CodeDefinition] = [:]
     internal var definitions: [CodeDefinition]
     
     public init(definitions: [CodeDefinition] = []) {
         self.definitions = definitions
+        self.definitionsByName = definitions.groupBy({ $0.name }).mapValues({ $0[0] })
     }
     
     public func definition(named name: String) -> CodeDefinition? {
-        return definitions.first { $0.name == name }
+        return definitionsByName[name]
     }
     
     public func allDefinitions() -> [CodeDefinition] {
@@ -127,6 +161,7 @@ public class DefaultCodeScope: CodeScope {
     
     public func recordDefinition(_ definition: CodeDefinition) {
         definitions.append(definition)
+        definitionsByName[definition.name] = definition
     }
     
     public func recordDefinitions(_ definitions: [CodeDefinition]) {
@@ -135,6 +170,7 @@ public class DefaultCodeScope: CodeScope {
     
     public func removeAllDefinitions() {
         definitions.removeAll()
+        definitionsByName.removeAll()
     }
 }
 

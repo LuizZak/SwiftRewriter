@@ -405,6 +405,54 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // End of file A.swift
             """)
     }
+    
+    func testMergeAndKeepNullabilityDefinitions() {
+        assertThat()
+            .file(name: "A.h", """
+            @interface A : NSObject
+            @property CGFloat width;
+            @end
+            """)
+            .file(name: "A.m", """
+            @implementation A
+            @end
+            """)
+            .file(name: "B.h", """
+            @interface B : NSObject
+            @property (nullable) A* a;
+            - (void)takesCGFloat:(CGFloat)f;
+            @end
+            """)
+            .file(name: "B.m", """
+            @implementation B
+            - (void)method {
+                [self takesCGFloat:a.width];
+            }
+            - (void)takesCGFloat:(CGFloat)f {
+            }
+            @end
+            """)
+            .translatesToSwift("""
+            @objc
+            class A: NSObject {
+                @objc var width: CGFloat = 0.0
+            }
+            // End of file A.swift
+            @objc
+            class B: NSObject {
+                @objc var a: A?
+                
+                @objc
+                func method() {
+                    self.takesCGFloat(a?.width ?? 0.0)
+                }
+                @objc
+                func takesCGFloat(_ f: CGFloat) {
+                }
+            }
+            // End of file B.swift
+            """)
+    }
 }
 
 extension SwiftRewriter_MultiFilesTests {

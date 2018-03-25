@@ -33,6 +33,9 @@ public class MethodGenerationIntention: MemberGenerationIntention, OverridableMe
     public var selector: SelectorSignature {
         return signature.asSelector
     }
+    public override var memberType: SwiftType {
+        return signature.swiftClosureType
+    }
     
     public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {

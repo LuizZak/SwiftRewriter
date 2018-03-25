@@ -112,18 +112,16 @@ public class PropertyMergeIntentionPass: IntentionPass {
             return bodies
         }
         
-        let matches = collectMethodBodies(fromClass: intent)
+        let bodies = collectMethodBodies(fromClass: intent)
         
         let fieldName = "_" + prop.name
         
-        for body in matches {
+        for body in bodies {
             let matches =
                 SyntaxNodeSequence(statement: body.body, inspectBlocks: true)
                     .lazy
                     .compactMap { node in node as? Expression }
                     .contains { exp in
-                        // TODO: Support indirect field resolution
-                        // (i.e.: `notSelfButAVarWithSelfAssigned->_field`)
                         switch exp {
                         case let identifier as IdentifierExpression where identifier.identifier == fieldName:
                             // Match only if identifier matched to nothing yet
@@ -153,7 +151,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 let getter =
                     FunctionBodyIntention(body: [
                         .return(.postfix(.identifier("self"), .member(fieldName)))
-                        ])
+                    ])
                 
                 // If the property is marked read-only, synthesize the backing
                 // field only.
@@ -167,7 +165,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                                             op: .assign,
                                             rhs: .identifier("newValue"))
                             )
-                            ])
+                        ])
                     
                     mode = .property(get: getter, set: .init(valueIdentifier: "newValue", body: setter))
                 }
