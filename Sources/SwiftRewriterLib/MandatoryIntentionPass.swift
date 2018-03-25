@@ -218,10 +218,10 @@ class MandatoryIntentionPass: IntentionPass {
                 guard let ivar = type.instanceVariable(named: synth.ivarName) else {
                     continue
                 }
-                // Allow synthesis, if member types are different
-                if ivar.memberType == prop.memberType {
-                    continue
-                }
+                
+                // Collapse backing field into property
+                applyBackingFieldPropertyCollapse(prop, ivar, type)
+                continue
             }
             
             // Synthesize ivar
@@ -259,6 +259,17 @@ class MandatoryIntentionPass: IntentionPass {
                                          body: setterBody))
             }
         }
+    }
+    
+    private func applyBackingFieldPropertyCollapse(
+        _ property: PropertyGenerationIntention,
+        _ field: InstanceVariableGenerationIntention,
+        _ type: BaseClassIntention) {
+        
+        property.setterAccessLevel = field.accessLevel
+        property.storage.type = field.storage.type
+        
+        type.removeInstanceVariable(named: field.name)
     }
     
     enum IntentionPassPhase {

@@ -2022,4 +2022,39 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testReadOnlyPropertyWithBackingFieldWithSameNameGetsCollapedAsPrivateSetProperty() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            {
+                @private
+                NSMutableString *a;
+                @protected
+                NSMutableString *b;
+                @package
+                NSMutableString *c;
+                @public
+                NSMutableString *d;
+            }
+            @property (readonly) NSString *a;
+            @property (readonly) NSString *b;
+            @property (readonly) NSString *c;
+            @property (readonly) NSString *d;
+            @end
+            
+            @implementation A
+            @synthesize a, b, c, d;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc private(set) var a: NSMutableString!
+                @objc var b: NSMutableString!
+                @objc var c: NSMutableString!
+                @objc var d: NSMutableString!
+            }
+            """)
+    }
 }

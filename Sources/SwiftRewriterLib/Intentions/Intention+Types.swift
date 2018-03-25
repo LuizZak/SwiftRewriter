@@ -376,6 +376,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, Overridable
         }
     }
     
+    /// If non-nil, specifies a different access level for the setter of this
+    /// property.
+    public var setterAccessLevel: AccessLevel?
+    
     public override var isStatic: Bool {
         return isClassProperty
     }
@@ -518,12 +522,4 @@ public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
         
         super.init(accessLevel: .public, source: source)
     }
-}
-
-/// Access level visibility for a member or type
-public enum AccessLevel: String {
-    case `private`
-    case `fileprivate`
-    case `internal`
-    case `public`
 }

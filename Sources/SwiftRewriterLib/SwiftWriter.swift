@@ -513,9 +513,20 @@ class InternalSwiftWriter {
         let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: prop.type)
         
+        // Emit setter visibility level (only if setter is less visible than property)
+        if let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreVisible(than: setterLevel) {
+            let setter =
+                InternalSwiftWriter._accessModifierFor(accessLevel: setterLevel,
+                                                       omitInternal: false)
+            
+            target.outputInlineWithSpace("\(setter)(set)", style: .keyword)
+        }
+        
+        // Visibility level
         if !accessModifier.isEmpty {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
         }
+        
         if prop.ownership != .strong {
             // Check for non-pointers
             if let original = prop.propertySource?.type?.type, !original.isPointer {
