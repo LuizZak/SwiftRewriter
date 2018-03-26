@@ -2057,4 +2057,34 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testApplyIntegerCastOnTypealiasedPropertyInVariableDeclaration() throws {
+        try assertObjcParse(
+            objc: """
+            typedef GLenum UInt32;
+
+            @interface A
+            @property CGFloat prop;
+            @end
+
+            @implementation A
+            - (void)method {
+                GLenum local = prop;
+            }
+            @end
+            """,
+            swift: """
+            typealias UInt32 = GLenum
+            
+            @objc
+            class A: NSObject {
+                @objc var prop: CGFloat = 0.0
+                
+                @objc
+                func method() {
+                    var local = GLenum(prop)
+                }
+            }
+            """)
+    }
 }

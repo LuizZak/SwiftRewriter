@@ -79,7 +79,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                         sut: ExpressionTypeResolver())
             .definingTypeAlias("A", type: .int)
             .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.int))
+            .thenAssertExpression(resolvedAs: .optional("A"))
     }
     
     func testAssignment() {
@@ -969,6 +969,21 @@ class ExpressionTypeResolverTests: XCTestCase {
                                   expectsType: .bool)
             .thenAssertExpression(at: \Expression.asBlock?.body.statements[2].asReturn?.exp,
                                   expectsType: .int)
+    }
+    
+    func testResolvesTypeAliasWhenPropagatingExpectedTypeOfFunctionArguments() {
+        startScopedTest(
+            with: Expression
+                .identifier("a")
+                .typed(SwiftType.block(returnType: .void, parameters: ["GLenum"]))
+                .call([Expression.constant(1).typed("GLint")]),
+            sut: ExpressionTypeResolver())
+            .definingTypeAlias("GLenum", type: "UInt32")
+            .definingTypeAlias("GLint", type: "Int32")
+            .resolve()
+            .thenAssertExpression(
+                at: \Expression.asPostfix?.op.asFuntionCall?.arguments[0].expression,
+                expectsType: "GLenum")
     }
 }
 

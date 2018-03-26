@@ -96,7 +96,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 }
             }
             
-            decl.initialization?.expectedType = expandAliases(in: type)
+            decl.initialization?.expectedType = type
             
             let definition = CodeDefinition(variableNamed: decl.identifier,
                                             type: type,
@@ -249,7 +249,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             return exp.makeErrorTyped()
         }
         
-        let type = expandAliases(in: exp.type)
+        let type = exp.type
         
         // Same-type casts always succeed
         if exp.exp.resolvedType == type {
@@ -266,7 +266,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         exp.lhs = visitExpression(exp.lhs)
-        exp.rhs.expectedType = exp.lhs.resolvedType.map(expandAliases)
+        exp.rhs.expectedType = exp.lhs.resolvedType
         exp.rhs = visitExpression(exp.rhs)
         
         // Propagte error type
@@ -483,7 +483,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         var blockReturnType = exp.returnType
         
         // Adjust signatures of block parameters based on expected type
-        if case let .block(ret, params)? = exp.expectedType, params.count == exp.parameters.count {
+        if case let .block(ret, params)? = exp.expectedType.map(expandAliases), params.count == exp.parameters.count {
             for (i, expectedType) in zip(0..<exp.parameters.count, params) {
                 let param = exp.parameters[i]
                 guard param.type.isImplicitlyUnwrapped else { continue }
@@ -587,7 +587,7 @@ private class MemberInvocationResolver {
         defer {
             // Elevate an implicitly-unwrapped optional access to an optional access
             if exp.op.hasOptionalAccess, case .implicitUnwrappedOptional(let inner)? = exp.resolvedType {
-                exp.resolvedType = .optional(typeResolver.expandAliases(in: inner))
+                exp.resolvedType = .optional(inner)
             }
         }
         
@@ -768,7 +768,7 @@ private class MemberInvocationResolver {
     
     func matchParameterTypes(types: [SwiftType], callArguments: [FunctionArgument]) {
         for (callArg, paramType) in zip(callArguments, types) {
-            callArg.expression.expectedType = typeResolver.expandAliases(in: paramType)
+            callArg.expression.expectedType = paramType
         }
     }
     

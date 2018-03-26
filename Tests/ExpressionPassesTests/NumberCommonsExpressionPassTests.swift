@@ -130,4 +130,16 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
             into: .variableDeclaration(identifier: "a", type: .int, initialization: Expression.identifier("Int").call([.identifier("b")]))
         ); assertNotifiedChange()
     }
+    
+    func testLookIntoTypealiasesForNumericalCasts() {
+        typeSystem.addTypealias(aliasName: "GLenum", originalType: "UInt32")
+        typeSystem.addTypealias(aliasName: "GLint", originalType: "Int32")
+        
+        assertTransform(
+            // a
+            expression: Expression.identifier("a").typed("GLenum").typed(expected: "GLint"),
+            // GLint(a)
+            into: Expression.identifier("GLint").call([.identifier("a")])
+        ); assertNotifiedChange()
+    }
 }
