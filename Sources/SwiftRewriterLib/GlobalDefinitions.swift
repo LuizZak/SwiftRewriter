@@ -1,3 +1,5 @@
+import SwiftAST
+
 // TODO: Figure out a way to support overloading of functions with different count
 // of parameters so we can support same function name with different parameter
 // count
@@ -38,6 +40,7 @@ public protocol GlobalsProvidersSource {
 public protocol GlobalsProvider {
     func registerDefinitions(on globals: GlobalDefinitions)
     func registerTypes(in typeSink: KnownTypeSink)
+    func registerTypealiases(in typealiasSink: TypealiasSink)
 }
 
 public extension GlobalsProvider {
@@ -49,4 +52,8 @@ public extension GlobalsProvider {
 /// Sources globals providers through an input array
 public struct ArrayGlobalProvidersSource: GlobalsProvidersSource {
     public var globalsProviders: [GlobalsProvider]
+}
+
+public protocol TypealiasSink {
+    func addTypealias(aliasName: String, originalType: SwiftType)
 }

@@ -5,7 +5,8 @@ public class DefaultGlobalsProvidersSource: GlobalsProvidersSource {
     public var globalsProviders: [GlobalsProvider] = [
         CLibGlobalsProviders(),
         CoreGraphicsGlobalsProvider(),
-        UIKitGlobalsProvider()
+        UIKitGlobalsProvider(),
+        OpenGLESGlobalsProvider()
     ]
     
     public init() {

@@ -9,6 +9,7 @@ class CoreGraphicsGlobalsProviderTests: BaseGlobalsProviderTestCase {
         
         sut.registerDefinitions(on: globals)
         sut.registerTypes(in: types)
+        sut.registerTypealiases(in: typealiases)
     }
     
     func testDefinedCGRect() {

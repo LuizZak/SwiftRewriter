@@ -4,18 +4,20 @@ import MiniLexer
 public class SwiftTypeParser {
     /// Parses a Swift type from a given type string
     public static func parse(from string: String) throws -> SwiftType {
-        let lexer = TokenizerLexer<SwiftTypeToken>(input: string)
+        let lexer = Lexer(input: string)
         
-        let result = try parseType(lexer)
+        let result = try parse(from: lexer)
         
-        if !lexer.isEof {
-            throw unexpectedTokenError(lexer: lexer)
+        if !lexer.isEof() {
+            throw unexpectedTokenError(lexer: TokenizerLexer<SwiftTypeToken>(lexer: lexer))
         }
         
         return result
     }
     
-    /// Swift type grammar
+    /// Parses a Swift type from a given lexer
+    ///
+    /// Formal Swift type grammar:
     ///
     /// ```
     /// swift-type
@@ -74,11 +76,19 @@ public class SwiftTypeParser {
     ///     : block-argument (',' block-argument)* ;
     ///
     /// block-argument
-    ///     : (argument-label identifier? ':') 'inout'? swift-type ;
+    ///     : (argument-label identifier? ':') arg-attribute-list? 'inout'? swift-type ;
     ///
     /// argument-label
     ///     : '_'
     ///     | identifier
+    ///     ;
+    ///
+    /// arg-attribute-list
+    ///     : attribute+
+    ///     ;
+    ///
+    /// arg-attribute
+    ///     : '@' identifier
     ///     ;
     ///
     /// -- Atoms
@@ -89,6 +99,11 @@ public class SwiftTypeParser {
     ///
     /// digit : [0-9]
     /// ```
+    public static func parse(from lexer: Lexer) throws -> SwiftType {
+        let tokenizer = TokenizerLexer<SwiftTypeToken>(lexer: lexer)
+        return try parseType(tokenizer)
+    }
+    
     private static func parseType(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
         let type: SwiftType
         
@@ -308,11 +323,19 @@ public class SwiftTypeParser {
     ///     : block-argument (',' block-argument)* ;
     ///
     /// block-argument
-    ///     : (argument-label identifier? ':') swift-type ;
+    ///     : (argument-label identifier? ':') arg-attribute-list? 'inout'? swift-type ;
     ///
     /// argument-label
     ///     : '_'
     ///     | identifier
+    ///     ;
+    ///
+    /// arg-attribute-list
+    ///     : attribute+
+    ///     ;
+    ///
+    /// arg-attribute
+    ///     : '@' identifier
     ///     ;
     /// ```
     private static func parseTupleOrBlock(_ lexer: TokenizerLexer<SwiftTypeToken>) throws -> SwiftType {
@@ -535,7 +558,7 @@ public class SwiftTypeParser {
             case let .notProtocolComposable(type, offset):
                 return "Found protocol composition, but type \(type) is not composable on composition '&' at column \(offset + 1)"
             case let .unexpectedToken(token, offset):
-                return "Unexpected token '\(token)' at column \(offset + 1)"
+                return "Unexpected token '\(token.tokenString)' at column \(offset + 1)"
             }
         }
     }
@@ -578,8 +601,8 @@ public enum SwiftTypeToken: String, TokenProtocol {
     case questionMark = "?"
     /// Character '!'
     case exclamationMark = "!"
-    /// Character ';'
-    case colon = ";"
+    /// Character ':'
+    case colon = ":"
     /// Character '&'
     case ampersand = "&"
     /// Character '['

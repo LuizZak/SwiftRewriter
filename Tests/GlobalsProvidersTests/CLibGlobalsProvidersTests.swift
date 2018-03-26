@@ -11,6 +11,7 @@ class CLibGlobalsProvidersTests: BaseGlobalsProviderTestCase {
         
         sut.registerDefinitions(on: globals)
         sut.registerTypes(in: types)
+        sut.registerTypealiases(in: typealiases)
     }
     
     func testDefinedMathLibFunctions() {

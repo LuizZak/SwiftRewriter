@@ -312,6 +312,7 @@ public class SwiftRewriter {
         for provider in globalsProvidersSource.globalsProviders {
             provider.registerDefinitions(on: globals)
             provider.registerTypes(in: typeSystem)
+            provider.registerTypealiases(in: typeSystem)
         }
         
         // Make a pre-type resolve before applying passes

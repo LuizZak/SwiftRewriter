@@ -12,6 +12,9 @@ class SwiftRewriter_IntentionPassTests: XCTestCase {
                 let type = KnownTypeBuilder(typeName: "TestType").build()
                 typeSink.addType(type)
             }
+            func registerTypealiases(in typealiasSink: TypealiasSink) {
+                
+            }
         }
         class Pass: IntentionPass {
             var isTypeChecked = false

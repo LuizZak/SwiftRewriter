@@ -86,7 +86,8 @@ public extension String {
         return endIndex
     }
     
-    private func lineNumber(at index: String.Index) -> Int {
+    /// Gets the line number for the given index in this string
+    public func lineNumber(at index: String.Index) -> Int {
         let line =
             self[..<index].reduce(0) {
                 $0 + ($1 == "\n" ? 1 : 0)
@@ -95,7 +96,10 @@ public extension String {
         return line + 1 // lines start at one
     }
     
-    private func columnOffset(at index: String.Index) -> Int {
+    /// Gets the column offset number for the given index in this string.
+    /// The column offset counts how many characters there are to the left to
+    /// either the nearest newline or the beginning of the string.
+    public func columnOffset(at index: String.Index) -> Int {
         // Figure out start of line at the given index
         let lineStart =
             zip(self[..<index], indices)

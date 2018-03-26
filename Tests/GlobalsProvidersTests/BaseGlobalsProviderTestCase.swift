@@ -10,12 +10,29 @@ class BaseGlobalsProviderTestCase: XCTestCase {
     var sut: GlobalsProvider!
     var globals: GlobalDefinitions!
     var types: Types!
+    var typealiases: Typealiases!
     
     override func setUp() {
         super.setUp()
         
         globals = GlobalDefinitions()
         types = Types()
+        typealiases = Typealiases()
+    }
+    
+    func assertDefined(typealiasFrom typealiasName: String, to type: SwiftType, file: String = #file,
+                       line: Int = #line) {
+        guard let actual = typealiases.typealiases[typealiasName] else {
+            recordFailure(withDescription: "Expected to find typealias with name \(typealiasName)",
+                inFile: file, atLine: line, expected: true)
+            return
+        }
+        
+        if actual != type {
+            recordFailure(
+                withDescription: "Expected typealias to be of type \(type), but found \(actual) instead.",
+                inFile: file, atLine: line, expected: true)
+        }
     }
     
     func assertDefined(variable: String, type: SwiftType, file: String = #file,
@@ -120,5 +137,13 @@ class Types: KnownTypeSink {
     
     func addType(_ type: KnownType) {
         types.append(type)
+    }
+}
+
+class Typealiases: TypealiasSink {
+    var typealiases: [String: SwiftType] = [:]
+    
+    func addTypealias(aliasName: String, originalType: SwiftType) {
+        typealiases[aliasName] = originalType
     }
 }

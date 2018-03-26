@@ -305,10 +305,6 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         }
     }
     
-    public func addTypeAlias(name: String, target: SwiftType) {
-        aliases[name] = target
-    }
-    
     public func resolveAlias(in typeName: String) -> SwiftType {
         guard let type = aliases[typeName] else {
             return .typeName(typeName)
@@ -568,6 +564,12 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
             
             return baseClassTypesByName[name]
         }
+    }
+}
+
+extension DefaultTypeSystem: TypealiasSink {
+    public func addTypealias(aliasName: String, originalType: SwiftType) {
+        aliases[aliasName] = originalType
     }
 }
 

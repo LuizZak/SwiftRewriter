@@ -57,7 +57,7 @@ extension ExpressionTestResolverTestFixture {
     }
     
     func definingTypeAlias(_ alias: String, type: SwiftType) -> Self {
-        typeSystem.addTypeAlias(name: alias, target: type)
+        typeSystem.addTypealias(aliasName: alias, originalType: type)
         
         return self
     }

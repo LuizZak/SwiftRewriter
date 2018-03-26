@@ -65,7 +65,7 @@ public protocol TypeSystem {
     /// Adds a typealias from a given nominal type to a target SwiftType.
     /// Typealiases affect lookup of types by name via `knownTypeWithName` and
     /// resolveAliases(in:).
-    func addTypeAlias(name: String, target: SwiftType)
+    func addTypealias(aliasName: String, originalType: SwiftType)
     
     /// Resolves type aliases in a given type name, returning a resulting type
     /// with all aliases expanded.
