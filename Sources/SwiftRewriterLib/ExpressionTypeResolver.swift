@@ -2,6 +2,14 @@ import SwiftAST
 import ObjcParser
 
 public final class ExpressionTypeResolver: SyntaxNodeRewriter {
+    /// In case the expression type resolver is resolving a function context,
+    /// this stack is prepared with the expected return types for the current
+    /// functions.
+    ///
+    /// The stack is incremented and decremented as the expression resolver
+    /// traverses into block expressions.
+    private var contextFunctionReturnTypeStack: [SwiftType?]
+    
     public var typeSystem: TypeSystem
     
     /// Intrinsic variables provided by the type system
@@ -14,19 +22,38 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override init() {
         self.typeSystem = DefaultTypeSystem()
         self.intrinsicVariables = EmptyCodeScope()
+        contextFunctionReturnTypeStack = []
         super.init()
     }
     
     public init(typeSystem: TypeSystem) {
         self.typeSystem = typeSystem
         self.intrinsicVariables = EmptyCodeScope()
+        contextFunctionReturnTypeStack = []
         super.init()
     }
     
     public init(typeSystem: TypeSystem, intrinsicVariables: DefinitionsSource) {
         self.typeSystem = typeSystem
         self.intrinsicVariables = intrinsicVariables
+        contextFunctionReturnTypeStack = []
         super.init()
+    }
+    
+    public init(typeSystem: TypeSystem, intrinsicVariables: DefinitionsSource,
+                contextFunctionReturnType: SwiftType) {
+        self.typeSystem = typeSystem
+        self.intrinsicVariables = intrinsicVariables
+        contextFunctionReturnTypeStack = [contextFunctionReturnType]
+        super.init()
+    }
+    
+    public func pushContainingFunctionReturnType(_ type: SwiftType) {
+        contextFunctionReturnTypeStack.append(type)
+    }
+    
+    public func popContainingFunctionReturnType() {
+        contextFunctionReturnTypeStack.removeLast()
     }
     
     /// Invocates the resolution of all expressions on a given statement recursively.
@@ -453,8 +480,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitBlock(_ exp: BlockLiteralExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
+        var blockReturnType = exp.returnType
+        
         // Adjust signatures of block parameters based on expected type
-        if case .block(_, let params)? = exp.expectedType, params.count == exp.parameters.count {
+        if case let .block(ret, params)? = exp.expectedType, params.count == exp.parameters.count {
             for (i, expectedType) in zip(0..<exp.parameters.count, params) {
                 let param = exp.parameters[i]
                 guard param.type.isImplicitlyUnwrapped else { continue }
@@ -462,15 +491,27 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 
                 exp.parameters[i].type = expectedType
             }
+            
+            if blockReturnType.isImplicitlyUnwrapped &&
+                blockReturnType.deepUnwrapped == ret.deepUnwrapped {
+                
+                blockReturnType = ret
+            }
         }
         
-        // Apply intrinsics
+        // Apply definitions for function parameters
         for param in exp.parameters {
             exp.recordDefinition(
                 CodeDefinition(variableNamed: param.name,
                                storage: ValueStorage(type: param.type, ownership: .strong, isConstant: true),
                                intention: nil)
             )
+        }
+        
+        // Push context of return type during expression resolving
+        pushContainingFunctionReturnType(blockReturnType)
+        defer {
+            popContainingFunctionReturnType()
         }
         
         return super.visitBlock(exp)
@@ -486,6 +527,14 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         stmt.exp.expectedType = .bool
         
         return super.visitWhile(stmt)
+    }
+    
+    public override func visitReturn(_ stmt: ReturnStatement) -> Statement {
+        if let lastType = contextFunctionReturnTypeStack.last {
+            stmt.exp?.expectedType = lastType
+        }
+        
+        return super.visitReturn(stmt)
     }
 }
 

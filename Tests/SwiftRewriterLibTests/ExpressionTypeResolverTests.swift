@@ -165,15 +165,15 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testNullCoalesce() {
         // Null-coalesce with non-null right-handside
-        assertResolve(.binary(lhs: makeAnOptional(.constant(1)),
+        assertResolve(.binary(lhs: Expression.constant(1).typed(.optional(.int)),
                               op: .nullCoalesce,
                               rhs: .constant(1)),
                       expect: .int)
         
         // Null-coalesce with nullable right-handside
-        assertResolve(.binary(lhs: makeAnOptional(.constant(1)),
+        assertResolve(.binary(lhs: Expression.constant(1).typed(.optional(.int)),
                               op: .nullCoalesce,
-                              rhs: makeAnOptional(.constant(1))),
+                              rhs: Expression.constant(1).typed(.optional(.int))),
                       expect: .optional(.int))
         
         // Nonnull type
@@ -872,6 +872,84 @@ class ExpressionTypeResolverTests: XCTestCase {
             expect: .optional("NSObject")
         )
     }
+    
+    /// When resolving the type of expressions that contain block literals, make
+    /// sure we're able to propagate the expected return types of the block to
+    /// return statements present within.
+    func testSetsExpectedTypeForReturnExpressionInBlockExpression() {
+        startScopedTest(
+            //  { () -> Int in
+            //      return 0
+            //  }
+            with: Expression.block(parameters: [],
+                                   return: .int,
+                                   body: [.return(.constant(0))]),
+            sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(at: \Expression.asBlock?.body.statements[0].asReturn?.exp,
+                                  expectsType: .int)
+    }
+    
+    /// Make sure when we're handling a block type with a pointer return that we're
+    /// able to correctly pass down the expected nullability type based on an existing
+    /// expected type signature for the block, if present.
+    func testSetsExpectedTypeForReturnExpressionInBlockExpressionTakingIntoAccountExpectedTypeOfBlockReturn() {
+        startScopedTest(
+            //  { () -> NSObject! in
+            //      return 0
+            //  }
+            with: Expression.block(parameters: [],
+                                   return: .implicitUnwrappedOptional(.typeName("NSObject")),
+                                   body: [.return(.constant(0))])
+                .typed(expected: SwiftType.block(returnType: .typeName("NSObject"), parameters: [])),
+            sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(at: \Expression.asBlock?.body.statements[0].asReturn?.exp,
+                                  expectsType: .typeName("NSObject")) // Should be non-nil!
+    }
+    
+    /// When resolving the type of expressions that contain block literals, make
+    /// sure we can correctly handle nested block literals.
+    func testSetsExpectedTypeForReturnExpressionInBlockExpressionNested() {
+        startScopedTest(
+            //  { () -> Int in
+            //      return 0
+            //      { () -> Bool in
+            //          return false
+            //      }
+            //      return 0
+            //  }
+            with: Expression
+                .block(parameters: [],
+                       return: .int,
+                       body: [
+                        .return(.constant(0)),
+                        .expression(
+                            Expression
+                            .block(parameters: [],
+                                   return: .bool,
+                                   body: [
+                                    .return(.constant(0))
+                                ])),
+                        .return(.constant(0))
+                    ]),
+            sut: ExpressionTypeResolver())
+            .resolve()
+            // First return
+            .thenAssertExpression(at: \Expression.asBlock?.body.statements[0].asReturn?.exp,
+                                  expectsType: .int)
+            //
+            .thenAssertExpression(at:
+                \Expression.asBlock?
+                    .body.statements[1]
+                    .asExpressions?
+                    .expressions[0]
+                    .asBlock?.body.statements[0]
+                    .asReturn?.exp,
+                                  expectsType: .bool)
+            .thenAssertExpression(at: \Expression.asBlock?.body.statements[2].asReturn?.exp,
+                                  expectsType: .int)
+    }
 }
 
 // MARK: - Test Building Helpers
@@ -883,16 +961,6 @@ private extension ExpressionTypeResolverTests {
     
     func startScopedTest<T: Expression>(with exp: T, sut: ExpressionTypeResolver) -> ExpressionTypeTestBuilder<T> {
         return ExpressionTypeTestBuilder(testCase: self, sut: sut, expression: exp)
-    }
-    
-    func makeAnOptional(_ exp: Expression) -> Expression {
-        let typeSystem = DefaultTypeSystem()
-        let sut = ExpressionTypeResolver(typeSystem: typeSystem)
-        
-        _=sut.visitExpression(exp)
-        
-        exp.resolvedType = exp.resolvedType.map { .optional($0) }
-        return exp
     }
     
     func assertResolve(_ exp: Expression, expect type: SwiftType?,

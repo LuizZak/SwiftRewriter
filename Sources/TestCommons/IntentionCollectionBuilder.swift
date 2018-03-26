@@ -274,6 +274,15 @@ public extension MemberBuilder where T: InitGenerationIntention {
     }
 }
 
+public extension MemberBuilder where T: PropertyGenerationIntention {
+    @discardableResult
+    public func setAsComputedProperty(body: CompoundStatement) -> MemberBuilder {
+        targetMember.mode = .computed(FunctionBodyIntention(body: body))
+        
+        return self
+    }
+}
+
 public class TypeBuilder<T: TypeGenerationIntention> {
     var targetType: T
     
@@ -311,7 +320,9 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     
     @discardableResult
     public func createProperty(
-        named name: String, type: SwiftType, mode: PropertyGenerationIntention.Mode,
+        named name: String,
+        type: SwiftType,
+        mode: PropertyGenerationIntention.Mode = .asField,
         attributes: [PropertyAttribute] = [],
         builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
         

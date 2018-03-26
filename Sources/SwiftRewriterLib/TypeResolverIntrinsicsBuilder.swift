@@ -3,12 +3,14 @@ import SwiftAST
 /// Class responsible for building the intrinsics exposed to type resolvers during
 /// resolution of member lookups.
 class TypeResolverIntrinsicsBuilder {
-    var typeResolver: ExpressionTypeResolver
-    var globalVariables: [GlobalVariableGenerationIntention] = []
-    var globals: DefinitionsSource
-    var typeSystem: TypeSystem
+    private var pushedReturnType: Bool = false
     
-    var miscellaneousDefinitions: DefaultCodeScope = DefaultCodeScope()
+    private var typeResolver: ExpressionTypeResolver
+    private var globals: DefinitionsSource
+    private var typeSystem: TypeSystem
+    private var miscellaneousDefinitions: DefaultCodeScope = DefaultCodeScope()
+    
+    var globalVariables: [GlobalVariableGenerationIntention] = []
     
     init(typeResolver: ExpressionTypeResolver,
          globals: DefinitionsSource,
@@ -26,6 +28,17 @@ class TypeResolverIntrinsicsBuilder {
         let intrinsics = createIntrinsics(forMember: member)
         
         typeResolver.intrinsicVariables = intrinsics
+        
+        if let method = member as? MethodGenerationIntention {
+            typeResolver.pushContainingFunctionReturnType(method.returnType)
+            pushedReturnType = true
+        } else if let prop = member as? PropertyGenerationIntention {
+            // Return type of property (getter) is the property's type itself
+            typeResolver.pushContainingFunctionReturnType(prop.type)
+            pushedReturnType = true
+        } else {
+            pushedReturnType = false
+        }
     }
     
     func addSetterIntrinsics(setter: PropertyGenerationIntention.Setter, type: SwiftType) {
@@ -39,6 +52,10 @@ class TypeResolverIntrinsicsBuilder {
     }
     
     func teardownIntrinsics() {
+        if pushedReturnType {
+            typeResolver.popContainingFunctionReturnType()
+        }
+        
         typeResolver.intrinsicVariables = EmptyCodeScope()
         miscellaneousDefinitions.removeAllDefinitions()
     }

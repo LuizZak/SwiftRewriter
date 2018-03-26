@@ -84,4 +84,52 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 .resolvedType
             , .optional(.cgFloat))
     }
+    
+    func testProperlyExposesReturnTypeOfMethodsToExpressionResolver() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { type in
+                    type.createMethod(named: "a", returnType: .typeName("A")) { method in
+                        method.setBody([.return(.identifier("self"))])
+                    }
+                }
+                .build()
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+        let sut = DefaultTypeResolverInvoker(globals: GlobalDefinitions(), typeSystem: typeSystem, numThreads: 8)
+        let method = intentions.classIntentions()[0].methods[0]
+        
+        sut.resolveExpressionTypes(in: method, force: true)
+        
+        XCTAssertEqual(
+            method.functionBody?
+                .body.statements[0]
+                .asReturn?
+                .exp?.expectedType
+            , .typeName("A"))
+    }
+    
+    func testProperlyExposesReturnTypeOfPropertyGettersToExpressionResolver() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named: "a", type: .typeName("A")) { builder in
+                        builder.setAsComputedProperty(body: [
+                            .return(.identifier("self"))
+                        ])
+                    }
+                }
+                .build()
+        let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+        let sut = DefaultTypeResolverInvoker(globals: GlobalDefinitions(), typeSystem: typeSystem, numThreads: 8)
+        let property = intentions.classIntentions()[0].properties[0]
+        
+        sut.resolveExpressionTypes(in: property, force: true)
+        
+        XCTAssertEqual(
+            property.getter?
+                .body.statements[0]
+                .asReturn?
+                .exp?.expectedType
+            , .typeName("A"))
+    }
 }
