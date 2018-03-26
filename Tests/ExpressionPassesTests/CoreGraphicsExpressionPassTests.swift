@@ -272,6 +272,18 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testCGRectEqualToRect() {
+        assertTransformParsed(
+            expression: "CGRectEqualToRect(self.frame, subview.frame)",
+            into: Expression
+                .identifier("self")
+                .dot("frame")
+                .dot("equalTo").call([
+                    Expression.identifier("subview").dot("frame")
+                ])
+        ); assertNotifiedChange()
+    }
+    
     func testCGPointMake() {
         assertTransformParsed(
             expression: "CGPointMake(1, 2)",

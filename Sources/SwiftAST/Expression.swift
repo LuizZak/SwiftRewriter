@@ -117,6 +117,10 @@ public class AssignmentExpression: Expression {
         return [lhs, rhs]
     }
     
+    public override var requiresParens: Bool {
+        return true
+    }
+    
     public override var description: String {
         // With spacing
         if op.requiresSpacing {
@@ -176,6 +180,15 @@ public class BinaryExpression: Expression {
     
     public override var isLiteralExpression: Bool {
         return lhs.isLiteralExpression && rhs.isLiteralExpression
+    }
+    
+    public override var requiresParens: Bool {
+        switch op.category {
+        case .assignment:
+            return true
+        default:
+            return false
+        }
     }
     
     public override var description: String {

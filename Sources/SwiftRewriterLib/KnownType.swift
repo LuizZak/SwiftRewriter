@@ -124,8 +124,8 @@ public protocol KnownMember {
 
     /// Gets the type for this member.
     /// In case this is a property or field member, this is just the storage type
-    /// of the variable, and if this is a method member, this is the signature
-    /// of the method.
+    /// of the variable, and if this is a method member, this is the signature of
+    /// the method.
     var memberType: SwiftType { get }
 }
 
@@ -222,9 +222,9 @@ public enum TraitType: Codable {
             self = .swiftType(try container.decode(SwiftType.self, forKey: .field))
         default:
             let message = """
-                    Unknown TraitType flag. Maybe data was encoded using a \
-                    different version of SwiftRewriter?
-                    """
+                Unknown TraitType flag. Maybe data was encoded using a \
+                different version of SwiftRewriter?
+                """
             throw DecodingError.dataCorruptedError(forKey: .flag, in: container,
                                                    debugDescription: message)
         }

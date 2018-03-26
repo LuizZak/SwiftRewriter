@@ -120,22 +120,26 @@ extension CoreGraphicsExpressionPass {
                             .labeled("top", .asIs), .labeled("left", .asIs),
                             .labeled("bottom", .asIs), .labeled("right", .asIs)
                           ])
+        
         // CGointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
         makeFuncTransform("CGPointMake", swiftName: "CGPoint",
                           arguments: [
                             .labeled("x", .asIs), .labeled("y", .asIs)
                           ])
+        
         // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
         makeFuncTransform("CGRectMake", swiftName: "CGRect",
                           arguments: [
                             .labeled("x", .asIs), .labeled("y", .asIs),
                             .labeled("width", .asIs), .labeled("height", .asIs)
                           ])
+        
         // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
         makeFuncTransform("CGSizeMake", swiftName: "CGSize",
                           arguments: [
                             .labeled("width", .asIs), .labeled("height", .asIs)
                           ])
+        
         // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
         makeFuncTransform("CGRectIntersectsRect", swiftName: "intersects",
                           arguments: [.asIs], firstArgIsInstance: true)
@@ -155,6 +159,10 @@ extension CoreGraphicsExpressionPass {
         // CGRectInset(<r>, <x>, <y>) -> <r>.insetBy(dx: <x>, dy: <y>)
         makeFuncTransform("CGRectInset", swiftName: "insetBy",
                           arguments: [.labeled("dx", .asIs), .labeled("dy", .asIs)],
+                          firstArgIsInstance: true)
+        // CGRectEqualToRect(<r>, <r2>) -> <r>.equalTo(<r2>)
+        makeFuncTransform("CGRectEqualToRect", swiftName: "equalTo",
+                          arguments: [.asIs],
                           firstArgIsInstance: true)
     }
     

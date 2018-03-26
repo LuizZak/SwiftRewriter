@@ -258,6 +258,98 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
+    /// Tests that base expressions (i.e. those that form a complete statement,
+    /// that form a function argument, or a subscript operand) have their nullability
+    /// corrected by default.
+    func testAlwaysCorrectBaseExpressionsScalarTypesThatResolveAsNull() {
+        let funcMaker = { (arg: Expression) in Expression.identifier("f").call([arg]) }
+        let expMaker = { Expression.identifier("a") }
+        
+        let exp = expMaker()
+        exp.resolvedType = .optional(.int)
+        
+        assertTransform(
+            // { f(a) }
+            statement: .expression(funcMaker(exp)),
+            // { f(a ?? 0) }
+            into: .expression(
+                funcMaker(Expression.parens(expMaker().binary(op: .nullCoalesce, rhs: .constant(0))))
+            )
+        ); assertNotifiedChange()
+    }
+    
+    /// Tests that base expressions (i.e. those that form a complete statement,
+    /// that form a function argument, or a subscript operand) have their nullability
+    /// corrected by default.
+    func testAlwaysCorrectBaseExpressionsScalarTypesThatResolveAsNullInFunctionArguments() {
+        let expMaker = {
+            Expression
+                .identifier("a")
+                .call([
+                    Expression
+                        .identifier("b")
+                        .typed(.optional(.int))
+                        .typed(expected: .int)
+                ])
+        }
+        
+        let exp = expMaker()
+        
+        assertTransform(
+            // { a(b) }
+            statement: Statement.expression(exp),
+            // { a((b ?? 0)) }
+            into:
+            .expression(
+                Expression
+                    .identifier("a")
+                    .call([.parens(Expression.identifier("b").binary(op: .nullCoalesce, rhs: .constant(0)))])
+            )
+        ); assertNotifiedChange()
+    }
+    
+    /// Tests we don't correct base expressions for assignment expressions that
+    /// are top-level (i.e. are a complete statement)
+    func testDontCorrectBaseAssignmentExpressions() {
+        let expMaker = {
+            Expression
+                .identifier("a")
+                .typed(.optional(.typeName("A")))
+                .optional()
+                .dot("b", type: .optional(.int))
+                .typed(.optional(.int))
+                .assignment(op: .assign, rhs: .constant(0))
+                .typed(.optional(.int))
+        }
+        
+        let exp = expMaker()
+        exp.expectedType = .int
+        
+        assertTransform(
+            // { a?.b = 0 }
+            statement: .expression(exp),
+            // { a?.b = 0 }
+            into: .expression(expMaker())
+        ); assertDidNotNotifyChange()
+    }
+    
+    /// Tests that base expressions (i.e. those that form a complete statement,
+    /// that form a function argument, or a subscript operand) have their nullability
+    /// corrected by default.
+    func testDontCorrectBaseExpressionsScalarTypesForConstantExpressions() {
+        let expMaker = { Expression.constant(0) }
+        
+        let exp = expMaker()
+        exp.expectedType = .optional(.int)
+        
+        assertTransform(
+            // { 0 }
+            statement: .expression(exp),
+            // { 0 }
+            into: .expression(expMaker())
+        ); assertDidNotNotifyChange()
+    }
+    
     /// Tests that making an access such as `self.superview?.bounds.midX` actually
     /// resolves into a null-coalesce before the `midX` access.
     /// This mimics the original Objective-C behavior where such an expression
@@ -659,7 +751,6 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
-    
     /// Tests non-null arguments with nullable scalar types are not corrected to
     /// an if-let, since this is dealt at another point in the AST corrector.
     func testDontCorrectSimpleNullableValueInNonnullParameterToIfLetIfArgumentIsNullableScalarType() {
@@ -674,12 +765,12 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             // a(b.c)
             statement: Statement.expression(exp),
-            // a(b.c)
+            // a((b.c ?? 0))
             into: Statement.expression(Expression
                 .identifier("a").typed(funcType)
-                .call([Expression.identifier("b").dot("c").typed(.optional(.int))],
+                .call([Expression.parens(Expression.identifier("b").dot("c").binary(op: .nullCoalesce, rhs: .constant(0)))],
                       callableSignature: funcType))
-        ); assertDidNotNotifyChange()
+        ); assertNotifiedChange()
     }
     
     /// Make sure we don't correct passing a nullable value to a nullable parameter

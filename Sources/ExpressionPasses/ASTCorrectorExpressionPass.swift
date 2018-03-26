@@ -13,6 +13,32 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         return nil
     }
     
+    public override func visitBaseExpression(_ exp: Expression) -> Expression {
+        let exp = super.visitBaseExpression(exp)
+        
+        if !(exp.parent is ExpressionsStatement), let type = exp.resolvedType,
+            type.isOptional && typeSystem.isScalarType(type.deepUnwrapped) {
+            
+            // If an expected type is present, sub-expression visitors will handle
+            // this expression for us.
+            guard exp.expectedType == nil else {
+                return exp
+            }
+            
+            exp.expectedType = exp.resolvedType?.deepUnwrapped
+            
+            if let newExp = correctToDefaultValue(exp) {
+                notifyChange()
+                
+                return super.visitExpression(newExp)
+            } else {
+                exp.expectedType = nil
+            }
+        }
+        
+        return exp
+    }
+    
     public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
         // TODO: Deal with multiple expressions on a single line, maybe.
         guard stmt.expressions.count == 1, let exp = stmt.expressions.first else {
@@ -77,13 +103,17 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         
         let exp = super.visitExpression(exp)
         
+        // Don't correct top-level expressions
+        if exp.parent is ExpressionsStatement {
+            return exp
+        }
+        
         if context.typeSystem.isNumeric(expectedType) {
             if let corrected = correctToNumeric(exp) {
                 notifyChange()
                 
                 return super.visitExpression(corrected)
             }
-            
         } else if expectedType == .bool {
             // Parenthesize depending on parent expression type to avoid issues
             // with operator precedence
@@ -226,7 +256,14 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
         
         exp.expectedType = nil
         
-        let converted = exp.binary(op: .nullCoalesce, rhs: defValue)
+        let converted: Expression
+        
+        if exp.requiresParens {
+            converted = Expression.parens(exp).binary(op: .nullCoalesce, rhs: defValue)
+        } else {
+            converted = exp.binary(op: .nullCoalesce, rhs: defValue)
+        }
+        
         converted.resolvedType = defValue.resolvedType
         converted.expectedType = converted.resolvedType
         
@@ -243,7 +280,14 @@ public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
                 return nil
             }
             
-            let newExp = Expression.parens(exp.binary(op: .nullCoalesce, rhs: defaultExp))
+            let newExp: Expression
+            
+            if exp.requiresParens {
+                newExp = Expression.parens(exp).binary(op: .nullCoalesce, rhs: defaultExp)
+            } else {
+                newExp = .parens(exp.binary(op: .nullCoalesce, rhs: defaultExp))
+            }
+            
             newExp.expectedType = exp.expectedType
             newExp.resolvedType = type.deepUnwrapped
             
