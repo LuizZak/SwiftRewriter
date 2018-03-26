@@ -544,14 +544,14 @@ extension ExpressionTypeResolver {
     }
     
     func searchIdentifierDefinition(_ exp: IdentifierExpression) -> IdentifierExpression.Definition? {
-        // Look into intrinsics first, since they always take precedence
-        if let intrinsic = intrinsicVariables.definition(named: exp.identifier) {
-            return .local(intrinsic)
-        }
-        
         // Visit identifier's type from current context
         if let definition = exp.nearestScope?.definition(named: exp.identifier) {
             return .local(definition)
+        }
+        
+        // Look into intrinsics first, since they always take precedence
+        if let intrinsic = intrinsicVariables.definition(named: exp.identifier) {
+            return .local(intrinsic)
         }
         
         // Check type system for a metatype with the identifier name

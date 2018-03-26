@@ -153,7 +153,7 @@ private class InternalTypeResolverInvoker {
     }
     
     func applyOnMethod(_ method: MethodGenerationIntention) {
-        intrinsicsBuilder.setupIntrinsics(forMember: method)
+        intrinsicsBuilder.setupIntrinsics(forMember: method, intentions: intentions)
         defer {
             intrinsicsBuilder.teardownIntrinsics()
         }
@@ -162,7 +162,7 @@ private class InternalTypeResolverInvoker {
     }
     
     func applyOnProperty(_ property: PropertyGenerationIntention) {
-        intrinsicsBuilder.setupIntrinsics(forMember: property)
+        intrinsicsBuilder.setupIntrinsics(forMember: property, intentions: intentions)
         defer {
             intrinsicsBuilder.teardownIntrinsics()
         }

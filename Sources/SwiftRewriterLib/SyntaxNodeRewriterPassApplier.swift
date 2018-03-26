@@ -29,7 +29,7 @@ public final class SyntaxNodeRewriterPassApplier {
         queue.maxConcurrentOperationCount = numThreds
         
         for file in intentions.fileIntentions() {
-            let invoker = makeResolverInvoker()
+            let invoker = makeResolverInvoker(intentions: intentions)
             queue.addOperation {
                 invoker.applyOnFile(file)
             }
@@ -40,7 +40,7 @@ public final class SyntaxNodeRewriterPassApplier {
         intentionTypeSystem?.tearDownCache()
     }
     
-    private func makeResolverInvoker() -> InternalSyntaxNodeApplier {
+    private func makeResolverInvoker(intentions: IntentionCollection) -> InternalSyntaxNodeApplier {
         let typeResolver =
             ExpressionTypeResolver(typeSystem: typeSystem,
                                    intrinsicVariables: EmptyCodeScope())
@@ -49,7 +49,9 @@ public final class SyntaxNodeRewriterPassApplier {
         let passes = self.passes.map { $0.init() }
         
         return InternalSyntaxNodeApplier(passes: passes, typeSystem: typeSystem,
-                                         typeResolver: typeResolver, globals: globals)
+                                         typeResolver: typeResolver,
+                                         globals: globals,
+                                         intentions: intentions)
     }
 }
 
@@ -59,11 +61,13 @@ private class InternalSyntaxNodeApplier {
     var typeSystem: TypeSystem
     var typeResolver: ExpressionTypeResolver
     var intrinsicsBuilder: TypeResolverIntrinsicsBuilder
+    var intentions: IntentionCollection
     
     init(passes: [SyntaxNodeRewriterPass],
          typeSystem: TypeSystem,
          typeResolver: ExpressionTypeResolver,
-         globals: DefinitionsSource) {
+         globals: DefinitionsSource,
+         intentions: IntentionCollection) {
         
         intrinsicsBuilder =
             TypeResolverIntrinsicsBuilder(
@@ -75,6 +79,7 @@ private class InternalSyntaxNodeApplier {
         self.passes = passes
         self.typeSystem = typeSystem
         self.typeResolver = typeResolver
+        self.intentions = intentions
     }
     
     func applyOnFile(_ file: FileGenerationIntention) {
@@ -102,7 +107,7 @@ private class InternalSyntaxNodeApplier {
     }
     
     private func applyOnProperty(_ property: PropertyGenerationIntention) {
-        intrinsicsBuilder.setupIntrinsics(forMember: property)
+        intrinsicsBuilder.setupIntrinsics(forMember: property, intentions: intentions)
         defer {
             intrinsicsBuilder.teardownIntrinsics()
         }
@@ -122,7 +127,7 @@ private class InternalSyntaxNodeApplier {
     }
     
     private func applyOnInitializer(_ ctor: InitGenerationIntention) {
-        intrinsicsBuilder.setupIntrinsics(forMember: ctor)
+        intrinsicsBuilder.setupIntrinsics(forMember: ctor, intentions: intentions)
         defer {
             intrinsicsBuilder.teardownIntrinsics()
         }
@@ -131,7 +136,7 @@ private class InternalSyntaxNodeApplier {
     }
     
     private func applyOnMethod(_ method: MethodGenerationIntention) {
-        intrinsicsBuilder.setupIntrinsics(forMember: method)
+        intrinsicsBuilder.setupIntrinsics(forMember: method, intentions: intentions)
         defer {
             intrinsicsBuilder.teardownIntrinsics()
         }

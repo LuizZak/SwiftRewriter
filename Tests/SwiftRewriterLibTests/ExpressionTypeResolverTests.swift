@@ -20,10 +20,10 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .typeName("MyType"))
     }
     
-    func testIntrinsicVariableTakesPrecedenceOverLocal() {
+    func testLocalValuesTakesPrecedenceOverIntrinsicVariable() {
         startScopedTest(with: .identifier("self"), sut: ExpressionTypeResolver())
-            .definingLocal(name: "self", type: .errorType)
-            .definingIntrinsic(name: "self", type: .typeName("MyType"))
+            .definingLocal(name: "self", type: .typeName("MyType"))
+            .definingIntrinsic(name: "self", type: .errorType)
             .resolve()
             .thenAssertExpression(resolvedAs: .typeName("MyType"))
     }

@@ -850,7 +850,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
         try assertObjcParse(
             objc: """
             typedef void(^_Nonnull Callback)();
-            void takesBlock(void(^block)());
+            NSString *takesBlock(void(^block)());
             
             @interface MyClass
             @property (nonnull) Callback callback;
@@ -877,7 +877,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
             swift: """
             typealias Callback = () -> Void
 
-            func takesBlock(_ block: (() -> Void)!) {
+            func takesBlock(_ block: (() -> Void)!) -> String! {
             }
 
             @objc
@@ -897,7 +897,7 @@ class SwiftRewriter_SelfTests: XCTestCase {
                         // type: Int
                         local
                     }
-                    // type: <nil>
+                    // type: String!
                     takesBlock { () -> Void in
                         // type: Int
                         local
@@ -967,6 +967,39 @@ class SwiftRewriter_SelfTests: XCTestCase {
                 }
                 @objc
                 func other() -> A {
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testVisibilityOfGlobalElements() throws {
+        try assertObjcParse(
+            objc: """
+            NSInteger global;
+            void globalFunc();
+            
+            @implementation A
+            - (void)f1 {
+                (global);
+                globalFunc();
+            }
+            @end
+            """,
+            swift: """
+            var global: Int
+            
+            func globalFunc() {
+            }
+            
+            @objc
+            class A: NSObject {
+                @objc
+                func f1() {
+                    // type: Int
+                    global
+                    // type: Void
+                    globalFunc()
                 }
             }
             """,

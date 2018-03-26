@@ -24,8 +24,8 @@ class TypeResolverIntrinsicsBuilder {
         self.typeSystem = typeSystem
     }
     
-    func setupIntrinsics(forMember member: MemberGenerationIntention) {
-        let intrinsics = createIntrinsics(forMember: member)
+    func setupIntrinsics(forMember member: MemberGenerationIntention, intentions: IntentionCollection) {
+        let intrinsics = createIntrinsics(forMember: member, intentions: intentions)
         
         typeResolver.intrinsicVariables = intrinsics
         
@@ -60,7 +60,7 @@ class TypeResolverIntrinsicsBuilder {
         miscellaneousDefinitions.removeAllDefinitions()
     }
     
-    func createIntrinsics(forMember member: MemberGenerationIntention) -> DefinitionsSource {
+    func createIntrinsics(forMember member: MemberGenerationIntention, intentions: IntentionCollection) -> DefinitionsSource {
         let intrinsics = DefaultCodeScope()
         
         // Push `self` intrinsic member variable, as well as all properties visible
@@ -118,7 +118,7 @@ class TypeResolverIntrinsicsBuilder {
         
         // Push file-level global variables
         let globalVars =
-            GlobalVariablesSource(variables: globalVariables, symbol: member)
+            GlobalVariablesSource(variables: intentions.globalVariables(), functions: intentions.globalFunctions(), symbol: member)
         
         // Push global definitions
         let compoundIntrinsics = CompoundDefinitionsSource()
@@ -133,10 +133,12 @@ class TypeResolverIntrinsicsBuilder {
     
     private class GlobalVariablesSource: DefinitionsSource {
         var variables: [GlobalVariableGenerationIntention]
+        var functions: [GlobalFunctionGenerationIntention]
         var symbol: FromSourceIntention
         
-        init(variables: [GlobalVariableGenerationIntention], symbol: FromSourceIntention) {
+        init(variables: [GlobalVariableGenerationIntention], functions: [GlobalFunctionGenerationIntention], symbol: FromSourceIntention) {
             self.variables = variables
+            self.functions = functions
             self.symbol = symbol
         }
         
@@ -146,6 +148,14 @@ class TypeResolverIntrinsicsBuilder {
                     return
                         CodeDefinition(variableNamed: global.name,
                                        storage: global.storage,
+                                       intention: global)
+                }
+            }
+            
+            for global in functions {
+                if global.name == name && global.isVisible(for: symbol) {
+                    return
+                        CodeDefinition(functionSignature: global.signature,
                                        intention: global)
                 }
             }
