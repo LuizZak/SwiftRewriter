@@ -3,7 +3,7 @@ import TypeDefinitions
 import Utils
 
 /// Standard type system implementation
-public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
+public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
     /// A singleton instance to a default type system.
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
     
@@ -32,6 +32,23 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     public func addType(_ type: KnownType) {
         types.append(type)
         typesByName[type.typeName] = type
+    }
+    
+    public func typesMatch(_ type1: SwiftType, _ type2: SwiftType, ignoreNullability: Bool) -> Bool {
+        let expanded1 = resolveAlias(in: type1)
+        let expanded2 = resolveAlias(in: type2)
+        
+        // Same structure, ignoring nullability
+        if ignoreNullability {
+            if expanded1.deepUnwrapped == expanded2.deepUnwrapped {
+                return true
+            }
+        } else if expanded1 == expanded2 {
+            // Same structure, taking nullabillity into account
+            return true
+        }
+        
+        return false
     }
     
     public func typeExists(_ name: String) -> Bool {
@@ -313,45 +330,21 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         }
     }
     
+    func unaliased(typeName: String) -> SwiftType? {
+        return aliases[typeName]
+    }
+    
     public func resolveAlias(in typeName: String) -> SwiftType {
         guard let type = aliases[typeName] else {
             return .typeName(typeName)
         }
         
-        switch type {
-        case var .block(returnType, parameters):
-            if let retTypeName = returnType.typeName {
-                returnType = resolveAlias(in: retTypeName)
-            }
-            
-            for (i, p) in parameters.enumerated() {
-                if let type = p.typeName {
-                    parameters[i] = resolveAlias(in: type)
-                }
-            }
-            
-            return .block(returnType: returnType, parameters: parameters)
-        default:
-            return type
-        }
+        return resolveAlias(in: type)
     }
     
     public func resolveAlias(in type: SwiftType) -> SwiftType {
-        switch type.deepUnwrapped {
-        case .nominal(.typeName(let name)):
-            return resolveAlias(in: name).withSameOptionalityAs(type)
-            
-        case var .block(returnType, parameters):
-            returnType = resolveAlias(in: returnType)
-            
-            for (i, p) in parameters.enumerated() {
-                parameters[i] = resolveAlias(in: p)
-            }
-            
-            return .block(returnType: returnType, parameters: parameters)
-        default:
-            return type
-        }
+        let resolver = TypealiasExpander(aliasesSource: self)
+        return resolver.expand(in: type)
     }
     
     public func supertype(of type: KnownType) -> KnownType? {
@@ -494,30 +487,6 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
         }
     }
     
-    fileprivate func typeNameIn(swiftType: SwiftType) -> String? {
-        let swiftType = swiftType.deepUnwrapped
-        
-        switch swiftType {
-        case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
-            return typeName
-            
-        // Meta-types recurse on themselves
-        case .metatype(for: let inner):
-            let type = inner.deepUnwrapped
-            
-            switch type {
-            case .nominal(.typeName(let name)):
-                return name
-            default:
-                return typeNameIn(swiftType: type)
-            }
-            
-        // Other Swift types are not supported, at the moment.
-        default:
-            return nil
-        }
-    }
-    
     public func constructor(withArgumentLabels labels: [String], in type: SwiftType) -> KnownConstructor? {
         guard let knownType = self.findType(for: type) else {
             return nil
@@ -573,6 +542,84 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
             return baseClassTypesByName[name]
         }
     }
+    
+    private class TypealiasExpander {
+        // Used to discover cycles in alias expansion
+        private var aliasesInStack: [String] = []
+        
+        private var source: AliasesSource
+        
+        init(aliasesSource: AliasesSource) {
+            self.source = aliasesSource
+        }
+        
+        func expand(in type: SwiftType) -> SwiftType {
+            switch type {
+            case let .block(returnType, parameters):
+                return .block(returnType: expand(in: returnType), parameters: parameters.map(expand))
+            case .nominal(.typeName(let name)):
+                if let type = source.unaliased(typeName: name) {
+                    return pushingAlias(name) {
+                        return expand(in: type)
+                    }
+                }
+                
+                return type
+            case .nominal(let nominal):
+                return .nominal(expand(inNominal: nominal))
+            case .optional(let type):
+                return .optional(expand(in: type))
+            case .implicitUnwrappedOptional(let type):
+                return .implicitUnwrappedOptional(expand(in: type))
+            case .nested(let nested):
+                return .nested(.fromCollection(nested.map(expand(inNominal:))))
+            case .metatype(let type):
+                return .metatype(for: expand(in: type))
+            case .tuple(.empty):
+                return type
+            case .tuple(.types(let values)):
+                return .tuple(.types(.fromCollection(values.map(expand))))
+            case .protocolComposition(let composition):
+                return .protocolComposition(.fromCollection(composition.map(expand(inNominal:))))
+            }
+        }
+        
+        private func expand(inString string: String) -> String {
+            guard let aliased = source.unaliased(typeName: string) else {
+                return string
+            }
+            
+            return pushingAlias(string) {
+                return typeNameIn(swiftType: aliased).map(expand(inString:)) ?? string
+            }
+        }
+        
+        private func expand(inNominal nominal: NominalSwiftType) -> NominalSwiftType {
+            switch nominal {
+            case .typeName(let name):
+                return .typeName(expand(inString: name))
+            case let .generic(name, parameters):
+                return .generic(expand(inString: name), parameters: .fromCollection(parameters.map(expand)))
+            }
+        }
+        
+        private func pushingAlias<T>(_ name: String, do work: () -> T) -> T {
+            if aliasesInStack.contains(name) {
+                fatalError("Cycle found while expanding typealises: \(aliasesInStack.joined(separator: " -> ")) -> \(name)")
+            }
+            
+            aliasesInStack.append(name)
+            defer {
+                aliasesInStack.removeLast()
+            }
+            
+            return work()
+        }
+    }
+}
+
+protocol AliasesSource {
+    func unaliased(typeName: String) -> SwiftType?
 }
 
 extension DefaultTypeSystem: TypealiasSink {
@@ -756,6 +803,22 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         return super.isClassInstanceType(typeName)
+    }
+    
+    override func unaliased(typeName: String) -> SwiftType? {
+        if let cache = cache {
+            if let alias = cache.typeAliases[typeName] {
+                return alias
+            }
+        } else {
+            for file in intentions.fileIntentions() {
+                for alias in file.typealiasIntentions where alias.name == typeName {
+                    return alias.fromType
+                }
+            }
+        }
+        
+        return super.unaliased(typeName: typeName)
     }
     
     public override func resolveAlias(in typeName: String) -> SwiftType {
@@ -1004,5 +1067,29 @@ private class CompoundKnownType: KnownType {
                 break
             }
         }
+    }
+}
+
+private func typeNameIn(swiftType: SwiftType) -> String? {
+    let swiftType = swiftType.deepUnwrapped
+    
+    switch swiftType {
+    case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
+        return typeName
+        
+    // Meta-types recurse on themselves
+    case .metatype(for: let inner):
+        let type = inner.deepUnwrapped
+        
+        switch type {
+        case .nominal(.typeName(let name)):
+            return name
+        default:
+            return typeNameIn(swiftType: type)
+        }
+        
+    // Other Swift types are not supported, at the moment.
+    default:
+        return nil
     }
 }

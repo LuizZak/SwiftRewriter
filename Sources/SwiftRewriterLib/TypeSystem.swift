@@ -2,6 +2,10 @@ import SwiftAST
 
 /// A wrapper for querying the type system context for specific type knowledges
 public protocol TypeSystem {
+    /// Returns true if two given Swift types match semmantically after expanding
+    /// all typealises.
+    func typesMatch(_ type1: SwiftType, _ type2: SwiftType, ignoreNullability: Bool) -> Bool
+    
     /// Returns an expression representing the default value for a given Swift type.
     /// Returns nil, in case no default values are known
     func defaultValue(for type: SwiftType) -> Expression?

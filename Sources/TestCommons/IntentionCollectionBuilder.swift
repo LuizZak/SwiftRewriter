@@ -41,7 +41,7 @@ public class IntentionCollectionBuilder {
         if typeChecked {
             let system = IntentionCollectionTypeSystem(intentions: intentions)
             
-            let invoker = DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
+            let invoker = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(),
                                                      typeSystem: system,
                                                      numThreads: 8)
             

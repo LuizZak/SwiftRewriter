@@ -12,10 +12,8 @@ public class BaseGlobalsProvider: GlobalsProvider {
         createTypealiases()
     }
     
-    public func registerDefinitions(on globals: GlobalDefinitions) {
-        for global in self.globals {
-            globals.recordDefinition(global)
-        }
+    public func definitionsSource() -> DefinitionsSource {
+        return ArrayDefinitionsSource(definitions: globals)
     }
     
     public func registerTypes(in typeSink: KnownTypeSink) {

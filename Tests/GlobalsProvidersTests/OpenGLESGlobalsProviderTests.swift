@@ -7,7 +7,7 @@ class OpenGLESGlobalsProviderTests: BaseGlobalsProviderTestCase {
         
         sut = OpenGLESGlobalsProvider()
         
-        sut.registerDefinitions(on: globals)
+        globals = sut.definitionsSource()
         sut.registerTypes(in: types)
         sut.registerTypealiases(in: typealiases)
     }

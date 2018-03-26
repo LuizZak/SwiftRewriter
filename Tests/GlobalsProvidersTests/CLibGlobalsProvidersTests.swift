@@ -9,7 +9,7 @@ class CLibGlobalsProvidersTests: BaseGlobalsProviderTestCase {
         
         sut = CLibGlobalsProviders()
         
-        sut.registerDefinitions(on: globals)
+        globals = sut.definitionsSource()
         sut.registerTypes(in: types)
         sut.registerTypealiases(in: typealiases)
     }

@@ -361,6 +361,10 @@ public enum ZeroOrMore<T: Equatable>: Equatable {
         
         return current
     }
+    
+    public static var empty: ZeroOrMore {
+        return .tail
+    }
 }
 
 /// An enum representing a list of one or more chained items
@@ -383,6 +387,10 @@ public enum OneOrMore<T: Equatable>: Equatable {
         
         return current
     }
+    
+    public static func one(_ value: T) -> OneOrMore {
+        return .tail(value)
+    }
 }
 
 /// An enum representing a list of two or more chained items
@@ -404,6 +412,10 @@ public enum TwoOrMore<T: Equatable>: Equatable {
         }
         
         return current
+    }
+    
+    public static func two(_ value1: T, _ value2: T) -> TwoOrMore {
+        return .tail(value1, value2)
     }
 }
 

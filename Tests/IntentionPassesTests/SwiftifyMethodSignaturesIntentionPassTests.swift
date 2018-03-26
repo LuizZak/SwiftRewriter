@@ -198,7 +198,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         type.addMethod(MethodGenerationIntention(signature: signature))
         
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
-        let invoker = DefaultTypeResolverInvoker(globals: GlobalDefinitions(),
+        let invoker = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(),
                                                  typeSystem: typeSystem,
                                                  numThreads: 8)
         let mapper = DefaultTypeMapper(typeSystem: typeSystem)

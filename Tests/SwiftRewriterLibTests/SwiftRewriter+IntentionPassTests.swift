@@ -5,8 +5,8 @@ import IntentionPasses
 class SwiftRewriter_IntentionPassTests: XCTestCase {
     func testIntentionPassHasExpressionTypesPreResolved() throws {
         class Globals: GlobalsProvider {
-            func registerDefinitions(on globals: GlobalDefinitions) {
-                
+            func definitionsSource() -> DefinitionsSource {
+                return ArrayDefinitionsSource()
             }
             func registerTypes(in typeSink: KnownTypeSink) {
                 let type = KnownTypeBuilder(typeName: "TestType").build()

@@ -298,7 +298,7 @@ public class SwiftRewriter {
             [MandatorySyntaxNodePass.self]
                 + syntaxNodeRewriterSources.syntaxNodePasses
         
-        let globals = GlobalDefinitions()
+        let globals = CompoundDefinitionsSource()
         
         let typeResolverInvoker =
             DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
@@ -310,7 +310,8 @@ public class SwiftRewriter {
         
         // Register globals first
         for provider in globalsProvidersSource.globalsProviders {
-            provider.registerDefinitions(on: globals)
+            globals.addSource(provider.definitionsSource())
+            
             provider.registerTypes(in: typeSystem)
             provider.registerTypealiases(in: typeSystem)
         }

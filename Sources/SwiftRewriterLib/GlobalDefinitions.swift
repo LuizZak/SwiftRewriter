@@ -9,27 +9,6 @@ public protocol KnownTypeSink {
     func addType(_ type: KnownType)
 }
 
-/// A storage for global definitions
-public class GlobalDefinitions: DefinitionsSource {
-    internal(set) public var definitions: [CodeDefinition] = []
-    
-    public init() {
-        
-    }
-    
-    public func recordDefinition(_ definition: CodeDefinition) {
-        definitions.append(definition)
-    }
-    
-    public func allDefinitions() -> [CodeDefinition] {
-        return definitions
-    }
-    
-    public func definition(named name: String) -> CodeDefinition? {
-        return definitions.first { $0.name == name }
-    }
-}
-
 /// Source for `GlobalsProvider` instances
 public protocol GlobalsProvidersSource {
     var globalsProviders: [GlobalsProvider] { get }
@@ -38,15 +17,11 @@ public protocol GlobalsProvidersSource {
 /// Protocol for objects to register global definitions to a target global definitions
 /// scope
 public protocol GlobalsProvider {
-    func registerDefinitions(on globals: GlobalDefinitions)
+    /// Gets a source for definitions for this globals provider
+    func definitionsSource() -> DefinitionsSource
+    
     func registerTypes(in typeSink: KnownTypeSink)
     func registerTypealiases(in typealiasSink: TypealiasSink)
-}
-
-public extension GlobalsProvider {
-    func registerTypes(in typeSink: KnownTypeSink) {
-        
-    }
 }
 
 /// Sources globals providers through an input array

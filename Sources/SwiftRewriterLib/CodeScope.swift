@@ -109,6 +109,24 @@ public protocol CodeScope: DefinitionsSource {
     func removeAllDefinitions()
 }
 
+public struct ArrayDefinitionsSource: DefinitionsSource {
+    private var definitionsByName: [String: CodeDefinition] = [:]
+    private var definitions: [CodeDefinition]
+    
+    public init(definitions: [CodeDefinition] = []) {
+        self.definitions = definitions
+        self.definitionsByName = definitions.groupBy({ $0.name }).mapValues({ $0[0] })
+    }
+    
+    public func definition(named name: String) -> CodeDefinition? {
+        return definitionsByName[name]
+    }
+    
+    public func allDefinitions() -> [CodeDefinition] {
+        return definitions
+    }
+}
+
 /// A definitions source composed of individual definition sources composed as
 /// a single definition source.
 public class CompoundDefinitionsSource: DefinitionsSource {

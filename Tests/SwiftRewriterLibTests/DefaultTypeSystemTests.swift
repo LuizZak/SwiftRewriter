@@ -9,6 +9,87 @@ class DefaultTypeSystemTests: XCTestCase {
         sut = DefaultTypeSystem()
     }
     
+    // MARK: - typesMatch
+    
+    func testTypesMatchSameStructure() {
+        XCTAssert(sut.typesMatch(.typeName("A"),
+                                 .typeName("A"),
+                                 ignoreNullability: false))
+        
+        XCTAssert(sut.typesMatch(.nested([.typeName("A"), .typeName("B")]),
+                                 .nested([.typeName("A"), .typeName("B")]),
+                                 ignoreNullability: false))
+    }
+    
+    func testTypesMatchSameStructureDifferentTypes() {
+        XCTAssertFalse(sut.typesMatch(.typeName("A"),
+                                      .typeName("DIFFER"),
+                                      ignoreNullability: false))
+        
+        XCTAssertFalse(sut.typesMatch(.nested([.typeName("A"), .typeName("B")]),
+                                      .nested([.typeName("A"), .typeName("DIFFER")]),
+                                      ignoreNullability: false))
+    }
+    
+    func testTypesMatchIgnoringNullability() {
+        XCTAssert(sut.typesMatch(.optional(.typeName("A")),
+                                 .typeName("A"),
+                                 ignoreNullability: true))
+        
+        XCTAssert(sut.typesMatch(.optional(.nested([.typeName("A"), .typeName("B")])),
+                                 .nested([.typeName("A"), .typeName("B")]),
+                                 ignoreNullability: true))
+    }
+    
+    func testTypesMatchExpandingTypeAliases() {
+        sut.addTypealias(aliasName: "A", originalType: "B")
+        
+        XCTAssert(sut.typesMatch(.typeName("A"),
+                                 .typeName("B"),
+                                 ignoreNullability: false))
+    }
+    
+    func testTypesMatchExpandingTypeAliasesDeep() {
+        sut.addTypealias(aliasName: "A", originalType: "B")
+        sut.addTypealias(aliasName: "C", originalType: .generic("D", parameters: .one(.typeName("A"))))
+        
+        XCTAssert(sut.typesMatch(.typeName("C"),
+                                 .generic("D", parameters: .one(.typeName("A"))),
+                                 ignoreNullability: false))
+    }
+    
+    func testTypesMatchExpandingAliasesInBlockType() {
+        sut.addTypealias(aliasName: "A", originalType: "B")
+        
+        XCTAssert(sut.typesMatch(.block(returnType: "A", parameters: []),
+                                 .block(returnType: "B", parameters: []),
+                                 ignoreNullability: false))
+    }
+    
+    func testExpandBlockTypeAliases() {
+        sut.addTypealias(
+            aliasName: "A",
+            originalType: .block(returnType: .void, parameters: []))
+        
+        XCTAssert(sut.typesMatch(.typeName("A"),
+                                 .block(returnType: .void, parameters: []),
+                                 ignoreNullability: false))
+    }
+    
+    func testExpandBlockTypeAliasesDeep() {
+        sut.addTypealias(aliasName: "A",
+                         originalType: .block(returnType: "B", parameters: []))
+        
+        sut.addTypealias(aliasName: "B",
+                         originalType: .typeName("C"))
+        
+        XCTAssert(sut.typesMatch(.typeName("A"),
+                                 .block(returnType: .typeName("C"), parameters: []),
+                                 ignoreNullability: false))
+    }
+    
+    // MARK: - defaultValue
+    
     func testDefaultValueForNumerics() {
         XCTAssertEqual(sut.defaultValue(for: .int), .constant(0))
         XCTAssertEqual(sut.defaultValue(for: .uint), .constant(0))

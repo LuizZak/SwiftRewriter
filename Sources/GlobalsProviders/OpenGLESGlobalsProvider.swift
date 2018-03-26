@@ -1,9 +1,32 @@
 import SwiftRewriterLib
 
-public class OpenGLESGlobalsProvider: BaseGlobalsProvider {
-    override public init() {
-        super.init()
+public class OpenGLESGlobalsProvider: GlobalsProvider {
+    private static var provider = InnerOpenGLESGlobalsProvider()
+    
+    public init() {
+        
     }
+    
+    public func registerTypes(in typeSink: KnownTypeSink) {
+        for def in OpenGLESGlobalsProvider.provider.types {
+            typeSink.addType(def)
+        }
+    }
+    
+    public func registerTypealiases(in typealiasSink: TypealiasSink) {
+        for (name, type) in OpenGLESGlobalsProvider.provider.typealiases {
+            typealiasSink.addTypealias(aliasName: name, originalType: type)
+        }
+    }
+    
+    public func definitionsSource() -> DefinitionsSource {
+        return OpenGLESGlobalsProvider.provider.definitions
+    }
+}
+
+private class InnerOpenGLESGlobalsProvider: BaseGlobalsProvider {
+    
+    var definitions: ArrayDefinitionsSource = ArrayDefinitionsSource(definitions: [])
     
     override func createTypealiases() {
         addTypealias(from: "GLbitfield", to: .typeName("UInt32"))
@@ -32,6 +55,8 @@ public class OpenGLESGlobalsProvider: BaseGlobalsProvider {
     override func createDefinitions() {
         createVariableDefinitions()
         createFunctionDefinitions()
+        
+        definitions = ArrayDefinitionsSource(definitions: globals)
     }
     
     func createVariableDefinitions() {

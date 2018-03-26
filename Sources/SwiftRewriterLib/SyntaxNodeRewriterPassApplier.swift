@@ -7,11 +7,11 @@ public final class SyntaxNodeRewriterPassApplier {
     public var passes: [SyntaxNodeRewriterPass.Type]
     public var typeSystem: TypeSystem
     public var numThreds: Int
-    public var globals: GlobalDefinitions
+    public var globals: DefinitionsSource
     
     public init(passes: [SyntaxNodeRewriterPass.Type],
                 typeSystem: TypeSystem,
-                globals: GlobalDefinitions,
+                globals: DefinitionsSource,
                 numThreds: Int = 8) {
         
         self.passes = passes

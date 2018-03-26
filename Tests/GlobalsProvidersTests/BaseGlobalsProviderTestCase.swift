@@ -8,14 +8,13 @@ let cDouble = SwiftType.typeName("CDouble")
 
 class BaseGlobalsProviderTestCase: XCTestCase {
     var sut: GlobalsProvider!
-    var globals: GlobalDefinitions!
+    var globals: DefinitionsSource!
     var types: Types!
     var typealiases: Typealiases!
     
     override func setUp() {
         super.setUp()
         
-        globals = GlobalDefinitions()
         types = Types()
         typealiases = Typealiases()
     }

@@ -8,7 +8,7 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
         
         sut = UIKitGlobalsProvider()
         
-        sut.registerDefinitions(on: globals)
+        globals = sut.definitionsSource()
         sut.registerTypes(in: types)
         sut.registerTypealiases(in: typealiases)
     }

@@ -27,7 +27,7 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 }
                 .build()
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
-        let sut = DefaultTypeResolverInvoker(globals: GlobalDefinitions(), typeSystem: typeSystem, numThreads: 8)
+        let sut = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(), typeSystem: typeSystem, numThreads: 8)
         let methodA = intentions.classIntentions()[0].methods[0]
         let methodB = intentions.classIntentions()[1].methods[0]
         
@@ -71,7 +71,7 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 }
                 .build()
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
-        let sut = DefaultTypeResolverInvoker(globals: GlobalDefinitions(), typeSystem: typeSystem, numThreads: 8)
+        let sut = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(), typeSystem: typeSystem, numThreads: 8)
         let method = intentions.classIntentions()[0].methods[0]
         
         sut.resolveExpressionTypes(in: method, force: true)
@@ -95,7 +95,7 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 }
                 .build()
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
-        let sut = DefaultTypeResolverInvoker(globals: GlobalDefinitions(), typeSystem: typeSystem, numThreads: 8)
+        let sut = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(), typeSystem: typeSystem, numThreads: 8)
         let method = intentions.classIntentions()[0].methods[0]
         
         sut.resolveExpressionTypes(in: method, force: true)
@@ -120,7 +120,7 @@ class DefaultTypeResolverInvokerTests: XCTestCase {
                 }
                 .build()
         let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
-        let sut = DefaultTypeResolverInvoker(globals: GlobalDefinitions(), typeSystem: typeSystem, numThreads: 8)
+        let sut = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(), typeSystem: typeSystem, numThreads: 8)
         let property = intentions.classIntentions()[0].properties[0]
         
         sut.resolveExpressionTypes(in: property, force: true)

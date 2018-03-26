@@ -17,11 +17,11 @@ public protocol TypeResolverInvoker {
 }
 
 public class DefaultTypeResolverInvoker: TypeResolverInvoker {
-    var globals: GlobalDefinitions
+    var globals: DefinitionsSource
     var typeSystem: IntentionCollectionTypeSystem
     var numThreads: Int
     
-    public init(globals: GlobalDefinitions, typeSystem: IntentionCollectionTypeSystem, numThreads: Int) {
+    public init(globals: DefinitionsSource, typeSystem: IntentionCollectionTypeSystem, numThreads: Int) {
         self.globals = globals
         self.typeSystem = typeSystem
         self.numThreads = numThreads
