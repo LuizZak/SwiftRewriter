@@ -539,10 +539,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 }
 
 extension ExpressionTypeResolver {
-    func findTypeNamed(_ typeName: String) -> KnownType? {
-        return typeSystem.knownTypeWithName(typeName)
-    }
-    
     func expandAliases(in type: SwiftType) -> SwiftType {
         return typeSystem.resolveAlias(in: type)
     }
@@ -774,10 +770,6 @@ private class MemberInvocationResolver {
         for (callArg, paramType) in zip(callArguments, types) {
             callArg.expression.expectedType = typeResolver.expandAliases(in: paramType)
         }
-    }
-    
-    func findType(for type: SwiftType) -> KnownType? {
-        return typeSystem.findType(for: type)
     }
     
     func extractMetatype(from exp: Expression) -> SwiftType? {
