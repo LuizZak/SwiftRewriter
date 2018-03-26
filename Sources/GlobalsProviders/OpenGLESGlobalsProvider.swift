@@ -470,6 +470,139 @@ public class OpenGLESGlobalsProvider: BaseGlobalsProvider {
         add(constant(name: "GL_MAX_ELEMENT_INDEX", type: .typeName("Int32")))
         add(constant(name: "GL_NUM_SAMPLE_COUNTS", type: .typeName("Int32")))
         add(constant(name: "GL_TEXTURE_IMMUTABLE_LEVELS", type: .typeName("Int32")))
+        
+        // Extended OpenGLES
+        add(constant(name: "GL_APPLE_copy_texture_levels", type: .typeName("Int32")))
+        add(constant(name: "GL_APPLE_framebuffer_multisample", type: .typeName("Int32")))
+        add(constant(name: "GL_APPLE_texture_2D_limited_npot", type: .typeName("Int32")))
+        add(constant(name: "GL_APPLE_texture_format_BGRA8888", type: .typeName("Int32")))
+        add(constant(name: "GL_APPLE_texture_max_level", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_blend_minmax", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_debug_label", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_debug_marker", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_discard_framebuffer", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_map_buffer_range", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_read_format_bgra", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_texture_filter_anisotropic", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_texture_lod_bias", type: .typeName("Int32")))
+        add(constant(name: "GL_EXT_texture_storage", type: .typeName("Int32")))
+        add(constant(name: "GL_IMG_read_format", type: .typeName("Int32")))
+        add(constant(name: "GL_IMG_texture_compression_pvrtc", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_blend_equation_separate", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_blend_func_separate", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_blend_subtract", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_depth24", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_element_index_uint", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_fbo_render_mipmap", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_framebuffer_object", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_mapbuffer", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_packed_depth_stencil", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_rgb8_rgba8", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_stencil_wrap", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_stencil8", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_texture_mirrored_repeat", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_vertex_array_object", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_SAMPLES_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_SAMPLES_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_READ_FRAMEBUFFER_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_DRAW_FRAMEBUFFER_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_DRAW_FRAMEBUFFER_BINDING_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_READ_FRAMEBUFFER_BINDING_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_BGRA_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_BGRA", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_MAX_LEVEL_APPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_MIN_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_BUFFER_OBJECT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY_OBJECT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAP_READ_BIT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAP_WRITE_BIT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAP_INVALIDATE_RANGE_BIT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAP_INVALIDATE_BUFFER_BIT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAP_FLUSH_EXPLICIT_BIT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAP_UNSYNCHRONIZED_BIT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_1_5_5_5_REV", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_4_4_4_4_REV", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_MAX_ANISOTROPY_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_TEXTURE_LOD_BIAS_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_FILTER_CONTROL_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_LOD_BIAS_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_IMMUTABLE_FORMAT_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_ALPHA8_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_LUMINANCE8_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_LUMINANCE8_ALPHA8_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_BGRA8_EXT", type: .typeName("Int32")))
+        add(constant(name: "GL_BGRA_IMG", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_4_4_4_4_REV_IMG", type: .typeName("Int32")))
+        add(constant(name: "GL_COMPRESSED_RGB_PVRTC_4BPPV1_IMG", type: .typeName("Int32")))
+        add(constant(name: "GL_COMPRESSED_RGB_PVRTC_2BPPV1_IMG", type: .typeName("Int32")))
+        add(constant(name: "GL_COMPRESSED_RGBA_PVRTC_4BPPV1_IMG", type: .typeName("Int32")))
+        add(constant(name: "GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_EQUATION_RGB_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_EQUATION_ALPHA_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_DST_RGB_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_SRC_RGB_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_DST_ALPHA_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_SRC_ALPHA_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_EQUATION_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FUNC_ADD_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FUNC_SUBTRACT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FUNC_REVERSE_SUBTRACT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_COMPONENT24_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_INT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RGBA4_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RGB5_A1_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RGB565_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_COMPONENT16_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_WIDTH_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_HEIGHT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_INTERNAL_FORMAT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_RED_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_GREEN_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_BLUE_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_ALPHA_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_DEPTH_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_STENCIL_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_LEVEL_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_ATTACHMENT0_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_ATTACHMENT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_ATTACHMENT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_COMPLETE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_INCOMPLETE_FORMATS_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_UNSUPPORTED_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_FRAMEBUFFER_BINDING_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERBUFFER_BINDING_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_RENDERBUFFER_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_INVALID_FRAMEBUFFER_OPERATION_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_WRITE_ONLY_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BUFFER_ACCESS_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BUFFER_MAPPED_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_BUFFER_MAP_POINTER_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_STENCIL_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_INT_24_8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH24_STENCIL8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RGB8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_RGBA8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_INCR_WRAP_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_DECR_WRAP_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_INDEX8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MIRRORED_REPEAT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY_BINDING_OES", type: .typeName("Int32")))
     }
     
     func createFunctionDefinitions() {
@@ -870,5 +1003,89 @@ public class OpenGLESGlobalsProvider: BaseGlobalsProvider {
                     paramsSignature: "(_ target: GLenum, _ levels: GLsizei, _ internalformat: GLenum, _ width: GLsizei, _ height: GLsizei, _ depth: GLsizei)"))
         add(function(name: "glGetInternalformativ",
                     paramsSignature: "(_ target: GLenum, _ internalformat: GLenum, _ pname: GLenum, _ bufSize: GLsizei, _ params: UnsafeMutablePointer<GLint>!)"))
+        
+        // Extended OpenGLES
+        
+        add(function(name: "glCopyTextureLevelsAPPLE",
+                    paramsSignature: "(_ destinationTexture: GLuint, _ sourceTexture: GLuint, _ sourceBaseLevel: GLint, _ sourceLevelCount: GLsizei)"))
+        add(function(name: "glRenderbufferStorageMultisampleAPPLE",
+                    paramsSignature: "(_ target: GLenum, _ samples: GLsizei, _ internalformat: GLenum, _ width: GLsizei, _ height: GLsizei)"))
+        add(function(name: "glResolveMultisampleFramebufferAPPLE",
+                    paramsSignature: "()"))
+        add(function(name: "glLabelObjectEXT",
+                    paramsSignature: "(_ type: GLenum, _ object: GLuint, _ length: GLsizei, _ label: UnsafePointer<Int8>!)"))
+        add(function(name: "glGetObjectLabelEXT",
+                    paramsSignature: "(_ type: GLenum, _ object: GLuint, _ bufSize: GLsizei, _ length: UnsafeMutablePointer<GLsizei>!, _ label: UnsafeMutablePointer<Int8>!)"))
+        add(function(name: "glInsertEventMarkerEXT",
+                    paramsSignature: "(_ length: GLsizei, _ marker: UnsafePointer<Int8>!)"))
+        add(function(name: "glPushGroupMarkerEXT",
+                    paramsSignature: "(_ length: GLsizei, _ marker: UnsafePointer<Int8>!)"))
+        add(function(name: "glPopGroupMarkerEXT",
+                    paramsSignature: "()"))
+        add(function(name: "glDiscardFramebufferEXT",
+                    paramsSignature: "(_ target: GLenum, _ numAttachments: GLsizei, _ attachments: UnsafePointer<GLenum>!)"))
+        add(function(name: "glMapBufferRangeEXT",
+                    paramsSignature: "(_ target: GLenum, _ offset: GLintptr, _ length: GLsizeiptr, _ access: GLbitfield)",
+                    returnType: .implicitUnwrappedOptional("UnsafeMutableRawPointer")))
+        add(function(name: "glFlushMappedBufferRangeEXT",
+                    paramsSignature: "(_ target: GLenum, _ offset: GLintptr, _ length: GLsizeiptr)"))
+        add(function(name: "glTexStorage2DEXT",
+                    paramsSignature: "(_ target: GLenum, _ levels: GLsizei, _ internalformat: GLenum, _ width: GLsizei, _ height: GLsizei)"))
+        add(function(name: "glBlendEquationSeparateOES",
+                    paramsSignature: "(_ modeRGB: GLenum, _ modeAlpha: GLenum)"))
+        add(function(name: "glBlendFuncSeparateOES",
+                    paramsSignature: "(_ srcRGB: GLenum, _ dstRGB: GLenum, _ srcAlpha: GLenum, _ dstAlpha: GLenum)"))
+        add(function(name: "glBlendEquationOES",
+                    paramsSignature: "(_ mode: GLenum)"))
+        add(function(name: "glIsRenderbufferOES",
+                    paramsSignature: "(_ renderbuffer: GLuint)",
+                    returnType: "GLboolean"))
+        add(function(name: "glBindRenderbufferOES",
+                    paramsSignature: "(_ target: GLenum, _ renderbuffer: GLuint)"))
+        add(function(name: "glDeleteRenderbuffersOES",
+                    paramsSignature: "(_ n: GLsizei, _ renderbuffers: UnsafePointer<GLuint>!)"))
+        add(function(name: "glGenRenderbuffersOES",
+                    paramsSignature: "(_ n: GLsizei, _ renderbuffers: UnsafeMutablePointer<GLuint>!)"))
+        add(function(name: "glRenderbufferStorageOES",
+                    paramsSignature: "(_ target: GLenum, _ internalformat: GLenum, _ width: GLsizei, _ height: GLsizei)"))
+        add(function(name: "glGetRenderbufferParameterivOES",
+                    paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLint>!)"))
+        add(function(name: "glIsFramebufferOES",
+                    paramsSignature: "(_ framebuffer: GLuint)",
+                    returnType: "GLboolean"))
+        add(function(name: "glBindFramebufferOES",
+                    paramsSignature: "(_ target: GLenum, _ framebuffer: GLuint)"))
+        add(function(name: "glDeleteFramebuffersOES",
+                    paramsSignature: "(_ n: GLsizei, _ framebuffers: UnsafePointer<GLuint>!)"))
+        add(function(name: "glGenFramebuffersOES",
+                    paramsSignature: "(_ n: GLsizei, _ framebuffers: UnsafeMutablePointer<GLuint>!)"))
+        add(function(name: "glCheckFramebufferStatusOES",
+                    paramsSignature: "(_ target: GLenum)",
+                    returnType: "GLenum"))
+        add(function(name: "glFramebufferRenderbufferOES",
+                    paramsSignature: "(_ target: GLenum, _ attachment: GLenum, _ renderbuffertarget: GLenum, _ renderbuffer: GLuint)"))
+        add(function(name: "glFramebufferTexture2DOES",
+                    paramsSignature: "(_ target: GLenum, _ attachment: GLenum, _ textarget: GLenum, _ texture: GLuint, _ level: GLint)"))
+        add(function(name: "glGetFramebufferAttachmentParameterivOES",
+                    paramsSignature: "(_ target: GLenum, _ attachment: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLint>!)"))
+        add(function(name: "glGenerateMipmapOES",
+                    paramsSignature: "(_ target: GLenum)"))
+        add(function(name: "glGetBufferPointervOES",
+                    paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<UnsafeMutableRawPointer?>!)"))
+        add(function(name: "glMapBufferOES",
+                    paramsSignature: "(_ target: GLenum, _ access: GLenum)",
+                    returnType: .implicitUnwrappedOptional("UnsafeMutableRawPointer")))
+        add(function(name: "glUnmapBufferOES",
+                    paramsSignature: "(_ target: GLenum)",
+                    returnType: "GLboolean"))
+        add(function(name: "glBindVertexArrayOES",
+                    paramsSignature: "(_ array: GLuint)"))
+        add(function(name: "glDeleteVertexArraysOES",
+                    paramsSignature: "(_ n: GLsizei, _ arrays: UnsafePointer<GLuint>!)"))
+        add(function(name: "glGenVertexArraysOES",
+                    paramsSignature: "(_ n: GLsizei, _ arrays: UnsafeMutablePointer<GLuint>!)"))
+        add(function(name: "glIsVertexArrayOES",
+                    paramsSignature: "(_ array: GLuint)",
+                    returnType: "GLboolean"))
     }
 }
