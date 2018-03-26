@@ -16,16 +16,12 @@ public class BaseGlobalsProvider: GlobalsProvider {
         return ArrayDefinitionsSource(definitions: globals)
     }
     
-    public func registerTypes(in typeSink: KnownTypeSink) {
-        for type in types {
-            typeSink.addType(type)
-        }
+    public func typealiasProvider() -> TypealiasProvider {
+        return CollectionTypealiasProvider(aliases: typealiases)
     }
     
-    public func registerTypealiases(in typealiasSink: TypealiasSink) {
-        for (source, target) in typealiases {
-            typealiasSink.addTypealias(aliasName: source, originalType: target)
-        }
+    public func knownTypeProvider() -> KnownTypeProvider {
+        return CollectionKnownTypeProvider(knownTypes: types)
     }
     
     func createDefinitions() {

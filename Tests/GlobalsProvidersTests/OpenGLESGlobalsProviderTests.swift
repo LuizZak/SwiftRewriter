@@ -8,8 +8,8 @@ class OpenGLESGlobalsProviderTests: BaseGlobalsProviderTestCase {
         sut = OpenGLESGlobalsProvider()
         
         globals = sut.definitionsSource()
-        sut.registerTypes(in: types)
-        sut.registerTypealiases(in: typealiases)
+        types = sut.knownTypeProvider()
+        typealiases = sut.typealiasProvider()
     }
     
     func testDefinedTypealiases() {

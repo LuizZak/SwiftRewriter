@@ -8,12 +8,11 @@ class SwiftRewriter_IntentionPassTests: XCTestCase {
             func definitionsSource() -> DefinitionsSource {
                 return ArrayDefinitionsSource()
             }
-            func registerTypes(in typeSink: KnownTypeSink) {
-                let type = KnownTypeBuilder(typeName: "TestType").build()
-                typeSink.addType(type)
+            func knownTypeProvider() -> KnownTypeProvider {
+                return CollectionKnownTypeProvider()
             }
-            func registerTypealiases(in typealiasSink: TypealiasSink) {
-                
+            func typealiasProvider() -> TypealiasProvider {
+                return CollectionTypealiasProvider()
             }
         }
         class Pass: IntentionPass {

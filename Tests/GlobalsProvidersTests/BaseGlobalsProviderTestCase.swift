@@ -9,19 +9,19 @@ let cDouble = SwiftType.typeName("CDouble")
 class BaseGlobalsProviderTestCase: XCTestCase {
     var sut: GlobalsProvider!
     var globals: DefinitionsSource!
-    var types: Types!
-    var typealiases: Typealiases!
+    var types: KnownTypeProvider!
+    var typealiases: TypealiasProvider!
     
     override func setUp() {
         super.setUp()
         
-        types = Types()
-        typealiases = Typealiases()
+        types = nil
+        typealiases = nil
     }
     
     func assertDefined(typealiasFrom typealiasName: String, to type: SwiftType, file: String = #file,
                        line: Int = #line) {
-        guard let actual = typealiases.typealiases[typealiasName] else {
+        guard let actual = typealiases.unalias(typealiasName) else {
             recordFailure(withDescription: "Expected to find typealias with name \(typealiasName)",
                 inFile: file, atLine: line, expected: true)
             return
@@ -99,7 +99,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
     }
     
     func assertDefined(typeName: String, file: String = #file, line: Int = #line) {
-        if !types.types.contains(where: { $0.typeName == typeName }) {
+        if types.knownType(withName: typeName) == nil {
             recordFailure(withDescription: "Expected to find type \(typeName)",
                           inFile: file, atLine: line, expected: true)
         }
@@ -107,7 +107,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
     
     func assertDefined(typeName: String, signature: String,
                        file: String = #file, line: Int = #line) {
-        guard let type = types.types.first(where: { $0.typeName == typeName }) else {
+        guard let type = types.knownType(withName: typeName) else {
             recordFailure(withDescription: "Expected to find type \(typeName)",
                 inFile: file, atLine: line, expected: true)
             return
@@ -128,21 +128,5 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                 """,
                 inFile: file, atLine: line, expected: true)
         }
-    }
-}
-
-class Types: KnownTypeSink {
-    var types: [KnownType] = []
-    
-    func addType(_ type: KnownType) {
-        types.append(type)
-    }
-}
-
-class Typealiases: TypealiasSink {
-    var typealiases: [String: SwiftType] = [:]
-    
-    func addTypealias(aliasName: String, originalType: SwiftType) {
-        typealiases[aliasName] = originalType
     }
 }

@@ -3,7 +3,7 @@ import TypeDefinitions
 import Utils
 
 /// Standard type system implementation
-public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
+public class DefaultTypeSystem: TypeSystem {
     /// A singleton instance to a default type system.
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
     
@@ -11,26 +11,38 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
     private var initializedCache = false
     
     /// Type-aliases
-    var aliases: [String: SwiftType] = [:]
+    var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
+    var typealiasProviders: CompoundTypealiasProvider
     
-    var types: [KnownType] = []
+    // Known types
+    var innerKnownTypes = CollectionKnownTypeProvider(knownTypes: [])
+    var knownTypeProviders: CompoundKnownTypeProvider
+    
     var typesByName: [String: KnownType] = [:]
     
     public init() {
+        typealiasProviders = CompoundTypealiasProvider(providers: [innerAliasesProvider])
+        knownTypeProviders = CompoundKnownTypeProvider(providers: [innerKnownTypes])
+        
         registerInitialKnownTypes()
     }
     
     /// Resets the storage of all known types and type aliases to the default
     /// values.
     public func reset() {
-        types.removeAll()
+        innerKnownTypes.removeAllTypes()
+        innerAliasesProvider.removeAllTypealises()
+        
+        knownTypeProviders.providers.removeAll()
+        typealiasProviders.providers.removeAll()
+        
         typesByName.removeAll()
-        aliases.removeAll()
         registerInitialKnownTypes()
     }
     
     public func addType(_ type: KnownType) {
-        types.append(type)
+        innerKnownTypes.addType(type)
+        
         typesByName[type.typeName] = type
     }
     
@@ -60,7 +72,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
-        return types.filter { $0.kind == kind }
+        return knownTypeProviders.knownTypes(ofKind: kind)
     }
     
     public func knownTypeWithName(_ name: String) -> KnownType? {
@@ -68,7 +80,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
             return nil
         }
         
-        return typesByName[name]
+        return knownTypeProviders.knownType(withName: name)
     }
     
     public func composeTypeWithKnownTypes(_ typeNames: [String]) -> KnownType? {
@@ -330,12 +342,12 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
         }
     }
     
-    func unaliased(typeName: String) -> SwiftType? {
-        return aliases[typeName]
+    func unalias(typeName: String) -> SwiftType? {
+        return typealiasProviders.unalias(typeName)
     }
     
     public func resolveAlias(in typeName: String) -> SwiftType {
-        guard let type = aliases[typeName] else {
+        guard let type = typealiasProviders.unalias(typeName) else {
             return .typeName(typeName)
         }
         
@@ -343,7 +355,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
     }
     
     public func resolveAlias(in type: SwiftType) -> SwiftType {
-        let resolver = TypealiasExpander(aliasesSource: self)
+        let resolver = TypealiasExpander(aliasesSource: typealiasProviders)
         return resolver.expand(in: type)
     }
     
@@ -547,9 +559,9 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
         // Used to discover cycles in alias expansion
         private var aliasesInStack: [String] = []
         
-        private var source: AliasesSource
+        private var source: TypealiasProvider
         
-        init(aliasesSource: AliasesSource) {
+        init(aliasesSource: TypealiasProvider) {
             self.source = aliasesSource
         }
         
@@ -558,7 +570,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
             case let .block(returnType, parameters):
                 return .block(returnType: expand(in: returnType), parameters: parameters.map(expand))
             case .nominal(.typeName(let name)):
-                if let type = source.unaliased(typeName: name) {
+                if let type = source.unalias(name) {
                     return pushingAlias(name) {
                         return expand(in: type)
                     }
@@ -585,7 +597,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
         }
         
         private func expand(inString string: String) -> String {
-            guard let aliased = source.unaliased(typeName: string) else {
+            guard let aliased = source.unalias(string) else {
                 return string
             }
             
@@ -618,13 +630,9 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink, AliasesSource {
     }
 }
 
-protocol AliasesSource {
-    func unaliased(typeName: String) -> SwiftType?
-}
-
-extension DefaultTypeSystem: TypealiasSink {
+extension DefaultTypeSystem {
     public func addTypealias(aliasName: String, originalType: SwiftType) {
-        aliases[aliasName] = originalType
+        self.innerAliasesProvider.addTypealias(aliasName, originalType)
     }
 }
 
@@ -749,12 +757,20 @@ extension DefaultTypeSystem {
 /// An extension over the default type system that enables using an intention
 /// collection to search for types
 public class IntentionCollectionTypeSystem: DefaultTypeSystem {
-    private var cache: Cache?
     public var intentions: IntentionCollection
+    
+    private var intentionsProvider: IntentionCollectionProvider
     
     public init(intentions: IntentionCollection) {
         self.intentions = intentions
+        intentionsProvider = IntentionCollectionProvider(intentions: intentions, typeSystem: nil)
+        
         super.init()
+        
+        intentionsProvider.typeSystem = self
+        
+        knownTypeProviders.providers.append(intentionsProvider)
+        typealiasProviders.providers.append(intentionsProvider)
     }
     
     func makeCache() {
@@ -778,11 +794,13 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                 CompoundKnownType(typeName: $0[0].typeName, typeSystem: self, types: $0)
             })
         
-        cache = Cache(typeAliases: aliases, types: compoundTypes)
+        typealiasProviders.providers.append(CollectionTypealiasProvider(aliases: aliases))
+        
+        intentionsProvider.cache = IntentionCollectionProvider.Cache(typeAliases: aliases, types: compoundTypes)
     }
     
     func tearDownCache() {
-        cache = nil
+        intentionsProvider.cache = nil
     }
     
     public override func isClassInstanceType(_ typeName: String) -> Bool {
@@ -790,7 +808,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return false
         }
         
-        if let cache = cache {
+        if let cache = intentionsProvider.cache {
             if let type = cache.types[aliased] {
                 return type.kind == .class || type.kind == .protocol
             }
@@ -805,44 +823,12 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         return super.isClassInstanceType(typeName)
     }
     
-    override func unaliased(typeName: String) -> SwiftType? {
-        if let cache = cache {
-            if let alias = cache.typeAliases[typeName] {
-                return alias
-            }
-        } else {
-            for file in intentions.fileIntentions() {
-                for alias in file.typealiasIntentions where alias.name == typeName {
-                    return alias.fromType
-                }
-            }
-        }
-        
-        return super.unaliased(typeName: typeName)
-    }
-    
-    public override func resolveAlias(in typeName: String) -> SwiftType {
-        if let cache = cache {
-            if let alias = cache.typeAliases[typeName] {
-                return alias
-            }
-        } else {
-            for file in intentions.fileIntentions() {
-                for alias in file.typealiasIntentions where alias.name == typeName {
-                    return alias.fromType
-                }
-            }
-        }
-        
-        return super.resolveAlias(in: typeName)
-    }
-    
     public override func typeExists(_ name: String) -> Bool {
         if super.typeExists(name) {
             return true
         }
         
-        if let cache = cache {
+        if let cache = intentionsProvider.cache {
             if cache.types.keys.contains(name) {
                 return true
             }
@@ -860,7 +846,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     public override func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
         var types = super.knownTypes(ofKind: kind)
         
-        if let cache = cache {
+        if let cache = intentionsProvider.cache {
             for type in cache.types.values where type.kind == kind {
                 types.append(type)
             }
@@ -875,44 +861,6 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         return types
     }
     
-    public override func knownTypeWithName(_ name: String) -> KnownType? {
-        if let type = super.knownTypeWithName(name) {
-            return type
-        }
-        
-        let aliased = resolveAlias(in: name)
-        guard let name = typeNameIn(swiftType: aliased) else {
-            return nil
-        }
-        
-        if let cache = cache {
-            if let match = cache.types[name] {
-                return match
-            }
-            
-            return nil
-        }
-        
-        // Search in type intentions
-        var types: [KnownType] = []
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.typeName == name {
-                types.append(type)
-            }
-        }
-        
-        guard !types.isEmpty else {
-            return nil
-        }
-        
-        // Single type found: Avoid complex merge operations and return it as is.
-        if types.count == 1 {
-            return types.first
-        }
-        
-        return CompoundKnownType(typeName: name, typeSystem: self, types: Array(types))
-    }
-    
     // MARK: Shortcuts for member searching
     
     public override func property(named name: String, static isStatic: Bool,
@@ -921,21 +869,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
         }
         
-        if let cache = cache {
-            if let match = cache.types[typeName] {
-                if let prop = match.knownProperties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                    return prop
-                }
-            }
-            
-            return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
-        }
-        
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.typeName == typeName {
-                if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                    return prop
-                }
+        if let type = intentionsProvider.knownType(withName: typeName) {
+            if let prop = type.knownProperties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                return prop
             }
         }
         
@@ -947,21 +883,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return super.field(named: name, static: isStatic, in: type)
         }
         
-        if let cache = cache {
-            if let match = cache.types[typeName] {
-                if let field = match.knownFields.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                    return field
-                }
-            }
-            
-            return super.field(named: name, static: isStatic, in: type)
-        }
-        
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.typeName == typeName {
-                if let prop = type.properties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                    return prop
-                }
+        if let type = intentionsProvider.knownType(withName: typeName) {
+            if let field = type.knownFields.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                return field
             }
         }
         
@@ -975,23 +899,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                                 includeOptional: includeOptional, in: type)
         }
         
-        if let cache = cache {
-            if let match = cache.types[typeName] {
-                if let method = method(matchingSelector: selector, in: match.knownMethods),
-                    method.isStatic == isStatic {
-                    return method
-                }
-            }
-            
-            return super.method(withObjcSelector: selector, static: isStatic,
-                                includeOptional: includeOptional, in: type)
-        }
-        
-        for file in intentions.fileIntentions() {
-            for type in file.typeIntentions where type.typeName == typeName {
-                if let method = type.method(matchingSelector: selector), method.isStatic == isStatic {
-                    return method
-                }
+        if let type = intentionsProvider.knownType(withName: typeName) {
+            if let method = method(matchingSelector: selector, in: type.knownMethods), method.isStatic == isStatic {
+                return method
             }
         }
         
@@ -1010,9 +920,88 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
     }
     
-    private struct Cache {
-        var typeAliases: [String: SwiftType]
-        var types: [String: CompoundKnownType]
+    private class IntentionCollectionProvider: TypealiasProvider, KnownTypeProvider {
+        var cache: Cache?
+        
+        var intentions: IntentionCollection
+        weak var typeSystem: DefaultTypeSystem?
+        
+        init(intentions: IntentionCollection, typeSystem: DefaultTypeSystem?) {
+            self.intentions = intentions
+            self.typeSystem = typeSystem
+        }
+        
+        func knownType(withName name: String) -> KnownType? {
+            if let cache = cache {
+                if let match = cache.types[name] {
+                    return match
+                }
+                
+                return nil
+            }
+            
+            guard let typeSystem = typeSystem else {
+                return nil
+            }
+            
+            // Search in type intentions
+            var types: [KnownType] = []
+            for file in intentions.fileIntentions() {
+                for type in file.typeIntentions where type.typeName == name {
+                    types.append(type)
+                }
+            }
+            
+            guard !types.isEmpty else {
+                return nil
+            }
+            
+            // Single type found: Avoid complex merge operations and return it as is.
+            if types.count == 1 {
+                return types.first
+            }
+            
+            return CompoundKnownType(typeName: name, typeSystem: typeSystem, types: Array(types))
+        }
+        
+        func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
+            var types: [KnownType] = []
+            
+            if let cache = cache {
+                for type in cache.types.values where type.kind == kind {
+                    types.append(type)
+                }
+            } else {
+                for file in intentions.fileIntentions() {
+                    for type in file.typeIntentions where type.kind == kind {
+                        types.append(type)
+                    }
+                }
+            }
+            
+            return types
+        }
+        
+        func unalias(_ typeName: String) -> SwiftType? {
+            if let cache = cache {
+                if let alias = cache.typeAliases[typeName] {
+                    return alias
+                }
+            } else {
+                for file in intentions.fileIntentions() {
+                    for alias in file.typealiasIntentions where alias.name == typeName {
+                        return alias.fromType
+                    }
+                }
+            }
+            
+            return nil
+        }
+        
+        struct Cache {
+            var typeAliases: [String: SwiftType]
+            var types: [String: CompoundKnownType]
+        }
     }
 }
 

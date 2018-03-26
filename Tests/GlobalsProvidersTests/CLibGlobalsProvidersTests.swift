@@ -10,8 +10,8 @@ class CLibGlobalsProvidersTests: BaseGlobalsProviderTestCase {
         sut = CLibGlobalsProviders()
         
         globals = sut.definitionsSource()
-        sut.registerTypes(in: types)
-        sut.registerTypealiases(in: typealiases)
+        types = sut.knownTypeProvider()
+        typealiases = sut.typealiasProvider()
     }
     
     func testDefinedMathLibFunctions() {

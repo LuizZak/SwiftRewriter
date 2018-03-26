@@ -7,16 +7,12 @@ public class OpenGLESGlobalsProvider: GlobalsProvider {
         
     }
     
-    public func registerTypes(in typeSink: KnownTypeSink) {
-        for def in OpenGLESGlobalsProvider.provider.types {
-            typeSink.addType(def)
-        }
+    public func knownTypeProvider() -> KnownTypeProvider {
+        return CollectionKnownTypeProvider(knownTypes: OpenGLESGlobalsProvider.provider.types)
     }
     
-    public func registerTypealiases(in typealiasSink: TypealiasSink) {
-        for (name, type) in OpenGLESGlobalsProvider.provider.typealiases {
-            typealiasSink.addTypealias(aliasName: name, originalType: type)
-        }
+    public func typealiasProvider() -> TypealiasProvider {
+        return CollectionTypealiasProvider(aliases: OpenGLESGlobalsProvider.provider.typealiases)
     }
     
     public func definitionsSource() -> DefinitionsSource {
