@@ -211,9 +211,7 @@ class SuggestConversionInterface {
             let stopwatch = Stopwatch.start()
             
             try autoreleasepool {
-                let rewriter = SwiftRewriterServiceImpl.fileDiskService
-                
-                try rewriter.rewrite(files: objcFiles)
+                try rewriterService.rewrite(files: objcFiles)
             }
             
             let duration = stopwatch.stop()

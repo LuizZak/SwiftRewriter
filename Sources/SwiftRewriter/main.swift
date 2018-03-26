@@ -4,11 +4,31 @@ import Utility
 import Console
 import SwiftRewriterLib
 
+enum Target: String, ArgumentKind {
+    case stdout
+    case filedisk
+    
+    init(argument: String) throws {
+        if let value = Target(rawValue: argument) {
+            self = value
+        } else {
+            throw ArgumentParserError.invalidValue(argument: argument, error: ArgumentConversionError.custom("Expected either 'stdout' or 'filedisk'"))
+        }
+    }
+    
+    static var completion: ShellCompletion {
+        return ShellCompletion.values([
+            ("terminal", "Prints output of conversion to the terminal's standard output."),
+            ("filedisk", "Saves output of conersion to the filedisk as .swift files on the same folder as the input files.")
+        ])
+    }
+}
+
 let parser =
     ArgumentParser(
         usage: """
         [--colorize] [--print-expression-types] [--print-tracing-history] \
-        [--verbose] [--num-threads <n>]
+        [--verbose] [--num-threads <n>] [--target stdout | filedisk]
         [files <files...> \
         | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]
         """,
@@ -60,6 +80,21 @@ let omitObjcCompatibilityArg
         usage: """
         Don't emit '@objc' attributes on definitions, and don't emit NSObject subclass \
         and NSObjectProtocol conformance by default.
+        """)
+
+//// --target stdout | filedisk
+let targetArg
+    = parser.add(
+        option: "--target", kind: Target.self,
+        usage: """
+        Specifies the output target for the conversion.
+        Defaults to 'filedisk' if not provided.
+        
+            stdout
+                Prints the conversion results to the terminal's standard output;
+            
+            filedisk
+                Saves output of conersion to the filedisk as .swift files on the same folder as the input files.
         """)
 
 //// files <files...>
@@ -124,14 +159,22 @@ do {
     Settings.astWriter.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
     Settings.astWriter.omitObjcCompatibility = result.get(omitObjcCompatibilityArg) ?? false
     
+    let target = result.get(targetArg) ?? .filedisk
+    
+    let rewriter: SwiftRewriterService
+    
+    switch target {
+    case .filedisk:
+        rewriter = SwiftRewriterServiceImpl.fileDisk()
+    case .stdout:
+        rewriter = SwiftRewriterServiceImpl.terminal(colorize: colorize)
+    }
+    
     if result.subparser(parser) == "files" {
         guard let files = result.get(filesArg) else {
             throw Utility.ArgumentParserError.expectedValue(option: "<files...>")
         }
         
-        let output = StdoutWriterOutput(colorize: colorize)
-        
-        let rewriter: SwiftRewriterService = SwiftRewriterServiceImpl(output: output)
         try rewriter.rewrite(files: files.map { URL(fileURLWithPath: $0) })
         
     } else if result.subparser(parser) == "path" {
@@ -144,16 +187,14 @@ do {
         let includePattern = result.get(includePatternArg)
         let overwrite = result.get(overwriteArg) ?? false
         
-        let service = SwiftRewriterServiceImpl.fileDiskService
-        
         let console = Console()
-        let menu = Menu(rewriterService: service, console: console)
+        let menu = Menu(rewriterService: rewriter, console: console)
         
         let options: SuggestConversionInterface.Options
             = .init(overwrite: overwrite, skipConfirm: skipConfirm,
                     excludePattern: excludePattern, includePattern: includePattern)
         
-        let interface = SuggestConversionInterface(rewriterService: service)
+        let interface = SuggestConversionInterface(rewriterService: rewriter)
         interface.searchAndShowConfirm(in: menu,
                                        path: (path as NSString).standardizingPath,
                                        options: options)
