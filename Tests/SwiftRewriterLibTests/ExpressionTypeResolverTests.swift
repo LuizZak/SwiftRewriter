@@ -131,12 +131,19 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: nil) // Invalid operands
     }
     
-    func testBitwiseBinary() {
+    func testBitwiseBinaryDeducesResultAsOperandTypes() {
         func test(_ op: SwiftOperator, line: Int = #line) {
             assertResolve(.binary(lhs: .constant(1), op: op, rhs: .constant(2)),
                           expect: .int, line: line)
+            
+            assertResolve(.binary(lhs: Expression.constant(1).typed("UInt32"),
+                                  op: op,
+                                  rhs: Expression.constant(2).typed("UInt32")),
+                          expect: .typeName("UInt32"), line: line)
+            
             assertResolve(.binary(lhs: .constant(2.0), op: op, rhs: .constant(2.0)),
                           expect: nil, line: line) // Invalid operands
+            
             assertResolve(.binary(lhs: .constant(true), op: op, rhs: .constant(2)),
                           expect: nil, line: line) // Invalid operands
         }
@@ -144,9 +151,22 @@ class ExpressionTypeResolverTests: XCTestCase {
         test(.bitwiseAnd)
         test(.bitwiseOr)
         test(.bitwiseXor)
+    }
+    
+    func testBitwiseBinaryDeducesResultAsOperandTypesWithTypealiases() {
+        func test(_ op: SwiftOperator, line: Int = #line) {
+            startScopedTest(with: .binary(lhs: Expression.constant(1).typed("GLenum"),
+                                          op: op,
+                                          rhs: Expression.constant(2).typed("GLenum")),
+                            sut: ExpressionTypeResolver())
+                .definingTypeAlias("GLenum", type: "UInt32")
+                .resolve()
+                .thenAssertExpression(resolvedAs: "GLenum")
+        }
         
-        assertResolve(.binary(lhs: .constant(1), op: .bitwiseNot, rhs: .constant(2)),
-                      expect: nil) // Bitwise not is a unary operator
+        test(.bitwiseAnd)
+        test(.bitwiseOr)
+        test(.bitwiseXor)
     }
     
     func testTernary() {

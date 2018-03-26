@@ -67,6 +67,14 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.isNumeric(.typeName("CBool")))
     }
     
+    func testIsIntegerTypealiased() {
+        sut.addTypealias(aliasName: "Alias", originalType: .int)
+        sut.addTypealias(aliasName: "NonIntegerAlias", originalType: .float)
+        
+        XCTAssert(sut.isInteger("Alias"))
+        XCTAssertFalse(sut.isInteger("NonIntegerAlias"))
+    }
+    
     func testIsTypeSubtypeOf() {
         let typeA = KnownTypeBuilder(typeName: "A").build()
         let typeB = KnownTypeBuilder(typeName: "B", supertype: typeA).build()
@@ -463,5 +471,11 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.isClassInstanceType(protocolType.typeName))
         XCTAssertFalse(sut.isClassInstanceType(structType.typeName))
         XCTAssertFalse(sut.isClassInstanceType(enumType.typeName))
+    }
+    
+    func testCategoryForTypeWithTypealias() {
+        sut.addTypealias(aliasName: "GLenum", originalType: "UInt32")
+        
+        XCTAssertEqual(sut.category(forType: "GLenum"), .integer)
     }
 }

@@ -187,11 +187,17 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func category(forType type: String) -> TypeCategory {
-        if isInteger(.typeName(type)) {
+        let aliasedType = resolveAlias(in: type)
+        
+        if isInteger(aliasedType) {
             return .integer
         }
         
-        switch type {
+        guard let aliased = typeNameIn(swiftType: aliasedType) else {
+            return .unknown
+        }
+        
+        switch aliased {
         case "Bool", "ObjCBool":
             return .boolean
         case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
@@ -200,7 +206,7 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
             break
         }
         
-        if let type = self.knownTypeWithName(type) {
+        if let type = self.knownTypeWithName(aliased) {
             switch type.kind {
             case .class:
                 return .class
@@ -283,7 +289,9 @@ public class DefaultTypeSystem: TypeSystem, KnownTypeSink {
     }
     
     public func isInteger(_ type: SwiftType) -> Bool {
-        switch type {
+        let aliased = resolveAlias(in: type)
+        
+        switch aliased {
         case .int, .uint:
             return true
         case .nominal(.typeName(let name)):
