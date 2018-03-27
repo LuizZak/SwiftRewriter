@@ -453,6 +453,48 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // End of file B.swift
             """)
     }
+    
+    func testHandleMultifileTypesInheritingFromTypesDefinedInGlobalProviders() {
+        assertThat()
+            .file(name: "A.h", """
+            @interface A: UIView
+            @property (nullable) B* b;
+            @end
+            """)
+            .file(name: "A.m", """
+            @implementation A
+            - (void)test {
+                (self.window.bounds);
+                (self.b.bounds);
+            }
+            @end
+            """)
+            .file(name: "B.h", """
+            @interface B: UIView
+            @end
+            """)
+            .translatesToSwift(
+            """
+            @objc
+            class A: UIView {
+                @objc var b: B?
+                
+                @objc
+                func test() {
+                    // type: CGRect?
+                    self.window?.bounds
+                    // type: CGRect?
+                    self.b?.bounds
+                }
+            }
+            // End of file A.swift
+            @objc
+            class B: UIView {
+            }
+            // End of file B.swift
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
 
 extension SwiftRewriter_MultiFilesTests {

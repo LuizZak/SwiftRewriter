@@ -51,11 +51,11 @@ class SwiftRewriter_GlobalsProvidersTests: XCTestCase {
             class A: UIView {
                 @objc
                 func method() {
-                    
-                }
-                @objc
-                func takesFrame(_ frame: CGRect) {
-                    
+                    var some: UIView?
+                    if let some = some {
+                        // type: Void
+                        self.addSubview(some)
+                    }
                 }
             }
             """,
