@@ -23,14 +23,11 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                      returnType: .optional(.typeName("CGContext"))))
         
         add(CodeDefinition(variableNamed: "UIViewNoIntrinsicMetric",
-                           storage: ValueStorage.constant(ofType: .cgFloat),
-                           intention: nil))
+                           storage: ValueStorage.constant(ofType: .cgFloat)))
         add(CodeDefinition(variableNamed: "UILayoutFittingCompressedSize",
-                           storage: ValueStorage.constant(ofType: "CGSize"),
-                           intention: nil))
+                           storage: ValueStorage.constant(ofType: "CGSize")))
         add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
-                           storage: ValueStorage.constant(ofType: "CGSize"),
-                           intention: nil))
+                           storage: ValueStorage.constant(ofType: "CGSize")))
     }
     
     func createUIViewController() {

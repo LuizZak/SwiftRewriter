@@ -301,7 +301,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testIdentifier() {
-        let definition = CodeDefinition(variableNamed: "i", type: .int, intention: nil)
+        let definition = CodeDefinition(variableNamed: "i", type: .int)
         
         startScopedTest(with: IdentifierExpression(identifier: "i"), sut: ExpressionTypeResolver())
             .definingLocal(definition)
@@ -753,6 +753,17 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(at: \Expression.asPostfix?.functionCall?.arguments[0].expression, expectsType: .int)
     }
     
+    /// Tests ternary expressions `<exp> ? <ifTrue> : <ifFalse>` have `<exp>`
+    /// properly set as expecting a boolean result type
+    func testTernaryExpressionSetsExpectedTypeOfTestExpressionToBoolean() {
+        _=startScopedTest(with:
+            Expression.ternary(.identifier("a"), true: .constant(0), false: .constant(0)),
+                          sut: ExpressionTypeResolver())
+            .definingLocal(name: "a", type: .bool)
+            .resolve()
+            .thenAssertExpression(at: \Expression.asTernary?.exp, expectsType: .bool)
+    }
+    
     /// Tests expressions on `if` statements have expectedType set to boolean.
     func testIfStatementSetsExpectedTypeOfExpressionsToBoolean() {
         _=startScopedTest(with:
@@ -853,7 +864,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testOptionalReturnTypeFromCodeDefinition() {
         startScopedTest(with: Expression.identifier("a").call(),
                         sut: ExpressionTypeResolver())
-            .definingLocal(CodeDefinition(functionSignature: FunctionSignature(name: "a", returnType: .optional(.string)), intention: nil))
+            .definingLocal(CodeDefinition(functionSignature: FunctionSignature(name: "a", returnType: .optional(.string))))
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.string))
     }

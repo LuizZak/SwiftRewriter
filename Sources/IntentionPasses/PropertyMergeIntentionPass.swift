@@ -8,6 +8,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     /// instantiated, +1.
     private var operationsNumber: Int = 1
     
+    private var intentions: IntentionCollection!
     private var context: IntentionPassContext!
     
     /// Textual tag this intention pass applies to history tracking entries.
@@ -20,10 +21,19 @@ public class PropertyMergeIntentionPass: IntentionPass {
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        self.intentions = intentionCollection
         self.context = context
+        
+        var classesSeen: Set<String> = []
         
         for file in intentionCollection.fileIntentions() {
             for cls in file.typeIntentions.compactMap({ $0 as? BaseClassIntention }) {
+                if classesSeen.contains(cls.typeName) {
+                    continue
+                }
+                
+                classesSeen.insert(cls.typeName)
+                
                 apply(on: cls)
             }
         }
@@ -82,11 +92,19 @@ public class PropertyMergeIntentionPass: IntentionPass {
     }
     
     func collectProperties(fromClass classIntention: BaseClassIntention) -> [PropertyGenerationIntention] {
-        return classIntention.properties
+        return
+            intentions
+                .typeIntentions()
+                .filter({ $0.typeName == classIntention.typeName })
+                .flatMap { $0.properties }
     }
     
     func collectMethods(fromClass classIntention: BaseClassIntention) -> [MethodGenerationIntention] {
-        return classIntention.methods
+        return
+            intentions
+                .typeIntentions()
+                .filter({ $0.typeName == classIntention.typeName })
+                .flatMap { $0.methods }
     }
     
     private func synthesizeBackingFieldIfUsing(in intent: BaseClassIntention,
@@ -100,7 +118,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 }
             }
             
-            for prop in classIntention.properties {
+            for prop in collectProperties(fromClass: classIntention) {
                 if let getter = prop.getter {
                     bodies.append(getter)
                 }
@@ -199,9 +217,17 @@ public class PropertyMergeIntentionPass: IntentionPass {
     ///
     /// Returns `false` if the method ended up making no changes.
     private func joinPropertySet(_ propertySet: PropertySet, on classIntention: BaseClassIntention) -> Bool {
+        guard let propertyOwner = propertySet.property.type else {
+            return false
+        }
+        
         switch (propertySet.getter, propertySet.setter) {
         // Getter and setter: Create a property with `{ get { [...] } set { [...] }`
         case let (getter?, setter?):
+            guard let getterOwner = getter.type, let setterOwner = setter.type else {
+                return false
+            }
+            
             let finalGetter: FunctionBodyIntention
             let finalSetter: PropertyGenerationIntention.Setter
             
@@ -223,32 +249,32 @@ public class PropertyMergeIntentionPass: IntentionPass {
             propertySet.property.mode = .property(get: finalGetter, set: finalSetter)
             
             // Remove the original method intentions
-            classIntention.removeMethod(getter)
-            classIntention.removeMethod(setter)
+            getterOwner.removeMethod(getter)
+            setterOwner.removeMethod(setter)
             
             propertySet.property
                 .history
                 .recordChange(tag: historyTag,
                               description: """
-                    Merged \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
-                    and \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
-                    into property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    Merged \(TypeFormatter.asString(method: getter, ofType: propertyOwner)) \
+                    and \(TypeFormatter.asString(method: setter, ofType: propertyOwner)) \
+                    into property \(TypeFormatter.asString(property: propertySet.property, ofType: propertyOwner))
                     """, relatedIntentions: [getter, setter, propertySet.property])
             
-            classIntention.history
+            getterOwner.history
                 .recordChange(tag: historyTag,
                               description: """
-                    Removed method \(TypeFormatter.asString(method: getter, ofType: classIntention)) since deduced it \
+                    Removed method \(TypeFormatter.asString(method: getter, ofType: getterOwner)) since deduced it \
                     is a getter for property \
-                    \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    \(TypeFormatter.asString(property: propertySet.property, ofType: getterOwner))
                     """)
             
-            classIntention.history
+            setterOwner.history
                 .recordChange(tag: historyTag,
                               description: """
-                    Removed method \(TypeFormatter.asString(method: setter, ofType: classIntention)) since deduced it \
+                    Removed method \(TypeFormatter.asString(method: setter, ofType: setterOwner)) since deduced it \
                     is a setter for property \
-                    \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    \(TypeFormatter.asString(property: propertySet.property, ofType: setterOwner))
                     """)
             
             operationsNumber += 1
@@ -259,20 +285,24 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
         // Getter-only on readonly property: Create computed property.
         case let (getter?, nil) where propertySet.property.isReadOnly:
+            guard let getterOwner = getter.type else {
+                return false
+            }
+            
             let getterBody = getter.functionBody ?? FunctionBodyIntention(body: [])
             
             propertySet.property.mode = .computed(getterBody)
             
             // Remove the original method intention
-            classIntention.removeMethod(getter)
+            getterOwner.removeMethod(getter)
             
-            classIntention
+            getterOwner
                 .history
                 .recordChange(tag: historyTag,
                               description: """
-                    Merged getter method \(TypeFormatter.asString(method: getter, ofType: classIntention)) \
+                    Merged getter method \(TypeFormatter.asString(method: getter, ofType: getterOwner)) \
                     into the getter-only property \
-                    \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention))
+                    \(TypeFormatter.asString(property: propertySet.property, ofType: getterOwner))
                     """, relatedIntentions: [propertySet.property, getterBody])
                 .echoRecord(to: propertySet.property)
                 .echoRecord(to: getterBody)
@@ -286,10 +316,14 @@ public class PropertyMergeIntentionPass: IntentionPass {
         // Setter-only: Synthesize the backing field of the property and expose
         // a default getter `return _field` and the found setter.
         case let (nil, setter?):
-            classIntention.removeMethod(setter)
+            guard let setterOwner = setter.type else {
+                return false
+            }
+            
+            setterOwner.removeMethod(setter)
             
             guard let setterBody = setter.functionBody else {
-                return false
+                return true
             }
             
             let backingFieldName = "_" + propertySet.property.name
@@ -308,14 +342,14 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             let field = synthesizeBackingField(for: propertySet.property, in: classIntention)
             
-            classIntention
+            setterOwner
                 .history
                 .recordChange(tag: historyTag,
                               description: """
-                    Merged found setter method \(TypeFormatter.asString(method: setter, ofType: classIntention)) \
-                    into property \(TypeFormatter.asString(property: propertySet.property, ofType: classIntention)) \
+                    Merged found setter method \(TypeFormatter.asString(method: setter, ofType: setterOwner)) \
+                    into property \(TypeFormatter.asString(property: propertySet.property, ofType: setterOwner)) \
                     and creating a getter body + synthesized backing field \
-                    \(TypeFormatter.asString(field: field, ofType: classIntention))
+                    \(TypeFormatter.asString(field: field, ofType: setterOwner))
                     """, relatedIntentions: [field, setter, propertySet.property])
                 .echoRecord(to: field)
                 .echoRecord(to: setter)

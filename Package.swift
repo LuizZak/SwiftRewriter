@@ -92,7 +92,7 @@ let package = Package(
             dependencies: ["GrammarModels"]),
         .testTarget(
             name: "SwiftASTTests",
-            dependencies: ["SwiftAST"]),
+            dependencies: ["SwiftAST", "TestCommons"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",

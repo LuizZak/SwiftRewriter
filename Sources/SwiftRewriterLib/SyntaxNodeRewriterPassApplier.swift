@@ -73,7 +73,6 @@ private class InternalSyntaxNodeApplier {
             TypeResolverIntrinsicsBuilder(
                 typeResolver: typeResolver,
                 globals: globals,
-                globalVariables: [],
                 typeSystem: typeSystem)
         
         self.passes = passes

@@ -105,7 +105,15 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.defaultValue(for: .optional(.int)), .constant(.nil))
         XCTAssertEqual(sut.defaultValue(for: .optional(.string)), .constant(.nil))
         XCTAssertEqual(sut.defaultValue(for: .optional(.double)), .constant(.nil))
+    }
+    
+    func testDefaultValueForOptionalOfArrayOfIntegers() {
         XCTAssertEqual(sut.defaultValue(for: .optional(.array(.int))), .constant(.nil))
+    }
+    
+    func testResolveTypeAliasesInOptionalArrayOfInts() {
+        XCTAssertEqual(sut.resolveAlias(in: .optional(.array(.int))),
+                       .optional(.array(.int)))
     }
     
     func testIsNumeric() {
@@ -558,5 +566,22 @@ class DefaultTypeSystemTests: XCTestCase {
         sut.addTypealias(aliasName: "GLenum", originalType: "UInt32")
         
         XCTAssertEqual(sut.category(forType: "GLenum"), .integer)
+    }
+    
+    func testTypeExists() {
+        let type = KnownTypeBuilder(typeName: "A").build()
+        sut.addType(type)
+        
+        XCTAssert(sut.typeExists("A"))
+        XCTAssertFalse(sut.typeExists("Unknown"))
+    }
+    
+    func testTypeExistsQueriesTypeProviders() {
+        let type = KnownTypeBuilder(typeName: "A").build()
+        let provider = CollectionKnownTypeProvider(knownTypes: [type])
+        sut.addKnownTypeProvider(provider)
+        
+        XCTAssert(sut.typeExists("A"))
+        XCTAssertFalse(sut.typeExists("Unknown"))
     }
 }

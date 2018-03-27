@@ -300,10 +300,6 @@ public class SwiftRewriter {
         
         let globals = CompoundDefinitionsSource()
         
-        let typeResolverInvoker =
-            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
-                                       numThreads: settings.numThreads)
-        
         if settings.verbose {
             print("Running intention passes...")
         }
@@ -312,9 +308,13 @@ public class SwiftRewriter {
         for provider in globalsProvidersSource.globalsProviders {
             globals.addSource(provider.definitionsSource())
             
-            typeSystem.typealiasProviders.providers.append(provider.typealiasProvider())
-            typeSystem.knownTypeProviders.providers.append(provider.knownTypeProvider())
+            typeSystem.addTypealiasProvider(provider.typealiasProvider())
+            typeSystem.addKnownTypeProvider(provider.knownTypeProvider())
         }
+        
+        let typeResolverInvoker =
+            DefaultTypeResolverInvoker(globals: globals, typeSystem: typeSystem,
+                                       numThreads: settings.numThreads)
         
         // Make a pre-type resolve before applying passes
         typeResolverInvoker.resolveAllExpressionTypes(in: intentionCollection, force: true)

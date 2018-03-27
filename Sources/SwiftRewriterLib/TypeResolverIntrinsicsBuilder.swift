@@ -10,16 +10,12 @@ class TypeResolverIntrinsicsBuilder {
     private var typeSystem: TypeSystem
     private var miscellaneousDefinitions: DefaultCodeScope = DefaultCodeScope()
     
-    var globalVariables: [GlobalVariableGenerationIntention] = []
-    
     init(typeResolver: ExpressionTypeResolver,
          globals: DefinitionsSource,
-         globalVariables: [GlobalVariableGenerationIntention],
          typeSystem: TypeSystem) {
         
         self.typeResolver = typeResolver
         self.globals = globals
-        self.globalVariables = globalVariables
         self.typeResolver = typeResolver
         self.typeSystem = typeSystem
     }
@@ -45,8 +41,7 @@ class TypeResolverIntrinsicsBuilder {
         miscellaneousDefinitions
             .recordDefinition(
                 CodeDefinition(variableNamed: setter.valueIdentifier,
-                               type: type,
-                               intention: nil
+                               type: type
                 )
             )
     }
@@ -84,23 +79,20 @@ class TypeResolverIntrinsicsBuilder {
             
             intrinsics.recordDefinition(
                 CodeDefinition(variableNamed: "self",
-                               storage: selfStorage,
-                               intention: type)
+                               storage: selfStorage)
             )
             
             // Record all known static properties visible
             if let knownType = typeSystem.knownTypeWithName(type.typeName) {
                 for prop in knownType.knownProperties where prop.isStatic == member.isStatic {
                     intrinsics.recordDefinition(
-                        CodeDefinition(variableNamed: prop.name, storage: prop.storage,
-                                       intention: prop as? Intention)
+                        CodeDefinition(variableNamed: prop.name, storage: prop.storage)
                     )
                 }
                 
                 for field in knownType.knownFields where field.isStatic == member.isStatic {
                     intrinsics.recordDefinition(
-                        CodeDefinition(variableNamed: field.name, storage: field.storage,
-                                       intention: field as? Intention)
+                        CodeDefinition(variableNamed: field.name, storage: field.storage)
                     )
                 }
             }
@@ -110,69 +102,79 @@ class TypeResolverIntrinsicsBuilder {
         if let function = member as? FunctionIntention {
             for param in function.parameters {
                 intrinsics.recordDefinition(
-                    CodeDefinition(variableNamed: param.name, type: param.type,
-                                   intention: function)
+                    CodeDefinition(variableNamed: param.name, type: param.type)
                 )
             }
         }
         
-        // Push file-level global variables
-        let globalVars =
-            GlobalVariablesSource(variables: intentions.globalVariables(), functions: intentions.globalFunctions(), symbol: member)
+        // Push file-level global definitions (variables and functions)
+        let intentionGlobals =
+            IntentionCollectionGlobalsDefinitionsSource(intentions: intentions, symbol: member)
         
         // Push global definitions
         let compoundIntrinsics = CompoundDefinitionsSource()
         
         compoundIntrinsics.addSource(intrinsics)
-        compoundIntrinsics.addSource(globalVars)
+        compoundIntrinsics.addSource(intentionGlobals)
         compoundIntrinsics.addSource(miscellaneousDefinitions)
         compoundIntrinsics.addSource(globals)
         
         return compoundIntrinsics
     }
+}
+
+private class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
+    var intentions: IntentionCollection
+    var symbol: FromSourceIntention
     
-    private class GlobalVariablesSource: DefinitionsSource {
-        var variables: [GlobalVariableGenerationIntention]
-        var functions: [GlobalFunctionGenerationIntention]
-        var symbol: FromSourceIntention
-        
-        init(variables: [GlobalVariableGenerationIntention], functions: [GlobalFunctionGenerationIntention], symbol: FromSourceIntention) {
-            self.variables = variables
-            self.functions = functions
-            self.symbol = symbol
-        }
-        
-        func definition(named name: String) -> CodeDefinition? {
-            for global in variables {
-                if global.name == name && global.isVisible(for: symbol) {
-                    return
+    init(intentions: IntentionCollection, symbol: FromSourceIntention) {
+        self.intentions = intentions
+        self.symbol = symbol
+    }
+    
+    func definition(named name: String) -> CodeDefinition? {
+        for file in intentions.fileIntentions() {
+            for global in file.globalVariableIntentions where global.name == name {
+                if global.isVisible(for: symbol) {
+                    let def =
                         CodeDefinition(variableNamed: global.name,
-                                       storage: global.storage,
-                                       intention: global)
+                                       storage: global.storage)
+                    
+                    return def
                 }
             }
             
-            for global in functions {
-                if global.name == name && global.isVisible(for: symbol) {
-                    return
-                        CodeDefinition(functionSignature: global.signature,
-                                       intention: global)
+            for global in file.globalFunctionIntentions where global.name == name {
+                if global.isVisible(for: symbol) {
+                    let def =
+                        CodeDefinition(functionSignature: global.signature)
+                    
+                    return def
                 }
             }
-            
-            return nil
         }
         
-        func allDefinitions() -> [CodeDefinition] {
-            return
-                variables
-                    .filter { global in
-                        global.isVisible(for: symbol)
-                    }.map {
-                        CodeDefinition(variableNamed: $0.name,
-                                       storage: $0.storage,
-                                       intention: $0)
-            }
-        }
+        return nil
+    }
+    
+    func allDefinitions() -> [CodeDefinition] {
+        let variables =
+            intentions.globalVariables()
+                .filter { global in
+                    global.isVisible(for: symbol)
+                }.map { global in
+                    CodeDefinition(variableNamed: global.name,
+                                   storage: global.storage)
+                }
+        
+        let functions =
+            intentions.globalFunctions()
+                .filter { global in
+                    global.isVisible(for: symbol)
+                }.map { global in
+                    CodeDefinition(functionSignature: global.signature)
+                }
+        
+        return variables + functions
     }
 }

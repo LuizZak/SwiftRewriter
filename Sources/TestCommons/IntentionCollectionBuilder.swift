@@ -225,8 +225,10 @@ public class MemberBuilder<T: MemberGenerationIntention> {
         self.targetMember = targetMember
     }
     
-    public func setAccessLevel(_ accessLevel: AccessLevel) {
+    @discardableResult
+    public func setAccessLevel(_ accessLevel: AccessLevel) -> MemberBuilder  {
         targetMember.accessLevel = accessLevel
+        return self
     }
     
     public func build() -> T {
@@ -235,8 +237,10 @@ public class MemberBuilder<T: MemberGenerationIntention> {
 }
 
 public extension MemberBuilder where T: OverridableMemberGenerationIntention {
-    public func setIsOverride(_ isOverride: Bool) {
+    @discardableResult
+    public func setIsOverride(_ isOverride: Bool) -> MemberBuilder  {
         targetMember.isOverride = isOverride
+        return self
     }
 }
 

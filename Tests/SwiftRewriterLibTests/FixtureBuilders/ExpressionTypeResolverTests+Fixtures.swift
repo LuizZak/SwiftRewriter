@@ -33,7 +33,7 @@ protocol ExpressionTestResolverTestFixture {
 
 extension ExpressionTestResolverTestFixture {
     func definingLocal(name: String, type: SwiftType) -> Self {
-        let definition = CodeDefinition(variableNamed: name, type: type, intention: nil)
+        let definition = CodeDefinition(variableNamed: name, type: type)
         
         return definingLocal(definition)
     }
@@ -45,7 +45,7 @@ extension ExpressionTestResolverTestFixture {
     }
     
     func definingIntrinsic(name: String, type: SwiftType) -> Self {
-        let definition = CodeDefinition(variableNamed: name, type: type, intention: nil)
+        let definition = CodeDefinition(variableNamed: name, type: type)
         
         return definingIntrinsic(definition)
     }

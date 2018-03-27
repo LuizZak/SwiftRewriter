@@ -11,20 +11,28 @@ public class DefaultTypeSystem: TypeSystem {
     private var initializedCache = false
     
     /// Type-aliases
-    var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
-    var typealiasProviders: CompoundTypealiasProvider
+    fileprivate var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
+    fileprivate var typealiasProviders: CompoundTypealiasProvider
     
     // Known types
-    var innerKnownTypes = CollectionKnownTypeProvider(knownTypes: [])
-    var knownTypeProviders: CompoundKnownTypeProvider
+    fileprivate var innerKnownTypes = CollectionKnownTypeProvider(knownTypes: [])
+    fileprivate var knownTypeProviders: CompoundKnownTypeProvider
     
-    var typesByName: [String: KnownType] = [:]
+    private var typesByName: [String: KnownType] = [:]
     
     public init() {
         typealiasProviders = CompoundTypealiasProvider(providers: [innerAliasesProvider])
         knownTypeProviders = CompoundKnownTypeProvider(providers: [innerKnownTypes])
         
         registerInitialKnownTypes()
+    }
+    
+    public func addTypealiasProvider(_ provider: TypealiasProvider) {
+        typealiasProviders.providers.append(provider)
+    }
+    
+    public func addKnownTypeProvider(_ provider: KnownTypeProvider) {
+        knownTypeProviders.providers.append(provider)
     }
     
     /// Resets the storage of all known types and type aliases to the default
@@ -68,7 +76,15 @@ public class DefaultTypeSystem: TypeSystem {
             return false
         }
         
-        return typesByName.keys.contains(name)
+        if typesByName.keys.contains(name) {
+            return true
+        }
+        
+        if knownTypeProviders.knownType(withName: name) != nil {
+            return true
+        }
+        
+        return false
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
@@ -611,7 +627,9 @@ public class DefaultTypeSystem: TypeSystem {
             case .typeName(let name):
                 return .typeName(expand(inString: name))
             case let .generic(name, parameters):
-                return .generic(expand(inString: name), parameters: .fromCollection(parameters.map(expand)))
+                if case .tail = parameters { } // Here to avoid a weird crash due to a compiler bug when accessing parameters without destructuring it first
+                return .generic(expand(inString: name),
+                                parameters: .fromCollection(parameters.map(expand)))
             }
         }
         

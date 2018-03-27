@@ -465,6 +465,8 @@ public class SwiftTypeParser {
                 return try .protocolComposition(verifyProtocolCompositionTrailing(after: [nominal], lexer: lexer))
             case .protocolComposition(let composition):
                 return try .protocolComposition(verifyProtocolCompositionTrailing(after: Array(composition), lexer: lexer))
+            default:
+                throw notProtocolComposableError(type: parameters[0], lexer: lexer)
             }
         }
         

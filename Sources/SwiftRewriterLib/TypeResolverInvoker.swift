@@ -36,8 +36,6 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         
         for file in intentions.fileIntentions() {
             let invoker = makeResolverInvoker(forceResolve: force)
-            invoker.collectGlobalVariables()
-            
             queue.addOperation {
                 invoker.applyOnFile(file)
             }
@@ -50,14 +48,12 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     public func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool) {
         let invoker = makeResolverInvoker(forceResolve: force)
-        invoker.collectGlobalVariables()
         
         invoker.applyOnMethod(method)
     }
     
     public func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool) {
         let invoker = makeResolverInvoker(forceResolve: force)
-        invoker.collectGlobalVariables()
         
         invoker.applyOnProperty(property)
     }
@@ -93,7 +89,6 @@ private class InternalTypeResolverInvoker {
             TypeResolverIntrinsicsBuilder(
                 typeResolver: typeResolver,
                 globals: globals,
-                globalVariables: [],
                 typeSystem: typeSystem)
         
         self.globals = globals
@@ -101,21 +96,7 @@ private class InternalTypeResolverInvoker {
         self.typeResolver = typeResolver
     }
     
-    func collectGlobalVariables() {
-        var globalVariables: [GlobalVariableGenerationIntention] = []
-        
-        for file in intentions.fileIntentions() {
-            for global in file.globalVariableIntentions {
-                globalVariables.append(global)
-            }
-        }
-        
-        intrinsicsBuilder.globalVariables = globalVariables
-    }
-    
     func apply(on intentions: IntentionCollection) {
-        collectGlobalVariables()
-        
         for file in intentions.fileIntentions() {
             applyOnFile(file)
         }

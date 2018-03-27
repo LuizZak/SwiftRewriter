@@ -61,11 +61,11 @@ public class BaseGlobalsProvider: GlobalsProvider {
     
     func constant(name: String, type: SwiftType) -> CodeDefinition {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: true)
-        return CodeDefinition(variableNamed: name, storage: storage, intention: nil)
+        return CodeDefinition(variableNamed: name, storage: storage)
     }
     
     func variable(name: String, type: SwiftType) -> CodeDefinition {
-        return CodeDefinition(variableNamed: name, type: type, intention: nil)
+        return CodeDefinition(variableNamed: name, type: type)
     }
     
     func function(name: String, paramsSignature: String, returnType: SwiftType = .void) -> CodeDefinition {
@@ -75,7 +75,7 @@ public class BaseGlobalsProvider: GlobalsProvider {
             FunctionSignature(name: name, parameters: params,
                               returnType: returnType, isStatic: false)
         
-        let definition = CodeDefinition(functionSignature: signature, intention: nil)
+        let definition = CodeDefinition(functionSignature: signature)
         
         return definition
     }
@@ -90,7 +90,7 @@ public class BaseGlobalsProvider: GlobalsProvider {
             FunctionSignature(name: name, parameters: paramSignatures,
                               returnType: returnType, isStatic: false)
         
-        let definition = CodeDefinition(functionSignature: signature, intention: nil)
+        let definition = CodeDefinition(functionSignature: signature)
         
         return definition
     }

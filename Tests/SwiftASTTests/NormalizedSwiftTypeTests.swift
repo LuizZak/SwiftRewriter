@@ -28,6 +28,14 @@ class NormalizedSwiftTypeTests: XCTestCase {
         XCTAssertEqual(result, [1, 2, 3])
     }
     
+    func testIterateOneOrMoreOneItem() {
+        let sut: OneOrMore<Int> = .tail(1)
+        
+        let result = Array(sut)
+        
+        XCTAssertEqual(result, [1])
+    }
+    
     func testIterateOneOrMore() {
         let sut: OneOrMore<Int> = .list(1, .list(2, .tail(3)))
         

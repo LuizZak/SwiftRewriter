@@ -89,6 +89,51 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         }
     }
     
+    func testMergeReadonlyRespectsCustomizedGetterWithNonRelatedSetter() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { builder in
+                    builder
+                        .createInstanceVariable(named: "innerA", type: .int)
+                        .createProperty(named: "a", type: .int,
+                                        attributes: [.attribute("readonly")])
+                        .createMethod(named: "a", returnType: .int) { method in
+                            method.setBody([.return(.identifier("innerA"))])
+                        }.createMethod(named: "setA",
+                                       parameters: [
+                                        ParameterSignature(label: "_", name: "a", type: .int)]) { method in
+                                            method.setBody([
+                                                .expression(
+                                                    Expression
+                                                        .identifier("innerA")
+                                                        .assignment(op: .assign, rhs: .identifier("a")))
+                                                ])
+                                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.methods.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        switch cls.properties[0].mode {
+        case let .property(getter, setter):
+            XCTAssertEqual(getter.body, [.return(.identifier("innerA"))])
+            XCTAssertEqual(setter.body.body, [
+                .expression(
+                    Expression
+                        .identifier("innerA")
+                        .assignment(op: .assign, rhs: .identifier("a")))
+                ])
+            
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+    }
+    
     func testMergeInCategories() {
         let intentions =
             IntentionCollectionBuilder()
@@ -352,6 +397,116 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(cls.properties.count, 2)
         switch cls.properties[0].mode {
         case .asField:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+    }
+    
+    func testMergesPropertyAndAccessorMethodsBetweenExtensionsWithinFile() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { (file) in
+                    file.createClass(withName: "A") { type in
+                            type.createProperty(named: "a", type: .int)
+                        }.createExtension(forClassNamed: "A") { ext in
+                            ext.createMethod(named: "a", returnType: .int)
+                                .createMethod(named: "setA", parameters: [
+                                    ParameterSignature(label: "_", name: "a", type: .int)
+                                ])
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.methods.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        switch cls.properties[0].mode {
+        case .property:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+    }
+    
+    func testMergesPropertyAndAccessorMethodsBetweenExtensionsAcrossFiles() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { (file) in
+                    file.createClass(withName: "A") { type in
+                        type.createProperty(named: "a", type: .int)
+                    }
+                }.createFile(named: "A+Ext.h") { (file) in
+                    file.createExtension(forClassNamed: "A") { ext in
+                        ext.createMethod(named: "a", returnType: .int)
+                            .createMethod(named: "setA", parameters: [
+                                ParameterSignature(label: "_", name: "a", type: .int)
+                            ])
+                    }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.methods.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        switch cls.properties[0].mode {
+        case .property:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+    }
+    
+    /// Tests a bug where the existence of another type extension would execute
+    /// the analysis twice for the same type, resulting in overwriting of previous
+    /// work.
+    ///
+    /// Make sure we analyze a class as a whole a single time only.
+    func testDontOverwriteImplementationsWhileVisitingCategoriesOfType() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { (file) in
+                    file.createClass(withName: "A") { type in
+                        type.createProperty(named: "a", type: .int)
+                            .createMethod(named: "a", returnType: .int) { member in
+                                member.setBody([.expression(.identifier("test"))])
+                            }
+                            .createMethod(named: "setA",
+                                          parameters: [ParameterSignature(label: "_", name: "a", type: .int)]) { member in
+                                            member.setBody([.expression(.identifier("test"))])
+                                        }
+                        }.createExtension(forClassNamed: "A") { ext in
+                            ext.createMethod(named: "work") { work in
+                                work.setBody([
+                                    .expression(
+                                        Expression
+                                            .identifier("self")
+                                            .dot("_a")
+                                    )
+                                ])
+                            }
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.methods.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        switch cls.properties[0].mode {
+        case let .property(getter, setter):
+            
+            XCTAssertEqual(getter.body, [.expression(.identifier("test"))])
+            XCTAssertEqual(setter.body.body, [.expression(.identifier("test"))])
+            
             // Success
             break
         default:

@@ -206,9 +206,6 @@ public class CodeDefinition {
     
     public var kind: Kind
     
-    /// An optionally associated intention value
-    public var intention: Intention?
-    
     /// Gets the type signature for this definition.
     /// In case this is a function definition, the type represents the closure
     /// signature of the function.
@@ -221,20 +218,17 @@ public class CodeDefinition {
         }
     }
     
-    public convenience init(variableNamed name: String, type: SwiftType, intention: Intention?) {
+    public convenience init(variableNamed name: String, type: SwiftType) {
         self.init(variableNamed: name,
-                  storage: ValueStorage(type: type, ownership: .strong, isConstant: false),
-                  intention: intention)
+                  storage: ValueStorage(type: type, ownership: .strong, isConstant: false))
     }
     
-    public init(variableNamed name: String, storage: ValueStorage, intention: Intention?) {
+    public init(variableNamed name: String, storage: ValueStorage) {
         kind = .variable(name: name, storage: storage)
-        self.intention = intention
     }
     
-    public init(functionSignature: FunctionSignature, intention: Intention?) {
+    public init(functionSignature: FunctionSignature) {
         kind = .function(signature: functionSignature)
-        self.intention = intention
     }
     
     public enum Kind {

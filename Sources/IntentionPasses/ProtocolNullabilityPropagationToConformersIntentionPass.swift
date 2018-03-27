@@ -22,12 +22,15 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         }
         
         for cls in classes {
+            guard let type = context.typeSystem.knownTypeWithName(cls.typeName) else {
+                continue
+            }
+            
             // Find conforming protocols
             let knownProtocols =
                 protocols.filter { prot in
-                    cls.protocols.contains {
-                        $0.protocolName == prot.typeName
-                    }
+                    context.typeSystem
+                        .conformance(toProtocolName: prot.typeName, in: type) != nil
                 }
             
             for prot in knownProtocols {
