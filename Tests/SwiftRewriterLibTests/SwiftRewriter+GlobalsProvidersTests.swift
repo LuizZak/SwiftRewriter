@@ -32,33 +32,4 @@ class SwiftRewriter_GlobalsProvidersTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
-    
-    func testCaseThing() throws {
-        try assertObjcParse(
-            objc: """
-            @interface A : UIView
-            @end
-            
-            @implementation A
-            - (void)method {
-                UIView *_Nullable some;
-                [self addSubview:some];
-            }
-            @end
-            """,
-            swift: """
-            @objc
-            class A: UIView {
-                @objc
-                func method() {
-                    var some: UIView?
-                    if let some = some {
-                        // type: Void
-                        self.addSubview(some)
-                    }
-                }
-            }
-            """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
-    }
 }
