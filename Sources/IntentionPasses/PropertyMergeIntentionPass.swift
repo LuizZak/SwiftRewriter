@@ -107,34 +107,35 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .flatMap { $0.methods }
     }
     
-    private func synthesizeBackingFieldIfUsing(in intent: BaseClassIntention,
-                                               for prop: PropertyGenerationIntention) {
-        func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [FunctionBodyIntention] {
-            var bodies: [FunctionBodyIntention] = []
+    private func synthesizeBackingFieldIfUsing(in type: BaseClassIntention,
+                                               for property: PropertyGenerationIntention) {
+        
+        func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [(FunctionBodyIntention, source: String)] {
+            var bodies: [(FunctionBodyIntention, source: String)] = []
             
             for method in collectMethods(fromClass: classIntention) {
                 if let body = method.functionBody {
-                    bodies.append(body)
+                    bodies.append((body, TypeFormatter.asString(method: method, ofType: classIntention)))
                 }
             }
             
             for prop in collectProperties(fromClass: classIntention) {
                 if let getter = prop.getter {
-                    bodies.append(getter)
+                    bodies.append((getter, TypeFormatter.asString(property: prop, ofType: classIntention) + ":getter"))
                 }
                 if let setter = prop.setter {
-                    bodies.append(setter.body)
+                    bodies.append((setter.body, TypeFormatter.asString(property: prop, ofType: classIntention) + ":setter"))
                 }
             }
             
             return bodies
         }
         
-        let bodies = collectMethodBodies(fromClass: intent)
+        let bodies = collectMethodBodies(fromClass: type)
         
-        let fieldName = "_" + prop.name
+        let fieldName = backingFieldName(for: property, in: type)
         
-        for body in bodies {
+        for (body, source) in bodies {
             let matches =
                 SyntaxNodeSequence(statement: body.body, inspectBlocks: true)
                     .lazy
@@ -151,7 +152,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                                 return true
                             }
                             // Indirect type access
-                            if postfix.exp.resolvedType?.unwrapped == .typeName(intent.typeName) {
+                            if postfix.exp.resolvedType?.unwrapped == .typeName(type.typeName) {
                                 return true
                             }
                             
@@ -162,7 +163,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     }
             
             if matches {
-                let field = synthesizeBackingField(for: prop, in: intent)
+                let field = synthesizeBackingField(for: property, in: type)
                 
                 let mode: PropertyGenerationIntention.Mode
                 
@@ -173,7 +174,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 
                 // If the property is marked read-only, synthesize the backing
                 // field only.
-                if prop.isReadOnly {
+                if property.isReadOnly {
                     mode = .computed(getter)
                 } else {
                     let setter =
@@ -188,17 +189,17 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     mode = .property(get: getter, set: .init(valueIdentifier: "newValue", body: setter))
                 }
                 
-                prop.mode = mode
+                property.mode = mode
                 
-                intent.history
+                type.history
                     .recordChange(tag: historyTag,
                                   description: """
-                        Created field \(TypeFormatter.asString(field: field, ofType: intent)) \
+                        Created field \(TypeFormatter.asString(field: field, ofType: type)) \
                         as it was detected that the backing field of \
-                        \(TypeFormatter.asString(property: prop, ofType: intent)) \
-                        was being used inside the class.
+                        \(TypeFormatter.asString(property: property, ofType: type)) (\(fieldName)) \
+                        was being used in \(source).
                         """)
-                    .echoRecord(to: prop)
+                    .echoRecord(to: property)
                     .echoRecord(to: field)
                 
                 operationsNumber += 1
@@ -326,7 +327,9 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 return true
             }
             
-            let backingFieldName = "_" + propertySet.property.name
+            let backingFieldName =
+                self.backingFieldName(for: propertySet.property, in: classIntention)
+            
             let newSetter =
                 PropertyGenerationIntention
                     .Setter(valueIdentifier: setter.parameters[0].name,
@@ -340,20 +343,34 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             propertySet.property.mode = .property(get: getterIntention, set: newSetter)
             
-            let field = synthesizeBackingField(for: propertySet.property, in: classIntention)
-            
-            setterOwner
-                .history
-                .recordChange(tag: historyTag,
-                              description: """
-                    Merged found setter method \(TypeFormatter.asString(method: setter, ofType: setterOwner)) \
-                    into property \(TypeFormatter.asString(property: propertySet.property, ofType: setterOwner)) \
-                    and creating a getter body + synthesized backing field \
-                    \(TypeFormatter.asString(field: field, ofType: setterOwner))
-                    """, relatedIntentions: [field, setter, propertySet.property])
-                .echoRecord(to: field)
-                .echoRecord(to: setter)
-                .echoRecord(to: propertySet.property)
+            // Existing backing field
+            if classIntention.hasInstanceVariable(named: backingFieldName) {
+                setterOwner
+                    .history
+                    .recordChange(tag: historyTag,
+                                  description: """
+                        Merged found setter method \(TypeFormatter.asString(method: setter, ofType: setterOwner)) \
+                        into property \(TypeFormatter.asString(property: propertySet.property, ofType: setterOwner)) \
+                        and creating a getter body returning existing backing field \(backingFieldName)
+                        """, relatedIntentions: [setter, propertySet.property])
+                    .echoRecord(to: setter)
+                    .echoRecord(to: propertySet.property)
+            } else {
+                let field = synthesizeBackingField(for: propertySet.property, in: classIntention)
+                
+                setterOwner
+                    .history
+                    .recordChange(tag: historyTag,
+                                  description: """
+                        Merged found setter method \(TypeFormatter.asString(method: setter, ofType: setterOwner)) \
+                        into property \(TypeFormatter.asString(property: propertySet.property, ofType: setterOwner)) \
+                        and creating a getter body + synthesized backing field \
+                        \(TypeFormatter.asString(field: field, ofType: setterOwner))
+                        """, relatedIntentions: [field, setter, propertySet.property])
+                    .echoRecord(to: field)
+                    .echoRecord(to: setter)
+                    .echoRecord(to: propertySet.property)
+            }
             
             operationsNumber += 1
             
@@ -365,16 +382,28 @@ public class PropertyMergeIntentionPass: IntentionPass {
         }
     }
     
+    private func backingFieldName(for property: PropertyGenerationIntention,
+                                  in type: BaseClassIntention) -> String {
+        // Check presence of `@synthesize` to make sure we use the correct
+        // backing field name for the property
+        if let synth = type.synthesizations.first(where: { $0.propertyName == property.name }) {
+            return synth.ivarName
+        }
+        
+        return "_" + property.name
+    }
+    
     private func synthesizeBackingField(for property: PropertyGenerationIntention,
                                         in type: BaseClassIntention) -> InstanceVariableGenerationIntention {
-        let name = "_" + property.name
+        
+        let name = backingFieldName(for: property, in: type)
         
         if let ivar = type.instanceVariables.first(where: { $0.name == name }) {
             return ivar
         }
         
         let field =
-            InstanceVariableGenerationIntention(name: "_" + property.name,
+            InstanceVariableGenerationIntention(name: name,
                                                 storage: property.storage,
                                                 accessLevel: .private,
                                                 source: property.source)

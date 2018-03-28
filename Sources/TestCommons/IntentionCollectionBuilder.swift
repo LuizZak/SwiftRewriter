@@ -417,6 +417,18 @@ public extension TypeBuilder where T: BaseClassIntention {
         
         return self
     }
+    
+    @discardableResult
+    public func createSynthesize(propertyName: String, variableName: String? = nil) -> TypeBuilder {
+        let intent =
+            PropertySynthesizationIntention(
+                propertyName: propertyName, ivarName: variableName ?? propertyName,
+                isExplicit: false)
+        
+        targetType.addSynthesization(intent)
+        
+        return self
+    }
 }
 
 public extension TypeBuilder where T: ClassGenerationIntention {

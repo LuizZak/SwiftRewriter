@@ -9,12 +9,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A") { builder in
-                    builder
-                        .createProperty(named: "a", type: .int)
-                        .createMethod(named: "setA", parameters: [
-                            ParameterSignature(label: "_", name: "a", type: .int)
-                        ])
-                        .createMethod(named: "a", returnType: .int)
+                    builder.ext_makePropertyWithGetterSetter(named: "a")
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -39,11 +34,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A") { builder in
-                    builder
-                        .createProperty(named: "a", type: .int)
-                        .createMethod(named: "setA", parameters: [
-                            ParameterSignature(label: "_", name: "a", type: .int)
-                        ])
+                    builder.ext_makePropertyWithSetter(named: "a", type: .int)
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -68,10 +59,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A") { builder in
-                    builder
-                        .createProperty(named: "a", type: .int,
-                                        attributes: [.attribute("readonly")])
-                        .createMethod(named: "a", returnType: .int)
+                    builder.ext_makeReadonlyPropertyWithGetter(named: "a")
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -89,6 +77,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         }
     }
     
+    /// Make sure when merging properties we respect the getter and setter bodies,
+    /// in case of readonly properties which feature candidate getter and setters.
     func testMergeReadonlyRespectsCustomizedGetterWithNonRelatedSetter() {
         let intentions =
             IntentionCollectionBuilder()
@@ -98,7 +88,9 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createProperty(named: "a", type: .int,
                                         attributes: [.attribute("readonly")])
                         .createMethod(named: "a", returnType: .int) { method in
-                            method.setBody([.return(.identifier("innerA"))])
+                            method.setBody([
+                                .return(.identifier("innerA"))
+                            ])
                         }.createMethod(named: "setA",
                                        parameters: [
                                         ParameterSignature(label: "_", name: "a", type: .int)]) { method in
@@ -140,8 +132,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 .createFile(named: "A") { file in
                     file.createExtension(forClassNamed: "A") { builder in
                         builder
-                            .createProperty(named: "a", type: .int, attributes: [.attribute("readonly")])
-                            .createMethod(named: "a", returnType: .int)
+                            .ext_makeReadonlyPropertyWithGetter(named: "a")
                     }
                 }.build()
         let cls = intentions.extensionIntentions()[0]
@@ -166,12 +157,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A") { (builder) in
-                    builder
-                        .createProperty(named: "a", type: .int)
-                        .createMethod(named: "a", returnType: .int)
-                        .createMethod(named: "setA", parameters: [
-                            ParameterSignature(label: "_", name: "a", type: .int)
-                        ])
+                    builder.ext_makePropertyWithGetterSetter(named: "a")
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -227,14 +213,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             cls.history.summary,
             """
             [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int was being used inside the class.
+            that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
         XCTAssertEqual(
             cls.properties[0].history.summary,
             """
             [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int was being used inside the class.
+            that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
     }
@@ -278,14 +264,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             cls.history.summary,
             """
             [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int was being used inside the class.
+            that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
         XCTAssertEqual(
             cls.properties[0].history.summary,
             """
             [PropertyMergeIntentionPass:1] Created field A._a: Int as it was detected \
-            that the backing field of A.a: Int was being used inside the class.
+            that the backing field of A.a: Int (_a) was being used in A.b().
             """
         )
     }
@@ -333,6 +319,43 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         }
     }
     
+    /// Tests that usage of backing field in category extensions are properly
+    /// detected and managed
+    func testSynthesizeBackingFieldInCategoryExtensions() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { type in
+                            type.createProperty(named: "a", type: .int)
+                        }.createExtension(forClassNamed: "A") { type in
+                            type.createMethod(named: "method") { method in
+                                method.setBody([
+                                    .expression(Expression.identifier("self").dot("_a"))
+                                ])
+                            }
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 1)
+        XCTAssertEqual(cls.instanceVariables[0].name, "_a")
+        XCTAssertEqual(cls.properties.count, 1)
+        
+        switch cls.properties[0].mode {
+        case let .property(get, set):
+            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
+            XCTAssertEqual(set.valueIdentifier, "newValue")
+            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: .postfix(.identifier("self"), .member("_a")),
+                                                                   op: .assign,
+                                                                   rhs: .identifier("newValue")))])
+        default:
+            XCTFail("Expected to synthesize getter/setter with backing field.")
+        }
+    }
+    
     /// Test that local definitions that have the same name than a potential backing
     /// field are not confused with an actual backing field access.
     func testDoesntConfusesLocalVariableWithSynthesizedBackingField() {
@@ -372,6 +395,9 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(cls.properties[0].history.summary, "<empty>")
     }
     
+    /// Test that we don't perform type merging when properties and methods don't
+    /// match statically-wise (i.e. property is class type, method is instance type,
+    /// etc.)
     func testDontMergeInstancePropertyWithClassGetterSetterLikesAndViceVersa() {
         let intentions =
             IntentionCollectionBuilder()
@@ -396,6 +422,14 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(cls.methods.count, 4)
         XCTAssertEqual(cls.properties.count, 2)
         switch cls.properties[0].mode {
+        case .asField:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+        
+        switch cls.properties[1].mode {
         case .asField:
             // Success
             break
@@ -464,8 +498,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         }
     }
     
-    /// Tests a bug where the existence of another type extension would execute
-    /// the analysis twice for the same type, resulting in overwriting of previous
+    /// Tests a bug where the existence of a type extension would trigger the
+    /// analysis twice for the same type, resulting in overwriting of previous
     /// work.
     ///
     /// Make sure we analyze a class as a whole a single time only.
@@ -512,5 +546,161 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         default:
             XCTFail("Unexpected property mode \(cls.properties[0].mode)")
         }
+    }
+    
+    /// If a property is declared along with `@synthesize`'s and accessor methods,
+    /// ensure that we don't get confused and overwrite implementations accidentally.
+    func testPropertyMergingRespectsExistingPropertySynthetization() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { type in
+                        type.createInstanceVariable(named: "backing", type: .int)
+                            .createProperty(named: "a", type: .int)
+                            .createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .int)]) { method in
+                                method.setBody([
+                                    // self.backing = a
+                                    .expression(
+                                        Expression
+                                            .identifier("self").dot("backing")
+                                            .assignment(op: .assign, rhs: .identifier("a"))
+                                    )
+                                ])
+                            }.createSynthesize(propertyName: "a", variableName: "backing")
+                    }
+                }.build()
+        let type = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(type.instanceVariables.count, 1) // Shouldn't synthesize backing field since we already provide a backing field to use
+        let property = type.properties[0]
+        switch property.mode {
+        case let .property(get, set):
+            XCTAssertEqual(
+                get.body, [
+                    // return backing
+                    .return(Expression.identifier("backing"))
+                ])
+            
+            XCTAssertEqual(
+                set.body.body, [
+                    // self.backing = a
+                    .expression(
+                        Expression
+                            .identifier("self").dot("backing")
+                            .assignment(op: .assign, rhs: .identifier("a"))
+                    )
+                ])
+            
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(property.mode)")
+        }
+    }
+    
+    /// Tests that when examining method bodies for backing field usages we take
+    /// into account any existing `@synthesize` declarations for the property and
+    /// use the resulting name for the usage lookup.
+    func testCreateBackingFieldIfUsageIsFoundTakingIntoAccountSynthesizationDeclarations() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named: "a", type: .int)
+                        .createSynthesize(propertyName: "a", variableName: "b")
+                        .createMethod(named: "method") { method in
+                            method.setBody([
+                                .expression(Expression.identifier("self").dot("b"))
+                                ])
+                    }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 1)
+        XCTAssertEqual(cls.instanceVariables.first?.name, "b")
+    }
+    
+    /// Tests that when examining method bodies for backing field usages we take
+    /// into account any existing `@synthesize` declarations for the property and
+    /// use the resulting name for the usage lookup (take 2; avoiding creating
+    /// backing fields for mistaken backing field lookups).
+    func testDontCreateBackingFieldIfExplicitSynthesizeDeclarationNamesAnotherBackingField() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named: "a", type: .int)
+                        .createSynthesize(propertyName: "a", variableName: "b")
+                        .createMethod(named: "method") { method in
+                            method.setBody([
+                                .expression(Expression.identifier("self").dot("_a"))
+                            ])
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 0)
+    }
+    
+    /// Tests that when examining method bodies for backing field usages we take
+    /// into account any existing `@synthesize` declarations for the property and
+    /// use the resulting name for the usage lookup (take 3; avoiding creating
+    /// backing fields for mistaken backing field lookups in category extensions).
+    func testDontCreateBackingFieldIfExplicitSynthesizeDeclarationNamesAnotherBackingField_AcrossCategories() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { type in
+                            type.createProperty(named: "a", type: .int)
+                                .createSynthesize(propertyName: "a", variableName: "b")
+                        }.createExtension(forClassNamed: "A") { type in
+                            type.createMethod(named: "method") { method in
+                                method.setBody([
+                                    .expression(Expression.identifier("self").dot("_a"))
+                                ])
+                            }
+                        }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 0)
+    }
+}
+
+// MARK: - Private test setup shortcuts
+
+private extension TypeBuilder {
+    @discardableResult
+    func ext_makeReadonlyPropertyWithGetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
+        return
+            self.createProperty(named: "a", type: .int, attributes: [.attribute("readonly")])
+                .createMethod(named: "a", returnType: .int)
+    }
+    
+    @discardableResult
+    func ext_makePropertyWithGetterSetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
+        return
+            self.createProperty(named: name, type: type)
+                .createMethod(named: "set\(name.uppercasedFirstLetter)",
+                              parameters: [ParameterSignature(label: "_", name: name, type: type)])
+                .createMethod(named: name, returnType: type)
+    }
+    
+    @discardableResult
+    func ext_makePropertyWithSetter(named name: String, type: SwiftType = .int) -> TypeBuilder<T> {
+        return
+            self.createProperty(named: name, type: type)
+                .createMethod(named: "set\(name.uppercasedFirstLetter)",
+                    parameters: [ParameterSignature(label: "_", name: name, type: type)])
     }
 }
