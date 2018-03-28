@@ -8,7 +8,9 @@ import Utils
 
 class MultiFileTestBuilder {
     var test: XCTestCase
-    var files: [(name: String, souce: String)] = []
+    var results: [TestFileOutput] = []
+    var files: [(path: String, souce: String)] = []
+    var expectedFiles: [(path: String, souce: String)] = []
     var errors: String = ""
     
     init(test: XCTestCase) {
@@ -17,6 +19,11 @@ class MultiFileTestBuilder {
     
     func file(name: String, _ contents: String) -> MultiFileTestBuilder {
         files.append((name, contents))
+        return self
+    }
+    
+    func expectSwiftFile(name: String, _ contents: String) -> MultiFileTestBuilder {
+        expectedFiles.append((name, contents))
         return self
     }
     
@@ -32,14 +39,12 @@ class MultiFileTestBuilder {
         let output = TestWriterOutput()
         let input = TestMultiInputProvider(inputs: inputs)
         
-        let sut = SwiftRewriter(input: input, output: output)
-        sut.writerOptions = options
-        sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
-        sut.intentionPassesSource = DefaultIntentionPasses()
-        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        let sut = makeSut(with: input, output: output, options: options)
         
         do {
             try sut.rewrite()
+            
+            results = output.outputs
             
             if !expectsErrors && sut.diagnostics.errors.count != 0 {
                 test.recordFailure(
@@ -53,6 +58,14 @@ class MultiFileTestBuilder {
         }
     }
     
+    /// Asserts expected Swift files recorded with `expectSwiftFile(name:contents:)`
+    /// where produced correctly.
+    ///
+    /// Does not assert if unexpected files where produced during compilation.
+    func assertExpectedSwiftFiles(file: String = #file, line: Int = #line) {
+        assertMatcheshWithExpectedFiles(results, file: file, line: line)
+    }
+    
     /// Assertion execution point
     @discardableResult
     func translatesToSwift(_ expectedSwift: String, expectsErrors: Bool = false, options: ASTWriterOptions = .default, file: String = #file, line: Int = #line) -> MultiFileTestBuilder {
@@ -61,11 +74,7 @@ class MultiFileTestBuilder {
         let output = TestWriterOutput()
         let input = TestMultiInputProvider(inputs: inputs)
         
-        let sut = SwiftRewriter(input: input, output: output)
-        sut.writerOptions = options
-        sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
-        sut.intentionPassesSource = DefaultIntentionPasses()
-        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        let sut = makeSut(with: input, output: output, options: options)
         
         do {
             try sut.rewrite()
@@ -110,6 +119,52 @@ class MultiFileTestBuilder {
             test.recordFailure(withDescription: "Mismatched errors stream. Expected \(expected) but found \(errors)",
                                inFile: file, atLine: line, expected: true)
         }
+    }
+    
+    private func assertMatcheshWithExpectedFiles(_ files: [TestFileOutput], file: String, line: Int) {
+        let matches = files.sorted { $0.path < $1.path }.compactMap { file -> ResultMatch? in
+            guard let expected = expectedFiles.first(where: { expected in file.path == expected.path }) else {
+                return nil
+            }
+            
+            return ResultMatch(result: file, expectedPath: expected.path, expectedSource: expected.souce)
+        }
+        
+        for match in matches where match.result.buffer != match.expectedSource {
+            let expectedSwift = match.expectedSource
+            let actualSwift = match.result.buffer
+            
+            test.recordFailure(withDescription: """
+                Failed: Expected to produce Swift file \(match.expectedPath) inputs as:
+                
+                \(expectedSwift)
+                
+                but translated as:
+                
+                \(actualSwift)
+                
+                Diff:
+                
+                \(expectedSwift.makeDifferenceMarkString(against: actualSwift))
+                """, inFile: file, atLine: line, expected: true)
+            break
+        }
+    }
+    
+    private func makeSut(with input: InputSourcesProvider, output: WriterOutput, options: ASTWriterOptions) -> SwiftRewriter {
+        let sut = SwiftRewriter(input: input, output: output)
+        sut.writerOptions = options
+        sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
+        sut.intentionPassesSource = DefaultIntentionPasses()
+        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        
+        return sut
+    }
+    
+    private struct ResultMatch {
+        var result: TestFileOutput
+        var expectedPath: String
+        var expectedSource: String
     }
 }
 

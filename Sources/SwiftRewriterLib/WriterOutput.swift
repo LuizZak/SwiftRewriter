@@ -1,4 +1,5 @@
-/// Manages output
+/// Manages output of a Swift Rewriter invocation by providing file targets to
+/// output Swift code to.
 public protocol WriterOutput {
     /// Opens a file for outputting contents to
     func createFile(path: String) -> FileOutput
