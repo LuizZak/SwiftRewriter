@@ -311,8 +311,8 @@ func mergeMethods(_ source: KnownMethod,
         target.history
             .recordChange(tag: historyTag,
                           description: """
-                Updated nullability signature \(TypeFormatter.asString(signature: originalSignature)) \
-                -> \(TypeFormatter.asString(signature: target.signature))
+                Updated nullability signature from \(TypeFormatter.asString(signature: originalSignature)) \
+                to: \(TypeFormatter.asString(signature: target.signature))
                 """)
     }
     
@@ -356,8 +356,8 @@ func mergeFunction(_ source: GlobalFunctionGenerationIntention,
         target.history
             .recordChange(tag: historyTag,
                           description: """
-                Updated nullability signature \(TypeFormatter.asString(signature: originalSignature)) \
-                -> \(TypeFormatter.asString(signature: target.signature))
+                Updated nullability signature from \(TypeFormatter.asString(signature: originalSignature)) \
+                to: \(TypeFormatter.asString(signature: target.signature))
                 """)
     }
     

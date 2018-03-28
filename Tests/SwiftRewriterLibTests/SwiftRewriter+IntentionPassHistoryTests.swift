@@ -48,7 +48,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 }
                 
                 // [Creation]  line 8 column 2
-                // [TypeMerge] Updated nullability signature () -> String! -> () -> String
+                // [TypeMerge] Updated nullability signature from () -> String! to: () -> String
                 @objc
                 func aMethod() -> String {
                 }

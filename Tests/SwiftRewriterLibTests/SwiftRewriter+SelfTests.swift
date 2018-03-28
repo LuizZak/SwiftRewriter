@@ -1005,4 +1005,36 @@ class SwiftRewriter_SelfTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testOutOfOrderTypeResolving() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A (B)
+            - (void)f1 {
+                (self.window.bounds);
+            }
+            @end
+            
+            @interface A : UIView
+            @end
+            """,
+            swift: """
+            var global: Int
+            
+            func globalFunc() {
+            }
+            
+            @objc
+            class A: NSObject {
+                @objc
+                func f1() {
+                    // type: Int
+                    global
+                    // type: Void
+                    globalFunc()
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
