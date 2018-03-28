@@ -679,6 +679,47 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(cls.instanceVariables.first?.name, "b")
         XCTAssertEqual(cls.instanceVariables.first?.type, .int)
     }
+    
+    /// Tests that when we merge properties which have setters in a separate
+    /// category, that we don't accidentally create a duplicated variable
+    func testMergePropertyWithSetterInCategory() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A+Ext.m") { file in
+                    file.createExtension(forClassNamed: "A") { type in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .int)])  { method in
+                            method.setBody([.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
+                        }
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") { type in
+                        type.createSynthesize(propertyName: "a", variableName: "b")
+                            .createProperty(named: "a", type: .int)
+                            .createMethod(named: "a", returnType: .int) { method in
+                                method.setBody([.return(Expression.identifier("self").dot("b"))])
+                            }
+                    }
+                }.build()
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let cls = intentions.classIntentions()[0]
+        XCTAssertEqual(intentions.extensionIntentions()[0].properties.count, 0)
+        XCTAssertEqual(intentions.classIntentions()[0].properties.count, 1)
+        switch cls.properties.first?.mode {
+        case let .property(getter, setter)?:
+            
+            XCTAssertEqual(getter.body, [.return(Expression.identifier("self").dot("b"))])
+            XCTAssertEqual(setter.valueIdentifier, "a")
+            XCTAssertEqual(setter.body.body, [.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
+            
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        }
+    }
 }
 
 // MARK: - Private test setup shortcuts

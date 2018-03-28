@@ -412,6 +412,17 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
     }
+    
+    func testParseSemicolonAfterMethodDefinition() {
+        _=parserTest("""
+            @implementation A
+            - (void)noSemicolon {
+            }
+            - (void)withSemicolon {
+            };
+            @end
+            """)
+    }
 }
 
 extension ObjcParserTests {

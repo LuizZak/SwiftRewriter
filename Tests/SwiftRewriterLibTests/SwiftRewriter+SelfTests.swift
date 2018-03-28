@@ -1019,19 +1019,17 @@ class SwiftRewriter_SelfTests: XCTestCase {
             @end
             """,
             swift: """
-            var global: Int
-            
-            func globalFunc() {
-            }
-            
             @objc
-            class A: NSObject {
+            class A: UIView {
+            }
+
+            // MARK: - B
+            @objc
+            extension A {
                 @objc
                 func f1() {
-                    // type: Int
-                    global
-                    // type: Void
-                    globalFunc()
+                    // type: CGRect?
+                    self.window?.bounds
                 }
             }
             """,

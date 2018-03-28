@@ -1,6 +1,5 @@
-// Generated from /Users/luizsilva/Desktop/grammars-v4-master/objc/ObjectiveCLexer.g4 by ANTLR 4.7
+// Generated from /Users/luizsilva/Documents/Local Projects/objcgrammar/ObjectiveCLexer.g4 by ANTLR 4.7
 import Antlr4
-import Foundation
 
 open class ObjectiveCLexer: Lexer {
     public class State {
@@ -234,14 +233,14 @@ open class ObjectiveCLexer: Lexer {
 		return tokenNames
 	}()
 
-	open func getTokenNames() -> [String?]? {
-		return tokenNames
-	}
-
+    open func getTokenNames() -> [String?]? {
+        return tokenNames
+    }
+    
     open override func getVocabulary() -> Vocabulary {
         return ObjectiveCLexer.VOCABULARY
     }
-
+    
     public required init(_ input: CharStream) {
         self.state = State()
         
