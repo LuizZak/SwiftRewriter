@@ -82,6 +82,16 @@ let omitObjcCompatibilityArg
         and NSObjectProtocol conformance by default.
         """)
 
+// --diagnose-file
+let diagnoseFileArg
+    = parser.add(
+        option: "--diagnose-file", kind: String.self,
+        usage: """
+        Provides a target file path to diagnose during rewriting.
+        After each intention pass and after expression passes, the file is written
+        to the standard output for diagnosing rewriting issues.
+        """)
+
 //// --target stdout | filedisk
 let targetArg
     = parser.add(
@@ -153,6 +163,7 @@ do {
     
     // Read settings
     Settings.rewriter.verbose = result.get(verboseArg) ?? false
+    Settings.rewriter.diagnoseFiles = result.get(diagnoseFileArg).map({ [$0] }) ?? []
     Settings.rewriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
     Settings.astWriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
     Settings.astWriter.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false

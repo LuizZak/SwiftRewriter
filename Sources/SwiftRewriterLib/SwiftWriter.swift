@@ -91,8 +91,20 @@ class InternalSwiftWriter {
     }
     
     func outputFile(_ fileIntent: FileGenerationIntention) {
-        let file = output.createFile(path: fileIntent.targetPath)
-        let out = file.outputTarget()
+        let target = output.createFile(path: fileIntent.targetPath)
+        
+        outputFile(fileIntent, targetFile: target)
+    }
+    
+    func outputFile(_ fileIntent: FileGenerationIntention, targetFile: FileOutput) {
+        let out = targetFile.outputTarget()
+        
+        outputFile(fileIntent, out: out)
+        
+        targetFile.close()
+    }
+    
+    func outputFile(_ fileIntent: FileGenerationIntention, out: RewriterOutputTarget) {
         let classes = fileIntent.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         let classExtensions = fileIntent.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         let structs = fileIntent.typeIntentions.compactMap { $0 as? StructGenerationIntention }
@@ -148,8 +160,6 @@ class InternalSwiftWriter {
         }
         
         out.onAfterOutput()
-        
-        file.close()
     }
     
     func outputImports(_ imports: [String], target: RewriterOutputTarget) {

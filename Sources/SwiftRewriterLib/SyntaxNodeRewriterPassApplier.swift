@@ -4,6 +4,8 @@ import SwiftAST
 /// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
 /// all function bodies found in one go.
 public final class SyntaxNodeRewriterPassApplier {
+    var afterFile: ((String) -> Void)?
+    
     public var passes: [SyntaxNodeRewriterPass.Type]
     public var typeSystem: TypeSystem
     public var numThreds: Int
@@ -32,6 +34,7 @@ public final class SyntaxNodeRewriterPassApplier {
             let invoker = makeResolverInvoker(intentions: intentions)
             queue.addOperation {
                 invoker.applyOnFile(file)
+                self.afterFile?(file.targetPath)
             }
         }
         

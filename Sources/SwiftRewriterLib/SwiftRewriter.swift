@@ -355,6 +355,8 @@ public class SwiftRewriter {
                 
                 pass.apply(on: intentionCollection, context: context)
                 
+                printDiagnosedFiles(step: "After intention pass \(type(of: pass))")
+                
                 if requiresResolve {
                     typeResolverInvoker
                         .resolveAllExpressionTypes(in: intentionCollection,
@@ -372,6 +374,14 @@ public class SwiftRewriter {
                                           typeSystem: typeSystem,
                                           globals: globals,
                                           numThreds: settings.numThreads)
+        
+        if !settings.diagnoseFiles.isEmpty {
+            applier.afterFile = { _ in
+                synchronized(self) {
+                    self.printDiagnosedFiles(step: "After applying expression passes")
+                }
+            }
+        }
         
         applier.apply(on: intentionCollection)
     }
@@ -483,10 +493,34 @@ public class SwiftRewriter {
         }
     }
     
+    private func printDiagnosedFiles(step: String) {
+        let files = intentionCollection.fileIntentions()
+        
+        for diagnoseFile in settings.diagnoseFiles {
+            guard let match = files.first(where: { $0.targetPath.hasSuffix(diagnoseFile) }) else {
+                continue
+            }
+            
+            let writer =
+                InternalSwiftWriter(
+                    intentions: intentionCollection, options: writerOptions,
+                    diagnostics: Diagnostics(), output: outputTarget,
+                    typeMapper: typeMapper, typeSystem: typeSystem)
+            
+            let output = StringRewriterOutput()
+            
+            writer.outputFile(match, out: output)
+            
+            print("Diagnose file: \(match.targetPath)\ncontext: \(step)")
+            print(output.buffer)
+            print("")
+        }
+    }
+    
     /// Settings for a `SwiftRewriter` instance
     public struct Settings {
         /// Gets the default settings for a `SwiftRewriter` invocation
-        public static var `default`: Settings = Settings(numThreads: 8, verbose: false)
+        public static var `default` = Settings(numThreads: 8, verbose: false, diagnoseFiles: [])
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -500,9 +534,14 @@ public class SwiftRewriter {
         /// Default is false.
         public var verbose: Bool
         
-        public init(numThreads: Int, verbose: Bool) {
+        /// Array of files to periodically print out on the console whenever
+        /// intention and expression passes are passed through the files.
+        public var diagnoseFiles: [String]
+        
+        public init(numThreads: Int, verbose: Bool, diagnoseFiles: [String]) {
             self.numThreads = numThreads
             self.verbose = verbose
+            self.diagnoseFiles = []
         }
     }
 }
