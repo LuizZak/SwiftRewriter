@@ -2058,6 +2058,44 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testBackingFieldUsageAnalysisWithSynthesizedBackingFieldIsOrderIndependent() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A (category)
+            - (void)setA:(NSInteger)a {
+                self->_b = a;
+            }
+            @end
+            
+            @interface A: NSObject
+            @property NSInteger a;
+            @end
+            
+            @implementation A
+            @synthesize a = b;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                private var b: Int = 0
+                @objc var a: Int {
+                    get {
+                        return b
+                    }
+                    set(a) {
+                        self._b = a
+                    }
+                }
+            }
+
+            // MARK: - category
+            @objc
+            extension A {
+            }
+            """)
+    }
+    
     func testApplyIntegerCastOnTypealiasedPropertyInVariableDeclaration() throws {
         try assertObjcParse(
             objc: """

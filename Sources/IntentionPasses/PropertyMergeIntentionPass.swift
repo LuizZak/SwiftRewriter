@@ -26,8 +26,14 @@ public class PropertyMergeIntentionPass: IntentionPass {
         
         var classesSeen: Set<String> = []
         
+        // Collect all (nominal, non-category types) and analyze them one-by-one.
         for file in intentionCollection.fileIntentions() {
             for cls in file.typeIntentions.compactMap({ $0 as? BaseClassIntention }) {
+                // Extensions are handled separately.
+                if cls is ClassExtensionGenerationIntention {
+                    continue
+                }
+                
                 if classesSeen.contains(cls.typeName) {
                     continue
                 }

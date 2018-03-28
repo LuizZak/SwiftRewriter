@@ -130,10 +130,11 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A") { file in
-                    file.createExtension(forClassNamed: "A") { builder in
-                        builder
-                            .ext_makeReadonlyPropertyWithGetter(named: "a")
-                    }
+                    file.createClass(withName: "A")
+                        .createExtension(forClassNamed: "A") { builder in
+                            builder
+                                .ext_makeReadonlyPropertyWithGetter(named: "a")
+                        }
                 }.build()
         let cls = intentions.extensionIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -652,28 +653,31 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     /// Tests that when examining method bodies for backing field usages we take
     /// into account any existing `@synthesize` declarations for the property and
     /// use the resulting name for the usage lookup (take 3; avoiding creating
-    /// backing fields for mistaken backing field lookups in category extensions).
+    /// backing fields for mistaken backing field lookups in category extensions
+    /// when the category is found before the original nominal type declaration).
     func testDontCreateBackingFieldIfExplicitSynthesizeDeclarationNamesAnotherBackingField_AcrossCategories() {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in
-                    file.createClass(withName: "A") { type in
-                            type.createProperty(named: "a", type: .int)
-                                .createSynthesize(propertyName: "a", variableName: "b")
-                        }.createExtension(forClassNamed: "A") { type in
-                            type.createMethod(named: "method") { method in
-                                method.setBody([
-                                    .expression(Expression.identifier("self").dot("_a"))
-                                ])
+                    file.createExtension(forClassNamed: "A") { type in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .int)]) { method in
+                                    method.setBody([
+                                        .expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))
+                                    ])
+                                }
+                            }.createClass(withName: "A") { type in
+                                type.createProperty(named: "a", type: .int)
+                                    .createSynthesize(propertyName: "a", variableName: "b")
                             }
-                        }
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        XCTAssertEqual(cls.instanceVariables.count, 0)
+        XCTAssertEqual(cls.instanceVariables.count, 1)
+        XCTAssertEqual(cls.instanceVariables.first?.name, "b")
+        XCTAssertEqual(cls.instanceVariables.first?.type, .int)
     }
 }
 
