@@ -218,6 +218,34 @@ public class SwiftRewriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
+        // Resolve typealiases and extension declarations first
+        for item in lazyResolve {
+            queue.addOperation {
+                switch item {
+                case .extensionDecl(let ext):
+                    let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
+                    ext.typeName = typeName
+                    
+                case .typealias(let typeali):
+                    let nullability =
+                        InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
+                    
+                    let ctx =
+                        TypeMappingContext(explicitNullability: nullability,
+                                           inNonnull: typeali.inNonnullContext)
+                    
+                    typeali.fromType =
+                        typeMapper.swiftType(forObjcType: typeali.originalObjcType,
+                                             context: ctx)
+                default:
+                    break
+                }
+            }
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
+        
+        // Now resolve all remaining items
         for item in lazyResolve {
             queue.addOperation {
                 switch item {
@@ -271,21 +299,9 @@ public class SwiftRewriter {
                                                           instanceTypeAlias: nil)
                     fn.signature = signGen.generateDefinitionSignature(from: node)
                     
-                case .extensionDecl(let ext):
-                    let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
-                    ext.typeName = typeName
-                    
-                case .typealias(let typeali):
-                    let nullability =
-                        InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
-                    
-                    let ctx =
-                        TypeMappingContext(explicitNullability: nullability,
-                                           inNonnull: typeali.inNonnullContext)
-                    
-                    typeali.fromType =
-                        typeMapper.swiftType(forObjcType: typeali.originalObjcType,
-                                             context: ctx)
+                case .extensionDecl, .typealias:
+                    // These have already been resolved in a previous loop.
+                    break
                 }
             }
         }
