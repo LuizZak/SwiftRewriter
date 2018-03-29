@@ -600,6 +600,14 @@ public class IntentionCollector {
         
         context.pushContext(globalFunc)
         
+        if let body = node.methodBody {
+            let methodBodyIntention = FunctionBodyIntention(body: [], source: body)
+            recordSourceHistory(intention: methodBodyIntention, node: body)
+            
+            delegate?.reportForLazyParsing(intention: methodBodyIntention)
+            globalFunc.functionBody = methodBodyIntention
+        }
+        
         delegate?.reportForLazyResolving(intention: globalFunc)
     }
     

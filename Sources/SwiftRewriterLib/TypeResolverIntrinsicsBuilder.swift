@@ -5,7 +5,7 @@ import SwiftAST
 class TypeResolverIntrinsicsBuilder {
     private var pushedReturnType: Bool = false
     
-    private var typeResolver: ExpressionTypeResolver
+    var typeResolver: ExpressionTypeResolver
     private var globals: DefinitionsSource
     private var typeSystem: TypeSystem
     private var miscellaneousDefinitions: DefaultCodeScope = DefaultCodeScope()
@@ -18,6 +18,18 @@ class TypeResolverIntrinsicsBuilder {
         self.globals = globals
         self.typeResolver = typeResolver
         self.typeSystem = typeSystem
+    }
+    
+    func setForceResolveExpressions(_ force: Bool) {
+        typeResolver.ignoreResolvedExpressions = !force
+    }
+    
+    func setupIntrinsics(forFunction function: GlobalFunctionGenerationIntention, intentions: IntentionCollection) {
+        let intrinsics = createIntrinsics(forFunction: function, intentions: intentions)
+        typeResolver.pushContainingFunctionReturnType(function.signature.returnType)
+        typeResolver.intrinsicVariables = intrinsics
+        
+        pushedReturnType = true
     }
     
     func setupIntrinsics(forMember member: MemberGenerationIntention, intentions: IntentionCollection) {
@@ -35,6 +47,10 @@ class TypeResolverIntrinsicsBuilder {
         } else {
             pushedReturnType = false
         }
+    }
+    
+    func setupGetterIntrinsics(getterType: SwiftType) {
+        typeResolver.pushContainingFunctionReturnType(getterType)
     }
     
     func addSetterIntrinsics(setter: PropertyGenerationIntention.Setter, type: SwiftType) {
@@ -55,7 +71,33 @@ class TypeResolverIntrinsicsBuilder {
         miscellaneousDefinitions.removeAllDefinitions()
     }
     
-    func createIntrinsics(forMember member: MemberGenerationIntention, intentions: IntentionCollection) -> DefinitionsSource {
+    private func createIntrinsics(forFunction function: GlobalFunctionGenerationIntention, intentions: IntentionCollection) -> DefinitionsSource {
+        let intrinsics = DefaultCodeScope()
+        
+        // Push function parameters as intrinsics, if member is a method type
+        for param in function.parameters {
+            intrinsics.recordDefinition(
+                CodeDefinition(variableNamed: param.name, type: param.type)
+            )
+        }
+        
+        // Push file-level global definitions (variables and functions)
+        let intentionGlobals =
+            IntentionCollectionGlobalsDefinitionsSource(intentions: intentions,
+                                                        symbol: function)
+        
+        // Push global definitions
+        let compoundIntrinsics = CompoundDefinitionsSource()
+        
+        compoundIntrinsics.addSource(intrinsics)
+        compoundIntrinsics.addSource(intentionGlobals)
+        compoundIntrinsics.addSource(miscellaneousDefinitions)
+        compoundIntrinsics.addSource(globals)
+        
+        return compoundIntrinsics
+    }
+    
+    private func createIntrinsics(forMember member: MemberGenerationIntention, intentions: IntentionCollection) -> DefinitionsSource {
         let intrinsics = DefaultCodeScope()
         
         // Push `self` intrinsic member variable, as well as all properties visible

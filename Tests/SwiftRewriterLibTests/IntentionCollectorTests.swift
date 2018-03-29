@@ -51,11 +51,26 @@ class IntentionCollectorTests: XCTestCase {
                                          ],
                                          isStatic: false))
     }
+    
+    func testCollectFunctionDefinitionBody() throws {
+        // Arrange
+        let parser = ObjcParser(string: "void global() { stmt(); }")
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssertEqual(file.globalFunctionIntentions.count, 1)
+        XCTAssertEqual(delegate.reportedForLazyParsing.count, 1)
+        XCTAssert(delegate.reportedForLazyParsing.first === file.globalFunctionIntentions.first?.functionBody)
+    }
 }
 
 private class TestCollectorDelegate: IntentionCollectorDelegate {
     var context: IntentionBuildingContext
     var intentions: IntentionCollection
+    
+    var reportedForLazyParsing: [Intention] = []
     
     init(file: FileGenerationIntention) {
         context = IntentionBuildingContext()
@@ -72,7 +87,7 @@ private class TestCollectorDelegate: IntentionCollectorDelegate {
     }
     
     func reportForLazyParsing(intention: Intention) {
-        
+        reportedForLazyParsing.append(intention)
     }
     
     func reportForLazyResolving(intention: Intention) {

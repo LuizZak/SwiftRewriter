@@ -9,6 +9,7 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     override func createTypes() {
+        createUIResponder()
         createUIViewController()
         createUILayoutConstraintAxis()
         createUIView()
@@ -28,6 +29,11 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                            storage: ValueStorage.constant(ofType: "CGSize")))
         add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
                            storage: ValueStorage.constant(ofType: "CGSize")))
+    }
+    
+    func createUIResponder() {
+        let type = UIResponderCompoundType.create()
+        types.append(type)
     }
     
     func createUIViewController() {

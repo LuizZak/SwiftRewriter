@@ -30,135 +30,132 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public func resolveAllExpressionTypes(in intentions: IntentionCollection, force: Bool) {
         typeSystem.makeCache()
         
-        // Make a file invoker for each file and execute resolving in parallel
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = numThreads
+        let queue = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: makeDelegate())
         
-        for file in intentions.fileIntentions() {
-            let invoker = makeResolverInvoker(forceResolve: force)
-            queue.addOperation {
-                invoker.applyOnFile(file)
-            }
-        }
-        
-        queue.waitUntilAllOperationsAreFinished()
+        resolveFromQueue(queue)
         
         typeSystem.tearDownCache()
     }
     
     public func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool) {
-        let invoker = makeResolverInvoker(forceResolve: force)
+        let queue =
+            FunctionBodyQueue.fromMethod(typeSystem.intentions, method: method,
+                                         delegate: makeDelegate())
         
-        invoker.applyOnMethod(method)
+        resolveFromQueue(queue)
     }
     
     public func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool) {
-        let invoker = makeResolverInvoker(forceResolve: force)
+        let queue =
+            FunctionBodyQueue.fromProperty(typeSystem.intentions, property: property,
+                                           delegate: makeDelegate())
         
-        invoker.applyOnProperty(property)
+        resolveFromQueue(queue)
+    }
+    
+    private func resolveFromQueue(_ queue: FunctionBodyQueue<TypeResolvingQueueDelegate>) {
+        // Make a file invoker for each file and execute resolving in parallel
+        let opQueue = OperationQueue()
+        opQueue.maxConcurrentOperationCount = numThreads
+        
+        for item in queue.items {
+            opQueue.addOperation {
+                _=item.context.typeResolver.resolveTypes(in: item.body.body)
+            }
+        }
+        
+        opQueue.waitUntilAllOperationsAreFinished()
     }
     
     // MARK: - Private methods
     
-    private func makeResolverInvoker(forceResolve: Bool) -> InternalTypeResolverInvoker {
-        let typeResolver =
-            ExpressionTypeResolver(typeSystem: typeSystem,
-                                   intrinsicVariables: EmptyCodeScope())
-        typeResolver.ignoreResolvedExpressions = !forceResolve
-        
-        return InternalTypeResolverInvoker(globals: globals,
-                                           intentions: typeSystem.intentions,
-                                           typeResolver: typeResolver,
-                                           typeSystem: typeSystem)
+    private func makeDelegate() -> TypeResolvingQueueDelegate {
+        return TypeResolvingQueueDelegate(intentions: typeSystem.intentions,
+                                         globals: globals, typeSystem: typeSystem)
     }
 }
 
-private class InternalTypeResolverInvoker {
-    var globals: DefinitionsSource
-    var globalVariables: [GlobalVariableGenerationIntention] = []
+class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
     var intentions: IntentionCollection
-    var typeResolver: ExpressionTypeResolver
-    var intrinsicsBuilder: TypeResolverIntrinsicsBuilder
+    var globals: DefinitionsSource
+    var typeSystem: TypeSystem
     
-    init(globals: DefinitionsSource,
-         intentions: IntentionCollection,
-         typeResolver: ExpressionTypeResolver,
-         typeSystem: TypeSystem) {
-        
-        intrinsicsBuilder =
-            TypeResolverIntrinsicsBuilder(
-                typeResolver: typeResolver,
-                globals: globals,
-                typeSystem: typeSystem)
-        
-        self.globals = globals
+    init(intentions: IntentionCollection, globals: DefinitionsSource, typeSystem: TypeSystem) {
         self.intentions = intentions
-        self.typeResolver = typeResolver
+        self.globals = globals
+        self.typeSystem = typeSystem
     }
     
-    func apply(on intentions: IntentionCollection) {
-        for file in intentions.fileIntentions() {
-            applyOnFile(file)
-        }
-    }
-    
-    func applyOnFile(_ file: FileGenerationIntention) {
-        for cls in file.classIntentions {
-            applyOnClass(cls)
-        }
+    func makeContext(forFunction function: GlobalFunctionGenerationIntention) -> TypeResolvingQueueDelegate.Context {
+        let resolver = ExpressionTypeResolver(
+            typeSystem: typeSystem, contextFunctionReturnType: function.signature.returnType)
         
-        for cls in file.extensionIntentions {
-            applyOnClass(cls)
-        }
-    }
-    
-    func applyOnClass(_ cls: BaseClassIntention) {
-        for prop in cls.properties {
-            applyOnProperty(prop)
-        }
+        let intrinsics =
+            TypeResolverIntrinsicsBuilder(typeResolver: resolver, globals: globals,
+                                          typeSystem: typeSystem)
         
-        for method in cls.methods {
-            applyOnMethod(method)
-        }
-    }
-    
-    func applyOnFunction(_ f: FunctionIntention) {
-        if let method = f.functionBody {
-            applyOnFunctionBody(method)
-        }
-    }
-    
-    func applyOnFunctionBody(_ functionBody: FunctionBodyIntention) {
-        // Resolve types before feeding into passes
-        _=typeResolver.resolveTypes(in: functionBody.body)
-    }
-    
-    func applyOnMethod(_ method: MethodGenerationIntention) {
-        intrinsicsBuilder.setupIntrinsics(forMember: method, intentions: intentions)
-        defer {
-            intrinsicsBuilder.teardownIntrinsics()
-        }
+        intrinsics.setupIntrinsics(forFunction: function, intentions: intentions)
         
-        applyOnFunction(method)
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    func applyOnProperty(_ property: PropertyGenerationIntention) {
-        intrinsicsBuilder.setupIntrinsics(forMember: property, intentions: intentions)
-        defer {
-            intrinsicsBuilder.teardownIntrinsics()
-        }
+    func makeContext(forInit ctor: InitGenerationIntention) -> TypeResolvingQueueDelegate.Context {
+        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
         
-        switch property.mode {
-        case .computed(let intent):
-            applyOnFunctionBody(intent)
-        case let .property(get, set):
-            applyOnFunctionBody(get)
-            
-            intrinsicsBuilder.addSetterIntrinsics(setter: set, type: property.type)
-            
-            applyOnFunctionBody(set.body)
-        case .asField:
-            break
-        }
+        let intrinsics =
+            TypeResolverIntrinsicsBuilder(typeResolver: resolver, globals: globals,
+                                          typeSystem: typeSystem)
+        
+        intrinsics.setupIntrinsics(forMember: ctor, intentions: intentions)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
+    }
+    
+    func makeContext(forMethod method: MethodGenerationIntention) -> Context {
+        let resolver = ExpressionTypeResolver(
+            typeSystem: typeSystem, contextFunctionReturnType: method.returnType)
+        
+        let intrinsics =
+            TypeResolverIntrinsicsBuilder(typeResolver: resolver, globals: globals,
+                                          typeSystem: typeSystem)
+        
+        intrinsics.setupIntrinsics(forMember: method, intentions: intentions)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
+    }
+    
+    func makeContext(forPropertyGetter property: PropertyGenerationIntention,
+                     getter: FunctionBodyIntention) -> Context {
+        
+        let resolver = ExpressionTypeResolver(
+            typeSystem: typeSystem, contextFunctionReturnType: property.type)
+        
+        let intrinsics =
+            TypeResolverIntrinsicsBuilder(typeResolver: resolver, globals: globals,
+                                          typeSystem: typeSystem)
+        
+        intrinsics.setupIntrinsics(forMember: property, intentions: intentions)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
+    }
+    
+    func makeContext(forPropertySetter property: PropertyGenerationIntention,
+                     setter: PropertyGenerationIntention.Setter) -> Context {
+        
+        let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        
+        let intrinsics =
+            TypeResolverIntrinsicsBuilder(typeResolver: resolver, globals: globals,
+                                          typeSystem: typeSystem)
+        
+        intrinsics.setupIntrinsics(forMember: property, intentions: intentions)
+        intrinsics.addSetterIntrinsics(setter: setter, type: property.type)
+        
+        return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
+    }
+    
+    struct Context {
+        var typeResolver: ExpressionTypeResolver
+        var intrinsicsBuilder: TypeResolverIntrinsicsBuilder
     }
 }

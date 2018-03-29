@@ -40,7 +40,16 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         super.init()
     }
     
-    public init(typeSystem: TypeSystem, intrinsicVariables: DefinitionsSource,
+    public init(typeSystem: TypeSystem,
+                contextFunctionReturnType: SwiftType) {
+        self.typeSystem = typeSystem
+        self.intrinsicVariables = EmptyCodeScope()
+        contextFunctionReturnTypeStack = [contextFunctionReturnType]
+        super.init()
+    }
+    
+    public init(typeSystem: TypeSystem,
+                intrinsicVariables: DefinitionsSource,
                 contextFunctionReturnType: SwiftType) {
         self.typeSystem = typeSystem
         self.intrinsicVariables = intrinsicVariables

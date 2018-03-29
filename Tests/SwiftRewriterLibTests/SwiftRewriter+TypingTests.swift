@@ -2,8 +2,9 @@ import SwiftRewriterLib
 import SwiftAST
 import XCTest
 
-/// Tests for some meta behavior of SwiftRewriter when handling `self`
-class SwiftRewriter_SelfTests: XCTestCase {
+/// Tests for some meta behavior of SwiftRewriter when handling `self` and general
+/// type resolving results.
+class SwiftRewriter_TypingTests: XCTestCase {
     
     /// Tests that the `self` identifier is properly assigned when resolving the
     /// final types of statements in a class
@@ -1031,6 +1032,29 @@ class SwiftRewriter_SelfTests: XCTestCase {
                     // type: CGRect?
                     self.window?.bounds
                 }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testTypingInGlobalFunction() throws {
+        try assertObjcParse(
+            objc: """
+            void global() {
+                [[A alloc] init];
+            }
+            
+            @interface A : UIView
+            @end
+            """,
+            swift: """
+            func global() {
+                // type: A
+                A()
+            }
+            
+            @objc
+            class A: UIView {
             }
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))

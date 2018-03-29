@@ -145,6 +145,25 @@ public struct KnownTypeBuilder {
         return new
     }
     
+    /// Adds a method with a given signature string parsed, and a flag specifying
+    /// whether the method is an optional protocol conformance method.
+    ///
+    /// Method traps, if signature is invalid.
+    public func method(named name: String,
+                       parsingSignature signature: String,
+                       isStatic: Bool = false,
+                       returning returnType: SwiftType = .void,
+                       optional: Bool = false) -> KnownTypeBuilder {
+        
+        let params = try! FunctionSignatureParser.parseParameters(from: signature)
+        
+        let signature =
+            FunctionSignature(name: name, parameters: params, returnType: returnType,
+                              isStatic: isStatic)
+        
+        return method(withSignature: signature, optional: optional)
+    }
+    
     /// Adds a strong property with no attributes with a given name and type, and
     /// a flag specifying whether the property is an optional protocol conformance
     /// property
