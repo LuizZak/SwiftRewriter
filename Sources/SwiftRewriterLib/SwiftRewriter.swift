@@ -93,6 +93,7 @@ public class SwiftRewriter {
         defer {
             lazyResolve = []
             typeSystem.reset()
+            parsers.removeAll()
         }
         
         try autoreleasepool {
