@@ -19,11 +19,20 @@ public protocol FunctionBodyQueueDelegate: class {
 public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     public typealias Context = Delegate.Context
     
+    public static func fromFile(_ intentionCollection: IntentionCollection,
+                                file: FileGenerationIntention,
+                                delegate: Delegate) -> FunctionBodyQueue {
+        
+        let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
+        queue.collectFromFile(file)
+        
+        return queue
+    }
+    
     public static func fromIntentionCollection(_ intentionCollection: IntentionCollection,
                                                delegate: Delegate) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
-        
         queue.collect(from: intentionCollection)
         
         return queue
@@ -34,7 +43,6 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
                                   delegate: Delegate) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
-        
         queue.collectMethod(method)
         
         return queue
@@ -45,7 +53,6 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
                                     delegate: Delegate) -> FunctionBodyQueue {
         
         let queue = FunctionBodyQueue(intentionCollection, delegate: delegate)
-        
         queue.collectProperty(property)
         
         return queue
