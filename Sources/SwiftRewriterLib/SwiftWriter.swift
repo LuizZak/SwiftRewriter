@@ -53,10 +53,12 @@ public final class SwiftWriter {
                     output: output, typeMapper: typeMapper, typeSystem: typeSystem)
             
             queue.addOperation {
-                writer.outputFile(file)
-                
-                synchronized(self) {
-                    self.diagnostics.merge(with: writer.diagnostics)
+                autoreleasepool {
+                    writer.outputFile(file)
+                    
+                    synchronized(self) {
+                        self.diagnostics.merge(with: writer.diagnostics)
+                    }
                 }
             }
         }

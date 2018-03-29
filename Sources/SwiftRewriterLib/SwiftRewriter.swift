@@ -147,6 +147,9 @@ public class SwiftRewriter {
         
         // Keep file ordering of intentions
         intentionCollection.sortFileIntentions()
+        
+        // Clear pool to get rid of parser stored memory
+        parserStatePool.clear()
     }
     
     /// Parses all statements now, with proper type information available.
@@ -165,35 +168,37 @@ public class SwiftRewriter {
         
         for item in lazyParse {
             queue.addOperation {
-                let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
-                let state = SwiftRewriter._parserStatePool.pull()
-                let typeParser = TypeParsing(state: state)
-                defer {
-                    SwiftRewriter._parserStatePool.repool(state)
-                }
-                
-                let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
-                
-                switch item {
-                case .enumCase(let enCase):
-                    guard let expression = (enCase.source as? ObjcEnumCase)?.expression?.expression else {
-                        return
+                autoreleasepool {
+                    let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
+                    let state = SwiftRewriter._parserStatePool.pull()
+                    let typeParser = TypeParsing(state: state)
+                    defer {
+                        SwiftRewriter._parserStatePool.repool(state)
                     }
                     
-                    enCase.expression = reader.parseExpression(expression: expression)
-                case .functionBody(let funcBody):
-                    guard let body = funcBody.typedSource?.statements else {
-                        return
+                    let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
+                    
+                    switch item {
+                    case .enumCase(let enCase):
+                        guard let expression = (enCase.source as? ObjcEnumCase)?.expression?.expression else {
+                            return
+                        }
+                        
+                        enCase.expression = reader.parseExpression(expression: expression)
+                    case .functionBody(let funcBody):
+                        guard let body = funcBody.typedSource?.statements else {
+                            return
+                        }
+                        
+                        funcBody.body = reader.parseStatements(compoundStatement: body)
+                        
+                    case .globalVar(let v):
+                        guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
+                            return
+                        }
+                        
+                        v.expression = reader.parseExpression(expression: expression)
                     }
-                    
-                    funcBody.body = reader.parseStatements(compoundStatement: body)
-                    
-                case .globalVar(let v):
-                    guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
-                        return
-                    }
-                    
-                    v.expression = reader.parseExpression(expression: expression)
                 }
             }
         }
@@ -221,24 +226,26 @@ public class SwiftRewriter {
         // Resolve typealiases and extension declarations first
         for item in lazyResolve {
             queue.addOperation {
-                switch item {
-                case .extensionDecl(let ext):
-                    let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
-                    ext.typeName = typeName
-                    
-                case .typealias(let typeali):
-                    let nullability =
-                        InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
-                    
-                    let ctx =
-                        TypeMappingContext(explicitNullability: nullability,
-                                           inNonnull: typeali.inNonnullContext)
-                    
-                    typeali.fromType =
-                        typeMapper.swiftType(forObjcType: typeali.originalObjcType,
-                                             context: ctx)
-                default:
-                    break
+                autoreleasepool {
+                    switch item {
+                    case .extensionDecl(let ext):
+                        let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
+                        ext.typeName = typeName
+                        
+                    case .typealias(let typeali):
+                        let nullability =
+                            InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
+                        
+                        let ctx =
+                            TypeMappingContext(explicitNullability: nullability,
+                                               inNonnull: typeali.inNonnullContext)
+                        
+                        typeali.fromType =
+                            typeMapper.swiftType(forObjcType: typeali.originalObjcType,
+                                                 context: ctx)
+                    default:
+                        break
+                    }
                 }
             }
         }
@@ -248,60 +255,62 @@ public class SwiftRewriter {
         // Now resolve all remaining items
         for item in lazyResolve {
             queue.addOperation {
-                switch item {
-                case let .property(prop):
-                    guard let node = prop.propertySource else { return }
-                    guard let type = node.type?.type else { return }
-                    
-                    let context =
-                        TypeMappingContext(modifiers: node.attributesList,
-                                           inNonnull: prop.inNonnullContext)
-                    
-                    prop.storage.type = typeMapper.swiftType(forObjcType: type,
-                                                             context: context)
-                    
-                case let .method(method):
-                    guard let node = method.typedSource else { return }
-                    
-                    let instancetype = (method.type?.typeName).map { SwiftType.typeName($0) }
-                    
-                    let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
-                                                          inNonnullContext: method.inNonnullContext,
-                                                          instanceTypeAlias: instancetype)
-                    method.signature = signGen.generateDefinitionSignature(from: node)
-                    
-                case let .ivar(ivar):
-                    guard let node = ivar.typedSource else { return }
-                    guard let type = node.type?.type else { return }
-                    
-                    ivar.storage.type =
-                        typeMapper.swiftType(forObjcType: type,
-                                             context: .init(inNonnull: ivar.inNonnullContext))
-                    
-                case let .globalVar(gvar):
-                    guard let node = gvar.variableSource else { return }
-                    guard let type = node.type?.type else { return }
-                    
-                    gvar.storage.type =
-                        typeMapper.swiftType(forObjcType: type,
-                                             context: .init(inNonnull: gvar.inNonnullContext))
-                    
-                case let .enumDecl(en):
-                    guard let type = en.typedSource?.type else { return }
-                    
-                    en.rawValueType = typeMapper.swiftType(forObjcType: type.type, context: .alwaysNonnull)
-                    
-                case .globalFunc(let fn):
-                    guard let node = fn.typedSource else { return }
-                    
-                    let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
-                                                          inNonnullContext: fn.inNonnullContext,
-                                                          instanceTypeAlias: nil)
-                    fn.signature = signGen.generateDefinitionSignature(from: node)
-                    
-                case .extensionDecl, .typealias:
-                    // These have already been resolved in a previous loop.
-                    break
+                autoreleasepool {
+                    switch item {
+                    case let .property(prop):
+                        guard let node = prop.propertySource else { return }
+                        guard let type = node.type?.type else { return }
+                        
+                        let context =
+                            TypeMappingContext(modifiers: node.attributesList,
+                                               inNonnull: prop.inNonnullContext)
+                        
+                        prop.storage.type = typeMapper.swiftType(forObjcType: type,
+                                                                 context: context)
+                        
+                    case let .method(method):
+                        guard let node = method.typedSource else { return }
+                        
+                        let instancetype = (method.type?.typeName).map { SwiftType.typeName($0) }
+                        
+                        let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                                                              inNonnullContext: method.inNonnullContext,
+                                                              instanceTypeAlias: instancetype)
+                        method.signature = signGen.generateDefinitionSignature(from: node)
+                        
+                    case let .ivar(ivar):
+                        guard let node = ivar.typedSource else { return }
+                        guard let type = node.type?.type else { return }
+                        
+                        ivar.storage.type =
+                            typeMapper.swiftType(forObjcType: type,
+                                                 context: .init(inNonnull: ivar.inNonnullContext))
+                        
+                    case let .globalVar(gvar):
+                        guard let node = gvar.variableSource else { return }
+                        guard let type = node.type?.type else { return }
+                        
+                        gvar.storage.type =
+                            typeMapper.swiftType(forObjcType: type,
+                                                 context: .init(inNonnull: gvar.inNonnullContext))
+                        
+                    case let .enumDecl(en):
+                        guard let type = en.typedSource?.type else { return }
+                        
+                        en.rawValueType = typeMapper.swiftType(forObjcType: type.type, context: .alwaysNonnull)
+                        
+                    case .globalFunc(let fn):
+                        guard let node = fn.typedSource else { return }
+                        
+                        let signGen = SwiftMethodSignatureGen(typeMapper: typeMapper,
+                                                              inNonnullContext: fn.inNonnullContext,
+                                                              instanceTypeAlias: nil)
+                        fn.signature = signGen.generateDefinitionSignature(from: node)
+                        
+                    case .extensionDecl, .typealias:
+                        // These have already been resolved in a previous loop.
+                        break
+                    }
                 }
             }
         }

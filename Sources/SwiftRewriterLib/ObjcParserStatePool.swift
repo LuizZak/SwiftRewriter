@@ -5,6 +5,13 @@ import Utils
 final class ObjcParserStatePool {
     private var pool: [ObjcParserState] = []
     
+    /// Clears all states stored by this pool.
+    func clear() {
+        synchronized(self) {
+            pool.removeAll()
+        }
+    }
+    
     /// Pulls a new instance of an `ObjcParserState` to parse with.
     ///
     /// - Returns: An `ObjcParserState` ready to parse data.
