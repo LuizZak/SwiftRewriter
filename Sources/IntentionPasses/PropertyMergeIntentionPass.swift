@@ -60,7 +60,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             let potentialGetters =
                 methods.filter { $0.name == property.name }
                     .filter { $0.isStatic == property.isStatic }
-                    .filter { $0.returnType.deepUnwrapped == property.type.deepUnwrapped }
+                    .filter { context.typeSystem.typesMatch($0.returnType, property.type, ignoreNullability: true) }
                     .filter { $0.parameters.isEmpty }
             
             // Setters: All methods named `func set[Name](_ name: Type)` where
@@ -70,7 +70,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 methods.filter { $0.returnType == .void }
                     .filter { $0.isStatic == property.isStatic }
                     .filter { $0.parameters.count == 1 }
-                    .filter { $0.parameters[0].type.deepUnwrapped == property.type.deepUnwrapped }
+                    .filter { context.typeSystem.typesMatch($0.parameters[0].type, property.type, ignoreNullability: true) }
                     .filter { $0.name == expectedName }
             
             var propSet = PropertySet(property: property, getter: nil, setter: nil)

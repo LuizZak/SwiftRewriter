@@ -27,6 +27,62 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         }
     }
     
+    /// Test that property merging checks for typealiases while checking if accessor
+    /// types match.
+    func testMergeGetterAndSetterWithTypeAliases() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "Aliases") { type in
+                    type.createTypealias(withName: "AliasedInt", type: .struct("NSInteger"))
+                        .createTypealias(withName: "OtherAliasedInt", type: .struct("NSInteger"))
+                }
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named:  "a", type: .int)
+                        .createMethod(named: "a", returnType: .typeName("AliasedInt"))
+                        .createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .typeName("OtherAliasedInt"))])
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.methods.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        switch cls.properties[0].mode {
+        case .property:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+    }
+    
+    /// Tests that when merging property accessors we check that the accessor
+    /// typing matches the property's before merging
+    func testDontMergeGetterAndSetterWithDifferentTypes() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named:  "a", type: .int)
+                        .createMethod(named: "a", returnType: .string)
+                        .createMethod(named: "setA", returnType: .cgFloat)
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.methods.count, 2)
+        XCTAssertEqual(cls.properties.count, 1)
+        switch cls.properties[0].mode {
+        case .asField:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties[0].mode)")
+        }
+    }
+    
     // When merging a property with a setter (w/ no getter found), merge, but
     // produce a backing field to allow properly overriding the setter on the
     // type, and produce a default getter returning the backing field, as well.
@@ -614,7 +670,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createMethod(named: "method") { method in
                             method.setBody([
                                 .expression(Expression.identifier("self").dot("b"))
-                                ])
+                            ])
                     }
                 }.build()
         let cls = intentions.classIntentions()[0]
@@ -698,6 +754,46 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             .createMethod(named: "a", returnType: .int) { method in
                                 method.setBody([.return(Expression.identifier("self").dot("b"))])
                             }
+                    }
+                }.build()
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let cls = intentions.classIntentions()[0]
+        XCTAssertEqual(intentions.extensionIntentions()[0].properties.count, 0)
+        XCTAssertEqual(intentions.classIntentions()[0].properties.count, 1)
+        switch cls.properties.first?.mode {
+        case let .property(getter, setter)?:
+            
+            XCTAssertEqual(getter.body, [.return(Expression.identifier("self").dot("b"))])
+            XCTAssertEqual(setter.valueIdentifier, "a")
+            XCTAssertEqual(setter.body.body, [.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
+            
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        }
+    }
+    
+    /// Tests that property merging ignores nullability across accessor types
+    func testMergePropertiesWithDifferentNullabilitySignatures() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A+Ext.m") { file in
+                    file.createExtension(forClassNamed: "A") { type in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .implicitUnwrappedOptional(.string))])  { method in
+                            method.setBody([.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
+                        }
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") { type in
+                        type.createSynthesize(propertyName: "a", variableName: "b")
+                            .createProperty(named: "a", type: .string)
+                            .createMethod(named: "a", returnType: .implicitUnwrappedOptional(.string)) { method in
+                                method.setBody([.return(Expression.identifier("self").dot("b"))])
+                        }
                     }
                 }.build()
         let sut = PropertyMergeIntentionPass()

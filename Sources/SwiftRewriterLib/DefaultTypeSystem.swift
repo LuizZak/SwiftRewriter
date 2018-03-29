@@ -55,6 +55,13 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func typesMatch(_ type1: SwiftType, _ type2: SwiftType, ignoreNullability: Bool) -> Bool {
+        // Structurally the same
+        if !ignoreNullability && type1 == type2 {
+            return true
+        } else if ignoreNullability && type1.deepUnwrapped == type2.deepUnwrapped {
+            return true
+        }
+        
         let expanded1 = resolveAlias(in: type1)
         let expanded2 = resolveAlias(in: type2)
         
