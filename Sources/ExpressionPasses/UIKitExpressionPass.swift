@@ -76,41 +76,29 @@ public class UIKitExpressionPass: BaseExpressionPass {
             return nil
         }
         
+        let conversions: [String: String] = [
+            "hidden": "isHidden",
+            "editable": "isEditable",
+            "focused": "isFocused",
+            "firstResponder": "isFirstResponder",
+            "userInteractionEnabled": "isUserInteractionEnabled",
+            "opaque": "isOpaque"
+        ]
+        
+        guard let converted = conversions[member.name] else {
+            return nil
+        }
+        
         if !context.typeSystem.isType(typeName, subtypeOf: "UIView") {
             return nil
         }
         
-        let makeMember: (String) -> Postfix = {
-            let op = Postfix.member($0)
-            op.hasOptionalAccess = exp.op.hasOptionalAccess
-            
-            return op
-        }
+        let op = Postfix.member(converted)
+        op.hasOptionalAccess = exp.op.hasOptionalAccess
         
-        switch member.name {
-        case "hidden":
-            exp.op = makeMember("isHidden")
-            return exp
-        case "editable":
-            exp.op = makeMember("isEditable")
-            return exp
-        case "focused":
-            exp.op = makeMember("isFocused")
-            return exp
-        case "firstResponder":
-            exp.op = makeMember("isFirstResponder")
-            return exp
-        case "userInteractionEnabled":
-            exp.op = makeMember("isUserInteractionEnabled")
-            return exp
-        case "opaque":
-            exp.op = makeMember("isOpaque")
-            return exp
-        default:
-            break
-        }
+        exp.op = op
         
-        return nil
+        return exp
     }
     
     /// Converts UIColor.orangeColor() -> UIColor.orange, etc.

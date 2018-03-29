@@ -151,9 +151,6 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.isNumeric(.typeName("Double")))
         XCTAssert(sut.isNumeric(.typeName("CFloat")))
         XCTAssert(sut.isNumeric(.typeName("CDouble")))
-        
-        // Boolean (considered numeric due to semantics of C)
-        XCTAssert(sut.isNumeric(.typeName("CBool")))
     }
     
     func testIsIntegerTypealiased() {
@@ -496,6 +493,7 @@ class DefaultTypeSystemTests: XCTestCase {
     func testTypeCategoryPrimitives() {
         XCTAssertEqual(sut.category(forType: "Bool"), .boolean)
         XCTAssertEqual(sut.category(forType: "ObjCBool"), .boolean)
+        XCTAssertEqual(sut.category(forType: "CBool"), .boolean)
         
         XCTAssertEqual(sut.category(forType: "Float"), .float)
         XCTAssertEqual(sut.category(forType: "CFloat"), .float)
@@ -504,7 +502,6 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertEqual(sut.category(forType: "CGFloat"), .float)
         XCTAssertEqual(sut.category(forType: "Float80"), .float)
         
-        XCTAssertEqual(sut.category(forType: "CBool"), .integer)
         XCTAssertEqual(sut.category(forType: "Int64"), .integer)
         XCTAssertEqual(sut.category(forType: "UInt64"), .integer)
         XCTAssertEqual(sut.category(forType: "CLongLong"), .integer)

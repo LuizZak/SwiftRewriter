@@ -60,7 +60,9 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
         
         for item in queue.items {
             opQueue.addOperation {
-                _=item.context.typeResolver.resolveTypes(in: item.body.body)
+                autoreleasepool {
+                    _=item.context.typeResolver.resolveTypes(in: item.body.body)
+                }
             }
         }
         

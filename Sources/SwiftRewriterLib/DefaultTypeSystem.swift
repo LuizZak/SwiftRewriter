@@ -243,7 +243,7 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         switch aliased {
-        case "Bool", "ObjCBool":
+        case "Bool", "ObjCBool", "CBool":
             return .boolean
         case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
             return .float
@@ -334,28 +334,30 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func isInteger(_ type: SwiftType) -> Bool {
-        let aliased = resolveAlias(in: type)
-        
-        switch aliased {
-        case .int, .uint:
-            return true
-        case .nominal(.typeName(let name)):
-            switch name {
-            // Swift integer types
-            case "Int", "Int64", "Int32", "Int16", "Int8", "UInt", "UInt64", "UInt32",
-                 "UInt16", "UInt8":
+        func internalIsInteger(_ type: SwiftType) -> Bool {
+            switch type {
+            case .int, .uint:
                 return true
-            // C integer types
-            case "CChar", "CSignedChar", "CChar16", "CChar32", "CUnsignedChar", "CInt", "CUnsignedInt",
-                 "CShort", "CUnsignedShort", "CLong", "CUnsignedLong", "CLongLong", "CUnsignedLongLong",
-                 "CWideChar", "CBool":
-                return true
+            case .nominal(.typeName(let name)):
+                switch name {
+                // Swift integer types
+                case "Int", "Int64", "Int32", "Int16", "Int8", "UInt", "UInt64",
+                     "UInt32", "UInt16", "UInt8":
+                    return true
+                // C integer types
+                case "CChar", "CSignedChar", "CChar16", "CChar32", "CUnsignedChar",
+                     "CInt", "CUnsignedInt", "CShort", "CUnsignedShort", "CLong",
+                     "CUnsignedLong", "CLongLong", "CUnsignedLongLong", "CWideChar":
+                    return true
+                default:
+                    return false
+                }
             default:
                 return false
             }
-        default:
-            return false
         }
+        
+        return internalIsInteger(type) || internalIsInteger(resolveAlias(in: type))
     }
     
     func unalias(typeName: String) -> SwiftType? {
