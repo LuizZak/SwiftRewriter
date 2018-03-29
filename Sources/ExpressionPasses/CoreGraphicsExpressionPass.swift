@@ -291,7 +291,7 @@ extension CoreGraphicsExpressionPass {
             arguments: [.labeled("x", .asIs), .labeled("y", .asIs)]
         )
 
-        makeCGContextCall("CGContextTranslateCTM", swiftName: "translateBe",
+        makeCGContextCall("CGContextTranslateCTM", swiftName: "translateBy",
             arguments: [.labeled("x", .asIs), .labeled("y", .asIs)]
         )
 
