@@ -50,6 +50,7 @@ public class PropertySynthesizeItem: ASTNode, InitializableNode {
     public var instanceVarName: Identifier? {
         return child(atIndex: 1)
     }
+    public var isDynamic: Bool = false
     
     public required init() {
         super.init(location: .invalid, existsInSource: true)

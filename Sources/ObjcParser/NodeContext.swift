@@ -21,6 +21,20 @@ public class NodeCreationContext {
         return node
     }
     
+    /// Searches for a context node with a given node type.
+    /// Returns nil, if no nodes along the context stack are of type `T`.
+    ///
+    /// Searchs from most recently added to least recently added nodes.
+    public func findContextNode<T: ASTNode>(as node: T.Type = T.self) -> T? {
+        for node in _nodeStack.reversed() {
+            if let node = node as? T {
+                return node
+            }
+        }
+        
+        return nil
+    }
+    
     /// Gets the current context node as a given node type.
     /// Returns nil, if `topmostNode` is nil or if it is not castable to `T`.
     public func currentContextNode<T: ASTNode>(as node: T.Type = T.self) -> T? {

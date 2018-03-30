@@ -83,6 +83,35 @@ class FunctionBodyQueueTests: XCTestCase {
         XCTAssert(items.contains(where: { $0.body === bodyGetter }))
         XCTAssert(items.contains(where: { $0.body === bodySetter }))
     }
+    
+    func testQueueAllBodiesFound() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A") { file in
+                    file.createGlobalFunction(withName: "a", body: [])
+                        .createClass(withName: "B") { type in
+                            type.createProperty(named: "b", type: .int, mode: .computed(FunctionBodyIntention(body: [])))
+                        }
+                }.createFile(named: "C") { file in
+                    file.createClass(withName: "C") { type in
+                        type.createProperty(named: "c", type: .int, mode: .property(get: FunctionBodyIntention(body: []),
+                                                                                    set: PropertyGenerationIntention.Setter(valueIdentifier: "setter", body: FunctionBodyIntention(body: []))))
+                    }
+                }.build()
+        let global = intentions.fileIntentions()[0].globalFunctionIntentions[0].functionBody
+        let bodyGetter1 = intentions.fileIntentions()[0].typeIntentions[0].properties[0].getter
+        let bodyGetter2 = intentions.fileIntentions()[1].typeIntentions[0].properties[0].getter
+        let bodySetter = intentions.fileIntentions()[1].typeIntentions[0].properties[0].setter?.body
+        
+        sut = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: delegate)
+        let items = sut.items
+        
+        XCTAssertEqual(items.count, 4)
+        XCTAssert(items.contains(where: { $0.body === global }))
+        XCTAssert(items.contains(where: { $0.body === bodyGetter1 }))
+        XCTAssert(items.contains(where: { $0.body === bodyGetter2 }))
+        XCTAssert(items.contains(where: { $0.body === bodySetter }))
+    }
 }
 
 private class TestQueueDelegate: FunctionBodyQueueDelegate {

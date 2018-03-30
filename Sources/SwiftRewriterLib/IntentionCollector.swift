@@ -410,6 +410,10 @@ public class IntentionCollector {
     
     // MARK: - Property Implementation
     private func visitPropertySynthesizeItemNode(_ node: PropertySynthesizeItem) {
+        if node.isDynamic { // Dynamic property implementations are not yet supported
+            return
+        }
+        
         guard let ctx = context.findContext(ofType: BaseClassIntention.self) else {
             return
         }
@@ -422,7 +426,8 @@ public class IntentionCollector {
         
         let intent =
             PropertySynthesizationIntention(
-                propertyName: propertyName.name, ivarName: ivarName, isExplicit: true)
+                propertyName: propertyName.name, ivarName: ivarName, isExplicit: true,
+                type: node.isDynamic ? .dynamic : .synthesize)
         
         recordSourceHistory(intention: intent, node: node)
         

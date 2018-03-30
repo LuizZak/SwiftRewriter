@@ -74,6 +74,14 @@ public struct KnownTypeBuilder {
         return new
     }
     
+    /// Sets the flag that indicates whether this known type is an extension of
+    /// another concrete known type
+    public func settingIsExtension(_ isExtension: Bool) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.isExtension = isExtension
+        return new
+    }
+    
     /// Adds a parameter-less constructor to this type
     public func constructor() -> KnownTypeBuilder {
         assert(!type.knownConstructors.contains { $0.parameters.isEmpty },
@@ -322,6 +330,7 @@ private class DummyType: KnownType {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
+    var isExtension: Bool = false
     var knownTraits: [String: TraitType] = [:]
     var knownConstructors: [KnownConstructor] = []
     var knownMethods: [KnownMethod] = []
@@ -358,6 +367,7 @@ private struct BuildingKnownType: Codable {
     var origin: String
     var typeName: String
     var kind: KnownTypeKind = .class
+    var isExtension: Bool = false
     var traits: [String: TraitType] = [:]
     var constructors: [BuildingKnownConstructor] = []
     var methods: [BuildingKnownMethod] = []

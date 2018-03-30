@@ -106,6 +106,10 @@ public class ClassGenerationIntention: BaseClassIntention {
 public class ClassExtensionGenerationIntention: BaseClassIntention {
     /// Original Objective-C category name that originated this category.
     public var categoryName: String?
+    
+    public override var isExtension: Bool {
+        return true
+    }
 }
 
 /// An intention to conform a class to a protocol

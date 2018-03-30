@@ -18,13 +18,19 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     public func knownType(withName name: String) -> KnownType? {
+        var types: [KnownType] = []
+        
         for provider in providers {
             if let type = provider.knownType(withName: name) {
-                return type
+                types.append(type)
             }
         }
         
-        return nil
+        if types.count == 0 {
+            return nil
+        }
+        
+        return CompoundKnownType(typeName: name, types: types)
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {

@@ -1,10 +1,13 @@
 import Foundation
 import SwiftAST
+import Utils
 
 /// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
 /// all function bodies found in one go.
 public final class SyntaxNodeRewriterPassApplier {
-    var afterFile: ((String) -> Void)?
+    private var dirtyFunctions = DirtyFunctionBodyMap()
+    
+    var afterFile: ((String, _ passName: String) -> Void)?
     
     public var passes: [SyntaxNodeRewriterPass.Type]
     public var typeSystem: TypeSystem
@@ -26,52 +29,98 @@ public final class SyntaxNodeRewriterPassApplier {
         internalApply(on: intentions)
     }
     
-    func internalApply(on intentions: IntentionCollection) {
+    private func applyPassOnBody(_ item: FunctionBodyQueue<TypeResolvingQueueDelegate>.FunctionBodyQueueItem,
+                                 passType: SyntaxNodeRewriterPass.Type) {
+        let functionBody = item.body
+        
+        // Resolve types before feeding into passes
+        if dirtyFunctions.isDirty(functionBody) {
+            _=item.context.typeResolver.resolveTypes(in: functionBody.body)
+        }
+        
+        let notifyChangedTree: () -> Void = {
+            self.dirtyFunctions.markDirty(functionBody)
+        }
+        
+        let expContext =
+            SyntaxNodeRewriterPassContext(typeSystem: self.typeSystem,
+                                          typeResolver: item.context.typeResolver,
+                                          notifyChangedTree: notifyChangedTree)
+        
+        let pass = passType.init()
+        _=pass.apply(on: item.body.body, context: expContext)
+    }
+    
+    private func internalApply(on intentions: IntentionCollection) {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = numThreds
+        
+        
+        for file in intentions.fileIntentions() {
+            queue.addOperation {
+                for passType in self.passes {
+                    self.internalApply(on: file, intentions: intentions,
+                                       passType: passType)
+                }
+            }
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
+    }
+    
+    private func internalApply(on file: FileGenerationIntention, intentions: IntentionCollection,
+                               passType: SyntaxNodeRewriterPass.Type) {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = numThreds
+        
         let delegate =
             TypeResolvingQueueDelegate(intentions: intentions, globals: globals,
                                        typeSystem: typeSystem)
         
         let bodyQueue =
             FunctionBodyQueue
-                .fromIntentionCollection(intentions,
-                                         delegate: delegate)
-        
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = numThreds
+                .fromFile(intentions, file: file, delegate: delegate)
         
         for item in bodyQueue.items {
             queue.addOperation {
                 autoreleasepool {
-                    // Resolve types before feeding into passes
-                    _=item.context.typeResolver.resolveTypes(in: item.body.body)
-                    
-                    var didChangeTree = false
-                    let notifyChangedTree: () -> Void = {
-                        didChangeTree = true
-                    }
-                    
-                    let expContext =
-                        SyntaxNodeRewriterPassContext(typeSystem: self.typeSystem,
-                                                      typeResolver: item.context.typeResolver,
-                                                      notifyChangedTree: notifyChangedTree)
-                    
-                    self.passes.forEach { pass in
-                        let pass = pass.init()
-                        
-                        didChangeTree = false
-                        
-                        _=pass.apply(on: item.body.body, context: expContext)
-                        
-                        if didChangeTree {
-                            // After each apply to the body, we must re-type check the result
-                            // before handing it off to the next pass.
-                            _=item.context.typeResolver.resolveTypes(in: item.body.body)
-                        }
-                    }
+                    self.applyPassOnBody(item, passType: passType)
                 }
             }
         }
         
         queue.waitUntilAllOperationsAreFinished()
+        
+        self.afterFile?(file.targetPath, "\(passType)")
+    }
+    
+    private class DirtyFunctionBodyMap {
+        var dirty: [FunctionBodyIntention] = []
+        
+        func markDirty(_ body: FunctionBodyIntention) {
+            synchronized(self) {
+                if dirty.contains(where: { $0 === body }) {
+                    return
+                }
+                
+                dirty.append(body)
+            }
+        }
+        
+        func clearDirty(_ body: FunctionBodyIntention) {
+            synchronized(self) {
+                guard let index = dirty.index(where: { $0 === body }) else {
+                    return
+                }
+                
+                dirty.remove(at: index)
+            }
+        }
+        
+        func isDirty(_ body: FunctionBodyIntention) -> Bool {
+            return synchronized(self) {
+                return dirty.contains(where: { $0 === body })
+            }
+        }
     }
 }

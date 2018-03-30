@@ -1974,6 +1974,25 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testDontSynthesizeDynamicDeclaration() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property NSInteger a;
+            @end
+            
+            @implementation A
+            @dynamic a = b;
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var a: Int = 0
+            }
+            """)
+    }
+    
     func testSynthesizeReadonlyPropertyOnExistingIVar() throws {
         try assertObjcParse(
             objc: """

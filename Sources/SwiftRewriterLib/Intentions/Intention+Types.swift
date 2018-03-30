@@ -108,6 +108,10 @@ public class TypeGenerationIntention: FromSourceIntention {
     private(set) public var methods: [MethodGenerationIntention] = []
     private(set) public var constructors: [InitGenerationIntention] = []
     
+    public var isExtension: Bool {
+        return false
+    }
+    
     /// Returns `true` if this type has no inner members, or any protocol conformance.
     public var isEmptyType: Bool {
         return protocols.isEmpty && properties.isEmpty && methods.isEmpty && constructors.isEmpty

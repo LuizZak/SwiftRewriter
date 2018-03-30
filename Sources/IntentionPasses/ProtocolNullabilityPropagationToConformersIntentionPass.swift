@@ -13,6 +13,12 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        let typeSystem = context.typeSystem as? IntentionCollectionTypeSystem
+        typeSystem?.makeCache()
+        defer {
+            typeSystem?.tearDownCache()
+        }
+        
         // Collect protocols
         let protocols = intentionCollection.protocolIntentions()
         let classes = intentionCollection.classIntentions()

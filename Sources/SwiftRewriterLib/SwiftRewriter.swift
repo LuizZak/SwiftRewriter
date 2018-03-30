@@ -70,11 +70,13 @@ public class SwiftRewriter {
                   settings: .default)
     }
     
-    public init(input: InputSourcesProvider, output: WriterOutput,
+    public init(input: InputSourcesProvider,
+                output: WriterOutput,
                 intentionPassesSource: IntentionPassSource,
                 syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource,
                 globalsProvidersSource: GlobalsProvidersSource,
                 settings: Settings) {
+        
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
         self.outputTarget = output
@@ -148,9 +150,6 @@ public class SwiftRewriter {
         
         // Keep file ordering of intentions
         intentionCollection.sortFileIntentions()
-        
-        // Clear pool to get rid of parser stored memory
-        parserStatePool.clear()
     }
     
     /// Parses all statements now, with proper type information available.
@@ -379,6 +378,11 @@ public class SwiftRewriter {
             print("Running syntax passes...")
         }
         
+        // Resolve all expressions again
+        typeResolverInvoker
+            .resolveAllExpressionTypes(in: intentionCollection,
+                                       force: true)
+        
         let applier =
             SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
                                           typeSystem: typeSystem,
@@ -386,14 +390,18 @@ public class SwiftRewriter {
                                           numThreds: settings.numThreads)
         
         if !settings.diagnoseFiles.isEmpty {
-            applier.afterFile = { _ in
+            applier.afterFile = { file, passName in
                 synchronized(self) {
-                    self.printDiagnosedFiles(step: "After applying expression passes")
+                    self.printDiagnosedFile(targetPath: file, step: "After applying \(passName) pass")
                 }
             }
         }
         
+        typeSystem.makeCache()
+        
         applier.apply(on: intentionCollection)
+        
+        typeSystem.tearDownCache()
     }
     
     private func outputDefinitions() {
@@ -504,27 +512,35 @@ public class SwiftRewriter {
     }
     
     private func printDiagnosedFiles(step: String) {
+        for diagnoseFile in settings.diagnoseFiles {
+            printDiagnosedFile(targetPath: diagnoseFile, step: step)
+        }
+    }
+    
+    private func printDiagnosedFile(targetPath: String, step: String) {
         let files = intentionCollection.fileIntentions()
         
-        for diagnoseFile in settings.diagnoseFiles {
-            guard let match = files.first(where: { $0.targetPath.hasSuffix(diagnoseFile) }) else {
-                continue
-            }
-            
-            let writer =
-                InternalSwiftWriter(
-                    intentions: intentionCollection, options: writerOptions,
-                    diagnostics: Diagnostics(), output: outputTarget,
-                    typeMapper: typeMapper, typeSystem: typeSystem)
-            
-            let output = StringRewriterOutput()
-            
-            writer.outputFile(match, out: output)
-            
-            print("Diagnose file: \(match.targetPath)\ncontext: \(step)")
-            print(output.buffer)
-            print("")
+        if !settings.diagnoseFiles.contains(where: { targetPath.contains($0) }) {
+            return
         }
+        
+        guard let match = files.first(where: { $0.targetPath.hasSuffix(targetPath) }) else {
+            return
+        }
+        
+        let writer =
+            InternalSwiftWriter(
+                intentions: intentionCollection, options: writerOptions,
+                diagnostics: Diagnostics(), output: outputTarget,
+                typeMapper: typeMapper, typeSystem: typeSystem)
+        
+        let output = StringRewriterOutput()
+        
+        writer.outputFile(match, out: output)
+        
+        print("Diagnose file: \(match.targetPath)\ncontext: \(step)")
+        print(output.buffer)
+        print("")
     }
     
     /// Settings for a `SwiftRewriter` instance

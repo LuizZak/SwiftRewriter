@@ -353,6 +353,19 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     // MARM: - Property implementaiton
+    override func exitPropertyImplementation(_ ctx: ObjectiveCParser.PropertyImplementationContext) {
+        guard let node = context.currentContextNode(as: PropertyImplementation.self) else {
+            return
+        }
+        guard let list = node.list else {
+            return
+        }
+        
+        for synth in list.synthesizations {
+            synth.isDynamic = ctx.DYNAMIC() != nil
+        }
+    }
+    
     override func enterPropertySynthesizeItem(_ ctx: ObjectiveCParser.PropertySynthesizeItemContext) {
         guard let node = context.currentContextNode(as: PropertySynthesizeItem.self) else {
             return

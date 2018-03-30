@@ -423,7 +423,7 @@ public extension TypeBuilder where T: BaseClassIntention {
         let intent =
             PropertySynthesizationIntention(
                 propertyName: propertyName, ivarName: variableName ?? propertyName,
-                isExplicit: false)
+                isExplicit: false, type: .synthesize)
         
         targetType.addSynthesization(intent)
         

@@ -1,3 +1,6 @@
+import Foundation
+import Utils
+
 public protocol FunctionBodyQueueDelegate: class {
     associatedtype Context
     
@@ -70,9 +73,15 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     }
     
     private func collect(from intentions: IntentionCollection) {
+        let queue = OperationQueue()
+        
         for file in intentions.fileIntentions() {
-            collectFromFile(file)
+            queue.addOperation {
+                self.collectFromFile(file)
+            }
         }
+        
+        queue.waitUntilAllOperationsAreFinished()
     }
     
     private func collectFromFile(_ file: FileGenerationIntention) {
@@ -118,10 +127,6 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
     }
     
-    private func collectFunctionBody(_ functionBody: FunctionBodyIntention, context: Context) {
-        items.append(FunctionBodyQueueItem(body: functionBody, context: context))
-    }
-    
     private func collectInit(_ ctor: InitGenerationIntention) {
         guard let delegate = delegate else {
             return
@@ -165,6 +170,12 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             
         case .asField:
             break
+        }
+    }
+    
+    private func collectFunctionBody(_ functionBody: FunctionBodyIntention, context: Context) {
+        synchronized(self) {
+            items.append(FunctionBodyQueueItem(body: functionBody, context: context))
         }
     }
     

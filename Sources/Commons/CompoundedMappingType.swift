@@ -29,6 +29,9 @@ extension CompoundedMappingType: KnownType {
     public var kind: KnownTypeKind {
         return knownType.kind
     }
+    public var isExtension: Bool {
+        return knownType.isExtension
+    }
     public var knownTraits: [String : TraitType] {
         get {
             return knownType.knownTraits

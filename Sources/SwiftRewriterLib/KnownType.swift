@@ -10,6 +10,10 @@ public protocol KnownType: KnownTypeReferenceConvertible {
     /// etc.
     var origin: String { get }
     
+    /// Returns `true` if this known type represents an extension for another
+    /// known type.
+    var isExtension: Bool { get }
+    
     /// The supertype for this known type, if any.
     var supertype: KnownTypeReference? { get }
     

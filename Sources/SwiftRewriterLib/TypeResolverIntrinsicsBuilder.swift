@@ -24,7 +24,9 @@ class TypeResolverIntrinsicsBuilder {
         typeResolver.ignoreResolvedExpressions = !force
     }
     
-    func setupIntrinsics(forFunction function: GlobalFunctionGenerationIntention, intentions: IntentionCollection) {
+    func setupIntrinsics(forFunction function: GlobalFunctionGenerationIntention,
+                         intentions: IntentionCollection) {
+        
         let intrinsics = createIntrinsics(forFunction: function, intentions: intentions)
         typeResolver.pushContainingFunctionReturnType(function.signature.returnType)
         typeResolver.intrinsicVariables = intrinsics
@@ -32,7 +34,9 @@ class TypeResolverIntrinsicsBuilder {
         pushedReturnType = true
     }
     
-    func setupIntrinsics(forMember member: MemberGenerationIntention, intentions: IntentionCollection) {
+    func setupIntrinsics(forMember member: MemberGenerationIntention,
+                         intentions: IntentionCollection) {
+        
         let intrinsics = createIntrinsics(forMember: member, intentions: intentions)
         
         typeResolver.intrinsicVariables = intrinsics
@@ -71,7 +75,8 @@ class TypeResolverIntrinsicsBuilder {
         miscellaneousDefinitions.removeAllDefinitions()
     }
     
-    private func createIntrinsics(forFunction function: GlobalFunctionGenerationIntention, intentions: IntentionCollection) -> DefinitionsSource {
+    private func createIntrinsics(forFunction function: GlobalFunctionGenerationIntention,
+                                  intentions: IntentionCollection) -> DefinitionsSource {
         let intrinsics = DefaultCodeScope()
         
         // Push function parameters as intrinsics, if member is a method type
@@ -97,7 +102,9 @@ class TypeResolverIntrinsicsBuilder {
         return compoundIntrinsics
     }
     
-    private func createIntrinsics(forMember member: MemberGenerationIntention, intentions: IntentionCollection) -> DefinitionsSource {
+    private func createIntrinsics(forMember member: MemberGenerationIntention,
+                                  intentions: IntentionCollection) -> DefinitionsSource {
+        
         let intrinsics = DefaultCodeScope()
         
         // Push `self` intrinsic member variable, as well as all properties visible
@@ -151,7 +158,8 @@ class TypeResolverIntrinsicsBuilder {
         
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
-            IntentionCollectionGlobalsDefinitionsSource(intentions: intentions, symbol: member)
+            IntentionCollectionGlobalsDefinitionsSource(intentions: intentions,
+                                                        symbol: member)
         
         // Push global definitions
         let compoundIntrinsics = CompoundDefinitionsSource()

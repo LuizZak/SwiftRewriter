@@ -30,7 +30,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public func resolveAllExpressionTypes(in intentions: IntentionCollection, force: Bool) {
         typeSystem.makeCache()
         
-        let queue = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: makeDelegate())
+        let queue = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: makeQueueDelegate())
         
         resolveFromQueue(queue)
         
@@ -40,7 +40,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool) {
         let queue =
             FunctionBodyQueue.fromMethod(typeSystem.intentions, method: method,
-                                         delegate: makeDelegate())
+                                         delegate: makeQueueDelegate())
         
         resolveFromQueue(queue)
     }
@@ -48,7 +48,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool) {
         let queue =
             FunctionBodyQueue.fromProperty(typeSystem.intentions, property: property,
-                                           delegate: makeDelegate())
+                                           delegate: makeQueueDelegate())
         
         resolveFromQueue(queue)
     }
@@ -71,7 +71,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     // MARK: - Private methods
     
-    private func makeDelegate() -> TypeResolvingQueueDelegate {
+    private func makeQueueDelegate() -> TypeResolvingQueueDelegate {
         return TypeResolvingQueueDelegate(intentions: typeSystem.intentions,
                                          globals: globals, typeSystem: typeSystem)
     }

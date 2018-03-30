@@ -581,4 +581,30 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.typeExists("A"))
         XCTAssertFalse(sut.typeExists("Unknown"))
     }
+    
+    func testExtensionTypesDontOvershadowOriginalImplementation() {
+        let ext =
+            KnownTypeBuilder(typeName: "UIView")
+                .settingIsExtension(true)
+                .method(named: "fromExtension")
+                .build()
+        let viewType =
+            KnownTypeBuilder(typeName: "UIView")
+                .property(named: "window", type: .optional("UIWindow"))
+                .build()
+        let source = CollectionKnownTypeProvider(knownTypes: [viewType])
+        sut.addType(ext)
+        sut.addKnownTypeProvider(source)
+        
+        let type = sut.knownTypeWithName("UIView")!
+        
+        XCTAssert(type.knownMethods.contains(where: { $0.signature.name == "fromExtension" }))
+        XCTAssertNotNil(
+            sut.method(withObjcSelector: SelectorSignature(isStatic:false, keywords: ["fromExtension"]),
+                       static: false, includeOptional: false, in: .typeName("UIView")))
+        
+        XCTAssert(type.knownProperties.contains(where: { $0.name == "window" }))
+        XCTAssertNotNil(sut.property(named: "window", static: false,
+                                     includeOptional: false, in: .typeName("UIView")))
+    }
 }

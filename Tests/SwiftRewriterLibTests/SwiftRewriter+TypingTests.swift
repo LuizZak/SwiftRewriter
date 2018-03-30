@@ -1059,4 +1059,37 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testExtensionOfGlobalClass() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A : UIView
+            @end
+            
+            @implementation A
+            - (void)method {
+                (self.window);
+            }
+            @end
+            
+            @interface UIView (Category)
+            @end
+            """,
+            swift: """
+            @objc
+            class A: UIView {
+                @objc
+                func method() {
+                    // type: UIWindow?
+                    self.window
+                }
+            }
+
+            // MARK: - Category
+            @objc
+            extension UIView {
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

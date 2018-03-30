@@ -1,4 +1,4 @@
-// Generated from /Users/luizsilva/Documents/Local Projects/objcgrammar/ObjectiveCLexer.g4 by ANTLR 4.7
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCLexer.g4 by ANTLR 4.7
 import Antlr4
 
 open class ObjectiveCLexer: Lexer {
@@ -30,7 +30,7 @@ open class ObjectiveCLexer: Lexer {
     
     public var state: State
     
-	public static let AUTO=1, BREAK=2, CASE=3, CHAR=4, CONST=5, CONTINUE=6, 
+	public static let AUTO=1, BREAK=2, CASE=3, CHAR=4, CONST=5, CONTINUE=6,
                    DEFAULT=7, DO=8, DOUBLE=9, ELSE=10, ENUM=11, EXTERN=12, 
                    FLOAT=13, FOR=14, GOTO=15, IF=16, INLINE=17, INT=18, 
                    LONG=19, REGISTER=20, RESTRICT=21, RETURN=22, SHORT=23, 

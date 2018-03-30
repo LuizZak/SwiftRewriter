@@ -1,4 +1,4 @@
-// Generated from /Users/luizsilva/Documents/Local Projects/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.7
+// Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCParser.g4 by ANTLR 4.7
 import Antlr4
 
 open class ObjectiveCParser: Parser {
@@ -3879,9 +3879,11 @@ open class ObjectiveCParser: Parser {
 		return _localctx
 	}
 	open class PropertyImplementationContext:ParserRuleContext {
+		open func SYNTHESIZE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SYNTHESIZE.rawValue, 0) }
 		open func propertySynthesizeList() -> PropertySynthesizeListContext? {
 			return getRuleContext(PropertySynthesizeListContext.self,0)
 		}
+		open func DYNAMIC() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DYNAMIC.rawValue, 0) }
 		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_propertyImplementation }
 		override
 		open func enterRule(_ listener: ParseTreeListener) {
