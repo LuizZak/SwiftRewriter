@@ -184,10 +184,17 @@ private class ExpressionWriter: ExpressionVisitor {
             target.outputInline("MemoryLayout<")
             target.outputInline(typeMapper.typeNameString(for: type))
             target.outputInline(">.size")
+            
         case .expression(let exp):
-            target.outputInline("MemoryLayout.size(ofValue: ")
-            exp.unwrappingParens.accept(self)
-            target.outputInline(")")
+            if case let .metatype(innerType)? = exp.resolvedType {
+                target.outputInline("MemoryLayout<")
+                target.outputInline(typeMapper.typeNameString(for: innerType))
+                target.outputInline(">.size")
+            } else {
+                target.outputInline("MemoryLayout.size(ofValue: ")
+                exp.unwrappingParens.accept(self)
+                target.outputInline(")")
+            }
         }
     }
     

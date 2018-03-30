@@ -59,7 +59,6 @@ public final class SyntaxNodeRewriterPassApplier {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreds
         
-        
         for file in intentions.fileIntentions() {
             queue.addOperation {
                 for passType in self.passes {
@@ -72,8 +71,10 @@ public final class SyntaxNodeRewriterPassApplier {
         queue.waitUntilAllOperationsAreFinished()
     }
     
-    private func internalApply(on file: FileGenerationIntention, intentions: IntentionCollection,
+    private func internalApply(on file: FileGenerationIntention,
+                               intentions: IntentionCollection,
                                passType: SyntaxNodeRewriterPass.Type) {
+        
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreds
         

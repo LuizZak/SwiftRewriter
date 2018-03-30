@@ -305,6 +305,41 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testEmitSizeOfForKnownTypes() throws {
+        try assertObjcParse(
+            objc: """
+            typedef struct {
+                int field;
+            } VertexObject;
+            
+            @implementation MyClass
+            - (void)myMethod {
+                sizeof(VertexObject);
+            }
+            @end
+            """,
+            swift: """
+            struct VertexObject {
+                var field: CInt
+                
+                init() {
+                    field = 0
+                }
+                init(field: CInt) {
+                    self.field = field
+                }
+            }
+
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    MemoryLayout<VertexObject>.size
+                }
+            }
+            """)
+    }
+    
     func testSingleBlockArgument() throws {
         try assertObjcParse(
             objc: """
