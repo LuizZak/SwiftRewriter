@@ -9,6 +9,8 @@ public final class SyntaxNodeRewriterPassApplier {
     
     var afterFile: ((String, _ passName: String) -> Void)?
     
+    var intentionGlobals: IntentionCollectionGlobals!
+    
     public var passes: [SyntaxNodeRewriterPass.Type]
     public var typeSystem: TypeSystem
     public var numThreds: Int
@@ -26,6 +28,8 @@ public final class SyntaxNodeRewriterPassApplier {
     }
     
     public func apply(on intentions: IntentionCollection) {
+        intentionGlobals = IntentionCollectionGlobals(intentions: intentions)
+        
         internalApply(on: intentions)
     }
     
@@ -74,8 +78,9 @@ public final class SyntaxNodeRewriterPassApplier {
         queue.maxConcurrentOperationCount = numThreds
         
         let delegate =
-            TypeResolvingQueueDelegate(intentions: intentions, globals: globals,
-                                       typeSystem: typeSystem)
+            TypeResolvingQueueDelegate(
+                intentions: intentions, globals: globals, typeSystem: typeSystem,
+                intentionGlobals: intentionGlobals)
         
         let bodyQueue =
             FunctionBodyQueue

@@ -62,20 +62,9 @@ class MandatoryIntentionPass: IntentionPass {
         let plainInitBody
             = FunctionBodyIntention(body:
                 CompoundStatement(statements:
-                    fields.map { field in
-                        let rhs: Expression
-                        
-                        if context.typeSystem.isNumeric(field.type) {
-                            // <integer field> = 0
-                            rhs = .constant(0)
-                        } else {
-                            // <field> = FieldType()
-                            rhs =
-                                Expression
-                                    .identifier(
-                                        context.typeMapper.typeNameString(for: field.type)
-                                    )
-                                    .call()
+                    fields.compactMap { field in
+                        guard let rhs = context.typeSystem.defaultValue(for: field.type) else {
+                            return nil
                         }
                         
                         return .expression(

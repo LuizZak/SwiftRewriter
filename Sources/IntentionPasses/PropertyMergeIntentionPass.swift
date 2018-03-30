@@ -26,6 +26,11 @@ public class PropertyMergeIntentionPass: IntentionPass {
         
         var classesSeen: Set<String> = []
         
+        let typeSystem = context.typeSystem as? IntentionCollectionTypeSystem
+        typeSystem?.makeCache()
+        
+        var matches: [PropertySet] = []
+        
         // Collect all (nominal, non-category types) and analyze them one-by-one.
         for file in intentionCollection.fileIntentions() {
             for cls in file.typeIntentions.compactMap({ $0 as? BaseClassIntention }) {
@@ -40,12 +45,25 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 
                 classesSeen.insert(cls.typeName)
                 
-                apply(on: cls)
+                matches.append(contentsOf: collectMatches(in: cls))
+            }
+        }
+        
+        typeSystem?.tearDownCache()
+        
+        // Flatten properties now
+        for match in matches {
+            let acted = joinPropertySet(match, on: match.classIntention)
+            
+            // If no action was taken, look into synthesizing a backing field
+            // anyway, due to usage of backing field in any method of the type
+            if !acted {
+                synthesizeBackingFieldIfUsing(in: match.classIntention, for: match.property)
             }
         }
     }
     
-    func apply(on classIntention: BaseClassIntention) {
+    private func collectMatches(in classIntention: BaseClassIntention) -> [PropertySet] {
         let properties = collectProperties(fromClass: classIntention)
         let methods = collectMethods(fromClass: classIntention)
         
@@ -73,7 +91,9 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     .filter { context.typeSystem.typesMatch($0.parameters[0].type, property.type, ignoreNullability: true) }
                     .filter { $0.name == expectedName }
             
-            var propSet = PropertySet(property: property, getter: nil, setter: nil)
+            var propSet =
+                PropertySet(classIntention: classIntention, property: property,
+                            getter: nil, setter: nil)
             
             if potentialGetters.count == 1 {
                 propSet.getter = potentialGetters[0]
@@ -85,16 +105,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             matches.append(propSet)
         }
         
-        // Flatten properties now
-        for match in matches {
-            let acted = joinPropertySet(match, on: classIntention)
-            
-            // If no action was taken, look into synthesizing a backing field
-            // anyway, due to usage of backing field in any method of the type
-            if !acted {
-                synthesizeBackingFieldIfUsing(in: classIntention, for: match.property)
-            }
-        }
+        return matches
     }
     
     func collectProperties(fromClass classIntention: BaseClassIntention) -> [PropertyGenerationIntention] {
@@ -422,6 +433,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     }
     
     private struct PropertySet {
+        var classIntention: BaseClassIntention
         var property: PropertyGenerationIntention
         var getter: MethodGenerationIntention?
         var setter: MethodGenerationIntention?

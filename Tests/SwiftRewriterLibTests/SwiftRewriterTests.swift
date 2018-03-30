@@ -994,26 +994,77 @@ class SwiftRewriterTests: XCTestCase {
         try assertObjcParse(
             objc: """
             typedef struct {
+                float x;
+                float y;
+                float z;
+            } vector_float3;
+            typedef struct {
+                float x;
+                float y;
+                float z;
+                float w;
+            } packed_float4;
+            
+            typedef struct {
                 vector_float3 position;
                 packed_float4 color;
                 int offset;
+                BOOL booly;
             } VertexObject;
             """
             , swift: """
+            struct vector_float3 {
+                var x: CFloat
+                var y: CFloat
+                var z: CFloat
+                
+                init() {
+                    x = 0.0
+                    y = 0.0
+                    z = 0.0
+                }
+                init(x: CFloat, y: CFloat, z: CFloat) {
+                    self.x = x
+                    self.y = y
+                    self.z = z
+                }
+            }
+            struct packed_float4 {
+                var x: CFloat
+                var y: CFloat
+                var z: CFloat
+                var w: CFloat
+                
+                init() {
+                    x = 0.0
+                    y = 0.0
+                    z = 0.0
+                    w = 0.0
+                }
+                init(x: CFloat, y: CFloat, z: CFloat, w: CFloat) {
+                    self.x = x
+                    self.y = y
+                    self.z = z
+                    self.w = w
+                }
+            }
             struct VertexObject {
                 var position: vector_float3
                 var color: packed_float4
                 var offset: CInt
+                var booly: Bool
                 
                 init() {
                     position = vector_float3()
                     color = packed_float4()
                     offset = 0
+                    booly = false
                 }
-                init(position: vector_float3, color: packed_float4, offset: CInt) {
+                init(position: vector_float3, color: packed_float4, offset: CInt, booly: Bool) {
                     self.position = position
                     self.color = color
                     self.offset = offset
+                    self.booly = booly
                 }
             }
             """)
@@ -1023,6 +1074,18 @@ class SwiftRewriterTests: XCTestCase {
         try assertObjcParse(
             objc: """
             typedef struct {
+                float x;
+                float y;
+                float z;
+            } vector_float3;
+            typedef struct {
+                float x;
+                float y;
+                float z;
+                float w;
+            } packed_float4;
+            
+            typedef struct {
                 vector_float3 position;
                 packed_float4 color;
             } VertexObject;
@@ -1030,6 +1093,41 @@ class SwiftRewriterTests: XCTestCase {
             VertexObject *vertedObject;
             """
             , swift: """
+            struct vector_float3 {
+                var x: CFloat
+                var y: CFloat
+                var z: CFloat
+                
+                init() {
+                    x = 0.0
+                    y = 0.0
+                    z = 0.0
+                }
+                init(x: CFloat, y: CFloat, z: CFloat) {
+                    self.x = x
+                    self.y = y
+                    self.z = z
+                }
+            }
+            struct packed_float4 {
+                var x: CFloat
+                var y: CFloat
+                var z: CFloat
+                var w: CFloat
+                
+                init() {
+                    x = 0.0
+                    y = 0.0
+                    z = 0.0
+                    w = 0.0
+                }
+                init(x: CFloat, y: CFloat, z: CFloat, w: CFloat) {
+                    self.x = x
+                    self.y = y
+                    self.z = z
+                    self.w = w
+                }
+            }
             struct VertexObject {
                 var position: vector_float3
                 var color: packed_float4

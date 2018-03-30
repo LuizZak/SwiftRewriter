@@ -6,18 +6,22 @@ class TypeResolverIntrinsicsBuilder {
     private var pushedReturnType: Bool = false
     
     var typeResolver: ExpressionTypeResolver
+    
     private var globals: DefinitionsSource
     private var typeSystem: TypeSystem
     private var miscellaneousDefinitions: DefaultCodeScope = DefaultCodeScope()
+    private var intentionGlobals: IntentionCollectionGlobals
     
     init(typeResolver: ExpressionTypeResolver,
          globals: DefinitionsSource,
-         typeSystem: TypeSystem) {
+         typeSystem: TypeSystem,
+         intentionGlobals: IntentionCollectionGlobals) {
         
         self.typeResolver = typeResolver
         self.globals = globals
         self.typeResolver = typeResolver
         self.typeSystem = typeSystem
+        self.intentionGlobals = intentionGlobals
     }
     
     func setForceResolveExpressions(_ force: Bool) {
@@ -88,7 +92,7 @@ class TypeResolverIntrinsicsBuilder {
         
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
-            IntentionCollectionGlobalsDefinitionsSource(intentions: intentions,
+            IntentionCollectionGlobalsDefinitionsSource(globals: self.intentionGlobals,
                                                         symbol: function)
         
         // Push global definitions
@@ -158,7 +162,7 @@ class TypeResolverIntrinsicsBuilder {
         
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
-            IntentionCollectionGlobalsDefinitionsSource(intentions: intentions,
+            IntentionCollectionGlobalsDefinitionsSource(globals: self.intentionGlobals,
                                                         symbol: member)
         
         // Push global definitions
@@ -173,31 +177,40 @@ class TypeResolverIntrinsicsBuilder {
     }
 }
 
-private class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
-    var intentions: IntentionCollection
+struct IntentionCollectionGlobals {
+    let funcMap: [String: [GlobalFunctionGenerationIntention]]
+    let varMap: [String: [GlobalVariableGenerationIntention]]
+    
+    init(intentions: IntentionCollection) {
+        funcMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.name })
+        varMap = Dictionary(grouping: intentions.globalVariables(), by: { $0.name })
+    }
+}
+
+class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
+    var globals: IntentionCollectionGlobals
     var symbol: FromSourceIntention
     
-    init(intentions: IntentionCollection, symbol: FromSourceIntention) {
-        self.intentions = intentions
+    init(globals: IntentionCollectionGlobals, symbol: FromSourceIntention) {
+        self.globals = globals
         self.symbol = symbol
     }
     
     func definition(named name: String) -> CodeDefinition? {
-        for file in intentions.fileIntentions() {
-            for global in file.globalVariableIntentions where global.name == name {
-                if global.isVisible(for: symbol) {
-                    let def =
-                        CodeDefinition(variableNamed: global.name,
-                                       storage: global.storage)
-                    
+        if let functions = globals.funcMap[name] {
+            for function in functions {
+                if function.isVisible(for: symbol) {
+                    let def = CodeDefinition(functionSignature: function.signature)
                     return def
                 }
             }
-            
-            for global in file.globalFunctionIntentions where global.name == name {
-                if global.isVisible(for: symbol) {
+        }
+        if let variables = globals.varMap[name] {
+            for variable in variables {
+                if variable.isVisible(for: symbol) {
                     let def =
-                        CodeDefinition(functionSignature: global.signature)
+                        CodeDefinition(variableNamed: variable.name,
+                                       storage: variable.storage)
                     
                     return def
                 }
@@ -209,7 +222,7 @@ private class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
     
     func allDefinitions() -> [CodeDefinition] {
         let variables =
-            intentions.globalVariables()
+            globals.varMap.flatMap { $0.value }
                 .filter { global in
                     global.isVisible(for: symbol)
                 }.map { global in
@@ -218,7 +231,7 @@ private class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
                 }
         
         let functions =
-            intentions.globalFunctions()
+            globals.funcMap.flatMap { $0.value }
                 .filter { global in
                     global.isVisible(for: symbol)
                 }.map { global in
