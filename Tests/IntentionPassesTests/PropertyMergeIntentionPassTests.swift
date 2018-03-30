@@ -736,6 +736,70 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         XCTAssertEqual(cls.instanceVariables.first?.type, .int)
     }
     
+    /// Tests that when looking for explicit usages of backing fields for properties
+    /// we ignore any property that has a backing field matching the property's
+    /// name on a `@synthesize` declaration.
+    func testDontCreateBackingFieldIfExplicitSynthesizeDeclarationPointsInstanceVariableWithSameNameAsProperty() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named: "a", type: .int, attributes: [.readonly])
+                        .createSynthesize(propertyName: "a", variableName: "a")
+                        .createMethod(named: "method") { method in
+                            method.setBody([
+                                .expression(Expression.identifier("self").dot("a"))
+                            ])
+                    }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        XCTAssertEqual(cls.properties.first?.setterAccessLevel, .private)
+        switch cls.properties.first?.mode {
+        case .asField?:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        }
+    }
+    
+    /// When detecting a `@synthesize` for a (settable) property with the same
+    /// name as the property, the setter access level must be erased to its default
+    /// value.
+    func testErasesAccessLevelWhenDealingWithSettableSynthesizedProperty() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFileWithClass(named: "A") { type in
+                    type.createProperty(named: "a", type: .int)
+                        .createSynthesize(propertyName: "a", variableName: "a")
+                        .createMethod(named: "method") { method in
+                            method.setBody([
+                                .expression(Expression.identifier("self").dot("a"))
+                            ])
+                    }
+                }.build()
+        let cls = intentions.classIntentions()[0]
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        XCTAssertEqual(cls.instanceVariables.count, 0)
+        XCTAssertEqual(cls.properties.count, 1)
+        XCTAssertNil(cls.properties.first?.setterAccessLevel)
+        switch cls.properties.first?.mode {
+        case .asField?:
+            // Success
+            break
+        default:
+            XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
+        }
+    }
+    
     /// Tests that when we merge properties which have setters in a separate
     /// category, that we don't accidentally create a duplicated variable
     func testMergePropertyWithSetterInCategory() {

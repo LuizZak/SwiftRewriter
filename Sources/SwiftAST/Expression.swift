@@ -307,6 +307,17 @@ public class SizeOfExpression: Expression {
         }
     }
     
+    /// If this `SizeOfExpression`'s value is an expression input value, returns
+    /// that expression, otherwise returns `nil`
+    public var exp: Expression? {
+        switch value {
+        case .expression(let exp):
+            return exp
+        case .type:
+            return nil
+        }
+    }
+    
     public override var subExpressions: [Expression] {
         switch value {
         case .expression(let exp):

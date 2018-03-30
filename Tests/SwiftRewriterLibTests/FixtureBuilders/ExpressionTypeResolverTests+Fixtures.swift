@@ -304,6 +304,32 @@ extension ExpressionTypeResolverTests {
             }
             
             /// Makes an assertion the expression contained at a given keypath was
+            /// resolved as having a specified type
+            @discardableResult
+            func thenAssertExpression(at keyPath: KeyPath<Expression, Expression?>,
+                                      resolvedAs type: SwiftType?, file: String = #file,
+                                      line: Int = #line) -> Asserter {
+                
+                guard let exp = expression[keyPath: keyPath] else {
+                    testCase.recordFailure(withDescription: """
+                        Could not locale expression at keypath \(keyPath)
+                        """,
+                        inFile: file, atLine: line, expected: true)
+                    return self
+                }
+                
+                if exp.resolvedType != type {
+                    testCase.recordFailure(withDescription: """
+                        Expected expression to resolve with type \(type?.description ?? "nil"), \
+                        but it resolved as \(exp.resolvedType?.description ?? "nil")"
+                        """,
+                        inFile: file, atLine: line, expected: true)
+                }
+                
+                return self
+            }
+            
+            /// Makes an assertion the expression contained at a given keypath was
             /// set to expect a given type
             @discardableResult
             func thenAssertExpression(at keyPath: KeyPath<Expression, Expression?>,

@@ -2213,6 +2213,40 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    /// Tests that we ignore lookup for explicit usages of backing fields on types
+    /// when the backing field name matches the property's: This is ambiguous on
+    /// Swift and we should just collapse the property/ivar into a single property.
+    func testBackingFieldAnalysisForSynthesizedPropertyIsIgnoredIfSynthesizedNameMatchesPropertyName() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: NSObject
+            {
+                NSInteger a;
+            }
+            @property (readonly) NSInteger a;
+            @end
+            
+            @implementation A
+            @synthesize a = a;
+            
+            - (void)method {
+                self->a = 0;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc private(set) var a: Int = 0
+                
+                @objc
+                func method() {
+                    self.a = 0
+                }
+            }
+            """)
+    }
+    
     func testApplyIntegerCastOnTypealiasedPropertyInVariableDeclaration() throws {
         try assertObjcParse(
             objc: """

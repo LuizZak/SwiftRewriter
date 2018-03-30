@@ -394,6 +394,16 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         return exp
     }
+    
+    public override func visitSizeOf(_ exp: SizeOfExpression) -> Expression {
+        if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
+        
+        _=super.visitSizeOf(exp)
+        
+        exp.resolvedType = .int
+        
+        return exp
+    }
 
     // MARK: - Postfix type resolving
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {

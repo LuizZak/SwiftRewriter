@@ -24,12 +24,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
         self.intentions = intentionCollection
         self.context = context
         
-        var classesSeen: Set<String> = []
-        
         let typeSystem = context.typeSystem as? IntentionCollectionTypeSystem
         typeSystem?.makeCache()
         
         var matches: [PropertySet] = []
+        
+        var classesSeen: Set<String> = []
         
         // Collect all (nominal, non-category types) and analyze them one-by-one.
         for file in intentionCollection.fileIntentions() {
@@ -59,6 +59,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // anyway, due to usage of backing field in any method of the type
             if !acted {
                 synthesizeBackingFieldIfUsing(in: match.classIntention, for: match.property)
+                adjustPropertySetterAccessLevel(in: match.classIntention, for: match.property)
             }
         }
     }
@@ -124,8 +125,31 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 .flatMap { $0.methods }
     }
     
+    private func adjustPropertySetterAccessLevel(in type: BaseClassIntention,
+                                                 for property: PropertyGenerationIntention) {
+        
+        let backingField = backingFieldName(for: property, in: type)
+        guard backingField == property.name else {
+            return
+        }
+        
+        if let field = context.typeSystem.field(named: backingField, static: false, in: type) as? InstanceVariableGenerationIntention {
+            property.setterAccessLevel = field.accessLevel
+        } else {
+            // Private by default, for get-only properties
+            property.setterAccessLevel = property.isReadOnly ? .private : nil
+        }
+    }
+    
     private func synthesizeBackingFieldIfUsing(in type: BaseClassIntention,
                                                for property: PropertyGenerationIntention) {
+        
+        let fieldName = backingFieldName(for: property, in: type)
+        // Ignore backing fields that end up having the same name as the property
+        // as this can be confusing later when looking for backing field usages
+        if fieldName == property.name {
+            return
+        }
         
         func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [(FunctionBodyIntention, source: String)] {
             var bodies: [(FunctionBodyIntention, source: String)] = []
@@ -149,8 +173,6 @@ public class PropertyMergeIntentionPass: IntentionPass {
         }
         
         let bodies = collectMethodBodies(fromClass: type)
-        
-        let fieldName = backingFieldName(for: property, in: type)
         
         for (body, source) in bodies {
             let matches =

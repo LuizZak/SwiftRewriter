@@ -55,7 +55,405 @@ private class InnerOpenGLESGlobalsProvider: BaseGlobalsProvider {
         definitions = ArrayDefinitionsSource(definitions: globals)
     }
     
+    func createFunctionDefinitions() {
+        createES1Functions()
+        createES3Functions()
+    }
+    
     func createVariableDefinitions() {
+        createES1Constants()
+        createES3Constants()
+    }
+    
+    func createES1Constants() {
+        add(constant(name: "GL_VERSION_ES_CM_1_0", type: .typeName("Int32")))
+        add(constant(name: "GL_VERSION_ES_CL_1_0", type: .typeName("Int32")))
+        add(constant(name: "GL_VERSION_ES_CM_1_1", type: .typeName("Int32")))
+        add(constant(name: "GL_VERSION_ES_CL_1_1", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_VERSION_1_0", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_VERSION_1_1", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_byte_coordinates", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_compressed_paletted_texture", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_draw_texture", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_fixed_point", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_matrix_get", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_matrix_palette", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_point_size_array", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_point_sprite", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_read_format", type: .typeName("Int32")))
+        add(constant(name: "GL_OES_single_precision", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_BUFFER_BIT", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_BUFFER_BIT", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_BUFFER_BIT", type: .typeName("Int32")))
+        add(constant(name: "GL_FALSE", type: .typeName("Int32")))
+        add(constant(name: "GL_TRUE", type: .typeName("Int32")))
+        add(constant(name: "GL_POINTS", type: .typeName("Int32")))
+        add(constant(name: "GL_LINES", type: .typeName("Int32")))
+        add(constant(name: "GL_LINE_LOOP", type: .typeName("Int32")))
+        add(constant(name: "GL_LINE_STRIP", type: .typeName("Int32")))
+        add(constant(name: "GL_TRIANGLES", type: .typeName("Int32")))
+        add(constant(name: "GL_TRIANGLE_STRIP", type: .typeName("Int32")))
+        add(constant(name: "GL_TRIANGLE_FAN", type: .typeName("Int32")))
+        add(constant(name: "GL_NEVER", type: .typeName("Int32")))
+        add(constant(name: "GL_LESS", type: .typeName("Int32")))
+        add(constant(name: "GL_EQUAL", type: .typeName("Int32")))
+        add(constant(name: "GL_LEQUAL", type: .typeName("Int32")))
+        add(constant(name: "GL_GREATER", type: .typeName("Int32")))
+        add(constant(name: "GL_NOTEQUAL", type: .typeName("Int32")))
+        add(constant(name: "GL_GEQUAL", type: .typeName("Int32")))
+        add(constant(name: "GL_ALWAYS", type: .typeName("Int32")))
+        add(constant(name: "GL_ZERO", type: .typeName("Int32")))
+        add(constant(name: "GL_ONE", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_ONE_MINUS_SRC_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_ONE_MINUS_SRC_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_DST_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_ONE_MINUS_DST_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_DST_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_ONE_MINUS_DST_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC_ALPHA_SATURATE", type: .typeName("Int32")))
+        add(constant(name: "GL_CLIP_PLANE0", type: .typeName("Int32")))
+        add(constant(name: "GL_CLIP_PLANE1", type: .typeName("Int32")))
+        add(constant(name: "GL_CLIP_PLANE2", type: .typeName("Int32")))
+        add(constant(name: "GL_CLIP_PLANE3", type: .typeName("Int32")))
+        add(constant(name: "GL_CLIP_PLANE4", type: .typeName("Int32")))
+        add(constant(name: "GL_CLIP_PLANE5", type: .typeName("Int32")))
+        add(constant(name: "GL_FRONT", type: .typeName("Int32")))
+        add(constant(name: "GL_BACK", type: .typeName("Int32")))
+        add(constant(name: "GL_FRONT_AND_BACK", type: .typeName("Int32")))
+        add(constant(name: "GL_FOG", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHTING", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_2D", type: .typeName("Int32")))
+        add(constant(name: "GL_CULL_FACE", type: .typeName("Int32")))
+        add(constant(name: "GL_ALPHA_TEST", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_LOGIC_OP", type: .typeName("Int32")))
+        add(constant(name: "GL_DITHER", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_TEST", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_TEST", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SMOOTH", type: .typeName("Int32")))
+        add(constant(name: "GL_LINE_SMOOTH", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_MATERIAL", type: .typeName("Int32")))
+        add(constant(name: "GL_NORMALIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_RESCALE_NORMAL", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY", type: .typeName("Int32")))
+        add(constant(name: "GL_NORMAL_ARRAY", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_ARRAY", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_COORD_ARRAY", type: .typeName("Int32")))
+        add(constant(name: "GL_MULTISAMPLE", type: .typeName("Int32")))
+        add(constant(name: "GL_SAMPLE_ALPHA_TO_COVERAGE", type: .typeName("Int32")))
+        add(constant(name: "GL_SAMPLE_ALPHA_TO_ONE", type: .typeName("Int32")))
+        add(constant(name: "GL_SAMPLE_COVERAGE", type: .typeName("Int32")))
+        add(constant(name: "GL_NO_ERROR", type: .typeName("Int32")))
+        add(constant(name: "GL_INVALID_ENUM", type: .typeName("Int32")))
+        add(constant(name: "GL_INVALID_VALUE", type: .typeName("Int32")))
+        add(constant(name: "GL_INVALID_OPERATION", type: .typeName("Int32")))
+        add(constant(name: "GL_STACK_OVERFLOW", type: .typeName("Int32")))
+        add(constant(name: "GL_STACK_UNDERFLOW", type: .typeName("Int32")))
+        add(constant(name: "GL_OUT_OF_MEMORY", type: .typeName("Int32")))
+        add(constant(name: "GL_EXP", type: .typeName("Int32")))
+        add(constant(name: "GL_EXP2", type: .typeName("Int32")))
+        add(constant(name: "GL_FOG_DENSITY", type: .typeName("Int32")))
+        add(constant(name: "GL_FOG_START", type: .typeName("Int32")))
+        add(constant(name: "GL_FOG_END", type: .typeName("Int32")))
+        add(constant(name: "GL_FOG_MODE", type: .typeName("Int32")))
+        add(constant(name: "GL_FOG_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_CW", type: .typeName("Int32")))
+        add(constant(name: "GL_CCW", type: .typeName("Int32")))
+        add(constant(name: "GL_CURRENT_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_CURRENT_NORMAL", type: .typeName("Int32")))
+        add(constant(name: "GL_CURRENT_TEXTURE_COORDS", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE_MIN", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE_MAX", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_FADE_THRESHOLD_SIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_DISTANCE_ATTENUATION", type: .typeName("Int32")))
+        add(constant(name: "GL_SMOOTH_POINT_SIZE_RANGE", type: .typeName("Int32")))
+        add(constant(name: "GL_LINE_WIDTH", type: .typeName("Int32")))
+        add(constant(name: "GL_SMOOTH_LINE_WIDTH_RANGE", type: .typeName("Int32")))
+        add(constant(name: "GL_ALIASED_POINT_SIZE_RANGE", type: .typeName("Int32")))
+        add(constant(name: "GL_ALIASED_LINE_WIDTH_RANGE", type: .typeName("Int32")))
+        add(constant(name: "GL_CULL_FACE_MODE", type: .typeName("Int32")))
+        add(constant(name: "GL_FRONT_FACE", type: .typeName("Int32")))
+        add(constant(name: "GL_SHADE_MODEL", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_RANGE", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_WRITEMASK", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_CLEAR_VALUE", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_FUNC", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_CLEAR_VALUE", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_FUNC", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_VALUE_MASK", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_FAIL", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_PASS_DEPTH_FAIL", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_PASS_DEPTH_PASS", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_REF", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_WRITEMASK", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_MODE", type: .typeName("Int32")))
+        add(constant(name: "GL_VIEWPORT", type: .typeName("Int32")))
+        add(constant(name: "GL_MODELVIEW_STACK_DEPTH", type: .typeName("Int32")))
+        add(constant(name: "GL_PROJECTION_STACK_DEPTH", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_STACK_DEPTH", type: .typeName("Int32")))
+        add(constant(name: "GL_MODELVIEW_MATRIX", type: .typeName("Int32")))
+        add(constant(name: "GL_PROJECTION_MATRIX", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_MATRIX", type: .typeName("Int32")))
+        add(constant(name: "GL_ALPHA_TEST_FUNC", type: .typeName("Int32")))
+        add(constant(name: "GL_ALPHA_TEST_REF", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_DST", type: .typeName("Int32")))
+        add(constant(name: "GL_BLEND_SRC", type: .typeName("Int32")))
+        add(constant(name: "GL_LOGIC_OP_MODE", type: .typeName("Int32")))
+        add(constant(name: "GL_SCISSOR_BOX", type: .typeName("Int32")))
+        add(constant(name: "GL_SCISSOR_TEST", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_CLEAR_VALUE", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_WRITEMASK", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_LIGHTS", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_CLIP_PLANES", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_TEXTURE_SIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_MODELVIEW_STACK_DEPTH", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_PROJECTION_STACK_DEPTH", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_TEXTURE_STACK_DEPTH", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_VIEWPORT_DIMS", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_TEXTURE_UNITS", type: .typeName("Int32")))
+        add(constant(name: "GL_SUBPIXEL_BITS", type: .typeName("Int32")))
+        add(constant(name: "GL_RED_BITS", type: .typeName("Int32")))
+        add(constant(name: "GL_GREEN_BITS", type: .typeName("Int32")))
+        add(constant(name: "GL_BLUE_BITS", type: .typeName("Int32")))
+        add(constant(name: "GL_ALPHA_BITS", type: .typeName("Int32")))
+        add(constant(name: "GL_DEPTH_BITS", type: .typeName("Int32")))
+        add(constant(name: "GL_STENCIL_BITS", type: .typeName("Int32")))
+        add(constant(name: "GL_POLYGON_OFFSET_UNITS", type: .typeName("Int32")))
+        add(constant(name: "GL_POLYGON_OFFSET_FILL", type: .typeName("Int32")))
+        add(constant(name: "GL_POLYGON_OFFSET_FACTOR", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_BINDING_2D", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY_SIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY_TYPE", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY_STRIDE", type: .typeName("Int32")))
+        add(constant(name: "GL_NORMAL_ARRAY_TYPE", type: .typeName("Int32")))
+        add(constant(name: "GL_NORMAL_ARRAY_STRIDE", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_ARRAY_SIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_ARRAY_TYPE", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_ARRAY_STRIDE", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_COORD_ARRAY_SIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_COORD_ARRAY_TYPE", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_COORD_ARRAY_STRIDE", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY_POINTER", type: .typeName("Int32")))
+        add(constant(name: "GL_NORMAL_ARRAY_POINTER", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_ARRAY_POINTER", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_COORD_ARRAY_POINTER", type: .typeName("Int32")))
+        add(constant(name: "GL_SAMPLE_BUFFERS", type: .typeName("Int32")))
+        add(constant(name: "GL_SAMPLES", type: .typeName("Int32")))
+        add(constant(name: "GL_SAMPLE_COVERAGE_VALUE", type: .typeName("Int32")))
+        add(constant(name: "GL_SAMPLE_COVERAGE_INVERT", type: .typeName("Int32")))
+        add(constant(name: "GL_IMPLEMENTATION_COLOR_READ_TYPE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_IMPLEMENTATION_COLOR_READ_FORMAT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_NUM_COMPRESSED_TEXTURE_FORMATS", type: .typeName("Int32")))
+        add(constant(name: "GL_COMPRESSED_TEXTURE_FORMATS", type: .typeName("Int32")))
+        add(constant(name: "GL_DONT_CARE", type: .typeName("Int32")))
+        add(constant(name: "GL_FASTEST", type: .typeName("Int32")))
+        add(constant(name: "GL_NICEST", type: .typeName("Int32")))
+        add(constant(name: "GL_PERSPECTIVE_CORRECTION_HINT", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SMOOTH_HINT", type: .typeName("Int32")))
+        add(constant(name: "GL_LINE_SMOOTH_HINT", type: .typeName("Int32")))
+        add(constant(name: "GL_FOG_HINT", type: .typeName("Int32")))
+        add(constant(name: "GL_GENERATE_MIPMAP_HINT", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT_MODEL_AMBIENT", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT_MODEL_TWO_SIDE", type: .typeName("Int32")))
+        add(constant(name: "GL_AMBIENT", type: .typeName("Int32")))
+        add(constant(name: "GL_DIFFUSE", type: .typeName("Int32")))
+        add(constant(name: "GL_SPECULAR", type: .typeName("Int32")))
+        add(constant(name: "GL_POSITION", type: .typeName("Int32")))
+        add(constant(name: "GL_SPOT_DIRECTION", type: .typeName("Int32")))
+        add(constant(name: "GL_SPOT_EXPONENT", type: .typeName("Int32")))
+        add(constant(name: "GL_SPOT_CUTOFF", type: .typeName("Int32")))
+        add(constant(name: "GL_CONSTANT_ATTENUATION", type: .typeName("Int32")))
+        add(constant(name: "GL_LINEAR_ATTENUATION", type: .typeName("Int32")))
+        add(constant(name: "GL_QUADRATIC_ATTENUATION", type: .typeName("Int32")))
+        add(constant(name: "GL_BYTE", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_BYTE", type: .typeName("Int32")))
+        add(constant(name: "GL_SHORT", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT", type: .typeName("Int32")))
+        add(constant(name: "GL_FLOAT", type: .typeName("Int32")))
+        add(constant(name: "GL_FIXED", type: .typeName("Int32")))
+        add(constant(name: "GL_CLEAR", type: .typeName("Int32")))
+        add(constant(name: "GL_AND", type: .typeName("Int32")))
+        add(constant(name: "GL_AND_REVERSE", type: .typeName("Int32")))
+        add(constant(name: "GL_COPY", type: .typeName("Int32")))
+        add(constant(name: "GL_AND_INVERTED", type: .typeName("Int32")))
+        add(constant(name: "GL_NOOP", type: .typeName("Int32")))
+        add(constant(name: "GL_XOR", type: .typeName("Int32")))
+        add(constant(name: "GL_OR", type: .typeName("Int32")))
+        add(constant(name: "GL_NOR", type: .typeName("Int32")))
+        add(constant(name: "GL_EQUIV", type: .typeName("Int32")))
+        add(constant(name: "GL_INVERT", type: .typeName("Int32")))
+        add(constant(name: "GL_OR_REVERSE", type: .typeName("Int32")))
+        add(constant(name: "GL_COPY_INVERTED", type: .typeName("Int32")))
+        add(constant(name: "GL_OR_INVERTED", type: .typeName("Int32")))
+        add(constant(name: "GL_NAND", type: .typeName("Int32")))
+        add(constant(name: "GL_SET", type: .typeName("Int32")))
+        add(constant(name: "GL_EMISSION", type: .typeName("Int32")))
+        add(constant(name: "GL_SHININESS", type: .typeName("Int32")))
+        add(constant(name: "GL_AMBIENT_AND_DIFFUSE", type: .typeName("Int32")))
+        add(constant(name: "GL_MODELVIEW", type: .typeName("Int32")))
+        add(constant(name: "GL_PROJECTION", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE", type: .typeName("Int32")))
+        add(constant(name: "GL_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_RGBA", type: .typeName("Int32")))
+        add(constant(name: "GL_LUMINANCE", type: .typeName("Int32")))
+        add(constant(name: "GL_LUMINANCE_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_UNPACK_ALIGNMENT", type: .typeName("Int32")))
+        add(constant(name: "GL_PACK_ALIGNMENT", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_4_4_4_4", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_5_5_5_1", type: .typeName("Int32")))
+        add(constant(name: "GL_UNSIGNED_SHORT_5_6_5", type: .typeName("Int32")))
+        add(constant(name: "GL_FLAT", type: .typeName("Int32")))
+        add(constant(name: "GL_SMOOTH", type: .typeName("Int32")))
+        add(constant(name: "GL_KEEP", type: .typeName("Int32")))
+        add(constant(name: "GL_REPLACE", type: .typeName("Int32")))
+        add(constant(name: "GL_INCR", type: .typeName("Int32")))
+        add(constant(name: "GL_DECR", type: .typeName("Int32")))
+        add(constant(name: "GL_VENDOR", type: .typeName("Int32")))
+        add(constant(name: "GL_RENDERER", type: .typeName("Int32")))
+        add(constant(name: "GL_VERSION", type: .typeName("Int32")))
+        add(constant(name: "GL_EXTENSIONS", type: .typeName("Int32")))
+        add(constant(name: "GL_MODULATE", type: .typeName("Int32")))
+        add(constant(name: "GL_DECAL", type: .typeName("Int32")))
+        add(constant(name: "GL_ADD", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_ENV_MODE", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_ENV_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_ENV", type: .typeName("Int32")))
+        add(constant(name: "GL_NEAREST", type: .typeName("Int32")))
+        add(constant(name: "GL_LINEAR", type: .typeName("Int32")))
+        add(constant(name: "GL_NEAREST_MIPMAP_NEAREST", type: .typeName("Int32")))
+        add(constant(name: "GL_LINEAR_MIPMAP_NEAREST", type: .typeName("Int32")))
+        add(constant(name: "GL_NEAREST_MIPMAP_LINEAR", type: .typeName("Int32")))
+        add(constant(name: "GL_LINEAR_MIPMAP_LINEAR", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_MAG_FILTER", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_MIN_FILTER", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_WRAP_S", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_WRAP_T", type: .typeName("Int32")))
+        add(constant(name: "GL_GENERATE_MIPMAP", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE0", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE1", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE2", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE3", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE4", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE5", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE6", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE7", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE8", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE9", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE10", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE11", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE12", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE13", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE14", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE15", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE16", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE17", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE18", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE19", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE20", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE21", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE22", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE23", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE24", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE25", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE26", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE27", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE28", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE29", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE30", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE31", type: .typeName("Int32")))
+        add(constant(name: "GL_ACTIVE_TEXTURE", type: .typeName("Int32")))
+        add(constant(name: "GL_CLIENT_ACTIVE_TEXTURE", type: .typeName("Int32")))
+        add(constant(name: "GL_REPEAT", type: .typeName("Int32")))
+        add(constant(name: "GL_CLAMP_TO_EDGE", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE4_RGB8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE4_RGBA8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE4_R5_G6_B5_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE4_RGBA4_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE4_RGB5_A1_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE8_RGB8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE8_RGBA8_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE8_R5_G6_B5_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE8_RGBA4_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PALETTE8_RGB5_A1_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT0", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT1", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT2", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT3", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT4", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT5", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT6", type: .typeName("Int32")))
+        add(constant(name: "GL_LIGHT7", type: .typeName("Int32")))
+        add(constant(name: "GL_ARRAY_BUFFER", type: .typeName("Int32")))
+        add(constant(name: "GL_ELEMENT_ARRAY_BUFFER", type: .typeName("Int32")))
+        add(constant(name: "GL_ARRAY_BUFFER_BINDING", type: .typeName("Int32")))
+        add(constant(name: "GL_ELEMENT_ARRAY_BUFFER_BINDING", type: .typeName("Int32")))
+        add(constant(name: "GL_VERTEX_ARRAY_BUFFER_BINDING", type: .typeName("Int32")))
+        add(constant(name: "GL_NORMAL_ARRAY_BUFFER_BINDING", type: .typeName("Int32")))
+        add(constant(name: "GL_COLOR_ARRAY_BUFFER_BINDING", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING", type: .typeName("Int32")))
+        add(constant(name: "GL_STATIC_DRAW", type: .typeName("Int32")))
+        add(constant(name: "GL_DYNAMIC_DRAW", type: .typeName("Int32")))
+        add(constant(name: "GL_BUFFER_SIZE", type: .typeName("Int32")))
+        add(constant(name: "GL_BUFFER_USAGE", type: .typeName("Int32")))
+        add(constant(name: "GL_SUBTRACT", type: .typeName("Int32")))
+        add(constant(name: "GL_COMBINE", type: .typeName("Int32")))
+        add(constant(name: "GL_COMBINE_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_COMBINE_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_RGB_SCALE", type: .typeName("Int32")))
+        add(constant(name: "GL_ADD_SIGNED", type: .typeName("Int32")))
+        add(constant(name: "GL_INTERPOLATE", type: .typeName("Int32")))
+        add(constant(name: "GL_CONSTANT", type: .typeName("Int32")))
+        add(constant(name: "GL_PRIMARY_COLOR", type: .typeName("Int32")))
+        add(constant(name: "GL_PREVIOUS", type: .typeName("Int32")))
+        add(constant(name: "GL_OPERAND0_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_OPERAND1_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_OPERAND2_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_OPERAND0_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_OPERAND1_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_OPERAND2_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_ALPHA_SCALE", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC0_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC1_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC2_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC0_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC1_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_SRC2_ALPHA", type: .typeName("Int32")))
+        add(constant(name: "GL_DOT3_RGB", type: .typeName("Int32")))
+        add(constant(name: "GL_DOT3_RGBA", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_CROP_RECT_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MODELVIEW_MATRIX_FLOAT_AS_INT_BITS_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_PROJECTION_MATRIX_FLOAT_AS_INT_BITS_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_TEXTURE_MATRIX_FLOAT_AS_INT_BITS_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_VERTEX_UNITS_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MAX_PALETTE_MATRICES_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_PALETTE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_INDEX_ARRAY_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_WEIGHT_ARRAY_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_CURRENT_PALETTE_MATRIX_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_INDEX_ARRAY_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_INDEX_ARRAY_TYPE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_INDEX_ARRAY_STRIDE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_INDEX_ARRAY_POINTER_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_MATRIX_INDEX_ARRAY_BUFFER_BINDING_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_WEIGHT_ARRAY_SIZE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_WEIGHT_ARRAY_TYPE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_WEIGHT_ARRAY_STRIDE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_WEIGHT_ARRAY_POINTER_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_WEIGHT_ARRAY_BUFFER_BINDING_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE_ARRAY_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE_ARRAY_TYPE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE_ARRAY_STRIDE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE_ARRAY_POINTER_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SIZE_ARRAY_BUFFER_BINDING_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_POINT_SPRITE_OES", type: .typeName("Int32")))
+        add(constant(name: "GL_COORD_REPLACE_OES", type: .typeName("Int32")))
+    }
+    
+    func createES3Constants() {
         add(constant(name: "GL_ES_VERSION_3_0", type: .typeName("Int32")))
         add(constant(name: "GL_ES_VERSION_2_0", type: .typeName("Int32")))
         add(constant(name: "GL_FUNC_ADD", type: .typeName("Int32")))
@@ -626,7 +1024,329 @@ private class InnerOpenGLESGlobalsProvider: BaseGlobalsProvider {
         add(constant(name: "GL_VERTEX_ARRAY_BINDING_OES", type: .typeName("Int32")))
     }
     
-    func createFunctionDefinitions() {
+    func createES1Functions() {
+                add(function(name: "glAlphaFunc",
+                     paramsSignature: "(_ func: GLenum, _ ref: GLclampf)"))
+        add(function(name: "glClearColor",
+                     paramsSignature: "(_ red: GLclampf, _ green: GLclampf, _ blue: GLclampf, _ alpha: GLclampf)"))
+        add(function(name: "glClearDepthf",
+                     paramsSignature: "(_ depth: GLclampf)"))
+        add(function(name: "glClipPlanef",
+                     paramsSignature: "(_ plane: GLenum, _ equation: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glColor4f",
+                     paramsSignature: "(_ red: GLfloat, _ green: GLfloat, _ blue: GLfloat, _ alpha: GLfloat)"))
+        add(function(name: "glDepthRangef",
+                     paramsSignature: "(_ zNear: GLclampf, _ zFar: GLclampf)"))
+        add(function(name: "glFogf",
+                     paramsSignature: "(_ pname: GLenum, _ param: GLfloat)"))
+        add(function(name: "glFogfv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glFrustumf",
+                     paramsSignature: "(_ left: GLfloat, _ right: GLfloat, _ bottom: GLfloat, _ top: GLfloat, _ zNear: GLfloat, _ zFar: GLfloat)"))
+        add(function(name: "glGetClipPlanef",
+                     paramsSignature: "(_ pname: GLenum, _ equation: UnsafeMutablePointer<GLfloat>!)"))
+        add(function(name: "glGetFloatv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafeMutablePointer<GLfloat>!)"))
+        add(function(name: "glGetLightfv",
+                     paramsSignature: "(_ light: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfloat>!)"))
+        add(function(name: "glGetMaterialfv",
+                     paramsSignature: "(_ face: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfloat>!)"))
+        add(function(name: "glGetTexEnvfv",
+                     paramsSignature: "(_ env: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfloat>!)"))
+        add(function(name: "glGetTexParameterfv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfloat>!)"))
+        add(function(name: "glLightModelf",
+                     paramsSignature: "(_ pname: GLenum, _ param: GLfloat)"))
+        add(function(name: "glLightModelfv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glLightf",
+                     paramsSignature: "(_ light: GLenum, _ pname: GLenum, _ param: GLfloat)"))
+        add(function(name: "glLightfv",
+                     paramsSignature: "(_ light: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glLineWidth",
+                     paramsSignature: "(_ width: GLfloat)"))
+        add(function(name: "glLoadMatrixf",
+                     paramsSignature: "(_ m: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glMaterialf",
+                     paramsSignature: "(_ face: GLenum, _ pname: GLenum, _ param: GLfloat)"))
+        add(function(name: "glMaterialfv",
+                     paramsSignature: "(_ face: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glMultMatrixf",
+                     paramsSignature: "(_ m: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glMultiTexCoord4f",
+                     paramsSignature: "(_ target: GLenum, _ s: GLfloat, _ t: GLfloat, _ r: GLfloat, _ q: GLfloat)"))
+        add(function(name: "glNormal3f",
+                     paramsSignature: "(_ nx: GLfloat, _ ny: GLfloat, _ nz: GLfloat)"))
+        add(function(name: "glOrthof",
+                     paramsSignature: "(_ left: GLfloat, _ right: GLfloat, _ bottom: GLfloat, _ top: GLfloat, _ zNear: GLfloat, _ zFar: GLfloat)"))
+        add(function(name: "glPointParameterf",
+                     paramsSignature: "(_ pname: GLenum, _ param: GLfloat)"))
+        add(function(name: "glPointParameterfv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glPointSize",
+                     paramsSignature: "(_ size: GLfloat)"))
+        add(function(name: "glPolygonOffset",
+                     paramsSignature: "(_ factor: GLfloat, _ units: GLfloat)"))
+        add(function(name: "glRotatef",
+                     paramsSignature: "(_ angle: GLfloat, _ x: GLfloat, _ y: GLfloat, _ z: GLfloat)"))
+        add(function(name: "glSampleCoverage",
+                     paramsSignature: "(_ value: GLclampf, _ invert: GLboolean)"))
+        add(function(name: "glScalef",
+                     paramsSignature: "(_ x: GLfloat, _ y: GLfloat, _ z: GLfloat)"))
+        add(function(name: "glTexEnvf",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ param: GLfloat)"))
+        add(function(name: "glTexEnvfv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glTexParameterf",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ param: GLfloat)"))
+        add(function(name: "glTexParameterfv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfloat>!)"))
+        add(function(name: "glTranslatef",
+                     paramsSignature: "(_ x: GLfloat, _ y: GLfloat, _ z: GLfloat)"))
+        add(function(name: "glActiveTexture",
+                     paramsSignature: "(_ texture: GLenum)"))
+        add(function(name: "glAlphaFuncx",
+                     paramsSignature: "(_ func: GLenum, _ ref: GLclampx)"))
+        add(function(name: "glBindBuffer",
+                     paramsSignature: "(_ target: GLenum, _ buffer: GLuint)"))
+        add(function(name: "glBindTexture",
+                     paramsSignature: "(_ target: GLenum, _ texture: GLuint)"))
+        add(function(name: "glBlendFunc",
+                     paramsSignature: "(_ sfactor: GLenum, _ dfactor: GLenum)"))
+        add(function(name: "glBufferData",
+                     paramsSignature: "(_ target: GLenum, _ size: GLsizeiptr, _ data: UnsafeRawPointer!, _ usage: GLenum)"))
+        add(function(name: "glBufferSubData",
+                     paramsSignature: "(_ target: GLenum, _ offset: GLintptr, _ size: GLsizeiptr, _ data: UnsafeRawPointer!)"))
+        add(function(name: "glClear",
+                     paramsSignature: "(_ mask: GLbitfield)"))
+        add(function(name: "glClearColorx",
+                     paramsSignature: "(_ red: GLclampx, _ green: GLclampx, _ blue: GLclampx, _ alpha: GLclampx)"))
+        add(function(name: "glClearDepthx",
+                     paramsSignature: "(_ depth: GLclampx)"))
+        add(function(name: "glClearStencil",
+                     paramsSignature: "(_ s: GLint)"))
+        add(function(name: "glClientActiveTexture",
+                     paramsSignature: "(_ texture: GLenum)"))
+        add(function(name: "glClipPlanex",
+                     paramsSignature: "(_ plane: GLenum, _ equation: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glColor4ub",
+                     paramsSignature: "(_ red: GLubyte, _ green: GLubyte, _ blue: GLubyte, _ alpha: GLubyte)"))
+        add(function(name: "glColor4x",
+                     paramsSignature: "(_ red: GLfixed, _ green: GLfixed, _ blue: GLfixed, _ alpha: GLfixed)"))
+        add(function(name: "glColorMask",
+                     paramsSignature: "(_ red: GLboolean, _ green: GLboolean, _ blue: GLboolean, _ alpha: GLboolean)"))
+        add(function(name: "glColorPointer",
+                     paramsSignature: "(_ size: GLint, _ type: GLenum, _ stride: GLsizei, _ pointer: UnsafeRawPointer!)"))
+        add(function(name: "glCompressedTexImage2D",
+                     paramsSignature: "(_ target: GLenum, _ level: GLint, _ internalformat: GLenum, _ width: GLsizei, _ height: GLsizei, _ border: GLint, _ imageSize: GLsizei, _ data: UnsafeRawPointer!)"))
+        add(function(name: "glCompressedTexSubImage2D",
+                     paramsSignature: "(_ target: GLenum, _ level: GLint, _ xoffset: GLint, _ yoffset: GLint, _ width: GLsizei, _ height: GLsizei, _ format: GLenum, _ imageSize: GLsizei, _ data: UnsafeRawPointer!)"))
+        add(function(name: "glCopyTexImage2D",
+                     paramsSignature: "(_ target: GLenum, _ level: GLint, _ internalformat: GLenum, _ x: GLint, _ y: GLint, _ width: GLsizei, _ height: GLsizei, _ border: GLint)"))
+        add(function(name: "glCopyTexSubImage2D",
+                     paramsSignature: "(_ target: GLenum, _ level: GLint, _ xoffset: GLint, _ yoffset: GLint, _ x: GLint, _ y: GLint, _ width: GLsizei, _ height: GLsizei)"))
+        add(function(name: "glCullFace",
+                     paramsSignature: "(_ mode: GLenum)"))
+        add(function(name: "glDeleteBuffers",
+                     paramsSignature: "(_ n: GLsizei, _ buffers: UnsafePointer<GLuint>!)"))
+        add(function(name: "glDeleteTextures",
+                     paramsSignature: "(_ n: GLsizei, _ textures: UnsafePointer<GLuint>!)"))
+        add(function(name: "glDepthFunc",
+                     paramsSignature: "(_ func: GLenum)"))
+        add(function(name: "glDepthMask",
+                     paramsSignature: "(_ flag: GLboolean)"))
+        add(function(name: "glDepthRangex",
+                     paramsSignature: "(_ zNear: GLclampx, _ zFar: GLclampx)"))
+        add(function(name: "glDisable",
+                     paramsSignature: "(_ cap: GLenum)"))
+        add(function(name: "glDisableClientState",
+                     paramsSignature: "(_ array: GLenum)"))
+        add(function(name: "glDrawArrays",
+                     paramsSignature: "(_ mode: GLenum, _ first: GLint, _ count: GLsizei)"))
+        add(function(name: "glDrawElements",
+                     paramsSignature: "(_ mode: GLenum, _ count: GLsizei, _ type: GLenum, _ indices: UnsafeRawPointer!)"))
+        add(function(name: "glEnable",
+                     paramsSignature: "(_ cap: GLenum)"))
+        add(function(name: "glEnableClientState",
+                     paramsSignature: "(_ array: GLenum)"))
+        add(function(name: "glFinish",
+                     paramsSignature: "()"))
+        add(function(name: "glFlush",
+                     paramsSignature: "()"))
+        add(function(name: "glFogx",
+                     paramsSignature: "(_ pname: GLenum, _ param: GLfixed)"))
+        add(function(name: "glFogxv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glFrontFace",
+                     paramsSignature: "(_ mode: GLenum)"))
+        add(function(name: "glFrustumx",
+                     paramsSignature: "(_ left: GLfixed, _ right: GLfixed, _ bottom: GLfixed, _ top: GLfixed, _ zNear: GLfixed, _ zFar: GLfixed)"))
+        add(function(name: "glGenBuffers",
+                     paramsSignature: "(_ n: GLsizei, _ buffers: UnsafeMutablePointer<GLuint>!)"))
+        add(function(name: "glGenTextures",
+                     paramsSignature: "(_ n: GLsizei, _ textures: UnsafeMutablePointer<GLuint>!)"))
+        add(function(name: "glGetBooleanv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafeMutablePointer<GLboolean>!)"))
+        add(function(name: "glGetBufferParameteriv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLint>!)"))
+        add(function(name: "glGetClipPlanex",
+                     paramsSignature: "(_ pname: GLenum, _ eqn: UnsafeMutablePointer<GLfixed>!)"))
+        add(function(name: "glGetError",
+                     paramsSignature: "()",
+                     returnType: .typeName("GLenum")))
+        add(function(name: "glGetFixedv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafeMutablePointer<GLfixed>!)"))
+        add(function(name: "glGetIntegerv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafeMutablePointer<GLint>!)"))
+        add(function(name: "glGetLightxv",
+                     paramsSignature: "(_ light: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfixed>!)"))
+        add(function(name: "glGetMaterialxv",
+                     paramsSignature: "(_ face: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfixed>!)"))
+        add(function(name: "glGetPointerv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafeMutablePointer<UnsafeMutableRawPointer?>!)"))
+        add(function(name: "glGetString",
+                     paramsSignature: "(_ name: GLenum)",
+                     returnType: .typeName("UnsafePointer<GLubyte>!")))
+        add(function(name: "glGetTexEnviv",
+                     paramsSignature: "(_ env: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLint>!)"))
+        add(function(name: "glGetTexEnvxv",
+                     paramsSignature: "(_ env: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfixed>!)"))
+        add(function(name: "glGetTexParameteriv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLint>!)"))
+        add(function(name: "glGetTexParameterxv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafeMutablePointer<GLfixed>!)"))
+        add(function(name: "glHint",
+                     paramsSignature: "(_ target: GLenum, _ mode: GLenum)"))
+        add(function(name: "glIsBuffer",
+                     paramsSignature: "(_ buffer: GLuint)",
+                     returnType: .typeName("GLboolean")))
+        add(function(name: "glIsEnabled",
+                     paramsSignature: "(_ cap: GLenum)",
+                     returnType: .typeName("GLboolean")))
+        add(function(name: "glIsTexture",
+                     paramsSignature: "(_ texture: GLuint)",
+                     returnType: .typeName("GLboolean")))
+        add(function(name: "glLightModelx",
+                     paramsSignature: "(_ pname: GLenum, _ param: GLfixed)"))
+        add(function(name: "glLightModelxv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glLightx",
+                     paramsSignature: "(_ light: GLenum, _ pname: GLenum, _ param: GLfixed)"))
+        add(function(name: "glLightxv",
+                     paramsSignature: "(_ light: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glLineWidthx",
+                     paramsSignature: "(_ width: GLfixed)"))
+        add(function(name: "glLoadIdentity",
+                     paramsSignature: "()"))
+        add(function(name: "glLoadMatrixx",
+                     paramsSignature: "(_ m: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glLogicOp",
+                     paramsSignature: "(_ opcode: GLenum)"))
+        add(function(name: "glMaterialx",
+                     paramsSignature: "(_ face: GLenum, _ pname: GLenum, _ param: GLfixed)"))
+        add(function(name: "glMaterialxv",
+                     paramsSignature: "(_ face: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glMatrixMode",
+                     paramsSignature: "(_ mode: GLenum)"))
+        add(function(name: "glMultMatrixx",
+                     paramsSignature: "(_ m: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glMultiTexCoord4x",
+                     paramsSignature: "(_ target: GLenum, _ s: GLfixed, _ t: GLfixed, _ r: GLfixed, _ q: GLfixed)"))
+        add(function(name: "glNormal3x",
+                     paramsSignature: "(_ nx: GLfixed, _ ny: GLfixed, _ nz: GLfixed)"))
+        add(function(name: "glNormalPointer",
+                     paramsSignature: "(_ type: GLenum, _ stride: GLsizei, _ pointer: UnsafeRawPointer!)"))
+        add(function(name: "glOrthox",
+                     paramsSignature: "(_ left: GLfixed, _ right: GLfixed, _ bottom: GLfixed, _ top: GLfixed, _ zNear: GLfixed, _ zFar: GLfixed)"))
+        add(function(name: "glPixelStorei",
+                     paramsSignature: "(_ pname: GLenum, _ param: GLint)"))
+        add(function(name: "glPointParameterx",
+                     paramsSignature: "(_ pname: GLenum, _ param: GLfixed)"))
+        add(function(name: "glPointParameterxv",
+                     paramsSignature: "(_ pname: GLenum, _ params: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glPointSizex",
+                     paramsSignature: "(_ size: GLfixed)"))
+        add(function(name: "glPolygonOffsetx",
+                     paramsSignature: "(_ factor: GLfixed, _ units: GLfixed)"))
+        add(function(name: "glPopMatrix",
+                     paramsSignature: "()"))
+        add(function(name: "glPushMatrix",
+                     paramsSignature: "()"))
+        add(function(name: "glReadPixels",
+                     paramsSignature: "(_ x: GLint, _ y: GLint, _ width: GLsizei, _ height: GLsizei, _ format: GLenum, _ type: GLenum, _ pixels: UnsafeMutableRawPointer!)"))
+        add(function(name: "glRotatex",
+                     paramsSignature: "(_ angle: GLfixed, _ x: GLfixed, _ y: GLfixed, _ z: GLfixed)"))
+        add(function(name: "glSampleCoveragex",
+                     paramsSignature: "(_ value: GLclampx, _ invert: GLboolean)"))
+        add(function(name: "glScalex",
+                     paramsSignature: "(_ x: GLfixed, _ y: GLfixed, _ z: GLfixed)"))
+        add(function(name: "glScissor",
+                     paramsSignature: "(_ x: GLint, _ y: GLint, _ width: GLsizei, _ height: GLsizei)"))
+        add(function(name: "glShadeModel",
+                     paramsSignature: "(_ mode: GLenum)"))
+        add(function(name: "glStencilFunc",
+                     paramsSignature: "(_ func: GLenum, _ ref: GLint, _ mask: GLuint)"))
+        add(function(name: "glStencilMask",
+                     paramsSignature: "(_ mask: GLuint)"))
+        add(function(name: "glStencilOp",
+                     paramsSignature: "(_ fail: GLenum, _ zfail: GLenum, _ zpass: GLenum)"))
+        add(function(name: "glTexCoordPointer",
+                     paramsSignature: "(_ size: GLint, _ type: GLenum, _ stride: GLsizei, _ pointer: UnsafeRawPointer!)"))
+        add(function(name: "glTexEnvi",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ param: GLint)"))
+        add(function(name: "glTexEnvx",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ param: GLfixed)"))
+        add(function(name: "glTexEnviv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLint>!)"))
+        add(function(name: "glTexEnvxv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glTexImage2D",
+                     paramsSignature: "(_ target: GLenum, _ level: GLint, _ internalformat: GLint, _ width: GLsizei, _ height: GLsizei, _ border: GLint, _ format: GLenum, _ type: GLenum, _ pixels: UnsafeRawPointer!)"))
+        add(function(name: "glTexParameteri",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ param: GLint)"))
+        add(function(name: "glTexParameterx",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ param: GLfixed)"))
+        add(function(name: "glTexParameteriv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLint>!)"))
+        add(function(name: "glTexParameterxv",
+                     paramsSignature: "(_ target: GLenum, _ pname: GLenum, _ params: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glTexSubImage2D",
+                     paramsSignature: "(_ target: GLenum, _ level: GLint, _ xoffset: GLint, _ yoffset: GLint, _ width: GLsizei, _ height: GLsizei, _ format: GLenum, _ type: GLenum, _ pixels: UnsafeRawPointer!)"))
+        add(function(name: "glTranslatex",
+                     paramsSignature: "(_ x: GLfixed, _ y: GLfixed, _ z: GLfixed)"))
+        add(function(name: "glVertexPointer",
+                     paramsSignature: "(_ size: GLint, _ type: GLenum, _ stride: GLsizei, _ pointer: UnsafeRawPointer!)"))
+        add(function(name: "glViewport",
+                     paramsSignature: "(_ x: GLint, _ y: GLint, _ width: GLsizei, _ height: GLsizei)"))
+        add(function(name: "glCurrentPaletteMatrixOES",
+                     paramsSignature: "(_ matrixpaletteindex: GLuint)"))
+        add(function(name: "glLoadPaletteFromModelViewMatrixOES",
+                     paramsSignature: "()"))
+        add(function(name: "glMatrixIndexPointerOES",
+                     paramsSignature: "(_ size: GLint, _ type: GLenum, _ stride: GLsizei, _ pointer: UnsafeRawPointer!)"))
+        add(function(name: "glWeightPointerOES",
+                     paramsSignature: "(_ size: GLint, _ type: GLenum, _ stride: GLsizei, _ pointer: UnsafeRawPointer!)"))
+        add(function(name: "glPointSizePointerOES",
+                     paramsSignature: "(_ type: GLenum, _ stride: GLsizei, _ pointer: UnsafeRawPointer!)"))
+        add(function(name: "glDrawTexsOES",
+                     paramsSignature: "(_ x: GLshort, _ y: GLshort, _ z: GLshort, _ width: GLshort, _ height: GLshort)"))
+        add(function(name: "glDrawTexiOES",
+                     paramsSignature: "(_ x: GLint, _ y: GLint, _ z: GLint, _ width: GLint, _ height: GLint)"))
+        add(function(name: "glDrawTexxOES",
+                     paramsSignature: "(_ x: GLfixed, _ y: GLfixed, _ z: GLfixed, _ width: GLfixed, _ height: GLfixed)"))
+        add(function(name: "glDrawTexsvOES",
+                     paramsSignature: "(_ coords: UnsafePointer<GLshort>!)"))
+        add(function(name: "glDrawTexivOES",
+                     paramsSignature: "(_ coords: UnsafePointer<GLint>!)"))
+        add(function(name: "glDrawTexxvOES",
+                     paramsSignature: "(_ coords: UnsafePointer<GLfixed>!)"))
+        add(function(name: "glDrawTexfOES",
+                     paramsSignature: "(_ x: GLfloat, _ y: GLfloat, _ z: GLfloat, _ width: GLfloat, _ height: GLfloat)"))
+        add(function(name: "glDrawTexfvOES",
+                     paramsSignature: "(_ coords: UnsafePointer<GLfloat>!)"))
+    }
+    
+    func createES3Functions() {
         add(function(name: "glAttachShader",
                     paramsSignature: "(_ program: GLuint, _ shader: GLuint)"))
         add(function(name: "glBindAttribLocation",

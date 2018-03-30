@@ -201,6 +201,20 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .int)
     }
     
+    func testSizeOf() {
+        let exp = Expression.sizeof(.identifier("a"))
+        
+        assertResolve(exp, expect: .int)
+    }
+    
+    func testExpressionWithinSizeOf() {
+        let exp = Expression.sizeof(.constant(0))
+        
+        startScopedTest(with: exp, sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssertExpression(at: \Expression.asSizeOf?.exp, resolvedAs: .int)
+    }
+    
     func testArray() {
         assertResolve(.arrayLiteral([.constant(1), .constant(2), .constant(3)]),
                       expect: .array(.int))
@@ -333,7 +347,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testDefinitionCollecting() {
         let stmt = Statement.variableDeclarations([
             StatementVariableDeclaration(identifier: "a", type: .int, ownership: .strong, isConstant: false, initialization: nil)
-            ])
+        ])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(localNamed: "a", type: .int)

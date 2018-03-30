@@ -461,6 +461,9 @@ extension PropertyGenerationIntention: KnownProperty {
 
 /// Specifies an attribute for a property
 public enum PropertyAttribute: Equatable, Codable {
+    /// Standard `readonly` property attribute
+    public static var readonly: PropertyAttribute = .attribute("readonly")
+    
     case attribute(String)
     case setterName(String)
     case getterName(String)
