@@ -187,7 +187,6 @@ extension ExpressionTypeResolverTests {
             return self
         }
         
-        
         /// Makes an assertion the expression contained at a given keypath was
         /// set to expect a given type
         @discardableResult
@@ -223,8 +222,43 @@ extension ExpressionTypeResolverTests {
             
             return self
         }
+        
+        /// Makes an assertion the expression contained at a given keypath was
+        /// resolved to a specified type
+        @discardableResult
+        func thenAssertExpression(at keyPath: KeyPath<Statement, Expression?>,
+                                  resolvedAs type: SwiftType?, file: String = #file,
+                                  line: Int = #line) -> StatementTypeTestBuilder {
+            // Make sure to apply definitions just before starting assertions
+            if !applied {
+                sut.typeSystem = typeSystem
+                sut.intrinsicVariables = intrinsics
+                sut.ignoreResolvedExpressions = true
+                
+                _=statement.accept(sut)
+                applied = true
+            }
+            
+            guard let exp = statement[keyPath: keyPath] else {
+                testCase.recordFailure(withDescription: """
+                    Could not locale expression at keypath \(keyPath)
+                    """,
+                    inFile: file, atLine: line, expected: true)
+                return self
+            }
+            
+            if exp.resolvedType != type {
+                testCase.recordFailure(withDescription: """
+                    Expected expression to resolve as type \(type?.description ?? "nil"), \
+                    but it resolved as \(exp.resolvedType?.description ?? "nil")"
+                    """,
+                    inFile: file, atLine: line, expected: true)
+            }
+            
+            return self
+        }
     }
-    
+
     /// Test builder for expression type resolver tests that require scope for expression
     /// resolving.
     final class ExpressionTypeTestBuilder<T: Expression>: ExpressionTestResolverTestFixture {

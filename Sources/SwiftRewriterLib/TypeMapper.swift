@@ -432,6 +432,8 @@ public class DefaultTypeMapper: TypeMapper {
             }
             
             return swiftType(type: final, withNullability: context.nullability())
+        } else if case .void = type {
+            return .typeName("UnsafeMutableRawPointer")
         }
         
         final = swiftType(forObjcType: type, context: context)

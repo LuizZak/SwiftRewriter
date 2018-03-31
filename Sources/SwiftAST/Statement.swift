@@ -7,6 +7,9 @@ open class Statement: SyntaxNode, Equatable {
         return false
     }
     
+    /// This statement label's (parsed from C's goto labels), if any.
+    public var label: String?
+    
     /// Accepts the given visitor instance, calling the appropriate visiting method
     /// according to this statement's type.
     ///

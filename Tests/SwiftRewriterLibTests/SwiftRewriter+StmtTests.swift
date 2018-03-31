@@ -398,7 +398,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    let myBlock = { () -> Void in
+                    let myBlock: (() -> Void)! = {
                     }
                 }
             }
@@ -418,7 +418,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    let myBlock = { () -> Void in
+                    let myBlock: (() -> Void)! = {
                         self.doThing()
                     }
                 }
@@ -622,6 +622,33 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
+    func testIfStatementWithExpressions() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                if (a -= 10, true) {
+                    print(10);
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    if ({
+                        a -= 10
+                        return true
+                    })() {
+                        print(10)
+                    }
+                }
+            }
+            """)
+    }
+    
     func testSwitchStatement() throws {
         try assertObjcParse(
             objc: """
@@ -813,6 +840,33 @@ class SwiftRewriter_StmtTests: XCTestCase {
             )
     }
     
+    func testForStatementWithNonInitializerStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                for(i = 0; i < count; i++) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    i = 0
+                    while i < count {
+                        defer {
+                            i += 1
+                        }
+                    }
+                }
+            }
+            """
+        )
+    }
+    
     func testSynchronizedStatement() throws {
         try assertObjcParse(
             objc: """
@@ -904,7 +958,67 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    private func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
+    func testLabeledStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                label:
+                if (true) {
+                }
+                label2:
+                if (true) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    // label:
+                    if true {
+                    }
+                    // label2:
+                    if true {
+                    }
+                }
+            }
+            """)
+    }
+    
+    func testLabeledStatementNested() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                label:
+                {
+                    if (true) {
+                    }
+                    return;
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    // label:
+                    if true {
+                    }
+                    return
+                }
+            }
+            """)
+    }
+}
+
+private extension SwiftRewriter_StmtTests {
+    func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
         let objc = """
             @implementation MyClass: UIView
             - (void)myMethod {

@@ -895,6 +895,54 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitDeclaration(_ ctx: ObjectiveCParser.DeclarationContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#functionPointer}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#functionPointer}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#functionPointerParameterList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterFunctionPointerParameterList(_ ctx: ObjectiveCParser.FunctionPointerParameterListContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#functionPointerParameterList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitFunctionPointerParameterList(_ ctx: ObjectiveCParser.FunctionPointerParameterListContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#functionPointerParameterDeclarationList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterFunctionPointerParameterDeclarationList(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationListContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#functionPointerParameterDeclarationList}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitFunctionPointerParameterDeclarationList(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationListContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#functionPointerParameterDeclaration}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterFunctionPointerParameterDeclaration(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#functionPointerParameterDeclaration}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitFunctionPointerParameterDeclaration(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationContext)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#functionCallExpression}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -1135,6 +1183,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#scalarTypeSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterScalarTypeSpecifier(_ ctx: ObjectiveCParser.ScalarTypeSpecifierContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#scalarTypeSpecifier}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitScalarTypeSpecifier(_ ctx: ObjectiveCParser.ScalarTypeSpecifierContext)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#typeofExpression}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -1302,6 +1362,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitStructInitializer(_ ctx: ObjectiveCParser.StructInitializerContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#structInitializerItem}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterStructInitializerItem(_ ctx: ObjectiveCParser.StructInitializerItemContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#structInitializerItem}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitStructInitializerItem(_ ctx: ObjectiveCParser.StructInitializerItemContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#initializerList}.
 	 - Parameters:

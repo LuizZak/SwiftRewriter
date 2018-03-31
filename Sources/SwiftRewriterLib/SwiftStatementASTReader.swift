@@ -48,6 +48,16 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         return ctx.accept(VarDeclarationExtractor(expressionReader: expressionReader))
     }
     
+    public override func visitLabeledStatement(_ ctx: ObjectiveCParser.LabeledStatementContext) -> Statement? {
+        guard let stmt = ctx.statement()?.accept(self), let label = ctx.identifier() else {
+            return .unknown(UnknownASTContext(context: ctx.getText()))
+        }
+        
+        stmt.label = label.getText()
+        
+        return stmt
+    }
+    
     public override func visitStatement(_ ctx: Parser.StatementContext) -> Statement? {
         if let cpd = ctx.compoundStatement(), let compound = cpd.accept(compoundStatementVisitor()) {
             return compound
@@ -58,7 +68,8 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                            ctx.expressions(),
                            ctx.jumpStatement(),
                            ctx.synchronizedStatement(),
-                           ctx.autoreleaseStatement())
+                           ctx.autoreleaseStatement(),
+                           ctx.labeledStatement())
             ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
@@ -153,23 +164,35 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     // MARK: - if / switch
     public override func visitSelectionStatement(_ ctx: Parser.SelectionStatementContext) -> Statement? {
-        if let expression = ctx.expression() {
-            guard let expr = expression.accept(expressionReader) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            guard let body = ctx.ifBody?.accept(compoundStatementVisitor()) else {
-                return .unknown(UnknownASTContext(context: ctx.getText()))
-            }
-            
-            let elseStmt = ctx.elseBody?.accept(compoundStatementVisitor())
-            
-            return .if(expr, body: body, else: elseStmt)
-        }
         if let switchStmt = ctx.switchStatement() {
             return visitSwitchStatement(switchStmt)
         }
         
-        return .unknown(UnknownASTContext(context: ctx.getText()))
+        guard let expressions = ctx.expressions()?.expression().compactMap({ $0.accept(expressionReader) }) else {
+            return .unknown(UnknownASTContext(context: ctx.getText()))
+        }
+        guard let body = ctx.ifBody?.accept(compoundStatementVisitor()) else {
+            return .unknown(UnknownASTContext(context: ctx.getText()))
+        }
+        
+        let expr: Expression
+        if expressions.count == 1 {
+            expr = expressions[0]
+        } else {
+            // Synthesize a block expression that returns the last expression
+            // result
+            let block: Expression =
+                .block(parameters: [],
+                       return: .bool,
+                       body: [.expressions(Array(expressions.dropLast())),
+                              .return(expressions.last!)])
+            
+            expr = .parens(block.call())
+        }
+        
+        let elseStmt = ctx.elseBody?.accept(compoundStatementVisitor())
+        
+        return .if(expr, body: body, else: elseStmt)
     }
     
     public override func visitSwitchStatement(_ ctx: Parser.SwitchStatementContext) -> Statement? {
@@ -322,10 +345,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         // Loop body
         let body = CompoundStatement()
         if let iteration = iteration {
-            body.statements.append(
-                .defer([iteration]
-                )
-            )
+            body.statements.append(.defer([iteration]))
         }
         
         body.statements.append(contentsOf: compoundStatement.statements)
@@ -335,7 +355,13 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         
         // Loop init (pre-loop)
         let bodyWithWhile: Statement
-        if let initExpr = initExpr {
+        if let expStmt = ctx.forLoopInitializer()?.expressions()?.accept(self) {
+            let body = CompoundStatement()
+            body.statements.append(expStmt)
+            body.statements.append(whileBody)
+            
+            bodyWithWhile = body
+        } else if let initExpr = initExpr {
             let body = CompoundStatement()
             body.statements.append(initExpr)
             body.statements.append(whileBody)
@@ -428,6 +454,10 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             }.flatMap { stmt -> [Statement] in
                 // Free compound blocks cannot be declared in Swift
                 if let inner = stmt.asCompound {
+                    // Label the first statement with the compound's label, as
+                    // well
+                    inner.statements.first?.label = stmt.label
+                    
                     return inner.statements
                 }
                 

@@ -977,6 +977,58 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterFunctionPointerParameterList(_ ctx: ObjectiveCParser.FunctionPointerParameterListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitFunctionPointerParameterList(_ ctx: ObjectiveCParser.FunctionPointerParameterListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterFunctionPointerParameterDeclarationList(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationListContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitFunctionPointerParameterDeclarationList(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationListContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterFunctionPointerParameterDeclaration(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitFunctionPointerParameterDeclaration(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterFunctionCallExpression(_ ctx: ObjectiveCParser.FunctionCallExpressionContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1237,6 +1289,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterScalarTypeSpecifier(_ ctx: ObjectiveCParser.ScalarTypeSpecifierContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitScalarTypeSpecifier(_ ctx: ObjectiveCParser.ScalarTypeSpecifierContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterTypeofExpression(_ ctx: ObjectiveCParser.TypeofExpressionContext) { }
 	/**
 	 * {@inheritDoc}
@@ -1413,6 +1478,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitStructInitializer(_ ctx: ObjectiveCParser.StructInitializerContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterStructInitializerItem(_ ctx: ObjectiveCParser.StructInitializerItemContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitStructInitializerItem(_ ctx: ObjectiveCParser.StructInitializerItemContext) { }
 
 	/**
 	 * {@inheritDoc}

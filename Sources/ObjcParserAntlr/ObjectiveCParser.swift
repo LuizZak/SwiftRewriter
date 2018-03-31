@@ -124,38 +124,41 @@ open class ObjectiveCParser: Parser {
                    RULE_attribute = 67, RULE_attributeName = 68, RULE_attributeParameters = 69, 
                    RULE_attributeParameterList = 70, RULE_attributeParameter = 71, 
                    RULE_attributeParameterAssignment = 72, RULE_declaration = 73, 
-                   RULE_functionCallExpression = 74, RULE_enumDeclaration = 75, 
-                   RULE_varDeclaration = 76, RULE_typedefDeclaration = 77, 
-                   RULE_typeDeclaratorList = 78, RULE_declarationSpecifiers = 79, 
-                   RULE_attributeSpecifier = 80, RULE_initDeclaratorList = 81, 
-                   RULE_initDeclarator = 82, RULE_structOrUnionSpecifier = 83, 
-                   RULE_fieldDeclaration = 84, RULE_specifierQualifierList = 85, 
-                   RULE_ibOutletQualifier = 86, RULE_arcBehaviourSpecifier = 87, 
-                   RULE_nullabilitySpecifier = 88, RULE_storageClassSpecifier = 89, 
-                   RULE_typePrefix = 90, RULE_typeQualifier = 91, RULE_protocolQualifier = 92, 
-                   RULE_typeSpecifier = 93, RULE_typeofExpression = 94, 
-                   RULE_fieldDeclaratorList = 95, RULE_fieldDeclarator = 96, 
-                   RULE_enumSpecifier = 97, RULE_enumeratorList = 98, RULE_enumerator = 99, 
-                   RULE_enumeratorIdentifier = 100, RULE_directDeclarator = 101, 
-                   RULE_declaratorSuffix = 102, RULE_parameterList = 103, 
-                   RULE_pointer = 104, RULE_macro = 105, RULE_arrayInitializer = 106, 
-                   RULE_structInitializer = 107, RULE_initializerList = 108, 
-                   RULE_typeName = 109, RULE_abstractDeclarator = 110, RULE_abstractDeclaratorSuffix = 111, 
-                   RULE_parameterDeclarationList = 112, RULE_parameterDeclaration = 113, 
-                   RULE_declarator = 114, RULE_statement = 115, RULE_labeledStatement = 116, 
-                   RULE_rangeExpression = 117, RULE_compoundStatement = 118, 
-                   RULE_selectionStatement = 119, RULE_switchStatement = 120, 
-                   RULE_switchBlock = 121, RULE_switchSection = 122, RULE_switchLabel = 123, 
-                   RULE_iterationStatement = 124, RULE_whileStatement = 125, 
-                   RULE_doStatement = 126, RULE_forStatement = 127, RULE_forLoopInitializer = 128, 
-                   RULE_forInStatement = 129, RULE_jumpStatement = 130, 
-                   RULE_expressions = 131, RULE_expression = 132, RULE_assignmentOperator = 133, 
-                   RULE_castExpression = 134, RULE_initializer = 135, RULE_constantExpression = 136, 
-                   RULE_unaryExpression = 137, RULE_unaryOperator = 138, 
-                   RULE_postfixExpression = 139, RULE_postfixExpr = 140, 
-                   RULE_argumentExpressionList = 141, RULE_argumentExpression = 142, 
-                   RULE_primaryExpression = 143, RULE_constant = 144, RULE_stringLiteral = 145, 
-                   RULE_identifier = 146
+                   RULE_functionPointer = 74, RULE_functionPointerParameterList = 75, 
+                   RULE_functionPointerParameterDeclarationList = 76, RULE_functionPointerParameterDeclaration = 77, 
+                   RULE_functionCallExpression = 78, RULE_enumDeclaration = 79, 
+                   RULE_varDeclaration = 80, RULE_typedefDeclaration = 81, 
+                   RULE_typeDeclaratorList = 82, RULE_declarationSpecifiers = 83, 
+                   RULE_attributeSpecifier = 84, RULE_initDeclaratorList = 85, 
+                   RULE_initDeclarator = 86, RULE_structOrUnionSpecifier = 87, 
+                   RULE_fieldDeclaration = 88, RULE_specifierQualifierList = 89, 
+                   RULE_ibOutletQualifier = 90, RULE_arcBehaviourSpecifier = 91, 
+                   RULE_nullabilitySpecifier = 92, RULE_storageClassSpecifier = 93, 
+                   RULE_typePrefix = 94, RULE_typeQualifier = 95, RULE_protocolQualifier = 96, 
+                   RULE_typeSpecifier = 97, RULE_scalarTypeSpecifier = 98, 
+                   RULE_typeofExpression = 99, RULE_fieldDeclaratorList = 100, 
+                   RULE_fieldDeclarator = 101, RULE_enumSpecifier = 102, 
+                   RULE_enumeratorList = 103, RULE_enumerator = 104, RULE_enumeratorIdentifier = 105, 
+                   RULE_directDeclarator = 106, RULE_declaratorSuffix = 107, 
+                   RULE_parameterList = 108, RULE_pointer = 109, RULE_macro = 110, 
+                   RULE_arrayInitializer = 111, RULE_structInitializer = 112, 
+                   RULE_structInitializerItem = 113, RULE_initializerList = 114, 
+                   RULE_typeName = 115, RULE_abstractDeclarator = 116, RULE_abstractDeclaratorSuffix = 117, 
+                   RULE_parameterDeclarationList = 118, RULE_parameterDeclaration = 119, 
+                   RULE_declarator = 120, RULE_statement = 121, RULE_labeledStatement = 122, 
+                   RULE_rangeExpression = 123, RULE_compoundStatement = 124, 
+                   RULE_selectionStatement = 125, RULE_switchStatement = 126, 
+                   RULE_switchBlock = 127, RULE_switchSection = 128, RULE_switchLabel = 129, 
+                   RULE_iterationStatement = 130, RULE_whileStatement = 131, 
+                   RULE_doStatement = 132, RULE_forStatement = 133, RULE_forLoopInitializer = 134, 
+                   RULE_forInStatement = 135, RULE_jumpStatement = 136, 
+                   RULE_expressions = 137, RULE_expression = 138, RULE_assignmentOperator = 139, 
+                   RULE_castExpression = 140, RULE_initializer = 141, RULE_constantExpression = 142, 
+                   RULE_unaryExpression = 143, RULE_unaryOperator = 144, 
+                   RULE_postfixExpression = 145, RULE_postfixExpr = 146, 
+                   RULE_argumentExpressionList = 147, RULE_argumentExpression = 148, 
+                   RULE_primaryExpression = 149, RULE_constant = 150, RULE_stringLiteral = 151, 
+                   RULE_identifier = 152
 	public static let ruleNames: [String] = [
 		"translationUnit", "topLevelDeclaration", "importDeclaration", "classInterface", 
 		"categoryInterface", "classImplementation", "categoryImplementation", 
@@ -176,17 +179,18 @@ open class ObjectiveCParser: Parser {
 		"tryBlock", "catchStatement", "synchronizedStatement", "autoreleaseStatement", 
 		"functionDeclaration", "functionDefinition", "functionSignature", "attribute", 
 		"attributeName", "attributeParameters", "attributeParameterList", "attributeParameter", 
-		"attributeParameterAssignment", "declaration", "functionCallExpression", 
-		"enumDeclaration", "varDeclaration", "typedefDeclaration", "typeDeclaratorList", 
-		"declarationSpecifiers", "attributeSpecifier", "initDeclaratorList", "initDeclarator", 
-		"structOrUnionSpecifier", "fieldDeclaration", "specifierQualifierList", 
+		"attributeParameterAssignment", "declaration", "functionPointer", "functionPointerParameterList", 
+		"functionPointerParameterDeclarationList", "functionPointerParameterDeclaration", 
+		"functionCallExpression", "enumDeclaration", "varDeclaration", "typedefDeclaration", 
+		"typeDeclaratorList", "declarationSpecifiers", "attributeSpecifier", "initDeclaratorList", 
+		"initDeclarator", "structOrUnionSpecifier", "fieldDeclaration", "specifierQualifierList", 
 		"ibOutletQualifier", "arcBehaviourSpecifier", "nullabilitySpecifier", 
 		"storageClassSpecifier", "typePrefix", "typeQualifier", "protocolQualifier", 
-		"typeSpecifier", "typeofExpression", "fieldDeclaratorList", "fieldDeclarator", 
-		"enumSpecifier", "enumeratorList", "enumerator", "enumeratorIdentifier", 
+		"typeSpecifier", "scalarTypeSpecifier", "typeofExpression", "fieldDeclaratorList", 
+		"fieldDeclarator", "enumSpecifier", "enumeratorList", "enumerator", "enumeratorIdentifier", 
 		"directDeclarator", "declaratorSuffix", "parameterList", "pointer", "macro", 
-		"arrayInitializer", "structInitializer", "initializerList", "typeName", 
-		"abstractDeclarator", "abstractDeclaratorSuffix", "parameterDeclarationList", 
+		"arrayInitializer", "structInitializer", "structInitializerItem", "initializerList", 
+		"typeName", "abstractDeclarator", "abstractDeclaratorSuffix", "parameterDeclarationList", 
 		"parameterDeclaration", "declarator", "statement", "labeledStatement", 
 		"rangeExpression", "compoundStatement", "selectionStatement", "switchStatement", 
 		"switchBlock", "switchSection", "switchLabel", "iterationStatement", "whileStatement", 
@@ -368,7 +372,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(297)
+		 	setState(309)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -383,15 +387,15 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(294)
+		 		setState(306)
 		 		try topLevelDeclaration()
 
 
-		 		setState(299)
+		 		setState(311)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(300)
+		 	setState(312)
 		 	try match(ObjectiveCParser.Tokens.EOF.rawValue)
 
 		}
@@ -470,72 +474,72 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(313)
+		 	setState(325)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,1, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(302)
+		 		setState(314)
 		 		try importDeclaration()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(303)
+		 		setState(315)
 		 		try functionDeclaration()
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(304)
+		 		setState(316)
 		 		try declaration()
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(305)
+		 		setState(317)
 		 		try classInterface()
 
 		 		break
 		 	case 5:
 		 		try enterOuterAlt(_localctx, 5)
-		 		setState(306)
+		 		setState(318)
 		 		try classImplementation()
 
 		 		break
 		 	case 6:
 		 		try enterOuterAlt(_localctx, 6)
-		 		setState(307)
+		 		setState(319)
 		 		try categoryInterface()
 
 		 		break
 		 	case 7:
 		 		try enterOuterAlt(_localctx, 7)
-		 		setState(308)
+		 		setState(320)
 		 		try categoryImplementation()
 
 		 		break
 		 	case 8:
 		 		try enterOuterAlt(_localctx, 8)
-		 		setState(309)
+		 		setState(321)
 		 		try protocolDeclaration()
 
 		 		break
 		 	case 9:
 		 		try enterOuterAlt(_localctx, 9)
-		 		setState(310)
+		 		setState(322)
 		 		try protocolDeclarationList()
 
 		 		break
 		 	case 10:
 		 		try enterOuterAlt(_localctx, 10)
-		 		setState(311)
+		 		setState(323)
 		 		try classDeclarationList()
 
 		 		break
 		 	case 11:
 		 		try enterOuterAlt(_localctx, 11)
-		 		setState(312)
+		 		setState(324)
 		 		try functionDefinition()
 
 		 		break
@@ -588,11 +592,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(315)
+		 	setState(327)
 		 	try match(ObjectiveCParser.Tokens.IMPORT.rawValue)
-		 	setState(316)
+		 	setState(328)
 		 	try identifier()
-		 	setState(317)
+		 	setState(329)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -658,7 +662,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(320)
+		 	setState(332)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -666,16 +670,16 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(319)
+		 		setState(331)
 		 		try match(ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue)
 
 		 	}
 
-		 	setState(322)
+		 	setState(334)
 		 	try match(ObjectiveCParser.Tokens.INTERFACE.rawValue)
-		 	setState(323)
+		 	setState(335)
 		 	try className()
-		 	setState(326)
+		 	setState(338)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -683,14 +687,14 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COLON.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(324)
+		 		setState(336)
 		 		try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 		setState(325)
+		 		setState(337)
 		 		try superclassName()
 
 		 	}
 
-		 	setState(332)
+		 	setState(344)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -698,16 +702,16 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LT.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(328)
+		 		setState(340)
 		 		try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 		setState(329)
+		 		setState(341)
 		 		try protocolList()
-		 		setState(330)
+		 		setState(342)
 		 		try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 		 	}
 
-		 	setState(335)
+		 	setState(347)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -715,12 +719,12 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LBRACE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(334)
+		 		setState(346)
 		 		try instanceVariables()
 
 		 	}
 
-		 	setState(338)
+		 	setState(350)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -736,12 +740,12 @@ open class ObjectiveCParser: Parser {
 		 	          testSet = testSet || _la == ObjectiveCParser.Tokens.ADD.rawValue || _la == ObjectiveCParser.Tokens.SUB.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(337)
+		 		setState(349)
 		 		try interfaceDeclarationList()
 
 		 	}
 
-		 	setState(340)
+		 	setState(352)
 		 	try match(ObjectiveCParser.Tokens.END.rawValue)
 
 		}
@@ -809,17 +813,17 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(342)
+		 	setState(354)
 		 	try match(ObjectiveCParser.Tokens.INTERFACE.rawValue)
-		 	setState(343)
+		 	setState(355)
 		 	try {
 		 			let assignmentValue = try className()
 		 			_localctx.castdown(CategoryInterfaceContext.self).categoryName = assignmentValue
 		 	     }()
 
-		 	setState(344)
+		 	setState(356)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(346)
+		 	setState(358)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -834,14 +838,14 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(345)
+		 		setState(357)
 		 		try identifier()
 
 		 	}
 
-		 	setState(348)
+		 	setState(360)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(353)
+		 	setState(365)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -849,16 +853,16 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LT.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(349)
+		 		setState(361)
 		 		try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 		setState(350)
+		 		setState(362)
 		 		try protocolList()
-		 		setState(351)
+		 		setState(363)
 		 		try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 		 	}
 
-		 	setState(356)
+		 	setState(368)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -866,12 +870,12 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LBRACE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(355)
+		 		setState(367)
 		 		try instanceVariables()
 
 		 	}
 
-		 	setState(359)
+		 	setState(371)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -887,12 +891,12 @@ open class ObjectiveCParser: Parser {
 		 	          testSet = testSet || _la == ObjectiveCParser.Tokens.ADD.rawValue || _la == ObjectiveCParser.Tokens.SUB.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(358)
+		 		setState(370)
 		 		try interfaceDeclarationList()
 
 		 	}
 
-		 	setState(361)
+		 	setState(373)
 		 	try match(ObjectiveCParser.Tokens.END.rawValue)
 
 		}
@@ -952,11 +956,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(363)
+		 	setState(375)
 		 	try match(ObjectiveCParser.Tokens.IMPLEMENTATION.rawValue)
-		 	setState(364)
+		 	setState(376)
 		 	try className()
-		 	setState(367)
+		 	setState(379)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -964,14 +968,14 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COLON.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(365)
+		 		setState(377)
 		 		try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 		setState(366)
+		 		setState(378)
 		 		try superclassName()
 
 		 	}
 
-		 	setState(370)
+		 	setState(382)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -979,12 +983,12 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LBRACE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(369)
+		 		setState(381)
 		 		try instanceVariables()
 
 		 	}
 
-		 	setState(373)
+		 	setState(385)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -1000,12 +1004,12 @@ open class ObjectiveCParser: Parser {
 		 	          testSet = testSet || _la == ObjectiveCParser.Tokens.ADD.rawValue || _la == ObjectiveCParser.Tokens.SUB.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(372)
+		 		setState(384)
 		 		try implementationDefinitionList()
 
 		 	}
 
-		 	setState(375)
+		 	setState(387)
 		 	try match(ObjectiveCParser.Tokens.END.rawValue)
 
 		}
@@ -1065,21 +1069,21 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(377)
+		 	setState(389)
 		 	try match(ObjectiveCParser.Tokens.IMPLEMENTATION.rawValue)
-		 	setState(378)
+		 	setState(390)
 		 	try {
 		 			let assignmentValue = try className()
 		 			_localctx.castdown(CategoryImplementationContext.self).categoryName = assignmentValue
 		 	     }()
 
-		 	setState(379)
+		 	setState(391)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(380)
+		 	setState(392)
 		 	try identifier()
-		 	setState(381)
+		 	setState(393)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(383)
+		 	setState(395)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -1095,12 +1099,12 @@ open class ObjectiveCParser: Parser {
 		 	          testSet = testSet || _la == ObjectiveCParser.Tokens.ADD.rawValue || _la == ObjectiveCParser.Tokens.SUB.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(382)
+		 		setState(394)
 		 		try implementationDefinitionList()
 
 		 	}
 
-		 	setState(385)
+		 	setState(397)
 		 	try match(ObjectiveCParser.Tokens.END.rawValue)
 
 		}
@@ -1158,23 +1162,23 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(387)
+		 	setState(399)
 		 	try identifier()
-		 	setState(393)
+		 	setState(405)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,15,_ctx)) {
 		 	case 1:
-		 		setState(388)
+		 		setState(400)
 		 		try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 		setState(389)
+		 		setState(401)
 		 		try protocolList()
-		 		setState(390)
+		 		setState(402)
 		 		try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 
 		 		break
 		 	case 2:
-		 		setState(392)
+		 		setState(404)
 		 		try genericsSpecifier()
 
 		 		break
@@ -1231,13 +1235,13 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(395)
+		 	setState(407)
 		 	try identifier()
-		 	setState(397)
+		 	setState(409)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,16,_ctx)) {
 		 	case 1:
-		 		setState(396)
+		 		setState(408)
 		 		try genericSuperclassSpecifier()
 
 		 		break
@@ -1299,23 +1303,23 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(399)
+		 	setState(411)
 		 	try identifier()
-		 	setState(405)
+		 	setState(417)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,17, _ctx)) {
 		 	case 1:
-		 		setState(400)
+		 		setState(412)
 		 		try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 		setState(401)
+		 		setState(413)
 		 		try protocolList()
-		 		setState(402)
+		 		setState(414)
 		 		try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 
 		 		break
 		 	case 2:
-		 		setState(404)
+		 		setState(416)
 		 		try genericsSpecifier()
 
 		 		break
@@ -1375,9 +1379,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(407)
+		 	setState(419)
 		 	try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 	setState(416)
+		 	setState(428)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -1392,9 +1396,9 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(408)
+		 		setState(420)
 		 		try superclassTypeSpecifierWithPrefixes()
-		 		setState(413)
+		 		setState(425)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		while (//closure
@@ -1402,20 +1406,20 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(409)
+		 			setState(421)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(410)
+		 			setState(422)
 		 			try superclassTypeSpecifierWithPrefixes()
 
 
-		 			setState(415)
+		 			setState(427)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		}
 
 		 	}
 
-		 	setState(418)
+		 	setState(430)
 		 	try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 		}
@@ -1475,23 +1479,23 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(423)
+		 	setState(435)
 		 	try _errHandler.sync(self)
 		 	_alt = try getInterpreter().adaptivePredict(_input,20,_ctx)
 		 	while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 		if ( _alt==1 ) {
-		 			setState(420)
+		 			setState(432)
 		 			try typePrefix()
 
 		 	 
 		 		}
-		 		setState(425)
+		 		setState(437)
 		 		try _errHandler.sync(self)
 		 		_alt = try getInterpreter().adaptivePredict(_input,20,_ctx)
 		 	}
-		 	setState(426)
+		 	setState(438)
 		 	try typeSpecifier()
-		 	setState(427)
+		 	setState(439)
 		 	try pointer()
 
 		}
@@ -1553,11 +1557,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(429)
+		 	setState(441)
 		 	try match(ObjectiveCParser.Tokens.PROTOCOL.rawValue)
-		 	setState(430)
+		 	setState(442)
 		 	try protocolName()
-		 	setState(435)
+		 	setState(447)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -1565,16 +1569,16 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LT.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(431)
+		 		setState(443)
 		 		try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 		setState(432)
+		 		setState(444)
 		 		try protocolList()
-		 		setState(433)
+		 		setState(445)
 		 		try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 		 	}
 
-		 	setState(440)
+		 	setState(452)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -1590,15 +1594,15 @@ open class ObjectiveCParser: Parser {
 		 	          testSet = testSet || _la == ObjectiveCParser.Tokens.ADD.rawValue || _la == ObjectiveCParser.Tokens.SUB.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(437)
+		 		setState(449)
 		 		try protocolDeclarationSection()
 
 
-		 		setState(442)
+		 		setState(454)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(443)
+		 	setState(455)
 		 	try match(ObjectiveCParser.Tokens.END.rawValue)
 
 		}
@@ -1655,13 +1659,13 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 			var _alt:Int
-		 	setState(457)
+		 	setState(469)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .OPTIONAL:fallthrough
 		 	case .REQUIRED:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(445)
+		 		setState(457)
 		 		_localctx.castdown(ProtocolDeclarationSectionContext.self).modifier = try _input.LT(1)
 		 		_la = try _input.LA(1)
 		 		if (!(//closure
@@ -1675,17 +1679,17 @@ open class ObjectiveCParser: Parser {
 		 			_errHandler.reportMatch(self)
 		 			try consume()
 		 		}
-		 		setState(449)
+		 		setState(461)
 		 		try _errHandler.sync(self)
 		 		_alt = try getInterpreter().adaptivePredict(_input,23,_ctx)
 		 		while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 			if ( _alt==1 ) {
-		 				setState(446)
+		 				setState(458)
 		 				try interfaceDeclarationList()
 
 		 		 
 		 			}
-		 			setState(451)
+		 			setState(463)
 		 			try _errHandler.sync(self)
 		 			_alt = try getInterpreter().adaptivePredict(_input,23,_ctx)
 		 		}
@@ -1769,13 +1773,13 @@ open class ObjectiveCParser: Parser {
 		 	case .ADD:fallthrough
 		 	case .SUB:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(453); 
+		 		setState(465); 
 		 		try _errHandler.sync(self)
 		 		_alt = 1;
 		 		repeat {
 		 			switch (_alt) {
 		 			case 1:
-		 				setState(452)
+		 				setState(464)
 		 				try interfaceDeclarationList()
 
 
@@ -1783,7 +1787,7 @@ open class ObjectiveCParser: Parser {
 		 			default:
 		 				throw ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
-		 			setState(455); 
+		 			setState(467); 
 		 			try _errHandler.sync(self)
 		 			_alt = try getInterpreter().adaptivePredict(_input,24,_ctx)
 		 		} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
@@ -1839,11 +1843,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(459)
+		 	setState(471)
 		 	try match(ObjectiveCParser.Tokens.PROTOCOL.rawValue)
-		 	setState(460)
+		 	setState(472)
 		 	try protocolList()
-		 	setState(461)
+		 	setState(473)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -1897,11 +1901,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(463)
+		 	setState(475)
 		 	try match(ObjectiveCParser.Tokens.CLASS.rawValue)
-		 	setState(464)
+		 	setState(476)
 		 	try identifier()
-		 	setState(469)
+		 	setState(481)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -1909,17 +1913,17 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(465)
+		 		setState(477)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(466)
+		 		setState(478)
 		 		try identifier()
 
 
-		 		setState(471)
+		 		setState(483)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(472)
+		 	setState(484)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -1973,9 +1977,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(474)
+		 	setState(486)
 		 	try protocolName()
-		 	setState(479)
+		 	setState(491)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -1983,13 +1987,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(475)
+		 		setState(487)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(476)
+		 		setState(488)
 		 		try protocolName()
 
 
-		 		setState(481)
+		 		setState(493)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -2051,9 +2055,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(482)
+		 	setState(494)
 		 	try match(ObjectiveCParser.Tokens.PROPERTY.rawValue)
-		 	setState(487)
+		 	setState(499)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -2061,36 +2065,36 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(483)
+		 		setState(495)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(484)
+		 		setState(496)
 		 		try propertyAttributesList()
-		 		setState(485)
+		 		setState(497)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 	}
 
-		 	setState(490)
+		 	setState(502)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,29,_ctx)) {
 		 	case 1:
-		 		setState(489)
+		 		setState(501)
 		 		try ibOutletQualifier()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(493)
+		 	setState(505)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,30,_ctx)) {
 		 	case 1:
-		 		setState(492)
+		 		setState(504)
 		 		try match(ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue)
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(495)
+		 	setState(507)
 		 	try fieldDeclaration()
 
 		}
@@ -2144,9 +2148,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(497)
+		 	setState(509)
 		 	try propertyAttribute()
-		 	setState(502)
+		 	setState(514)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -2154,13 +2158,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(498)
+		 		setState(510)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(499)
+		 		setState(511)
 		 		try propertyAttribute()
 
 
-		 		setState(504)
+		 		setState(516)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -2226,100 +2230,100 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(525)
+		 	setState(537)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,32, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(505)
+		 		setState(517)
 		 		try match(ObjectiveCParser.Tokens.ATOMIC.rawValue)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(506)
+		 		setState(518)
 		 		try match(ObjectiveCParser.Tokens.NONATOMIC.rawValue)
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(507)
+		 		setState(519)
 		 		try match(ObjectiveCParser.Tokens.STRONG.rawValue)
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(508)
+		 		setState(520)
 		 		try match(ObjectiveCParser.Tokens.WEAK.rawValue)
 
 		 		break
 		 	case 5:
 		 		try enterOuterAlt(_localctx, 5)
-		 		setState(509)
+		 		setState(521)
 		 		try match(ObjectiveCParser.Tokens.RETAIN.rawValue)
 
 		 		break
 		 	case 6:
 		 		try enterOuterAlt(_localctx, 6)
-		 		setState(510)
+		 		setState(522)
 		 		try match(ObjectiveCParser.Tokens.ASSIGN.rawValue)
 
 		 		break
 		 	case 7:
 		 		try enterOuterAlt(_localctx, 7)
-		 		setState(511)
+		 		setState(523)
 		 		try match(ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue)
 
 		 		break
 		 	case 8:
 		 		try enterOuterAlt(_localctx, 8)
-		 		setState(512)
+		 		setState(524)
 		 		try match(ObjectiveCParser.Tokens.COPY.rawValue)
 
 		 		break
 		 	case 9:
 		 		try enterOuterAlt(_localctx, 9)
-		 		setState(513)
+		 		setState(525)
 		 		try match(ObjectiveCParser.Tokens.READONLY.rawValue)
 
 		 		break
 		 	case 10:
 		 		try enterOuterAlt(_localctx, 10)
-		 		setState(514)
+		 		setState(526)
 		 		try match(ObjectiveCParser.Tokens.READWRITE.rawValue)
 
 		 		break
 		 	case 11:
 		 		try enterOuterAlt(_localctx, 11)
-		 		setState(515)
+		 		setState(527)
 		 		try match(ObjectiveCParser.Tokens.GETTER.rawValue)
-		 		setState(516)
+		 		setState(528)
 		 		try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
-		 		setState(517)
+		 		setState(529)
 		 		try identifier()
 
 		 		break
 		 	case 12:
 		 		try enterOuterAlt(_localctx, 12)
-		 		setState(518)
+		 		setState(530)
 		 		try match(ObjectiveCParser.Tokens.SETTER.rawValue)
-		 		setState(519)
+		 		setState(531)
 		 		try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
-		 		setState(520)
+		 		setState(532)
 		 		try identifier()
-		 		setState(521)
+		 		setState(533)
 		 		try match(ObjectiveCParser.Tokens.COLON.rawValue)
 
 		 		break
 		 	case 13:
 		 		try enterOuterAlt(_localctx, 13)
-		 		setState(523)
+		 		setState(535)
 		 		try nullabilitySpecifier()
 
 		 		break
 		 	case 14:
 		 		try enterOuterAlt(_localctx, 14)
-		 		setState(524)
+		 		setState(536)
 		 		try identifier()
 
 		 		break
@@ -2377,16 +2381,16 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(535)
+		 	setState(547)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .LT:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(527)
+		 		setState(539)
 		 		try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 		setState(528)
+		 		setState(540)
 		 		try protocolList()
-		 		setState(529)
+		 		setState(541)
 		 		try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 		 		break
@@ -2438,11 +2442,11 @@ open class ObjectiveCParser: Parser {
 		 	case .IB_DESIGNABLE:fallthrough
 		 	case .IDENTIFIER:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(532)
+		 		setState(544)
 		 		try _errHandler.sync(self)
 		 		switch (try getInterpreter().adaptivePredict(_input,33,_ctx)) {
 		 		case 1:
-		 			setState(531)
+		 			setState(543)
 		 			_la = try _input.LA(1)
 		 			if (!(//closure
 		 			 { () -> Bool in
@@ -2459,7 +2463,7 @@ open class ObjectiveCParser: Parser {
 		 			break
 		 		default: break
 		 		}
-		 		setState(534)
+		 		setState(546)
 		 		try identifier()
 
 		 		break
@@ -2517,32 +2521,32 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(537)
+		 	setState(549)
 		 	try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 	setState(541)
+		 	setState(553)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
 		 	 { () -> Bool in
 		 	      var testSet: Bool = {  () -> Bool in
-		 	   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.CHAR.rawValue,ObjectiveCParser.Tokens.CONST.rawValue,ObjectiveCParser.Tokens.DOUBLE.rawValue,ObjectiveCParser.Tokens.ENUM.rawValue,ObjectiveCParser.Tokens.FLOAT.rawValue,ObjectiveCParser.Tokens.INLINE.rawValue,ObjectiveCParser.Tokens.INT.rawValue,ObjectiveCParser.Tokens.LONG.rawValue,ObjectiveCParser.Tokens.RESTRICT.rawValue,ObjectiveCParser.Tokens.SHORT.rawValue,ObjectiveCParser.Tokens.SIGNED.rawValue,ObjectiveCParser.Tokens.STRUCT.rawValue,ObjectiveCParser.Tokens.UNION.rawValue,ObjectiveCParser.Tokens.UNSIGNED.rawValue,ObjectiveCParser.Tokens.VOID.rawValue,ObjectiveCParser.Tokens.VOLATILE.rawValue,ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
+		 	   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.AUTO.rawValue,ObjectiveCParser.Tokens.CHAR.rawValue,ObjectiveCParser.Tokens.CONST.rawValue,ObjectiveCParser.Tokens.DOUBLE.rawValue,ObjectiveCParser.Tokens.ENUM.rawValue,ObjectiveCParser.Tokens.EXTERN.rawValue,ObjectiveCParser.Tokens.FLOAT.rawValue,ObjectiveCParser.Tokens.INLINE.rawValue,ObjectiveCParser.Tokens.INT.rawValue,ObjectiveCParser.Tokens.LONG.rawValue,ObjectiveCParser.Tokens.REGISTER.rawValue,ObjectiveCParser.Tokens.RESTRICT.rawValue,ObjectiveCParser.Tokens.SHORT.rawValue,ObjectiveCParser.Tokens.SIGNED.rawValue,ObjectiveCParser.Tokens.STATIC.rawValue,ObjectiveCParser.Tokens.STRUCT.rawValue,ObjectiveCParser.Tokens.UNION.rawValue,ObjectiveCParser.Tokens.UNSIGNED.rawValue,ObjectiveCParser.Tokens.VOID.rawValue,ObjectiveCParser.Tokens.VOLATILE.rawValue,ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
 		 	    return  Utils.testBitLeftShiftArray(testArray, 0)
 		 	}()
 		 	          testSet = testSet || {  () -> Bool in
-		 	             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.PACKAGE.rawValue,ObjectiveCParser.Tokens.PRIVATE.rawValue,ObjectiveCParser.Tokens.PROTECTED.rawValue,ObjectiveCParser.Tokens.PUBLIC.rawValue,ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.STRONG_QUALIFIER.rawValue,ObjectiveCParser.Tokens.TYPEOF.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED_QUALIFIER.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.WEAK_QUALIFIER.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
+		 	             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.PACKAGE.rawValue,ObjectiveCParser.Tokens.PRIVATE.rawValue,ObjectiveCParser.Tokens.PROTECTED.rawValue,ObjectiveCParser.Tokens.PUBLIC.rawValue,ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.ATTRIBUTE.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.STRONG_QUALIFIER.rawValue,ObjectiveCParser.Tokens.TYPEOF.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED_QUALIFIER.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.WEAK_QUALIFIER.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
 		 	              return  Utils.testBitLeftShiftArray(testArray, 68)
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(538)
+		 		setState(550)
 		 		try visibilitySection()
 
 
-		 		setState(543)
+		 		setState(555)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(544)
+		 	setState(556)
 		 	try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		}
@@ -2598,7 +2602,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 			var _alt:Int
-		 	setState(558)
+		 	setState(570)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .PACKAGE:fallthrough
@@ -2606,35 +2610,39 @@ open class ObjectiveCParser: Parser {
 		 	case .PROTECTED:fallthrough
 		 	case .PUBLIC:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(546)
+		 		setState(558)
 		 		try accessModifier()
-		 		setState(550)
+		 		setState(562)
 		 		try _errHandler.sync(self)
 		 		_alt = try getInterpreter().adaptivePredict(_input,36,_ctx)
 		 		while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 			if ( _alt==1 ) {
-		 				setState(547)
+		 				setState(559)
 		 				try fieldDeclaration()
 
 		 		 
 		 			}
-		 			setState(552)
+		 			setState(564)
 		 			try _errHandler.sync(self)
 		 			_alt = try getInterpreter().adaptivePredict(_input,36,_ctx)
 		 		}
 
 		 		break
+		 	case .AUTO:fallthrough
 		 	case .CHAR:fallthrough
 		 	case .CONST:fallthrough
 		 	case .DOUBLE:fallthrough
 		 	case .ENUM:fallthrough
+		 	case .EXTERN:fallthrough
 		 	case .FLOAT:fallthrough
 		 	case .INLINE:fallthrough
 		 	case .INT:fallthrough
 		 	case .LONG:fallthrough
+		 	case .REGISTER:fallthrough
 		 	case .RESTRICT:fallthrough
 		 	case .SHORT:fallthrough
 		 	case .SIGNED:fallthrough
+		 	case .STATIC:fallthrough
 		 	case .STRUCT:fallthrough
 		 	case .UNION:fallthrough
 		 	case .UNSIGNED:fallthrough
@@ -2657,6 +2665,7 @@ open class ObjectiveCParser: Parser {
 		 	case .ATOMIC:fallthrough
 		 	case .NONATOMIC:fallthrough
 		 	case .RETAIN:fallthrough
+		 	case .ATTRIBUTE:fallthrough
 		 	case .AUTORELEASING_QUALIFIER:fallthrough
 		 	case .BLOCK:fallthrough
 		 	case .BRIDGE:fallthrough
@@ -2693,13 +2702,13 @@ open class ObjectiveCParser: Parser {
 		 	case .IB_DESIGNABLE:fallthrough
 		 	case .IDENTIFIER:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(554); 
+		 		setState(566); 
 		 		try _errHandler.sync(self)
 		 		_alt = 1;
 		 		repeat {
 		 			switch (_alt) {
 		 			case 1:
-		 				setState(553)
+		 				setState(565)
 		 				try fieldDeclaration()
 
 
@@ -2707,7 +2716,7 @@ open class ObjectiveCParser: Parser {
 		 			default:
 		 				throw ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
-		 			setState(556); 
+		 			setState(568); 
 		 			try _errHandler.sync(self)
 		 			_alt = try getInterpreter().adaptivePredict(_input,37,_ctx)
 		 		} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
@@ -2765,7 +2774,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(560)
+		 	setState(572)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -2857,37 +2866,37 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(567); 
+		 	setState(579); 
 		 	try _errHandler.sync(self)
 		 	_alt = 1;
 		 	repeat {
 		 		switch (_alt) {
 		 		case 1:
-		 			setState(567)
+		 			setState(579)
 		 			try _errHandler.sync(self)
 		 			switch(try getInterpreter().adaptivePredict(_input,39, _ctx)) {
 		 			case 1:
-		 				setState(562)
+		 				setState(574)
 		 				try declaration()
 
 		 				break
 		 			case 2:
-		 				setState(563)
+		 				setState(575)
 		 				try classMethodDeclaration()
 
 		 				break
 		 			case 3:
-		 				setState(564)
+		 				setState(576)
 		 				try instanceMethodDeclaration()
 
 		 				break
 		 			case 4:
-		 				setState(565)
+		 				setState(577)
 		 				try propertyDeclaration()
 
 		 				break
 		 			case 5:
-		 				setState(566)
+		 				setState(578)
 		 				try functionDeclaration()
 
 		 				break
@@ -2898,7 +2907,7 @@ open class ObjectiveCParser: Parser {
 		 		default:
 		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
-		 		setState(569); 
+		 		setState(581); 
 		 		try _errHandler.sync(self)
 		 		_alt = try getInterpreter().adaptivePredict(_input,40,_ctx)
 		 	} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
@@ -2950,9 +2959,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(571)
+		 	setState(583)
 		 	try match(ObjectiveCParser.Tokens.ADD.rawValue)
-		 	setState(572)
+		 	setState(584)
 		 	try methodDeclaration()
 
 		}
@@ -3002,9 +3011,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(574)
+		 	setState(586)
 		 	try match(ObjectiveCParser.Tokens.SUB.rawValue)
-		 	setState(575)
+		 	setState(587)
 		 	try methodDeclaration()
 
 		}
@@ -3067,7 +3076,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(578)
+		 	setState(590)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3075,14 +3084,14 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(577)
+		 		setState(589)
 		 		try methodType()
 
 		 	}
 
-		 	setState(580)
+		 	setState(592)
 		 	try methodSelector()
-		 	setState(584)
+		 	setState(596)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -3090,15 +3099,15 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(581)
+		 		setState(593)
 		 		try attributeSpecifier()
 
 
-		 		setState(586)
+		 		setState(598)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(588)
+		 	setState(600)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3113,12 +3122,12 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(587)
+		 		setState(599)
 		 		try macro()
 
 		 	}
 
-		 	setState(590)
+		 	setState(602)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -3196,42 +3205,42 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(597) 
+		 	setState(609) 
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	repeat {
-		 		setState(597)
+		 		setState(609)
 		 		try _errHandler.sync(self)
 		 		switch(try getInterpreter().adaptivePredict(_input,44, _ctx)) {
 		 		case 1:
-		 			setState(592)
+		 			setState(604)
 		 			try functionDefinition()
 
 		 			break
 		 		case 2:
-		 			setState(593)
+		 			setState(605)
 		 			try declaration()
 
 		 			break
 		 		case 3:
-		 			setState(594)
+		 			setState(606)
 		 			try classMethodDefinition()
 
 		 			break
 		 		case 4:
-		 			setState(595)
+		 			setState(607)
 		 			try instanceMethodDefinition()
 
 		 			break
 		 		case 5:
-		 			setState(596)
+		 			setState(608)
 		 			try propertyImplementation()
 
 		 			break
 		 		default: break
 		 		}
 
-		 		setState(599); 
+		 		setState(611); 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	} while (//closure
@@ -3295,9 +3304,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(601)
+		 	setState(613)
 		 	try match(ObjectiveCParser.Tokens.ADD.rawValue)
-		 	setState(602)
+		 	setState(614)
 		 	try methodDefinition()
 
 		}
@@ -3347,9 +3356,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(604)
+		 	setState(616)
 		 	try match(ObjectiveCParser.Tokens.SUB.rawValue)
-		 	setState(605)
+		 	setState(617)
 		 	try methodDefinition()
 
 		}
@@ -3412,7 +3421,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(608)
+		 	setState(620)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3420,14 +3429,14 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(607)
+		 		setState(619)
 		 		try methodType()
 
 		 	}
 
-		 	setState(610)
+		 	setState(622)
 		 	try methodSelector()
-		 	setState(612)
+		 	setState(624)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3442,12 +3451,12 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(611)
+		 		setState(623)
 		 		try initDeclaratorList()
 
 		 	}
 
-		 	setState(615)
+		 	setState(627)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3455,12 +3464,12 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.SEMI.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(614)
+		 		setState(626)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 	}
 
-		 	setState(618)
+		 	setState(630)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3468,14 +3477,14 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(617)
+		 		setState(629)
 		 		try attributeSpecifier()
 
 		 	}
 
-		 	setState(620)
+		 	setState(632)
 		 	try compoundStatement()
-		 	setState(622)
+		 	setState(634)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3483,7 +3492,7 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.SEMI.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(621)
+		 		setState(633)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 	}
@@ -3543,24 +3552,24 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 			var _alt:Int
-		 	setState(634)
+		 	setState(646)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,53, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(624)
+		 		setState(636)
 		 		try selector()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(626); 
+		 		setState(638); 
 		 		try _errHandler.sync(self)
 		 		_alt = 1;
 		 		repeat {
 		 			switch (_alt) {
 		 			case 1:
-		 				setState(625)
+		 				setState(637)
 		 				try keywordDeclarator()
 
 
@@ -3568,11 +3577,11 @@ open class ObjectiveCParser: Parser {
 		 			default:
 		 				throw ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
-		 			setState(628); 
+		 			setState(640); 
 		 			try _errHandler.sync(self)
 		 			_alt = try getInterpreter().adaptivePredict(_input,51,_ctx)
 		 		} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
-		 		setState(632)
+		 		setState(644)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -3580,9 +3589,9 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(630)
+		 			setState(642)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(631)
+		 			setState(643)
 		 			try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
 
 		 		}
@@ -3651,7 +3660,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(637)
+		 	setState(649)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -3666,14 +3675,14 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(636)
+		 		setState(648)
 		 		try selector()
 
 		 	}
 
-		 	setState(639)
+		 	setState(651)
 		 	try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 	setState(643)
+		 	setState(655)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -3681,25 +3690,25 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(640)
+		 		setState(652)
 		 		try methodType()
 
 
-		 		setState(645)
+		 		setState(657)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(647)
+		 	setState(659)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,56,_ctx)) {
 		 	case 1:
-		 		setState(646)
+		 		setState(658)
 		 		try arcBehaviourSpecifier()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(649)
+		 	setState(661)
 		 	try identifier()
 
 		}
@@ -3748,7 +3757,7 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(653)
+		 	setState(665)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .BOOL:fallthrough
@@ -3799,14 +3808,14 @@ open class ObjectiveCParser: Parser {
 		 	case .IB_DESIGNABLE:fallthrough
 		 	case .IDENTIFIER:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(651)
+		 		setState(663)
 		 		try identifier()
 
 		 		break
 
 		 	case .RETURN:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(652)
+		 		setState(664)
 		 		try match(ObjectiveCParser.Tokens.RETURN.rawValue)
 
 		 		break
@@ -3862,11 +3871,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(655)
+		 	setState(667)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(656)
+		 	setState(668)
 		 	try typeName()
-		 	setState(657)
+		 	setState(669)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		}
@@ -3917,27 +3926,27 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(667)
+		 	setState(679)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .SYNTHESIZE:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(659)
+		 		setState(671)
 		 		try match(ObjectiveCParser.Tokens.SYNTHESIZE.rawValue)
-		 		setState(660)
+		 		setState(672)
 		 		try propertySynthesizeList()
-		 		setState(661)
+		 		setState(673)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
 
 		 	case .DYNAMIC:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(663)
+		 		setState(675)
 		 		try match(ObjectiveCParser.Tokens.DYNAMIC.rawValue)
-		 		setState(664)
+		 		setState(676)
 		 		try propertySynthesizeList()
-		 		setState(665)
+		 		setState(677)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
@@ -3995,9 +4004,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(669)
+		 	setState(681)
 		 	try propertySynthesizeItem()
-		 	setState(674)
+		 	setState(686)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -4005,13 +4014,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(670)
+		 		setState(682)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(671)
+		 		setState(683)
 		 		try propertySynthesizeItem()
 
 
-		 		setState(676)
+		 		setState(688)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -4067,9 +4076,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(677)
+		 	setState(689)
 		 	try identifier()
-		 	setState(680)
+		 	setState(692)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4077,9 +4086,9 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ASSIGNMENT.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(678)
+		 		setState(690)
 		 		try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
-		 		setState(679)
+		 		setState(691)
 		 		try identifier()
 
 		 	}
@@ -4147,19 +4156,19 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(683)
+		 	setState(695)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,61,_ctx)) {
 		 	case 1:
-		 		setState(682)
+		 		setState(694)
 		 		try nullabilitySpecifier()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(685)
+		 	setState(697)
 		 	try typeSpecifier()
-		 	setState(687)
+		 	setState(699)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4170,33 +4179,33 @@ open class ObjectiveCParser: Parser {
 		 	}()
 		 	      return testSet
 		 	 }()) {
-		 		setState(686)
+		 		setState(698)
 		 		try nullabilitySpecifier()
 
 		 	}
 
-		 	setState(689)
+		 	setState(701)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(690)
+		 	setState(702)
 		 	try match(ObjectiveCParser.Tokens.BITXOR.rawValue)
-		 	setState(693)
+		 	setState(705)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,63,_ctx)) {
 		 	case 1:
-		 		setState(691)
+		 		setState(703)
 		 		try nullabilitySpecifier()
 
 		 		break
 		 	case 2:
-		 		setState(692)
+		 		setState(704)
 		 		try typeSpecifier()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(695)
+		 	setState(707)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(697)
+		 	setState(709)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4204,7 +4213,7 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(696)
+		 		setState(708)
 		 		try blockParameters()
 
 		 	}
@@ -4263,9 +4272,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(699)
+		 	setState(711)
 		 	try match(ObjectiveCParser.Tokens.LT.rawValue)
-		 	setState(708)
+		 	setState(720)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4280,9 +4289,9 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(700)
+		 		setState(712)
 		 		try typeSpecifierWithPrefixes()
-		 		setState(705)
+		 		setState(717)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		while (//closure
@@ -4290,20 +4299,20 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(701)
+		 			setState(713)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(702)
+		 			setState(714)
 		 			try typeSpecifierWithPrefixes()
 
 
-		 			setState(707)
+		 			setState(719)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		}
 
 		 	}
 
-		 	setState(710)
+		 	setState(722)
 		 	try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 		}
@@ -4364,23 +4373,23 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(715)
+		 	setState(727)
 		 	try _errHandler.sync(self)
 		 	_alt = try getInterpreter().adaptivePredict(_input,67,_ctx)
 		 	while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 		if ( _alt==1 ) {
-		 			setState(712)
+		 			setState(724)
 		 			try typePrefix()
 
 		 	 
 		 		}
-		 		setState(717)
+		 		setState(729)
 		 		try _errHandler.sync(self)
 		 		_alt = try getInterpreter().adaptivePredict(_input,67,_ctx)
 		 	}
-		 	setState(718)
+		 	setState(730)
 		 	try typeSpecifier()
-		 	setState(720)
+		 	setState(732)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4388,7 +4397,7 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.MUL.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(719)
+		 		setState(731)
 		 		try pointer()
 
 		 	}
@@ -4446,11 +4455,11 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(722)
+		 	setState(734)
 		 	try match(ObjectiveCParser.Tokens.AT.rawValue)
-		 	setState(723)
-		 	try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
 		 	setState(735)
+		 	try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
+		 	setState(747)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4469,25 +4478,25 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(724)
+		 		setState(736)
 		 		try dictionaryPair()
-		 		setState(729)
+		 		setState(741)
 		 		try _errHandler.sync(self)
 		 		_alt = try getInterpreter().adaptivePredict(_input,69,_ctx)
 		 		while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 			if ( _alt==1 ) {
-		 				setState(725)
+		 				setState(737)
 		 				try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 				setState(726)
+		 				setState(738)
 		 				try dictionaryPair()
 
 		 		 
 		 			}
-		 			setState(731)
+		 			setState(743)
 		 			try _errHandler.sync(self)
 		 			_alt = try getInterpreter().adaptivePredict(_input,69,_ctx)
 		 		}
-		 		setState(733)
+		 		setState(745)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -4495,7 +4504,7 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(732)
+		 			setState(744)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 
 		 		}
@@ -4503,7 +4512,7 @@ open class ObjectiveCParser: Parser {
 
 		 	}
 
-		 	setState(737)
+		 	setState(749)
 		 	try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		}
@@ -4556,11 +4565,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(739)
+		 	setState(751)
 		 	try castExpression()
-		 	setState(740)
+		 	setState(752)
 		 	try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 	setState(741)
+		 	setState(753)
 		 	try expression(0)
 
 		}
@@ -4611,11 +4620,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(743)
+		 	setState(755)
 		 	try match(ObjectiveCParser.Tokens.AT.rawValue)
-		 	setState(744)
+		 	setState(756)
 		 	try match(ObjectiveCParser.Tokens.LBRACK.rawValue)
-		 	setState(749)
+		 	setState(761)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4634,9 +4643,9 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(745)
+		 		setState(757)
 		 		try expressions()
-		 		setState(747)
+		 		setState(759)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -4644,7 +4653,7 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(746)
+		 			setState(758)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 
 		 		}
@@ -4652,7 +4661,7 @@ open class ObjectiveCParser: Parser {
 
 		 	}
 
-		 	setState(751)
+		 	setState(763)
 		 	try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
 
 		}
@@ -4709,26 +4718,26 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(763)
+		 	setState(775)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,75, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(753)
+		 		setState(765)
 		 		try match(ObjectiveCParser.Tokens.AT.rawValue)
-		 		setState(754)
+		 		setState(766)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(755)
+		 		setState(767)
 		 		try expression(0)
-		 		setState(756)
+		 		setState(768)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(758)
+		 		setState(770)
 		 		try match(ObjectiveCParser.Tokens.AT.rawValue)
-		 		setState(761)
+		 		setState(773)
 		 		try _errHandler.sync(self)
 		 		switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 		case .TRUE:fallthrough
@@ -4745,7 +4754,7 @@ open class ObjectiveCParser: Parser {
 		 		case .BINARY_LITERAL:fallthrough
 		 		case .DECIMAL_LITERAL:fallthrough
 		 		case .FLOATING_POINT_LITERAL:
-		 			setState(759)
+		 			setState(771)
 		 			try constant()
 
 		 			break
@@ -4796,7 +4805,7 @@ open class ObjectiveCParser: Parser {
 		 		case .IB_INSPECTABLE:fallthrough
 		 		case .IB_DESIGNABLE:fallthrough
 		 		case .IDENTIFIER:
-		 			setState(760)
+		 			setState(772)
 		 			try identifier()
 
 		 			break
@@ -4861,9 +4870,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(765)
-		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
 		 	setState(777)
+		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
+		 	setState(789)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -4878,22 +4887,22 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(768)
+		 		setState(780)
 		 		try _errHandler.sync(self)
 		 		switch(try getInterpreter().adaptivePredict(_input,76, _ctx)) {
 		 		case 1:
-		 			setState(766)
+		 			setState(778)
 		 			try typeVariableDeclaratorOrName()
 
 		 			break
 		 		case 2:
-		 			setState(767)
+		 			setState(779)
 		 			try match(ObjectiveCParser.Tokens.VOID.rawValue)
 
 		 			break
 		 		default: break
 		 		}
-		 		setState(774)
+		 		setState(786)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		while (//closure
@@ -4901,20 +4910,20 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(770)
+		 			setState(782)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(771)
+		 			setState(783)
 		 			try typeVariableDeclaratorOrName()
 
 
-		 			setState(776)
+		 			setState(788)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		}
 
 		 	}
 
-		 	setState(779)
+		 	setState(791)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		}
@@ -4966,18 +4975,18 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(783)
+		 	setState(795)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,79, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(781)
+		 		setState(793)
 		 		try typeVariableDeclarator()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(782)
+		 		setState(794)
 		 		try typeName()
 
 		 		break
@@ -5040,19 +5049,19 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(785)
+		 	setState(797)
 		 	try match(ObjectiveCParser.Tokens.BITXOR.rawValue)
-		 	setState(787)
+		 	setState(799)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,80,_ctx)) {
 		 	case 1:
-		 		setState(786)
+		 		setState(798)
 		 		try typeSpecifier()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(790)
+		 	setState(802)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -5063,12 +5072,12 @@ open class ObjectiveCParser: Parser {
 		 	}()
 		 	      return testSet
 		 	 }()) {
-		 		setState(789)
+		 		setState(801)
 		 		try nullabilitySpecifier()
 
 		 	}
 
-		 	setState(793)
+		 	setState(805)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -5076,12 +5085,12 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(792)
+		 		setState(804)
 		 		try blockParameters()
 
 		 	}
 
-		 	setState(795)
+		 	setState(807)
 		 	try compoundStatement()
 
 		}
@@ -5134,13 +5143,13 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(797)
+		 	setState(809)
 		 	try match(ObjectiveCParser.Tokens.LBRACK.rawValue)
-		 	setState(798)
+		 	setState(810)
 		 	try receiver()
-		 	setState(799)
+		 	setState(811)
 		 	try messageSelector()
-		 	setState(800)
+		 	setState(812)
 		 	try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
 
 		}
@@ -5192,18 +5201,18 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(804)
+		 	setState(816)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,83, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(802)
+		 		setState(814)
 		 		try expression(0)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(803)
+		 		setState(815)
 		 		try genericTypeSpecifier()
 
 		 		break
@@ -5262,26 +5271,26 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(812)
+		 	setState(824)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,85, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(806)
+		 		setState(818)
 		 		try selector()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(808) 
+		 		setState(820) 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		repeat {
-		 			setState(807)
+		 			setState(819)
 		 			try keywordArgument()
 
 
-		 			setState(810); 
+		 			setState(822); 
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		} while (//closure
@@ -5354,7 +5363,7 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(815)
+		 	setState(827)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -5369,16 +5378,16 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(814)
+		 		setState(826)
 		 		try selector()
 
 		 	}
 
-		 	setState(817)
+		 	setState(829)
 		 	try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 	setState(818)
+		 	setState(830)
 		 	try keywordArgumentType()
-		 	setState(823)
+		 	setState(835)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -5386,13 +5395,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(819)
+		 		setState(831)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(820)
+		 		setState(832)
 		 		try keywordArgumentType()
 
 
-		 		setState(825)
+		 		setState(837)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -5451,19 +5460,19 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(826)
+		 	setState(838)
 		 	try expressions()
-		 	setState(828)
+		 	setState(840)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,88,_ctx)) {
 		 	case 1:
-		 		setState(827)
+		 		setState(839)
 		 		try nullabilitySpecifier()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(834)
+		 	setState(846)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -5471,11 +5480,11 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LBRACE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(830)
+		 		setState(842)
 		 		try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 		setState(831)
+		 		setState(843)
 		 		try initializerList()
-		 		setState(832)
+		 		setState(844)
 		 		try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		 	}
@@ -5530,13 +5539,13 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(836)
+		 	setState(848)
 		 	try match(ObjectiveCParser.Tokens.SELECTOR.rawValue)
-		 	setState(837)
+		 	setState(849)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(838)
+		 	setState(850)
 		 	try selectorName()
-		 	setState(839)
+		 	setState(851)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		}
@@ -5589,22 +5598,22 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(850)
+		 	setState(862)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,92, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(841)
+		 		setState(853)
 		 		try selector()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(846) 
+		 		setState(858) 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		repeat {
-		 			setState(843)
+		 			setState(855)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 			if (//closure
@@ -5619,16 +5628,16 @@ open class ObjectiveCParser: Parser {
 		 			          }()
 		 			      return testSet
 		 			 }()) {
-		 				setState(842)
+		 				setState(854)
 		 				try selector()
 
 		 			}
 
-		 			setState(845)
+		 			setState(857)
 		 			try match(ObjectiveCParser.Tokens.COLON.rawValue)
 
 
-		 			setState(848); 
+		 			setState(860); 
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		} while (//closure
@@ -5696,13 +5705,13 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(852)
+		 	setState(864)
 		 	try match(ObjectiveCParser.Tokens.PROTOCOL.rawValue)
-		 	setState(853)
+		 	setState(865)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(854)
+		 	setState(866)
 		 	try protocolName()
-		 	setState(855)
+		 	setState(867)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		}
@@ -5754,13 +5763,13 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(857)
+		 	setState(869)
 		 	try match(ObjectiveCParser.Tokens.ENCODE.rawValue)
-		 	setState(858)
+		 	setState(870)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(859)
+		 	setState(871)
 		 	try typeName()
-		 	setState(860)
+		 	setState(872)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		}
@@ -5813,9 +5822,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(862)
+		 	setState(874)
 		 	try declarationSpecifiers()
-		 	setState(863)
+		 	setState(875)
 		 	try declarator()
 
 		}
@@ -5869,26 +5878,26 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(872)
+		 	setState(884)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,93, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(865)
+		 		setState(877)
 		 		try match(ObjectiveCParser.Tokens.THROW.rawValue)
-		 		setState(866)
+		 		setState(878)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(867)
+		 		setState(879)
 		 		try identifier()
-		 		setState(868)
+		 		setState(880)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(870)
+		 		setState(882)
 		 		try match(ObjectiveCParser.Tokens.THROW.rawValue)
-		 		setState(871)
+		 		setState(883)
 		 		try expression(0)
 
 		 		break
@@ -5953,15 +5962,15 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(874)
+		 	setState(886)
 		 	try match(ObjectiveCParser.Tokens.TRY.rawValue)
-		 	setState(875)
+		 	setState(887)
 		 	try {
 		 			let assignmentValue = try compoundStatement()
 		 			_localctx.castdown(TryBlockContext.self).tryStatement = assignmentValue
 		 	     }()
 
-		 	setState(879)
+		 	setState(891)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -5969,15 +5978,15 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.CATCH.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(876)
+		 		setState(888)
 		 		try catchStatement()
 
 
-		 		setState(881)
+		 		setState(893)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(884)
+		 	setState(896)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -5985,9 +5994,9 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.FINALLY.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(882)
+		 		setState(894)
 		 		try match(ObjectiveCParser.Tokens.FINALLY.rawValue)
-		 		setState(883)
+		 		setState(895)
 		 		try {
 		 				let assignmentValue = try compoundStatement()
 		 				_localctx.castdown(TryBlockContext.self).finallyStatement = assignmentValue
@@ -6049,15 +6058,15 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(886)
+		 	setState(898)
 		 	try match(ObjectiveCParser.Tokens.CATCH.rawValue)
-		 	setState(887)
+		 	setState(899)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(888)
+		 	setState(900)
 		 	try typeVariableDeclarator()
-		 	setState(889)
+		 	setState(901)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(890)
+		 	setState(902)
 		 	try compoundStatement()
 
 		}
@@ -6112,15 +6121,15 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(892)
+		 	setState(904)
 		 	try match(ObjectiveCParser.Tokens.SYNCHRONIZED.rawValue)
-		 	setState(893)
+		 	setState(905)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(894)
+		 	setState(906)
 		 	try expression(0)
-		 	setState(895)
+		 	setState(907)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(896)
+		 	setState(908)
 		 	try compoundStatement()
 
 		}
@@ -6170,9 +6179,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(898)
+		 	setState(910)
 		 	try match(ObjectiveCParser.Tokens.AUTORELEASEPOOL.rawValue)
-		 	setState(899)
+		 	setState(911)
 		 	try compoundStatement()
 
 		}
@@ -6222,9 +6231,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(901)
+		 	setState(913)
 		 	try functionSignature()
-		 	setState(902)
+		 	setState(914)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -6277,9 +6286,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(904)
+		 	setState(916)
 		 	try functionSignature()
-		 	setState(905)
+		 	setState(917)
 		 	try compoundStatement()
 
 		}
@@ -6341,22 +6350,22 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(908)
+		 	setState(920)
 		 	try _errHandler.sync(self)
 		 	switch (try getInterpreter().adaptivePredict(_input,96,_ctx)) {
 		 	case 1:
-		 		setState(907)
+		 		setState(919)
 		 		try declarationSpecifiers()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(910)
+		 	setState(922)
 		 	try identifier()
 
-		 	setState(911)
+		 	setState(923)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(913)
+		 	setState(925)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -6371,15 +6380,15 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(912)
+		 		setState(924)
 		 		try parameterList()
 
 		 	}
 
-		 	setState(915)
+		 	setState(927)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
-		 	setState(918)
+		 	setState(930)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -6387,7 +6396,7 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(917)
+		 		setState(929)
 		 		try attributeSpecifier()
 
 		 	}
@@ -6444,9 +6453,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(920)
+		 	setState(932)
 		 	try attributeName()
-		 	setState(922)
+		 	setState(934)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -6454,7 +6463,7 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(921)
+		 		setState(933)
 		 		try attributeParameters()
 
 		 	}
@@ -6506,12 +6515,12 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(926)
+		 	setState(938)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .CONST:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(924)
+		 		setState(936)
 		 		try match(ObjectiveCParser.Tokens.CONST.rawValue)
 
 		 		break
@@ -6563,7 +6572,7 @@ open class ObjectiveCParser: Parser {
 		 	case .IB_DESIGNABLE:fallthrough
 		 	case .IDENTIFIER:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(925)
+		 		setState(937)
 		 		try identifier()
 
 		 		break
@@ -6620,9 +6629,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(928)
+		 	setState(940)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(930)
+		 	setState(942)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -6641,12 +6650,12 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(929)
+		 		setState(941)
 		 		try attributeParameterList()
 
 		 	}
 
-		 	setState(932)
+		 	setState(944)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		}
@@ -6700,9 +6709,9 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(934)
+		 	setState(946)
 		 	try attributeParameter()
-		 	setState(939)
+		 	setState(951)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -6710,13 +6719,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(935)
+		 		setState(947)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(936)
+		 		setState(948)
 		 		try attributeParameter()
 
 
-		 		setState(941)
+		 		setState(953)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -6776,30 +6785,30 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(946)
+		 	setState(958)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,103, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(942)
+		 		setState(954)
 		 		try attribute()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(943)
+		 		setState(955)
 		 		try constant()
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(944)
+		 		setState(956)
 		 		try stringLiteral()
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(945)
+		 		setState(957)
 		 		try attributeParameterAssignment()
 
 		 		break
@@ -6861,11 +6870,11 @@ open class ObjectiveCParser: Parser {
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(948)
+		 	setState(960)
 		 	try attributeName()
-		 	setState(949)
+		 	setState(961)
 		 	try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
-		 	setState(953)
+		 	setState(965)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .TRUE:fallthrough
@@ -6882,7 +6891,7 @@ open class ObjectiveCParser: Parser {
 		 	case .BINARY_LITERAL:fallthrough
 		 	case .DECIMAL_LITERAL:fallthrough
 		 	case .FLOATING_POINT_LITERAL:
-		 		setState(950)
+		 		setState(962)
 		 		try constant()
 
 		 		break
@@ -6934,13 +6943,13 @@ open class ObjectiveCParser: Parser {
 		 	case .IB_INSPECTABLE:fallthrough
 		 	case .IB_DESIGNABLE:fallthrough
 		 	case .IDENTIFIER:
-		 		setState(951)
+		 		setState(963)
 		 		try attributeName()
 
 		 		break
 
 		 	case .STRING_START:
-		 		setState(952)
+		 		setState(964)
 		 		try stringLiteral()
 
 		 		break
@@ -6960,6 +6969,9 @@ open class ObjectiveCParser: Parser {
 	open class DeclarationContext:ParserRuleContext {
 		open func functionCallExpression() -> FunctionCallExpressionContext? {
 			return getRuleContext(FunctionCallExpressionContext.self,0)
+		}
+		open func functionPointer() -> FunctionPointerContext? {
+			return getRuleContext(FunctionPointerContext.self,0)
 		}
 		open func enumDeclaration() -> EnumDeclarationContext? {
 			return getRuleContext(EnumDeclarationContext.self,0)
@@ -7003,31 +7015,342 @@ open class ObjectiveCParser: Parser {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(959)
+		 	setState(974)
 		 	try _errHandler.sync(self)
 		 	switch(try getInterpreter().adaptivePredict(_input,105, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(955)
+		 		setState(967)
 		 		try functionCallExpression()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(956)
-		 		try enumDeclaration()
+		 		setState(968)
+		 		try functionPointer()
+		 		setState(969)
+		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(957)
-		 		try varDeclaration()
+		 		setState(971)
+		 		try enumDeclaration()
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(958)
+		 		setState(972)
+		 		try varDeclaration()
+
+		 		break
+		 	case 5:
+		 		try enterOuterAlt(_localctx, 5)
+		 		setState(973)
 		 		try typedefDeclaration()
+
+		 		break
+		 	default: break
+		 	}
+		}
+		catch ANTLRException.recognition(let re) {
+			_localctx.exception = re
+			_errHandler.reportError(self, re)
+			try _errHandler.recover(self, re)
+		}
+
+		return _localctx
+	}
+	open class FunctionPointerContext:ParserRuleContext {
+		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+			return getRuleContext(DeclarationSpecifiersContext.self,0)
+		}
+		open func LP() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.LP.rawValue) }
+		open func LP(_ i:Int) -> TerminalNode?{
+			return getToken(ObjectiveCParser.Tokens.LP.rawValue, i)
+		}
+		open func identifier() -> IdentifierContext? {
+			return getRuleContext(IdentifierContext.self,0)
+		}
+		open func RP() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.RP.rawValue) }
+		open func RP(_ i:Int) -> TerminalNode?{
+			return getToken(ObjectiveCParser.Tokens.RP.rawValue, i)
+		}
+		open func functionPointerParameterList() -> FunctionPointerParameterListContext? {
+			return getRuleContext(FunctionPointerParameterListContext.self,0)
+		}
+		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointer }
+		override
+		open func enterRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).enterFunctionPointer(self)
+			}
+		}
+		override
+		open func exitRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).exitFunctionPointer(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointer(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointer(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
+	}
+	@discardableResult
+	open func functionPointer() throws -> FunctionPointerContext {
+		var _localctx: FunctionPointerContext = FunctionPointerContext(_ctx, getState())
+		try enterRule(_localctx, 148, ObjectiveCParser.RULE_functionPointer)
+		defer {
+	    		try! exitRule()
+	    }
+		do {
+		 	try enterOuterAlt(_localctx, 1)
+		 	setState(976)
+		 	try declarationSpecifiers()
+		 	setState(977)
+		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
+		 	setState(978)
+		 	try match(ObjectiveCParser.Tokens.MUL.rawValue)
+		 	setState(979)
+		 	try identifier()
+		 	setState(980)
+		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
+		 	setState(981)
+		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
+		 	setState(982)
+		 	try functionPointerParameterList()
+		 	setState(983)
+		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
+
+		}
+		catch ANTLRException.recognition(let re) {
+			_localctx.exception = re
+			_errHandler.reportError(self, re)
+			try _errHandler.recover(self, re)
+		}
+
+		return _localctx
+	}
+	open class FunctionPointerParameterListContext:ParserRuleContext {
+		open func functionPointerParameterDeclarationList() -> FunctionPointerParameterDeclarationListContext? {
+			return getRuleContext(FunctionPointerParameterDeclarationListContext.self,0)
+		}
+		open func ELIPSIS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.ELIPSIS.rawValue, 0) }
+		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointerParameterList }
+		override
+		open func enterRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).enterFunctionPointerParameterList(self)
+			}
+		}
+		override
+		open func exitRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).exitFunctionPointerParameterList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointerParameterList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointerParameterList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
+	}
+	@discardableResult
+	open func functionPointerParameterList() throws -> FunctionPointerParameterListContext {
+		var _localctx: FunctionPointerParameterListContext = FunctionPointerParameterListContext(_ctx, getState())
+		try enterRule(_localctx, 150, ObjectiveCParser.RULE_functionPointerParameterList)
+		var _la: Int = 0
+		defer {
+	    		try! exitRule()
+	    }
+		do {
+		 	try enterOuterAlt(_localctx, 1)
+		 	setState(985)
+		 	try functionPointerParameterDeclarationList()
+		 	setState(988)
+		 	try _errHandler.sync(self)
+		 	_la = try _input.LA(1)
+		 	if (//closure
+		 	 { () -> Bool in
+		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
+		 	      return testSet
+		 	 }()) {
+		 		setState(986)
+		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+		 		setState(987)
+		 		try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
+
+		 	}
+
+
+		}
+		catch ANTLRException.recognition(let re) {
+			_localctx.exception = re
+			_errHandler.reportError(self, re)
+			try _errHandler.recover(self, re)
+		}
+
+		return _localctx
+	}
+	open class FunctionPointerParameterDeclarationListContext:ParserRuleContext {
+		open func functionPointerParameterDeclaration() -> Array<FunctionPointerParameterDeclarationContext> {
+			return getRuleContexts(FunctionPointerParameterDeclarationContext.self)
+		}
+		open func functionPointerParameterDeclaration(_ i: Int) -> FunctionPointerParameterDeclarationContext? {
+			return getRuleContext(FunctionPointerParameterDeclarationContext.self,i)
+		}
+		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointerParameterDeclarationList }
+		override
+		open func enterRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).enterFunctionPointerParameterDeclarationList(self)
+			}
+		}
+		override
+		open func exitRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).exitFunctionPointerParameterDeclarationList(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointerParameterDeclarationList(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointerParameterDeclarationList(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
+	}
+	@discardableResult
+	open func functionPointerParameterDeclarationList() throws -> FunctionPointerParameterDeclarationListContext {
+		var _localctx: FunctionPointerParameterDeclarationListContext = FunctionPointerParameterDeclarationListContext(_ctx, getState())
+		try enterRule(_localctx, 152, ObjectiveCParser.RULE_functionPointerParameterDeclarationList)
+		defer {
+	    		try! exitRule()
+	    }
+		do {
+			var _alt:Int
+		 	try enterOuterAlt(_localctx, 1)
+		 	setState(990)
+		 	try functionPointerParameterDeclaration()
+		 	setState(995)
+		 	try _errHandler.sync(self)
+		 	_alt = try getInterpreter().adaptivePredict(_input,107,_ctx)
+		 	while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
+		 		if ( _alt==1 ) {
+		 			setState(991)
+		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
+		 			setState(992)
+		 			try functionPointerParameterDeclaration()
+
+		 	 
+		 		}
+		 		setState(997)
+		 		try _errHandler.sync(self)
+		 		_alt = try getInterpreter().adaptivePredict(_input,107,_ctx)
+		 	}
+
+		}
+		catch ANTLRException.recognition(let re) {
+			_localctx.exception = re
+			_errHandler.reportError(self, re)
+			try _errHandler.recover(self, re)
+		}
+
+		return _localctx
+	}
+	open class FunctionPointerParameterDeclarationContext:ParserRuleContext {
+		open func declarationSpecifiers() -> DeclarationSpecifiersContext? {
+			return getRuleContext(DeclarationSpecifiersContext.self,0)
+		}
+		open func declarator() -> DeclaratorContext? {
+			return getRuleContext(DeclaratorContext.self,0)
+		}
+		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
+		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_functionPointerParameterDeclaration }
+		override
+		open func enterRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).enterFunctionPointerParameterDeclaration(self)
+			}
+		}
+		override
+		open func exitRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).exitFunctionPointerParameterDeclaration(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitFunctionPointerParameterDeclaration(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitFunctionPointerParameterDeclaration(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
+	}
+	@discardableResult
+	open func functionPointerParameterDeclaration() throws -> FunctionPointerParameterDeclarationContext {
+		var _localctx: FunctionPointerParameterDeclarationContext = FunctionPointerParameterDeclarationContext(_ctx, getState())
+		try enterRule(_localctx, 154, ObjectiveCParser.RULE_functionPointerParameterDeclaration)
+		var _la: Int = 0
+		defer {
+	    		try! exitRule()
+	    }
+		do {
+		 	setState(1003)
+		 	try _errHandler.sync(self)
+		 	switch(try getInterpreter().adaptivePredict(_input,109, _ctx)) {
+		 	case 1:
+		 		try enterOuterAlt(_localctx, 1)
+		 		setState(998)
+		 		try declarationSpecifiers()
+		 		setState(1000)
+		 		try _errHandler.sync(self)
+		 		_la = try _input.LA(1)
+		 		if (//closure
+		 		 { () -> Bool in
+		 		      var testSet: Bool = {  () -> Bool in
+		 		   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue,ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue]
+		 		    return  Utils.testBitLeftShiftArray(testArray, 40)
+		 		}()
+		 		          testSet = testSet || {  () -> Bool in
+		 		             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue,ObjectiveCParser.Tokens.LP.rawValue,ObjectiveCParser.Tokens.MUL.rawValue]
+		 		              return  Utils.testBitLeftShiftArray(testArray, 104)
+		 		          }()
+		 		      return testSet
+		 		 }()) {
+		 			setState(999)
+		 			try declarator()
+
+		 		}
+
+
+		 		break
+		 	case 2:
+		 		try enterOuterAlt(_localctx, 2)
+		 		setState(1002)
+		 		try match(ObjectiveCParser.Tokens.VOID.rawValue)
 
 		 		break
 		 	default: break
@@ -7084,14 +7407,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func functionCallExpression() throws -> FunctionCallExpressionContext {
 		var _localctx: FunctionCallExpressionContext = FunctionCallExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 148, ObjectiveCParser.RULE_functionCallExpression)
+		try enterRule(_localctx, 156, ObjectiveCParser.RULE_functionCallExpression)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(962)
+		 	setState(1006)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -7099,14 +7422,14 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(961)
+		 		setState(1005)
 		 		try attributeSpecifier()
 
 		 	}
 
-		 	setState(964)
+		 	setState(1008)
 		 	try identifier()
-		 	setState(966)
+		 	setState(1010)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -7114,18 +7437,18 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(965)
+		 		setState(1009)
 		 		try attributeSpecifier()
 
 		 	}
 
-		 	setState(968)
+		 	setState(1012)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(969)
+		 	setState(1013)
 		 	try directDeclarator()
-		 	setState(970)
+		 	setState(1014)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(971)
+		 	setState(1015)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -7176,14 +7499,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func enumDeclaration() throws -> EnumDeclarationContext {
 		var _localctx: EnumDeclarationContext = EnumDeclarationContext(_ctx, getState())
-		try enterRule(_localctx, 150, ObjectiveCParser.RULE_enumDeclaration)
+		try enterRule(_localctx, 158, ObjectiveCParser.RULE_enumDeclaration)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(974)
+		 	setState(1018)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -7191,12 +7514,12 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(973)
+		 		setState(1017)
 		 		try attributeSpecifier()
 
 		 	}
 
-		 	setState(977)
+		 	setState(1021)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -7204,14 +7527,14 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.TYPEDEF.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(976)
+		 		setState(1020)
 		 		try match(ObjectiveCParser.Tokens.TYPEDEF.rawValue)
 
 		 	}
 
-		 	setState(979)
+		 	setState(1023)
 		 	try enumSpecifier()
-		 	setState(981)
+		 	setState(1025)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -7226,12 +7549,12 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(980)
+		 		setState(1024)
 		 		try identifier()
 
 		 	}
 
-		 	setState(983)
+		 	setState(1027)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -7278,30 +7601,30 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func varDeclaration() throws -> VarDeclarationContext {
 		var _localctx: VarDeclarationContext = VarDeclarationContext(_ctx, getState())
-		try enterRule(_localctx, 152, ObjectiveCParser.RULE_varDeclaration)
+		try enterRule(_localctx, 160, ObjectiveCParser.RULE_varDeclaration)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(989)
+		 	setState(1033)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,111, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,115, _ctx)) {
 		 	case 1:
-		 		setState(985)
+		 		setState(1029)
 		 		try declarationSpecifiers()
-		 		setState(986)
+		 		setState(1030)
 		 		try initDeclaratorList()
 
 		 		break
 		 	case 2:
-		 		setState(988)
+		 		setState(1032)
 		 		try declarationSpecifiers()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(991)
+		 	setState(1035)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -7326,6 +7649,9 @@ open class ObjectiveCParser: Parser {
 		}
 		open func macro() -> MacroContext? {
 			return getRuleContext(MacroContext.self,0)
+		}
+		open func functionPointer() -> FunctionPointerContext? {
+			return getRuleContext(FunctionPointerContext.self,0)
 		}
 		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_typedefDeclaration }
 		override
@@ -7355,68 +7681,98 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func typedefDeclaration() throws -> TypedefDeclarationContext {
 		var _localctx: TypedefDeclarationContext = TypedefDeclarationContext(_ctx, getState())
-		try enterRule(_localctx, 154, ObjectiveCParser.RULE_typedefDeclaration)
+		try enterRule(_localctx, 162, ObjectiveCParser.RULE_typedefDeclaration)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	try enterOuterAlt(_localctx, 1)
-		 	setState(994)
+		 	setState(1059)
 		 	try _errHandler.sync(self)
-		 	_la = try _input.LA(1)
-		 	if (//closure
-		 	 { () -> Bool in
-		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
-		 	      return testSet
-		 	 }()) {
-		 		setState(993)
-		 		try attributeSpecifier()
-
-		 	}
-
-		 	setState(996)
-		 	try match(ObjectiveCParser.Tokens.TYPEDEF.rawValue)
-		 	setState(1001)
-		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,113, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,120, _ctx)) {
 		 	case 1:
-		 		setState(997)
-		 		try declarationSpecifiers()
-		 		setState(998)
-		 		try typeDeclaratorList()
+		 		try enterOuterAlt(_localctx, 1)
+		 		setState(1038)
+		 		try _errHandler.sync(self)
+		 		_la = try _input.LA(1)
+		 		if (//closure
+		 		 { () -> Bool in
+		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
+		 		      return testSet
+		 		 }()) {
+		 			setState(1037)
+		 			try attributeSpecifier()
+
+		 		}
+
+		 		setState(1040)
+		 		try match(ObjectiveCParser.Tokens.TYPEDEF.rawValue)
+		 		setState(1045)
+		 		try _errHandler.sync(self)
+		 		switch(try getInterpreter().adaptivePredict(_input,117, _ctx)) {
+		 		case 1:
+		 			setState(1041)
+		 			try declarationSpecifiers()
+		 			setState(1042)
+		 			try typeDeclaratorList()
+
+		 			break
+		 		case 2:
+		 			setState(1044)
+		 			try declarationSpecifiers()
+
+		 			break
+		 		default: break
+		 		}
+		 		setState(1048)
+		 		try _errHandler.sync(self)
+		 		_la = try _input.LA(1)
+		 		if (//closure
+		 		 { () -> Bool in
+		 		      var testSet: Bool = {  () -> Bool in
+		 		   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
+		 		    return  Utils.testBitLeftShiftArray(testArray, 0)
+		 		}()
+		 		          testSet = testSet || {  () -> Bool in
+		 		             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
+		 		              return  Utils.testBitLeftShiftArray(testArray, 81)
+		 		          }()
+		 		      return testSet
+		 		 }()) {
+		 			setState(1047)
+		 			try macro()
+
+		 		}
+
+		 		setState(1050)
+		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
 		 	case 2:
-		 		setState(1000)
-		 		try declarationSpecifiers()
+		 		try enterOuterAlt(_localctx, 2)
+		 		setState(1053)
+		 		try _errHandler.sync(self)
+		 		_la = try _input.LA(1)
+		 		if (//closure
+		 		 { () -> Bool in
+		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.ATTRIBUTE.rawValue
+		 		      return testSet
+		 		 }()) {
+		 			setState(1052)
+		 			try attributeSpecifier()
+
+		 		}
+
+		 		setState(1055)
+		 		try match(ObjectiveCParser.Tokens.TYPEDEF.rawValue)
+		 		setState(1056)
+		 		try functionPointer()
+		 		setState(1057)
+		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(1004)
-		 	try _errHandler.sync(self)
-		 	_la = try _input.LA(1)
-		 	if (//closure
-		 	 { () -> Bool in
-		 	      var testSet: Bool = {  () -> Bool in
-		 	   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
-		 	    return  Utils.testBitLeftShiftArray(testArray, 0)
-		 	}()
-		 	          testSet = testSet || {  () -> Bool in
-		 	             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
-		 	              return  Utils.testBitLeftShiftArray(testArray, 81)
-		 	          }()
-		 	      return testSet
-		 	 }()) {
-		 		setState(1003)
-		 		try macro()
-
-		 	}
-
-		 	setState(1006)
-		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
-
 		}
 		catch ANTLRException.recognition(let re) {
 			_localctx.exception = re
@@ -7461,16 +7817,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func typeDeclaratorList() throws -> TypeDeclaratorListContext {
 		var _localctx: TypeDeclaratorListContext = TypeDeclaratorListContext(_ctx, getState())
-		try enterRule(_localctx, 156, ObjectiveCParser.RULE_typeDeclaratorList)
+		try enterRule(_localctx, 164, ObjectiveCParser.RULE_typeDeclaratorList)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1008)
+		 	setState(1061)
 		 	try declarator()
-		 	setState(1013)
+		 	setState(1066)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -7478,13 +7834,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1009)
+		 		setState(1062)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(1010)
+		 		setState(1063)
 		 		try declarator()
 
 
-		 		setState(1015)
+		 		setState(1068)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -7575,59 +7931,59 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func declarationSpecifiers() throws -> DeclarationSpecifiersContext {
 		var _localctx: DeclarationSpecifiersContext = DeclarationSpecifiersContext(_ctx, getState())
-		try enterRule(_localctx, 158, ObjectiveCParser.RULE_declarationSpecifiers)
+		try enterRule(_localctx, 166, ObjectiveCParser.RULE_declarationSpecifiers)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1024); 
+		 	setState(1077); 
 		 	try _errHandler.sync(self)
 		 	_alt = 1;
 		 	repeat {
 		 		switch (_alt) {
 		 		case 1:
-		 			setState(1024)
+		 			setState(1077)
 		 			try _errHandler.sync(self)
-		 			switch(try getInterpreter().adaptivePredict(_input,116, _ctx)) {
+		 			switch(try getInterpreter().adaptivePredict(_input,122, _ctx)) {
 		 			case 1:
-		 				setState(1016)
+		 				setState(1069)
 		 				try storageClassSpecifier()
 
 		 				break
 		 			case 2:
-		 				setState(1017)
+		 				setState(1070)
 		 				try attributeSpecifier()
 
 		 				break
 		 			case 3:
-		 				setState(1018)
+		 				setState(1071)
 		 				try arcBehaviourSpecifier()
 
 		 				break
 		 			case 4:
-		 				setState(1019)
+		 				setState(1072)
 		 				try nullabilitySpecifier()
 
 		 				break
 		 			case 5:
-		 				setState(1020)
+		 				setState(1073)
 		 				try ibOutletQualifier()
 
 		 				break
 		 			case 6:
-		 				setState(1021)
+		 				setState(1074)
 		 				try typePrefix()
 
 		 				break
 		 			case 7:
-		 				setState(1022)
+		 				setState(1075)
 		 				try typeQualifier()
 
 		 				break
 		 			case 8:
-		 				setState(1023)
+		 				setState(1076)
 		 				try typeSpecifier()
 
 		 				break
@@ -7638,9 +7994,9 @@ open class ObjectiveCParser: Parser {
 		 		default:
 		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
-		 		setState(1026); 
+		 		setState(1079); 
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,117,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,123,_ctx)
 		 	} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
 
 		}
@@ -7695,22 +8051,22 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func attributeSpecifier() throws -> AttributeSpecifierContext {
 		var _localctx: AttributeSpecifierContext = AttributeSpecifierContext(_ctx, getState())
-		try enterRule(_localctx, 160, ObjectiveCParser.RULE_attributeSpecifier)
+		try enterRule(_localctx, 168, ObjectiveCParser.RULE_attributeSpecifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1028)
+		 	setState(1081)
 		 	try match(ObjectiveCParser.Tokens.ATTRIBUTE.rawValue)
-		 	setState(1029)
+		 	setState(1082)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1030)
+		 	setState(1083)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1031)
+		 	setState(1084)
 		 	try attribute()
-		 	setState(1036)
+		 	setState(1089)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -7718,19 +8074,19 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1032)
+		 		setState(1085)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(1033)
+		 		setState(1086)
 		 		try attribute()
 
 
-		 		setState(1038)
+		 		setState(1091)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(1039)
+		 	setState(1092)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(1040)
+		 	setState(1093)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		}
@@ -7777,16 +8133,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func initDeclaratorList() throws -> InitDeclaratorListContext {
 		var _localctx: InitDeclaratorListContext = InitDeclaratorListContext(_ctx, getState())
-		try enterRule(_localctx, 162, ObjectiveCParser.RULE_initDeclaratorList)
+		try enterRule(_localctx, 170, ObjectiveCParser.RULE_initDeclaratorList)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1042)
+		 	setState(1095)
 		 	try initDeclarator()
-		 	setState(1047)
+		 	setState(1100)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -7794,13 +8150,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1043)
+		 		setState(1096)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(1044)
+		 		setState(1097)
 		 		try initDeclarator()
 
 
-		 		setState(1049)
+		 		setState(1102)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -7849,16 +8205,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func initDeclarator() throws -> InitDeclaratorContext {
 		var _localctx: InitDeclaratorContext = InitDeclaratorContext(_ctx, getState())
-		try enterRule(_localctx, 164, ObjectiveCParser.RULE_initDeclarator)
+		try enterRule(_localctx, 172, ObjectiveCParser.RULE_initDeclarator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1050)
+		 	setState(1103)
 		 	try declarator()
-		 	setState(1053)
+		 	setState(1106)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -7866,9 +8222,9 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ASSIGNMENT.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1051)
+		 		setState(1104)
 		 		try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
-		 		setState(1052)
+		 		setState(1105)
 		 		try initializer()
 
 		 	}
@@ -7923,14 +8279,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func structOrUnionSpecifier() throws -> StructOrUnionSpecifierContext {
 		var _localctx: StructOrUnionSpecifierContext = StructOrUnionSpecifierContext(_ctx, getState())
-		try enterRule(_localctx, 166, ObjectiveCParser.RULE_structOrUnionSpecifier)
+		try enterRule(_localctx, 174, ObjectiveCParser.RULE_structOrUnionSpecifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1055)
+		 	setState(1108)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -7943,16 +8299,16 @@ open class ObjectiveCParser: Parser {
 		 		_errHandler.reportMatch(self)
 		 		try consume()
 		 	}
-		 	setState(1068)
+		 	setState(1121)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,123, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,129, _ctx)) {
 		 	case 1:
-		 		setState(1056)
+		 		setState(1109)
 		 		try identifier()
 
 		 		break
 		 	case 2:
-		 		setState(1058)
+		 		setState(1111)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -7967,37 +8323,37 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1057)
+		 			setState(1110)
 		 			try identifier()
 
 		 		}
 
-		 		setState(1060)
+		 		setState(1113)
 		 		try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 		setState(1062) 
+		 		setState(1115) 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		repeat {
-		 			setState(1061)
+		 			setState(1114)
 		 			try fieldDeclaration()
 
 
-		 			setState(1064); 
+		 			setState(1117); 
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		} while (//closure
 		 		 { () -> Bool in
 		 		      var testSet: Bool = {  () -> Bool in
-		 		   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.CHAR.rawValue,ObjectiveCParser.Tokens.CONST.rawValue,ObjectiveCParser.Tokens.DOUBLE.rawValue,ObjectiveCParser.Tokens.ENUM.rawValue,ObjectiveCParser.Tokens.FLOAT.rawValue,ObjectiveCParser.Tokens.INLINE.rawValue,ObjectiveCParser.Tokens.INT.rawValue,ObjectiveCParser.Tokens.LONG.rawValue,ObjectiveCParser.Tokens.RESTRICT.rawValue,ObjectiveCParser.Tokens.SHORT.rawValue,ObjectiveCParser.Tokens.SIGNED.rawValue,ObjectiveCParser.Tokens.STRUCT.rawValue,ObjectiveCParser.Tokens.UNION.rawValue,ObjectiveCParser.Tokens.UNSIGNED.rawValue,ObjectiveCParser.Tokens.VOID.rawValue,ObjectiveCParser.Tokens.VOLATILE.rawValue,ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
+		 		   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.AUTO.rawValue,ObjectiveCParser.Tokens.CHAR.rawValue,ObjectiveCParser.Tokens.CONST.rawValue,ObjectiveCParser.Tokens.DOUBLE.rawValue,ObjectiveCParser.Tokens.ENUM.rawValue,ObjectiveCParser.Tokens.EXTERN.rawValue,ObjectiveCParser.Tokens.FLOAT.rawValue,ObjectiveCParser.Tokens.INLINE.rawValue,ObjectiveCParser.Tokens.INT.rawValue,ObjectiveCParser.Tokens.LONG.rawValue,ObjectiveCParser.Tokens.REGISTER.rawValue,ObjectiveCParser.Tokens.RESTRICT.rawValue,ObjectiveCParser.Tokens.SHORT.rawValue,ObjectiveCParser.Tokens.SIGNED.rawValue,ObjectiveCParser.Tokens.STATIC.rawValue,ObjectiveCParser.Tokens.STRUCT.rawValue,ObjectiveCParser.Tokens.UNION.rawValue,ObjectiveCParser.Tokens.UNSIGNED.rawValue,ObjectiveCParser.Tokens.VOID.rawValue,ObjectiveCParser.Tokens.VOLATILE.rawValue,ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
 		 		    return  Utils.testBitLeftShiftArray(testArray, 0)
 		 		}()
 		 		          testSet = testSet || {  () -> Bool in
-		 		             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.STRONG_QUALIFIER.rawValue,ObjectiveCParser.Tokens.TYPEOF.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED_QUALIFIER.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.WEAK_QUALIFIER.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
+		 		             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.ATTRIBUTE.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.STRONG_QUALIFIER.rawValue,ObjectiveCParser.Tokens.TYPEOF.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED_QUALIFIER.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.WEAK_QUALIFIER.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
 		 		              return  Utils.testBitLeftShiftArray(testArray, 81)
 		 		          }()
 		 		      return testSet
 		 		 }())
-		 		setState(1066)
+		 		setState(1119)
 		 		try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		 		break
@@ -8022,6 +8378,9 @@ open class ObjectiveCParser: Parser {
 		}
 		open func macro() -> MacroContext? {
 			return getRuleContext(MacroContext.self,0)
+		}
+		open func functionPointer() -> FunctionPointerContext? {
+			return getRuleContext(FunctionPointerContext.self,0)
 		}
 		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_fieldDeclaration }
 		override
@@ -8051,40 +8410,55 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func fieldDeclaration() throws -> FieldDeclarationContext {
 		var _localctx: FieldDeclarationContext = FieldDeclarationContext(_ctx, getState())
-		try enterRule(_localctx, 168, ObjectiveCParser.RULE_fieldDeclaration)
+		try enterRule(_localctx, 176, ObjectiveCParser.RULE_fieldDeclaration)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1070)
-		 	try specifierQualifierList()
-		 	setState(1071)
-		 	try fieldDeclaratorList()
-		 	setState(1073)
+		 	setState(1133)
 		 	try _errHandler.sync(self)
-		 	_la = try _input.LA(1)
-		 	if (//closure
-		 	 { () -> Bool in
-		 	      var testSet: Bool = {  () -> Bool in
-		 	   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
-		 	    return  Utils.testBitLeftShiftArray(testArray, 0)
-		 	}()
-		 	          testSet = testSet || {  () -> Bool in
-		 	             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
-		 	              return  Utils.testBitLeftShiftArray(testArray, 81)
-		 	          }()
-		 	      return testSet
-		 	 }()) {
-		 		setState(1072)
-		 		try macro()
+		 	switch(try getInterpreter().adaptivePredict(_input,131, _ctx)) {
+		 	case 1:
+		 		try enterOuterAlt(_localctx, 1)
+		 		setState(1123)
+		 		try specifierQualifierList()
+		 		setState(1124)
+		 		try fieldDeclaratorList()
+		 		setState(1126)
+		 		try _errHandler.sync(self)
+		 		_la = try _input.LA(1)
+		 		if (//closure
+		 		 { () -> Bool in
+		 		      var testSet: Bool = {  () -> Bool in
+		 		   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue]
+		 		    return  Utils.testBitLeftShiftArray(testArray, 0)
+		 		}()
+		 		          testSet = testSet || {  () -> Bool in
+		 		             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue]
+		 		              return  Utils.testBitLeftShiftArray(testArray, 81)
+		 		          }()
+		 		      return testSet
+		 		 }()) {
+		 			setState(1125)
+		 			try macro()
 
+		 		}
+
+		 		setState(1128)
+		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
+		 		break
+		 	case 2:
+		 		try enterOuterAlt(_localctx, 2)
+		 		setState(1130)
+		 		try functionPointer()
+		 		setState(1131)
+		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
+
+		 		break
+		 	default: break
 		 	}
-
-		 	setState(1075)
-		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
-
 		}
 		catch ANTLRException.recognition(let re) {
 			_localctx.exception = re
@@ -8159,49 +8533,49 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func specifierQualifierList() throws -> SpecifierQualifierListContext {
 		var _localctx: SpecifierQualifierListContext = SpecifierQualifierListContext(_ctx, getState())
-		try enterRule(_localctx, 170, ObjectiveCParser.RULE_specifierQualifierList)
+		try enterRule(_localctx, 178, ObjectiveCParser.RULE_specifierQualifierList)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1083); 
+		 	setState(1141); 
 		 	try _errHandler.sync(self)
 		 	_alt = 1;
 		 	repeat {
 		 		switch (_alt) {
 		 		case 1:
-		 			setState(1083)
+		 			setState(1141)
 		 			try _errHandler.sync(self)
-		 			switch(try getInterpreter().adaptivePredict(_input,125, _ctx)) {
+		 			switch(try getInterpreter().adaptivePredict(_input,132, _ctx)) {
 		 			case 1:
-		 				setState(1077)
+		 				setState(1135)
 		 				try arcBehaviourSpecifier()
 
 		 				break
 		 			case 2:
-		 				setState(1078)
+		 				setState(1136)
 		 				try nullabilitySpecifier()
 
 		 				break
 		 			case 3:
-		 				setState(1079)
+		 				setState(1137)
 		 				try ibOutletQualifier()
 
 		 				break
 		 			case 4:
-		 				setState(1080)
+		 				setState(1138)
 		 				try typePrefix()
 
 		 				break
 		 			case 5:
-		 				setState(1081)
+		 				setState(1139)
 		 				try typeQualifier()
 
 		 				break
 		 			case 6:
-		 				setState(1082)
+		 				setState(1140)
 		 				try typeSpecifier()
 
 		 				break
@@ -8212,9 +8586,9 @@ open class ObjectiveCParser: Parser {
 		 		default:
 		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
-		 		setState(1085); 
+		 		setState(1143); 
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,126,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,133,_ctx)
 		 	} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
 
 		}
@@ -8262,30 +8636,30 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func ibOutletQualifier() throws -> IbOutletQualifierContext {
 		var _localctx: IbOutletQualifierContext = IbOutletQualifierContext(_ctx, getState())
-		try enterRule(_localctx, 172, ObjectiveCParser.RULE_ibOutletQualifier)
+		try enterRule(_localctx, 180, ObjectiveCParser.RULE_ibOutletQualifier)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1093)
+		 	setState(1151)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .IB_OUTLET_COLLECTION:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1087)
+		 		setState(1145)
 		 		try match(ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue)
-		 		setState(1088)
+		 		setState(1146)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1089)
+		 		setState(1147)
 		 		try identifier()
-		 		setState(1090)
+		 		setState(1148)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 		break
 
 		 	case .IB_OUTLET:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1092)
+		 		setState(1150)
 		 		try match(ObjectiveCParser.Tokens.IB_OUTLET.rawValue)
 
 		 		break
@@ -8334,14 +8708,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func arcBehaviourSpecifier() throws -> ArcBehaviourSpecifierContext {
 		var _localctx: ArcBehaviourSpecifierContext = ArcBehaviourSpecifierContext(_ctx, getState())
-		try enterRule(_localctx, 174, ObjectiveCParser.RULE_arcBehaviourSpecifier)
+		try enterRule(_localctx, 182, ObjectiveCParser.RULE_arcBehaviourSpecifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1095)
+		 	setState(1153)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -8400,14 +8774,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func nullabilitySpecifier() throws -> NullabilitySpecifierContext {
 		var _localctx: NullabilitySpecifierContext = NullabilitySpecifierContext(_ctx, getState())
-		try enterRule(_localctx, 176, ObjectiveCParser.RULE_nullabilitySpecifier)
+		try enterRule(_localctx, 184, ObjectiveCParser.RULE_nullabilitySpecifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1097)
+		 	setState(1155)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -8466,14 +8840,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func storageClassSpecifier() throws -> StorageClassSpecifierContext {
 		var _localctx: StorageClassSpecifierContext = StorageClassSpecifierContext(_ctx, getState())
-		try enterRule(_localctx, 178, ObjectiveCParser.RULE_storageClassSpecifier)
+		try enterRule(_localctx, 186, ObjectiveCParser.RULE_storageClassSpecifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1099)
+		 	setState(1157)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -8535,14 +8909,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func typePrefix() throws -> TypePrefixContext {
 		var _localctx: TypePrefixContext = TypePrefixContext(_ctx, getState())
-		try enterRule(_localctx, 180, ObjectiveCParser.RULE_typePrefix)
+		try enterRule(_localctx, 188, ObjectiveCParser.RULE_typePrefix)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1101)
+		 	setState(1159)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -8604,31 +8978,31 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func typeQualifier() throws -> TypeQualifierContext {
 		var _localctx: TypeQualifierContext = TypeQualifierContext(_ctx, getState())
-		try enterRule(_localctx, 182, ObjectiveCParser.RULE_typeQualifier)
+		try enterRule(_localctx, 190, ObjectiveCParser.RULE_typeQualifier)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1107)
+		 	setState(1165)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .CONST:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1103)
+		 		setState(1161)
 		 		try match(ObjectiveCParser.Tokens.CONST.rawValue)
 
 		 		break
 
 		 	case .VOLATILE:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1104)
+		 		setState(1162)
 		 		try match(ObjectiveCParser.Tokens.VOLATILE.rawValue)
 
 		 		break
 
 		 	case .RESTRICT:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1105)
+		 		setState(1163)
 		 		try match(ObjectiveCParser.Tokens.RESTRICT.rawValue)
 
 		 		break
@@ -8639,7 +9013,7 @@ open class ObjectiveCParser: Parser {
 		 	case .ONEWAY:fallthrough
 		 	case .OUT:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1106)
+		 		setState(1164)
 		 		try protocolQualifier()
 
 		 		break
@@ -8690,14 +9064,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func protocolQualifier() throws -> ProtocolQualifierContext {
 		var _localctx: ProtocolQualifierContext = ProtocolQualifierContext(_ctx, getState())
-		try enterRule(_localctx, 184, ObjectiveCParser.RULE_protocolQualifier)
+		try enterRule(_localctx, 192, ObjectiveCParser.RULE_protocolQualifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1109)
+		 	setState(1167)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -8724,15 +9098,12 @@ open class ObjectiveCParser: Parser {
 		return _localctx
 	}
 	open class TypeSpecifierContext:ParserRuleContext {
-		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
-		open func CHAR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CHAR.rawValue, 0) }
-		open func SHORT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SHORT.rawValue, 0) }
-		open func INT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INT.rawValue, 0) }
-		open func LONG() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LONG.rawValue, 0) }
-		open func FLOAT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FLOAT.rawValue, 0) }
-		open func DOUBLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DOUBLE.rawValue, 0) }
-		open func SIGNED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SIGNED.rawValue, 0) }
-		open func UNSIGNED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNSIGNED.rawValue, 0) }
+		open func scalarTypeSpecifier() -> ScalarTypeSpecifierContext? {
+			return getRuleContext(ScalarTypeSpecifierContext.self,0)
+		}
+		open func pointer() -> PointerContext? {
+			return getRuleContext(PointerContext.self,0)
+		}
 		open func typeofExpression() -> TypeofExpressionContext? {
 			return getRuleContext(TypeofExpressionContext.self,0)
 		}
@@ -8740,9 +9111,6 @@ open class ObjectiveCParser: Parser {
 			return getRuleContext(GenericTypeSpecifierContext.self,0)
 		}
 		open func KINDOF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.KINDOF.rawValue, 0) }
-		open func pointer() -> PointerContext? {
-			return getRuleContext(PointerContext.self,0)
-		}
 		open func structOrUnionSpecifier() -> StructOrUnionSpecifierContext? {
 			return getRuleContext(StructOrUnionSpecifierContext.self,0)
 		}
@@ -8780,93 +9148,23 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func typeSpecifier() throws -> TypeSpecifierContext {
 		var _localctx: TypeSpecifierContext = TypeSpecifierContext(_ctx, getState())
-		try enterRule(_localctx, 186, ObjectiveCParser.RULE_typeSpecifier)
+		try enterRule(_localctx, 194, ObjectiveCParser.RULE_typeSpecifier)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1137)
+		 	setState(1193)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,133, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,142, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1111)
-		 		try match(ObjectiveCParser.Tokens.VOID.rawValue)
-
-		 		break
-		 	case 2:
-		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1112)
-		 		try match(ObjectiveCParser.Tokens.CHAR.rawValue)
-
-		 		break
-		 	case 3:
-		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1113)
-		 		try match(ObjectiveCParser.Tokens.SHORT.rawValue)
-
-		 		break
-		 	case 4:
-		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1114)
-		 		try match(ObjectiveCParser.Tokens.INT.rawValue)
-
-		 		break
-		 	case 5:
-		 		try enterOuterAlt(_localctx, 5)
-		 		setState(1115)
-		 		try match(ObjectiveCParser.Tokens.LONG.rawValue)
-
-		 		break
-		 	case 6:
-		 		try enterOuterAlt(_localctx, 6)
-		 		setState(1116)
-		 		try match(ObjectiveCParser.Tokens.FLOAT.rawValue)
-
-		 		break
-		 	case 7:
-		 		try enterOuterAlt(_localctx, 7)
-		 		setState(1117)
-		 		try match(ObjectiveCParser.Tokens.DOUBLE.rawValue)
-
-		 		break
-		 	case 8:
-		 		try enterOuterAlt(_localctx, 8)
-		 		setState(1118)
-		 		try match(ObjectiveCParser.Tokens.SIGNED.rawValue)
-
-		 		break
-		 	case 9:
-		 		try enterOuterAlt(_localctx, 9)
-		 		setState(1119)
-		 		try match(ObjectiveCParser.Tokens.UNSIGNED.rawValue)
-
-		 		break
-		 	case 10:
-		 		try enterOuterAlt(_localctx, 10)
-		 		setState(1120)
-		 		try typeofExpression()
-
-		 		break
-		 	case 11:
-		 		try enterOuterAlt(_localctx, 11)
-		 		setState(1122)
+		 		setState(1169)
+		 		try scalarTypeSpecifier()
+		 		setState(1171)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,129,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,136,_ctx)) {
 		 		case 1:
-		 			setState(1121)
-		 			try match(ObjectiveCParser.Tokens.KINDOF.rawValue)
-
-		 			break
-		 		default: break
-		 		}
-		 		setState(1124)
-		 		try genericTypeSpecifier()
-		 		setState(1126)
-		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,130,_ctx)) {
-		 		case 1:
-		 			setState(1125)
+		 			setState(1170)
 		 			try pointer()
 
 		 			break
@@ -8874,37 +9172,79 @@ open class ObjectiveCParser: Parser {
 		 		}
 
 		 		break
-		 	case 12:
-		 		try enterOuterAlt(_localctx, 12)
-		 		setState(1128)
-		 		try structOrUnionSpecifier()
+		 	case 2:
+		 		try enterOuterAlt(_localctx, 2)
+		 		setState(1173)
+		 		try typeofExpression()
 
 		 		break
-		 	case 13:
-		 		try enterOuterAlt(_localctx, 13)
-		 		setState(1129)
-		 		try enumSpecifier()
-
-		 		break
-		 	case 14:
-		 		try enterOuterAlt(_localctx, 14)
-		 		setState(1131)
+		 	case 3:
+		 		try enterOuterAlt(_localctx, 3)
+		 		setState(1175)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,131,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,137,_ctx)) {
 		 		case 1:
-		 			setState(1130)
+		 			setState(1174)
 		 			try match(ObjectiveCParser.Tokens.KINDOF.rawValue)
 
 		 			break
 		 		default: break
 		 		}
-		 		setState(1133)
-		 		try identifier()
-		 		setState(1135)
+		 		setState(1177)
+		 		try genericTypeSpecifier()
+		 		setState(1179)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,132,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,138,_ctx)) {
 		 		case 1:
-		 			setState(1134)
+		 			setState(1178)
+		 			try pointer()
+
+		 			break
+		 		default: break
+		 		}
+
+		 		break
+		 	case 4:
+		 		try enterOuterAlt(_localctx, 4)
+		 		setState(1181)
+		 		try structOrUnionSpecifier()
+		 		setState(1183)
+		 		try _errHandler.sync(self)
+		 		switch (try getInterpreter().adaptivePredict(_input,139,_ctx)) {
+		 		case 1:
+		 			setState(1182)
+		 			try pointer()
+
+		 			break
+		 		default: break
+		 		}
+
+		 		break
+		 	case 5:
+		 		try enterOuterAlt(_localctx, 5)
+		 		setState(1185)
+		 		try enumSpecifier()
+
+		 		break
+		 	case 6:
+		 		try enterOuterAlt(_localctx, 6)
+		 		setState(1187)
+		 		try _errHandler.sync(self)
+		 		switch (try getInterpreter().adaptivePredict(_input,140,_ctx)) {
+		 		case 1:
+		 			setState(1186)
+		 			try match(ObjectiveCParser.Tokens.KINDOF.rawValue)
+
+		 			break
+		 		default: break
+		 		}
+		 		setState(1189)
+		 		try identifier()
+		 		setState(1191)
+		 		try _errHandler.sync(self)
+		 		switch (try getInterpreter().adaptivePredict(_input,141,_ctx)) {
+		 		case 1:
+		 			setState(1190)
 		 			try pointer()
 
 		 			break
@@ -8914,6 +9254,77 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	default: break
 		 	}
+		}
+		catch ANTLRException.recognition(let re) {
+			_localctx.exception = re
+			_errHandler.reportError(self, re)
+			try _errHandler.recover(self, re)
+		}
+
+		return _localctx
+	}
+	open class ScalarTypeSpecifierContext:ParserRuleContext {
+		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
+		open func CHAR() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CHAR.rawValue, 0) }
+		open func SHORT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SHORT.rawValue, 0) }
+		open func INT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.INT.rawValue, 0) }
+		open func LONG() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LONG.rawValue, 0) }
+		open func FLOAT() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.FLOAT.rawValue, 0) }
+		open func DOUBLE() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.DOUBLE.rawValue, 0) }
+		open func SIGNED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SIGNED.rawValue, 0) }
+		open func UNSIGNED() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.UNSIGNED.rawValue, 0) }
+		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_scalarTypeSpecifier }
+		override
+		open func enterRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).enterScalarTypeSpecifier(self)
+			}
+		}
+		override
+		open func exitRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).exitScalarTypeSpecifier(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitScalarTypeSpecifier(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitScalarTypeSpecifier(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
+	}
+	@discardableResult
+	open func scalarTypeSpecifier() throws -> ScalarTypeSpecifierContext {
+		var _localctx: ScalarTypeSpecifierContext = ScalarTypeSpecifierContext(_ctx, getState())
+		try enterRule(_localctx, 196, ObjectiveCParser.RULE_scalarTypeSpecifier)
+		var _la: Int = 0
+		defer {
+	    		try! exitRule()
+	    }
+		do {
+		 	try enterOuterAlt(_localctx, 1)
+		 	setState(1195)
+		 	_la = try _input.LA(1)
+		 	if (!(//closure
+		 	 { () -> Bool in
+		 	      let testSet: Bool = {  () -> Bool in
+		 	   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.CHAR.rawValue,ObjectiveCParser.Tokens.DOUBLE.rawValue,ObjectiveCParser.Tokens.FLOAT.rawValue,ObjectiveCParser.Tokens.INT.rawValue,ObjectiveCParser.Tokens.LONG.rawValue,ObjectiveCParser.Tokens.SHORT.rawValue,ObjectiveCParser.Tokens.SIGNED.rawValue,ObjectiveCParser.Tokens.UNSIGNED.rawValue,ObjectiveCParser.Tokens.VOID.rawValue]
+		 	    return  Utils.testBitLeftShiftArray(testArray, 0)
+		 	}()
+		 	      return testSet
+		 	 }())) {
+		 	try _errHandler.recoverInline(self)
+		 	}
+		 	else {
+		 		_errHandler.reportMatch(self)
+		 		try consume()
+		 	}
+
 		}
 		catch ANTLRException.recognition(let re) {
 			_localctx.exception = re
@@ -8958,20 +9369,20 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func typeofExpression() throws -> TypeofExpressionContext {
 		var _localctx: TypeofExpressionContext = TypeofExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 188, ObjectiveCParser.RULE_typeofExpression)
+		try enterRule(_localctx, 198, ObjectiveCParser.RULE_typeofExpression)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1139)
+		 	setState(1197)
 		 	try match(ObjectiveCParser.Tokens.TYPEOF.rawValue)
 
-		 	setState(1140)
+		 	setState(1198)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1141)
+		 	setState(1199)
 		 	try expression(0)
-		 	setState(1142)
+		 	setState(1200)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 
@@ -9019,16 +9430,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func fieldDeclaratorList() throws -> FieldDeclaratorListContext {
 		var _localctx: FieldDeclaratorListContext = FieldDeclaratorListContext(_ctx, getState())
-		try enterRule(_localctx, 190, ObjectiveCParser.RULE_fieldDeclaratorList)
+		try enterRule(_localctx, 200, ObjectiveCParser.RULE_fieldDeclaratorList)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1144)
+		 	setState(1202)
 		 	try fieldDeclarator()
-		 	setState(1149)
+		 	setState(1207)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -9036,13 +9447,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1145)
+		 		setState(1203)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(1146)
+		 		setState(1204)
 		 		try fieldDeclarator()
 
 
-		 		setState(1151)
+		 		setState(1209)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -9091,24 +9502,24 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func fieldDeclarator() throws -> FieldDeclaratorContext {
 		var _localctx: FieldDeclaratorContext = FieldDeclaratorContext(_ctx, getState())
-		try enterRule(_localctx, 192, ObjectiveCParser.RULE_fieldDeclarator)
+		try enterRule(_localctx, 202, ObjectiveCParser.RULE_fieldDeclarator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1158)
+		 	setState(1216)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,136, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,145, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1152)
+		 		setState(1210)
 		 		try declarator()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1154)
+		 		setState(1212)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -9123,14 +9534,14 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1153)
+		 			setState(1211)
 		 			try declarator()
 
 		 		}
 
-		 		setState(1156)
+		 		setState(1214)
 		 		try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 		setState(1157)
+		 		setState(1215)
 		 		try constant()
 
 		 		break
@@ -9191,24 +9602,24 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func enumSpecifier() throws -> EnumSpecifierContext {
 		var _localctx: EnumSpecifierContext = EnumSpecifierContext(_ctx, getState())
-		try enterRule(_localctx, 194, ObjectiveCParser.RULE_enumSpecifier)
+		try enterRule(_localctx, 204, ObjectiveCParser.RULE_enumSpecifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1191)
+		 	setState(1249)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .ENUM:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1160)
+		 		setState(1218)
 		 		try match(ObjectiveCParser.Tokens.ENUM.rawValue)
-		 		setState(1166)
+		 		setState(1224)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,138,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,147,_ctx)) {
 		 		case 1:
-		 			setState(1162)
+		 			setState(1220)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 			if (//closure
@@ -9223,20 +9634,20 @@ open class ObjectiveCParser: Parser {
 		 			          }()
 		 			      return testSet
 		 			 }()) {
-		 				setState(1161)
+		 				setState(1219)
 		 				try identifier()
 
 		 			}
 
-		 			setState(1164)
+		 			setState(1222)
 		 			try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 			setState(1165)
+		 			setState(1223)
 		 			try typeName()
 
 		 			break
 		 		default: break
 		 		}
-		 		setState(1179)
+		 		setState(1237)
 		 		try _errHandler.sync(self)
 		 		switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 		case .BOOL:fallthrough
@@ -9286,17 +9697,17 @@ open class ObjectiveCParser: Parser {
 		 		case .IB_INSPECTABLE:fallthrough
 		 		case .IB_DESIGNABLE:fallthrough
 		 		case .IDENTIFIER:
-		 			setState(1168)
+		 			setState(1226)
 		 			try identifier()
-		 			setState(1173)
+		 			setState(1231)
 		 			try _errHandler.sync(self)
-		 			switch (try getInterpreter().adaptivePredict(_input,139,_ctx)) {
+		 			switch (try getInterpreter().adaptivePredict(_input,148,_ctx)) {
 		 			case 1:
-		 				setState(1169)
+		 				setState(1227)
 		 				try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 				setState(1170)
+		 				setState(1228)
 		 				try enumeratorList()
-		 				setState(1171)
+		 				setState(1229)
 		 				try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		 				break
@@ -9306,11 +9717,11 @@ open class ObjectiveCParser: Parser {
 		 			break
 
 		 		case .LBRACE:
-		 			setState(1175)
+		 			setState(1233)
 		 			try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 			setState(1176)
+		 			setState(1234)
 		 			try enumeratorList()
-		 			setState(1177)
+		 			setState(1235)
 		 			try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		 			break
@@ -9322,7 +9733,7 @@ open class ObjectiveCParser: Parser {
 		 	case .NS_ENUM:fallthrough
 		 	case .NS_OPTIONS:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1181)
+		 		setState(1239)
 		 		_la = try _input.LA(1)
 		 		if (!(//closure
 		 		 { () -> Bool in
@@ -9335,21 +9746,21 @@ open class ObjectiveCParser: Parser {
 		 			_errHandler.reportMatch(self)
 		 			try consume()
 		 		}
-		 		setState(1182)
+		 		setState(1240)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1183)
+		 		setState(1241)
 		 		try typeName()
-		 		setState(1184)
+		 		setState(1242)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(1185)
+		 		setState(1243)
 		 		try identifier()
-		 		setState(1186)
+		 		setState(1244)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 		setState(1187)
+		 		setState(1245)
 		 		try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 		setState(1188)
+		 		setState(1246)
 		 		try enumeratorList()
-		 		setState(1189)
+		 		setState(1247)
 		 		try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		 		break
@@ -9400,7 +9811,7 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func enumeratorList() throws -> EnumeratorListContext {
 		var _localctx: EnumeratorListContext = EnumeratorListContext(_ctx, getState())
-		try enterRule(_localctx, 196, ObjectiveCParser.RULE_enumeratorList)
+		try enterRule(_localctx, 206, ObjectiveCParser.RULE_enumeratorList)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
@@ -9408,25 +9819,25 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1193)
+		 	setState(1251)
 		 	try enumerator()
-		 	setState(1198)
+		 	setState(1256)
 		 	try _errHandler.sync(self)
-		 	_alt = try getInterpreter().adaptivePredict(_input,142,_ctx)
+		 	_alt = try getInterpreter().adaptivePredict(_input,151,_ctx)
 		 	while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 		if ( _alt==1 ) {
-		 			setState(1194)
+		 			setState(1252)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(1195)
+		 			setState(1253)
 		 			try enumerator()
 
 		 	 
 		 		}
-		 		setState(1200)
+		 		setState(1258)
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,142,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,151,_ctx)
 		 	}
-		 	setState(1202)
+		 	setState(1260)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -9434,7 +9845,7 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1201)
+		 		setState(1259)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 
 		 	}
@@ -9484,16 +9895,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func enumerator() throws -> EnumeratorContext {
 		var _localctx: EnumeratorContext = EnumeratorContext(_ctx, getState())
-		try enterRule(_localctx, 198, ObjectiveCParser.RULE_enumerator)
+		try enterRule(_localctx, 208, ObjectiveCParser.RULE_enumerator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1204)
+		 	setState(1262)
 		 	try enumeratorIdentifier()
-		 	setState(1207)
+		 	setState(1265)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -9501,9 +9912,9 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ASSIGNMENT.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1205)
+		 		setState(1263)
 		 		try match(ObjectiveCParser.Tokens.ASSIGNMENT.rawValue)
-		 		setState(1206)
+		 		setState(1264)
 		 		try expression(0)
 
 		 	}
@@ -9551,12 +9962,12 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func enumeratorIdentifier() throws -> EnumeratorIdentifierContext {
 		var _localctx: EnumeratorIdentifierContext = EnumeratorIdentifierContext(_ctx, getState())
-		try enterRule(_localctx, 200, ObjectiveCParser.RULE_enumeratorIdentifier)
+		try enterRule(_localctx, 210, ObjectiveCParser.RULE_enumeratorIdentifier)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1211)
+		 	setState(1269)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .BOOL:fallthrough
@@ -9607,14 +10018,14 @@ open class ObjectiveCParser: Parser {
 		 	case .IB_DESIGNABLE:fallthrough
 		 	case .IDENTIFIER:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1209)
+		 		setState(1267)
 		 		try identifier()
 
 		 		break
 
 		 	case .DEFAULT:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1210)
+		 		setState(1268)
 		 		try match(ObjectiveCParser.Tokens.DEFAULT.rawValue)
 
 		 		break
@@ -9679,18 +10090,18 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func directDeclarator() throws -> DirectDeclaratorContext {
 		var _localctx: DirectDeclaratorContext = DirectDeclaratorContext(_ctx, getState())
-		try enterRule(_localctx, 202, ObjectiveCParser.RULE_directDeclarator)
+		try enterRule(_localctx, 212, ObjectiveCParser.RULE_directDeclarator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1236)
+		 	setState(1294)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,150, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,159, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1218)
+		 		setState(1276)
 		 		try _errHandler.sync(self)
 		 		switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 		case .BOOL:fallthrough
@@ -9740,24 +10151,24 @@ open class ObjectiveCParser: Parser {
 		 		case .IB_INSPECTABLE:fallthrough
 		 		case .IB_DESIGNABLE:fallthrough
 		 		case .IDENTIFIER:
-		 			setState(1213)
+		 			setState(1271)
 		 			try identifier()
 
 		 			break
 
 		 		case .LP:
-		 			setState(1214)
+		 			setState(1272)
 		 			try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 			setState(1215)
+		 			setState(1273)
 		 			try declarator()
-		 			setState(1216)
+		 			setState(1274)
 		 			try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 			break
 		 		default:
 		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
-		 		setState(1223)
+		 		setState(1281)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		while (//closure
@@ -9765,11 +10176,11 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.LBRACK.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(1220)
+		 			setState(1278)
 		 			try declaratorSuffix()
 
 
-		 			setState(1225)
+		 			setState(1283)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		}
@@ -9777,21 +10188,21 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1226)
+		 		setState(1284)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1227)
+		 		setState(1285)
 		 		try match(ObjectiveCParser.Tokens.BITXOR.rawValue)
-		 		setState(1229)
+		 		setState(1287)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,148,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,157,_ctx)) {
 		 		case 1:
-		 			setState(1228)
+		 			setState(1286)
 		 			try nullabilitySpecifier()
 
 		 			break
 		 		default: break
 		 		}
-		 		setState(1232)
+		 		setState(1290)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -9806,14 +10217,14 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1231)
+		 			setState(1289)
 		 			try identifier()
 
 		 		}
 
-		 		setState(1234)
+		 		setState(1292)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 		setState(1235)
+		 		setState(1293)
 		 		try blockParameters()
 
 		 		break
@@ -9860,16 +10271,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func declaratorSuffix() throws -> DeclaratorSuffixContext {
 		var _localctx: DeclaratorSuffixContext = DeclaratorSuffixContext(_ctx, getState())
-		try enterRule(_localctx, 204, ObjectiveCParser.RULE_declaratorSuffix)
+		try enterRule(_localctx, 214, ObjectiveCParser.RULE_declaratorSuffix)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1238)
+		 	setState(1296)
 		 	try match(ObjectiveCParser.Tokens.LBRACK.rawValue)
-		 	setState(1240)
+		 	setState(1298)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -9888,12 +10299,12 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1239)
+		 		setState(1297)
 		 		try constantExpression()
 
 		 	}
 
-		 	setState(1242)
+		 	setState(1300)
 		 	try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
 
 		}
@@ -9938,16 +10349,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func parameterList() throws -> ParameterListContext {
 		var _localctx: ParameterListContext = ParameterListContext(_ctx, getState())
-		try enterRule(_localctx, 206, ObjectiveCParser.RULE_parameterList)
+		try enterRule(_localctx, 216, ObjectiveCParser.RULE_parameterList)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1244)
+		 	setState(1302)
 		 	try parameterDeclarationList()
-		 	setState(1247)
+		 	setState(1305)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -9955,9 +10366,9 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1245)
+		 		setState(1303)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(1246)
+		 		setState(1304)
 		 		try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
 
 		 	}
@@ -10007,29 +10418,29 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func pointer() throws -> PointerContext {
 		var _localctx: PointerContext = PointerContext(_ctx, getState())
-		try enterRule(_localctx, 208, ObjectiveCParser.RULE_pointer)
+		try enterRule(_localctx, 218, ObjectiveCParser.RULE_pointer)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1249)
+		 	setState(1307)
 		 	try match(ObjectiveCParser.Tokens.MUL.rawValue)
-		 	setState(1251)
+		 	setState(1309)
 		 	try _errHandler.sync(self)
-		 	switch (try getInterpreter().adaptivePredict(_input,153,_ctx)) {
+		 	switch (try getInterpreter().adaptivePredict(_input,162,_ctx)) {
 		 	case 1:
-		 		setState(1250)
+		 		setState(1308)
 		 		try declarationSpecifiers()
 
 		 		break
 		 	default: break
 		 	}
-		 	setState(1254)
+		 	setState(1312)
 		 	try _errHandler.sync(self)
-		 	switch (try getInterpreter().adaptivePredict(_input,154,_ctx)) {
+		 	switch (try getInterpreter().adaptivePredict(_input,163,_ctx)) {
 		 	case 1:
-		 		setState(1253)
+		 		setState(1311)
 		 		try pointer()
 
 		 		break
@@ -10085,16 +10496,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func macro() throws -> MacroContext {
 		var _localctx: MacroContext = MacroContext(_ctx, getState())
-		try enterRule(_localctx, 210, ObjectiveCParser.RULE_macro)
+		try enterRule(_localctx, 220, ObjectiveCParser.RULE_macro)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1256)
+		 	setState(1314)
 		 	try identifier()
-		 	setState(1268)
+		 	setState(1326)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -10102,11 +10513,11 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.LP.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1257)
+		 		setState(1315)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1258)
+		 		setState(1316)
 		 		try primaryExpression()
-		 		setState(1263)
+		 		setState(1321)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		while (//closure
@@ -10114,17 +10525,17 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(1259)
+		 			setState(1317)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(1260)
+		 			setState(1318)
 		 			try primaryExpression()
 
 
-		 			setState(1265)
+		 			setState(1323)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		}
-		 		setState(1266)
+		 		setState(1324)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 	}
@@ -10171,16 +10582,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func arrayInitializer() throws -> ArrayInitializerContext {
 		var _localctx: ArrayInitializerContext = ArrayInitializerContext(_ctx, getState())
-		try enterRule(_localctx, 212, ObjectiveCParser.RULE_arrayInitializer)
+		try enterRule(_localctx, 222, ObjectiveCParser.RULE_arrayInitializer)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1270)
+		 	setState(1328)
 		 	try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 	setState(1275)
+		 	setState(1333)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -10199,9 +10610,9 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1271)
+		 		setState(1329)
 		 		try expressions()
-		 		setState(1273)
+		 		setState(1331)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -10209,7 +10620,7 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(1272)
+		 			setState(1330)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 
 		 		}
@@ -10217,7 +10628,7 @@ open class ObjectiveCParser: Parser {
 
 		 	}
 
-		 	setState(1277)
+		 	setState(1335)
 		 	try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		}
@@ -10230,11 +10641,11 @@ open class ObjectiveCParser: Parser {
 		return _localctx
 	}
 	open class StructInitializerContext:ParserRuleContext {
-		open func expression() -> Array<ExpressionContext> {
-			return getRuleContexts(ExpressionContext.self)
+		open func structInitializerItem() -> Array<StructInitializerItemContext> {
+			return getRuleContexts(StructInitializerItemContext.self)
 		}
-		open func expression(_ i: Int) -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,i)
+		open func structInitializerItem(_ i: Int) -> StructInitializerItemContext? {
+			return getRuleContext(StructInitializerItemContext.self,i)
 		}
 		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_structInitializer }
 		override
@@ -10264,7 +10675,7 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func structInitializer() throws -> StructInitializerContext {
 		var _localctx: StructInitializerContext = StructInitializerContext(_ctx, getState())
-		try enterRule(_localctx, 214, ObjectiveCParser.RULE_structInitializer)
+		try enterRule(_localctx, 224, ObjectiveCParser.RULE_structInitializer)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
@@ -10272,39 +10683,46 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1279)
+		 	setState(1337)
 		 	try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 	setState(1293)
+		 	setState(1349)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
 		 	 { () -> Bool in
-		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.DOT.rawValue
+		 	      var testSet: Bool = {  () -> Bool in
+		 	   let testArray: [Int] = [_la, ObjectiveCParser.Tokens.SIZEOF.rawValue,ObjectiveCParser.Tokens.TRUE.rawValue,ObjectiveCParser.Tokens.FALSE.rawValue,ObjectiveCParser.Tokens.BOOL.rawValue,ObjectiveCParser.Tokens.Class.rawValue,ObjectiveCParser.Tokens.BYCOPY.rawValue,ObjectiveCParser.Tokens.BYREF.rawValue,ObjectiveCParser.Tokens.ID.rawValue,ObjectiveCParser.Tokens.IMP.rawValue,ObjectiveCParser.Tokens.IN.rawValue,ObjectiveCParser.Tokens.INOUT.rawValue,ObjectiveCParser.Tokens.NIL.rawValue,ObjectiveCParser.Tokens.NO.rawValue,ObjectiveCParser.Tokens.NULL.rawValue,ObjectiveCParser.Tokens.ONEWAY.rawValue,ObjectiveCParser.Tokens.OUT.rawValue,ObjectiveCParser.Tokens.PROTOCOL_.rawValue,ObjectiveCParser.Tokens.SEL.rawValue,ObjectiveCParser.Tokens.SELF.rawValue,ObjectiveCParser.Tokens.SUPER.rawValue,ObjectiveCParser.Tokens.YES.rawValue,ObjectiveCParser.Tokens.ENCODE.rawValue]
+		 	    return  Utils.testBitLeftShiftArray(testArray, 0)
+		 	}()
+		 	          testSet = testSet || {  () -> Bool in
+		 	             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.PROTOCOL.rawValue,ObjectiveCParser.Tokens.SELECTOR.rawValue,ObjectiveCParser.Tokens.ATOMIC.rawValue,ObjectiveCParser.Tokens.NONATOMIC.rawValue,ObjectiveCParser.Tokens.RETAIN.rawValue,ObjectiveCParser.Tokens.AUTORELEASING_QUALIFIER.rawValue,ObjectiveCParser.Tokens.BLOCK.rawValue,ObjectiveCParser.Tokens.BRIDGE_RETAINED.rawValue,ObjectiveCParser.Tokens.BRIDGE_TRANSFER.rawValue,ObjectiveCParser.Tokens.COVARIANT.rawValue,ObjectiveCParser.Tokens.CONTRAVARIANT.rawValue,ObjectiveCParser.Tokens.DEPRECATED.rawValue,ObjectiveCParser.Tokens.KINDOF.rawValue,ObjectiveCParser.Tokens.UNUSED.rawValue,ObjectiveCParser.Tokens.NULL_UNSPECIFIED.rawValue,ObjectiveCParser.Tokens.NULLABLE.rawValue,ObjectiveCParser.Tokens.NONNULL.rawValue,ObjectiveCParser.Tokens.NULL_RESETTABLE.rawValue,ObjectiveCParser.Tokens.NS_INLINE.rawValue,ObjectiveCParser.Tokens.NS_ENUM.rawValue,ObjectiveCParser.Tokens.NS_OPTIONS.rawValue,ObjectiveCParser.Tokens.ASSIGN.rawValue,ObjectiveCParser.Tokens.COPY.rawValue,ObjectiveCParser.Tokens.GETTER.rawValue,ObjectiveCParser.Tokens.SETTER.rawValue,ObjectiveCParser.Tokens.STRONG.rawValue,ObjectiveCParser.Tokens.READONLY.rawValue,ObjectiveCParser.Tokens.READWRITE.rawValue,ObjectiveCParser.Tokens.WEAK.rawValue,ObjectiveCParser.Tokens.UNSAFE_UNRETAINED.rawValue,ObjectiveCParser.Tokens.IB_OUTLET.rawValue,ObjectiveCParser.Tokens.IB_OUTLET_COLLECTION.rawValue,ObjectiveCParser.Tokens.IB_INSPECTABLE.rawValue,ObjectiveCParser.Tokens.IB_DESIGNABLE.rawValue,ObjectiveCParser.Tokens.IDENTIFIER.rawValue,ObjectiveCParser.Tokens.LP.rawValue,ObjectiveCParser.Tokens.LBRACE.rawValue,ObjectiveCParser.Tokens.LBRACK.rawValue]
+		 	              return  Utils.testBitLeftShiftArray(testArray, 69)
+		 	          }()
+		 	          testSet = testSet || {  () -> Bool in
+		 	             let testArray: [Int] = [_la, ObjectiveCParser.Tokens.DOT.rawValue,ObjectiveCParser.Tokens.AT.rawValue,ObjectiveCParser.Tokens.BANG.rawValue,ObjectiveCParser.Tokens.TILDE.rawValue,ObjectiveCParser.Tokens.INC.rawValue,ObjectiveCParser.Tokens.DEC.rawValue,ObjectiveCParser.Tokens.ADD.rawValue,ObjectiveCParser.Tokens.SUB.rawValue,ObjectiveCParser.Tokens.MUL.rawValue,ObjectiveCParser.Tokens.BITAND.rawValue,ObjectiveCParser.Tokens.BITXOR.rawValue,ObjectiveCParser.Tokens.CHARACTER_LITERAL.rawValue,ObjectiveCParser.Tokens.STRING_START.rawValue,ObjectiveCParser.Tokens.HEX_LITERAL.rawValue,ObjectiveCParser.Tokens.OCTAL_LITERAL.rawValue,ObjectiveCParser.Tokens.BINARY_LITERAL.rawValue,ObjectiveCParser.Tokens.DECIMAL_LITERAL.rawValue,ObjectiveCParser.Tokens.FLOATING_POINT_LITERAL.rawValue]
+		 	              return  Utils.testBitLeftShiftArray(testArray, 134)
+		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1280)
-		 		try match(ObjectiveCParser.Tokens.DOT.rawValue)
-		 		setState(1281)
-		 		try expression(0)
-		 		setState(1287)
+		 		setState(1338)
+		 		try structInitializerItem()
+		 		setState(1343)
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,159,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,168,_ctx)
 		 		while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 			if ( _alt==1 ) {
-		 				setState(1282)
+		 				setState(1339)
 		 				try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 				setState(1283)
-		 				try match(ObjectiveCParser.Tokens.DOT.rawValue)
-		 				setState(1284)
-		 				try expression(0)
+		 				setState(1340)
+		 				try structInitializerItem()
 
 		 		 
 		 			}
-		 			setState(1289)
+		 			setState(1345)
 		 			try _errHandler.sync(self)
-		 			_alt = try getInterpreter().adaptivePredict(_input,159,_ctx)
+		 			_alt = try getInterpreter().adaptivePredict(_input,168,_ctx)
 		 		}
-		 		setState(1291)
+		 		setState(1347)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -10312,7 +10730,7 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(1290)
+		 			setState(1346)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 
 		 		}
@@ -10320,9 +10738,167 @@ open class ObjectiveCParser: Parser {
 
 		 	}
 
-		 	setState(1295)
+		 	setState(1351)
 		 	try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
+		}
+		catch ANTLRException.recognition(let re) {
+			_localctx.exception = re
+			_errHandler.reportError(self, re)
+			try _errHandler.recover(self, re)
+		}
+
+		return _localctx
+	}
+	open class StructInitializerItemContext:ParserRuleContext {
+		open func expression() -> ExpressionContext? {
+			return getRuleContext(ExpressionContext.self,0)
+		}
+		open func structInitializer() -> StructInitializerContext? {
+			return getRuleContext(StructInitializerContext.self,0)
+		}
+		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_structInitializerItem }
+		override
+		open func enterRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).enterStructInitializerItem(self)
+			}
+		}
+		override
+		open func exitRule(_ listener: ParseTreeListener) {
+			if listener is ObjectiveCParserListener {
+			 	(listener as! ObjectiveCParserListener).exitStructInitializerItem(self)
+			}
+		}
+		override
+		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+			if visitor is ObjectiveCParserVisitor {
+			     return (visitor as! ObjectiveCParserVisitor<T>).visitStructInitializerItem(self)
+			}else if visitor is ObjectiveCParserBaseVisitor {
+		    	 return (visitor as! ObjectiveCParserBaseVisitor<T>).visitStructInitializerItem(self)
+		    }
+			else {
+			     return visitor.visitChildren(self)
+			}
+		}
+	}
+	@discardableResult
+	open func structInitializerItem() throws -> StructInitializerItemContext {
+		var _localctx: StructInitializerItemContext = StructInitializerItemContext(_ctx, getState())
+		try enterRule(_localctx, 226, ObjectiveCParser.RULE_structInitializerItem)
+		var _la: Int = 0
+		defer {
+	    		try! exitRule()
+	    }
+		do {
+		 	setState(1358)
+		 	try _errHandler.sync(self)
+		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
+		 	case .SIZEOF:fallthrough
+		 	case .TRUE:fallthrough
+		 	case .FALSE:fallthrough
+		 	case .BOOL:fallthrough
+		 	case .Class:fallthrough
+		 	case .BYCOPY:fallthrough
+		 	case .BYREF:fallthrough
+		 	case .ID:fallthrough
+		 	case .IMP:fallthrough
+		 	case .IN:fallthrough
+		 	case .INOUT:fallthrough
+		 	case .NIL:fallthrough
+		 	case .NO:fallthrough
+		 	case .NULL:fallthrough
+		 	case .ONEWAY:fallthrough
+		 	case .OUT:fallthrough
+		 	case .PROTOCOL_:fallthrough
+		 	case .SEL:fallthrough
+		 	case .SELF:fallthrough
+		 	case .SUPER:fallthrough
+		 	case .YES:fallthrough
+		 	case .ENCODE:fallthrough
+		 	case .PROTOCOL:fallthrough
+		 	case .SELECTOR:fallthrough
+		 	case .ATOMIC:fallthrough
+		 	case .NONATOMIC:fallthrough
+		 	case .RETAIN:fallthrough
+		 	case .AUTORELEASING_QUALIFIER:fallthrough
+		 	case .BLOCK:fallthrough
+		 	case .BRIDGE_RETAINED:fallthrough
+		 	case .BRIDGE_TRANSFER:fallthrough
+		 	case .COVARIANT:fallthrough
+		 	case .CONTRAVARIANT:fallthrough
+		 	case .DEPRECATED:fallthrough
+		 	case .KINDOF:fallthrough
+		 	case .UNUSED:fallthrough
+		 	case .NULL_UNSPECIFIED:fallthrough
+		 	case .NULLABLE:fallthrough
+		 	case .NONNULL:fallthrough
+		 	case .NULL_RESETTABLE:fallthrough
+		 	case .NS_INLINE:fallthrough
+		 	case .NS_ENUM:fallthrough
+		 	case .NS_OPTIONS:fallthrough
+		 	case .ASSIGN:fallthrough
+		 	case .COPY:fallthrough
+		 	case .GETTER:fallthrough
+		 	case .SETTER:fallthrough
+		 	case .STRONG:fallthrough
+		 	case .READONLY:fallthrough
+		 	case .READWRITE:fallthrough
+		 	case .WEAK:fallthrough
+		 	case .UNSAFE_UNRETAINED:fallthrough
+		 	case .IB_OUTLET:fallthrough
+		 	case .IB_OUTLET_COLLECTION:fallthrough
+		 	case .IB_INSPECTABLE:fallthrough
+		 	case .IB_DESIGNABLE:fallthrough
+		 	case .IDENTIFIER:fallthrough
+		 	case .LP:fallthrough
+		 	case .LBRACK:fallthrough
+		 	case .DOT:fallthrough
+		 	case .AT:fallthrough
+		 	case .BANG:fallthrough
+		 	case .TILDE:fallthrough
+		 	case .INC:fallthrough
+		 	case .DEC:fallthrough
+		 	case .ADD:fallthrough
+		 	case .SUB:fallthrough
+		 	case .MUL:fallthrough
+		 	case .BITAND:fallthrough
+		 	case .BITXOR:fallthrough
+		 	case .CHARACTER_LITERAL:fallthrough
+		 	case .STRING_START:fallthrough
+		 	case .HEX_LITERAL:fallthrough
+		 	case .OCTAL_LITERAL:fallthrough
+		 	case .BINARY_LITERAL:fallthrough
+		 	case .DECIMAL_LITERAL:fallthrough
+		 	case .FLOATING_POINT_LITERAL:
+		 		try enterOuterAlt(_localctx, 1)
+		 		setState(1354)
+		 		try _errHandler.sync(self)
+		 		_la = try _input.LA(1)
+		 		if (//closure
+		 		 { () -> Bool in
+		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.DOT.rawValue
+		 		      return testSet
+		 		 }()) {
+		 			setState(1353)
+		 			try match(ObjectiveCParser.Tokens.DOT.rawValue)
+
+		 		}
+
+		 		setState(1356)
+		 		try expression(0)
+
+		 		break
+
+		 	case .LBRACE:
+		 		try enterOuterAlt(_localctx, 2)
+		 		setState(1357)
+		 		try structInitializer()
+
+		 		break
+		 	default:
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
+		 	}
 		}
 		catch ANTLRException.recognition(let re) {
 			_localctx.exception = re
@@ -10367,7 +10943,7 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func initializerList() throws -> InitializerListContext {
 		var _localctx: InitializerListContext = InitializerListContext(_ctx, getState())
-		try enterRule(_localctx, 216, ObjectiveCParser.RULE_initializerList)
+		try enterRule(_localctx, 228, ObjectiveCParser.RULE_initializerList)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
@@ -10375,25 +10951,25 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1297)
+		 	setState(1360)
 		 	try initializer()
-		 	setState(1302)
+		 	setState(1365)
 		 	try _errHandler.sync(self)
-		 	_alt = try getInterpreter().adaptivePredict(_input,162,_ctx)
+		 	_alt = try getInterpreter().adaptivePredict(_input,173,_ctx)
 		 	while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 		if ( _alt==1 ) {
-		 			setState(1298)
+		 			setState(1361)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(1299)
+		 			setState(1362)
 		 			try initializer()
 
 		 	 
 		 		}
-		 		setState(1304)
+		 		setState(1367)
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,162,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,173,_ctx)
 		 	}
-		 	setState(1306)
+		 	setState(1369)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -10401,7 +10977,7 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1305)
+		 		setState(1368)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 
 		 	}
@@ -10454,20 +11030,20 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func typeName() throws -> TypeNameContext {
 		var _localctx: TypeNameContext = TypeNameContext(_ctx, getState())
-		try enterRule(_localctx, 218, ObjectiveCParser.RULE_typeName)
+		try enterRule(_localctx, 230, ObjectiveCParser.RULE_typeName)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1313)
+		 	setState(1376)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,165, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,176, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1308)
+		 		setState(1371)
 		 		try specifierQualifierList()
-		 		setState(1310)
+		 		setState(1373)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -10478,7 +11054,7 @@ open class ObjectiveCParser: Parser {
 		 		}()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1309)
+		 			setState(1372)
 		 			try abstractDeclarator()
 
 		 		}
@@ -10487,7 +11063,7 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1312)
+		 		setState(1375)
 		 		try blockType()
 
 		 		break
@@ -10551,20 +11127,20 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func abstractDeclarator() throws -> AbstractDeclaratorContext {
 		var _localctx: AbstractDeclaratorContext = AbstractDeclaratorContext(_ctx, getState())
-		try enterRule(_localctx, 220, ObjectiveCParser.RULE_abstractDeclarator)
+		try enterRule(_localctx, 232, ObjectiveCParser.RULE_abstractDeclarator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1338)
+		 	setState(1401)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .MUL:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1315)
+		 		setState(1378)
 		 		try pointer()
-		 		setState(1317)
+		 		setState(1380)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -10575,7 +11151,7 @@ open class ObjectiveCParser: Parser {
 		 		}()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1316)
+		 			setState(1379)
 		 			try abstractDeclarator()
 
 		 		}
@@ -10585,9 +11161,9 @@ open class ObjectiveCParser: Parser {
 
 		 	case .LP:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1319)
+		 		setState(1382)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1321)
+		 		setState(1384)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -10598,22 +11174,22 @@ open class ObjectiveCParser: Parser {
 		 		}()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1320)
+		 			setState(1383)
 		 			try abstractDeclarator()
 
 		 		}
 
-		 		setState(1323)
+		 		setState(1386)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 		setState(1325) 
+		 		setState(1388) 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		repeat {
-		 			setState(1324)
+		 			setState(1387)
 		 			try abstractDeclaratorSuffix()
 
 
-		 			setState(1327); 
+		 			setState(1390); 
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		} while (//closure
@@ -10626,13 +11202,13 @@ open class ObjectiveCParser: Parser {
 
 		 	case .LBRACK:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1334) 
+		 		setState(1397) 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		repeat {
-		 			setState(1329)
+		 			setState(1392)
 		 			try match(ObjectiveCParser.Tokens.LBRACK.rawValue)
-		 			setState(1331)
+		 			setState(1394)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 			if (//closure
@@ -10651,16 +11227,16 @@ open class ObjectiveCParser: Parser {
 		 			          }()
 		 			      return testSet
 		 			 }()) {
-		 				setState(1330)
+		 				setState(1393)
 		 				try constantExpression()
 
 		 			}
 
-		 			setState(1333)
+		 			setState(1396)
 		 			try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
 
 
-		 			setState(1336); 
+		 			setState(1399); 
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		} while (//closure
@@ -10719,20 +11295,20 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func abstractDeclaratorSuffix() throws -> AbstractDeclaratorSuffixContext {
 		var _localctx: AbstractDeclaratorSuffixContext = AbstractDeclaratorSuffixContext(_ctx, getState())
-		try enterRule(_localctx, 222, ObjectiveCParser.RULE_abstractDeclaratorSuffix)
+		try enterRule(_localctx, 234, ObjectiveCParser.RULE_abstractDeclaratorSuffix)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1350)
+		 	setState(1413)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .LBRACK:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1340)
+		 		setState(1403)
 		 		try match(ObjectiveCParser.Tokens.LBRACK.rawValue)
-		 		setState(1342)
+		 		setState(1405)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -10751,21 +11327,21 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1341)
+		 			setState(1404)
 		 			try constantExpression()
 
 		 		}
 
-		 		setState(1344)
+		 		setState(1407)
 		 		try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
 
 		 		break
 
 		 	case .LP:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1345)
+		 		setState(1408)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1347)
+		 		setState(1410)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -10780,12 +11356,12 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1346)
+		 			setState(1409)
 		 			try parameterDeclarationList()
 
 		 		}
 
-		 		setState(1349)
+		 		setState(1412)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 		break
@@ -10836,30 +11412,30 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func parameterDeclarationList() throws -> ParameterDeclarationListContext {
 		var _localctx: ParameterDeclarationListContext = ParameterDeclarationListContext(_ctx, getState())
-		try enterRule(_localctx, 224, ObjectiveCParser.RULE_parameterDeclarationList)
+		try enterRule(_localctx, 236, ObjectiveCParser.RULE_parameterDeclarationList)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1352)
+		 	setState(1415)
 		 	try parameterDeclaration()
-		 	setState(1357)
+		 	setState(1420)
 		 	try _errHandler.sync(self)
-		 	_alt = try getInterpreter().adaptivePredict(_input,175,_ctx)
+		 	_alt = try getInterpreter().adaptivePredict(_input,186,_ctx)
 		 	while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 		if ( _alt==1 ) {
-		 			setState(1353)
+		 			setState(1416)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(1354)
+		 			setState(1417)
 		 			try parameterDeclaration()
 
 		 	 
 		 		}
-		 		setState(1359)
+		 		setState(1422)
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,175,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,186,_ctx)
 		 	}
 
 		}
@@ -10877,6 +11453,9 @@ open class ObjectiveCParser: Parser {
 		}
 		open func declarator() -> DeclaratorContext? {
 			return getRuleContext(DeclaratorContext.self,0)
+		}
+		open func functionPointer() -> FunctionPointerContext? {
+			return getRuleContext(FunctionPointerContext.self,0)
 		}
 		open func VOID() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.VOID.rawValue, 0) }
 		open override func getRuleIndex() -> Int { return ObjectiveCParser.RULE_parameterDeclaration }
@@ -10907,25 +11486,31 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func parameterDeclaration() throws -> ParameterDeclarationContext {
 		var _localctx: ParameterDeclarationContext = ParameterDeclarationContext(_ctx, getState())
-		try enterRule(_localctx, 226, ObjectiveCParser.RULE_parameterDeclaration)
+		try enterRule(_localctx, 238, ObjectiveCParser.RULE_parameterDeclaration)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1364)
+		 	setState(1428)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,176, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,187, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1360)
+		 		setState(1423)
 		 		try declarationSpecifiers()
-		 		setState(1361)
+		 		setState(1424)
 		 		try declarator()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1363)
+		 		setState(1426)
+		 		try functionPointer()
+
+		 		break
+		 	case 3:
+		 		try enterOuterAlt(_localctx, 3)
+		 		setState(1427)
 		 		try match(ObjectiveCParser.Tokens.VOID.rawValue)
 
 		 		break
@@ -10975,14 +11560,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func declarator() throws -> DeclaratorContext {
 		var _localctx: DeclaratorContext = DeclaratorContext(_ctx, getState())
-		try enterRule(_localctx, 228, ObjectiveCParser.RULE_declarator)
+		try enterRule(_localctx, 240, ObjectiveCParser.RULE_declarator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1367)
+		 	setState(1431)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -10990,12 +11575,12 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.MUL.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1366)
+		 		setState(1430)
 		 		try pointer()
 
 		 	}
 
-		 	setState(1369)
+		 	setState(1433)
 		 	try directDeclarator()
 
 		}
@@ -11066,23 +11651,23 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func statement() throws -> StatementContext {
 		var _localctx: StatementContext = StatementContext(_ctx, getState())
-		try enterRule(_localctx, 230, ObjectiveCParser.RULE_statement)
+		try enterRule(_localctx, 242, ObjectiveCParser.RULE_statement)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1409)
+		 	setState(1473)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,185, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,196, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1371)
+		 		setState(1435)
 		 		try labeledStatement()
-		 		setState(1373)
+		 		setState(1437)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,178,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,189,_ctx)) {
 		 		case 1:
-		 			setState(1372)
+		 			setState(1436)
 		 			try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 			break
@@ -11092,13 +11677,13 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1375)
+		 		setState(1439)
 		 		try compoundStatement()
-		 		setState(1377)
+		 		setState(1441)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,179,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,190,_ctx)) {
 		 		case 1:
-		 			setState(1376)
+		 			setState(1440)
 		 			try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 			break
@@ -11108,13 +11693,13 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1379)
+		 		setState(1443)
 		 		try selectionStatement()
-		 		setState(1381)
+		 		setState(1445)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,180,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,191,_ctx)) {
 		 		case 1:
-		 			setState(1380)
+		 			setState(1444)
 		 			try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 			break
@@ -11124,13 +11709,13 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1383)
+		 		setState(1447)
 		 		try iterationStatement()
-		 		setState(1385)
+		 		setState(1449)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,181,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,192,_ctx)) {
 		 		case 1:
-		 			setState(1384)
+		 			setState(1448)
 		 			try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 			break
@@ -11140,21 +11725,21 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 5:
 		 		try enterOuterAlt(_localctx, 5)
-		 		setState(1387)
+		 		setState(1451)
 		 		try jumpStatement()
-		 		setState(1388)
+		 		setState(1452)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
 		 	case 6:
 		 		try enterOuterAlt(_localctx, 6)
-		 		setState(1390)
+		 		setState(1454)
 		 		try synchronizedStatement()
-		 		setState(1392)
+		 		setState(1456)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,182,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,193,_ctx)) {
 		 		case 1:
-		 			setState(1391)
+		 			setState(1455)
 		 			try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 			break
@@ -11164,13 +11749,13 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 7:
 		 		try enterOuterAlt(_localctx, 7)
-		 		setState(1394)
+		 		setState(1458)
 		 		try autoreleaseStatement()
-		 		setState(1396)
+		 		setState(1460)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,183,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,194,_ctx)) {
 		 		case 1:
-		 			setState(1395)
+		 			setState(1459)
 		 			try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 			break
@@ -11180,21 +11765,21 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 8:
 		 		try enterOuterAlt(_localctx, 8)
-		 		setState(1398)
+		 		setState(1462)
 		 		try throwStatement()
-		 		setState(1399)
+		 		setState(1463)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
 		 	case 9:
 		 		try enterOuterAlt(_localctx, 9)
-		 		setState(1401)
+		 		setState(1465)
 		 		try tryBlock()
-		 		setState(1403)
+		 		setState(1467)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,184,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,195,_ctx)) {
 		 		case 1:
-		 			setState(1402)
+		 			setState(1466)
 		 			try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 			break
@@ -11204,15 +11789,15 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 10:
 		 		try enterOuterAlt(_localctx, 10)
-		 		setState(1405)
+		 		setState(1469)
 		 		try expressions()
-		 		setState(1406)
+		 		setState(1470)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
 		 	case 11:
 		 		try enterOuterAlt(_localctx, 11)
-		 		setState(1408)
+		 		setState(1472)
 		 		try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		 		break
@@ -11262,17 +11847,17 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func labeledStatement() throws -> LabeledStatementContext {
 		var _localctx: LabeledStatementContext = LabeledStatementContext(_ctx, getState())
-		try enterRule(_localctx, 232, ObjectiveCParser.RULE_labeledStatement)
+		try enterRule(_localctx, 244, ObjectiveCParser.RULE_labeledStatement)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1411)
+		 	setState(1475)
 		 	try identifier()
-		 	setState(1412)
+		 	setState(1476)
 		 	try match(ObjectiveCParser.Tokens.COLON.rawValue)
-		 	setState(1413)
+		 	setState(1477)
 		 	try statement()
 
 		}
@@ -11319,16 +11904,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func rangeExpression() throws -> RangeExpressionContext {
 		var _localctx: RangeExpressionContext = RangeExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 234, ObjectiveCParser.RULE_rangeExpression)
+		try enterRule(_localctx, 246, ObjectiveCParser.RULE_rangeExpression)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1415)
+		 	setState(1479)
 		 	try expression(0)
-		 	setState(1418)
+		 	setState(1482)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -11336,9 +11921,9 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.ELIPSIS.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1416)
+		 		setState(1480)
 		 		try match(ObjectiveCParser.Tokens.ELIPSIS.rawValue)
-		 		setState(1417)
+		 		setState(1481)
 		 		try expression(0)
 
 		 	}
@@ -11394,16 +11979,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func compoundStatement() throws -> CompoundStatementContext {
 		var _localctx: CompoundStatementContext = CompoundStatementContext(_ctx, getState())
-		try enterRule(_localctx, 236, ObjectiveCParser.RULE_compoundStatement)
+		try enterRule(_localctx, 248, ObjectiveCParser.RULE_compoundStatement)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1420)
+		 	setState(1484)
 		 	try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 	setState(1425)
+		 	setState(1489)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -11422,27 +12007,27 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1423)
+		 		setState(1487)
 		 		try _errHandler.sync(self)
-		 		switch(try getInterpreter().adaptivePredict(_input,187, _ctx)) {
+		 		switch(try getInterpreter().adaptivePredict(_input,198, _ctx)) {
 		 		case 1:
-		 			setState(1421)
+		 			setState(1485)
 		 			try declaration()
 
 		 			break
 		 		case 2:
-		 			setState(1422)
+		 			setState(1486)
 		 			try statement()
 
 		 			break
 		 		default: break
 		 		}
 
-		 		setState(1427)
+		 		setState(1491)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(1428)
+		 	setState(1492)
 		 	try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		}
@@ -11459,8 +12044,8 @@ open class ObjectiveCParser: Parser {
 		public var elseBody: StatementContext!
 		open func IF() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.IF.rawValue, 0) }
 		open func LP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LP.rawValue, 0) }
-		open func expression() -> ExpressionContext? {
-			return getRuleContext(ExpressionContext.self,0)
+		open func expressions() -> ExpressionsContext? {
+			return getRuleContext(ExpressionsContext.self,0)
 		}
 		open func RP() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.RP.rawValue, 0) }
 		open func statement() -> Array<StatementContext> {
@@ -11501,37 +12086,37 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func selectionStatement() throws -> SelectionStatementContext {
 		var _localctx: SelectionStatementContext = SelectionStatementContext(_ctx, getState())
-		try enterRule(_localctx, 238, ObjectiveCParser.RULE_selectionStatement)
+		try enterRule(_localctx, 250, ObjectiveCParser.RULE_selectionStatement)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1440)
+		 	setState(1504)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .IF:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1430)
+		 		setState(1494)
 		 		try match(ObjectiveCParser.Tokens.IF.rawValue)
-		 		setState(1431)
+		 		setState(1495)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1432)
-		 		try expression(0)
-		 		setState(1433)
+		 		setState(1496)
+		 		try expressions()
+		 		setState(1497)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 		setState(1434)
+		 		setState(1498)
 		 		try {
 		 				let assignmentValue = try statement()
 		 				_localctx.castdown(SelectionStatementContext.self).ifBody = assignmentValue
 		 		     }()
 
-		 		setState(1437)
+		 		setState(1501)
 		 		try _errHandler.sync(self)
-		 		switch (try getInterpreter().adaptivePredict(_input,189,_ctx)) {
+		 		switch (try getInterpreter().adaptivePredict(_input,200,_ctx)) {
 		 		case 1:
-		 			setState(1435)
+		 			setState(1499)
 		 			try match(ObjectiveCParser.Tokens.ELSE.rawValue)
-		 			setState(1436)
+		 			setState(1500)
 		 			try {
 		 					let assignmentValue = try statement()
 		 					_localctx.castdown(SelectionStatementContext.self).elseBody = assignmentValue
@@ -11546,7 +12131,7 @@ open class ObjectiveCParser: Parser {
 
 		 	case .SWITCH:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1439)
+		 		setState(1503)
 		 		try switchStatement()
 
 		 		break
@@ -11599,21 +12184,21 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func switchStatement() throws -> SwitchStatementContext {
 		var _localctx: SwitchStatementContext = SwitchStatementContext(_ctx, getState())
-		try enterRule(_localctx, 240, ObjectiveCParser.RULE_switchStatement)
+		try enterRule(_localctx, 252, ObjectiveCParser.RULE_switchStatement)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1442)
+		 	setState(1506)
 		 	try match(ObjectiveCParser.Tokens.SWITCH.rawValue)
-		 	setState(1443)
+		 	setState(1507)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1444)
+		 	setState(1508)
 		 	try expression(0)
-		 	setState(1445)
+		 	setState(1509)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(1446)
+		 	setState(1510)
 		 	try switchBlock()
 
 		}
@@ -11660,16 +12245,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func switchBlock() throws -> SwitchBlockContext {
 		var _localctx: SwitchBlockContext = SwitchBlockContext(_ctx, getState())
-		try enterRule(_localctx, 242, ObjectiveCParser.RULE_switchBlock)
+		try enterRule(_localctx, 254, ObjectiveCParser.RULE_switchBlock)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1448)
+		 	setState(1512)
 		 	try match(ObjectiveCParser.Tokens.LBRACE.rawValue)
-		 	setState(1452)
+		 	setState(1516)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -11677,15 +12262,15 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.CASE.rawValue || _la == ObjectiveCParser.Tokens.DEFAULT.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1449)
+		 		setState(1513)
 		 		try switchSection()
 
 
-		 		setState(1454)
+		 		setState(1518)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
-		 	setState(1455)
+		 	setState(1519)
 		 	try match(ObjectiveCParser.Tokens.RBRACE.rawValue)
 
 		}
@@ -11738,22 +12323,22 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func switchSection() throws -> SwitchSectionContext {
 		var _localctx: SwitchSectionContext = SwitchSectionContext(_ctx, getState())
-		try enterRule(_localctx, 244, ObjectiveCParser.RULE_switchSection)
+		try enterRule(_localctx, 256, ObjectiveCParser.RULE_switchSection)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1458) 
+		 	setState(1522) 
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	repeat {
-		 		setState(1457)
+		 		setState(1521)
 		 		try switchLabel()
 
 
-		 		setState(1460); 
+		 		setState(1524); 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	} while (//closure
@@ -11761,15 +12346,15 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.CASE.rawValue || _la == ObjectiveCParser.Tokens.DEFAULT.rawValue
 		 	      return testSet
 		 	 }())
-		 	setState(1463) 
+		 	setState(1527) 
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	repeat {
-		 		setState(1462)
+		 		setState(1526)
 		 		try statement()
 
 
-		 		setState(1465); 
+		 		setState(1529); 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	} while (//closure
@@ -11832,47 +12417,47 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func switchLabel() throws -> SwitchLabelContext {
 		var _localctx: SwitchLabelContext = SwitchLabelContext(_ctx, getState())
-		try enterRule(_localctx, 246, ObjectiveCParser.RULE_switchLabel)
+		try enterRule(_localctx, 258, ObjectiveCParser.RULE_switchLabel)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1479)
+		 	setState(1543)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .CASE:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1467)
+		 		setState(1531)
 		 		try match(ObjectiveCParser.Tokens.CASE.rawValue)
-		 		setState(1473)
+		 		setState(1537)
 		 		try _errHandler.sync(self)
-		 		switch(try getInterpreter().adaptivePredict(_input,194, _ctx)) {
+		 		switch(try getInterpreter().adaptivePredict(_input,205, _ctx)) {
 		 		case 1:
-		 			setState(1468)
+		 			setState(1532)
 		 			try rangeExpression()
 
 		 			break
 		 		case 2:
-		 			setState(1469)
+		 			setState(1533)
 		 			try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 			setState(1470)
+		 			setState(1534)
 		 			try rangeExpression()
-		 			setState(1471)
+		 			setState(1535)
 		 			try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 			break
 		 		default: break
 		 		}
-		 		setState(1475)
+		 		setState(1539)
 		 		try match(ObjectiveCParser.Tokens.COLON.rawValue)
 
 		 		break
 
 		 	case .DEFAULT:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1477)
+		 		setState(1541)
 		 		try match(ObjectiveCParser.Tokens.DEFAULT.rawValue)
-		 		setState(1478)
+		 		setState(1542)
 		 		try match(ObjectiveCParser.Tokens.COLON.rawValue)
 
 		 		break
@@ -11929,35 +12514,35 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func iterationStatement() throws -> IterationStatementContext {
 		var _localctx: IterationStatementContext = IterationStatementContext(_ctx, getState())
-		try enterRule(_localctx, 248, ObjectiveCParser.RULE_iterationStatement)
+		try enterRule(_localctx, 260, ObjectiveCParser.RULE_iterationStatement)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1485)
+		 	setState(1549)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,196, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,207, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1481)
+		 		setState(1545)
 		 		try whileStatement()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1482)
+		 		setState(1546)
 		 		try doStatement()
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1483)
+		 		setState(1547)
 		 		try forStatement()
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1484)
+		 		setState(1548)
 		 		try forInStatement()
 
 		 		break
@@ -12009,21 +12594,21 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func whileStatement() throws -> WhileStatementContext {
 		var _localctx: WhileStatementContext = WhileStatementContext(_ctx, getState())
-		try enterRule(_localctx, 250, ObjectiveCParser.RULE_whileStatement)
+		try enterRule(_localctx, 262, ObjectiveCParser.RULE_whileStatement)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1487)
+		 	setState(1551)
 		 	try match(ObjectiveCParser.Tokens.WHILE.rawValue)
-		 	setState(1488)
+		 	setState(1552)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1489)
+		 	setState(1553)
 		 	try expression(0)
-		 	setState(1490)
+		 	setState(1554)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(1491)
+		 	setState(1555)
 		 	try statement()
 
 		}
@@ -12072,25 +12657,25 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func doStatement() throws -> DoStatementContext {
 		var _localctx: DoStatementContext = DoStatementContext(_ctx, getState())
-		try enterRule(_localctx, 252, ObjectiveCParser.RULE_doStatement)
+		try enterRule(_localctx, 264, ObjectiveCParser.RULE_doStatement)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1493)
+		 	setState(1557)
 		 	try match(ObjectiveCParser.Tokens.DO.rawValue)
-		 	setState(1494)
+		 	setState(1558)
 		 	try statement()
-		 	setState(1495)
+		 	setState(1559)
 		 	try match(ObjectiveCParser.Tokens.WHILE.rawValue)
-		 	setState(1496)
+		 	setState(1560)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1497)
+		 	setState(1561)
 		 	try expression(0)
-		 	setState(1498)
+		 	setState(1562)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(1499)
+		 	setState(1563)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
 
 		}
@@ -12145,18 +12730,18 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func forStatement() throws -> ForStatementContext {
 		var _localctx: ForStatementContext = ForStatementContext(_ctx, getState())
-		try enterRule(_localctx, 254, ObjectiveCParser.RULE_forStatement)
+		try enterRule(_localctx, 266, ObjectiveCParser.RULE_forStatement)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1501)
+		 	setState(1565)
 		 	try match(ObjectiveCParser.Tokens.FOR.rawValue)
-		 	setState(1502)
+		 	setState(1566)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1504)
+		 	setState(1568)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -12175,14 +12760,14 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1503)
+		 		setState(1567)
 		 		try forLoopInitializer()
 
 		 	}
 
-		 	setState(1506)
+		 	setState(1570)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
-		 	setState(1508)
+		 	setState(1572)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -12201,14 +12786,14 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1507)
+		 		setState(1571)
 		 		try expression(0)
 
 		 	}
 
-		 	setState(1510)
+		 	setState(1574)
 		 	try match(ObjectiveCParser.Tokens.SEMI.rawValue)
-		 	setState(1512)
+		 	setState(1576)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -12227,14 +12812,14 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1511)
+		 		setState(1575)
 		 		try expressions()
 
 		 	}
 
-		 	setState(1514)
+		 	setState(1578)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(1515)
+		 	setState(1579)
 		 	try statement()
 
 		}
@@ -12284,25 +12869,25 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func forLoopInitializer() throws -> ForLoopInitializerContext {
 		var _localctx: ForLoopInitializerContext = ForLoopInitializerContext(_ctx, getState())
-		try enterRule(_localctx, 256, ObjectiveCParser.RULE_forLoopInitializer)
+		try enterRule(_localctx, 268, ObjectiveCParser.RULE_forLoopInitializer)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1521)
+		 	setState(1585)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,200, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,211, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1517)
+		 		setState(1581)
 		 		try declarationSpecifiers()
-		 		setState(1518)
+		 		setState(1582)
 		 		try initDeclaratorList()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1520)
+		 		setState(1584)
 		 		try expressions()
 
 		 		break
@@ -12357,22 +12942,22 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func forInStatement() throws -> ForInStatementContext {
 		var _localctx: ForInStatementContext = ForInStatementContext(_ctx, getState())
-		try enterRule(_localctx, 258, ObjectiveCParser.RULE_forInStatement)
+		try enterRule(_localctx, 270, ObjectiveCParser.RULE_forInStatement)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1523)
+		 	setState(1587)
 		 	try match(ObjectiveCParser.Tokens.FOR.rawValue)
-		 	setState(1524)
+		 	setState(1588)
 		 	try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 	setState(1525)
+		 	setState(1589)
 		 	try typeVariableDeclarator()
-		 	setState(1526)
+		 	setState(1590)
 		 	try match(ObjectiveCParser.Tokens.IN.rawValue)
-		 	setState(1528)
+		 	setState(1592)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	if (//closure
@@ -12391,14 +12976,14 @@ open class ObjectiveCParser: Parser {
 		 	          }()
 		 	      return testSet
 		 	 }()) {
-		 		setState(1527)
+		 		setState(1591)
 		 		try expression(0)
 
 		 	}
 
-		 	setState(1530)
+		 	setState(1594)
 		 	try match(ObjectiveCParser.Tokens.RP.rawValue)
-		 	setState(1531)
+		 	setState(1595)
 		 	try statement()
 
 		}
@@ -12449,43 +13034,43 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func jumpStatement() throws -> JumpStatementContext {
 		var _localctx: JumpStatementContext = JumpStatementContext(_ctx, getState())
-		try enterRule(_localctx, 260, ObjectiveCParser.RULE_jumpStatement)
+		try enterRule(_localctx, 272, ObjectiveCParser.RULE_jumpStatement)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1541)
+		 	setState(1605)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .GOTO:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1533)
+		 		setState(1597)
 		 		try match(ObjectiveCParser.Tokens.GOTO.rawValue)
-		 		setState(1534)
+		 		setState(1598)
 		 		try identifier()
 
 		 		break
 
 		 	case .CONTINUE:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1535)
+		 		setState(1599)
 		 		try match(ObjectiveCParser.Tokens.CONTINUE.rawValue)
 
 		 		break
 
 		 	case .BREAK:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1536)
+		 		setState(1600)
 		 		try match(ObjectiveCParser.Tokens.BREAK.rawValue)
 
 		 		break
 
 		 	case .RETURN:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1537)
+		 		setState(1601)
 		 		try match(ObjectiveCParser.Tokens.RETURN.rawValue)
-		 		setState(1539)
+		 		setState(1603)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -12504,7 +13089,7 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1538)
+		 			setState(1602)
 		 			try expression(0)
 
 		 		}
@@ -12558,30 +13143,30 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func expressions() throws -> ExpressionsContext {
 		var _localctx: ExpressionsContext = ExpressionsContext(_ctx, getState())
-		try enterRule(_localctx, 262, ObjectiveCParser.RULE_expressions)
+		try enterRule(_localctx, 274, ObjectiveCParser.RULE_expressions)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1543)
+		 	setState(1607)
 		 	try expression(0)
-		 	setState(1548)
+		 	setState(1612)
 		 	try _errHandler.sync(self)
-		 	_alt = try getInterpreter().adaptivePredict(_input,204,_ctx)
+		 	_alt = try getInterpreter().adaptivePredict(_input,215,_ctx)
 		 	while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 		 		if ( _alt==1 ) {
-		 			setState(1544)
+		 			setState(1608)
 		 			try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 			setState(1545)
+		 			setState(1609)
 		 			try expression(0)
 
 		 	 
 		 		}
-		 		setState(1550)
+		 		setState(1614)
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,204,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,215,_ctx)
 		 	}
 
 		}
@@ -12673,8 +13258,8 @@ open class ObjectiveCParser: Parser {
 		var _parentState: Int = getState()
 		var _localctx: ExpressionContext = ExpressionContext(_ctx, _parentState)
 		var  _prevctx: ExpressionContext = _localctx
-		var _startState: Int = 264
-		try enterRecursionRule(_localctx, 264, ObjectiveCParser.RULE_expression, _p)
+		var _startState: Int = 276
+		try enterRecursionRule(_localctx, 276, ObjectiveCParser.RULE_expression, _p)
 		var _la: Int = 0
 		defer {
 	    		try! unrollRecursionContexts(_parentctx)
@@ -12682,20 +13267,20 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt: Int
 			try enterOuterAlt(_localctx, 1)
-			setState(1557)
+			setState(1621)
 			try _errHandler.sync(self)
-			switch(try getInterpreter().adaptivePredict(_input,205, _ctx)) {
+			switch(try getInterpreter().adaptivePredict(_input,216, _ctx)) {
 			case 1:
-				setState(1552)
+				setState(1616)
 				try castExpression()
 
 				break
 			case 2:
-				setState(1553)
+				setState(1617)
 				try unaryExpression()
-				setState(1554)
+				setState(1618)
 				try assignmentOperator()
-				setState(1555)
+				setState(1619)
 				try {
 						let assignmentValue = try expression(1)
 						_localctx.castdown(ExpressionContext.self).assignmentExpression = assignmentValue
@@ -12706,26 +13291,26 @@ open class ObjectiveCParser: Parser {
 			default: break
 			}
 			_ctx!.stop = try _input.LT(-1)
-			setState(1603)
+			setState(1667)
 			try _errHandler.sync(self)
-			_alt = try getInterpreter().adaptivePredict(_input,209,_ctx)
+			_alt = try getInterpreter().adaptivePredict(_input,220,_ctx)
 			while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 				if ( _alt==1 ) {
 					if _parseListeners != nil {
 					   try triggerExitRuleEvent()
 					}
 					_prevctx = _localctx
-					setState(1601)
+					setState(1665)
 					try _errHandler.sync(self)
-					switch(try getInterpreter().adaptivePredict(_input,208, _ctx)) {
+					switch(try getInterpreter().adaptivePredict(_input,219, _ctx)) {
 					case 1:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1559)
+						setState(1623)
 						if (!(precpred(_ctx, 12))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 12)"))
 						}
-						setState(1560)
+						setState(1624)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
 						_la = try _input.LA(1)
 						if (!(//closure
@@ -12742,18 +13327,18 @@ open class ObjectiveCParser: Parser {
 							_errHandler.reportMatch(self)
 							try consume()
 						}
-						setState(1561)
+						setState(1625)
 						try expression(13)
 
 						break
 					case 2:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1562)
+						setState(1626)
 						if (!(precpred(_ctx, 11))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 11)"))
 						}
-						setState(1563)
+						setState(1627)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
 						_la = try _input.LA(1)
 						if (!(//closure
@@ -12767,50 +13352,50 @@ open class ObjectiveCParser: Parser {
 							_errHandler.reportMatch(self)
 							try consume()
 						}
-						setState(1564)
+						setState(1628)
 						try expression(12)
 
 						break
 					case 3:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1565)
+						setState(1629)
 						if (!(precpred(_ctx, 10))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 10)"))
 						}
-						setState(1570)
+						setState(1634)
 						try _errHandler.sync(self)
 						switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 						case .LT:
-							setState(1566)
+							setState(1630)
 							try match(ObjectiveCParser.Tokens.LT.rawValue)
-							setState(1567)
+							setState(1631)
 							try match(ObjectiveCParser.Tokens.LT.rawValue)
 
 							break
 
 						case .GT:
-							setState(1568)
+							setState(1632)
 							try match(ObjectiveCParser.Tokens.GT.rawValue)
-							setState(1569)
+							setState(1633)
 							try match(ObjectiveCParser.Tokens.GT.rawValue)
 
 							break
 						default:
 							throw ANTLRException.recognition(e: NoViableAltException(self))
 						}
-						setState(1572)
+						setState(1636)
 						try expression(11)
 
 						break
 					case 4:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1573)
+						setState(1637)
 						if (!(precpred(_ctx, 9))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 9)"))
 						}
-						setState(1574)
+						setState(1638)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
 						_la = try _input.LA(1)
 						if (!(//closure
@@ -12827,18 +13412,18 @@ open class ObjectiveCParser: Parser {
 							_errHandler.reportMatch(self)
 							try consume()
 						}
-						setState(1575)
+						setState(1639)
 						try expression(10)
 
 						break
 					case 5:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1576)
+						setState(1640)
 						if (!(precpred(_ctx, 8))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 8)"))
 						}
-						setState(1577)
+						setState(1641)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
 						_la = try _input.LA(1)
 						if (!(//closure
@@ -12852,105 +13437,105 @@ open class ObjectiveCParser: Parser {
 							_errHandler.reportMatch(self)
 							try consume()
 						}
-						setState(1578)
+						setState(1642)
 						try expression(9)
 
 						break
 					case 6:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1579)
+						setState(1643)
 						if (!(precpred(_ctx, 7))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 7)"))
 						}
-						setState(1580)
+						setState(1644)
 						try {
 								let assignmentValue = try match(ObjectiveCParser.Tokens.BITAND.rawValue)
 								_localctx.castdown(ExpressionContext.self).op = assignmentValue
 						     }()
 
-						setState(1581)
+						setState(1645)
 						try expression(8)
 
 						break
 					case 7:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1582)
+						setState(1646)
 						if (!(precpred(_ctx, 6))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 6)"))
 						}
-						setState(1583)
+						setState(1647)
 						try {
 								let assignmentValue = try match(ObjectiveCParser.Tokens.BITXOR.rawValue)
 								_localctx.castdown(ExpressionContext.self).op = assignmentValue
 						     }()
 
-						setState(1584)
+						setState(1648)
 						try expression(7)
 
 						break
 					case 8:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1585)
+						setState(1649)
 						if (!(precpred(_ctx, 5))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 5)"))
 						}
-						setState(1586)
+						setState(1650)
 						try {
 								let assignmentValue = try match(ObjectiveCParser.Tokens.BITOR.rawValue)
 								_localctx.castdown(ExpressionContext.self).op = assignmentValue
 						     }()
 
-						setState(1587)
+						setState(1651)
 						try expression(6)
 
 						break
 					case 9:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1588)
+						setState(1652)
 						if (!(precpred(_ctx, 4))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 4)"))
 						}
-						setState(1589)
+						setState(1653)
 						try {
 								let assignmentValue = try match(ObjectiveCParser.Tokens.AND.rawValue)
 								_localctx.castdown(ExpressionContext.self).op = assignmentValue
 						     }()
 
-						setState(1590)
+						setState(1654)
 						try expression(5)
 
 						break
 					case 10:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1591)
+						setState(1655)
 						if (!(precpred(_ctx, 3))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 3)"))
 						}
-						setState(1592)
+						setState(1656)
 						try {
 								let assignmentValue = try match(ObjectiveCParser.Tokens.OR.rawValue)
 								_localctx.castdown(ExpressionContext.self).op = assignmentValue
 						     }()
 
-						setState(1593)
+						setState(1657)
 						try expression(4)
 
 						break
 					case 11:
 						_localctx = ExpressionContext(_parentctx, _parentState);
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
-						setState(1594)
+						setState(1658)
 						if (!(precpred(_ctx, 2))) {
 						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 2)"))
 						}
-						setState(1595)
+						setState(1659)
 						try match(ObjectiveCParser.Tokens.QUESTION.rawValue)
-						setState(1597)
+						setState(1661)
 						try _errHandler.sync(self)
 						_la = try _input.LA(1)
 						if (//closure
@@ -12969,7 +13554,7 @@ open class ObjectiveCParser: Parser {
 						          }()
 						      return testSet
 						 }()) {
-							setState(1596)
+							setState(1660)
 							try {
 									let assignmentValue = try expression(0)
 									_localctx.castdown(ExpressionContext.self).trueExpression = assignmentValue
@@ -12978,9 +13563,9 @@ open class ObjectiveCParser: Parser {
 
 						}
 
-						setState(1599)
+						setState(1663)
 						try match(ObjectiveCParser.Tokens.COLON.rawValue)
-						setState(1600)
+						setState(1664)
 						try {
 								let assignmentValue = try expression(3)
 								_localctx.castdown(ExpressionContext.self).falseExpression = assignmentValue
@@ -12992,9 +13577,9 @@ open class ObjectiveCParser: Parser {
 					}
 			 
 				}
-				setState(1605)
+				setState(1669)
 				try _errHandler.sync(self)
-				_alt = try getInterpreter().adaptivePredict(_input,209,_ctx)
+				_alt = try getInterpreter().adaptivePredict(_input,220,_ctx)
 			}
 
 		}
@@ -13035,14 +13620,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func assignmentOperator() throws -> AssignmentOperatorContext {
 		var _localctx: AssignmentOperatorContext = AssignmentOperatorContext(_ctx, getState())
-		try enterRule(_localctx, 266, ObjectiveCParser.RULE_assignmentOperator)
+		try enterRule(_localctx, 278, ObjectiveCParser.RULE_assignmentOperator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1606)
+		 	setState(1670)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -13111,39 +13696,39 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func castExpression() throws -> CastExpressionContext {
 		var _localctx: CastExpressionContext = CastExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 268, ObjectiveCParser.RULE_castExpression)
+		try enterRule(_localctx, 280, ObjectiveCParser.RULE_castExpression)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1617)
+		 	setState(1681)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,211, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,222, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1608)
+		 		setState(1672)
 		 		try unaryExpression()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1609)
+		 		setState(1673)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1610)
+		 		setState(1674)
 		 		try typeName()
-		 		setState(1611)
+		 		setState(1675)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
-		 		setState(1615)
+		 		setState(1679)
 		 		try _errHandler.sync(self)
-		 		switch(try getInterpreter().adaptivePredict(_input,210, _ctx)) {
+		 		switch(try getInterpreter().adaptivePredict(_input,221, _ctx)) {
 		 		case 1:
-		 			setState(1613)
+		 			setState(1677)
 		 			try castExpression()
 
 		 			break
 		 		case 2:
-		 			setState(1614)
+		 			setState(1678)
 		 			try initializer()
 
 		 			break
@@ -13200,29 +13785,29 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func initializer() throws -> InitializerContext {
 		var _localctx: InitializerContext = InitializerContext(_ctx, getState())
-		try enterRule(_localctx, 270, ObjectiveCParser.RULE_initializer)
+		try enterRule(_localctx, 282, ObjectiveCParser.RULE_initializer)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1622)
+		 	setState(1686)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,212, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,223, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1619)
+		 		setState(1683)
 		 		try expression(0)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1620)
+		 		setState(1684)
 		 		try arrayInitializer()
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1621)
+		 		setState(1685)
 		 		try structInitializer()
 
 		 		break
@@ -13272,12 +13857,12 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func constantExpression() throws -> ConstantExpressionContext {
 		var _localctx: ConstantExpressionContext = ConstantExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 272, ObjectiveCParser.RULE_constantExpression)
+		try enterRule(_localctx, 284, ObjectiveCParser.RULE_constantExpression)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1626)
+		 	setState(1690)
 		 	try _errHandler.sync(self)
 		 	switch (ObjectiveCParser.Tokens(rawValue: try _input.LA(1))!) {
 		 	case .BOOL:fallthrough
@@ -13328,7 +13913,7 @@ open class ObjectiveCParser: Parser {
 		 	case .IB_DESIGNABLE:fallthrough
 		 	case .IDENTIFIER:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1624)
+		 		setState(1688)
 		 		try identifier()
 
 		 		break
@@ -13347,7 +13932,7 @@ open class ObjectiveCParser: Parser {
 		 	case .DECIMAL_LITERAL:fallthrough
 		 	case .FLOATING_POINT_LITERAL:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1625)
+		 		setState(1689)
 		 		try constant()
 
 		 		break
@@ -13413,39 +13998,39 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func unaryExpression() throws -> UnaryExpressionContext {
 		var _localctx: UnaryExpressionContext = UnaryExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 274, ObjectiveCParser.RULE_unaryExpression)
+		try enterRule(_localctx, 286, ObjectiveCParser.RULE_unaryExpression)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1642)
+		 	setState(1706)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,215, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,226, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1628)
+		 		setState(1692)
 		 		try postfixExpression(0)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1629)
+		 		setState(1693)
 		 		try match(ObjectiveCParser.Tokens.SIZEOF.rawValue)
-		 		setState(1635)
+		 		setState(1699)
 		 		try _errHandler.sync(self)
-		 		switch(try getInterpreter().adaptivePredict(_input,214, _ctx)) {
+		 		switch(try getInterpreter().adaptivePredict(_input,225, _ctx)) {
 		 		case 1:
-		 			setState(1630)
+		 			setState(1694)
 		 			try unaryExpression()
 
 		 			break
 		 		case 2:
-		 			setState(1631)
+		 			setState(1695)
 		 			try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 			setState(1632)
+		 			setState(1696)
 		 			try typeSpecifier()
-		 			setState(1633)
+		 			setState(1697)
 		 			try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 			break
@@ -13455,7 +14040,7 @@ open class ObjectiveCParser: Parser {
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1637)
+		 		setState(1701)
 		 		_localctx.castdown(UnaryExpressionContext.self).op = try _input.LT(1)
 		 		_la = try _input.LA(1)
 		 		if (!(//closure
@@ -13469,15 +14054,15 @@ open class ObjectiveCParser: Parser {
 		 			_errHandler.reportMatch(self)
 		 			try consume()
 		 		}
-		 		setState(1638)
+		 		setState(1702)
 		 		try unaryExpression()
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1639)
+		 		setState(1703)
 		 		try unaryOperator()
-		 		setState(1640)
+		 		setState(1704)
 		 		try castExpression()
 
 		 		break
@@ -13522,14 +14107,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func unaryOperator() throws -> UnaryOperatorContext {
 		var _localctx: UnaryOperatorContext = UnaryOperatorContext(_ctx, getState())
-		try enterRule(_localctx, 276, ObjectiveCParser.RULE_unaryOperator)
+		try enterRule(_localctx, 288, ObjectiveCParser.RULE_unaryOperator)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1644)
+		 	setState(1708)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -13609,8 +14194,8 @@ open class ObjectiveCParser: Parser {
 		var _parentState: Int = getState()
 		var _localctx: PostfixExpressionContext = PostfixExpressionContext(_ctx, _parentState)
 		var  _prevctx: PostfixExpressionContext = _localctx
-		var _startState: Int = 278
-		try enterRecursionRule(_localctx, 278, ObjectiveCParser.RULE_postfixExpression, _p)
+		var _startState: Int = 290
+		try enterRecursionRule(_localctx, 290, ObjectiveCParser.RULE_postfixExpression, _p)
 		var _la: Int = 0
 		defer {
 	    		try! unrollRecursionContexts(_parentctx)
@@ -13618,27 +14203,27 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt: Int
 			try enterOuterAlt(_localctx, 1)
-			setState(1647)
+			setState(1711)
 			try primaryExpression()
-			setState(1651)
+			setState(1715)
 			try _errHandler.sync(self)
-			_alt = try getInterpreter().adaptivePredict(_input,216,_ctx)
+			_alt = try getInterpreter().adaptivePredict(_input,227,_ctx)
 			while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 				if ( _alt==1 ) {
-					setState(1648)
+					setState(1712)
 					try postfixExpr()
 
 			 
 				}
-				setState(1653)
+				setState(1717)
 				try _errHandler.sync(self)
-				_alt = try getInterpreter().adaptivePredict(_input,216,_ctx)
+				_alt = try getInterpreter().adaptivePredict(_input,227,_ctx)
 			}
 
 			_ctx!.stop = try _input.LT(-1)
-			setState(1665)
+			setState(1729)
 			try _errHandler.sync(self)
-			_alt = try getInterpreter().adaptivePredict(_input,218,_ctx)
+			_alt = try getInterpreter().adaptivePredict(_input,229,_ctx)
 			while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 				if ( _alt==1 ) {
 					if _parseListeners != nil {
@@ -13647,11 +14232,11 @@ open class ObjectiveCParser: Parser {
 					_prevctx = _localctx
 					_localctx = PostfixExpressionContext(_parentctx, _parentState);
 					try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_postfixExpression)
-					setState(1654)
+					setState(1718)
 					if (!(precpred(_ctx, 1))) {
 					    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 1)"))
 					}
-					setState(1655)
+					setState(1719)
 					_la = try _input.LA(1)
 					if (!(//closure
 					 { () -> Bool in
@@ -13664,28 +14249,28 @@ open class ObjectiveCParser: Parser {
 						_errHandler.reportMatch(self)
 						try consume()
 					}
-					setState(1656)
+					setState(1720)
 					try identifier()
-					setState(1660)
+					setState(1724)
 					try _errHandler.sync(self)
-					_alt = try getInterpreter().adaptivePredict(_input,217,_ctx)
+					_alt = try getInterpreter().adaptivePredict(_input,228,_ctx)
 					while (_alt != 2 && _alt != ATN.INVALID_ALT_NUMBER) {
 						if ( _alt==1 ) {
-							setState(1657)
+							setState(1721)
 							try postfixExpr()
 
 					 
 						}
-						setState(1662)
+						setState(1726)
 						try _errHandler.sync(self)
-						_alt = try getInterpreter().adaptivePredict(_input,217,_ctx)
+						_alt = try getInterpreter().adaptivePredict(_input,228,_ctx)
 					}
 
 			 
 				}
-				setState(1667)
+				setState(1731)
 				try _errHandler.sync(self)
-				_alt = try getInterpreter().adaptivePredict(_input,218,_ctx)
+				_alt = try getInterpreter().adaptivePredict(_input,229,_ctx)
 			}
 
 		}
@@ -13700,7 +14285,7 @@ open class ObjectiveCParser: Parser {
 	open class PostfixExprContext:ParserRuleContext {
 		public var _RP: Token!
 		public var macroArguments: Array<Token> = Array<Token>()
-		public var _tset3163: Token!
+		public var _tset3282: Token!
 		public var op: Token!
 		open func LBRACK() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.LBRACK.rawValue, 0) }
 		open func expression() -> ExpressionContext? {
@@ -13749,30 +14334,30 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func postfixExpr() throws -> PostfixExprContext {
 		var _localctx: PostfixExprContext = PostfixExprContext(_ctx, getState())
-		try enterRule(_localctx, 280, ObjectiveCParser.RULE_postfixExpr)
+		try enterRule(_localctx, 292, ObjectiveCParser.RULE_postfixExpr)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1686)
+		 	setState(1750)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,222, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,233, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1668)
+		 		setState(1732)
 		 		try match(ObjectiveCParser.Tokens.LBRACK.rawValue)
-		 		setState(1669)
+		 		setState(1733)
 		 		try expression(0)
-		 		setState(1670)
+		 		setState(1734)
 		 		try match(ObjectiveCParser.Tokens.RBRACK.rawValue)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1672)
+		 		setState(1736)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1674)
+		 		setState(1738)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -13791,53 +14376,53 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }()) {
-		 			setState(1673)
+		 			setState(1737)
 		 			try argumentExpressionList()
 
 		 		}
 
-		 		setState(1676)
+		 		setState(1740)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1677)
+		 		setState(1741)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1680) 
+		 		setState(1744) 
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		repeat {
-		 			setState(1680)
+		 			setState(1744)
 		 			try _errHandler.sync(self)
-		 			switch(try getInterpreter().adaptivePredict(_input,220, _ctx)) {
+		 			switch(try getInterpreter().adaptivePredict(_input,231, _ctx)) {
 		 			case 1:
-		 				setState(1678)
+		 				setState(1742)
 		 				try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 
 		 				break
 		 			case 2:
-		 				setState(1679)
-		 				_localctx.castdown(PostfixExprContext.self)._tset3163 = try _input.LT(1)
+		 				setState(1743)
+		 				_localctx.castdown(PostfixExprContext.self)._tset3282 = try _input.LT(1)
 		 				_la = try _input.LA(1)
 		 				if (_la <= 0 || (//closure
 		 				 { () -> Bool in
 		 				      let testSet: Bool = _la == ObjectiveCParser.Tokens.RP.rawValue
 		 				      return testSet
 		 				 }())) {
-		 					_localctx.castdown(PostfixExprContext.self)._tset3163 = try _errHandler.recoverInline(self) as Token
+		 					_localctx.castdown(PostfixExprContext.self)._tset3282 = try _errHandler.recoverInline(self) as Token
 		 				}
 		 				else {
 		 					_errHandler.reportMatch(self)
 		 					try consume()
 		 				}
-		 				_localctx.castdown(PostfixExprContext.self).macroArguments.append(_localctx.castdown(PostfixExprContext.self)._tset3163)
+		 				_localctx.castdown(PostfixExprContext.self).macroArguments.append(_localctx.castdown(PostfixExprContext.self)._tset3282)
 
 		 				break
 		 			default: break
 		 			}
 
-		 			setState(1682); 
+		 			setState(1746); 
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 		} while (//closure
@@ -13860,13 +14445,13 @@ open class ObjectiveCParser: Parser {
 		 		          }()
 		 		      return testSet
 		 		 }())
-		 		setState(1684)
+		 		setState(1748)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1685)
+		 		setState(1749)
 		 		_localctx.castdown(PostfixExprContext.self).op = try _input.LT(1)
 		 		_la = try _input.LA(1)
 		 		if (!(//closure
@@ -13928,16 +14513,16 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func argumentExpressionList() throws -> ArgumentExpressionListContext {
 		var _localctx: ArgumentExpressionListContext = ArgumentExpressionListContext(_ctx, getState())
-		try enterRule(_localctx, 282, ObjectiveCParser.RULE_argumentExpressionList)
+		try enterRule(_localctx, 294, ObjectiveCParser.RULE_argumentExpressionList)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1688)
+		 	setState(1752)
 		 	try argumentExpression()
-		 	setState(1693)
+		 	setState(1757)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
 		 	while (//closure
@@ -13945,13 +14530,13 @@ open class ObjectiveCParser: Parser {
 		 	      let testSet: Bool = _la == ObjectiveCParser.Tokens.COMMA.rawValue
 		 	      return testSet
 		 	 }()) {
-		 		setState(1689)
+		 		setState(1753)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
-		 		setState(1690)
+		 		setState(1754)
 		 		try argumentExpression()
 
 
-		 		setState(1695)
+		 		setState(1759)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 	}
@@ -14000,23 +14585,23 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func argumentExpression() throws -> ArgumentExpressionContext {
 		var _localctx: ArgumentExpressionContext = ArgumentExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 284, ObjectiveCParser.RULE_argumentExpression)
+		try enterRule(_localctx, 296, ObjectiveCParser.RULE_argumentExpression)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1698)
+		 	setState(1762)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,224, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,235, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1696)
+		 		setState(1760)
 		 		try expression(0)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1697)
+		 		setState(1761)
 		 		try genericTypeSpecifier()
 
 		 		break
@@ -14098,87 +14683,87 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func primaryExpression() throws -> PrimaryExpressionContext {
 		var _localctx: PrimaryExpressionContext = PrimaryExpressionContext(_ctx, getState())
-		try enterRule(_localctx, 286, ObjectiveCParser.RULE_primaryExpression)
+		try enterRule(_localctx, 298, ObjectiveCParser.RULE_primaryExpression)
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1715)
+		 	setState(1779)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,225, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,236, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1700)
+		 		setState(1764)
 		 		try identifier()
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1701)
+		 		setState(1765)
 		 		try constant()
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1702)
+		 		setState(1766)
 		 		try stringLiteral()
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1703)
+		 		setState(1767)
 		 		try match(ObjectiveCParser.Tokens.LP.rawValue)
-		 		setState(1704)
+		 		setState(1768)
 		 		try expression(0)
-		 		setState(1705)
+		 		setState(1769)
 		 		try match(ObjectiveCParser.Tokens.RP.rawValue)
 
 		 		break
 		 	case 5:
 		 		try enterOuterAlt(_localctx, 5)
-		 		setState(1707)
+		 		setState(1771)
 		 		try messageExpression()
 
 		 		break
 		 	case 6:
 		 		try enterOuterAlt(_localctx, 6)
-		 		setState(1708)
+		 		setState(1772)
 		 		try selectorExpression()
 
 		 		break
 		 	case 7:
 		 		try enterOuterAlt(_localctx, 7)
-		 		setState(1709)
+		 		setState(1773)
 		 		try protocolExpression()
 
 		 		break
 		 	case 8:
 		 		try enterOuterAlt(_localctx, 8)
-		 		setState(1710)
+		 		setState(1774)
 		 		try encodeExpression()
 
 		 		break
 		 	case 9:
 		 		try enterOuterAlt(_localctx, 9)
-		 		setState(1711)
+		 		setState(1775)
 		 		try dictionaryExpression()
 
 		 		break
 		 	case 10:
 		 		try enterOuterAlt(_localctx, 10)
-		 		setState(1712)
+		 		setState(1776)
 		 		try arrayExpression()
 
 		 		break
 		 	case 11:
 		 		try enterOuterAlt(_localctx, 11)
-		 		setState(1713)
+		 		setState(1777)
 		 		try boxExpression()
 
 		 		break
 		 	case 12:
 		 		try enterOuterAlt(_localctx, 12)
-		 		setState(1714)
+		 		setState(1778)
 		 		try blockExpression()
 
 		 		break
@@ -14234,36 +14819,36 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func constant() throws -> ConstantContext {
 		var _localctx: ConstantContext = ConstantContext(_ctx, getState())
-		try enterRule(_localctx, 288, ObjectiveCParser.RULE_constant)
+		try enterRule(_localctx, 300, ObjectiveCParser.RULE_constant)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
-		 	setState(1735)
+		 	setState(1799)
 		 	try _errHandler.sync(self)
-		 	switch(try getInterpreter().adaptivePredict(_input,228, _ctx)) {
+		 	switch(try getInterpreter().adaptivePredict(_input,239, _ctx)) {
 		 	case 1:
 		 		try enterOuterAlt(_localctx, 1)
-		 		setState(1717)
+		 		setState(1781)
 		 		try match(ObjectiveCParser.Tokens.HEX_LITERAL.rawValue)
 
 		 		break
 		 	case 2:
 		 		try enterOuterAlt(_localctx, 2)
-		 		setState(1718)
+		 		setState(1782)
 		 		try match(ObjectiveCParser.Tokens.OCTAL_LITERAL.rawValue)
 
 		 		break
 		 	case 3:
 		 		try enterOuterAlt(_localctx, 3)
-		 		setState(1719)
+		 		setState(1783)
 		 		try match(ObjectiveCParser.Tokens.BINARY_LITERAL.rawValue)
 
 		 		break
 		 	case 4:
 		 		try enterOuterAlt(_localctx, 4)
-		 		setState(1721)
+		 		setState(1785)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -14271,7 +14856,7 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.ADD.rawValue || _la == ObjectiveCParser.Tokens.SUB.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(1720)
+		 			setState(1784)
 		 			_la = try _input.LA(1)
 		 			if (!(//closure
 		 			 { () -> Bool in
@@ -14287,13 +14872,13 @@ open class ObjectiveCParser: Parser {
 
 		 		}
 
-		 		setState(1723)
+		 		setState(1787)
 		 		try match(ObjectiveCParser.Tokens.DECIMAL_LITERAL.rawValue)
 
 		 		break
 		 	case 5:
 		 		try enterOuterAlt(_localctx, 5)
-		 		setState(1725)
+		 		setState(1789)
 		 		try _errHandler.sync(self)
 		 		_la = try _input.LA(1)
 		 		if (//closure
@@ -14301,7 +14886,7 @@ open class ObjectiveCParser: Parser {
 		 		      let testSet: Bool = _la == ObjectiveCParser.Tokens.ADD.rawValue || _la == ObjectiveCParser.Tokens.SUB.rawValue
 		 		      return testSet
 		 		 }()) {
-		 			setState(1724)
+		 			setState(1788)
 		 			_la = try _input.LA(1)
 		 			if (!(//closure
 		 			 { () -> Bool in
@@ -14317,49 +14902,49 @@ open class ObjectiveCParser: Parser {
 
 		 		}
 
-		 		setState(1727)
+		 		setState(1791)
 		 		try match(ObjectiveCParser.Tokens.FLOATING_POINT_LITERAL.rawValue)
 
 		 		break
 		 	case 6:
 		 		try enterOuterAlt(_localctx, 6)
-		 		setState(1728)
+		 		setState(1792)
 		 		try match(ObjectiveCParser.Tokens.CHARACTER_LITERAL.rawValue)
 
 		 		break
 		 	case 7:
 		 		try enterOuterAlt(_localctx, 7)
-		 		setState(1729)
+		 		setState(1793)
 		 		try match(ObjectiveCParser.Tokens.NIL.rawValue)
 
 		 		break
 		 	case 8:
 		 		try enterOuterAlt(_localctx, 8)
-		 		setState(1730)
+		 		setState(1794)
 		 		try match(ObjectiveCParser.Tokens.NULL.rawValue)
 
 		 		break
 		 	case 9:
 		 		try enterOuterAlt(_localctx, 9)
-		 		setState(1731)
+		 		setState(1795)
 		 		try match(ObjectiveCParser.Tokens.YES.rawValue)
 
 		 		break
 		 	case 10:
 		 		try enterOuterAlt(_localctx, 10)
-		 		setState(1732)
+		 		setState(1796)
 		 		try match(ObjectiveCParser.Tokens.NO.rawValue)
 
 		 		break
 		 	case 11:
 		 		try enterOuterAlt(_localctx, 11)
-		 		setState(1733)
+		 		setState(1797)
 		 		try match(ObjectiveCParser.Tokens.TRUE.rawValue)
 
 		 		break
 		 	case 12:
 		 		try enterOuterAlt(_localctx, 12)
-		 		setState(1734)
+		 		setState(1798)
 		 		try match(ObjectiveCParser.Tokens.FALSE.rawValue)
 
 		 		break
@@ -14419,7 +15004,7 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func stringLiteral() throws -> StringLiteralContext {
 		var _localctx: StringLiteralContext = StringLiteralContext(_ctx, getState())
-		try enterRule(_localctx, 290, ObjectiveCParser.RULE_stringLiteral)
+		try enterRule(_localctx, 302, ObjectiveCParser.RULE_stringLiteral)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
@@ -14427,15 +15012,15 @@ open class ObjectiveCParser: Parser {
 		do {
 			var _alt:Int
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1745); 
+		 	setState(1809); 
 		 	try _errHandler.sync(self)
 		 	_alt = 1;
 		 	repeat {
 		 		switch (_alt) {
 		 		case 1:
-		 			setState(1737)
+		 			setState(1801)
 		 			try match(ObjectiveCParser.Tokens.STRING_START.rawValue)
-		 			setState(1741)
+		 			setState(1805)
 		 			try _errHandler.sync(self)
 		 			_la = try _input.LA(1)
 		 			while (//closure
@@ -14443,7 +15028,7 @@ open class ObjectiveCParser: Parser {
 		 			      let testSet: Bool = _la == ObjectiveCParser.Tokens.STRING_NEWLINE.rawValue || _la == ObjectiveCParser.Tokens.STRING_VALUE.rawValue
 		 			      return testSet
 		 			 }()) {
-		 				setState(1738)
+		 				setState(1802)
 		 				_la = try _input.LA(1)
 		 				if (!(//closure
 		 				 { () -> Bool in
@@ -14458,11 +15043,11 @@ open class ObjectiveCParser: Parser {
 		 				}
 
 
-		 				setState(1743)
+		 				setState(1807)
 		 				try _errHandler.sync(self)
 		 				_la = try _input.LA(1)
 		 			}
-		 			setState(1744)
+		 			setState(1808)
 		 			try match(ObjectiveCParser.Tokens.STRING_END.rawValue)
 
 
@@ -14470,9 +15055,9 @@ open class ObjectiveCParser: Parser {
 		 		default:
 		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
-		 		setState(1747); 
+		 		setState(1811); 
 		 		try _errHandler.sync(self)
-		 		_alt = try getInterpreter().adaptivePredict(_input,230,_ctx)
+		 		_alt = try getInterpreter().adaptivePredict(_input,241,_ctx)
 		 	} while (_alt != 2 && _alt !=  ATN.INVALID_ALT_NUMBER)
 
 		}
@@ -14560,14 +15145,14 @@ open class ObjectiveCParser: Parser {
 	@discardableResult
 	open func identifier() throws -> IdentifierContext {
 		var _localctx: IdentifierContext = IdentifierContext(_ctx, getState())
-		try enterRule(_localctx, 292, ObjectiveCParser.RULE_identifier)
+		try enterRule(_localctx, 304, ObjectiveCParser.RULE_identifier)
 		var _la: Int = 0
 		defer {
 	    		try! exitRule()
 	    }
 		do {
 		 	try enterOuterAlt(_localctx, 1)
-		 	setState(1749)
+		 	setState(1813)
 		 	_la = try _input.LA(1)
 		 	if (!(//closure
 		 	 { () -> Bool in
@@ -14601,9 +15186,9 @@ open class ObjectiveCParser: Parser {
     override
 	open func sempred(_ _localctx: RuleContext?, _ ruleIndex: Int,  _ predIndex: Int)throws -> Bool {
 		switch (ruleIndex) {
-		case  132:
+		case  138:
 			return try expression_sempred(_localctx?.castdown(ExpressionContext.self), predIndex)
-		case  139:
+		case  145:
 			return try postfixExpression_sempred(_localctx?.castdown(PostfixExpressionContext.self), predIndex)
 	    default: return true
 		}

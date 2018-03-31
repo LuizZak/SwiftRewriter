@@ -350,6 +350,11 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.fixedArray(.struct("char"), length: 3),
                toConvertTo: "(CChar, CChar, CChar)")
     }
+    
+    func testPointerToVoid() {
+        expect(.pointer(.void),
+               toConvertTo: "UnsafeMutableRawPointer")
+    }
 }
 
 extension DefaultTypeMapperTests {

@@ -750,6 +750,46 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#functionPointer}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#functionPointerParameterList}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitFunctionPointerParameterList(_ ctx: ObjectiveCParser.FunctionPointerParameterListContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#functionPointerParameterDeclarationList}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitFunctionPointerParameterDeclarationList(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationListContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#functionPointerParameterDeclaration}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitFunctionPointerParameterDeclaration(_ ctx: ObjectiveCParser.FunctionPointerParameterDeclarationContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#functionCallExpression}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -950,6 +990,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#scalarTypeSpecifier}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitScalarTypeSpecifier(_ ctx: ObjectiveCParser.ScalarTypeSpecifierContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#typeofExpression}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -1086,6 +1136,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitStructInitializer(_ ctx: ObjectiveCParser.StructInitializerContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#structInitializerItem}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitStructInitializerItem(_ ctx: ObjectiveCParser.StructInitializerItemContext) -> T{
 	 	fatalError(#function + " must be overridden")
 	}
 

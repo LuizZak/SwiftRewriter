@@ -54,6 +54,22 @@ class ASTSimplifierTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
+    func testMaintainStatementLabelWhileSimplifyingSingleStatementDos() {
+        let input = Statement.compound([.do([.expression(.constant(0))])])
+        input.label = "label"
+        
+        let expected = Statement.compound([.expression(.constant(0))])
+        
+        let res = assertTransform(
+            // label: { do { 0; } }
+            statement: input,
+            // label: { 0; }
+            into: expected
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.label, "label")
+    }
+    
     // MARK: - Test-not-nil-then-invoke block patterns
     
     func testSimplifyCheckThenCallConstructs() {
@@ -228,6 +244,4 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             into: Expression.parens(.constant(0)).binary(op: .add, rhs: .constant(1))
         ); assertDidNotNotifyChange()
     }
-    
-    // MARK: -
 }

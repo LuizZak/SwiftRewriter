@@ -230,6 +230,14 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
     }
     
+    func testLabeledStatement() {
+        let stmt = assert(objcStmt: "label: if(true) { };",
+               readsAs: Statement.if(.constant(true), body: [], else: nil)
+        )
+        
+        XCTAssertEqual(stmt?.label, "label")
+    }
+    
     func testDeclaration() {
         assert(objcStmt: "CGFloat value = 1;",
                parseBlock: { try $0.declaration() },
@@ -251,12 +259,15 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                              type: .block(returnType: .void, parameters: []),
                                              initialization: nil))
     }
-    
+}
+
+extension SwiftStatementASTReaderTests {
+    @discardableResult
     func assert(objcStmt: String,
                 parseBlock: (ObjectiveCParser) throws -> (ParserRuleContext) = { try $0.statement() },
                 readsAs expected: Statement,
                 file: String = #file,
-                line: Int = #line) {
+                line: Int = #line) -> Statement? {
         let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
         let typeParser = TypeParsing(state: SwiftStatementASTReaderTests._state)
         
@@ -273,6 +284,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                 var expStr = ""
                 
                 if let result = result {
+                    resStr = ""
                     dump(result, to: &resStr)
                 }
                 dump(expected, to: &expStr)
@@ -286,9 +298,13 @@ class SwiftStatementASTReaderTests: XCTestCase {
                     \(resStr)
                     """, inFile: file, atLine: line, expected: true)
             }
+            
+            return result
         } catch {
             recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
         }
+        
+        return nil
     }
     
     private static var _state = ObjcParserState()

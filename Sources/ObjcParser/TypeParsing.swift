@@ -19,7 +19,6 @@ public class TypeParsing {
     
     // Helper for mapping Objective-C types from type declarations into structured
     // types.
-    // Finds all types from the
     public func parseObjcTypes(inDeclaration decl: Parser.FieldDeclarationContext) -> [ObjcType] {
         var types: [ObjcType] = []
         

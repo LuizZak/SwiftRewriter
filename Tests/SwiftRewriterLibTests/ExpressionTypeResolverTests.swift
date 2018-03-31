@@ -1010,6 +1010,56 @@ class ExpressionTypeResolverTests: XCTestCase {
                 at: \Expression.asPostfix?.op.asFuntionCall?.arguments[0].expression,
                 expectsType: "GLenum")
     }
+    
+    /// Tests that function invocation expressions such as `function(myBlock())`,
+    /// where the expected type of `myBlock` is set from the surrounding context,
+    /// have their expected types set to be a block signature that takes in as
+    /// parameters all the parameters from the function invocation arguments, and
+    /// as return type the expected type from the surrounding context.
+    func testBackPropagatesBlockTypes() {
+        let signature =
+            FunctionSignature(
+                name: "f",
+                parameters: [.init(label: "_", name: "b", type: .int)],
+                returnType: .void,
+                isStatic: false)
+        
+        startScopedTest(
+            with: Expression.identifier("f").call([Expression.identifier("myBlock").call()]),
+            sut: ExpressionTypeResolver())
+            .definingLocal(CodeDefinition(functionSignature: signature))
+            .resolve()
+            .thenAssertExpression(
+                at: \Expression.asPostfix?.functionCall?.subExpressions[0].asPostfix?.exp,
+                expectsType: .block(returnType: .int, parameters: [])
+            )
+        
+        // Test that argument types are back-propagated as well
+        startScopedTest(
+            with: Expression.identifier("f").call([Expression.identifier("myBlock").call([.constant(0)])]),
+            sut: ExpressionTypeResolver())
+            .definingLocal(CodeDefinition(functionSignature: signature))
+            .resolve()
+            .thenAssertExpression(
+                at: \Expression.asPostfix?.functionCall?.subExpressions[0].asPostfix?.exp,
+                expectsType: .block(returnType: .int, parameters: [.int])
+            )
+    }
+    
+    func testBackPropagateBlockLiteralInIfStatement() {
+        // Test that backpropagation from statament expressions work as well
+        startScopedTest(
+            with: Statement.if(Expression.block(parameters: [.init(name: "p", type: .int)], return: .bool, body: []).call([.constant(0)]), body: [], else: nil),
+            sut: ExpressionTypeResolver())
+            .thenAssertExpression(
+                at: \Statement.asIf?.exp.asPostfix?.exp,
+                expectsType: .block(returnType: .bool, parameters: [.int])
+            )
+            .thenAssertExpression(
+                at: \Statement.asIf?.exp.asPostfix?.exp,
+                resolvedAs: .block(returnType: .bool, parameters: [.int])
+            )
+    }
 }
 
 // MARK: - Test Building Helpers

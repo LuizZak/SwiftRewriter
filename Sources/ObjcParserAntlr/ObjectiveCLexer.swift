@@ -30,7 +30,7 @@ open class ObjectiveCLexer: Lexer {
     
     public var state: State
     
-	public static let AUTO=1, BREAK=2, CASE=3, CHAR=4, CONST=5, CONTINUE=6,
+	public static let AUTO=1, BREAK=2, CASE=3, CHAR=4, CONST=5, CONTINUE=6, 
                    DEFAULT=7, DO=8, DOUBLE=9, ELSE=10, ENUM=11, EXTERN=12, 
                    FLOAT=13, FOR=14, GOTO=15, IF=16, INLINE=17, INT=18, 
                    LONG=19, REGISTER=20, RESTRICT=21, RETURN=22, SHORT=23, 
@@ -136,9 +136,10 @@ open class ObjectiveCLexer: Lexer {
 		"DIRECTIVE_BACKSLASH_ESCAPE", "DIRECTIVE_TEXT_BACKSLASH_NEWLINE", "DIRECTIVE_TEXT_MULTI_COMMENT", 
 		"DIRECTIVE_TEXT_SINGLE_COMMENT", "DIRECTIVE_SLASH", "DIRECTIVE_TEXT", 
 		"LetterOrDec", "Letter", "IntegerTypeSuffix", "Exponent", "Dec", "FloatTypeSuffix", 
-		"StringStart", "EscapeSequence", "OctalEscape", "UnicodeEscape", "HexDigit", 
-		"Ws", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
-		"N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+		"StringStart", "EscapeSequence", "OctalEscape", "UnicodeEscape", "CUnicodeEscape", 
+		"HexDigit", "Ws", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", 
+		"L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", 
+		"Z"
 	]
 
 	private static let _LITERAL_NAMES: [String?] = [

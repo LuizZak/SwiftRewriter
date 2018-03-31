@@ -92,4 +92,3 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the unknown statement context
     func visitUnknown(_ stmt: UnknownStatement) -> StmtResult
 }
-

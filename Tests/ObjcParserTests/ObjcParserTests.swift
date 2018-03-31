@@ -423,6 +423,37 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
     }
+    
+    func testParseGlobalFunctionPointer() {
+        _=parserTest("""
+            void (*myFunc)(char *a, int);
+            """)
+    }
+    
+    func testParseArrayWithStructInit() {
+        _=parserTest("""
+            static const struct game_params mines_presets[] = {
+              {9, 9, 10, TRUE},
+              {9, 9, 35, TRUE},
+              {16, 16, 40, TRUE},
+              {16, 16, 99, TRUE},
+            #ifndef SMALL_SCREEN
+              {30, 16, 99, TRUE},
+              {30, 16, 170, TRUE},
+            #endif
+            };
+            """)
+    }
+    
+    func testIfWithExpressionList() {
+        _=parserTest("""
+            void main() {
+                if (a[10] -= 20, true) {
+                    
+                }
+            }
+            """)
+    }
 }
 
 extension ObjcParserTests {

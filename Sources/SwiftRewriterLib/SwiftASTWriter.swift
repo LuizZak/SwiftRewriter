@@ -351,24 +351,28 @@ private class ExpressionWriter: ExpressionVisitor {
                             typeSystem: typeSystem)
         
         // Print signature
-        target.outputInline("{ ")
+        target.outputInline("{")
         
-        target.outputInline("(")
-        for (i, param) in parameters.enumerated() {
-            if i > 0 {
-                target.outputInline(", ")
+        // Avoid emitting block signature if block's expected type matches it's
+        // actual signature
+        if exp.expectedType != exp.resolvedType {
+            target.outputInline(" (")
+            for (i, param) in parameters.enumerated() {
+                if i > 0 {
+                    target.outputInline(", ")
+                }
+                
+                target.outputInline(param.name)
+                target.outputInline(": ")
+                target.outputInline(typeMapper.typeNameString(for: param.type), style: .typeName)
             }
+            target.outputInline(")")
             
-            target.outputInline(param.name)
-            target.outputInline(": ")
-            target.outputInline(typeMapper.typeNameString(for: param.type), style: .typeName)
+            target.outputInline(" -> ")
+            target.outputInline(typeMapper.typeNameString(for: returnType), style: .typeName)
+            
+            target.outputInline(" in", style: .keyword)
         }
-        target.outputInline(")")
-        
-        target.outputInline(" -> ")
-        target.outputInline(typeMapper.typeNameString(for: returnType), style: .typeName)
-        
-        target.outputInline(" in", style: .keyword)
         
         if body.isEmpty {
             target.outputLineFeed()
@@ -424,6 +428,10 @@ private class StatementWriter: StatementVisitor {
     }
     
     func visitStatement(_ statement: Statement) {
+        if let label = statement.label {
+            target.output(line: "// \(label):")
+        }
+        
         statement.accept(self)
     }
     
@@ -700,6 +708,10 @@ private class StatementWriter: StatementVisitor {
     
     private func shouldEmitTypeSignature(forInitVal exp: Expression, varType: SwiftType) -> Bool {
         if exp.isErrorTyped && typeSystem.isNumeric(varType) {
+            return true
+        }
+        
+        if case .block? = exp.resolvedType {
             return true
         }
         

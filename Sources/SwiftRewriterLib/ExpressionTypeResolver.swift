@@ -409,8 +409,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
-        _=super.visitPostfix(exp)
-        
         let resolver = MemberInvocationResolver(typeSystem: typeSystem, typeResolver: self)
         let result = resolver.resolve(postfix: exp, op: exp.op)
         
@@ -517,6 +515,10 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 
                 blockReturnType = ret
             }
+        } else {
+            exp.resolvedType =
+                .block(returnType: exp.returnType,
+                       parameters: exp.parameters.map { $0.type })
         }
         
         // Apply definitions for function parameters
@@ -593,16 +595,6 @@ private class MemberInvocationResolver {
     }
     
     func resolve(postfix exp: PostfixExpression, op: Postfix) -> Expression {
-        // If this type is a function call of a member access of, postpone the
-        // resolving to the parent (function call) node, since we could possibly
-        // end up performing an unnecessary type lookup here.
-        if op.asMember != nil,
-            let parent = exp.parent as? PostfixExpression,
-            parent.functionCall != nil,
-            parent.exp == exp {
-            return exp
-        }
-        
         defer {
             // Elevate an implicitly-unwrapped optional access to an optional access
             if exp.op.hasOptionalAccess, case .implicitUnwrappedOptional(let inner)? = exp.resolvedType {
@@ -612,6 +604,9 @@ private class MemberInvocationResolver {
         
         switch op {
         case let sub as SubscriptPostfix:
+            exp.exp = typeResolver.visitExpression(exp.exp)
+            exp.op = sub.replacingExpression(typeResolver.visitExpression(sub.expression))
+            
             // Propagate error type
             if exp.exp.isErrorTyped {
                 return exp.makeErrorTyped()
@@ -667,6 +662,8 @@ private class MemberInvocationResolver {
             
         // Meta-type fetching (TypeName.self, TypeName.self.self, etc.)
         case let member as MemberPostfix where member.name == "self":
+            exp.exp = typeResolver.visitExpression(exp.exp)
+            
             // Propagate error type
             if exp.exp.isErrorTyped {
                 return exp.makeErrorTyped()
@@ -676,6 +673,8 @@ private class MemberInvocationResolver {
             exp.op.returnType = exp.resolvedType
             
         case let member as MemberPostfix:
+            exp.exp = typeResolver.visitExpression(exp.exp)
+            
             // Propagate error type
             if exp.exp.isErrorTyped {
                 return exp.makeErrorTyped()
@@ -707,6 +706,20 @@ private class MemberInvocationResolver {
     }
     
     func handleFunctionCall(postfix: PostfixExpression, functionCall: FunctionCallPostfix) -> Expression {
+        postfix.exp = typeResolver.visitExpression(postfix.exp)
+        
+        defer {
+            postfix.op = functionCall.replacingArguments(functionCall.subExpressions.map(typeResolver.visitExpression))
+            
+            if let expectedType = postfix.expectedType, let args = postfix.op.asFuntionCall?.arguments {
+                let argTypes = args.compactMap { $0.expression.resolvedType }
+                
+                if args.count == argTypes.count {
+                    postfix.exp.expectedType = .block(returnType: expectedType, parameters: argTypes)
+                }
+            }
+        }
+        
         let arguments = functionCall.arguments
         
         // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
