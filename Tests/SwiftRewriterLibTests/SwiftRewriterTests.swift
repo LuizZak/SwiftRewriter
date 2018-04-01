@@ -2308,4 +2308,26 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteChainedSubscriptAccess() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation A
+            - (void)method {
+                NSDictionary* dict = @{};
+                NSLog(dict[@"abc"][@"def"].value);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                func method() {
+                    var dict = [:]
+                    NSLog(dict["abc"]?["def"].value)
+                }
+            }
+            """)
+    }
 }

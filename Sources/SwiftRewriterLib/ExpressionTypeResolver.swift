@@ -604,8 +604,10 @@ private class MemberInvocationResolver {
         
         switch op {
         case let sub as SubscriptPostfix:
+            let sub = sub.replacingExpression(typeResolver.visitExpression(sub.expression))
+            
             exp.exp = typeResolver.visitExpression(exp.exp)
-            exp.op = sub.replacingExpression(typeResolver.visitExpression(sub.expression))
+            exp.op = sub
             
             // Propagate error type
             if exp.exp.isErrorTyped {
