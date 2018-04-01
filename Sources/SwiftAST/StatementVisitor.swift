@@ -38,6 +38,12 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the `while` statement node
     func visitWhile(_ stmt: WhileStatement) -> StmtResult
     
+    /// Visits a `do/while` statement with this visitor
+    ///
+    /// - Parameter stmt: A while statement to visit
+    /// - Returns: Result of visiting the `do/while` statement node
+    func visitDoWhile(_ stmt: DoWhileStatement) -> StmtResult
+    
     /// Visits a `for` loop statement with this visitor
     ///
     /// - Parameter stmt: A for statement to visit

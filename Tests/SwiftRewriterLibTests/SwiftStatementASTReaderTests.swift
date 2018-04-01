@@ -38,6 +38,12 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
     }
     
+    func testDoWhile() {
+        assert(objcStmt: "do { } while(true);",
+               readsAs: Statement.doWhile(.constant(true), body: .empty)
+        )
+    }
+    
     func testFor() {
         assert(objcStmt: "for(NSInteger i = 0; i < 10; i++) { }",
                readsAs: .for(.identifier("i"), .binary(lhs: .constant(0), op: .openRange, rhs: .constant(10)),

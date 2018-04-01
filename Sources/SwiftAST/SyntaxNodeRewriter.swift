@@ -263,6 +263,17 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         return stmt
     }
     
+    /// Visits a `do/while` statement with this visitor
+    ///
+    /// - Parameter stmt: A DoWhileStatement to visit
+    /// - Returns: Result of visiting the `do/while` statement node
+    open func visitDoWhile(_ stmt: DoWhileStatement) -> Statement {
+        stmt.exp = visitExpression(stmt.exp)
+        _=visitStatement(stmt.body)
+        
+        return stmt
+    }
+    
     /// Visits a `for` loop statement with this visitor
     ///
     /// - Parameter stmt: A ForStatement to visit

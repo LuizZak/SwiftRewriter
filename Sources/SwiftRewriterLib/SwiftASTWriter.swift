@@ -574,6 +574,15 @@ private class StatementWriter: StatementVisitor {
         visitCompound(stmt.body)
     }
     
+    func visitDoWhile(_ stmt: DoWhileStatement) {
+        target.outputIdentation()
+        target.outputInline("repeat", style: .keyword)
+        visitCompound(stmt.body, lineFeedAfter: false)
+        target.outputInlineWithSpace(" while", style: .keyword)
+        emitExpr(stmt.exp)
+        target.outputLineFeed()
+    }
+    
     func visitFor(_ stmt: ForStatement) {
         target.outputIdentation()
         target.outputInlineWithSpace("for", style: .keyword)

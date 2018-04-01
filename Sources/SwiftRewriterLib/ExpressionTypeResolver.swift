@@ -550,6 +550,12 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return super.visitWhile(stmt)
     }
     
+    public override func visitDoWhile(_ stmt: DoWhileStatement) -> Statement {
+        stmt.exp.expectedType = .bool
+        
+        return super.visitDoWhile(stmt)
+    }
+    
     public override func visitReturn(_ stmt: ReturnStatement) -> Statement {
         if let lastType = contextFunctionReturnTypeStack.last {
             stmt.exp?.expectedType = lastType

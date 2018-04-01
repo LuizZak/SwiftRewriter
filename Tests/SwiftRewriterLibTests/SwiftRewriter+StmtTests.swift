@@ -867,6 +867,31 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testDoWhileStatement() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                do {
+                    stmt();
+                } while(true);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    repeat {
+                        stmt()
+                    } while true
+                }
+            }
+            """
+        )
+    }
+    
     func testSynchronizedStatement() throws {
         try assertObjcParse(
             objc: """

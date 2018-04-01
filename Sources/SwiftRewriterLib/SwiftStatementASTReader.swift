@@ -243,17 +243,11 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
     
     // MARK: - while / do-while / for / for-in
     public override func visitIterationStatement(_ ctx: Parser.IterationStatementContext) -> Statement? {
-        if let w = ctx.whileStatement()?.accept(self) {
-            return w
-        }
-        if let f = ctx.forStatement()?.accept(self) {
-            return f
-        }
-        if let forIn = ctx.forInStatement()?.accept(self) {
-            return forIn
-        }
-        
-        return .unknown(UnknownASTContext(context: ctx.getText()))
+        return acceptFirst(from: ctx.whileStatement(),
+                           ctx.doStatement(),
+                           ctx.forStatement(),
+                           ctx.forInStatement())
+            ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
     public override func visitWhileStatement(_ ctx: Parser.WhileStatementContext) -> Statement? {
@@ -265,6 +259,17 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
         }
         
         return .while(expr, body: body)
+    }
+    
+    public override func visitDoStatement(_ ctx: ObjectiveCParser.DoStatementContext) -> Statement? {
+        guard let expr = ctx.expression()?.accept(expressionReader) else {
+            return .unknown(UnknownASTContext(context: ctx.getText()))
+        }
+        guard let body = ctx.statement()?.accept(compoundStatementVisitor()) else {
+            return .unknown(UnknownASTContext(context: ctx.getText()))
+        }
+        
+        return .doWhile(expr, body: body)
     }
     
     public override func visitForStatement(_ ctx: Parser.ForStatementContext) -> Statement? {
