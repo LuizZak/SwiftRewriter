@@ -9,7 +9,8 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     
     public init(intentions: IntentionCollection) {
         self.intentions = intentions
-        intentionsProvider = IntentionCollectionProvider(intentions: intentions, typeSystem: nil)
+        intentionsProvider = IntentionCollectionProvider(intentions: intentions,
+                                                         typeSystem: nil)
         
         super.init()
         
@@ -37,10 +38,12 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         
         let compoundTypes =
             types.mapValues({
-                CompoundKnownType(typeName: $0[0].typeName, types: $0, typeSystem: self)
+                CompoundKnownType(typeName: $0[0].typeName, types: $0)
             })
         
-        intentionsProvider.cache = IntentionCollectionProvider.Cache(typeAliases: aliases, types: compoundTypes)
+        intentionsProvider.cache =
+            IntentionCollectionProvider.Cache(typeAliases: aliases,
+                                              types: compoundTypes)
     }
     
     public func tearDownCache() {
@@ -110,7 +113,8 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     public override func property(named name: String, static isStatic: Bool,
                                   includeOptional: Bool, in type: SwiftType) -> KnownProperty? {
         guard let typeName = typeNameIn(swiftType: type) else {
-            return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
+            return super.property(named: name, static: isStatic,
+                                  includeOptional: includeOptional, in: type)
         }
         
         if let type = intentionsProvider.knownType(withName: typeName) {
