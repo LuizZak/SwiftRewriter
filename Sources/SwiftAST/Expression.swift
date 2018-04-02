@@ -423,7 +423,9 @@ public class PostfixExpression: Expression {
     public var op: Postfix {
         didSet {
             oldValue.subExpressions.forEach { $0.parent = nil }
+            oldValue.postfixExpression = nil
             op.subExpressions.forEach { $0.parent = self }
+            op.postfixExpression = self
         }
     }
     
@@ -1027,7 +1029,10 @@ public struct ExpressionDictionaryPair: Equatable {
 
 /// A postfix operation of a PostfixExpression
 public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
-    /// Custom metadata that can be associated with this expression node
+    /// Owning postfix expression for this postfix operator
+    public internal(set) weak var postfixExpression: PostfixExpression?
+    
+    /// Custom metadata that can be associated with this postfix node
     public var metadata: [String: Any] = [:]
     
     /// Returns `true` if this postfix operation has an optional access specified
@@ -1057,6 +1062,7 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         return lhs.isEqual(to: rhs)
     }
 }
+
 public final class MemberPostfix: Postfix {
     public let name: String
     
