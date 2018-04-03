@@ -110,19 +110,27 @@ public class PropertyMergeIntentionPass: IntentionPass {
     }
     
     func collectProperties(fromClass classIntention: BaseClassIntention) -> [PropertyGenerationIntention] {
-        return
-            intentions
-                .typeIntentions()
-                .filter({ $0.typeName == classIntention.typeName })
-                .flatMap { $0.properties }
+        var props: [PropertyGenerationIntention] = []
+        
+        for file in intentions.fileIntentions() {
+            for type in file.typeIntentions where type.typeName == classIntention.typeName {
+                props.append(contentsOf: type.properties)
+            }
+        }
+        
+        return props
     }
     
     func collectMethods(fromClass classIntention: BaseClassIntention) -> [MethodGenerationIntention] {
-        return
-            intentions
-                .typeIntentions()
-                .filter({ $0.typeName == classIntention.typeName })
-                .flatMap { $0.methods }
+        var methods: [MethodGenerationIntention] = []
+        
+        for file in intentions.fileIntentions() {
+            for type in file.typeIntentions where type.typeName == classIntention.typeName {
+                methods.append(contentsOf: type.methods)
+            }
+        }
+        
+        return methods
     }
     
     private func adjustPropertySetterAccessLevel(in type: BaseClassIntention,

@@ -489,7 +489,7 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
             var declarations: [StatementVariableDeclaration] = []
             
             for (typeName, initDeclarator) in zip(types, initDeclarators) {
-                guard let type = try? ObjcParser(string: typeName).parseObjcType() else {
+                guard let type = expressionReader.typeParser.parseObjcType(typeName) else {
                     continue
                 }
                 guard let directDeclarator = initDeclarator.declarator()?.directDeclarator() else {
