@@ -22,6 +22,9 @@ class MandatoryIntentionPass: IntentionPass {
     func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         self.context = context
         
+        // Override detection pass
+        applyOverrideDetection(intentionCollection)
+        
         for file in intentionCollection.fileIntentions() {
             applyOnFile(file)
         }
@@ -35,16 +38,29 @@ class MandatoryIntentionPass: IntentionPass {
     
     func applyOnType(_ type: TypeGenerationIntention) {
         // Override detection
-        if type.kind == .class {
-            applyOverrideDetection(type)
-            
-            if let type = type as? BaseClassIntention {
-                applySynthesizatonExpansion(on: type)
-            }
+        if let type = type as? BaseClassIntention {
+            applySynthesizatonExpansion(on: type)
         }
         if let type = type as? StructGenerationIntention {
             applyStructInitializer(type)
         }
+    }
+    
+    private func applyOverrideDetection(_ intentions: IntentionCollection) {
+        (context.typeSystem as? IntentionCollectionTypeSystem)?.makeCache()
+        defer {
+            (context.typeSystem as? IntentionCollectionTypeSystem)?.tearDownCache()
+        }
+        
+        let visitor = AnonymousIntentionVisitor()
+        visitor.onVisitType = { [weak self] type in
+            guard let sSelf = self else { return }
+            guard type.kind == .class else { return }
+            
+            sSelf.applyOverrideDetection(type)
+        }
+        
+        visitor.visit(intentions: intentions)
     }
     
     private func applyStructInitializer(_ type: StructGenerationIntention) {
