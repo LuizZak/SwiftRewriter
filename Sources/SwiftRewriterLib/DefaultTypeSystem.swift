@@ -228,7 +228,7 @@ public class DefaultTypeSystem: TypeSystem {
             case .typeName(let name)?:
                 current = knownTypeWithName(name)
             default:
-                break
+                current = nil
             }
         }
         
