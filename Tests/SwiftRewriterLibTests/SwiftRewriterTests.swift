@@ -2330,4 +2330,26 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testDetectBooleanGettersInUIViewSubclasses() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A: UITableViewCell
+            @end
+            @implementation A
+            - (void)method {
+                (self.hidden);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: UITableViewCell {
+                @objc
+                func method() {
+                    self.isHidden
+                }
+            }
+            """)
+    }
 }

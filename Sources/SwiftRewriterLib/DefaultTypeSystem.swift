@@ -222,7 +222,14 @@ public class DefaultTypeSystem: TypeSystem {
                 return true
             }
             
-            current = c.supertype?.asKnownType
+            switch c.supertype {
+            case .knownType(let type)?:
+                current = type
+            case .typeName(let name)?:
+                current = knownTypeWithName(name)
+            default:
+                break
+            }
         }
         
         // Search type definitions
