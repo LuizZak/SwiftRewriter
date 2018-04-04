@@ -4,14 +4,14 @@ A program that aims to aid in automatization of conversion of Objective-C code i
 
 #### Requirements
 
-Xcode Version 9.3 beta (9Q98q) & Swift 4.1
+Xcode 9.3 & Swift 4.1
 
 #### Usage
 
 From the working directory execute as follow:
 
 ```bash
-swift run -c=release SwiftRewriter --colorize files /path/to/MyClass.h /path/to/MyClass.m
+swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/MyClass.h /path/to/MyClass.m
 ```
 
 ###### Ommit `--colorize` to produce a clean string proper for saving to a file
