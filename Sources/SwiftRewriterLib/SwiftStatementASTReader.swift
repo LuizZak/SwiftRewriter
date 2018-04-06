@@ -541,7 +541,8 @@ public class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statement> {
                 guard let type =
                     expressionReader
                         .typeParser
-                        .parseObjcType(inDeclarationSpecifiers: declarationSpecifiers, declarator: declarator) else {
+                        .parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
+                                       declarator: declarator) else {
                     continue
                 }
                 

@@ -828,26 +828,6 @@ class InternalSwiftWriter {
         return false
     }
     
-    internal static func _typeNullability(inType type: ObjcType) -> TypeNullability? {
-        switch type {
-        case .specified(let specifiers, let type):
-            // Struct types are never null.
-            if case .struct = type {
-                return .nonnull
-            }
-            
-            if specifiers.last == "__weak" {
-                return .nullable
-            } else if specifiers.last == "__unsafe_unretained" {
-                return .nonnull
-            }
-            
-            return nil
-        default:
-            return nil
-        }
-    }
-    
     internal static func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
         // In Swift, omitting the access level specifier infers 'internal', so we
         // allow the user to decide whether to omit the keyword here
