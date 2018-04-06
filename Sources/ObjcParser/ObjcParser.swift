@@ -313,7 +313,7 @@ public class ObjcParser {
             lexer.skipToken()
             type = .void
         } else {
-            throw LexerError.syntaxError("Expected type name")
+            throw lexer.lexer.syntaxError("Expected type name")
         }
         
         // '*' : Pointer

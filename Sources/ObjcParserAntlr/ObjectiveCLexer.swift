@@ -1,5 +1,6 @@
 // Generated from /Users/luizfernandosilva/Documents/Projetos/objcgrammar/ObjectiveCLexer.g4 by ANTLR 4.7
 import Antlr4
+import Foundation
 
 open class ObjectiveCLexer: Lexer {
     public class State {

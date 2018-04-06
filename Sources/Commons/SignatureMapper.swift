@@ -14,7 +14,7 @@ public class SignatureMapper {
     /// number of arguments of a method)
     ///
     /// - precondition: `from.count == to.count`
-    /// - precondition: `from.count > 0`
+    /// - precondition: `!from.isEmpty`
     public init(from: SelectorSignature, to: SelectorSignature) {
         precondition(from.keywords.count == to.keywords.count, "from.keywords.count == to.keywords.count")
         precondition(!from.keywords.isEmpty, "!from.keywords.isEmpty")

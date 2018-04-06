@@ -5,8 +5,6 @@ import Utils
 /// Provides capabilities of parsing function signatures and argument arrays
 /// from input strings.
 public final class FunctionSignatureParser {
-    private static let identifierLexer = (.letter | "_") + (.letter | "_" | .digit)*
-    
     /// Parses an array of parameter signatures from a given input string.
     /// Input must contain the argument list enclosed within their respective
     /// parenthesis - e.g. the following string produces the following parameter
@@ -56,94 +54,160 @@ public final class FunctionSignatureParser {
     public static func parseParameters(from string: String) throws -> [ParameterSignature] {
         var parameters: [ParameterSignature] = []
         
-        let lexer = Lexer(input: string)
+        let tokenizer = TokenizerLexer<Token>(input: string)
         
-        try lexer.advance(expectingCurrent: "(")
-        lexer.skipWhitespace()
+        try tokenizer.advance(over: .openParens)
         
         var afterComma = false
         
         // Parse parameters one-by-one until no more parameters can be read:
-        while !lexer.isEof() {
-            // Parameter
-            if lexer.safeNextCharPasses(with: { $0 == "_" || Lexer.isLetter($0) }) {
+        while !tokenizer.isEof {
+            if tokenizer.tokenType(is: .underscore) || tokenizer.tokenType(is: .identifier) {
                 afterComma = false
                 
-                let param = try parseParameter(lexer: lexer)
+                let param = try parseParameter(tokenizer: tokenizer)
                 
                 parameters.append(param)
                 
-                lexer.skipWhitespace()
-                if try lexer.peek() == "," {
-                    try lexer.advance()
-                    lexer.skipWhitespace()
+                if tokenizer.consumeToken(ifTypeIs: .comma) != nil {
                     afterComma = true
                 }
                 
                 continue
-            } else if lexer.safeIsNextChar(equalTo: ")") {
+            } else if tokenizer.tokenType(is: .closeParens) {
                 break
             }
             
-            throw LexerError.unexpectedCharacter(lexer.inputIndex,
-                                                 char: try lexer.peek(),
+            throw LexerError.unexpectedCharacter(tokenizer.lexer.inputIndex,
+                                                 char: try tokenizer.lexer.peek(),
                                                  message: "Expected ')'")
         }
         
         if afterComma {
-            throw LexerError.syntaxError("Expected argument after ','")
+            throw tokenizer.lexer.syntaxError("Expected argument after ','")
         }
         
-        try lexer.advance(expectingCurrent: ")")
+        try tokenizer.advance(over: .closeParens)
         
         // Verify extraneous input
-        lexer.skipWhitespace()
-        
-        if !lexer.isEof() {
-            let rem = lexer.consumeRemaining()
+        if !tokenizer.lexer.isEof() {
+            let index = tokenizer.lexer.inputIndex
+            let rem = tokenizer.lexer.consumeRemaining()
             
-            throw LexerError.syntaxError("Extraneous input '\(rem)'")
+            throw LexerError.syntaxError(index, "Extraneous input '\(rem)'")
         }
         
         return parameters
     }
     
-    private static func skipTypeAnnotations(lexer: Lexer) throws {
-        lexer.skipWhitespace()
-        
-        while try lexer.peek() == "@" {
-            try lexer.advance()
-            try identifierLexer.stepThroughApplying(on: lexer)
-            lexer.skipWhitespace()
+    private static func skipTypeAnnotations(tokenizer: TokenizerLexer<Token>) throws {
+        while tokenizer.consumeToken(ifTypeIs: .at) != nil {
+            try tokenizer.advance(over: .identifier)
         }
         
         // Inout marks the end of an attributes list
-        _=lexer.advanceIf(equals: "inout ")
+        tokenizer.consumeToken(ifTypeIs: .inout)
     }
     
-    private static func parseParameter(lexer: Lexer) throws -> ParameterSignature {
-        let label = try identifierLexer.consume(from: lexer)
+    private static func parseParameter(tokenizer: TokenizerLexer<Token>) throws -> ParameterSignature {
+        let label: Substring
+        if tokenizer.tokenType(is: .underscore) {
+            try tokenizer.advance(over: .underscore)
+            label = "_"
+        } else {
+            label = try tokenizer.advance(over: .identifier).value
+        }
         
-        lexer.skipWhitespace()
-        
-        if try lexer.peek() == ":" {
-            try lexer.advance()
+        if tokenizer.consumeToken(ifTypeIs: .colon) != nil {
+            try skipTypeAnnotations(tokenizer: tokenizer)
             
-            try skipTypeAnnotations(lexer: lexer)
-            let type = try SwiftTypeParser.parse(from: lexer)
+            let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
             
             return ParameterSignature(name: String(label), type: type)
         }
         
-        let name = try identifierLexer.consume(from: lexer)
+        let name = try tokenizer.advance(over: .identifier).value
         
-        lexer.skipWhitespace()
+        try tokenizer.advance(over: .colon)
         
-        try lexer.advance(expectingCurrent: ":")
-        
-        try skipTypeAnnotations(lexer: lexer)
-        let type = try SwiftTypeParser.parse(from: lexer)
+        try skipTypeAnnotations(tokenizer: tokenizer)
+        let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
         
         return ParameterSignature(label: String(label), name: String(name), type: type)
+    }
+    
+    private enum Token: String, TokenProtocol {
+        private static let identifierLexer = (.letter | "_") + (.letter | "_" | .digit)*
+        
+        case openParens = "("
+        case closeParens = ")"
+        case colon = ":"
+        case comma = ","
+        case at = "@"
+        case underscore = "_"
+        case `inout`
+        case identifier
+        case eof
+        
+        func advance(in lexer: Lexer) throws {
+            let len = length(in: lexer)
+            guard len > 0 else {
+                throw LexerError.miscellaneous("Cannot advance")
+            }
+            
+            try lexer.advanceLength(len)
+        }
+        
+        func length(in lexer: Lexer) -> Int {
+            switch self {
+            case .openParens, .closeParens, .colon, .comma, .underscore, .at:
+                return 1
+            case .inout:
+                return 5
+            case .identifier:
+                return Token.identifierLexer.maximumLength(in: lexer) ?? 0
+            case .eof:
+                return 0
+            }
+        }
+        
+        var tokenString: String {
+            return rawValue
+        }
+        
+        static func tokenType(at lexer: Lexer) -> FunctionSignatureParser.Token? {
+            if lexer.isEof() {
+                return .eof
+            }
+            
+            if lexer.safeIsNextChar(equalTo: "_") {
+                if lexer.safeNextCharPasses(with: { !Lexer.isLetter($0) && !Lexer.isDigit($0) && $0 != "_" }) {
+                    return .underscore
+                }
+                
+                return .identifier
+            }
+            
+            guard let next = try? lexer.peek() else {
+                return nil
+            }
+            
+            if Lexer.isLetter(next) {
+                let ident = try? lexer.withTemporaryIndex { try identifierLexer.consume(from: lexer) }
+                if ident == "inout" {
+                    return .inout
+                }
+                
+                return .identifier
+            }
+            
+            if let token = Token(rawValue: String(next)) {
+                return token
+            }
+            
+            return nil
+        }
+        
+        static var eofToken: Token = .eof
     }
 }
