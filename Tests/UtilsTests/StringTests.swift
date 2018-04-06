@@ -108,6 +108,11 @@ class StringTests: XCTestCase {
             """, result)
     }
     
+    func testRangeOfCommentsInEmptyString() {
+        let ranges = "".rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 0)
+    }
+    
     func testRangeOfComments() {
         let input = """
         // A comment!
