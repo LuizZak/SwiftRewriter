@@ -345,32 +345,34 @@ extension SwiftType: Codable {
 }
 
 // MARK: - Building structures
-
-/// An enum representing a list of zero or more chained items
-public enum ZeroOrMore<T: Equatable>: Equatable {
-    indirect case list(T, ZeroOrMore)
-    case tail
-    
-    /// Creates a ZeroOrMore enum list with a given sequence.
-    public static func fromSequence<S: Sequence>(_ sequence: S) -> ZeroOrMore where S.Element == T {
-        var current = ZeroOrMore.tail
-        
-        for item in sequence.reversed() {
-            current = .list(item, current)
-        }
-        
-        return current
-    }
-    
-    public static var empty: ZeroOrMore {
-        return .tail
-    }
-}
+public typealias ZeroOrMore<T> = Array<T>
 
 /// An enum representing a list of one or more chained items
-public enum OneOrMore<T: Equatable>: Equatable {
+public enum OneOrMore<T> {
     indirect case list(T, OneOrMore)
     case tail(T)
+    
+    /// Returns the item contained on this `OneOrMore` list node.
+    public var item: T {
+        switch self {
+        case .list(let item, _):
+            return item
+        case .tail(let item):
+            return item
+        }
+    }
+    
+    /// Returns the number of items on this `OneOrMore` list.
+    ///
+    /// Due to semantics of this list type, this value is always `>= 1`.
+    public var count: Int {
+        switch self {
+        case .list(_, let next):
+            return 1 + next.count
+        case .tail:
+            return 1
+        }
+    }
     
     /// Creates a OneOrMore enum list with a given collection.
     /// The collection must have at least one element.
@@ -388,15 +390,28 @@ public enum OneOrMore<T: Equatable>: Equatable {
         return current
     }
     
+    /// Shortcut for creating a `OneOrMore` list with a single item
     public static func one(_ value: T) -> OneOrMore {
         return .tail(value)
     }
 }
 
 /// An enum representing a list of two or more chained items
-public enum TwoOrMore<T: Equatable>: Equatable {
+public enum TwoOrMore<T> {
     indirect case list(T, TwoOrMore)
     case tail(T, T)
+    
+    /// Returns the number of items on this `TwoOrMore` list.
+    ///
+    /// Due to semantics of this list type, this value is always `>= 2`.
+    public var count: Int {
+        switch self {
+        case .list(_, let next):
+            return 1 + next.count
+        case .tail:
+            return 2
+        }
+    }
     
     /// Creates a TwoOrMore enum list with a given collection.
     /// The collection must have at least two elements.
@@ -414,38 +429,13 @@ public enum TwoOrMore<T: Equatable>: Equatable {
         return current
     }
     
+    /// Shortcut for creating a `TwoOrMore` list with two given items
     public static func two(_ value1: T, _ value2: T) -> TwoOrMore {
         return .tail(value1, value2)
     }
 }
 
 // MARK: Sequence protocol conformances
-
-extension ZeroOrMore: Sequence {
-    public func makeIterator() -> Iterator {
-        return Iterator(current: self)
-    }
-    
-    public struct Iterator: IteratorProtocol {
-        private var current: ZeroOrMore
-        
-        init(current: ZeroOrMore) {
-            self.current = current
-        }
-        
-        public mutating func next() -> T? {
-            switch current {
-            case let .list(item, next):
-                current = next
-                
-                return item
-            case .tail:
-                return nil
-            }
-        }
-    }
-}
-
 extension OneOrMore: Sequence {
     public func makeIterator() -> Iterator {
         return Iterator(current: self)
@@ -494,7 +484,7 @@ extension TwoOrMore: Sequence {
                 current = next
                 
                 return item
-            case .tail(let item, let next)?:
+            case let .tail(item, next)?:
                 current = nil
                 
                 rem = next
@@ -511,14 +501,139 @@ extension TwoOrMore: Sequence {
     }
 }
 
-// MARK: Array initialization
-
-extension ZeroOrMore: ExpressibleByArrayLiteral {
-    public init(arrayLiteral elements: T...) {
-        self = .fromSequence(elements)
+// MARK: Collection conformance
+extension OneOrMore: Collection {
+    public func index(after i: Int) -> Int {
+        precondition(i < endIndex)
+        return i + 1
+    }
+    
+    public var startIndex: Int {
+        return 0
+    }
+    
+    public var endIndex: Int {
+        switch self {
+        case .list(_, let next):
+            return next.endIndex + 1
+        case .tail:
+            return 1
+        }
+    }
+    
+    public subscript(position: Int) -> T {
+        precondition(position >= 0, "position >= 0")
+        
+        if position == 0 {
+            switch self {
+            case .list(let item, _):
+                return item
+            case .tail(let item):
+                return item
+            }
+        }
+        
+        switch self {
+        case .list(_, let next):
+            return next[position - 1]
+        case .tail:
+            fatalError("Exceeded index")
+        }
     }
 }
 
+extension OneOrMore {
+    public var first: T {
+        return self[0]
+    }
+    public var last: T {
+        return self[count - 1]
+    }
+}
+
+extension TwoOrMore: Collection {
+    public func index(after i: Int) -> Int {
+        precondition(i < endIndex)
+        return i + 1
+    }
+    
+    public var startIndex: Int {
+        return 0
+    }
+    
+    public var endIndex: Int {
+        switch self {
+        case .list(_, let next):
+            return next.endIndex + 1
+        case .tail:
+            return 2
+        }
+    }
+    
+    public subscript(position: Int) -> T {
+        precondition(position >= 0, "position >= 0")
+        
+        if position == 0 {
+            switch self {
+            case .list(let item, _):
+                return item
+            case .tail(let left, _):
+                return left
+            }
+        } else if position == 1 {
+            switch self {
+            case .list(_, let next):
+                return next[position - 1]
+            case .tail(_, let right):
+                return right
+            }
+        }
+        
+        switch self {
+        case .list(_, let next):
+            return next[position - 1]
+        case .tail:
+            fatalError("Exceeded index")
+        }
+    }
+}
+extension TwoOrMore {
+    public var first: T {
+        return self[0]
+    }
+    public var last: T {
+        return self[count - 1]
+    }
+}
+
+// MARK: Equatable conditional conformance
+extension OneOrMore: Equatable where T: Equatable {
+    public static func == (lhs: OneOrMore, rhs: OneOrMore) -> Bool {
+        switch (lhs, rhs) {
+        case let (.tail(l), .tail(r)):
+            return l == r
+        case let (.list(left), .list(right)):
+            return left == right
+        default:
+            return false
+        }
+    }
+}
+
+extension TwoOrMore: Equatable where T: Equatable {
+    public static func == (lhs: TwoOrMore, rhs: TwoOrMore) -> Bool {
+        switch (lhs, rhs) {
+        case let (.tail(l), .tail(r)):
+            return l == r
+        case let (.list(left), .list(right)):
+            return left == right
+        default:
+            return false
+        }
+    }
+}
+
+// MARK: Array initialization
 extension OneOrMore: ExpressibleByArrayLiteral {
     /// Initializes a OneOrMore list with a given array of items.
     ///

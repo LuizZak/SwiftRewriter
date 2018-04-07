@@ -246,26 +246,35 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func category(forType type: String) -> TypeCategory {
+        return category(forType: .typeName(type))
+    }
+    
+    public func category(forType type: SwiftType) -> TypeCategory {
+        if type == .void {
+            return .void
+        }
+        
         let aliasedType = resolveAlias(in: type)
         
         if isInteger(aliasedType) {
             return .integer
         }
         
-        guard let aliased = typeNameIn(swiftType: aliasedType) else {
-            return .unknown
-        }
-        
-        switch aliased {
-        case "Bool", "ObjCBool", "CBool":
-            return .boolean
-        case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
-            return .float
+        switch aliasedType {
+        case .nominal(.typeName(let typeName)):
+            switch typeName {
+            case "Bool", "ObjCBool", "CBool":
+                return .boolean
+            case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
+                return .float
+            default:
+                break
+            }
         default:
             break
         }
         
-        if let type = self.knownTypeWithName(aliased) {
+        if let type = self.findType(for: aliasedType) {
             switch type.kind {
             case .class:
                 return .class
@@ -279,14 +288,6 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         return .unknown
-    }
-    
-    public func category(forType type: SwiftType) -> TypeCategory {
-        guard let typeName = typeNameIn(swiftType: type) else {
-            return .unknown
-        }
-        
-        return category(forType: typeName)
     }
     
     public func defaultValue(for type: SwiftType) -> Expression? {
@@ -643,7 +644,10 @@ public class DefaultTypeSystem: TypeSystem {
             case .typeName(let name):
                 return .typeName(expand(inString: name))
             case let .generic(name, parameters):
-                if case .tail = parameters { } // Here to avoid a weird crash due to a compiler bug when accessing parameters without destructuring it first
+                if case .tail = parameters { } // Here to avoid a weird crash due
+                                               // to a compiler bug when accessing
+                                               // `parameters` without destructuring
+                                               // it somehow first
                 return .generic(expand(inString: name),
                                 parameters: .fromCollection(parameters.map(expand)))
             }
