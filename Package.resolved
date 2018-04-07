@@ -6,8 +6,8 @@
         "repositoryURL": "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git",
         "state": {
           "branch": null,
-          "revision": "8eea2f0f4d76ec093180ea6503e770fbb338f77a",
-          "version": "4.0.18"
+          "revision": "438e2a30cdb9f7067c9cc0ac792fd9bc59c35b7a",
+          "version": "4.0.19"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
           "branch": "swift4.1-experiments",
-          "revision": "21587a78ae10c681d00964513315e4a6e9c42bf3",
+          "revision": "250e6bd84bfa1b527ff100a6ed0cdb2a1e736bf5",
           "version": null
         }
       },

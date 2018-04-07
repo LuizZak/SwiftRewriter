@@ -344,7 +344,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         func dumpType() -> String {
             var dump = ""
             
-            if type.constructors.count > 0 {
+            if !type.constructors.isEmpty {
                 dump += "Initializers:\n"
                 
                 for ctor in type.constructors {
@@ -352,7 +352,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 }
             }
             
-            if type.methods.count > 0 {
+            if !type.methods.isEmpty {
                 dump += "Methods:\n"
                 
                 for method in type.methods {

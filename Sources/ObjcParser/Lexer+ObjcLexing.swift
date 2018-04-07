@@ -30,7 +30,7 @@ extension Lexer {
                 !lexer.advanceIf(equals: "__kindof") &&
                 !lexer.advanceIf(equals: "__block") &&
                 !lexer.advanceIf(equals: "__unused") {
-                throw LexerError.syntaxError("Expected type qualifier")
+                throw syntaxError("Expected type qualifier")
             }
         }
     }

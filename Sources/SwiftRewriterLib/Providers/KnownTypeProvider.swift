@@ -26,7 +26,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
             }
         }
         
-        if types.count == 0 {
+        if types.isEmpty {
             return nil
         }
         

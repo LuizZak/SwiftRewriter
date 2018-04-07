@@ -125,6 +125,7 @@ public extension String {
         
         enum State {
             case normal
+            case stringLiteral
             case singleLine(begin: Index)
             case multiLine(begin: Index)
         }
@@ -142,6 +143,12 @@ public extension String {
             
             switch state {
             case .normal:
+                // String literal
+                if unicodes[index] == "\"" {
+                    state = .stringLiteral
+                    continue
+                }
+                
                 // Ignore anything other than '/' since it doesn't form comments.
                 if unicodes[index] != "/" {
                     continue
@@ -155,6 +162,10 @@ public extension String {
                 // Multi-line
                 } else if next == "*" {
                     state = .multiLine(begin: index)
+                }
+            case .stringLiteral:
+                if unicodes[index] == "\"" {
+                    state = .normal
                 }
             case .singleLine(let begin):
                 // End of single-line
@@ -173,7 +184,7 @@ public extension String {
         
         // Finish any open commentary ranges
         switch state {
-        case .normal:
+        case .normal, .stringLiteral:
             break
         case .singleLine(let begin), .multiLine(let begin):
             ranges.append(begin..<endIndex)

@@ -91,7 +91,7 @@ class FunctionSignatureParserTests: XCTestCase {
             _=try FunctionSignatureParser.parseParameters(from: "(=)")
             XCTFail("Expected to throw error")
         } catch let lexError as LexerError {
-            XCTAssertEqual(lexError.description(withOffsetsIn: "(=)"), "Error at line 1 column 2: Expected ')'")
+            XCTAssertEqual(lexError.description(withOffsetsIn: "(=)"), "Error at line 1 column 2: Expected token ')' but found 'eof'")
         } catch {
             XCTFail("Wrong error type \(type(of: error))")
         }

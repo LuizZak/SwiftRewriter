@@ -337,7 +337,7 @@ class SwiftTypePermutator {
             if types.count == 1 {
                 return .nominal(types[0])
             }
-            if types.count == 0 {
+            if types.isEmpty {
                 return .nominal(identifier())
             }
             
@@ -375,7 +375,7 @@ class SwiftTypePermutator {
     
     private func generic() -> NominalSwiftType {
         let params = randomTypes(min: 1)
-        if params.count == 0 {
+        if params.isEmpty {
             return .typeName(randomTypeName())
         }
         

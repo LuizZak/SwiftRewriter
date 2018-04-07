@@ -234,7 +234,7 @@ public class SwiftRewriter {
                         
                     case .typealias(let typeali):
                         let nullability =
-                            InternalSwiftWriter._typeNullability(inType: typeali.originalObjcType)
+                            _typeNullability(inType: typeali.originalObjcType)
                         
                         let ctx =
                             TypeMappingContext(explicitNullability: nullability,
@@ -723,5 +723,25 @@ private enum LazyTypeResolveItem {
         case .typealias(let i):
             return i
         }
+    }
+}
+
+internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
+    switch type {
+    case .specified(let specifiers, let type):
+        // Struct types are never null.
+        if case .struct = type {
+            return .nonnull
+        }
+        
+        if specifiers.last == "__weak" {
+            return .nullable
+        } else if specifiers.last == "__unsafe_unretained" {
+            return .nonnull
+        }
+        
+        return nil
+    default:
+        return nil
     }
 }

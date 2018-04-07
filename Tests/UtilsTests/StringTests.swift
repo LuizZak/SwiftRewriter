@@ -108,6 +108,11 @@ class StringTests: XCTestCase {
             """, result)
     }
     
+    func testRangeOfCommentsInEmptyString() {
+        let ranges = "".rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 0)
+    }
+    
     func testRangeOfComments() {
         let input = """
         // A comment!
@@ -150,5 +155,34 @@ class StringTests: XCTestCase {
         let ranges = input.rangesOfCommentSections()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+    }
+    
+    func testRangeOfCommentsIgnoresCommentsInStringLiterals() {
+        let input = "\"A comment in a string: // etc.\""
+        
+        let ranges = input.rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 0)
+    }
+    
+    func testRangeOfCommentsIgnoresStringLiteralsWithinSingleLineComments() {
+        let input = "/* A comment! \"A string\" \n"
+        
+        let ranges = input.rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 1)
+        XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+    }
+    
+    func testRangeOfCommentsIgnoresStringLiteralsWithinMultiLineComments() {
+        let input = """
+            /* A comment! "An unterminated string literal
+            */ "A string /* */"
+            """
+        
+        let ranges = input.rangesOfCommentSections()
+        XCTAssertEqual(ranges.count, 1)
+        XCTAssertEqual(ranges[0], input.range(of: """
+            /* A comment! "An unterminated string literal
+            */
+            """))
     }
 }
