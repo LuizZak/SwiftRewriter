@@ -34,7 +34,7 @@ class Intention_FileTests: XCTestCase {
                                 .init(label: "observer", name: "observer", type: .anyObject),
                                 .init(label: "forEventType", name: "eventType", type: .string)
                 ]).asSelector,
-            SelectorSignature(isStatic: false, keywords: ["addObserver", nil, "forEventType"])
+            SelectorSignature(isStatic: false, keywords: ["add", "observer", "forEventType"])
         )
     }
 }
