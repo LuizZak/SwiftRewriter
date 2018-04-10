@@ -968,7 +968,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testParseGenericsWithinGenerics() throws {
+    func testRewriteGenericsWithinGenerics() throws {
         try assertObjcParse(
             objc: """
             @interface B: NSObject

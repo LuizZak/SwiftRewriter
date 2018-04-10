@@ -39,7 +39,7 @@ public class SwiftRewriter {
     
     /// An expression pass is executed for every method expression to allow custom
     /// transformations to be applied to resulting code.
-    public var syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource
+    public var astRewriterPassSources: ASTRewriterPassSource
     
     /// Custom source pre-processors that are applied to each input source code
     /// before parsing.
@@ -65,7 +65,7 @@ public class SwiftRewriter {
     public convenience init(input: InputSourcesProvider, output: WriterOutput) {
         self.init(input: input, output: output,
                   intentionPassesSource: ArrayIntentionPassSource(intentionPasses: []),
-                  syntaxNodeRewriterSources: ArraySyntaxNodeRewriterPassSource(syntaxNodePasses: []),
+                  astRewriterPassSources: ArrayASTRewriterPassSource(syntaxNodePasses: []),
                   globalsProvidersSource: ArrayGlobalProvidersSource(globalsProviders: []),
                   settings: .default)
     }
@@ -73,7 +73,7 @@ public class SwiftRewriter {
     public init(input: InputSourcesProvider,
                 output: WriterOutput,
                 intentionPassesSource: IntentionPassSource,
-                syntaxNodeRewriterSources: SyntaxNodeRewriterPassSource,
+                astRewriterPassSources: ASTRewriterPassSource,
                 globalsProvidersSource: GlobalsProvidersSource,
                 settings: Settings) {
         
@@ -82,7 +82,7 @@ public class SwiftRewriter {
         self.outputTarget = output
         self.intentionCollection = IntentionCollection()
         self.intentionPassesSource = intentionPassesSource
-        self.syntaxNodeRewriterSources = syntaxNodeRewriterSources
+        self.astRewriterPassSources = astRewriterPassSources
         self.globalsProvidersSource = globalsProvidersSource
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
@@ -321,7 +321,7 @@ public class SwiftRewriter {
     private func performIntentionPasses() {
         let syntaxPasses =
             [MandatorySyntaxNodePass.self]
-                + syntaxNodeRewriterSources.syntaxNodePasses
+                + astRewriterPassSources.syntaxNodePasses
         
         let globals = CompoundDefinitionsSource()
         
@@ -384,10 +384,10 @@ public class SwiftRewriter {
                                        force: true)
         
         let applier =
-            SyntaxNodeRewriterPassApplier(passes: syntaxPasses,
-                                          typeSystem: typeSystem,
-                                          globals: globals,
-                                          numThreds: settings.numThreads)
+            ASTRewriterPassApplier(passes: syntaxPasses,
+                                   typeSystem: typeSystem,
+                                   globals: globals,
+                                   numThreds: settings.numThreads)
         
         if !settings.diagnoseFiles.isEmpty {
             applier.afterFile = { file, passName in

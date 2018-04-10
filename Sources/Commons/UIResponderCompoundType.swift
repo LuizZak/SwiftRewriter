@@ -16,9 +16,7 @@ private static var singleton: CompoundedMappingType = {
     static func createMappings() -> [SignatureMapper] {
         let mappings = SignatureMapperBuilder()
         
-        return mappings
-            .mapKeywords(from: ["drawRect", nil], to: ["rect", nil])
-            .build()
+        return mappings.build()
     }
     
     static func createType() -> KnownType {

@@ -2,21 +2,21 @@ import Foundation
 import SwiftAST
 import Utils
 
-/// Handy class used to apply a series of `SyntaxNodeRewriterPass` instances to
+/// Handy class used to apply a series of `ASTRewriterPass` instances to
 /// all function bodies found in one go.
-public final class SyntaxNodeRewriterPassApplier {
+public final class ASTRewriterPassApplier {
     private var dirtyFunctions = DirtyFunctionBodyMap()
     
     var afterFile: ((String, _ passName: String) -> Void)?
     
     var intentionGlobals: IntentionCollectionGlobals!
     
-    public var passes: [SyntaxNodeRewriterPass.Type]
+    public var passes: [ASTRewriterPass.Type]
     public var typeSystem: TypeSystem
     public var numThreds: Int
     public var globals: DefinitionsSource
     
-    public init(passes: [SyntaxNodeRewriterPass.Type],
+    public init(passes: [ASTRewriterPass.Type],
                 typeSystem: TypeSystem,
                 globals: DefinitionsSource,
                 numThreds: Int = 8) {
@@ -34,7 +34,7 @@ public final class SyntaxNodeRewriterPassApplier {
     }
     
     private func applyPassOnBody(_ item: FunctionBodyQueue<TypeResolvingQueueDelegate>.FunctionBodyQueueItem,
-                                 passType: SyntaxNodeRewriterPass.Type) {
+                                 passType: ASTRewriterPass.Type) {
         let functionBody = item.body
         
         // Resolve types before feeding into passes
@@ -47,7 +47,7 @@ public final class SyntaxNodeRewriterPassApplier {
         }
         
         let expContext =
-            SyntaxNodeRewriterPassContext(typeSystem: self.typeSystem,
+            ASTRewriterPassContext(typeSystem: self.typeSystem,
                                           typeResolver: item.context.typeResolver,
                                           notifyChangedTree: notifyChangedTree)
         
@@ -73,7 +73,7 @@ public final class SyntaxNodeRewriterPassApplier {
     
     private func internalApply(on file: FileGenerationIntention,
                                intentions: IntentionCollection,
-                               passType: SyntaxNodeRewriterPass.Type) {
+                               passType: ASTRewriterPass.Type) {
         
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = numThreds

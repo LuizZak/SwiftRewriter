@@ -1,7 +1,7 @@
 import SwiftRewriterLib
 import SwiftAST
 
-public class ASTCorrectorExpressionPass: SyntaxNodeRewriterPass {
+public class ASTCorrectorExpressionPass: ASTRewriterPass {
     private func varNameForExpression(_ exp: Expression) -> String? {
         if let identifier = exp.asIdentifier {
             return identifier.identifier

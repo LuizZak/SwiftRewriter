@@ -2,7 +2,7 @@ import SwiftRewriterLib
 import SwiftAST
 
 /// Simplifies AST structures that may be unnecessarily complex.
-public class ASTSimplifier: SyntaxNodeRewriterPass {
+public class ASTSimplifier: ASTRewriterPass {
     public override func visitBaseExpression(_ exp: Expression) -> Expression {
         // Drop parens from base expressions
         if let parens = exp.asParens {

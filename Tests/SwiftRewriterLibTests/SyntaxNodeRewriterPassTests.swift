@@ -2,7 +2,7 @@ import XCTest
 import SwiftRewriterLib
 import SwiftAST
 
-class SyntaxNodeRewriterPassTests: XCTestCase {
+class ASTRewriterPassTests: XCTestCase {
     
     func testTraverseThroughPostfixFunctionArgument() {
         let exp: Expression =
@@ -159,7 +159,7 @@ class SyntaxNodeRewriterPassTests: XCTestCase {
         XCTAssert(sut.foundNeedle)
     }
     
-    class TestExpressionPass: SyntaxNodeRewriterPass {
+    class TestExpressionPass: ASTRewriterPass {
         var foundNeedle = false
         
         override func visitPostfix(_ exp: PostfixExpression) -> Expression {

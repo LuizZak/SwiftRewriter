@@ -40,7 +40,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         let converter =
             SwiftRewriter(input: input, output: output,
                           intentionPassesSource: DefaultIntentionPasses(),
-                          syntaxNodeRewriterSources: DefaultExpressionPasses(),
+                          astRewriterPassSources: DefaultExpressionPasses(),
                           globalsProvidersSource: DefaultGlobalsProvidersSource(),
                           settings: Settings.rewriter)
         

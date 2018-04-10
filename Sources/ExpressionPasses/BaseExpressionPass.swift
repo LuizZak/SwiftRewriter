@@ -2,7 +2,7 @@ import SwiftRewriterLib
 import Utils
 import SwiftAST
 
-public class BaseExpressionPass: SyntaxNodeRewriterPass {
+public class BaseExpressionPass: ASTRewriterPass {
     public typealias ArgumentStrategy = FunctionInvocationTransformer.ArgumentStrategy
     
     var staticConstructorTransformers: [StaticConstructorTransformer] = []

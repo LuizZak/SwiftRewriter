@@ -3,7 +3,7 @@ import SwiftRewriterLib
 import SwiftAST
 
 /// Converts Type.alloc().init[...]() expression chains into proper Type() calls.
-public class AllocInitExpressionPass: SyntaxNodeRewriterPass {
+public class AllocInitExpressionPass: ASTRewriterPass {
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         if let newInit = convertAllocInit(exp: exp) {

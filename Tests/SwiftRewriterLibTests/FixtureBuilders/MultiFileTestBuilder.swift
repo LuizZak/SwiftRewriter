@@ -154,7 +154,7 @@ class MultiFileTestBuilder {
     private func makeSut(with input: InputSourcesProvider, output: WriterOutput, options: ASTWriterOptions) -> SwiftRewriter {
         let sut = SwiftRewriter(input: input, output: output)
         sut.writerOptions = options
-        sut.syntaxNodeRewriterSources = DefaultExpressionPasses()
+        sut.astRewriterPassSources = DefaultExpressionPasses()
         sut.intentionPassesSource = DefaultIntentionPasses()
         sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
         

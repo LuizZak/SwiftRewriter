@@ -29,7 +29,7 @@ import SwiftRewriterLib
 ///    ```
 ///    anOptional?.member = 0
 ///    ```
-public class NilValueTransformationsPass: SyntaxNodeRewriterPass {
+public class NilValueTransformationsPass: ASTRewriterPass {
     public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
         for (i, exp) in stmt.expressions.enumerated() {
             guard let postfix = exp.asPostfix else {

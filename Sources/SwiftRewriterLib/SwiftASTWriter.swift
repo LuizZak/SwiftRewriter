@@ -522,7 +522,7 @@ private class StatementWriter: StatementVisitor {
             
             target.idented {
                 // TODO: Abstract these omit-break/fallthrough-inserting behaviors
-                // to an external SyntaxNodeRewriterPass
+                // to an external ASTRewriterPass
                 for (i, stmt) in cs.statements.enumerated() {
                     // No need to emit the last break statement
                     if i > 0 && i == cs.statements.count - 1 && stmt == .break {
@@ -547,7 +547,7 @@ private class StatementWriter: StatementVisitor {
             
             target.idented {
                 // TODO: Abstract this omit-break behavior to an external
-                // SyntaxNodeRewriterPass
+                // ASTRewriterPass
                 for (i, stmt) in def.enumerated() {
                     // No need to emit the last break statement
                     if i > 0 && i == def.count - 1 && stmt == .break {

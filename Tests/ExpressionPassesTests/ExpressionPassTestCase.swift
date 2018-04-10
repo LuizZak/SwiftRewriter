@@ -9,7 +9,7 @@ class ExpressionPassTestCase: XCTestCase {
     static var _state: ObjcParserState = ObjcParserState()
     
     var notified: Bool = false
-    var sut: SyntaxNodeRewriterPass!
+    var sut: ASTRewriterPass!
     var typeSystem: DefaultTypeSystem!
     
     override func setUp() {
@@ -24,7 +24,7 @@ class ExpressionPassTestCase: XCTestCase {
             recordFailure(withDescription:
                 """
                 Expected syntax rewriter \(type(of: sut!)) to notify change via \
-                \(\SyntaxNodeRewriterPassContext.notifyChangedTree), but it did not.
+                \(\ASTRewriterPassContext.notifyChangedTree), but it did not.
                 """,
                 inFile: file, atLine: line, expected: true)
         }
@@ -35,7 +35,7 @@ class ExpressionPassTestCase: XCTestCase {
             recordFailure(withDescription:
                 """
                 Expected syntax rewriter \(type(of: sut!)) to not notify any changes \
-                via \(\SyntaxNodeRewriterPassContext.notifyChangedTree), but it did.
+                via \(\ASTRewriterPassContext.notifyChangedTree), but it did.
                 """,
                 inFile: file, atLine: line, expected: true)
         }
@@ -169,12 +169,12 @@ class ExpressionPassTestCase: XCTestCase {
         return (parser.tokens, parser.parser)
     }
     
-    func makeContext() -> SyntaxNodeRewriterPassContext {
+    func makeContext() -> ASTRewriterPassContext {
         let block: () -> Void = { [weak self] in
             self?.notified = true
         }
         
-        return SyntaxNodeRewriterPassContext(typeSystem: typeSystem,
+        return ASTRewriterPassContext(typeSystem: typeSystem,
                                              notifyChangedTree: block)
     }
 }

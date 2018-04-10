@@ -1,14 +1,14 @@
 import SwiftAST
 
-/// Context for an `SyntaxNodeRewriterPass` execution.
-public struct SyntaxNodeRewriterPassContext {
+/// Context for an `ASTRewriterPass` execution.
+public struct ASTRewriterPassContext {
     public static let empty =
-        SyntaxNodeRewriterPassContext(typeSystem: DefaultTypeSystem())
+        ASTRewriterPassContext(typeSystem: DefaultTypeSystem())
     
     public let typeSystem: TypeSystem
     public let typeResolver: ExpressionTypeResolver
     
-    /// Must be called by every `SyntaxNodeRewriterPass` if it makes any sort of
+    /// Must be called by every `ASTRewriterPass` if it makes any sort of
     /// change to a syntax tree.
     ///
     /// Not calling this method may result in stale syntax structure metadata,
@@ -33,8 +33,8 @@ public struct SyntaxNodeRewriterPassContext {
 ///
 /// Syntax rewriters are run on every method body found to apply transformations
 /// to source code before it is output on files.
-open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
-    public var context: SyntaxNodeRewriterPassContext = .empty
+open class ASTRewriterPass: SyntaxNodeRewriter {
+    public var context: ASTRewriterPassContext = .empty
     public var typeSystem: TypeSystem {
         return context.typeSystem
     }
@@ -43,13 +43,13 @@ open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
         
     }
     
-    open func apply(on statement: Statement, context: SyntaxNodeRewriterPassContext) -> Statement {
+    open func apply(on statement: Statement, context: ASTRewriterPassContext) -> Statement {
         self.context = context
         
         return visitStatement(statement)
     }
     
-    open func apply(on expression: Expression, context: SyntaxNodeRewriterPassContext) -> Expression {
+    open func apply(on expression: Expression, context: ASTRewriterPassContext) -> Expression {
         self.context = context
         
         return visitBaseExpression(expression)
@@ -177,16 +177,16 @@ open class SyntaxNodeRewriterPass: SyntaxNodeRewriter {
 }
 
 /// A simple expression passes source that feeds from a contents array
-public struct ArraySyntaxNodeRewriterPassSource: SyntaxNodeRewriterPassSource {
-    public var syntaxNodePasses: [SyntaxNodeRewriterPass.Type]
+public struct ArrayASTRewriterPassSource: ASTRewriterPassSource {
+    public var syntaxNodePasses: [ASTRewriterPass.Type]
     
-    public init(syntaxNodePasses: [SyntaxNodeRewriterPass.Type]) {
+    public init(syntaxNodePasses: [ASTRewriterPass.Type]) {
         self.syntaxNodePasses = syntaxNodePasses
     }
 }
 
 /// Sources syntax rewriter passes to be used during conversion
-public protocol SyntaxNodeRewriterPassSource {
+public protocol ASTRewriterPassSource {
     /// Types of syntax node rewriters to instantiate and use during transformation.
-    var syntaxNodePasses: [SyntaxNodeRewriterPass.Type] { get }
+    var syntaxNodePasses: [ASTRewriterPass.Type] { get }
 }

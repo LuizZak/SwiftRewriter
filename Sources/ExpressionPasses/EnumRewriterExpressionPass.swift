@@ -3,16 +3,16 @@ import SwiftRewriterLib
 
 /// Converts top-level enumeration accesses into Swift's enum syntax
 /// (`<enum-type>.<enum-value>`)
-public class EnumRewriterExpressionPass: SyntaxNodeRewriterPass {
+public class EnumRewriterExpressionPass: ASTRewriterPass {
     var enums: [KnownType] = []
     
-    public override func apply(on expression: Expression, context: SyntaxNodeRewriterPassContext) -> Expression {
+    public override func apply(on expression: Expression, context: ASTRewriterPassContext) -> Expression {
         enums = context.typeSystem.knownTypes(ofKind: .enum)
         
         return super.apply(on: expression, context: context)
     }
     
-    public override func apply(on statement: Statement, context: SyntaxNodeRewriterPassContext) -> Statement {
+    public override func apply(on statement: Statement, context: ASTRewriterPassContext) -> Statement {
         enums = context.typeSystem.knownTypes(ofKind: .enum)
         
         return super.apply(on: statement, context: context)

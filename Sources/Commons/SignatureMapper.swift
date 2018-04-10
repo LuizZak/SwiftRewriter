@@ -4,38 +4,42 @@ import SwiftRewriterLib
 /// Provides simple signature mapping support by alowing rewriting the signature
 /// keywords of a method signature or invocation
 public class SignatureMapper {
-    let from: SelectorSignature
-    let to: SelectorSignature
+    let from: FunctionSignature
+    let to: FunctionSignature
     
     /// Creates a new `SignatureConversion` instance with a given source and target
     /// signatures to convert.
     ///
-    /// Count of keywords on both signatures must match (i.e. cannot change the
+    /// Count of parameters on both signatures must match (i.e. cannot change the
     /// number of arguments of a method)
     ///
-    /// - precondition: `from.count == to.count`
-    /// - precondition: `!from.isEmpty`
-    public init(from: SelectorSignature, to: SelectorSignature) {
-        precondition(from.keywords.count == to.keywords.count, "from.keywords.count == to.keywords.count")
-        precondition(!from.keywords.isEmpty, "!from.keywords.isEmpty")
+    /// - precondition: `from.parameters.count == to.parameters.count`
+    /// - precondition: `!from.parameters.isEmpty`
+    public init(from: FunctionSignature, to: FunctionSignature) {
+        precondition(from.parameters.count == to.parameters.count,
+                     "from.parameters.count == to.parameters.count")
         
         self.from = from
         self.to = to
     }
     
     public func canApply(to signature: FunctionSignature) -> Bool {
-        return signature.asSelector == from
+        return signature.asSelector == from.asSelector
     }
     
     public func apply(to signature: inout FunctionSignature) -> Bool {
-        guard signature.asSelector == from else {
+        guard signature.asSelector == from.asSelector else {
             return false
         }
         
-        signature.name = to.keywords[0] ?? "__"
+        signature.name = to.name
         
-        for i in 0..<to.keywords.count - 1 {
-            signature.parameters[i].label = to.keywords[i + 1] ?? "_"
+        for i in 0..<to.parameters.count {
+            signature.parameters[i].label = to.parameters[i].label
+            
+            if to.parameters[i].type != .ignoredMappingType {
+                signature.parameters[i].type = to.parameters[i].type
+            }
         }
         
         return true
@@ -45,9 +49,34 @@ public class SignatureMapper {
 public struct SignatureMapperBuilder {
     private var mappings: [SignatureMapper] = []
     
-    public func map(from: SelectorSignature, to: SelectorSignature) -> SignatureMapperBuilder {
+    public func map(from: FunctionSignature, to: FunctionSignature) -> SignatureMapperBuilder {
         var new = clone()
         new.mappings.append(SignatureMapper(from: from, to: to))
+        
+        return new
+    }
+    
+    public func map(from: SelectorSignature, to: SelectorSignature) -> SignatureMapperBuilder {
+        let signatureFrom =
+            FunctionSignature(
+                name: from.keywords[0] ?? "__",
+                parameters: from.keywords.dropFirst().map {
+                    ParameterSignature(label: $0 ?? "_", name: $0 ?? "param", type: .int)
+                },
+                returnType: .void,
+                isStatic: from.isStatic)
+        
+        let signatureTo =
+            FunctionSignature(
+                name: to.keywords[0] ?? "__",
+                parameters: to.keywords.dropFirst().map {
+                    ParameterSignature(label: $0 ?? "_", name: $0 ?? "param", type: .int)
+                },
+                returnType: .void,
+                isStatic: to.isStatic)
+        
+        var new = clone()
+        new.mappings.append(SignatureMapper(from: signatureFrom, to: signatureTo))
         
         return new
     }
@@ -63,10 +92,25 @@ public struct SignatureMapperBuilder {
                             isStatic: Bool = false) -> SignatureMapperBuilder {
         var new = clone()
         
-        let signFrom = SelectorSignature(isStatic: isStatic, keywords: fromKeywords)
-        let signTo = SelectorSignature(isStatic: isStatic, keywords: toKeywords)
+        let signatureFrom =
+            FunctionSignature(
+                name: fromKeywords[0] ?? "__",
+                parameters: fromKeywords.dropFirst().map {
+                    ParameterSignature(label: $0 ?? "_", name: $0 ?? "param", type: .ignoredMappingType)
+                },
+                returnType: .ignoredMappingType,
+                isStatic: isStatic)
         
-        new.mappings.append(SignatureMapper(from: signFrom, to: signTo))
+        let signatureTo =
+            FunctionSignature(
+                name: toKeywords[0] ?? "__",
+                parameters: toKeywords.dropFirst().map {
+                    ParameterSignature(label: $0 ?? "_", name: $0 ?? "param", type: .ignoredMappingType)
+                },
+                returnType: .ignoredMappingType,
+                isStatic: isStatic)
+        
+        new.mappings.append(SignatureMapper(from: signatureFrom, to: signatureTo))
         
         return new
     }
@@ -78,4 +122,8 @@ public struct SignatureMapperBuilder {
     private func clone() -> SignatureMapperBuilder {
         return self
     }
+}
+
+public extension SwiftType {
+    public static var ignoredMappingType = SwiftType.typeName("__ignored type name__")
 }
