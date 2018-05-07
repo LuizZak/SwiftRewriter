@@ -8,13 +8,49 @@ Xcode 9.3 & Swift 4.1
 
 #### Usage
 
-From the working directory execute as follow:
+- From the working directory execute as follow:
 
 ```bash
 swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/MyClass.h /path/to/MyClass.m
 ```
 
 ###### Ommit `--colorize` to produce a clean string proper for saving to a file
+
+- Run `swift run SwiftRewriter --help` flag to print usage information.
+
+Usage:
+
+```
+SwiftRewriter [--colorize] [--print-expression-types] [--print-tracing-history] [--verbose] [--num-threads <n>] [--target stdout | filedisk]
+[files <files...> | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]
+
+OPTIONS:
+  --colorize              Pass this parameter as true to enable terminal colorization during output.
+  --diagnose-file         Provides a target file path to diagnose during rewriting.
+After each intention pass and after expression passes, the file is written
+to the standard output for diagnosing rewriting issues.
+  --num-threads           Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.
+  --omit-objc-compatibility
+                          Don't emit '@objc' attributes on definitions, and don't emit NSObject subclass and NSObjectProtocol conformance by default.
+  --print-expression-types
+                          Prints the type of each top-level resolved expression statement found in function bodies.
+  --print-tracing-history
+                          Prints extra information before each declaration and member about the inner logical decisions of intention passes as they change the structure of declarations.
+  --target                Specifies the output target for the conversion.
+Defaults to 'filedisk' if not provided.
+
+    stdout
+        Prints the conversion results to the terminal's standard output;
+    
+    filedisk
+        Saves output of conersion to the filedisk as .swift files on the same folder as the input files.
+  --verbose               Prints progress information to the console while performing a transpiling job.
+  --help                  Display available options
+
+SUBCOMMANDS:
+  files                   Converts one or more series of files to Swift and print them to the terminal.
+  path                    Examines a path and collects all .h/.m files to convert, before presenting a prompt to confirm conversion of files.
+```
 
 The program should output the contents of the files you pass into the standard output.
 

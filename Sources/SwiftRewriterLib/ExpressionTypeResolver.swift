@@ -126,8 +126,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         let iteratorType: SwiftType
         
         switch stmt.exp.resolvedType {
-        case .nominal(.generic("Array", let args))? where Array(args).count == 1:
-            iteratorType = Array(args)[0]
+        case .nominal(.generic("Array", .tail(let iterator)))?:
+            iteratorType = iterator
             
         // Sub-types of array iterate as .anyObject
         case .nominal(.typeName(let typeName))? where typeSystem.isType(typeName, subtypeOf: "NSArray"):
