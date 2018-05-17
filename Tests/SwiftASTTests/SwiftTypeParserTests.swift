@@ -207,6 +207,13 @@ class SwiftTypeParserTests: XCTestCase {
                                            .typeName("TypeC")]))
     }
     
+    func testProtocolCompositionStartingWithNestedTypeInTupleWithNestedTypeAfter() throws {
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(TypeA.TypeB) & TypeC.TypeD"),
+            SwiftType.protocolComposition([.nested([.typeName("TypeA"), .typeName("TypeB")]),
+                                           .nested([.typeName("TypeC"), .typeName("TypeD")])]))
+    }
+    
     func testProtocolCompositionStartingWithNestedTypeInTupleWithTupledTypeAfter() throws {
         try XCTAssertEqual(
             SwiftTypeParser.parse(from: "(TypeA.TypeB) & (TypeC)"),
@@ -219,6 +226,21 @@ class SwiftTypeParserTests: XCTestCase {
             SwiftTypeParser.parse(from: "(TypeA.TypeB) & (TypeC.TypeD)"),
             SwiftType.protocolComposition([.nested([.typeName("TypeA"), .typeName("TypeB")]),
                                            .nested([.typeName("TypeC"), .typeName("TypeD")])]))
+    }
+    
+    func testProtocolCompositionWithNominalTypeInTuple() throws {
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(TypeA) & TypeB"),
+            SwiftType.protocolComposition([.typeName("TypeA"),
+                                           .typeName("TypeB")]))
+    }
+    
+    func testProtocolCompositionWithProtocolCompositionInTuple() throws {
+        try XCTAssertEqual(
+            SwiftTypeParser.parse(from: "(TypeA & TypeB) & TypeC"),
+            SwiftType.protocolComposition([.typeName("TypeA"),
+                                           .typeName("TypeB"),
+                                           .typeName("TypeC")]))
     }
     
     func testVoidParsesAsTypeAliasOfEmptyTuple() throws {
@@ -240,8 +262,16 @@ class SwiftTypeParserTests: XCTestCase {
         try XCTAssertThrowsError(SwiftTypeParser.parse(from: "(TypeA.TypeB) & (TypeC) -> Void"))
     }
     
+    func testProtocolCompositionWithMetatypeOnRightSideError() throws {
+        try XCTAssertThrowsError(SwiftTypeParser.parse(from: "TypeA & TypeC.Type"))
+    }
+    
     func testParseExtraCharacterMessage() throws {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "Type<(A, B))>"))
+    }
+    
+    func testParseMissingTypeAfterCommaInGenericSignatureError() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "Type<A, >"))
     }
     
     func testCannotUseInoutAsParameterName() throws {
@@ -255,6 +285,26 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testParseProtocolCompositionInBlockArgument() throws {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(TypeA & TypeB) -> )"))
+    }
+    
+    func testParseProtocolCompositionAfterTupleError() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(TypeA, TypeB) & TypeC"))
+    }
+    
+    func testParseProtocolCompositionAfterNonComposableTypeInTupleError() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(TypeA.Type) & TypeB"))
+    }
+    
+    func testParseEllipsisInTupleError() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(TypeA...)"))
+    }
+    
+    func testParseInoutAfterInoutError() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(inout inout Int) -> Void"))
+    }
+    
+    func testParseInvalidTokenAfterPeriodError() throws {
+        XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(Int).>"))
     }
     
     // MARK: - Prodecural tests
