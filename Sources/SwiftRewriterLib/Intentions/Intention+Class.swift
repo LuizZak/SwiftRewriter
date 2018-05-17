@@ -7,7 +7,6 @@ public protocol InstanceVariableContainerIntention: Intention {
     
     func addInstanceVariable(_ intention: InstanceVariableGenerationIntention)
     func hasInstanceVariable(named name: String) -> Bool
-    func removeInstanceVariable(named name: String)
     func instanceVariable(named name: String) -> InstanceVariableGenerationIntention?
 }
 

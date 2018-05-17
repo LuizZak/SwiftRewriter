@@ -99,8 +99,6 @@ public class SwiftRewriter {
         }
         
         try autoreleasepool {
-            parsers.removeAll()
-            
             try loadInputSources()
             parseStatements()
             evaluateTypes()
@@ -229,7 +227,10 @@ public class SwiftRewriter {
                 autoreleasepool {
                     switch item {
                     case .extensionDecl(let ext):
-                        let typeName = typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)), context: .alwaysNonnull)
+                        let typeName =
+                            typeMapper.typeNameString(for: .pointer(.struct(ext.typeName)),
+                                                      context: .alwaysNonnull)
+                        
                         ext.typeName = typeName
                         
                     case .typealias(let typeali):

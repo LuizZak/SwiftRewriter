@@ -68,10 +68,6 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
         return resolvedType == .errorType
     }
     
-    public override init() {
-        super.init()
-    }
-    
     /// Changes this Expression's resolved type to be an error type.
     /// This overwrites any existing type that may be assigned.
     /// Returns self for potential chaining support.

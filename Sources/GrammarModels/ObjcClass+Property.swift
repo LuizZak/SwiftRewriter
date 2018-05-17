@@ -37,28 +37,6 @@ public class PropertyAttributesList: ASTNode, InitializableNode {
         }
     }
     
-    public var getterAttributes: [String] {
-        return attributes.compactMap { mod in
-            switch mod.attribute {
-            case .getter(let gt):
-                return gt
-            default:
-                return nil
-            }
-        }
-    }
-    
-    public var setterAttributes: [String] {
-        return attributes.compactMap { mod in
-            switch mod.attribute {
-            case .setter(let st):
-                return st
-            default:
-                return nil
-            }
-        }
-    }
-    
     required public init() {
         
     }

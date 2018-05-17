@@ -277,7 +277,6 @@ public class ObjcParser {
             if lexer.tokenType() == .operator(.lessThan) {
                 let types =
                     _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             addTokensToContext: false,
                                              itemParser: { try lexer.advance(matching: { $0.isIdentifier }) })
                 type = .id(protocols: types.map { String($0.value) })
             } else {
@@ -301,7 +300,6 @@ public class ObjcParser {
             if lexer.tokenType() == .operator(.lessThan) {
                 let types =
                     _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             addTokensToContext: false,
                                              itemParser: parseObjcType)
                 type = .generic(typeName, parameters: types)
             } else if typeName == "instancetype" {
@@ -340,21 +338,9 @@ public class ObjcParser {
     }
     
     func parseTokenNode(_ tokenType: TokenType,
-                        onMissing message: String? = nil,
-                        addToContext: Bool = true) throws {
+                        onMissing message: String? = nil) throws {
         
-        let range = startRange()
-        
-        let tok = try lexer.advance(over: tokenType)
-        
-        if addToContext {
-            let token = Token(type: tok.tokenType, string: String(tok.value),
-                              location: range.makeLocation())
-            
-            let node = TokenNode(token: token, location: range.makeLocation())
-            
-            context.addChildNode(node)
-        }
+        try lexer.advance(over: tokenType)
     }
     
     /// Starts parsing a comman-separated list of items using the specified braces
@@ -382,12 +368,12 @@ public class ObjcParser {
     /// of errors as diagnostics must be made by this closure.
     /// - Returns: An array of items returned by `itemParser` for each successful
     /// parse performed.
-    internal func _parseCommaSeparatedList<T>(
-        braces openBrace: TokenType, _ closeBrace: TokenType,
-        addTokensToContext: Bool = true, itemParser: () throws -> T) -> [T] {
+    internal func _parseCommaSeparatedList<T>(braces openBrace: TokenType,
+                                              _ closeBrace: TokenType,
+                                              itemParser: () throws -> T) -> [T] {
         
         do {
-            try parseTokenNode(openBrace, addToContext: addTokensToContext)
+            try parseTokenNode(openBrace)
         } catch {
             diagnostics.error("Expected \(openBrace) to open list", location: location())
         }
@@ -408,7 +394,7 @@ public class ObjcParser {
             // Comma separator / close brace
             do {
                 if lexer.tokenType(is: .comma) {
-                    try parseTokenNode(.comma, addToContext: addTokensToContext)
+                    try parseTokenNode(.comma)
                     expectsItem = true
                 } else if lexer.tokenType(is: closeBrace) {
                     break
@@ -428,7 +414,7 @@ public class ObjcParser {
         }
         
         do {
-            try parseTokenNode(closeBrace, addToContext: addTokensToContext)
+            try parseTokenNode(closeBrace)
         } catch {
             diagnostics.error("Expected \(closeBrace) to close list", location: location())
         }

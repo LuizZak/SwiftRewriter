@@ -254,6 +254,15 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
+    public func typeNameString(for composition: ProtocolCompositionComponent) -> String {
+        switch composition {
+        case .nested(let types):
+            return types.map { typeNameString(for: $0) }.joined(separator: ".")
+        case .nominal(let nominal):
+            return typeNameString(for: nominal)
+        }
+    }
+    
     public func typeNameString(for nominal: NominalSwiftType) -> String {
         switch nominal {
         case .typeName(let name):
@@ -338,7 +347,7 @@ public class DefaultTypeMapper: TypeMapper {
         } else if protocols.count == 1 {
             type = .typeName(protocols[0])
         } else {
-            type = .protocolComposition(.fromCollection(protocols.map { .typeName($0) }))
+            type = .protocolComposition(.fromCollection(protocols.map { .nominal(.typeName($0)) }))
         }
         
         return swiftType(type: type, withNullability: context.nullability())
@@ -346,6 +355,7 @@ public class DefaultTypeMapper: TypeMapper {
     
     private func swiftType(forGenericObjcType name: String, parameters: [ObjcType],
                            context: TypeMappingContext) -> SwiftType {
+        
         if parameters.isEmpty {
             return .typeName(name)
         }
@@ -408,7 +418,9 @@ public class DefaultTypeMapper: TypeMapper {
                 return .generic(name, parameters: .fromCollection(types))
             }
             
-            return .protocolComposition(.fromCollection([.typeName(name)] + nominalTypes))
+            let composition = nominalTypes.map(ProtocolCompositionComponent.nominal)
+            
+            return .protocolComposition(.fromCollection([.nominal(.typeName(name))] + composition))
         }
     }
     

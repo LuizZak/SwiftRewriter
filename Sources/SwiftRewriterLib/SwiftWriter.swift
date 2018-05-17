@@ -583,7 +583,8 @@ class InternalSwiftWriter {
         
         switch prop.mode {
         case .asField:
-            outputInitialZeroValueForType(prop.type, isConstant: prop.isConstant, target: target)
+            outputInitialZeroValueForType(prop.type, isConstant: prop.isConstant,
+                                          target: target)
             target.outputLineFeed()
         case .computed(let body):
             outputMethodBody(body, target: target)
@@ -624,14 +625,16 @@ class InternalSwiftWriter {
             return
         }
         
-        if let defaultValue = typeSystem.defaultValue(for: type) {
-            target.outputInline(" = ")
-            
-            let writer =
-                SwiftASTWriter(options: options, typeMapper: typeMapper,
-                               typeSystem: typeSystem)
-            writer.write(expression: defaultValue, into: target)
+        guard let defaultValue = typeSystem.defaultValue(for: type) else {
+            return
         }
+        
+        target.outputInline(" = ")
+        
+        let writer =
+            SwiftASTWriter(options: options, typeMapper: typeMapper,
+                           typeSystem: typeSystem)
+        writer.write(expression: defaultValue, into: target)
     }
     
     private func outputInitMethod(_ initMethod: InitGenerationIntention,

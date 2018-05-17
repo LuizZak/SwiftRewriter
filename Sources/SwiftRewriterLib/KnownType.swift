@@ -4,7 +4,7 @@ import SwiftAST
 /// Describes a known type with known properties and methods and their signatures.
 public protocol KnownType: KnownTypeReferenceConvertible {
     /// A string that specifies the origin of this known type.
-    /// This should be implemented by conformes by returning an as precise as
+    /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
     /// type, such as a file name/line number, if the type originated from a file,
     /// etc.
@@ -68,25 +68,12 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
     case knownType(KnownType)
     case typeName(String)
     
-    public init(_ type: KnownTypeReferenceConvertible) {
-        self = .typeName(type.asKnownTypeReference.asTypeName)
-    }
-    
     public var asTypeName: String {
         switch self {
         case .knownType(let type):
             return type.typeName
         case .typeName(let name):
             return name
-        }
-    }
-    
-    public var asKnownType: KnownType? {
-        switch self {
-        case .knownType(let type):
-            return type
-        case .typeName:
-            return nil
         }
     }
     

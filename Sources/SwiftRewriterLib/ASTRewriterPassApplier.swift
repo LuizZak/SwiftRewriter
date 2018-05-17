@@ -113,16 +113,6 @@ public final class ASTRewriterPassApplier {
             }
         }
         
-        func clearDirty(_ body: FunctionBodyIntention) {
-            synchronized(self) {
-                guard let index = dirty.index(where: { $0 === body }) else {
-                    return
-                }
-                
-                dirty.remove(at: index)
-            }
-        }
-        
         func isDirty(_ body: FunctionBodyIntention) -> Bool {
             return synchronized(self) {
                 return dirty.contains(where: { $0 === body })

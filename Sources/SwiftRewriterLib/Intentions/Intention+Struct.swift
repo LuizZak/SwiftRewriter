@@ -17,14 +17,4 @@ public class StructGenerationIntention: TypeGenerationIntention, InstanceVariabl
         intention.parent = self
         intention.type = self
     }
-    
-    public func removeInstanceVariable(named name: String) {
-        guard let index = instanceVariables.index(where: { $0.name == name }) else {
-            return
-        }
-        
-        instanceVariables[index].type = nil
-        instanceVariables[index].parent = nil
-        instanceVariables.remove(at: index)
-    }
 }

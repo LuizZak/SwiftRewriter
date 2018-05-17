@@ -322,23 +322,13 @@ func mergeMethods(_ source: KnownMethod,
         
         target.functionBody?.history.recordCreation(description: "Merged from existing type body")
         
-        if let type = source.ownerType?.asKnownType {
-            target.history
-                .recordChange(
-                    tag: historyTag,
-                    description: """
-                    Inserted body from method \
-                    \(TypeFormatter.asString(method: source, ofType: type))
-                    """)
-        } else {
-            target.history
-                .recordChange(
-                    tag: historyTag,
-                    description: """
-                    Inserted body from function \
-                    \(TypeFormatter.asString(signature: source.signature, includeName: false))
-                    """)
-        }
+        target.history
+            .recordChange(
+                tag: historyTag,
+                description: """
+                Inserted body from function \
+                \(TypeFormatter.asString(signature: source.signature, includeName: false))
+                """)
     }
 }
 

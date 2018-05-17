@@ -10,18 +10,6 @@ public class UnknownNode: ASTNode {
     
 }
 
-/// A node that holds an arbitrary token that has no proper semantic naming without
-/// context.
-public class TokenNode: ASTNode {
-    public var token: Token
-    
-    public init(token: Token, location: SourceLocation = .invalid) {
-        self.token = token
-        
-        super.init(location: location)
-    }
-}
-
 /// An identifier node
 public class Identifier: ASTNode {
     /// String identifier

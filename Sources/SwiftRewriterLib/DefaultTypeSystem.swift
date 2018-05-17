@@ -625,7 +625,7 @@ public class DefaultTypeSystem: TypeSystem {
             case .tuple(.types(let values)):
                 return .tuple(.types(.fromCollection(values.map(expand))))
             case .protocolComposition(let composition):
-                return .protocolComposition(.fromCollection(composition.map(expand(inNominal:))))
+                return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
             }
         }
         
@@ -636,6 +636,15 @@ public class DefaultTypeSystem: TypeSystem {
             
             return pushingAlias(string) {
                 return typeNameIn(swiftType: aliased).map(expand(inString:)) ?? string
+            }
+        }
+        
+        private func expand(inComposition composition: ProtocolCompositionComponent) -> ProtocolCompositionComponent {
+            switch composition {
+            case .nested(let nested):
+                return .nested(.fromCollection(nested.map(expand(inNominal:))))
+            case .nominal(let nominal):
+                return .nominal(expand(inNominal: nominal))
             }
         }
         

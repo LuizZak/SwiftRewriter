@@ -115,7 +115,11 @@ public class SwiftTypeParser {
                 type = .void
             } else if lexer.tokenType(is: .ampersand) {
                 // Protocol type composition
-                type = .protocolComposition(try verifyProtocolCompositionTrailing(after: [ident], lexer: lexer))
+                let prot
+                    = try verifyProtocolCompositionTrailing(after: [.nominal(ident)],
+                                                            lexer: lexer)
+                
+                type = .protocolComposition(prot)
             } else if lexer.tokenType(is: .period) {
                 // Verify meta-type access
                 var isMetatypeAccess = false
@@ -170,12 +174,16 @@ public class SwiftTypeParser {
         }
         
         // Attempt a generic type parse
-        let type = try verifyGenericArgumentsTrailing(after: String(identifier.value), lexer: lexer)
+        let type =
+            try verifyGenericArgumentsTrailing(after: String(identifier.value),
+                                               lexer: lexer)
         
         return type
     }
     
-    private static func parseNestedType(_ lexer: TokenizerLexer<SwiftTypeToken>, after base: NominalSwiftType) throws -> NestedSwiftType {
+    private static func parseNestedType(_ lexer: TokenizerLexer<SwiftTypeToken>,
+                                        after base: NominalSwiftType) throws -> NestedSwiftType {
+        
         var types = [base]
         
         repeat {
@@ -209,7 +217,8 @@ public class SwiftTypeParser {
     ///     : type-identifier '&' type-identifier ('&' type-identifier)* ;
     /// ```
     private static func verifyProtocolCompositionTrailing(
-        after types: [NominalSwiftType], lexer: TokenizerLexer<SwiftTypeToken>) throws -> ProtocolCompositionSwiftType {
+        after types: [ProtocolCompositionComponent],
+        lexer: TokenizerLexer<SwiftTypeToken>) throws -> ProtocolCompositionSwiftType {
         
         var types = types
         
@@ -223,7 +232,9 @@ public class SwiftTypeParser {
                 let type = try parseType(lexer)
                 switch type {
                 case .nominal(let nominal):
-                    types.append(nominal)
+                    types.append(.nominal(nominal))
+                case .nested(let nested):
+                    types.append(.nested(nested))
                 case .protocolComposition(let list):
                     types.append(contentsOf: list)
                 default:
@@ -232,7 +243,7 @@ public class SwiftTypeParser {
                     throw notProtocolComposableError(type: type, lexer: lexer)
                 }
             } else {
-                types.append(try parseNominalType(lexer))
+                types.append(.nominal(try parseNominalType(lexer)))
             }
         }
         
@@ -462,9 +473,26 @@ public class SwiftTypeParser {
             
             switch parameters[0] {
             case .nominal(let nominal):
-                return try .protocolComposition(verifyProtocolCompositionTrailing(after: [nominal], lexer: lexer))
+                let prot =
+                    try verifyProtocolCompositionTrailing(after: [.nominal(nominal)],
+                                                          lexer: lexer)
+                
+                return .protocolComposition(prot)
+                
+            case .nested(let nested):
+                let prot =
+                    try verifyProtocolCompositionTrailing(after: [.nested(nested)],
+                                                          lexer: lexer)
+                
+                return .protocolComposition(prot)
+                
             case .protocolComposition(let composition):
-                return try .protocolComposition(verifyProtocolCompositionTrailing(after: Array(composition), lexer: lexer))
+                let prot =
+                    try verifyProtocolCompositionTrailing(after: Array(composition),
+                                                          lexer: lexer)
+                
+                return .protocolComposition(prot)
+                
             default:
                 throw notProtocolComposableError(type: parameters[0], lexer: lexer)
             }
@@ -562,20 +590,6 @@ public class SwiftTypeParser {
             case let .unexpectedToken(token, offset):
                 return "Unexpected token '\(token.tokenString)' at column \(offset + 1)"
             }
-        }
-    }
-}
-
-private extension Lexer {
-    func canConsume(_ rule: GrammarRule) -> Bool {
-        do {
-            return try withTemporaryIndex {
-                _=try rule.consume(from: self)
-                
-                return true
-            }
-        } catch {
-            return false
         }
     }
 }

@@ -22,6 +22,12 @@ public enum NominalSwiftType: Equatable {
     case generic(String, parameters: GenericArgumentSwiftType)
 }
 
+/// A component for a protocol composition
+public enum ProtocolCompositionComponent: Equatable {
+    case nominal(NominalSwiftType)
+    case nested(NestedSwiftType)
+}
+
 /// A tuple swift type, which either represents an empty tuple or two or more
 /// Swift types.
 public enum TupleSwiftType: Equatable {
@@ -29,7 +35,7 @@ public enum TupleSwiftType: Equatable {
     case empty
 }
 
-public typealias ProtocolCompositionSwiftType = TwoOrMore<NominalSwiftType>
+public typealias ProtocolCompositionSwiftType = TwoOrMore<ProtocolCompositionComponent>
 public typealias NestedSwiftType = TwoOrMore<NominalSwiftType>
 public typealias GenericArgumentSwiftType = OneOrMore<SwiftType>
 
@@ -269,6 +275,21 @@ extension NominalSwiftType: CustomStringConvertible {
                 return name + "<" + params.map { $0.description }.joined(separator: ", ") + ">"
             }
         }
+    }
+}
+
+extension ProtocolCompositionComponent: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .nested(let items):
+            return items.map { $0.description }.joined(separator: ".")
+        case .nominal(let nominal):
+            return nominal.description
+        }
+    }
+    
+    public static func typeName(_ name: String) -> ProtocolCompositionComponent {
+        return .nominal(.typeName(name))
     }
 }
 
