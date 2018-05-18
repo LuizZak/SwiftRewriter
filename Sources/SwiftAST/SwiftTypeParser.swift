@@ -586,14 +586,9 @@ public class SwiftTypeParser {
         return .expectedBlockType(index)
     }
     
-    private static func expectedTypeNameError(lexer: Tokenizer) -> Error {
-        let index = indexOn(lexer: lexer)
-        return .expectedTypeName(index)
-    }
-    
     private static func unexpectedTokenError(lexer: Tokenizer) -> Error {
         let index = indexOn(lexer: lexer)
-        return .unexpectedToken(lexer.token().tokenType, index)
+        return .unexpectedToken(lexer.token().tokenType.tokenString, index)
     }
     
     private static func notProtocolComposableError(
@@ -619,18 +614,15 @@ public class SwiftTypeParser {
     
     public enum Error: Swift.Error, CustomStringConvertible {
         case invalidType
-        case expectedTypeName(Int)
         case expectedMetatype(Int)
         case expectedBlockType(Int)
         case notProtocolComposable(SwiftType, Int)
-        case unexpectedToken(SwiftTypeToken, Int)
+        case unexpectedToken(String, Int)
         
         public var description: String {
             switch self {
             case .invalidType:
                 return "Invalid Swift type signature"
-            case .expectedTypeName(let offset):
-                return "Expected type name at column \(offset + 1)"
             case .expectedBlockType(let offset):
                 return "Expected block type at column \(offset + 1)"
             case .expectedMetatype(let offset):
@@ -638,52 +630,35 @@ public class SwiftTypeParser {
             case let .notProtocolComposable(type, offset):
                 return "Found protocol composition, but type \(type) is not composable on composition '&' at column \(offset + 1)"
             case let .unexpectedToken(token, offset):
-                return "Unexpected token '\(token.tokenString)' at column \(offset + 1)"
+                return "Unexpected token '\(token)' at column \(offset + 1)"
             }
         }
     }
 }
 
-public enum SwiftTypeToken: String, TokenProtocol {
+enum SwiftTypeToken: String, TokenProtocol {
     private static let identifierLexer = (.letter | "_") + (.letter | "_" | .digit)*
     
     public static var eofToken: SwiftTypeToken = .eof
     
-    /// Character '('
     case openParens = "("
-    /// Character ')'
     case closeParens = ")"
-    /// Character '.'
     case period = "."
-    /// Character sequence '...' (three consecutive periods)
     case ellipsis = "..."
-    /// Function arrow chars '->'
     case functionArrow = "->"
-    /// An identifier token
+    /// An arbitrary identifier token
     case identifier = "identifier"
-    /// An 'inout' keyword
     case `inout` = "inout"
-    /// Character '?'
     case questionMark = "?"
-    /// Character '!'
     case exclamationMark = "!"
-    /// Character ':'
     case colon = ":"
-    /// Character '&'
     case ampersand = "&"
-    /// Character '['
     case openBrace = "["
-    /// Character ']'
     case closeBrace = "]"
-    /// Character '<'
     case openBracket = "<"
-    /// Character '>'
     case closeBracket = ">"
-    /// Character '@'
     case at = "@"
-    /// Character ','
     case comma = ","
-    /// End-of-file character
     case eof = ""
     
     public var tokenString: String {
@@ -707,19 +682,6 @@ public enum SwiftTypeToken: String, TokenProtocol {
         case .eof:
             return 0
         }
-    }
-    
-    public func advance(in lexer: Lexer) throws {
-        let l = length(in: lexer)
-        if l == 0 {
-            return
-        }
-        
-        try lexer.advanceLength(l)
-    }
-    
-    public func matchesText(in lexer: Lexer) -> Bool {
-        return lexer.checkNext(matches: tokenString)
     }
     
     public static func tokenType(at lexer: Lexer) -> SwiftTypeToken? {
