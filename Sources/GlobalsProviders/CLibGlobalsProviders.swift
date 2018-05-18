@@ -6,7 +6,30 @@ private let cInt = SwiftType.typeName("CInt")
 private let cFloat = SwiftType.typeName("CFloat")
 private let cDouble = SwiftType.typeName("CDouble")
 
-public class CLibGlobalsProviders: BaseGlobalsProvider {
+public class CLibGlobalsProviders: GlobalsProvider {
+    private static var provider = InnerCLibGlobalsProviders()
+    
+    public init() {
+        
+    }
+    
+    public func knownTypeProvider() -> KnownTypeProvider {
+        return CollectionKnownTypeProvider(knownTypes: CLibGlobalsProviders.provider.types)
+    }
+    
+    public func typealiasProvider() -> TypealiasProvider {
+        return CollectionTypealiasProvider(aliases: CLibGlobalsProviders.provider.typealiases)
+    }
+    
+    public func definitionsSource() -> DefinitionsSource {
+        return CLibGlobalsProviders.provider.definitions
+    }
+}
+
+private class InnerCLibGlobalsProviders: BaseGlobalsProvider {
+    
+    var definitions: ArrayDefinitionsSource = ArrayDefinitionsSource(definitions: [])
+    
     public override init() {
         
     }
@@ -48,5 +71,7 @@ public class CLibGlobalsProviders: BaseGlobalsProvider {
         
         add(function(name: "fmodf", paramTypes: [cFloat, cFloat], returnType: cFloat))
         add(function(name: "fmod", paramTypes: [cDouble, cDouble], returnType: cDouble))
+        
+        definitions = ArrayDefinitionsSource(definitions: globals)
     }
 }

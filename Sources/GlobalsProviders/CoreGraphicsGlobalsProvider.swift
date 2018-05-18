@@ -1,7 +1,31 @@
 import SwiftAST
 import SwiftRewriterLib
+import Commons
 
-public class CoreGraphicsGlobalsProvider: BaseGlobalsProvider {
+public class CoreGraphicsGlobalsProvider: GlobalsProvider {
+    private static var provider = InnerCoreGraphicsGlobalsProvider()
+    
+    public init() {
+        
+    }
+    
+    public func knownTypeProvider() -> KnownTypeProvider {
+        return CollectionKnownTypeProvider(knownTypes: CoreGraphicsGlobalsProvider.provider.types)
+    }
+    
+    public func typealiasProvider() -> TypealiasProvider {
+        return CollectionTypealiasProvider(aliases: CoreGraphicsGlobalsProvider.provider.typealiases)
+    }
+    
+    public func definitionsSource() -> DefinitionsSource {
+        return CoreGraphicsGlobalsProvider.provider.definitions
+    }
+}
+
+private class InnerCoreGraphicsGlobalsProvider: BaseGlobalsProvider {
+    
+    var definitions: ArrayDefinitionsSource = ArrayDefinitionsSource(definitions: [])
+    
     public override init() {
         
     }
@@ -10,6 +34,12 @@ public class CoreGraphicsGlobalsProvider: BaseGlobalsProvider {
         createCGPoint()
         createCGSize()
         createCGRect()
+    }
+    
+    override func createDefinitions() {
+        super.createDefinitions()
+        
+        definitions = ArrayDefinitionsSource(definitions: globals)
     }
     
     func createCGPoint() {

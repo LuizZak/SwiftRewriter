@@ -2,8 +2,31 @@ import SwiftAST
 import SwiftRewriterLib
 import Commons
 
+public class UIKitGlobalsProvider: GlobalsProvider {
+    private static var provider = InnerUIKitGlobalsProvider()
+    
+    public init() {
+        
+    }
+    
+    public func knownTypeProvider() -> KnownTypeProvider {
+        return CollectionKnownTypeProvider(knownTypes: UIKitGlobalsProvider.provider.types)
+    }
+    
+    public func typealiasProvider() -> TypealiasProvider {
+        return CollectionTypealiasProvider(aliases: UIKitGlobalsProvider.provider.typealiases)
+    }
+    
+    public func definitionsSource() -> DefinitionsSource {
+        return UIKitGlobalsProvider.provider.definitions
+    }
+}
+
 /// Globals provider for `UIKit` framework
-public class UIKitGlobalsProvider: BaseGlobalsProvider {
+private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
+    
+    var definitions: ArrayDefinitionsSource = ArrayDefinitionsSource(definitions: [])
+    
     public override init() {
         
     }
@@ -29,6 +52,8 @@ public class UIKitGlobalsProvider: BaseGlobalsProvider {
                            storage: ValueStorage.constant(ofType: "CGSize")))
         add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
                            storage: ValueStorage.constant(ofType: "CGSize")))
+        
+        definitions = ArrayDefinitionsSource(definitions: globals)
     }
     
     func createUIResponder() {
