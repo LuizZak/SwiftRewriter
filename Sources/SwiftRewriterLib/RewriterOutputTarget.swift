@@ -17,7 +17,7 @@ public struct RewriterOutputSettings {
     public static var defaults = RewriterOutputSettings(tabStyle: .spaces(4))
 }
 
-/// Protocol for output targets of `SwiftRewritter` instances.
+/// Protocol for output targets of `SwiftRewriter` instances.
 public protocol RewriterOutputTarget: class {
     /// Outputs the given string with a `.plain` text style and outputs a line
     /// feed at the end, with padding for identation at the begginning.

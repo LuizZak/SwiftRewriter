@@ -1,7 +1,7 @@
 import SwiftAST
 import GrammarModels
 
-/// Provides type-transforming support for a Swift rewritter
+/// Provides type-transforming support for a Swift rewriter
 public protocol TypeMapper {
     func typeNameString(for swiftType: SwiftType) -> String
     func typeNameString(for objcType: ObjcType, context: TypeMappingContext) -> String

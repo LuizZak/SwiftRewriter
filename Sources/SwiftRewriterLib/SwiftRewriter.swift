@@ -10,10 +10,11 @@ private typealias NonnullTokenRange = (start: Int, end: Int)
 public class SwiftRewriter {
     private static var _parserStatePool: ObjcParserStatePool = ObjcParserStatePool()
     
+    private let sourcesProvider: InputSourcesProvider
     private var outputTarget: WriterOutput
+    
     private let typeMapper: TypeMapper
     private let intentionCollection: IntentionCollection
-    private let sourcesProvider: InputSourcesProvider
     private var typeSystem: IntentionCollectionTypeSystem
     
     /// For pooling and reusing Antlr parser states to aid in performance
