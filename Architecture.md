@@ -1,6 +1,6 @@
 ## Architectural description
 
-The tool splits the conversion process into a couple of discrete steps, which are mostly divided into separate targets:
+The tool splits the conversion process into six discrete steps, which are, whenever possible, divided into separate project targets.
 
 ```
 ┌─────────────┐ ┌──────────────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌──────────┐
