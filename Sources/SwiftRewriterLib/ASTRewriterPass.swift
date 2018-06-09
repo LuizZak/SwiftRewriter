@@ -71,7 +71,7 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
     }
     
     open override func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        if let fc = exp.op.asFuntionCall {
+        if let fc = exp.op.asFunctionCall {
             exp.exp = visitExpression(exp.exp)
             exp.op = fc.replacingArguments(fc.subExpressions.map(visitBaseExpression))
             return exp

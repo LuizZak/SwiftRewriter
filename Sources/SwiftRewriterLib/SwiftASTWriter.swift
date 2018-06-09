@@ -265,7 +265,7 @@ private class ExpressionWriter: ExpressionVisitor {
         let constant = exp.constant
         
         switch constant {
-        case .binary, .hexadecimal, .int, .octal, .float:
+        case .int, .float:
             target.outputInline(constant.description, style: .numberLiteral)
             
         case .nil:

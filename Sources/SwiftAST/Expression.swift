@@ -45,6 +45,15 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
         return []
     }
     
+    /// If this expression's parent type is an expression, returns that parent
+    /// casted to an expression.
+    ///
+    /// Returns `nil`, in case no parent is present, or if the parent is not an
+    /// Expression type.
+    open var parentExpression: Expression? {
+        return parent as? Expression
+    }
+    
     /// Resolved type of this expression.
     /// Is `nil`, in case it has not been resolved yet.
     open var resolvedType: SwiftType?
@@ -501,7 +510,7 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
         constant = .string(value)
     }
     public required init(integerLiteral value: Int) {
-        constant = .int(value)
+        constant = .int(value, .decimal)
     }
     public required init(floatLiteral value: Float) {
         constant = .float(value)
@@ -1213,7 +1222,7 @@ public extension Postfix {
         return FunctionCallPostfix(arguments: arguments)
     }
     
-    public var asFuntionCall: FunctionCallPostfix? {
+    public var asFunctionCall: FunctionCallPostfix? {
         return self as? FunctionCallPostfix
     }
 }
@@ -1248,14 +1257,11 @@ public struct FunctionArgument: Equatable {
     }
 }
 
-/// One of the recognized constant values
+/// Represents one of the recognized compile-time constant value types.
 public enum Constant: Equatable {
     case float(Float)
     case boolean(Bool)
-    case int(Int)
-    case binary(Int)
-    case octal(Int)
-    case hexadecimal(Int)
+    case int(Int, IntegerType)
     case string(String)
     case rawConstant(String)
     case `nil`
@@ -1264,7 +1270,7 @@ public enum Constant: Equatable {
     /// it does not.
     public var integerValue: Int? {
         switch self {
-        case .int(let i), .binary(let i), .octal(let i), .hexadecimal(let i):
+        case .int(let i, _):
             return i
         default:
             return nil
@@ -1274,11 +1280,30 @@ public enum Constant: Equatable {
     /// Returns `true` if this constant represents an integer value.
     public var isInteger: Bool {
         switch self {
-        case .int, .binary, .octal, .hexadecimal:
+        case .int:
             return true
         default:
             return false
         }
+    }
+    
+    public static func binary(_ value: Int) -> Constant {
+        return .int(value, .binary)
+    }
+    
+    public static func octal(_ value: Int) -> Constant {
+        return .int(value, .octal)
+    }
+    
+    public static func hexadecimal(_ value: Int) -> Constant {
+        return .int(value, .hexadecimal)
+    }
+    
+    public enum IntegerType {
+        case decimal
+        case binary
+        case octal
+        case hexadecimal
     }
 }
 
@@ -1416,20 +1441,29 @@ extension Constant: CustomStringConvertible {
         switch self {
         case .float(let fl):
             return fl.description
+            
         case .boolean(let bool):
             return bool.description
-        case .int(let int):
-            return int.description
-        case .binary(let int):
-            return "0b" + String(int, radix: 2)
-        case .octal(let int):
-            return "0o" + String(int, radix: 8)
-        case .hexadecimal(let int):
-            return "0x" + String(int, radix: 16, uppercase: false)
+            
+        case let .int(int, category):
+            
+            switch category {
+            case .decimal:
+                return int.description
+            case .binary:
+                return "0b" + String(int, radix: 2)
+            case .octal:
+                return "0o" + String(int, radix: 8)
+            case .hexadecimal:
+                return "0x" + String(int, radix: 16, uppercase: false)
+            }
+            
         case .string(let str):
             return "\"\(str)\""
+            
         case .rawConstant(let str):
             return str
+            
         case .nil:
             return "nil"
         }
@@ -1445,7 +1479,7 @@ extension SwiftOperator: CustomStringConvertible {
 // MARK: - Literal initialiation
 extension Constant: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int) {
-        self = .int(value)
+        self = .int(value, .decimal)
     }
 }
 

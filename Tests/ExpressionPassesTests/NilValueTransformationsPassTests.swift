@@ -228,7 +228,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             let exp: Expression
             
             let params = (0..<argCount).map {
-                FunctionArgument.unlabeled(.constant(.int($0)))
+                FunctionArgument.unlabeled(.constant(.int($0, .decimal)))
             }
             
             if collesced {

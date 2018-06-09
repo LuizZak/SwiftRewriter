@@ -38,13 +38,13 @@ class ExpressionTests: XCTestCase {
     
     func testDescriptionExpressions() {
        XCTAssertEqual(
-            Expression.postfix(.identifier("abc"), .subscript(.constant(.int(1)))).description,
+            Expression.postfix(.identifier("abc"), .subscript(.constant(.int(1, .decimal)))).description,
             "abc[1]")
         XCTAssertEqual(
-            Expression.postfix(.identifier("abc"), .functionCall(arguments: [.labeled("label", .constant(.int(1))), .unlabeled(.constant(.boolean(true)))])).description,
+            Expression.postfix(.identifier("abc"), .functionCall(arguments: [.labeled("label", .constant(.int(1, .decimal))), .unlabeled(.constant(.boolean(true)))])).description,
             "abc(label: 1, true)")
         XCTAssertEqual(
-            Expression.binary(lhs: .constant(.int(1)), op: .add, rhs: .constant(.int(4))).description,
+            Expression.binary(lhs: .constant(.int(1, .decimal)), op: .add, rhs: .constant(.int(4, .decimal))).description,
             "1 + 4")
     }
     
@@ -96,7 +96,7 @@ class ExpressionTests: XCTestCase {
     }
     
     func testDescriptionCostants() {
-        XCTAssertEqual(Expression.constant(.int(1)).description, "1")
+        XCTAssertEqual(Expression.constant(.int(1, .decimal)).description, "1")
         XCTAssertEqual(Expression.constant(.float(132.4)).description, "132.4")
         XCTAssertEqual(Expression.constant(.hexadecimal(0xfefe)).description, "0xfefe")
         XCTAssertEqual(Expression.constant(.octal(0o7767)).description, "0o7767")

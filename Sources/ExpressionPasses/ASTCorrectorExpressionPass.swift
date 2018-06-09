@@ -41,16 +41,32 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     
     public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
         // TODO: Deal with multiple expressions on a single line, maybe.
-        guard stmt.expressions.count == 1, let exp = stmt.expressions.first else {
-            return super.visitExpressions(stmt)
-        }
+//        guard stmt.expressions.count == 1, let exp = stmt.expressions.first else {
+//            return super.visitExpressions(stmt)
+//        }
         
-        guard let postfix = exp.asPostfix else {
+//        guard let postfix = exp.asPostfix else {
+//            return super.visitExpressions(stmt)
+//        }
+        
+        var pf: PostfixExpression?
+        var pfFunctionCall: FunctionCallPostfix?
+        let matcher =
+            ExpressionsStatement.matcher()
+                .keyPath(\.expressions, hasCount(1))
+                .keyPath(\.expressions[0].asPostfix) { postfix in
+                    postfix
+                        .bind(to: &pf)
+                        .keyPath(\.functionCall, !isNil() ->> &pfFunctionCall)
+                        .keyPath(\.functionCall?.arguments, hasCount(1))
+                }
+        
+        guard matcher.matches(stmt), let postfix = pf else {
             return super.visitExpressions(stmt)
         }
         
         // Apply potential if-let patterns to simple 1-parameter function calls
-        guard let functionCall = exp.asPostfix?.functionCall, functionCall.arguments.count == 1 else {
+        guard let functionCall = pfFunctionCall else {
             return super.visitExpressions(stmt)
         }
         guard case .block(_, let args)? = functionCall.callableSignature else {
@@ -197,8 +213,9 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     }
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        
         // Get <value>.<member>(<call>) postfix values
-        if exp.op.asFuntionCall != nil, let memberPostfix = exp.exp.asPostfix,
+        if exp.op.asFunctionCall != nil, let memberPostfix = exp.exp.asPostfix,
             let memberType = memberPostfix.exp.resolvedType {
             
             let member = memberPostfix.exp
@@ -328,7 +345,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                 
             // <nullable> -> <nullable> != nil
             // <nullable> -> <nullable> == nil (negated)
-            case .optional(.nominal(.typeName)):
+            case .optional:
                 exp.expectedType = nil
                 
                 let outer = exp.binary(op: negated ? .equals : .unequals, rhs: .constant(.nil))

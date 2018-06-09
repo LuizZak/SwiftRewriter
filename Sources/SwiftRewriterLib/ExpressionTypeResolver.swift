@@ -172,7 +172,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
         switch exp.constant {
-        case .int, .hexadecimal, .octal, .binary:
+        case .int:
             if let expected = exp.expectedType, typeSystem.category(forType: expected) == .integer {
                 exp.resolvedType = expected
             } else {
@@ -719,7 +719,7 @@ private class MemberInvocationResolver {
         defer {
             postfix.op = functionCall.replacingArguments(functionCall.subExpressions.map(typeResolver.visitExpression))
             
-            if let expectedType = postfix.expectedType, let args = postfix.op.asFuntionCall?.arguments {
+            if let expectedType = postfix.expectedType, let args = postfix.op.asFunctionCall?.arguments {
                 let argTypes = args.compactMap { $0.expression.resolvedType }
                 
                 if args.count == argTypes.count {

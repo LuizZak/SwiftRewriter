@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -19,9 +19,9 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.6.0"),
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", .branchItem("swift4.2")),
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0"),
-        .package(url: "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git", from: "4.0.18"),
+        .package(url: "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git", .branchItem("swift4.2")),
         .package(url: "https://bitbucket.org/cs-luiz-silva/console.git", from: "0.1.0")
     ],
     targets: [
@@ -118,5 +118,6 @@ let package = Package(
             name: "GlobalsProvidersTests",
             dependencies: ["SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
                            "TestCommons"])
-    ]
+    ],
+    swiftLanguageVersions: [.v4, .v4_2]
 )

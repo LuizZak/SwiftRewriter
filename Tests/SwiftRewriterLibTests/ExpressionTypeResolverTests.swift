@@ -1007,7 +1007,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .definingTypeAlias("GLint", type: "Int32")
             .resolve()
             .thenAssertExpression(
-                at: \Expression.asPostfix?.op.asFuntionCall?.arguments[0].expression,
+                at: \Expression.asPostfix?.op.asFunctionCall?.arguments[0].expression,
                 expectsType: "GLenum")
     }
     

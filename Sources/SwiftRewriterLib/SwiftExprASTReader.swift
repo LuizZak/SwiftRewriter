@@ -389,17 +389,17 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         
         if let int = ctx.DECIMAL_LITERAL(), let intV = Int(dropIntSuffixes(from: int.getText())) {
-            return .constant(.int(intV))
+            return .constant(.int(intV, .decimal))
         }
         if let oct = ctx.OCTAL_LITERAL(), let int = Int(dropIntSuffixes(from: oct.getText()), radix: 8) {
-            return .constant(.octal(int))
+            return .constant(.int(int, .octal))
         }
         if let binary = ctx.BINARY_LITERAL(),
             let int = Int(dropIntSuffixes(from: binary.getText()).dropFirst(2), radix: 2) {
-            return .constant(.binary(int))
+            return .constant(.int(int, .binary))
         }
         if let hex = ctx.HEX_LITERAL(), let int = Int(dropIntSuffixes(from: hex.getText()).dropFirst(2), radix: 16) {
-            return .constant(.hexadecimal(int))
+            return .constant(.int(int, .hexadecimal))
         }
         if ctx.YES() != nil || ctx.TRUE() != nil {
             return .constant(.boolean(true))

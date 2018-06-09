@@ -10,15 +10,15 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
             exp.op.hasOptionalAccess = true
         }
         
-        // [Type new] expressions
-        if let ident = exp.exp.asPostfix?.exp.asIdentifier,
-            exp.functionCall?.arguments.isEmpty == true,
-            exp.exp.asPostfix?.member?.name == "new" {
-            let result: Expression
-            if ident.identifier == "self" {
-                result = ident.dot("init").call()
+        // [Type new]
+        var typeName: String = ""
+        if Expression.matcher(ident(.any ->> &typeName).call("new")).matches(exp) {
+            var result: Expression = Expression.identifier(typeName)
+                
+            if typeName == "self" {
+                result = result.dot("init").call()
             } else {
-                result = ident.call()
+                result = result.call()
             }
             
             result.resolvedType = exp.resolvedType
@@ -26,13 +26,13 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
             return super.visitExpression(result)
         }
         
-        // Type.new expressions
-        if let ident = exp.exp.asIdentifier, exp.member?.name == "new" {
+        // Type.new
+        if Expression.matcher(ident(.any ->> &typeName).dot("new")).matches(exp) {
             let result: Expression
-            if ident.identifier == "self" {
-                result = ident.dot("init").call()
+            if typeName == "self" {
+                result = Expression.identifier(typeName).dot("init").call()
             } else {
-                result = ident.call()
+                result = Expression.identifier(typeName).call()
             }
             
             result.resolvedType = exp.resolvedType

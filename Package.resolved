@@ -5,9 +5,9 @@
         "package": "Antlr4",
         "repositoryURL": "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git",
         "state": {
-          "branch": null,
-          "revision": "438e2a30cdb9f7067c9cc0ac792fd9bc59c35b7a",
-          "version": "4.0.19"
+          "branch": "swift4.2",
+          "revision": "15b009489dae2f2c757bf30c1c6e57331c28f5d9",
+          "version": null
         }
       },
       {
@@ -23,9 +23,9 @@
         "package": "MiniLexer",
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
-          "branch": null,
-          "revision": "048083add7179a7918bec8193691526cda13f8b5",
-          "version": "0.6.0"
+          "branch": "swift4.2",
+          "revision": "24e50d9e7a6c2beebf2071dd56d7d584fa52fbfd",
+          "version": null
         }
       },
       {
@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/apple/swift-package-manager.git",
         "state": {
           "branch": null,
-          "revision": "63a01220e93271dc3bf204b9e13dd1aeb2beefee",
-          "version": "0.2.0"
+          "revision": "6983434787dec4e543e9d398a0a9acf63ccd4da1",
+          "version": "0.2.1"
         }
       }
     ]

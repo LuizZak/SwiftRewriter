@@ -9,8 +9,8 @@ class SwiftExprASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!
     
     func testConstants() {
-        assert(objcExpr: "1", readsAs: .constant(.int(1)))
-        assert(objcExpr: "1ulL", readsAs: .constant(.int(1)))
+        assert(objcExpr: "1", readsAs: .constant(.int(1, .decimal)))
+        assert(objcExpr: "1ulL", readsAs: .constant(.int(1, .decimal)))
         assert(objcExpr: "1.0e2", readsAs: .constant(.float(1e2)))
         assert(objcExpr: "1f", readsAs: .constant(.float(1)))
         assert(objcExpr: "1F", readsAs: .constant(.float(1)))
