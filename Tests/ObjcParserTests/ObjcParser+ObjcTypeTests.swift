@@ -113,7 +113,7 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
             
             // Assert
             if type != expectedType {
-                recordFailure(withDescription: "Failed: Expected to parse type '\(source)' as '\(expectedType)', but received '\(type)'",
+                recordFailure(withDescription: "Failed: Expected to parse type '\(source)' as '\(expectedType)', but received '\(type as Any)'",
                               inFile: file, atLine: line, expected: true)
             }
             
