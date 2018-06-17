@@ -1,5 +1,5 @@
 /// Specifies an attribute for a property
-public enum PropertyAttribute: Equatable, Codable {
+public enum PropertyAttribute: Hashable, Codable {
     /// Standard `readonly` property attribute
     public static var readonly: PropertyAttribute = .attribute("readonly")
     

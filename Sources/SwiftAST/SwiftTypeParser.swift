@@ -2,7 +2,7 @@ import MiniLexer
 
 /// Support for parsing of Swift type signatures into `SwiftType` structures.
 public class SwiftTypeParser {
-    private typealias Tokenizer = TokenizerLexer<SwiftTypeToken>
+    private typealias Tokenizer = TokenizerLexer<FullToken<SwiftTypeToken>>
     
     /// Parses a Swift type from a given type string
     public static func parse(from string: String) throws -> SwiftType {
@@ -243,7 +243,7 @@ public class SwiftTypeParser {
         repeat {
             let periodBT = lexer.backtracker()
             
-            try lexer.advance(over: .period)
+            try lexer.advance(overTokenType: .period)
             
             do {
                 // Check if the nesting is not actually a metatype access
@@ -330,7 +330,7 @@ public class SwiftTypeParser {
                 continue
             }
             
-            try lexer.advance(over: .closeBracket)
+            try lexer.advance(overTokenType: .closeBracket)
             break
         } while !lexer.isEof
         
@@ -347,7 +347,7 @@ public class SwiftTypeParser {
     ///     : '[' type ':' type ']' ;
     /// ```
     private static func parseArrayOrDictionary(_ lexer: Tokenizer) throws -> SwiftType {
-        try lexer.advance(over: .openBrace)
+        try lexer.advance(overTokenType: .openBrace)
         
         let type1 = try parseType(lexer)
         var type2: SwiftType?
@@ -358,7 +358,7 @@ public class SwiftTypeParser {
             type2 = try parseType(lexer)
         }
         
-        try lexer.advance(over: .closeBrace)
+        try lexer.advance(overTokenType: .closeBrace)
         
         if let type2 = type2 {
             return .dictionary(key: type1, value: type2)
@@ -406,14 +406,14 @@ public class SwiftTypeParser {
                 return
             }
             
-            try lexer.advance(over: .identifier)
+            try lexer.advance(overTokenType: .identifier)
             
             if lexer.lexer.safeIsNextChar(equalTo: "(") && lexer.consumeToken(ifTypeIs: .openParens) != nil {
                 while !lexer.isEof && !lexer.tokenType(is: .closeParens) {
-                    try lexer.advance(over: lexer.token().tokenType)
+                    try lexer.advance(overTokenType: lexer.tokenType())
                 }
                 
-                try lexer.advance(over: .closeParens)
+                try lexer.advance(overTokenType: .closeParens)
             }
             
             // Check for another attribute
@@ -423,7 +423,7 @@ public class SwiftTypeParser {
         var returnType: SwiftType
         var parameters: [SwiftType] = []
         
-        try lexer.advance(over: .openParens)
+        try lexer.advance(overTokenType: .openParens)
         
         var expectsBlock = false
         
@@ -446,10 +446,13 @@ public class SwiftTypeParser {
             if !expectsType {
                 // Check if we're handling a label
                 let hasSingleLabel: Bool = lexer.backtracking {
-                    return (lexer.consumeToken(ifTypeIs: .identifier) != nil && lexer.consumeToken(ifTypeIs: .colon) != nil)
+                    lexer.consumeToken(ifTypeIs: .identifier) != nil
+                        && lexer.consumeToken(ifTypeIs: .colon) != nil
                 }
                 let hasDoubleLabel: Bool = lexer.backtracking {
-                    return (lexer.consumeToken(ifTypeIs: .identifier) != nil && lexer.consumeToken(ifTypeIs: .identifier) != nil && lexer.consumeToken(ifTypeIs: .colon) != nil)
+                    lexer.consumeToken(ifTypeIs: .identifier) != nil
+                        && lexer.consumeToken(ifTypeIs: .identifier) != nil
+                        && lexer.consumeToken(ifTypeIs: .colon) != nil
                 }
                 
                 if hasSingleLabel {
@@ -493,7 +496,7 @@ public class SwiftTypeParser {
             }
         }
         
-        try lexer.advance(over: .closeParens)
+        try lexer.advance(overTokenType: .closeParens)
         
         // It's a block if if features a function arrow afterwards...
         if lexer.consumeToken(ifTypeIs: .functionArrow) != nil {

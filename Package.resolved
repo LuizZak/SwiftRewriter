@@ -2,15 +2,6 @@
   "object": {
     "pins": [
       {
-        "package": "Antlr4",
-        "repositoryURL": "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git",
-        "state": {
-          "branch": "swift4.2",
-          "revision": "4cb7bcedc5490e82b8f948439cf2373cf3ee75e8",
-          "version": null
-        }
-      },
-      {
         "package": "Console",
         "repositoryURL": "https://bitbucket.org/cs-luiz-silva/console.git",
         "state": {
@@ -24,7 +15,7 @@
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
           "branch": "swift4.2",
-          "revision": "24e50d9e7a6c2beebf2071dd56d7d584fa52fbfd",
+          "revision": "eae81dbdc6ffb96046457c7bf41e2fbcc33f9773",
           "version": null
         }
       },

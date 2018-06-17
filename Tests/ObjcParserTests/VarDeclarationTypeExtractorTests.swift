@@ -12,6 +12,7 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
         assertTypeVisit(objc: "NSString* abc;",
                         { try $0.varDeclaration() },
                         expected: "NSString*")
+        
         assertTypeVisit(objc: "static const NSString*_Nonnull abc;",
                         { try $0.varDeclaration() },
                         expected: "static const NSString*_Nonnull")

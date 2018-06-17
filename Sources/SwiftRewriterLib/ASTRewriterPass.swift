@@ -8,10 +8,10 @@ public struct ASTRewriterPassContext {
     public let typeSystem: TypeSystem
     public let typeResolver: ExpressionTypeResolver
     
-    /// Must be called by every `ASTRewriterPass` if it makes any sort of
-    /// change to a syntax tree.
+    /// Must be called by every `ASTRewriterPass` if it makes any sort of change
+    /// to a syntax tree.
     ///
-    /// Not calling this method may result in stale syntax structure metadata,
+    /// Not calling this closure may result in stale syntax structure metadata,
     /// like expression types, being fed to subsequent expression passes.
     public let notifyChangedTree: () -> Void
     

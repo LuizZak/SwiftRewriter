@@ -21,13 +21,13 @@ func filesAt(path directoryPath: String, includePattern: String? = nil, excludeP
     // Inclusions
     if let includePattern = includePattern {
         objcFiles = objcFiles.filter { path in
-            return fnmatch(includePattern, path, fnflags) == 0
+            fnmatch(includePattern, path, fnflags) == 0
         }
     }
     // Exclusions
     if let excludePattern = excludePattern {
         objcFiles = objcFiles.filter { path in
-            return fnmatch(excludePattern, path, fnflags) != 0
+            fnmatch(excludePattern, path, fnflags) != 0
         }
     }
     

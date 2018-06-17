@@ -163,16 +163,19 @@ public extension String {
                 } else if next == "*" {
                     state = .multiLine(begin: index)
                 }
+                
             case .stringLiteral:
                 if unicodes[index] == "\"" {
                     state = .normal
                 }
+                
             case .singleLine(let begin):
                 // End of single-line
                 if self[index] == "\n" {
                     ranges.append(begin..<unicodes.index(after: index))
                     state = .normal
                 }
+                
             case .multiLine(let begin):
                 // End of multi-line
                 if self[index] == "*" && unicodes[unicodes.index(after: index)] == "/" {
@@ -186,6 +189,7 @@ public extension String {
         switch state {
         case .normal, .stringLiteral:
             break
+            
         case .singleLine(let begin), .multiLine(let begin):
             ranges.append(begin..<endIndex)
         }

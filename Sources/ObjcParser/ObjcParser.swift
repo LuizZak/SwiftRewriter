@@ -277,17 +277,17 @@ public class ObjcParser {
             if lexer.tokenType() == .operator(.lessThan) {
                 let types =
                     _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             itemParser: { try lexer.advance(matching: { $0.isIdentifier }) })
+                                             itemParser: { try lexer.advance(matching: { $0.tokenType.isIdentifier }) })
                 type = .id(protocols: types.map { String($0.value) })
             } else {
                 type = .id(protocols: [])
             }
         } else if lexer.tokenType(matches: { $0.isIdentifier }) {
-            var typeName: String = String(try lexer.advance(matching: { $0.isIdentifier }).value)
+            var typeName: String = String(try lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
             
             // 'long long' support
             if typeName == "long" && lexer.tokenType(matches: { $0.isIdentifier }) && lexer.token().value == "long" {
-                typeName = String(try typeName + " " + lexer.advance(matching: { $0.isIdentifier }).value)
+                typeName = String(try typeName + " " + lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
             }
             
             // 'signed', 'unsigned' support
@@ -340,7 +340,7 @@ public class ObjcParser {
     func parseTokenNode(_ tokenType: TokenType,
                         onMissing message: String? = nil) throws {
         
-        try lexer.advance(over: tokenType)
+        try lexer.advance(overTokenType: tokenType)
     }
     
     /// Starts parsing a comman-separated list of items using the specified braces

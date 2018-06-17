@@ -155,7 +155,8 @@ class SuggestConversionInterface {
         var overwriteCount = 0
         
         let objcFiles: [URL] =
-            filesAt(path: directoryPath, includePattern: options.includePattern,
+            filesAt(path: directoryPath,
+                    includePattern: options.includePattern,
                     excludePattern: options.excludePattern)
                 // Filter down to .h/.m files
                 .filter { (path: URL) -> Bool in

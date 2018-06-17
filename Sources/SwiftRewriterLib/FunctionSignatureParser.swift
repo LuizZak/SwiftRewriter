@@ -5,6 +5,8 @@ import Utils
 /// Provides capabilities of parsing function signatures and argument arrays
 /// from input strings.
 public final class FunctionSignatureParser {
+    private typealias Tokenizer = TokenizerLexer<FullToken<Token>>
+    
     /// Parses an array of parameter signatures from a given input string.
     /// Input must contain the argument list enclosed within their respective
     /// parenthesis - e.g. the following string produces the following parameter
@@ -33,11 +35,20 @@ public final class FunctionSignatureParser {
     ///     ;
     ///
     /// parameter
-    ///     : parameter-name ':' swift-type ('=' 'default')?
+    ///     : parameter-name ':' parameter-attribute-list? swift-type ('=' 'default')?
     ///     ;
     ///
     /// parameter-name
     ///     : identifier? identifier
+    ///     ;
+    ///
+    /// parameter-attribute-list
+    ///     : parameter-attribute parameter-attribute-list?
+    ///     : 'inout'
+    ///     ;
+    ///
+    /// parameter-attribute
+    ///     : '@' identifier
     ///     ;
     ///
     /// identifier
@@ -54,9 +65,9 @@ public final class FunctionSignatureParser {
     public static func parseParameters(from string: String) throws -> [ParameterSignature] {
         var parameters: [ParameterSignature] = []
         
-        let tokenizer = TokenizerLexer<Token>(input: string)
+        let tokenizer = Tokenizer(input: string)
         
-        try tokenizer.advance(over: .openParens)
+        try tokenizer.advance(overTokenType: .openParens)
         
         var afterComma = false
         
@@ -87,7 +98,7 @@ public final class FunctionSignatureParser {
             throw tokenizer.lexer.syntaxError("Expected argument after ','")
         }
         
-        try tokenizer.advance(over: .closeParens)
+        try tokenizer.advance(overTokenType: .closeParens)
         
         // Verify extraneous input
         if !tokenizer.lexer.isEof() {
@@ -100,22 +111,22 @@ public final class FunctionSignatureParser {
         return parameters
     }
     
-    private static func skipTypeAnnotations(tokenizer: TokenizerLexer<Token>) throws {
+    private static func skipTypeAnnotations(tokenizer: Tokenizer) throws {
         while tokenizer.consumeToken(ifTypeIs: .at) != nil {
-            try tokenizer.advance(over: .identifier)
+            try tokenizer.advance(overTokenType: .identifier)
         }
         
         // Inout marks the end of an attributes list
         tokenizer.consumeToken(ifTypeIs: .inout)
     }
     
-    private static func parseParameter(tokenizer: TokenizerLexer<Token>) throws -> ParameterSignature {
+    private static func parseParameter(tokenizer: Tokenizer) throws -> ParameterSignature {
         let label: Substring
         if tokenizer.tokenType(is: .underscore) {
-            try tokenizer.advance(over: .underscore)
+            try tokenizer.advance(overTokenType: .underscore)
             label = "_"
         } else {
-            label = try tokenizer.advance(over: .identifier).value
+            label = try tokenizer.advance(overTokenType: .identifier).value
         }
         
         if tokenizer.consumeToken(ifTypeIs: .colon) != nil {
@@ -126,9 +137,9 @@ public final class FunctionSignatureParser {
             return ParameterSignature(name: String(label), type: type)
         }
         
-        let name = try tokenizer.advance(over: .identifier).value
+        let name = try tokenizer.advance(overTokenType: .identifier).value
         
-        try tokenizer.advance(over: .colon)
+        try tokenizer.advance(overTokenType: .colon)
         
         try skipTypeAnnotations(tokenizer: tokenizer)
         let type = try SwiftTypeParser.parse(from: tokenizer.lexer)

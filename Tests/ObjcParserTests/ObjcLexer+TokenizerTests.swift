@@ -127,7 +127,9 @@ class ObjcLexer_TokenizerTests: XCTestCase {
 
 extension ObjcLexer_TokenizerTests {
     
-    private func expect(sequence string: String, toTokenizeAs expectedTypes: [TokenType], file: String = #file, line: Int = #line) {
+    private func expect(sequence string: String, toTokenizeAs expectedTypes: [TokenType],
+                        file: String = #file, line: Int = #line) {
+        
         let lexer = makeLexer(string)
         
         for pair in zip(lexer.allTokens(), expectedTypes) {
@@ -147,7 +149,10 @@ extension ObjcLexer_TokenizerTests {
         }
     }
     
-    private func expect(_ string: String, toTokenizeAs expectedType: TokenType, _ expectedString: String? = nil, file: String = #file, line: Int = #line) {
+    private func expect(_ string: String, toTokenizeAs expectedType: TokenType,
+                        _ expectedString: String? = nil,
+                        file: String = #file, line: Int = #line) {
+        
         let expString = expectedString ?? string
         
         let token =
@@ -157,7 +162,9 @@ extension ObjcLexer_TokenizerTests {
         tokenizeTest(string, token, file: file, line: line)
     }
     
-    private func tokenizeTest(_ string: String, _ expected: ObjcLexer.Token, file: String = #file, line: Int = #line) {
+    private func tokenizeTest(_ string: String, _ expected: ObjcLexer.Token,
+                              file: String = #file, line: Int = #line) {
+        
         let lexer = makeLexer(string)
         
         if lexer.token() != expected {

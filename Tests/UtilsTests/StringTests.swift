@@ -125,7 +125,7 @@ class StringTests: XCTestCase {
         
         let ranges = input.rangesOfCommentSections()
         XCTAssertEqual(ranges.count, 2)
-        XCTAssertEqual(ranges[0], input.range(of: "// A comment!\n")!)
+        XCTAssertEqual(ranges[0], input.range(of: "// A comment!\n"))
         XCTAssertEqual(ranges[1], input.range(of: """
             /*
                 A multi-lined comment!

@@ -40,7 +40,7 @@ Statements are parsed into a customized AST for representing Swift grammars, con
 
 #### 2.1 Intention generation
 
-The complete grammar tree is then analyzed and grouped up into sets of objects that encapsulate the intent of creating matching Swift source code for each object from the original Objective-C source code. This set of structures are aptly named `Intentions`, and many subtypes of intentions are present and used to fully represent the final Swift source code.
+The complete grammar tree is then analyzed and grouped up into sets of objects that encapsulate the intent of creating matching Swift source code for each object from the original Objective-C source code. These structures are aptly named `Intentions`. Many intention types are used to represent the final Swift source code that the tool will generate.
 
 Source code statements/expressions are not split into invididual intentions; these constructs remains encapsulated behind SwiftAST trees, which are contained within `FunctionBodyIntention` instances, one for each method body.
 
@@ -67,17 +67,17 @@ Supplementary context and historical tracking is available to allow inspection o
 
 The code is inspected with a type resolver (`ExpressionTypeResolver`) to assign each expression in each statement a type. This must be done so that AST rewriting passes that are applied later have access to semantic context for expressions.
 
-This step is redone many times later during intention and AST rewriting steps to keep the type resolving data up to date with respect to source-code transformations.
+This step is redone many times later during intention and AST rewriting steps to keep the typing information data up to date with respect to source-code transformations.
 
 #### 4. Intention rewriting
 
 The final collection of intentions is passed to special steps that are free to change the structure of the generated intentions before actual outputting is performed.
 
-These steps are provided via an `IntentionPassSource` protocol provided to `SwiftRewriter.init`, which should provide an array of `IntentionPass` objects to a `SwiftRewriter` instance. These intention passes are then fed the entire source code represented by the intermediary intention collection. Intention passes are free to delete, merge, rename, or create new source-generation intentions as they see fit.
+These steps are represented by an `IntentionPass` protocol, which is fed to a `SwiftRewriter` via an instance of `IntentionPassSource`. These intention passes are then fed the entire source code represented by the intermediary intention collection. Intention passes are free to delete, merge, rename, or create new source-generation intentions freely.
 
 This is the step of the process in which outside code altering processors are allowed to change the resulting program's structure at a higher level. Actual method body rewriting should be done in a separate step (AST rewriting).
 
-- Intention passes are applied serially, in the same order as the `IntentionPassSource` provides them. A type resolving step is applied between each pass, before the intentions are fed to the next intention pass.
+- Intention passes are applied serially, in the same order as the `IntentionPassSource` provides them. Type resolution is invoked between each intention pass to keep the typing information up-to-date with respect to general source code transformations.
 
 #### 5. AST rewriting
 
@@ -85,14 +85,14 @@ After intention rewriting has finished altering the program's structure, special
 
 Expression passes are provided via an `ASTRewriterPassSource` protocol provided to `SwiftRewriter.init`, which should provide an array of `ASTRewriterPass`-subtypes, which are then individually instantiated and applied to all method bodies in parallel.
 
-- `ASTRwriterPass` types are instantiated for each method body to be run in parallel, in the same order as they are defined in `ASTRewriterPassSource`.
-    - Types are provided instead of instances to allow instantiation on a per-method basis, allowing improved guarantees of multi-threading correctness of method bodies. Do note that correctness of multi-threading is only implied for method bodies, but not to the surrounding intention context the method body is contained within.
-    - In other words, don't change intentions during AST rewriting!
+- `ASTRewriterPass` types are instantiated for each method body to be run in parallel, in the same order as they are defined in `ASTRewriterPassSource`.
+    - Types are provided instead of instances to allow instantiation on a per-method basis, with the goal of improved guarantees of multi-threading correctness when manipulating all method bodies simultaneously. Do note that correctness of multi-threading is only implied for method bodies, but not to the surrounding intention context the method body is contained within.
+        - In other words, don't change intentions during the AST rewriting phase.
 - Expression types are resolved again after each individual rewriter pass finishes modifying the method's body, before the AST is handed to the next pass.
-    - It is the sole responsibility of the rewriter pass to notify changes to source code have been made to allow deciding whether or not to update expression type information for each function, saving time in cases no modifications where made that require type re-evaluation.
+    - Rewriter passes must notify when changes are made via `ASTRewriterPassContext.notifyChangedTree` to allow type resolution to kick in in between rewriter passes.
 
 #### 6. Code output
 
-At the final step, the code is output via the `WriterOutput`-implementer object provided to `SwiftRewriter.init`.
+At the final step, the code is output to an implementer of `WriterOutput` fed to `SwiftRewriter.init`.
 
-Code is output per-file, with `WriterOutput` implementers handling the logic to create files and provide output buffers a rewriter instance.
+Code is output in a per-file basis.
