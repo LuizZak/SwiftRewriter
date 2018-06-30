@@ -66,6 +66,10 @@ public class Diagnostics {
         
         diagnostics.append(diag)
     }
+    
+    internal func removeAll() {
+        diagnostics.removeAll()
+    }
 }
 
 /// A single diagnostic message

@@ -2,7 +2,7 @@ import SwiftAST
 import SwiftRewriterLib
 
 public enum UIResponderCompoundType {
-private static var singleton: CompoundedMappingType = {
+    private static var singleton: CompoundedMappingType = {
         let mappings = createMappings()
         let type = createType()
     

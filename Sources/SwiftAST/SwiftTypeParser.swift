@@ -408,6 +408,8 @@ public class SwiftTypeParser {
             
             try lexer.advance(overTokenType: .identifier)
             
+            // Check for parenthesis on the annotation by detecting an open parens
+            // with no whitespace right after the annotation identifier
             if lexer.lexer.safeIsNextChar(equalTo: "(") && lexer.consumeToken(ifTypeIs: .openParens) != nil {
                 while !lexer.isEof && !lexer.tokenType(is: .closeParens) {
                     try lexer.advance(overTokenType: lexer.tokenType())

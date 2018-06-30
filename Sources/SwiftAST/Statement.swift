@@ -858,8 +858,12 @@ public struct StatementVariableDeclaration: Equatable {
     public var isConstant: Bool
     public var initialization: Expression?
     
-    public init(identifier: String, type: SwiftType, ownership: Ownership = .strong,
-                isConstant: Bool = false, initialization: Expression? = nil) {
+    public init(identifier: String,
+                type: SwiftType,
+                ownership: Ownership = .strong,
+                isConstant: Bool = false,
+                initialization: Expression? = nil) {
+        
         self.identifier = identifier
         self.type = type
         self.ownership = ownership

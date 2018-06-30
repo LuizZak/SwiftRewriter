@@ -34,46 +34,57 @@ public final class SyntaxNodeIterator: IteratorProtocol {
             if inspectBlocks, let block = exp as? BlockLiteralExpression {
                 enqueue(block.body)
             }
+            
         case let statement as Statement:
             
             switch statement {
             case let stmt as ExpressionsStatement:
                 enqueue(contentsOf: stmt.expressions)
+                
             case let stmt as IfStatement:
                 enqueue(stmt.exp)
                 enqueue(stmt.body)
                 if let elseBody = stmt.elseBody {
                     enqueue(elseBody)
                 }
+                
             case let stmt as CompoundStatement:
                 enqueue(contentsOf: stmt)
+                
             case let stmt as ReturnStatement:
                 if let exp = stmt.exp {
                     enqueue(exp)
                 }
+                
             case let stmt as DeferStatement:
                 enqueue(stmt.body)
+                
             case let stmt as DoStatement:
                 enqueue(stmt.body)
+                
             case let stmt as ForStatement:
                 enqueue(pattern: stmt.pattern)
                 enqueue(stmt.exp)
                 enqueue(stmt.body)
+                
             case let stmt as SwitchStatement:
                 enqueue(stmt.exp)
                 stmt.cases.forEach(enqueue)
                 if let def = stmt.defaultCase {
                     enqueue(contentsOf: def)
                 }
+                
             case let stmt as VariableDeclarationsStatement:
                 for decl in stmt.decl {
                     if let exp = decl.initialization {
                         enqueue(exp)
                     }
                 }
+                
             case let stmt as WhileStatement:
                 enqueue(stmt.exp)
                 enqueue(stmt.body)
+                
             default:
                 break
             }

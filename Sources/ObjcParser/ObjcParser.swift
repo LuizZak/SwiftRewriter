@@ -7,6 +7,7 @@ import class Antlr4.ATNSimulator
 import class Antlr4.ANTLRInputStream
 import class Antlr4.CommonTokenStream
 import class Antlr4.ParseTreeWalker
+import class Antlr4.ParserRuleContext
 import class Antlr4.Lexer
 import class Antlr4.Parser
 import ObjcParserAntlr
@@ -149,18 +150,43 @@ public class ObjcParser {
         traverser.traverse()
     }
     
+    private func tryParse<T: ParserRuleContext, P: Parser>(from parser: P, _ operation: (P) throws -> T) throws -> T {
+        
+        let diag = Diagnostics()
+        parser.addErrorListener(
+            DiagnosticsErrorListener(source: source, diagnostics: diag)
+        )
+        
+        parser._interp.setPredictionMode(.SLL)
+        
+        try parser.reset()
+        
+        var root: T = try operation(parser)
+        
+        if diag.errors.count > 0 {
+            diag.removeAll()
+            
+            try parser.reset()
+            parser._interp.setPredictionMode(.LL)
+            
+            root = try operation(parser)
+        }
+        
+        diagnostics.merge(with: diag)
+        
+        return root
+    }
+    
     /// Main source parsing pass which takes in preprocessors while parsing
     private func parsePreprocessor() throws -> String {
         let src = source.fetchSource()
         
         let parserState = try state.makePreprocessorParser(input: src)
         let parser = parserState.parser
+        parser.removeErrorListeners()
         preprocessorParser = parserState
-        parser.addErrorListener(
-            DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
-        )
         
-        let root = try parser.objectiveCDocument()
+        let root = try tryParse(from: parser, { try $0.objectiveCDocument() })
         
         let preprocessors = ObjcPreprocessorListener.walk(root)
         
@@ -185,14 +211,10 @@ public class ObjcParser {
         
         let parserState = try mainParser ?? state.makeMainParser(input: input)
         let parser = parserState.parser
+        parser.removeErrorListeners()
         mainParser = parserState
-        parser.addErrorListener(
-            DiagnosticsErrorListener(source: source, diagnostics: diagnostics)
-        )
         
-        try parser.reset()
-        
-        let root = try parser.translationUnit()
+        let root = try tryParse(from: parser, { try $0.translationUnit() })
         
         let listener = ObjcParserListener(sourceString: src, source: source, state: state)
         
