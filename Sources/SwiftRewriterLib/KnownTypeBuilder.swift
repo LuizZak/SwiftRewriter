@@ -14,6 +14,7 @@ public struct KnownTypeBuilder {
             BuildingKnownType(typeName: existingType.typeName,
                               supertype: (existingType.supertype?.asTypeName).map(KnownTypeReference.typeName))
         
+        type.semantics = existingType.semantics
         type.kind = existingType.kind
         type.origin = "Cloned from existing type with \(KnownTypeBuilder.self) at \(file) line \(line)"
         
@@ -24,17 +25,26 @@ public struct KnownTypeBuilder {
         }
         
         for field in existingType.knownFields {
-            self = self.field(named: field.name, storage: field.storage, isStatic: field.isStatic)
+            self = self.field(named: field.name,
+                              storage: field.storage,
+                              isStatic: field.isStatic,
+                              semantics: field.semantics)
         }
         for method in existingType.knownMethods {
-            self = self.method(withSignature: method.signature, optional: method.optional)
+            self = self.method(withSignature: method.signature,
+                               optional: method.optional,
+                               semantics: method.semantics)
         }
         for prop in existingType.knownProperties {
             self =
-                self.property(named: prop.name, storage: prop.storage,
-                              isStatic: prop.isStatic, optional: prop.optional,
-                              accessor: prop.accessor, attributes: prop.attributes,
-                              isEnumCase: prop.isEnumCase)
+                self.property(named: prop.name,
+                              storage: prop.storage,
+                              isStatic: prop.isStatic,
+                              optional: prop.optional,
+                              accessor: prop.accessor,
+                              attributes: prop.attributes,
+                              isEnumCase: prop.isEnumCase,
+                              semantics: prop.semantics)
         }
         for prot in existingType.knownProtocolConformances {
             self = self.protocolConformance(protocolName: prot.protocolName)
@@ -58,6 +68,13 @@ public struct KnownTypeBuilder {
     private init(type: BuildingKnownType, useSwiftSignatureMatching: Bool) {
         self.type = type
         self.useSwiftSignatureMatching = useSwiftSignatureMatching
+    }
+    
+    /// Adds a new semantical annotation
+    public func addingSemanticAnnotation(_ semantic: Semantic) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.semantics.insert(semantic)
+        return new
     }
     
     /// Sets the supertype of the type being constructed on this known type builder
@@ -91,19 +108,24 @@ public struct KnownTypeBuilder {
     }
     
     /// Adds a new constructor to this type
-    public func constructor(shortParameters shortParams: [ParameterTuple]) -> KnownTypeBuilder {
+    public func constructor(shortParameters shortParams: [ParameterTuple],
+                            semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+        
         let parameters =
             shortParams.map { tuple in
                 ParameterSignature(name: tuple.label, type: tuple.type)
             }
         
-        return constructor(withParameters: parameters)
+        return constructor(withParameters: parameters, semantics: semantics)
     }
     
     /// Adds a new constructor to this type
-    public func constructor(withParameters parameters: [ParameterSignature]) -> KnownTypeBuilder {
+    public func constructor(withParameters parameters: [ParameterSignature],
+                            semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+        
         var new = clone()
-        let ctor = BuildingKnownConstructor(parameters: parameters)
+        let ctor = BuildingKnownConstructor(parameters: parameters,
+                                            semantics: semantics)
         
         new.type.constructors.append(ctor)
         
@@ -112,26 +134,31 @@ public struct KnownTypeBuilder {
     
     /// Adds an instance method with a given return type, and a flag
     /// specifying whether the method is an optional protocol conformance method
-    public func method(named name: String, shortParams: [ParameterTuple] = [],
-                       returning returnType: SwiftType = .void, isStatic: Bool = false,
-                       optional: Bool = false) -> KnownTypeBuilder {
+    public func method(named name: String,
+                       shortParams: [ParameterTuple] = [],
+                       returning returnType: SwiftType = .void,
+                       isStatic: Bool = false,
+                       optional: Bool = false,
+                       semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
         let parameters =
             shortParams.map { tuple in
                 ParameterSignature(name: tuple.label, type: tuple.type)
         }
         
-        let signature = FunctionSignature(name: name, parameters: parameters,
+        let signature = FunctionSignature(name: name,
+                                          parameters: parameters,
                                           returnType: returnType,
                                           isStatic: isStatic)
         
-        return method(withSignature: signature, optional: optional)
+        return method(withSignature: signature, optional: optional, semantics: semantics)
     }
     
     /// Adds a method with a given signature, and a flag specifying whether the
     /// method is an optional protocol conformance method
     public func method(withSignature signature: FunctionSignature,
-                       optional: Bool = false) -> KnownTypeBuilder {
+                       optional: Bool = false,
+                       semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -145,8 +172,10 @@ public struct KnownTypeBuilder {
         }
         
         let method = BuildingKnownMethod(ownerType: type.asKnownTypeReference,
-                                         body: nil, signature: signature,
-                                         optional: optional)
+                                         body: nil,
+                                         signature: signature,
+                                         optional: optional,
+                                         semantics: semantics)
         
         new.type.methods.append(method)
         
@@ -161,7 +190,8 @@ public struct KnownTypeBuilder {
                        parsingSignature signature: String,
                        isStatic: Bool = false,
                        returning returnType: SwiftType = .void,
-                       optional: Bool = false) -> KnownTypeBuilder {
+                       optional: Bool = false,
+                       semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
         let params = try! FunctionSignatureParser.parseParameters(from: signature)
         
@@ -169,28 +199,41 @@ public struct KnownTypeBuilder {
             FunctionSignature(name: name, parameters: params, returnType: returnType,
                               isStatic: isStatic)
         
-        return method(withSignature: signature, optional: optional)
+        return method(withSignature: signature, optional: optional, semantics: semantics)
     }
     
     /// Adds a strong property with no attributes with a given name and type, and
     /// a flag specifying whether the property is an optional protocol conformance
     /// property
-    public func property(named name: String, type: SwiftType, ownership: Ownership = .strong,
-                         isStatic: Bool = false, optional: Bool = false,
-                         accessor: KnownPropertyAccessor = .getterAndSetter) -> KnownTypeBuilder {
+    public func property(named name: String,
+                         type: SwiftType,
+                         ownership: Ownership = .strong,
+                         isStatic: Bool = false,
+                         optional: Bool = false,
+                         accessor: KnownPropertyAccessor = .getterAndSetter,
+                         semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: ownership, isConstant: false)
         
-        return property(named: name, storage: storage, isStatic: isStatic,
-                        optional: optional, accessor: accessor)
+        return property(named: name,
+                        storage: storage,
+                        isStatic: isStatic,
+                        optional: optional,
+                        accessor: accessor,
+                        semantics: semantics)
     }
     
     /// Adds a property with no attributes with a given name and storage, and a
     /// flag specifying whether the property is an optional protocol conformance
     /// property
-    public func property(named name: String, storage: ValueStorage, isStatic: Bool = false,
-                         optional: Bool = false, accessor: KnownPropertyAccessor = .getterAndSetter,
-                         attributes: [PropertyAttribute] = [], isEnumCase: Bool = false) -> KnownTypeBuilder {
+    public func property(named name: String,
+                         storage: ValueStorage,
+                         isStatic: Bool = false,
+                         optional: Bool = false,
+                         accessor: KnownPropertyAccessor = .getterAndSetter,
+                         attributes: [PropertyAttribute] = [],
+                         isEnumCase: Bool = false,
+                         semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -202,10 +245,15 @@ public struct KnownTypeBuilder {
         }
         
         let property =
-            BuildingKnownProperty(ownerType: type.asKnownTypeReference, name: name,
-                                  storage: storage, attributes: attributes,
-                                  isStatic: isStatic, optional: optional,
-                                  accessor: accessor, isEnumCase: isEnumCase)
+            BuildingKnownProperty(ownerType: type.asKnownTypeReference,
+                                  name: name,
+                                  storage: storage,
+                                  attributes: attributes,
+                                  isStatic: isStatic,
+                                  optional: optional,
+                                  accessor: accessor,
+                                  isEnumCase: isEnumCase,
+                                  semantics: semantics)
         
         new.type.properties.append(property)
         
@@ -213,16 +261,22 @@ public struct KnownTypeBuilder {
     }
     
     /// Adds a strong field with no attributes with a given name and type
-    public func field(named name: String, type: SwiftType, isConstant: Bool = false,
-                      isStatic: Bool = false) -> KnownTypeBuilder {
+    public func field(named name: String,
+                      type: SwiftType,
+                      isConstant: Bool = false,
+                      isStatic: Bool = false,
+                      semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: isConstant)
         
-        return field(named: name, storage: storage, isStatic: isStatic)
+        return field(named: name, storage: storage, isStatic: isStatic, semantics: semantics)
     }
     
     /// Adds a property with no attributes with a given name and storage
-    public func field(named name: String, storage: ValueStorage, isStatic: Bool = false) -> KnownTypeBuilder {
+    public func field(named name: String,
+                      storage: ValueStorage,
+                      isStatic: Bool = false,
+                      semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -235,9 +289,14 @@ public struct KnownTypeBuilder {
         
         let property =
             BuildingKnownProperty(ownerType: type.asKnownTypeReference,
-                                  name: name, storage: storage, attributes: [],
-                                  isStatic: isStatic, optional: false,
-                                  accessor: .getterAndSetter, isEnumCase: false)
+                                  name: name,
+                                  storage: storage,
+                                  attributes: [],
+                                  isStatic: isStatic,
+                                  optional: false,
+                                  accessor: .getterAndSetter,
+                                  isEnumCase: false,
+                                  semantics: semantics)
         
         new.type.fields.append(property)
         
@@ -277,7 +336,7 @@ public struct KnownTypeBuilder {
         return new
     }
     
-    public func enumCase(named name: String, rawValue: Expression? = nil) -> KnownTypeBuilder {
+    public func enumCase(named name: String, rawValue: Expression? = nil, semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         var new = clone()
         
         precondition(type.kind == .enum)
@@ -287,9 +346,15 @@ public struct KnownTypeBuilder {
                          isConstant: true)
         
         let cs =
-            BuildingKnownProperty(ownerType: type.asKnownTypeReference, name: name,
-                                  storage: storage, attributes: [], isStatic: true,
-                                  optional: false, accessor: .getter, isEnumCase: true)
+            BuildingKnownProperty(ownerType: type.asKnownTypeReference,
+                                  name: name,
+                                  storage: storage,
+                                  attributes: [],
+                                  isStatic: true,
+                                  optional: false,
+                                  accessor: .getter,
+                                  isEnumCase: true,
+                                  semantics: semantics)
         
         new.type.properties.append(cs)
         
@@ -338,6 +403,7 @@ private class DummyType: KnownType {
     var knownFields: [KnownProperty] = []
     var knownProtocolConformances: [KnownProtocolConformance] = []
     var supertype: KnownTypeReference?
+    var semantics: Set<Semantic> = []
     
     init(type: BuildingKnownType) {
         origin = type.origin
@@ -350,6 +416,7 @@ private class DummyType: KnownType {
         knownFields = type.knownFields
         knownProtocolConformances = type.knownProtocolConformances
         supertype = type.supertype
+        semantics = type.semantics
     }
     
     init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil) {
@@ -375,6 +442,7 @@ private struct BuildingKnownType: Codable {
     var fields: [BuildingKnownProperty] = []
     var protocols: [BuildingKnownProtocolConformance] = []
     var supertype: KnownTypeReference?
+    var semantics: Set<Semantic> = []
     
     init(typeName: String, supertype: KnownTypeReference? = nil) {
         self.origin = "Synthesized type"
@@ -415,6 +483,7 @@ extension BuildingKnownType: KnownType {
 
 private struct BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
+    var semantics: Set<Semantic>
 }
 
 private struct BuildingKnownMethod: KnownMethod, Codable {
@@ -422,11 +491,13 @@ private struct BuildingKnownMethod: KnownMethod, Codable {
     var body: KnownMethodBody?
     var signature: FunctionSignature
     var optional: Bool
+    var semantics: Set<Semantic>
     
     public enum CodingKeys: String, CodingKey {
         case ownerType
         case signature
         case optional
+        case semantics
     }
 }
 
@@ -439,6 +510,7 @@ private struct BuildingKnownProperty: KnownProperty, Codable {
     var optional: Bool
     var accessor: KnownPropertyAccessor
     var isEnumCase: Bool
+    var semantics: Set<Semantic>
 }
 
 private struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {

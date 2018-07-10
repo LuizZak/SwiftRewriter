@@ -2,7 +2,7 @@ import Foundation
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
-public protocol KnownType: KnownTypeReferenceConvertible {
+public protocol KnownType: KnownTypeReferenceConvertible, SemanticalObject {
     /// A string that specifies the origin of this known type.
     /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
@@ -100,13 +100,13 @@ public extension KnownType {
 }
 
 /// Describes a known type constructor
-public protocol KnownConstructor {
+public protocol KnownConstructor: SemanticalObject {
     /// Gets the parameters for this constructor
     var parameters: [ParameterSignature] { get }
 }
 
 /// Describes a known member of a type
-public protocol KnownMember {
+public protocol KnownMember: SemanticalObject {
     /// The owner type for this known member
     var ownerType: KnownTypeReference? { get }
     
@@ -204,6 +204,7 @@ public extension KnownType {
 
 public enum TraitType: Codable {
     case swiftType(SwiftType)
+    case semantics([Semantic])
     
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -211,6 +212,10 @@ public enum TraitType: Codable {
         switch try container.decode(Int.self, forKey: .flag) {
         case 0:
             self = .swiftType(try container.decode(SwiftType.self, forKey: .field))
+            
+        case 1:
+            self = .semantics(try container.decode([Semantic].self, forKey: .field))
+            
         default:
             let message = """
                 Unknown TraitType flag. Maybe data was encoded using a \
@@ -228,6 +233,10 @@ public enum TraitType: Codable {
         case .swiftType(let type):
             try container.encode(0, forKey: .flag)
             try container.encode(type, forKey: .field)
+            
+        case .semantics(let semantics):
+            try container.encode(0, forKey: .flag)
+            try container.encode(semantics, forKey: .field)
         }
     }
     

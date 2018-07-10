@@ -36,35 +36,6 @@ public struct ASTWriterOptions {
     }
 }
 
-/// Reader that reads Objective-C AST and outputs equivalent a Swift AST
-class SwiftASTReader {
-    var typeMapper: TypeMapper, typeParser: TypeParsing
-    
-    public init(typeMapper: TypeMapper, typeParser: TypeParsing) {
-        self.typeMapper = typeMapper
-        self.typeParser = typeParser
-    }
-    
-    public func parseStatements(compoundStatement: ObjectiveCParser.CompoundStatementContext) -> CompoundStatement {
-        let expressionReader = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
-        let parser = SwiftStatementASTReader.CompoundStatementVisitor(expressionReader: expressionReader)
-        guard let result = compoundStatement.accept(parser) else {
-            return [.unknown(UnknownASTContext(context: compoundStatement))]
-        }
-        
-        return result
-    }
-    
-    public func parseExpression(expression: ObjectiveCParser.ExpressionContext) -> Expression {
-        let parser = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
-        guard let result = expression.accept(parser) else {
-            return .unknown(UnknownASTContext(context: expression))
-        }
-        
-        return result
-    }
-}
-
 /// Main frontend class for converting Objective-C into Swift AST and printing
 /// Swift AST as well
 class SwiftASTWriter {

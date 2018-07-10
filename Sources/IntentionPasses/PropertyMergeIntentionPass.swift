@@ -184,7 +184,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         
         for (body, source) in bodies {
             let matches =
-                SyntaxNodeSequence(statement: body.body, inspectBlocks: true)
+                SyntaxNodeSequence(node: body.body, inspectBlocks: true)
                     .lazy
                     .compactMap { node in node as? Expression }
                     .contains { exp in

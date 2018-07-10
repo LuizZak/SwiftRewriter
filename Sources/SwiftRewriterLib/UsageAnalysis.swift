@@ -30,7 +30,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
                 continue
             }
             
-            let iterator = SyntaxNodeSequence(statement: body, inspectBlocks: true)
+            let iterator = SyntaxNodeSequence(node: body, inspectBlocks: true)
             
             for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
                 guard let expMethod = exp.member?.memberDefinition as? KnownMethod else {
@@ -64,7 +64,7 @@ public class DefaultUsageAnalyzer: UsageAnalyzer {
                 continue
             }
             
-            let iterator = SyntaxNodeSequence(statement: body, inspectBlocks: true)
+            let iterator = SyntaxNodeSequence(node: body, inspectBlocks: true)
             
             for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
                 guard let expProperty = exp.member?.memberDefinition as? KnownProperty else {

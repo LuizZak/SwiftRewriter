@@ -307,11 +307,33 @@ public extension IdentifierExpression {
             switch self {
             case let .member(type, member):
                 return (type, member)
+                
             case .local, .type, .global:
                 return nil
             }
         }
     }
+}
+
+extension IdentifierExpression {
+    
+    public func setDefinition(localName: String,
+                              type: SwiftType,
+                              isConstant: Bool = false) -> Self {
+        
+        let storage =
+            ValueStorage(type: type,
+                         ownership: .strong,
+                         isConstant: isConstant)
+        
+        definition =
+            Definition
+                .local(CodeDefinition(variableNamed: localName,
+                                      storage: storage))
+        
+        return self
+    }
+    
 }
 
 public extension MemberPostfix {

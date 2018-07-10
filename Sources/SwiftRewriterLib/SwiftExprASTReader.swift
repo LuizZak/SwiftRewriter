@@ -6,13 +6,15 @@ import SwiftAST
 
 /// A visitor that reads simple Objective-C expressions and emits as Expression
 /// enum cases.
-public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
+public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     public var typeMapper: TypeMapper
     public var typeParser: TypeParsing
+    public var context: SwiftASTReaderContext
     
-    public init(typeMapper: TypeMapper, typeParser: TypeParsing) {
+    public init(typeMapper: TypeMapper, typeParser: TypeParsing, context: SwiftASTReaderContext) {
         self.typeMapper = typeMapper
         self.typeParser = typeParser
+        self.context = context
     }
     
     public override func visitExpression(_ ctx: ObjectiveCParser.ExpressionContext) -> Expression? {
@@ -356,7 +358,9 @@ public class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         
         let compoundVisitor =
             SwiftStatementASTReader
-                .CompoundStatementVisitor(expressionReader: self)
+                .CompoundStatementVisitor(expressionReader: self,
+                                          context: context)
+        
         guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }

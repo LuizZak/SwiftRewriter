@@ -177,7 +177,7 @@ class MandatoryIntentionPass: IntentionPass {
             let selector = method.selector
             
             let sequence =
-                SyntaxNodeSequence(statement: body.body, inspectBlocks: true)
+                SyntaxNodeSequence(node: body.body, inspectBlocks: true)
                     .lazy.compactMap { $0 as? Expression }
             
             for expression in sequence {

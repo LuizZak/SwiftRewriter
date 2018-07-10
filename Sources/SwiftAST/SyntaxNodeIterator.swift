@@ -128,30 +128,15 @@ public enum ExpressionOrStatement {
 }
 
 public final class SyntaxNodeSequence: Sequence {
-    private var source: ExpressionOrStatement
+    private var node: SyntaxNode
     private var inspectBlocks: Bool
     
-    public init(expression: Expression, inspectBlocks: Bool) {
-        self.source = .expression(expression)
-        self.inspectBlocks = inspectBlocks
-    }
-    
-    public init(statement: Statement, inspectBlocks: Bool) {
-        self.source = .statement(statement)
+    public init(node: SyntaxNode, inspectBlocks: Bool) {
+        self.node = node
         self.inspectBlocks = inspectBlocks
     }
     
     public func makeIterator() -> SyntaxNodeIterator {
-        switch source {
-        case .expression(let exp):
-            return SyntaxNodeIterator(expression: exp, inspectBlocks: inspectBlocks)
-        case .statement(let stmt):
-            return SyntaxNodeIterator(statement: stmt, inspectBlocks: inspectBlocks)
-        }
-    }
-    
-    private enum ExpressionOrStatement {
-        case expression(Expression)
-        case statement(Statement)
+        return SyntaxNodeIterator(node: node, inspectBlocks: inspectBlocks)
     }
 }

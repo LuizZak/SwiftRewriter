@@ -68,7 +68,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     /// Invocates the resolution of all expressions on a given statement recursively.
     public func resolveTypes(in statement: Statement) -> Statement {
         // First, clear all variable definitions found, and their usages too.
-        for node in SyntaxNodeSequence(statement: statement, inspectBlocks: true) {
+        for node in SyntaxNodeSequence(node: statement, inspectBlocks: true) {
             if let scoped = node as? CodeScopeNode {
                 scoped.removeAllDefinitions()
             }

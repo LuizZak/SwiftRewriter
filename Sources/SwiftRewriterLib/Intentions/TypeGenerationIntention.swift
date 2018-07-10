@@ -35,6 +35,8 @@ public class TypeGenerationIntention: FromSourceIntention {
         return .class
     }
     
+    public var semantics: Set<Semantic> = []
+    
     public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
         self.typeName = typeName
         

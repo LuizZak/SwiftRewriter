@@ -130,10 +130,13 @@ class ExpressionPassTestCase: XCTestCase {
                 inFile: file, atLine: line, expected: true)
         }
         
-        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
+        let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         
         let reader = SwiftExprASTReader(typeMapper: typeMapper,
-                                        typeParser: TypeParsing(state: ExpressionPassTestCase._state))
+                                        typeParser: TypeParsing(state: ExpressionPassTestCase._state),
+                                        context: SwiftASTReaderContext(typeSystem: typeSystem,
+                                                                       typeContext: nil))
+        
         return expression.accept(reader)!
     }
     
@@ -155,11 +158,18 @@ class ExpressionPassTestCase: XCTestCase {
                 inFile: file, atLine: line, expected: true)
         }
         
-        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
+        let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         let typeParser = TypeParsing(state: ExpressionPassTestCase._state)
         
-        let expReader = SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser)
-        let reader = SwiftStatementASTReader(expressionReader: expReader)
+        let expReader =
+            SwiftExprASTReader(
+                typeMapper: typeMapper,
+                typeParser: typeParser,
+                context: SwiftASTReaderContext(typeSystem: typeSystem,
+                                               typeContext: nil))
+        
+        let reader = SwiftStatementASTReader(expressionReader: expReader,
+                                             context: expReader.context)
         
         return stmt.accept(reader)!
     }

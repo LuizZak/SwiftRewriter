@@ -837,7 +837,88 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 }
             }
             """
-            )
+        )
+    }
+    
+    func testForStatementWithNonLiteralCount() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                const NSInteger count = 5;
+                for(NSInteger i = 0; i < count; i++) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    let count: Int = 5
+                    for i in 0..<count {
+                    }
+                }
+            }
+            """
+        )
+    }
+    
+    func testForStatementWithNonConstantCount() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                NSInteger count = 5;
+                for(NSInteger i = 0; i < count; i++) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    var count: Int = 5
+                    for i in 0..<count {
+                    }
+                }
+            }
+            """
+        )
+    }
+    
+    func testForStatementWithNonConstantCountModifiedWithinLoop() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                NSInteger count = 5;
+                for(NSInteger i = 0; i < count; i++) {
+                    count = 0;
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    var count: Int = 5
+                    var i: Int = 0
+                    while i < count {
+                        defer {
+                            i += 1
+                        }
+                        count = 0
+                    }
+                }
+            }
+            """
+        )
     }
     
     func testForStatementWithNonInitializerStatement() throws {
@@ -845,6 +926,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: """
             @implementation MyClass
             - (void)myMethod {
+                NSInteger count = 5;
                 for(i = 0; i < count; i++) {
                 }
             }
@@ -855,6 +937,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
+                    var count: Int = 5
                     i = 0
                     while i < count {
                         defer {

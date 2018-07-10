@@ -995,13 +995,15 @@ public extension Expression {
         return DictionaryLiteralExpression(pairs: pairs.map { ExpressionDictionaryPair(key: $0.key, value: $0.value) })
     }
     
-    public static func ternary(_ exp: Expression, `true` ifTrue: Expression,
+    public static func ternary(_ exp: Expression,
+                               `true` ifTrue: Expression,
                                `false` ifFalse: Expression) -> TernaryExpression {
         
         return TernaryExpression(exp: exp, ifTrue: ifTrue, ifFalse: ifFalse)
     }
     
-    public static func block(parameters: [BlockParameter], `return` returnType: SwiftType,
+    public static func block(parameters: [BlockParameter] = [],
+                             `return` returnType: SwiftType = .void,
                              body: CompoundStatement) -> BlockLiteralExpression {
         
         return BlockLiteralExpression(parameters: parameters, returnType: returnType, body: body)

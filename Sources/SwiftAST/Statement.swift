@@ -831,8 +831,10 @@ public enum Pattern: Equatable {
         switch self {
         case .expression(let exp):
             exp.parent = node
+            
         case .tuple(let tuple):
             tuple.forEach { $0.setParent(node) }
+            
         case .identifier:
             break
         }
@@ -842,8 +844,10 @@ public enum Pattern: Equatable {
         switch self {
         case .expression(let exp):
             expressions.append(exp)
+            
         case .tuple(let tuple):
             tuple.forEach { $0.collect(expressions: &expressions) }
+            
         case .identifier:
             break
         }

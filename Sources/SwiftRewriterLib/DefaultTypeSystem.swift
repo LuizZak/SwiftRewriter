@@ -724,7 +724,8 @@ extension DefaultTypeSystem {
                         ],
                         returnType: .void,
                         isStatic: false
-                    )
+                    ),
+                        semantics: Semantics.collectionMutator
                 )
                 .build()
         
@@ -743,7 +744,8 @@ extension DefaultTypeSystem {
                         ],
                         returnType: .void,
                         isStatic: false
-                    )
+                    ),
+                        semantics: Semantics.collectionMutator
                 )
                 .build()
         
@@ -759,7 +761,8 @@ extension DefaultTypeSystem {
                         parameters: [
                             ParameterSignature(label: "_", name: "object", type: .anyObject)
                         ]
-                    )
+                    ),
+                        semantics: Semantics.collectionMutator
                 )
                 .build()
         

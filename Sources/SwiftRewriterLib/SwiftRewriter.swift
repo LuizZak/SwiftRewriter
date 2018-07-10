@@ -175,7 +175,9 @@ public class SwiftRewriter {
                         SwiftRewriter._parserStatePool.repool(state)
                     }
                     
-                    let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
+                    let reader = SwiftASTReader(typeMapper: typeMapper,
+                                                typeParser: typeParser,
+                                                typeSystem: self.typeSystem)
                     
                     switch item {
                     case .enumCase(let enCase):
@@ -184,12 +186,15 @@ public class SwiftRewriter {
                         }
                         
                         enCase.expression = reader.parseExpression(expression: expression)
-                    case .functionBody(let funcBody):
+                        
+                    case let .functionBody(funcBody, method):
                         guard let body = funcBody.typedSource?.statements else {
                             return
                         }
                         
-                        funcBody.body = reader.parseStatements(compoundStatement: body)
+                        funcBody.body =
+                            reader.parseStatements(compoundStatement: body,
+                                                   typeContext: method?.type)
                         
                     case .globalVar(let v):
                         guard let expression = v.typedSource?.constantExpression?.expression?.expression else {
@@ -595,7 +600,7 @@ fileprivate extension SwiftRewriter {
             self.nonnullTokenRanges = nonnullTokenRanges
         }
         
-        public func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
+        func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
             let ranges = nonnullTokenRanges
             
             // Requires original ANTLR's rule context
@@ -618,7 +623,7 @@ fileprivate extension SwiftRewriter {
             return false
         }
         
-        public func reportForLazyResolving(intention: Intention) {
+        func reportForLazyResolving(intention: Intention) {
             switch intention {
             case let intention as GlobalVariableGenerationIntention:
                 lazyResolve.append(.globalVar(intention))
@@ -655,7 +660,10 @@ fileprivate extension SwiftRewriter {
                 lazyParse.append(.globalVar(intention))
                 
             case let intention as FunctionBodyIntention:
-                lazyParse.append(.functionBody(intention))
+                let context =
+                    intention.ancestor(ofType: MethodGenerationIntention.self)
+                
+                lazyParse.append(.functionBody(intention, method: context))
                 
             case let intention as EnumCaseGenerationIntention:
                 lazyParse.append(.enumCase(intention))
@@ -665,7 +673,7 @@ fileprivate extension SwiftRewriter {
             }
         }
         
-        public func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
+        func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
             return typeMapper
         }
         
@@ -677,7 +685,7 @@ fileprivate extension SwiftRewriter {
 
 private enum LazyParseItem {
     case enumCase(EnumCaseGenerationIntention)
-    case functionBody(FunctionBodyIntention)
+    case functionBody(FunctionBodyIntention, method: MethodGenerationIntention?)
     case globalVar(GlobalVariableInitialValueIntention)
     
     /// Returns the base `FromSourceIntention`-typed value, which is the intention
@@ -686,7 +694,7 @@ private enum LazyParseItem {
         switch self {
         case .enumCase(let i):
             return i
-        case .functionBody(let i):
+        case .functionBody(let i, _):
             return i
         case .globalVar(let i):
             return i

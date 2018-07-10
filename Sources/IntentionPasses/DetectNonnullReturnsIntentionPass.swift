@@ -31,7 +31,7 @@ public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
         
         // Collect all return statements
         let returns =
-            SyntaxNodeSequence(statement: body.body, inspectBlocks: false)
+            SyntaxNodeSequence(node: body.body, inspectBlocks: false)
                 .compactMap { $0 as? ReturnStatement }
         
         // Analyze individual returns, checking if they all return the same non-null

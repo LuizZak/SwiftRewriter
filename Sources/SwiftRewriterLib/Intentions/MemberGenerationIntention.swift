@@ -9,6 +9,8 @@ public class MemberGenerationIntention: FromSourceIntention {
     /// Defaults to `false`, unless overriden by a subclass.
     public var isStatic: Bool { return false }
     
+    public var semantics: Set<Semantic> = []
+    
     public var memberType: SwiftType {
         fatalError("Must be overriden by subtypes")
     }

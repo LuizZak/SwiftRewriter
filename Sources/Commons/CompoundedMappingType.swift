@@ -10,9 +10,15 @@ public class CompoundedMappingType {
     
     var knownType: KnownType
     
-    public init(knownType: KnownType, signatureMappings: [SignatureMapper]) {
+    public var semantics: Set<Semantic>
+    
+    public init(knownType: KnownType,
+                signatureMappings: [SignatureMapper],
+                semantics: Set<Semantic> = []) {
+        
         self.knownType = knownType
         self.signatureMappings = signatureMappings
+        self.semantics = semantics
     }
 }
 

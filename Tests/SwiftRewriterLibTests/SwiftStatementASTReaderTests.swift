@@ -274,10 +274,20 @@ extension SwiftStatementASTReaderTests {
                 readsAs expected: Statement,
                 file: String = #file,
                 line: Int = #line) -> Statement? {
-        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem())
+        
+        let typeSystem = DefaultTypeSystem()
+        let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         let typeParser = TypeParsing(state: SwiftStatementASTReaderTests._state)
         
-        let sut = SwiftStatementASTReader(expressionReader: SwiftExprASTReader(typeMapper: typeMapper, typeParser: typeParser))
+        let expReader =
+            SwiftExprASTReader(
+                typeMapper: typeMapper,
+                typeParser: typeParser,
+                context: SwiftASTReaderContext(typeSystem: typeSystem,
+                                               typeContext: nil))
+        
+        let sut = SwiftStatementASTReader(expressionReader: expReader,
+                                          context: expReader.context)
         
         do {
             let parser = try SwiftStatementASTReaderTests._state.makeMainParser(input: objcStmt).parser
