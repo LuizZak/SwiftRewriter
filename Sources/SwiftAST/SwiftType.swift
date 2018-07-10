@@ -218,6 +218,14 @@ public extension SwiftType {
     /// A special type used in place of definitions with improper typing
     public static let errorType = SwiftType.typeName("<<error type>>")
     
+    public static func openRange(_ operand: SwiftType) -> SwiftType {
+        return .nominal(.generic("Range", parameters: .tail(operand)))
+    }
+    
+    public static func closedRange(_ operand: SwiftType) -> SwiftType {
+        return .nominal(.generic("ClosedRange", parameters: .tail(operand)))
+    }
+    
     public static func array(_ type: SwiftType) -> SwiftType {
         return .nominal(.generic("Array", parameters: .tail(type)))
     }

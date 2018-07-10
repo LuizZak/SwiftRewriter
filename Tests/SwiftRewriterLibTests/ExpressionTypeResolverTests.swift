@@ -42,7 +42,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testConstant() {
         assertResolve(.constant(1), expect: .int)
-        assertResolve(.constant(1.1), expect: .float)
+        assertResolve(.constant(1.1), expect: .double)
         assertResolve(.constant(false), expect: .bool)
         assertResolve(.constant("abc"), expect: .string)
         assertResolve(.constant(.nil), expect: .optional(.anyObject))
@@ -51,9 +51,9 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testUnary() {
         assertResolve(.unary(op: .subtract, .constant(1)), expect: .int)
-        assertResolve(.unary(op: .subtract, .constant(1.0)), expect: .float)
+        assertResolve(.unary(op: .subtract, .constant(1.0)), expect: .double)
         assertResolve(.unary(op: .add, .constant(1)), expect: .int)
-        assertResolve(.unary(op: .add, .constant(1.0)), expect: .float)
+        assertResolve(.unary(op: .add, .constant(1.0)), expect: .double)
         assertResolve(.unary(op: .negate, .constant(true)), expect: .bool)
         assertResolve(.unary(op: .subtract, .constant("abc")), expect: nil)
         assertResolve(.unary(op: .bitwiseNot, .constant(1)), expect: .int)
@@ -104,7 +104,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         assertResolve(.binary(lhs: .constant(1), op: .divide, rhs: .constant(1)),
                       expect: .int)
         assertResolve(.binary(lhs: .constant(1.0), op: .add, rhs: .constant(1.0)),
-                      expect: .float)
+                      expect: .double)
         assertResolve(.binary(lhs: .constant(false), op: .add, rhs: .constant(true)),
                       expect: nil) // Invalid operands
         
@@ -129,6 +129,20 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .bool)
         assertResolve(.binary(lhs: .constant(1), op: .and, rhs: .constant(2)),
                       expect: nil) // Invalid operands
+        
+        // Range
+        assertResolve(.binary(lhs: .constant(1), op: .openRange, rhs: .constant(2)),
+                      expect: .openRange(.int))
+        assertResolve(.binary(lhs: .constant(1.0), op: .openRange, rhs: .constant(2.0)),
+                      expect: .openRange(.double))
+        assertResolve(.binary(lhs: .constant(1), op: .closedRange, rhs: .constant(2)),
+                      expect: .closedRange(.int))
+        assertResolve(.binary(lhs: .constant(1.0), op: .closedRange, rhs: .constant(2.0)),
+                      expect: .closedRange(.double))
+        assertResolve(.binary(lhs: .constant(1.0), op: .openRange, rhs: .constant("abc")),
+                      expect: nil) // Invalid operands
+        assertResolve(.binary(lhs: .constant(1.0), op: .closedRange, rhs: .constant("abc")),
+                      expect: nil)
     }
     
     func testBitwiseBinaryDeducesResultAsOperandTypes() {
@@ -452,6 +466,32 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .thenAssertDefined(in: stmt.body, localNamed: "i", type: .anyObject)
+    }
+    
+    func testForLoopArrayTypeResolving_OpenRange() {
+        // Iterating over an open range of integers should produce `Int` values
+        
+        let exp = Expression.identifier("")
+        exp.resolvedType = .openRange(.int)
+        
+        let stmt: ForStatement =
+            .for(.identifier("i"), exp, body: [])
+        
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int)
+    }
+    
+    func testForLoopArrayTypeResolving_ClosedRange() {
+        // Iterating over a closed range of integers should produce `Int` values
+        
+        let exp = Expression.identifier("")
+        exp.resolvedType = .closedRange(.int)
+        
+        let stmt: ForStatement =
+            .for(.identifier("i"), exp, body: [])
+        
+        startScopedTest(with: stmt, sut: ExpressionTypeResolver())
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int)
     }
     
     func testForLoopArrayTypeResolving_NonArray() {

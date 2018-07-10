@@ -657,6 +657,14 @@ private class ForStatementGenerator {
             }
             
             loopEnd = .identifier(local.name)
+            
+        case let .propertyAccess(local, member)?:
+            if ASTAnalyzer(compoundStatement).isLocalMutated(localName: local.name) {
+                return nil
+            }
+            
+            loopEnd = Expression.identifier(local.name).dot(member)
+            
         case nil:
             return nil
         }
@@ -686,6 +694,18 @@ private class ForStatementGenerator {
                 return .local(local)
             }
             
+        case let postfix as PostfixExpression:
+            guard let identifier = postfix.exp.asIdentifier else {
+                return nil
+            }
+            guard let member = postfix.op.asMember else {
+                return nil
+            }
+            guard let local = context.localNamed(identifier.identifier) else {
+                return nil
+            }
+            
+            return .propertyAccess(local, property: member.name)
         default:
             return nil
         }
@@ -696,6 +716,7 @@ private class ForStatementGenerator {
     enum LoopCounter {
         case literal(Int, Constant.IntegerType)
         case local(SwiftASTReaderContext.Local)
+        case propertyAccess(SwiftASTReaderContext.Local, property: String)
     }
 }
 

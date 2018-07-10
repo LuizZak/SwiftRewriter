@@ -69,14 +69,18 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public func resolveTypes(in statement: Statement) -> Statement {
         // First, clear all variable definitions found, and their usages too.
         for node in SyntaxNodeSequence(node: statement, inspectBlocks: true) {
-            if let scoped = node as? CodeScopeNode {
+            switch node {
+            case let scoped as CodeScopeNode:
                 scoped.removeAllDefinitions()
-            }
-            if let ident = node as? IdentifierExpression {
+            
+            case let ident as IdentifierExpression:
                 ident.definition = nil
-            }
-            if let postfix = node as? PostfixExpression {
+            
+            case let postfix as PostfixExpression:
                 postfix.op.returnType = nil
+                
+            default:
+                break
             }
         }
         
@@ -116,8 +120,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     }
     
     public override func visitFor(_ stmt: ForStatement) -> Statement {
-        _=super.visitFor(stmt)
-        
         // Define loop variables
         if stmt.exp.resolvedType == nil {
             stmt.exp = resolveType(stmt.exp)
@@ -132,11 +134,18 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         // Sub-types of array iterate as .anyObject
         case .nominal(.typeName(let typeName))? where typeSystem.isType(typeName, subtypeOf: "NSArray"):
             iteratorType = .anyObject
+            
+        case .nominal(.generic("Range", .tail(let type)))?,
+             .nominal(.generic("ClosedRange", .tail(let type)))?:
+            iteratorType = type
+            
         default:
             iteratorType = .errorType
         }
         
         collectInPattern(stmt.pattern, type: iteratorType, to: stmt.body)
+        
+        _=super.visitFor(stmt)
         
         return stmt
     }
@@ -185,10 +194,12 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             if let expected = exp.expectedType, typeSystem.category(forType: expected) == .float {
                 exp.resolvedType = expected
             } else {
-                exp.resolvedType = .float
+                exp.resolvedType = .double
             }
+            
         case .boolean:
             exp.resolvedType = .bool
+            
         case .nil:
             exp.resolvedType = .optional(.anyObject)
             
@@ -197,6 +208,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 case .optional, .implicitUnwrappedOptional:
                     exp.resolvedType = exp.expectedType
                     break
+                    
                 default:
                     if !typeSystem.isScalarType(expectedType) {
                         exp.resolvedType = .optional(expectedType)
@@ -234,12 +246,15 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         switch exp.op {
         case .negate where type == .bool:
             exp.resolvedType = .bool
+            
         case .subtract, .add:
             if typeSystem.isNumeric(type) {
                 exp.resolvedType = type
             }
+            
         case .bitwiseNot where typeSystem.isInteger(type):
             exp.resolvedType = type
+            
         default:
             break
         }
@@ -342,6 +357,25 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         case .nullCoalesce where exp.lhs.resolvedType?.deepUnwrapped == exp.rhs.resolvedType?.deepUnwrapped:
             // Return rhs' nullability
             exp.resolvedType = exp.rhs.resolvedType
+            
+        case .range where exp.lhs.resolvedType == exp.rhs.resolvedType:
+            guard let resolvedType = exp.lhs.resolvedType else {
+                break
+            }
+            
+            switch exp.op {
+            case .openRange:
+                exp.resolvedType = .openRange(resolvedType)
+                
+            case .closedRange:
+                exp.resolvedType = .closedRange(resolvedType)
+                
+            default:
+                break
+            }
+            
+            break
+            
         default:
             break
         }

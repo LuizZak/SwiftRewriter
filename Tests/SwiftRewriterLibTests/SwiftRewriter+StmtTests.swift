@@ -890,6 +890,31 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testForStatementWithArrayCount() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                NSArray *array = @[];
+                for(NSInteger i = 0; i < array.count; i++) {
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    var array = []
+                    for i in 0..<array.count {
+                    }
+                }
+            }
+            """
+        )
+    }
+    
     func testForStatementWithNonConstantCountModifiedWithinLoop() throws {
         try assertObjcParse(
             objc: """

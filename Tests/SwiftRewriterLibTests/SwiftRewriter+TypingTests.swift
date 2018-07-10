@@ -1092,4 +1092,30 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testForStatementIterator() throws {
+        try assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                for(NSInteger i = 0; i < 10; i++) {
+                    (i);
+                }
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class MyClass: NSObject {
+                @objc
+                func myMethod() {
+                    for i in 0..<10 {
+                        // type: Int
+                        i
+                    }
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
