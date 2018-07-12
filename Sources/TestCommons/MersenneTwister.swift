@@ -12,6 +12,7 @@
 final public class MersenneTwister {
     
     // Magic numbers
+    // swiftlint:disable:next large_tuple
     private let (w, n, m, r): (UInt32, Int, Int, UInt32) = (32, 624, 397, 31)
     private let a: UInt32 = 0x9908B0DF
     private let (u, d): (UInt32, UInt32) = (11, 0xFFFFFFFF)

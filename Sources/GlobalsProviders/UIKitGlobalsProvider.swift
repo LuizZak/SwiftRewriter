@@ -22,6 +22,9 @@ public class UIKitGlobalsProvider: GlobalsProvider {
     }
 }
 
+// swiftlint:disable line_length
+// swiftlint:disable type_body_length
+// swiftlint:disable function_body_length
 /// Globals provider for `UIKit` framework
 private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     

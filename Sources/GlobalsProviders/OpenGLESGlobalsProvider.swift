@@ -20,6 +20,9 @@ public class OpenGLESGlobalsProvider: GlobalsProvider {
     }
 }
 
+// swiftlint:disable line_length
+// swiftlint:disable type_body_length
+// swiftlint:disable function_body_length
 private class InnerOpenGLESGlobalsProvider: BaseGlobalsProvider {
     
     var definitions: ArrayDefinitionsSource = ArrayDefinitionsSource(definitions: [])

@@ -79,7 +79,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
             let potentialGetters =
                 methods.filter { $0.name == property.name }
                     .filter { $0.isStatic == property.isStatic }
-                    .filter { context.typeSystem.typesMatch($0.returnType, property.type, ignoreNullability: true) }
+                    .filter {
+                        context.typeSystem
+                            .typesMatch($0.returnType,
+                                        property.type,
+                                        ignoreNullability: true)
+                    }
                     .filter { $0.parameters.isEmpty }
             
             // Setters: All methods named `func set[Name](_ name: Type)` where
@@ -89,7 +94,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
                 methods.filter { $0.returnType == .void }
                     .filter { $0.isStatic == property.isStatic }
                     .filter { $0.parameters.count == 1 }
-                    .filter { context.typeSystem.typesMatch($0.parameters[0].type, property.type, ignoreNullability: true) }
+                    .filter {
+                        context.typeSystem
+                            .typesMatch($0.parameters[0].type,
+                                        property.type,
+                                        ignoreNullability: true)
+                    }
                     .filter { $0.name == expectedName }
             
             var propSet =
@@ -164,16 +174,30 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             for method in collectMethods(fromClass: classIntention) {
                 if let body = method.functionBody {
-                    bodies.append((body, TypeFormatter.asString(method: method, ofType: classIntention)))
+                    let source =
+                        TypeFormatter
+                            .asString(method: method,
+                                      ofType: classIntention)
+                    
+                    bodies.append((body, source))
                 }
             }
             
             for prop in collectProperties(fromClass: classIntention) {
                 if let getter = prop.getter {
-                    bodies.append((getter, TypeFormatter.asString(property: prop, ofType: classIntention) + ":getter"))
+                    let source =
+                        TypeFormatter
+                            .asString(property: prop, ofType: classIntention)
+                            + ":getter"
+                    
+                    bodies.append((getter, source))
                 }
                 if let setter = prop.setter {
-                    bodies.append((setter.body, TypeFormatter.asString(property: prop, ofType: classIntention) + ":setter"))
+                    let source =
+                        TypeFormatter
+                            .asString(property: prop, ofType: classIntention)
+                            + ":setter"
+                    bodies.append((setter.body, source))
                 }
             }
             
@@ -264,6 +288,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
     /// getter/setters into `var myVar { get set }` Swift computed properties.
     ///
     /// Returns `false` if the method ended up making no changes.
+    // swiftlint:disable function_body_length
     private func joinPropertySet(_ propertySet: PropertySet, on classIntention: BaseClassIntention) -> Bool {
         guard let propertyOwner = propertySet.property.type else {
             return false
@@ -428,6 +453,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             return false
         }
     }
+    // swiftlint:enable function_body_length
     
     private func backingFieldName(for property: PropertyGenerationIntention,
                                   in type: BaseClassIntention) -> String {

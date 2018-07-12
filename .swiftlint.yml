@@ -11,6 +11,7 @@ opt_in_rules:
 excluded:
   - Sources/ObjcParserAntlr
   - Tests
+  - Packages
   - .build
 
 force_cast: warning

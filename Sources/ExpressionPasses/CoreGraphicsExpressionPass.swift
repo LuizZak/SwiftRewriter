@@ -1,3 +1,5 @@
+// swiftlint:disable file_length
+
 import Foundation
 import SwiftRewriterLib
 import SwiftAST
@@ -42,14 +44,19 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         // CGRectGet[Min/Max/Mid][X/Y](<exp>) -> <exp>.height
         case (.identifier("CGRectGetMinX"), _):
             convertMethodToField(field: "minX", ifArgCountIs: 1, exp)
+            
         case (.identifier("CGRectGetMinY"), _):
             convertMethodToField(field: "minY", ifArgCountIs: 1, exp)
+            
         case (.identifier("CGRectGetMaxX"), _):
             convertMethodToField(field: "maxX", ifArgCountIs: 1, exp)
+            
         case (.identifier("CGRectGetMaxY"), _):
             convertMethodToField(field: "maxY", ifArgCountIs: 1, exp)
+            
         case (.identifier("CGRectGetMidX"), _):
             convertMethodToField(field: "midX", ifArgCountIs: 1, exp)
+            
         case (.identifier("CGRectGetMidY"), _):
             convertMethodToField(field: "midY", ifArgCountIs: 1, exp)
             
@@ -60,7 +67,7 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         // MARK: CGPath
             
         // CGPathCreateMutable() -> CGMutablePath()
-        case (.identifier("CGPathCreateMutable"), .functionCall()):
+        case (.identifier("CGPathCreateMutable"), .functionCall()): // swiftlint:disable:this empty_enum_arguments
             exp.exp.asIdentifier?.identifier = "CGMutablePath"
             
             notifyChange()
@@ -104,6 +111,7 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
     }
 }
 
+// swiftlint:disable function_body_length
 extension CoreGraphicsExpressionPass {
     
     func createTransformers() {
@@ -288,15 +296,15 @@ extension CoreGraphicsExpressionPass {
         makeCGContextCall("CGContextRestoreGState", swiftName: "restoreGState")
 
         makeCGContextCall("CGContextScaleCTM", swiftName: "scale",
-            arguments: [.labeled("x", .asIs), .labeled("y", .asIs)]
+            arguments: .addingLabels("x", "y")
         )
 
         makeCGContextCall("CGContextTranslateCTM", swiftName: "translateBy",
-            arguments: [.labeled("x", .asIs), .labeled("y", .asIs)]
+            arguments: .addingLabels("x", "y")
         )
 
         makeCGContextCall("CGContextRotateCTM", swiftName: "rotate",
-            arguments: [.labeled("by", .asIs)]
+            arguments: .addingLabels("by")
         )
 
         makeCGContextCall("CGContextConcatCTM", swiftName: "concatenate",
@@ -322,7 +330,7 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextSetLineDash", swiftName: "setLineDash",
-            arguments: [.labeled("phase", .asIs), .asIs]
+            arguments: .addingLabels("phase", nil)
         )
 
         makeCGContextCall("CGContextSetFlatness", swiftName: "setFlatness",
@@ -408,11 +416,11 @@ extension CoreGraphicsExpressionPass {
         makeCGContextCall("CGContextCopyPath", swiftName: "copyPath")
 
         makeCGContextCall("CGContextPathContainsPoint", swiftName: "pathContains",
-            arguments: [.asIs, .labeled("mode", .asIs)]
+            arguments: .addingLabels(nil, "mode")
         )
 
         makeCGContextCall("CGContextDrawPath", swiftName: "drawPath",
-            arguments: [.labeled("using", .asIs)]
+            arguments: .addingLabels("using")
         )
 
         makeCGContextCall("CGContextFillPath", swiftName: "fillPath")
@@ -434,7 +442,7 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextStrokeRectWithWidth", swiftName: "stroke",
-            arguments: [.asIs, .labeled("width", .asIs)]
+            arguments: .addingLabels(nil, "width")
         )
 
         makeCGContextCall("CGContextClearRect", swiftName: "clear",
@@ -442,15 +450,15 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextFillEllipseInRect", swiftName: "fillEllipse",
-            arguments: [.labeled("in", .asIs)]
+            arguments: .addingLabels("in")
         )
 
         makeCGContextCall("CGContextStrokeEllipseInRect", swiftName: "strokeEllipse",
-            arguments: [.labeled("in", .asIs)]
+            arguments: .addingLabels("in")
         )
 
         makeCGContextCall("CGContextStrokeLineSegments", swiftName: "strokeLineSegments",
-            arguments: [.labeled("between", .asIs)]
+            arguments: .addingLabels("between")
         )
 
         makeCGContextCall("CGContextClip", swiftName: "clip")
@@ -460,17 +468,17 @@ extension CoreGraphicsExpressionPass {
         makeCGContextCall("CGContextResetClip", swiftName: "resetClip")
 
         makeCGContextCall("CGContextClipToMask", swiftName: "clip",
-            arguments: [.labeled("to", .asIs), .labeled("mask", .asIs)]
+            arguments: .addingLabels("to", "mask")
         )
 
         makeCGContextCall("CGContextGetClipBoundingBox", swiftName: "getClipBoundingBox")
 
         makeCGContextCall("CGContextClipToRect", swiftName: "clip",
-            arguments: [.labeled("to", .asIs)]
+            arguments: .addingLabels("to")
         )
 
         makeCGContextCall("CGContextClipToRects", swiftName: "clip",
-            arguments: [.labeled("to", .asIs)]
+            arguments: .addingLabels("to")
         )
 
         makeCGContextCall("CGContextSetFillColorWithColor", swiftName: "setFillColor",
@@ -498,11 +506,11 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextSetFillPattern", swiftName: "setFillPattern",
-            arguments: [.asIs, .labeled("colorComponents", .asIs)]
+            arguments: .addingLabels(nil, "colorComponents")
         )
 
         makeCGContextCall("CGContextSetStrokePattern", swiftName: "setStrokePattern",
-            arguments: [.asIs, .labeled("colorComponents", .asIs)]
+            arguments: .addingLabels(nil, "colorComponents")
         )
 
         makeCGContextCall("CGContextSetPatternPhase", swiftName: "setPatternPhase",
@@ -510,33 +518,27 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextSetGrayFillColor", swiftName: "setFillColor",
-            arguments: [.labeled("gray", .asIs), .labeled("alpha", .asIs)]
+            arguments: .addingLabels("gray", "alpha")
         )
 
         makeCGContextCall("CGContextSetGrayStrokeColor", swiftName: "setStrokeColor",
-            arguments: [.labeled("gray", .asIs), .labeled("alpha", .asIs)]
+            arguments: .addingLabels("gray", "alpha")
         )
 
         makeCGContextCall("CGContextSetRGBFillColor", swiftName: "setFillColor",
-            arguments: [.labeled("red", .asIs), .labeled("green", .asIs),
-                        .labeled("blue", .asIs), .labeled("alpha", .asIs)]
+            arguments: .addingLabels("red", "green", "blue", "alpha")
         )
 
         makeCGContextCall("CGContextSetRGBStrokeColor", swiftName: "setStrokeColor",
-            arguments: [.labeled("red", .asIs), .labeled("green", .asIs),
-                        .labeled("blue", .asIs), .labeled("alpha", .asIs)]
+            arguments: .addingLabels("red", "green", "blue", "alpha")
         )
 
         makeCGContextCall("CGContextSetCMYKFillColor", swiftName: "setFillColor",
-            arguments: [.labeled("cyan", .asIs), .labeled("magenta", .asIs),
-                        .labeled("yellow", .asIs), .labeled("black", .asIs),
-                        .labeled("alpha", .asIs)]
+            arguments: .addingLabels("cyan", "magenta", "yellow", "black", "alpha")
         )
 
         makeCGContextCall("CGContextSetCMYKStrokeColor", swiftName: "setStrokeColor",
-            arguments: [.labeled("cyan", .asIs), .labeled("magenta", .asIs),
-                        .labeled("yellow", .asIs), .labeled("black", .asIs),
-                        .labeled("alpha", .asIs)]
+            arguments: .addingLabels("cyan", "magenta", "yellow", "black", "alpha")
         )
 
         makeCGContextCall("CGContextSetRenderingIntent", swiftName: "setRenderingIntent",
@@ -548,7 +550,11 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextDrawTiledImage", swiftName: "draw",
-            arguments: [.fromArgIndex(1), .labeled("in", .fromArgIndex(0)), .labeled("byTiling", .fixed({ .constant(true) }))]
+            arguments: [
+                .fromArgIndex(1),
+                .labeled("in", .fromArgIndex(0)),
+                .labeled("byTiling", .fixed { .constant(true) })
+            ]
         )
 
         makeCGContextCall("CGContextGetInterpolationQuality", swiftName: "getInterpolationQuality")
@@ -558,27 +564,27 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextSetShadowWithColor", swiftName: "setShadow",
-            arguments: [.labeled("offset", .asIs), .labeled("blur", .asIs), .labeled("color", .asIs)]
+            arguments: .addingLabels("offset", "blue", "color")
         )
 
         makeCGContextCall("CGContextSetShadow", swiftName: "setShadow",
-            arguments: [.labeled("offset", .asIs), .labeled("blur", .asIs)]
+            arguments: .addingLabels("offset", "blue")
         )
 
         makeCGContextCall("CGContextDrawLinearGradient", swiftName: "drawLinearGradient",
-            arguments: [.asIs,
-                        .labeled("start", .asIs),
-                        .labeled("end", .asIs),
-                        .labeled("options", .asIs)]
+            arguments: .addingLabels(nil,
+                                    "start",
+                                    "end",
+                                    "options")
         )
 
         makeCGContextCall("CGContextDrawRadialGradient", swiftName: "drawRadialGradient",
-            arguments: [.asIs,
-                        .labeled("startCenter", .asIs),
-                        .labeled("startRadius", .asIs),
-                        .labeled("endCenter", .asIs),
-                        .labeled("endRadius", .asIs),
-                        .labeled("options", .asIs)]
+            arguments: .addingLabels(nil,
+                                     "startCenter",
+                                     "startRadius",
+                                     "endCenter",
+                                     "endRadius",
+                                     "options")
         )
 
         makeCGContextCall("CGContextDrawShading", swiftName: "drawShading",
@@ -657,16 +663,17 @@ extension CoreGraphicsExpressionPass {
         )
 
         makeCGContextCall("CGContextBeginTransparencyLayer", swiftName: "beginTransparencyLayer",
-            arguments: [.labeled("auxiliaryInfo", .asIs)]
+            arguments: .addingLabels("auxiliaryInfo")
         )
 
         makeCGContextCall("CGContextBeginTransparencyLayerWithRect", swiftName: "beginTransparencyLayerWithRect",
-            arguments: [.labeled("in", .asIs), .labeled("auxiliaryInfo", .asIs)]
+            arguments: .addingLabels("in", "auxiliaryInfo")
         )
 
         makeCGContextCall("CGContextEndTransparencyLayer", swiftName: "endTransparencyLayer")
 
-        makeCGContextCall("CGContextGetUserSpaceToDeviceSpaceTransform", swiftName: "getUserSpaceToDeviceSpaceTransform")
+        makeCGContextCall("CGContextGetUserSpaceToDeviceSpaceTransform",
+                          swiftName: "getUserSpaceToDeviceSpaceTransform")
 
         makeCGContextCall("CGContextConvertPointToDeviceSpace", swiftName: "convertToDeviceSpace",
             arguments: [.asIs]
@@ -721,12 +728,12 @@ extension CoreGraphicsExpressionPass {
         
         // Read-only properties
         
-        makeFuncTransform("CGContextGetCTM",                getterName: "ctm")
-        makeFuncTransform("CGContextCopyPath",              getterName: "path")
-        makeFuncTransform("CGContextIsPathEmpty",           getterName: "isPathEmpty")
-        makeFuncTransform("CGContextGetPathCurrentPoint",   getterName: "currentPointOfPath")
-        makeFuncTransform("CGContextGetClipBoundingBox",    getterName: "boundingBoxOfClipPath")
-        makeFuncTransform("CGContextGetPathBoundingBox",    getterName: "boundingBoxOfPath")
+        makeFuncTransform("CGContextGetCTM",              getterName: "ctm")
+        makeFuncTransform("CGContextCopyPath",            getterName: "path")
+        makeFuncTransform("CGContextIsPathEmpty",         getterName: "isPathEmpty")
+        makeFuncTransform("CGContextGetPathCurrentPoint", getterName: "currentPointOfPath")
+        makeFuncTransform("CGContextGetClipBoundingBox",  getterName: "boundingBoxOfClipPath")
+        makeFuncTransform("CGContextGetPathBoundingBox",  getterName: "boundingBoxOfPath")
         makeFuncTransform("CGContextGetUserSpaceToDeviceSpaceTransform",
                           getterName: "userSpaceToDeviceSpaceTransform")
         
@@ -762,6 +769,7 @@ extension CoreGraphicsExpressionPass {
         */
     }
 }
+// swiftlint:enable function_body_length
 
 internal extension Sequence where Element == FunctionArgument {
     func hasLabeledArguments() -> Bool {

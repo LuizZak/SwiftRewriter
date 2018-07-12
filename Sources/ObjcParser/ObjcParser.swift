@@ -163,7 +163,7 @@ public class ObjcParser {
         
         var root: T = try operation(parser)
         
-        if diag.errors.count > 0 {
+        if !diag.errors.isEmpty {
             diag.removeAll()
             
             try parser.reset()
