@@ -450,6 +450,7 @@ public class DefaultTypeSystem: TypeSystem {
     
     public func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
                        includeOptional: Bool, in type: KnownType) -> KnownMethod? {
+        
         if let method = type.knownMethods.first(where: {
             $0.signature.asSelector == selector
                 && $0.isStatic == isStatic
@@ -478,6 +479,7 @@ public class DefaultTypeSystem: TypeSystem {
     
     public func property(named name: String, static isStatic: Bool, includeOptional: Bool,
                          in type: KnownType) -> KnownProperty? {
+        
         if let property = type.knownProperties.first(where: {
             $0.name == name
                 && $0.isStatic == isStatic
@@ -602,6 +604,7 @@ public class DefaultTypeSystem: TypeSystem {
             switch type {
             case let .block(returnType, parameters):
                 return .block(returnType: expand(in: returnType), parameters: parameters.map(expand))
+                
             case .nominal(.typeName(let name)):
                 if let type = source.unalias(name) {
                     return pushingAlias(name) {
@@ -610,20 +613,28 @@ public class DefaultTypeSystem: TypeSystem {
                 }
                 
                 return type
+                
             case .nominal(let nominal):
                 return .nominal(expand(inNominal: nominal))
+                
             case .optional(let type):
                 return .optional(expand(in: type))
+                
             case .implicitUnwrappedOptional(let type):
                 return .implicitUnwrappedOptional(expand(in: type))
+                
             case .nested(let nested):
                 return .nested(.fromCollection(nested.map(expand(inNominal:))))
+                
             case .metatype(let type):
                 return .metatype(for: expand(in: type))
+                
             case .tuple(.empty):
                 return type
+                
             case .tuple(.types(let values)):
                 return .tuple(.types(.fromCollection(values.map(expand))))
+                
             case .protocolComposition(let composition):
                 return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
             }
@@ -689,16 +700,22 @@ extension DefaultTypeSystem {
         let nsObjectProtocol =
             KnownTypeBuilder(typeName: "NSObjectProtocol", kind: .protocol)
                 .method(withSignature:
-                    FunctionSignature(name: "responds",
-                                      parameters: [ParameterSignature(label: "to", name: "selector", type: .selector)],
-                                      returnType: .bool,
-                                      isStatic: false)
+                    FunctionSignature(
+                        name: "responds",
+                        parameters: [ParameterSignature(label: "to",
+                                                        name: "selector",
+                                                        type: .selector)],
+                        returnType: .bool,
+                        isStatic: false)
                 )
                 .method(withSignature:
-                    FunctionSignature(name: "isEqual",
-                                      parameters: [ParameterSignature(label: "_", name: "object", type: .anyObject)],
-                                      returnType: .bool,
-                                      isStatic: false)
+                    FunctionSignature(
+                        name: "isEqual",
+                        parameters: [ParameterSignature(label: "_",
+                                                        name: "object",
+                                                        type: .anyObject)],
+                        returnType: .bool,
+                        isStatic: false)
                 )
                 .build()
         
