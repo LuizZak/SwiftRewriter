@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "Antlr4",
+        "repositoryURL": "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git",
+        "state": {
+          "branch": "swift4.2",
+          "revision": "6e385332fb9562df2e857f601a958a60612be1b8",
+          "version": null
+        }
+      },
+      {
         "package": "Console",
         "repositoryURL": "https://bitbucket.org/cs-luiz-silva/console.git",
         "state": {

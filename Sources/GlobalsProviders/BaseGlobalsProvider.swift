@@ -60,8 +60,7 @@ public class BaseGlobalsProvider: GlobalsProvider {
     }
     
     func constant(name: String, type: SwiftType) -> CodeDefinition {
-        let storage = ValueStorage(type: type, ownership: .strong, isConstant: true)
-        return CodeDefinition(variableNamed: name, storage: storage)
+        return CodeDefinition(constantNamed: name, type: type)
     }
     
     func variable(name: String, type: SwiftType) -> CodeDefinition {

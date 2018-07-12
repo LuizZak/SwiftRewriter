@@ -18,6 +18,20 @@ class VarDeclarationTypeExtractorTests: XCTestCase {
                         expected: "static const NSString*_Nonnull")
     }
     
+    func testReadTypeVariableDeclaratorOrName() {
+        assertTypeVisit(objc: "void",
+                        { try $0.typeVariableDeclaratorOrName() },
+                        expected: "void")
+        
+        assertTypeVisit(objc: "const int",
+                        { try $0.typeVariableDeclaratorOrName() },
+                        expected: "const int")
+        
+        assertTypeVisit(objc: "nullable NSString *a;",
+                        { try $0.typeVariableDeclaratorOrName() },
+                        expected: "nullable NSString*")
+    }
+    
     func assertTypeVisit(objc: String, _ parseBlock: (ObjectiveCParser) throws -> ParserRuleContext,
                          expected: String, file: String = #file, line: Int = #line) {
         let sut = VarDeclarationTypeExtractor()

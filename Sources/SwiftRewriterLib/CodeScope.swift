@@ -220,7 +220,16 @@ public class CodeDefinition {
     
     public convenience init(variableNamed name: String, type: SwiftType) {
         self.init(variableNamed: name,
-                  storage: ValueStorage(type: type, ownership: .strong, isConstant: false))
+                  storage: ValueStorage(type: type,
+                                        ownership: .strong,
+                                        isConstant: false))
+    }
+    
+    public convenience init(constantNamed name: String, type: SwiftType) {
+        self.init(variableNamed: name,
+                  storage: ValueStorage(type: type,
+                                        ownership: .strong,
+                                        isConstant: true))
     }
     
     public init(variableNamed name: String, storage: ValueStorage) {

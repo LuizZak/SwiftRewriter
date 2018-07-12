@@ -224,14 +224,17 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         guard let declarationSpecifiers = typeVarDeclarator.declarationSpecifiers() else {
             return nil
         }
-        guard let typeDeclarator = typeVarDeclarator.declarator() else {
+        guard let declarator = typeVarDeclarator.declarator() else {
             return nil
         }
         
-        let pointer = typeDeclarator.pointer()?.accept(self)
+        let pointer = declarator.pointer()?.accept(self)
         let specifiersString = declarationSpecifiers.accept(self) ?? ""
         
-        let typeString = "\(specifiersString) \(pointer ?? "")"
+        var typeString = specifiersString
+        if let pointer = pointer {
+            typeString += " \(pointer)"
+        }
         
         return typeString
     }
@@ -328,9 +331,11 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         }
         let specifierList = specifierQualifierList.accept(self) ?? ""
         
-        let abstractDeclarator = ctx.abstractDeclarator()?.getText() ?? ""
+        if let abstractDeclarator = ctx.abstractDeclarator()?.getText() {
+            return "\(specifierList) \(abstractDeclarator)"
+        }
         
-        return "\(specifierList) \(abstractDeclarator)"
+        return specifierList
     }
     
     public override func visitPointer(_ ctx: Parser.PointerContext) -> TypeName? {
