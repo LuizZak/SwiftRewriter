@@ -22,7 +22,7 @@ Usage:
 
 ```
 SwiftRewriter [--colorize] [--print-expression-types] [--print-tracing-history] [--verbose] [--num-threads <n>] [--target stdout | filedisk]
-[files <files...> | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]
+[files <files...> | path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]]
 
 OPTIONS:
   --colorize              Pass this parameter as true to enable terminal colorization during output.
