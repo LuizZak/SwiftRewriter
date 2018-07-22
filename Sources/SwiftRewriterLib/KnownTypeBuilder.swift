@@ -336,7 +336,10 @@ public struct KnownTypeBuilder {
         return new
     }
     
-    public func enumCase(named name: String, rawValue: Expression? = nil, semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+    public func enumCase(named name: String,
+                         rawValue: Expression? = nil,
+                         semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+        
         var new = clone()
         
         precondition(type.kind == .enum)

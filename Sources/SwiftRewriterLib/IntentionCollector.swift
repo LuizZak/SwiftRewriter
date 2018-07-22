@@ -189,7 +189,7 @@ public class IntentionCollector {
         guard let type = node.type else {
             return
         }
-        guard let name = node.identifier?.name else {
+        guard let name = node.typeDeclarators[0].identifier?.name else {
             return
         }
         
@@ -626,15 +626,17 @@ public class IntentionCollector {
     
     // MARK: - Struct declaration
     private func enterStructDeclarationNode(_ node: ObjcStructDeclaration) {
+        var declarators: [TypeDeclaratorNode] = []
         var nodeIdentifiers: [Identifier] = []
         if let identifier = node.identifier {
             nodeIdentifiers = [identifier]
         }
         if let parentNode = node.parent as? TypedefNode {
             nodeIdentifiers.append(contentsOf: parentNode.childrenMatching(type: Identifier.self))
+            declarators.append(contentsOf: parentNode.childrenMatching(type: TypeDeclaratorNode.self))
         }
         
-        guard let identifier = nodeIdentifiers.first else {
+        guard let identifier = nodeIdentifiers.first ?? declarators.first?.identifier else {
             return
         }
         
@@ -642,8 +644,6 @@ public class IntentionCollector {
         
         let structIntent = StructGenerationIntention(typeName: identifier.name, source: node)
         recordSourceHistory(intention: structIntent, node: node)
-        
-        fileIntent?.addType(structIntent)
         
         context.pushContext(structIntent)
         
@@ -657,6 +657,66 @@ public class IntentionCollector {
             fileIntent?.addTypealias(alias)
             
             delegate?.reportForLazyResolving(intention: alias)
+        }
+        
+        var shouldRecord = true
+        
+        if let delegate = delegate {
+            let typeParser = delegate.typeParser(for: self)
+            
+            let effectiveDeclarators =
+                (nodeIdentifiers.isEmpty ? Array(declarators.dropFirst()) : declarators)
+            
+            for declarator in effectiveDeclarators {
+                guard let identifier = declarator.identifier else {
+                    continue
+                }
+                
+                let objcType: ObjcType?
+                
+                if let pointer = declarator.pointerNode {
+                    objcType = typeParser.parseObjcType("\(structIntent.typeName)\(pointer.asString)")
+                } else {
+                    objcType = .struct(structIntent.typeName)
+                }
+                
+                if let objcType = objcType {
+                    let inNonnull = delegate.isNodeInNonnullContext(declarator)
+                    
+                    let alias = TypealiasIntention(originalObjcType: objcType,
+                                                   fromType: .void,
+                                                   named: identifier.name)
+                    alias.inNonnullContext = inNonnull
+                    
+                    fileIntent?.addTypealias(alias)
+                    
+                    delegate.reportForLazyResolving(intention: alias)
+                }
+            }
+            
+            // Analyze if this is an opaque pointer struct reference
+            if effectiveDeclarators.isEmpty && nodeIdentifiers.isEmpty {
+                if let declarator = declarators.first, declarator.pointerNode != nil, let identifier = declarator.identifier {
+                    shouldRecord = false
+                    
+                    let inNonnull = delegate.isNodeInNonnullContext(declarator)
+                    
+                    let alias = TypealiasIntention(originalObjcType: .struct("OpaquePointer"),
+                                                   fromType: .void,
+                                                   named: identifier.name)
+                    alias.inNonnullContext = inNonnull
+                    
+                    fileIntent?.addTypealias(alias)
+                    
+                    delegate.reportForLazyResolving(intention: alias)
+                }
+            }
+        } else {
+            shouldRecord = false
+        }
+        
+        if shouldRecord {
+            fileIntent?.addType(structIntent)
         }
     }
     

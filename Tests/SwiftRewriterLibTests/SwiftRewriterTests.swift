@@ -1192,6 +1192,18 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteOpaqueTypealias() throws {
+        try assertObjcParse(
+            objc: """
+            typedef struct {
+                int a;
+            } *b;
+            """,
+            swift: """
+            typealias b = OpaquePointer
+            """)
+    }
+    
     func testRewriteFuncDeclaration() throws {
         try assertObjcParse(
             objc: """

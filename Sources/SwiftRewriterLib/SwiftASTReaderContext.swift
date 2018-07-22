@@ -10,7 +10,7 @@ public final class SwiftASTReaderContext {
         self.typeContext = typeContext
     }
     
-    func define(localNamed name: String, storage: ValueStorage) {
+    public func define(localNamed name: String, storage: ValueStorage) {
         guard !localsStack.isEmpty else {
             fatalError("No definition contexts available to define local variable in")
         }
@@ -20,7 +20,7 @@ public final class SwiftASTReaderContext {
         localsStack[localsStack.count - 1].append(local)
     }
     
-    func localNamed(_ name: String) -> Local? {
+    public func localNamed(_ name: String) -> Local? {
         for stackLevel in localsStack.reversed() {
             if let local = stackLevel.first(where: { $0.name == name }) {
                 return local
@@ -30,7 +30,7 @@ public final class SwiftASTReaderContext {
         return nil
     }
     
-    func typePropertyOrFieldNamed(_ name: String) -> KnownMember? {
+    public func typePropertyOrFieldNamed(_ name: String) -> KnownMember? {
         guard let typeContext = typeContext else {
             return nil
         }
@@ -45,17 +45,16 @@ public final class SwiftASTReaderContext {
                                     in: typeContext)
     }
     
-    func pushDefinitionContext() {
+    public func pushDefinitionContext() {
         localsStack.append([])
     }
     
-    func popDefinitionContext() {
+    public func popDefinitionContext() {
         localsStack.removeLast()
     }
     
-    struct Local {
-        var name: String
-        var storage: ValueStorage
+    public struct Local {
+        public var name: String
+        public var storage: ValueStorage
     }
-    
 }

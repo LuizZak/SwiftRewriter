@@ -454,15 +454,20 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         
         typedefNode.addChildren(listener.structs)
         
-        for typeDeclarator in typeDeclaratorList.declarator() {
+        for (i, typeDeclarator) in typeDeclaratorList.declarator().enumerated() {
             guard let directDeclarator = typeDeclarator.directDeclarator() else {
                 continue
             }
-            guard let identifier = directDeclarator.identifier() else {
-                continue
+            
+            let declarator = makeTypeDeclarator(typeDeclarator)
+            
+            // Tie first declarator to any pointer from the type specifier of the
+            // struct declaration, recording it as a typealias to a pointer type.
+            if i == 0, let pointer = ctx.declarationSpecifiers()?.typeSpecifier(0)?.pointer() {
+                declarator.addChild(makePointer(pointer))
             }
             
-            typedefNode.addChild(makeIdentifier(identifier))
+            typedefNode.addChild(declarator)
         }
     }
     
@@ -642,6 +647,27 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         let ident = Identifier(name: context.getText())
         ident.sourceRuleContext = context
         return ident
+    }
+    
+    private func makeTypeDeclarator(_ context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
+        let node = TypeDeclaratorNode()
+        if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
+            node.addChild(identifierNode)
+        }
+        if let pointer = context.pointer() {
+            node.addChild(makePointer(pointer))
+        }
+        node.sourceRuleContext = context
+        return node
+    }
+    
+    private func makePointer(_ context: ObjectiveCParser.PointerContext) -> PointerNode {
+        let node = PointerNode()
+        node.sourceRuleContext = context
+        if let pointer = context.pointer() {
+            node.addChild(makePointer(pointer))
+        }
+        return node
     }
 }
 
