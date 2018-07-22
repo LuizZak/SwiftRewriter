@@ -455,10 +455,6 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         typedefNode.addChildren(listener.structs)
         
         for (i, typeDeclarator) in typeDeclaratorList.declarator().enumerated() {
-            guard let directDeclarator = typeDeclarator.directDeclarator() else {
-                continue
-            }
-            
             let declarator = makeTypeDeclarator(typeDeclarator)
             
             // Tie first declarator to any pointer from the type specifier of the
