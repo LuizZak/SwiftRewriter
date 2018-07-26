@@ -1,4 +1,5 @@
 import XCTest
+import SwiftAST
 import SwiftRewriterLib
 
 class KnownTypeSerializerTests: XCTestCase {
@@ -63,5 +64,23 @@ class KnownTypeSerializerTests: XCTestCase {
             
             \(result.makeDifferenceMarkString(against: expected))
             """)
+    }
+    
+    func testSerializeTraitTypeWithSwiftType() throws {
+        let trait = TraitType.swiftType(.typeName("TypeA"))
+        
+        let data = try JSONEncoder().encode(trait)
+        let unserialized = try JSONDecoder().decode(TraitType.self, from: data)
+        
+        XCTAssertEqual(trait, unserialized)
+    }
+    
+    func testSerializeTraitTypeWithSemantics() throws {
+        let trait = TraitType.semantics([Semantic(name: "S1"), Semantic(name: "S2")])
+        
+        let data = try JSONEncoder().encode(trait)
+        let unserialized = try JSONDecoder().decode(TraitType.self, from: data)
+        
+        XCTAssertEqual(trait, unserialized)
     }
 }

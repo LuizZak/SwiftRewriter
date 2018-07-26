@@ -202,7 +202,7 @@ public extension KnownType {
     }
 }
 
-public enum TraitType: Codable {
+public enum TraitType: Equatable, Codable {
     case swiftType(SwiftType)
     case semantics([Semantic])
     
@@ -235,7 +235,7 @@ public enum TraitType: Codable {
             try container.encode(type, forKey: .field)
             
         case .semantics(let semantics):
-            try container.encode(0, forKey: .flag)
+            try container.encode(1, forKey: .flag)
             try container.encode(semantics, forKey: .field)
         }
     }
