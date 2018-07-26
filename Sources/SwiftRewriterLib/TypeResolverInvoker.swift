@@ -76,8 +76,10 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     private func makeQueueDelegate() -> TypeResolvingQueueDelegate {
         return TypeResolvingQueueDelegate(
-            intentions: typeSystem.intentions, globals: globals,
-            typeSystem: typeSystem, intentionGlobals: intentionGlobals)
+            intentions: typeSystem.intentions,
+            globals: globals,
+            typeSystem: typeSystem,
+            intentionGlobals: intentionGlobals)
     }
 }
 

@@ -8,12 +8,30 @@ public extension Matchable {
         return ValueMatcher()
     }
     
+    public func matches(_ matcher: ValueMatcher<Self>) -> Bool {
+        return matcher.matches(self)
+    }
+    
 }
 
 public extension Statement {
     
     public static func matcher<T: Statement>(_ matcher: SyntaxMatcher<T>) -> SyntaxMatcher<T> {
         return matcher
+    }
+    
+}
+
+public extension ValueMatcher where T: Statement {
+    
+    public func anyStatement() -> ValueMatcher<Statement> {
+        return ValueMatcher<Statement>().match { (value) -> Bool in
+            if let value = value as? T {
+                return self.matches(value)
+            }
+            
+            return false
+        }
     }
     
 }

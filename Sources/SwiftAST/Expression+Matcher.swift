@@ -47,19 +47,59 @@ public extension ValueMatcher where T: Expression {
     
     public func call(_ args: [FunctionArgument]) -> SyntaxMatcher<PostfixExpression> {
         return SyntaxMatcher<PostfixExpression>()
-            .match(.closure { postfix -> Bool in
+            .match { postfix -> Bool in
                 guard let exp = postfix.exp as? T else {
                     return false
                 }
                 
                 return self.matches(exp)
-                })
+            }
             .keyPath(\.op.asFunctionCall?.arguments, equals: args)
     }
     
     public func call(_ method: String) -> SyntaxMatcher<PostfixExpression> {
         return dot(method).call([])
     }
+    
+    public func binary(op: SwiftOperator, rhs: SyntaxMatcher<Expression>) -> SyntaxMatcher<BinaryExpression> {
+        return SyntaxMatcher<BinaryExpression>()
+            .keyPath(\.op, .equals(op))
+            .keyPath(\.rhs, rhs)
+    }
+    
+    public func assignment(op: SwiftOperator, rhs: SyntaxMatcher<Expression>) -> SyntaxMatcher<AssignmentExpression> {
+        return SyntaxMatcher<AssignmentExpression>()
+            .keyPath(\.op, .equals(op))
+            .keyPath(\.rhs, rhs)
+    }
+}
+
+public extension ValueMatcher where T: Expression {
+    
+    public func anyExpression() -> ValueMatcher<Expression> {
+        return ValueMatcher<Expression>().match { (value) -> Bool in
+            if let value = value as? T {
+                return self.matches(value)
+            }
+            
+            return false
+        }
+    }
+    
+}
+
+public extension ValueMatcher where T: Expression {
+    
+    public static var `nil`: ValueMatcher<Expression> {
+        return ValueMatcher<Expression>().match { exp -> Bool in
+            guard let constant = exp as? ConstantExpression else {
+                return false
+            }
+            
+            return constant.constant == .nil
+        }
+    }
+    
 }
 
 public extension Expression {

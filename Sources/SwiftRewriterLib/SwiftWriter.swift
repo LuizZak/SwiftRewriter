@@ -15,9 +15,13 @@ public final class SwiftWriter {
     var options: ASTWriterOptions
     let typeSystem: TypeSystem
     
-    public init(intentions: IntentionCollection, options: ASTWriterOptions,
-                diagnostics: Diagnostics, output: WriterOutput,
-                typeMapper: TypeMapper, typeSystem: TypeSystem) {
+    public init(intentions: IntentionCollection,
+                options: ASTWriterOptions,
+                diagnostics: Diagnostics,
+                output: WriterOutput,
+                typeMapper: TypeMapper,
+                typeSystem: TypeSystem) {
+        
         self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
@@ -49,8 +53,12 @@ public final class SwiftWriter {
             
             let writer
                 = InternalSwiftWriter(
-                    intentions: intentions, options: options, diagnostics: Diagnostics(),
-                    output: output, typeMapper: typeMapper, typeSystem: typeSystem)
+                    intentions: intentions,
+                    options: options,
+                    diagnostics: Diagnostics(),
+                    output: output,
+                    typeMapper: typeMapper,
+                    typeSystem: typeSystem)
             
             queue.addOperation {
                 autoreleasepool {
@@ -78,9 +86,13 @@ class InternalSwiftWriter {
     let astWriter: SwiftASTWriter
     let typeSystem: TypeSystem
     
-    init(intentions: IntentionCollection, options: ASTWriterOptions,
-         diagnostics: Diagnostics, output: WriterOutput,
-         typeMapper: TypeMapper, typeSystem: TypeSystem) {
+    init(intentions: IntentionCollection,
+         options: ASTWriterOptions,
+         diagnostics: Diagnostics,
+         output: WriterOutput,
+         typeMapper: TypeMapper,
+         typeSystem: TypeSystem) {
+        
         self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
@@ -283,7 +295,7 @@ class InternalSwiftWriter {
         target.outputLineFeed()
     }
     
-    private func outputFunctionDeclaration(_ funcDef: GlobalFunctionGenerationIntention, target: RewriterOutputTarget) {
+    func outputFunctionDeclaration(_ funcDef: GlobalFunctionGenerationIntention, target: RewriterOutputTarget) {
         let accessModifier =
             InternalSwiftWriter._accessModifierFor(accessLevel: funcDef.accessLevel)
         
@@ -319,7 +331,7 @@ class InternalSwiftWriter {
         }
     }
     
-    private func outputClassExtension(_ cls: ClassExtensionGenerationIntention, target: RewriterOutputTarget) {
+    func outputClassExtension(_ cls: ClassExtensionGenerationIntention, target: RewriterOutputTarget) {
         outputHistory(for: cls, target: target)
         
         if let categoryName = cls.categoryName, !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -337,7 +349,7 @@ class InternalSwiftWriter {
         outputTypeBodyCommon(cls, target: target)
     }
     
-    private func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
+    func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
         outputHistory(cls.history, target: target)
         
         if !options.omitObjcCompatibility {
@@ -350,7 +362,7 @@ class InternalSwiftWriter {
         outputTypeBodyCommon(cls, target: target)
     }
     
-    private func outputTypeBodyCommon(_ type: TypeGenerationIntention, target: RewriterOutputTarget) {
+    func outputTypeBodyCommon(_ type: TypeGenerationIntention, target: RewriterOutputTarget) {
         // Figure out inheritance clauses
         var inheritances: [String] = []
         if let cls = type as? ClassGenerationIntention {
@@ -418,7 +430,7 @@ class InternalSwiftWriter {
         target.output(line: "}")
     }
     
-    private func outputProtocol(_ prot: ProtocolGenerationIntention, target: RewriterOutputTarget) {
+    func outputProtocol(_ prot: ProtocolGenerationIntention, target: RewriterOutputTarget) {
         // Figure out inheritance clauses
         var inheritances: [String] = []
         inheritances.append(contentsOf: prot.protocols.map { p in p.protocolName })
@@ -473,7 +485,7 @@ class InternalSwiftWriter {
     }
     
     // TODO: See if we can reuse outputVariableDeclaration
-    private func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
+    func outputInstanceVar(_ ivar: InstanceVariableGenerationIntention, target: RewriterOutputTarget) {
         outputHistory(for: ivar, target: target)
         
         target.outputIdentation()
@@ -512,8 +524,10 @@ class InternalSwiftWriter {
         target.outputLineFeed()
     }
     
-    private func outputProperty(_ prop: PropertyGenerationIntention, selfType: KnownType,
-                                target: RewriterOutputTarget) {
+    func outputProperty(_ prop: PropertyGenerationIntention,
+                        selfType: KnownType,
+                        target: RewriterOutputTarget) {
+        
         outputHistory(for: prop, target: target)
         
         target.outputIdentation()
@@ -614,8 +628,9 @@ class InternalSwiftWriter {
     }
     
     // TODO: Maybe this should be extracted to an external `IntentionPass`?
-    private func outputInitialZeroValueForType(_ type: SwiftType, isConstant: Bool,
-                                               target: RewriterOutputTarget) {
+    func outputInitialZeroValueForType(_ type: SwiftType,
+                                       isConstant: Bool,
+                                       target: RewriterOutputTarget) {
         
         // Don't emit `nil` values for non-constant fields, since Swift assumes
         // the initial value of these values to be nil already.
@@ -637,9 +652,10 @@ class InternalSwiftWriter {
         writer.write(expression: defaultValue, into: target)
     }
     
-    private func outputInitMethod(_ initMethod: InitGenerationIntention,
-                                  selfType: KnownType,
-                                  target: RewriterOutputTarget) {
+    func outputInitMethod(_ initMethod: InitGenerationIntention,
+                          selfType: KnownType,
+                          target: RewriterOutputTarget) {
+        
         outputHistory(for: initMethod, target: target)
         
         if !options.omitObjcCompatibility && (selfType.kind == .class || selfType.kind == .protocol) {
@@ -661,7 +677,12 @@ class InternalSwiftWriter {
         
         target.outputInline("init", style: .keyword)
         
-        outputParameters(initMethod.parameters, into: target,
+        if initMethod.isFailableInitializer {
+            target.outputInline("?")
+        }
+        
+        outputParameters(initMethod.parameters,
+                         into: target,
                          inNonnullContext: initMethod.inNonnullContext)
         
         if let body = initMethod.functionBody {
@@ -676,8 +697,10 @@ class InternalSwiftWriter {
         }
     }
     
-    private func outputDeinit(_ method: MethodGenerationIntention, selfType: KnownType,
-                              target: RewriterOutputTarget) {
+    func outputDeinit(_ method: MethodGenerationIntention,
+                      selfType: KnownType,
+                      target: RewriterOutputTarget) {
+        
         outputHistory(for: method, target: target)
         
         if !options.omitObjcCompatibility {
@@ -705,8 +728,10 @@ class InternalSwiftWriter {
         }
     }
     
-    private func outputMethod(_ method: MethodGenerationIntention, selfType: KnownType,
-                              target: RewriterOutputTarget) {
+    func outputMethod(_ method: MethodGenerationIntention,
+                      selfType: KnownType,
+                      target: RewriterOutputTarget) {
+        
         outputHistory(for: method, target: target)
         
         if !options.omitObjcCompatibility {
@@ -766,13 +791,13 @@ class InternalSwiftWriter {
         }
     }
     
-    private func outputMethodBody(_ body: FunctionBodyIntention, target: RewriterOutputTarget) {
+    func outputMethodBody(_ body: FunctionBodyIntention, target: RewriterOutputTarget) {
         astWriter.write(compoundStatement: body.body, into: target)
     }
     
-    private func outputParameters(_ parameters: [ParameterSignature],
-                                  into target: RewriterOutputTarget,
-                                  inNonnullContext: Bool = false) {
+    func outputParameters(_ parameters: [ParameterSignature],
+                          into target: RewriterOutputTarget,
+                          inNonnullContext: Bool = false) {
         
         target.outputInline("(")
         
@@ -795,11 +820,11 @@ class InternalSwiftWriter {
         target.outputInline(")")
     }
     
-    private func outputHistory(for intention: Intention, target: RewriterOutputTarget) {
+    func outputHistory(for intention: Intention, target: RewriterOutputTarget) {
         outputHistory(intention.history, target: target)
     }
     
-    private func outputHistory(_ history: IntentionHistory, target: RewriterOutputTarget) {
+    func outputHistory(_ history: IntentionHistory, target: RewriterOutputTarget) {
         if !options.printIntentionHistory {
             return
         }

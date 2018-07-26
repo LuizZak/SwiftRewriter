@@ -1,6 +1,9 @@
 import SwiftAST
 import SwiftRewriterLib
 
+/// Analyzes non-overriden methods that have implicitly unwrapped optional returns,
+/// detecting non-null return signature by looking into all return statements
+/// on all exit paths and the values they return.
 public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
     var didWork = false
     
@@ -33,6 +36,8 @@ public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
         let returns =
             SyntaxNodeSequence(node: body.body, inspectBlocks: false)
                 .compactMap { $0 as? ReturnStatement }
+        
+        // TODO: Be aware of polymorphism/inheritance here.
         
         // Analyze individual returns, checking if they all return the same non-null
         // type value

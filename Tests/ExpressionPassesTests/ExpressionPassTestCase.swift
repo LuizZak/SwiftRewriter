@@ -11,12 +11,14 @@ class ExpressionPassTestCase: XCTestCase {
     var notified: Bool = false
     var sut: ASTRewriterPass!
     var typeSystem: DefaultTypeSystem!
+    var intentionContext: FunctionBodyCarryingIntention?
     
     override func setUp() {
         super.setUp()
         
         typeSystem = DefaultTypeSystem()
         notified = false
+        intentionContext = nil
     }
     
     func assertNotifiedChange(file: String = #file, line: Int = #line) {
@@ -185,6 +187,7 @@ class ExpressionPassTestCase: XCTestCase {
         }
         
         return ASTRewriterPassContext(typeSystem: typeSystem,
-                                             notifyChangedTree: block)
+                                      notifyChangedTree: block,
+                                      source: intentionContext)
     }
 }

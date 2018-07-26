@@ -2364,4 +2364,57 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteInitBody() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            @property NSInteger a;
+            @end
+            @implementation A
+            - (instancetype)init {
+                self = [super init];
+                if(self) {
+                    self.a = 0;
+                }
+                return self;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc var a: Int = 0
+                
+                @objc
+                override init() {
+                    self.a = 0
+                    super.init()
+                }
+            }
+            """)
+    }
+    
+    func testRewriteFailableInit() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            @end
+
+            @implementation A
+            - (instancetype)initWithThing:(NSInteger)thing {
+                return nil;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                init?(thing: Int) {
+                    return nil
+                }
+            }
+            """)
+    }
 }

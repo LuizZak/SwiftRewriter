@@ -35,6 +35,7 @@ public final class ASTRewriterPassApplier {
     
     private func applyPassOnBody(_ item: FunctionBodyQueue<TypeResolvingQueueDelegate>.FunctionBodyQueueItem,
                                  passType: ASTRewriterPass.Type) {
+        
         let functionBody = item.body
         
         // Resolve types before feeding into passes
@@ -48,8 +49,9 @@ public final class ASTRewriterPassApplier {
         
         let expContext =
             ASTRewriterPassContext(typeSystem: self.typeSystem,
-                                          typeResolver: item.context.typeResolver,
-                                          notifyChangedTree: notifyChangedTree)
+                                   typeResolver: item.context.typeResolver,
+                                   notifyChangedTree: notifyChangedTree,
+                                   source: item.intention)
         
         let pass = passType.init()
         _=pass.apply(on: item.body.body, context: expContext)

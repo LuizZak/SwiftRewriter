@@ -193,6 +193,14 @@ extension ValueMatcher {
     }
 }
 
+public extension ValueMatcher {
+    
+    public static var any: ValueMatcher {
+        return ValueMatcher().match(closure: { _ in true })
+    }
+    
+}
+
 extension ValueMatcher where T: Equatable {
     
     /// Returns a new matcher that matches the tested value against a given matcher.

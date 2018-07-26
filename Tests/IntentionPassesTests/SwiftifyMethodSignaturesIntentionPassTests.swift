@@ -1,10 +1,3 @@
-//
-//  SwiftifyMethodSignaturesIntentionPassTests.swift
-//  SwiftRewriterLibTests
-//
-//  Created by Luiz Fernando Silva on 24/02/2018.
-//
-
 import XCTest
 import GrammarModels
 import ObjcParser

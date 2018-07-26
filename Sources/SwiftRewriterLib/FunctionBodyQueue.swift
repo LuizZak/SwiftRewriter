@@ -104,7 +104,7 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
         
         let context = delegate.makeContext(forFunction: function)
-        collectFunctionBody(body, context: context)
+        collectFunctionBody(body, .global(function), context: context)
     }
     
     private func collectFromClass(_ cls: BaseClassIntention) {
@@ -121,9 +121,12 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
     }
     
-    private func collectFunction(_ f: FunctionIntention, context: Context) {
+    private func collectFunction(_ f: FunctionIntention,
+                                 _ intention: FunctionBodyCarryingIntention,
+                                 context: Context) {
+        
         if let method = f.functionBody {
-            collectFunctionBody(method, context: context)
+            collectFunctionBody(method, intention, context: context)
         }
     }
     
@@ -133,7 +136,7 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
         
         let context = delegate.makeContext(forInit: ctor)
-        collectFunction(ctor, context: context)
+        collectFunction(ctor, .initializer(ctor), context: context)
     }
     
     private func collectMethod(_ method: MethodGenerationIntention) {
@@ -142,7 +145,7 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
         }
         
         let context = delegate.makeContext(forMethod: method)
-        collectFunction(method, context: context)
+        collectFunction(method, .method(method), context: context)
     }
     
     private func collectProperty(_ property: PropertyGenerationIntention) {
@@ -155,37 +158,56 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
             let context =
                 delegate.makeContext(forPropertyGetter: property, getter: getter)
             
-            collectFunctionBody(getter, context: context)
+            collectFunctionBody(getter, .property(property, isSetter: false), context: context)
             
         case let .property(get, set):
             let getterContext =
                 delegate.makeContext(forPropertyGetter: property, getter: get)
             
-            collectFunctionBody(get, context: getterContext)
+            collectFunctionBody(get, .property(property, isSetter: false), context: getterContext)
             
             let setterContext =
                 delegate.makeContext(forPropertySetter: property, setter: set)
             
-            collectFunctionBody(set.body, context: setterContext)
+            collectFunctionBody(set.body, .property(property, isSetter: true), context: setterContext)
             
         case .asField:
             break
         }
     }
     
-    private func collectFunctionBody(_ functionBody: FunctionBodyIntention, context: Context) {
+    private func collectFunctionBody(_ functionBody: FunctionBodyIntention,
+                                     _ intention: FunctionBodyCarryingIntention,
+                                     context: Context) {
+        
         synchronized(self) {
-            items.append(FunctionBodyQueueItem(body: functionBody, context: context))
+            items.append(
+                FunctionBodyQueueItem(body: functionBody,
+                                      intention: intention,
+                                      context: context))
         }
     }
     
     public struct FunctionBodyQueueItem {
         public var body: FunctionBodyIntention
+        public var intention: FunctionBodyCarryingIntention?
         public var context: Context
         
-        public init(body: FunctionBodyIntention, context: Context) {
+        public init(body: FunctionBodyIntention,
+                    intention: FunctionBodyCarryingIntention?,
+                    context: Context) {
+            
             self.body = body
+            self.intention = intention
             self.context = context
         }
     }
+}
+
+/// Describes an intention that is a carrier of a function body.
+public enum FunctionBodyCarryingIntention {
+    case method(MethodGenerationIntention)
+    case initializer(InitGenerationIntention)
+    case global(GlobalFunctionGenerationIntention)
+    case property(PropertyGenerationIntention, isSetter: Bool)
 }

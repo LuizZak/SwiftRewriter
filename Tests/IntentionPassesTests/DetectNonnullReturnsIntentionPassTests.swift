@@ -48,7 +48,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
                     type.createMethod(named: "a", returnType: .implicitUnwrappedOptional(.typeName("A"))) { method in
                         method.setBody([
                             Statement.return(Expression.identifier("self").typed(.errorType))
-                            ])
+                        ])
                     }
                 }.build()
         let sut = DetectNonnullReturnsIntentionPass()

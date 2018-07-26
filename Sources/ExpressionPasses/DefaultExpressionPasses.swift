@@ -2,6 +2,7 @@ import SwiftRewriterLib
 
 public class DefaultExpressionPasses: ASTRewriterPassSource {
     public var syntaxNodePasses: [ASTRewriterPass.Type] = [
+        InitRewriterExpressionPass.self,
         ASTSimplifier.self,
         AllocInitExpressionPass.self,
         CoreGraphicsExpressionPass.self,

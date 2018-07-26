@@ -5,7 +5,12 @@ public class AnonymousIntentionVisitor {
     public var onVisitType: ((TypeGenerationIntention) -> Void)?
     public var onVisitInstanceVar: ((InstanceVariableGenerationIntention) -> Void)?
     public var onVisitMethod: ((MethodGenerationIntention) -> Void)?
+    public var onVisitInitializer: ((InitGenerationIntention) -> Void)?
     public var onVisitProperty: ((PropertyGenerationIntention) -> Void)?
+    
+    public init() {
+        
+    }
     
     public func visit(intentions: IntentionCollection) {
         for file in intentions.fileIntentions() {
@@ -49,6 +54,10 @@ public class AnonymousIntentionVisitor {
             visitProperty(property)
         }
         
+        for ctor in type.constructors {
+            visitInitializer(ctor)
+        }
+        
         for method in type.methods {
             visitMethod(method)
         }
@@ -60,6 +69,10 @@ public class AnonymousIntentionVisitor {
     
     func visitMethod(_ method: MethodGenerationIntention) {
         onVisitMethod?(method)
+    }
+    
+    func visitInitializer(_ initializer: InitGenerationIntention) {
+        onVisitInitializer?(initializer)
     }
     
     func visitProperty(_ property: PropertyGenerationIntention) {

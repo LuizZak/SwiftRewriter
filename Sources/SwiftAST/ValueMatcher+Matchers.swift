@@ -22,7 +22,7 @@ public func lazyEquals<T: Equatable>(_ value: @autoclosure @escaping () -> T?) -
     return MatchRule.lazyEqualsNullable(value)
 }
 
-public func isNil<T>() -> MatchRule<Optional<T>> {
+public func isNil<T>() -> MatchRule<T?> {
     return MatchRule.equals(nil)
 }
 
@@ -31,12 +31,14 @@ public func hasCount<C: Collection>(_ count: MatchRule<Int>) -> ValueMatcher<C> 
 }
 
 public extension ValueMatcher {
+    @inlinable
     public static prefix func ! (lhs: ValueMatcher) -> ValueMatcher {
         return not(lhs)
     }
 }
 
 public extension MatchRule {
+    @inlinable
     public static prefix func ! (lhs: MatchRule) -> MatchRule {
         switch lhs {
         case .negated(let rule):
@@ -48,10 +50,12 @@ public extension MatchRule {
 }
 
 public extension ValueMatcher {
+    @inlinable
     public static func == (lhs: Bool, rhs: ValueMatcher) -> ValueMatcher {
         return lhs ? rhs : !rhs
     }
     
+    @inlinable
     public static func == (lhs: ValueMatcher, rhs: Bool) -> ValueMatcher {
         return rhs ? lhs : !lhs
     }

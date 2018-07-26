@@ -1,10 +1,3 @@
-//
-//  FileTypeMergingIntentionPassTests.swift
-//  IntentionPassesTests
-//
-//  Created by Luiz Silva on 28/02/2018.
-//
-
 import XCTest
 import IntentionPasses
 import SwiftRewriterLib

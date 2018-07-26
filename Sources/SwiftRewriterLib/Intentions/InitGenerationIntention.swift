@@ -7,6 +7,7 @@ public class InitGenerationIntention: MemberGenerationIntention, FunctionIntenti
     public var functionBody: FunctionBodyIntention?
     
     public var isOverride: Bool = false
+    public var isFailableInitializer: Bool = false
     
     public init(parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal,

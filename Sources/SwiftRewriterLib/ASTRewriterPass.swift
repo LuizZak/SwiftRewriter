@@ -7,6 +7,7 @@ public struct ASTRewriterPassContext {
     
     public let typeSystem: TypeSystem
     public let typeResolver: ExpressionTypeResolver
+    public let source: FunctionBodyCarryingIntention?
     
     /// Must be called by every `ASTRewriterPass` if it makes any sort of change
     /// to a syntax tree.
@@ -15,17 +16,25 @@ public struct ASTRewriterPassContext {
     /// like expression types, being fed to subsequent expression passes.
     public let notifyChangedTree: () -> Void
     
-    public init(typeSystem: TypeSystem, notifyChangedTree: @escaping () -> Void = { }) {
+    public init(typeSystem: TypeSystem,
+                notifyChangedTree: @escaping () -> Void = { },
+                source: FunctionBodyCarryingIntention? = nil) {
+        
         self.typeSystem = typeSystem
         self.typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
         self.notifyChangedTree = notifyChangedTree
+        self.source = source
     }
     
-    public init(typeSystem: TypeSystem, typeResolver: ExpressionTypeResolver,
-                notifyChangedTree: @escaping () -> Void = { }) {
+    public init(typeSystem: TypeSystem,
+                typeResolver: ExpressionTypeResolver,
+                notifyChangedTree: @escaping () -> Void = { },
+                source: FunctionBodyCarryingIntention? = nil) {
+        
         self.typeSystem = typeSystem
         self.typeResolver = typeResolver
         self.notifyChangedTree = notifyChangedTree
+        self.source = source
     }
 }
 

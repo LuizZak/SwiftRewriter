@@ -10,13 +10,14 @@ class DefaultIntentionPassesTests: XCTestCase {
         // (could crash and abort tests halfway through)
         var intentsIterator = intents.makeIterator()
         
-        XCTAssertEqual(intents.count, 9)
+        XCTAssertEqual(intents.count, 10)
         
         XCTAssert(intentsIterator.next() is FileTypeMergingIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
         XCTAssert(intentsIterator.next() is PropertyMergeIntentionPass)
         XCTAssert(intentsIterator.next() is StoredPropertyToNominalTypesIntentionPass)
         XCTAssert(intentsIterator.next() is SwiftifyMethodSignaturesIntentionPass)
+        XCTAssert(intentsIterator.next() is FailableInitFlaggingIntentionPass)
         XCTAssert(intentsIterator.next() is ImportDirectiveIntentionPass)
         XCTAssert(intentsIterator.next() is UIKitCorrectorIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
@@ -28,9 +29,11 @@ class DefaultIntentionPassesTests: XCTestCase {
 func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
     let system = IntentionCollectionTypeSystem(intentions: intentions)
     let invoker = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(),
-                                             typeSystem: system, numThreads: 8)
+                                             typeSystem: system,
+                                             numThreads: 8)
     let typeMapper = DefaultTypeMapper(typeSystem: system)
     
-    return IntentionPassContext(typeSystem: system, typeMapper: typeMapper,
+    return IntentionPassContext(typeSystem: system,
+                                typeMapper: typeMapper,
                                 typeResolverInvoker: invoker)
 }
