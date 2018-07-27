@@ -54,5 +54,4 @@ class SwiftWriterTests: XCTestCase {
         
         XCTAssertEqual(output.buffer.trimmingCharacters(in: .whitespacesAndNewlines), expected)
     }
-    
 }

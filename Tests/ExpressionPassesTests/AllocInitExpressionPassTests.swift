@@ -107,4 +107,23 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
         
         assertNotifiedChange()
     }
+    
+    /// Tests `[<nullable-exp> initWithThing:[...]]` transforms properly into
+    /// a still nullable-accessed `<nullable-exp>.init(thing: [...])`
+    func testOptionalInitWithThing() {
+        let typeNameExp = Expression.identifier("className")
+        typeNameExp.resolvedType = .optional(.typeName("ClassName"))
+        
+        assertTransform(
+            expression: Expression
+                .identifier("className")
+                .typed(.optional(.typeName("ClassName")))
+                .optional()
+                .dot("initWithThing")
+                .call([.unlabeled(.constant(1))]),
+            into: typeNameExp.optional().dot("init").call([.labeled("thing", .constant(1))])
+        )
+        
+        assertNotifiedChange()
+    }
 }

@@ -2440,4 +2440,45 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteDelegatedInitializer() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            @end
+            @interface B : A
+            @end
+            
+            @implementation B
+            - (instancetype)initWithA:(nonnull A*)a {
+                self = [super initWithA:a];
+                return self;
+            }
+            - (instancetype)initWithB:(nonnull B*)b {
+                self = [self initWithA:a];
+                if (self) {
+                    
+                }
+                return self;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+            }
+            @objc
+            class B: A {
+                @objc
+                override init(a: A) {
+                    self = super.init(a: a)
+                    return self
+                }
+                @objc
+                init(b: B) {
+                    self.init(a: a)
+                }
+            }
+            """)
+    }
 }

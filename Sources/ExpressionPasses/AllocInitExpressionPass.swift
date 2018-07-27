@@ -1,6 +1,7 @@
 import Foundation
 import SwiftRewriterLib
 import SwiftAST
+import Utils
 
 /// Converts Type.alloc().init[...]() expression chains into proper Type() calls.
 public class AllocInitExpressionPass: ASTRewriterPass {
@@ -16,7 +17,7 @@ public class AllocInitExpressionPass: ASTRewriterPass {
             
             return super.visitExpression(newInitParametrized)
         }
-        if let newInit = convertSuperInit(exp: exp) {
+        if let newInit = convertExpressionInit(exp: exp) {
             notifyChange()
             
             return super.visitExpression(newInit)
@@ -79,8 +80,8 @@ public class AllocInitExpressionPass: ASTRewriterPass {
         return Expression.identifier(typeName).call(newArgs)
     }
     
-    /// Convert [super initWithThing:[...]] -> super.init(thing: [...])
-    func convertSuperInit(exp: PostfixExpression) -> Expression? {
+    /// Convert [<exp> initWithThing:[...]] -> <exp>.init(thing: [...])
+    func convertExpressionInit(exp: PostfixExpression) -> Expression? {
         guard let initInvocation = exp.asPostfix,
             let args = initInvocation.functionCall?.arguments, !args.isEmpty else {
             return nil
@@ -89,22 +90,24 @@ public class AllocInitExpressionPass: ASTRewriterPass {
             let initName = initTarget.member?.name, initName.hasPrefix("initWith") else {
             return nil
         }
-        guard let superTarget = initTarget.exp.asIdentifier, superTarget.identifier == "super" else {
-            return nil
-        }
+        
+        let target = initTarget.exp
         
         let newArgs = swiftify(methodName: initName, arguments: args)
         
-        return Expression.identifier("super").dot("init").call(newArgs)
+        if initTarget.op.hasOptionalAccess {
+            return target.optional().dot("init").call(newArgs)
+        }
+        
+        return target.dot("init").call(newArgs)
     }
     
     func swiftify(methodName: String, arguments: [FunctionArgument]) -> [FunctionArgument] {
         // Do a little Swift-importer-like-magic here: If the method selector is
-        // in the form `loremWithThing:thing...`, where after a `[...]With`
-        // prefix, a noun is followed by a parameter that has the same name, we
-        // collapse such selector in Swift as `lorem(with:)`.
+        // in the form `loremWithThing:thing...`, we collapse such selector in
+        // Swift as `lorem(thing:)`.
         let split = methodName.components(separatedBy: "With")
-        if split.count != 2 || split.contains(where: { $0.count < 2 }) {
+        if split.count != 2 || split.contains(where: ~~\.isEmpty) {
             return arguments
         }
         

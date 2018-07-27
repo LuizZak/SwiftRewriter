@@ -75,8 +75,11 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     @discardableResult
-    func assertTransform(expression: Expression, into expected: Expression,
-                         file: String = #file, line: Int = #line) -> Expression {
+    func assertTransform(expression: Expression,
+                         into expected: Expression,
+                         file: String = #file,
+                         line: Int = #line) -> Expression {
+        
         notified = false
         let result = sut.apply(on: expression, context: makeContext())
         
@@ -95,8 +98,11 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     @discardableResult
-    func assertTransform(statement: Statement, into expected: Statement,
-                         file: String = #file, line: Int = #line) -> Statement {
+    func assertTransform(statement: Statement,
+                         into expected: Statement,
+                         file: String = #file,
+                         line: Int = #line) -> Statement {
+        
         notified = false
         let result = sut.apply(on: statement, context: makeContext())
         

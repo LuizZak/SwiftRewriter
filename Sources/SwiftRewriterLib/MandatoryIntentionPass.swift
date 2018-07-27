@@ -53,11 +53,10 @@ class MandatoryIntentionPass: IntentionPass {
         }
         
         let visitor = AnonymousIntentionVisitor()
-        visitor.onVisitType = { [weak self] type in
-            guard let sSelf = self else { return }
+        visitor.onVisitType = { type in
             guard type.kind == .class else { return }
             
-            sSelf.applyOverrideDetection(type)
+            self.applyOverrideDetection(type)
         }
         
         visitor.visit(intentions: intentions)
