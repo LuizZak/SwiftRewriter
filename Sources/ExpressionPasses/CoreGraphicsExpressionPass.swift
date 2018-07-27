@@ -95,6 +95,37 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         return super.visitPostfix(exp)
     }
     
+    public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
+        switch exp.identifier {
+        case "CGRectZero":
+            notifyChange()
+            return Expression.identifier("CGRect").dot("zero")
+            
+        case "CGPointZero":
+            notifyChange()
+            return Expression.identifier("CGPoint").dot("zero")
+            
+        case "CGVectorZero":
+            notifyChange()
+            return Expression.identifier("CGVector").dot("zero")
+            
+        case "CGSizeZero":
+            notifyChange()
+            return Expression.identifier("CGSize").dot("zero")
+            
+        case "CGRectNull":
+            notifyChange()
+            return Expression.identifier("CGRect").dot("null")
+            
+        case "CGRectInfinite":
+            notifyChange()
+            return Expression.identifier("CGRect").dot("infinite")
+            
+        default:
+            return super.visitIdentifier(exp)
+        }
+    }
+    
     /// Converts a method to a field access, e.g.: `CGRectGetWidth(<exp>)` -> `<exp>.width`.
     private func convertMethodToField(field: String, ifArgCountIs argCount: Int, _ exp: PostfixExpression) {
         switch (exp.exp, exp.op) {

@@ -88,6 +88,40 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testCoreGraphicsStaticConstants() {
+        
+        assertTransformParsed(
+            expression: "CGRectZero",
+            into: Expression.identifier("CGRect").dot("zero")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "CGRectNull",
+            into: Expression.identifier("CGRect").dot("null")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "CGRectInfinite",
+            into: Expression.identifier("CGRect").dot("infinite")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "CGPointZero",
+            into: Expression.identifier("CGPoint").dot("zero")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "CGSizeZero",
+            into: Expression.identifier("CGSize").dot("zero")
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "CGVectorZero",
+            into: Expression.identifier("CGVector").dot("zero")
+        ); assertNotifiedChange()
+        
+    }
+    
     func testCGRecsGetters() {
         assertTransformParsed(
             expression: "CGRectGetWidth(self.frame)",
@@ -174,7 +208,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                     .labeled("y", .constant(2)),
                     .labeled("width", .constant(3)),
                     .labeled("height", .constant(4))
-                    ]).dot("isNull")
+                ]).dot("isNull")
         ); assertNotifiedChange()
     }
     
