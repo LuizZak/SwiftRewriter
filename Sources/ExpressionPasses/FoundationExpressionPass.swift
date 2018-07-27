@@ -117,7 +117,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
             .labeled("format", args[0].expression)
         ] + args.dropFirst()
         
-        var newExp = exp.copy()
+        let newExp = exp.copy()
         
         newExp.exp = .identifier(typename == "NSMutableString" ? "NSMutableString" : "String")
         newExp.op = .functionCall(arguments: newArgs)
