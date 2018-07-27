@@ -165,7 +165,7 @@ public final class FunctionInvocationTransformer {
                 return nil
             }
             
-            return functionCall.arguments[0].expression.dot(name).typed(postfix.resolvedType)
+            return functionCall.arguments[0].expression.copy().dot(name).typed(postfix.resolvedType)
             
         case let .propertySetter(name, transformer):
             if functionCall.arguments.count != 1 + transformer.argumentConsumeCount {
@@ -178,10 +178,11 @@ public final class FunctionInvocationTransformer {
                 return nil
             }
             
-            let exp = functionCall.arguments[0].expression.dot(name)
+            let exp = functionCall.arguments[0].expression.copy().dot(name)
             exp.resolvedType = postfix.resolvedType
             
-            return exp.assignment(op: .assign, rhs: rhs.expression)
+            return exp.assignment(op: .assign, rhs: rhs.expression.copy())
+            
         case let .method(name, firstArgIsInstance, args):
             guard let result = attemptApply(on: functionCall, name: name,
                                             firstArgIsInstance: firstArgIsInstance,
@@ -194,7 +195,7 @@ public final class FunctionInvocationTransformer {
             if firstArgIsInstance {
                 let exp =
                     functionCall.arguments[0]
-                        .expression.dot(name).call(result.arguments)
+                        .expression.copy().dot(name).call(result.arguments)
                 exp.resolvedType = postfix.resolvedType
                 
                 return exp
@@ -215,8 +216,8 @@ public final class FunctionInvocationTransformer {
         }
         
         let arguments = firstArgIsInstance
-            ? Array(functionCall.arguments.dropFirst())
-            : functionCall.arguments
+            ? Array(functionCall.copy().arguments.dropFirst())
+            : functionCall.copy().arguments
         
         var result: [FunctionArgument] = []
         
@@ -316,9 +317,9 @@ public final class FunctionInvocationTransformer {
                 let arg =
                     FunctionArgument(
                         label: nil,
-                        expression: merger(arguments[arg0].expression,
-                                           arguments[arg1].expression)
-                )
+                        expression: merger(arguments[arg0].expression.copy(),
+                                           arguments[arg1].expression.copy())
+                    )
                 
                 return arg
                 

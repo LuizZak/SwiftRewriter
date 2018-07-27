@@ -32,7 +32,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                readsAs: .while(.constant(true),
                                body: CompoundStatement(statements: [
                                 .expression(
-                                    .postfix(.identifier("thing"), .functionCall(arguments: []))
+                                    Expression.identifier("thing").call()
                                 )
                                 ]))
         )
@@ -219,9 +219,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                 ],
                                 default: [
                                     .expression(
-                                        .postfix(.identifier("stmt"),
-                                                 .functionCall(arguments: [])
-                                        )
+                                        Expression.identifier("stmt").call()
                                     )
                                 ])
         )

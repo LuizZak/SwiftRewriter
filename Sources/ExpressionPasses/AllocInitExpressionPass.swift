@@ -45,10 +45,10 @@ public class AllocInitExpressionPass: ASTRewriterPass {
         
         // self.alloc.init() -> self.init()
         if alloc.exp.asIdentifier?.identifier == "self", case .metatype? = alloc.exp.resolvedType {
-            return alloc.exp.dot("init").call()
+            return alloc.exp.copy().dot("init").call()
         }
         
-        return alloc.exp.call()
+        return alloc.copy().exp.call()
     }
     
     /// Converts `[[Class alloc] initWithThing:[...]]` -> `Class(thing: [...])`
@@ -91,7 +91,7 @@ public class AllocInitExpressionPass: ASTRewriterPass {
             return nil
         }
         
-        let target = initTarget.exp
+        let target = initTarget.exp.copy()
         
         let newArgs = swiftify(methodName: initName, arguments: args)
         
@@ -108,11 +108,11 @@ public class AllocInitExpressionPass: ASTRewriterPass {
         // Swift as `lorem(thing:)`.
         let split = methodName.components(separatedBy: "With")
         if split.count != 2 || split.contains(where: ~~\.isEmpty) {
-            return arguments
+            return arguments.map { $0.copy() }
         }
         
         // All good! Collapse the identifier into a more 'swifty' construct
-        var arguments = arguments
+        var arguments = arguments.map { $0.copy() }
         arguments[0] = .labeled(split[1].lowercasedFirstLetter, arguments[0].expression)
         
         return arguments

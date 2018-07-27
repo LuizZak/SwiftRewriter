@@ -37,23 +37,24 @@ class ExpressionTests: XCTestCase {
     }
     
     func testDescriptionExpressions() {
-       XCTAssertEqual(
-            Expression.postfix(.identifier("abc"), .subscript(.constant(.int(1, .decimal)))).description,
+        
+        XCTAssertEqual(
+            Expression.identifier("abc").sub(.constant(1)).description,
             "abc[1]")
         XCTAssertEqual(
-            Expression.postfix(.identifier("abc"), .functionCall(arguments: [.labeled("label", .constant(.int(1, .decimal))), .unlabeled(.constant(.boolean(true)))])).description,
+            Expression.identifier("abc").call([.labeled("label", .constant(1)), .unlabeled(.constant(true))]).description,
             "abc(label: 1, true)")
         XCTAssertEqual(
-            Expression.binary(lhs: .constant(.int(1, .decimal)), op: .add, rhs: .constant(.int(4, .decimal))).description,
+            Expression.constant(1).binary(op: .add, rhs: .constant(4)).description,
             "1 + 4")
     }
     
     func testDescriptionCasts() {
         XCTAssertEqual(
-            Expression.cast(.identifier("abc"), type: .string).description,
+            Expression.identifier("abc").casted(to: .string).description,
             "abc as? String")
         XCTAssertEqual(
-            Expression.postfix(.cast(.identifier("abc"), type: .string), .member("count")).description,
+            Expression.identifier("abc").casted(to: .string).dot("count").description,
             "(abc as? String).count")
     }
     

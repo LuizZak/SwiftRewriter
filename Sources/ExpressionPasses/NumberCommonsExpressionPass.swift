@@ -30,7 +30,7 @@ public class NumberCommonsExpressionPass: ASTRewriterPass {
             let newExp =
                 Expression
                     .identifier(name)
-                    .call([.unlabeled(exp.exp)])
+                    .call([exp.exp.copy()])
             
             notifyChange()
             
@@ -100,7 +100,7 @@ public class NumberCommonsExpressionPass: ASTRewriterPass {
             let cast = Expression
                 .identifier(typeName)
                 .typed(.metatype(for: expected))
-                .call([exp.typed(expected: nil)])
+                .call([exp.copy().typed(expected: nil)])
                 .typed(expected)
                 .typed(expected: expected)
             

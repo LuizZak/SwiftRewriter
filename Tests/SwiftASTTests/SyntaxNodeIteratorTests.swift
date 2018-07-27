@@ -50,34 +50,32 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
     
     func testPostfix() {
-        assertExpression(.postfix(.identifier("a"), .member("a")),
+        assertExpression(Expression.identifier("a").dot("a"),
                          iteratesAs: [
-                            Expression.postfix(.identifier("a"), .member("a")),
+                            Expression.identifier("a").dot("a"),
                             Expression.identifier("a")
             ]
         )
         
         // Test iterating into subscript expressions
-        assertExpression(.postfix(.identifier("a"), .subscript(.identifier("b"))),
+        assertExpression(Expression.identifier("a").sub(.identifier("b")),
                          iteratesAs: [
-                            Expression.postfix(.identifier("a"), .subscript(.identifier("b"))),
+                            Expression.identifier("a").sub(.identifier("b")),
                             Expression.identifier("a"),
                             Expression.identifier("b")
             ]
         )
         
         // Test iterating into function call arguments
-        assertExpression(.postfix(.identifier("a"),
-                                  .functionCall(arguments: [
+        assertExpression(Expression.identifier("a").call([
                                     .labeled("label", .identifier("b")),
                                     .unlabeled(.identifier("c"))
-                                    ])),
+                                ]),
                          iteratesAs: [
-                            Expression.postfix(.identifier("a"),
-                                               .functionCall(arguments: [
-                                                .labeled("label", .identifier("b")),
-                                                .unlabeled(.identifier("c"))
-                                                ])),
+                            Expression.identifier("a").call([
+                                .labeled("label", .identifier("b")),
+                                .unlabeled(.identifier("c"))
+                            ]),
                             Expression.identifier("a"),
                             Expression.identifier("b"),
                             Expression.identifier("c")
@@ -102,9 +100,9 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
     
     func testCast() {
-        assertExpression(.cast(.identifier("a"), type: .typeName("B")),
+        assertExpression(Expression.identifier("a").casted(to: .typeName("B")),
                          iteratesAs: [
-                            Expression.cast(.identifier("a"), type: .typeName("B")),
+                            Expression.identifier("a").casted(to: .typeName("B")),
                             Expression.identifier("a")
             ]
         )
@@ -335,11 +333,13 @@ class SyntaxNodeIteratorTests: XCTestCase {
      */
     
     func testSwitchNotInspectingBlocks() {
-        let cases: [SwitchCase] = [
-            SwitchCase(patterns: [.expression(makeBlock("b"))],
-                       statements: [.expression(.identifier("c"))]
-            )
-        ]
+        var cases: [SwitchCase] {
+            return [
+                SwitchCase(patterns: [.expression(makeBlock("b"))],
+                           statements: [.expression(.identifier("c"))]
+                )
+            ]
+        }
         
         assertStatement(.switch(makeBlock(),
                                 cases: cases, default: nil),
@@ -360,11 +360,13 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
     
     func testSwitchInspectingBlocks() {
-        let cases: [SwitchCase] = [
-            SwitchCase(patterns: [.expression(makeBlock("b"))],
-                       statements: [.expression(.identifier("c"))]
-            )
-        ]
+        var cases: [SwitchCase] {
+            return [
+                SwitchCase(patterns: [.expression(makeBlock("b"))],
+                           statements: [.expression(.identifier("c"))]
+                )
+            ]
+        }
         
         assertStatement(.switch(makeBlock(),
                                 cases: cases,
@@ -520,10 +522,10 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
     
     func testPostfixSubscriptExpression() {
-        assertExpression(.postfix(makeBlock(), .subscript(makeBlock("b"))),
+        assertExpression(makeBlock().sub(makeBlock("b")),
                          inspectingBlocks: true,
                          iteratesAs: [
-                            Expression.postfix(makeBlock(), .subscript(makeBlock("b"))),
+                            makeBlock().sub(makeBlock("b")),
                             makeBlock(),
                             makeBlock("b"),
                             
@@ -539,10 +541,10 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
     
     func testPostfixFunctionCallExpression() {
-        assertExpression(.postfix(makeBlock("a"), .functionCall(arguments: [.unlabeled(makeBlock("b"))])),
+        assertExpression(makeBlock("a").call([.unlabeled(makeBlock("b"))]),
                          inspectingBlocks: true,
                          iteratesAs: [
-                            Expression.postfix(makeBlock("a"), .functionCall(arguments: [.unlabeled(makeBlock("b"))])),
+                            makeBlock("a").call([.unlabeled(makeBlock("b"))]),
                             makeBlock(),
                             makeBlock("b"),
                             

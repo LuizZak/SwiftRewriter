@@ -91,10 +91,10 @@ class SwiftExprASTReaderTests: XCTestCase {
                         .identifier("CGRectMake")
                         .call(
                             [
-                                .unlabeled(.constant(0)),
-                                .unlabeled(.identifier("kCPDefaultTimelineRowHeight")),
-                                .unlabeled(.postfix(.identifier("self"), .member("ganttWidth"))),
-                                .unlabeled(.postfix(.identifier("self"), .member("ganttHeight")))
+                                .constant(0),
+                                .identifier("kCPDefaultTimelineRowHeight"),
+                                Expression.identifier("self").dot("ganttWidth"),
+                                Expression.identifier("self").dot("ganttHeight")
                             ]))
                 ])
         

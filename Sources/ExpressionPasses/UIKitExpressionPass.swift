@@ -153,7 +153,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
     ///
     /// E.g.: "UIControlEventTouchUpInside" enumified over "UIControlEvent" (Objective-C) to
     /// "UIControlEvents" (Swift)
-    /// will return `.postfix(.identifier("UIControlEvents"), .member("touchUpInside"))`.
+    /// will return `Expression.identifier("UIControlEvents").dot("touchUpInside")`.
     func enumify(ident: String, enumPrefix: String, swiftEnumName: String) -> Expression? {
         if !ident.hasPrefix(enumPrefix) || ident == swiftEnumName {
             return nil
@@ -162,7 +162,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
         let suffix = ident.suffix(from: enumPrefix.endIndex)
         let enumCase = suffix.lowercasedFirstLetter
         
-        return .postfix(.identifier(swiftEnumName), .member(enumCase))
+        return Expression.identifier(swiftEnumName).dot(enumCase)
     }
 }
 

@@ -30,12 +30,12 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     func testUIColor() {
         assertTransformParsed(
             expression: "[UIColor orangeColor]",
-            into: .postfix(.identifier("UIColor"), .member("orange"))
+            into: Expression.identifier("UIColor").dot("orange")
         ); assertNotifiedChange()
         
         assertTransformParsed(
             expression: "[UIColor redColor]",
-            into: .postfix(.identifier("UIColor"), .member("red"))
+            into: Expression.identifier("UIColor").dot("red")
         ); assertNotifiedChange()
         
         // Test unrecognized cases are left alone
@@ -75,8 +75,12 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testConvertBooleanGetters() {
-        let exp = Expression.identifier("view")
-        exp.resolvedType = .typeName("UIView")
+        let _exp = Expression.identifier("view")
+        _exp.resolvedType = .typeName("UIView")
+        
+        var exp: Expression {
+            return _exp.copy()
+        }
         
         let makeGetter: (String) -> Expression = {
             return exp.dot($0)
@@ -114,8 +118,12 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testConvertBooleanGettersOnOptionalViews() {
-        let exp = Expression.identifier("view").optional()
-        exp.exp.resolvedType = .optional(.typeName("UIView"))
+        let _exp = Expression.identifier("view").optional()
+        _exp.exp.resolvedType = .optional(.typeName("UIView"))
+        
+        var exp: OptionalAccessPostfixBuilder {
+            return _exp.copy()
+        }
         
         let makeGetter: (String) -> Expression = {
             return exp.dot($0)

@@ -124,6 +124,10 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     
     public var expressionToBuild: Expression { return exp }
     
+    public func copy() -> OptionalAccessPostfixBuilder {
+        return OptionalAccessPostfixBuilder(exp: exp.copy())
+    }
+    
     public func call(_ arguments: [FunctionArgument], type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
         let op = Postfix.functionCall(arguments: arguments)

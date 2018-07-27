@@ -8,7 +8,7 @@ public class ASTSimplifier: ASTRewriterPass {
         if let parens = exp.asParens {
             notifyChange()
             
-            return visitBaseExpression(parens.exp)
+            return visitBaseExpression(parens.exp.copy())
         }
         
         return super.visitBaseExpression(exp)
@@ -21,7 +21,9 @@ public class ASTSimplifier: ASTRewriterPass {
             return super.visitCompound(stmt)
         }
         
-        stmt.statements = doStmt.body.statements
+        let body = doStmt.body.statements
+        doStmt.body.statements = []
+        stmt.statements = body
         
         for def in doStmt.body.allDefinitions() {
             stmt.definitions.recordDefinition(def)
@@ -49,7 +51,7 @@ public class ASTSimplifier: ASTRewriterPass {
                                      ValueMatcher().keyPath(\.exp, lazyEquals(nullCheckM)) ->> &postfix
                             ))
         
-        if matcher.matches(stmt), let postfix = postfix {
+        if matcher.matches(stmt), let postfix = postfix?.copy() {
             postfix.op.hasOptionalAccess = true
             
             let statement = Statement.expression(postfix)

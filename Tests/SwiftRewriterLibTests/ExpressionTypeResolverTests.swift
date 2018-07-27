@@ -61,21 +61,21 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testCast() {
-        assertResolve(Expression.cast(.constant(1), type: .int),
+        assertResolve(Expression.constant(1).casted(to: .int),
                       expect: .int) // Same-type casts don't need to result in optional
         
-        assertResolve(Expression.cast(.constant(1), type: .float),
+        assertResolve(Expression.constant(1).casted(to: .float),
                       expect: .optional(.float))
         
-        assertResolve(Expression.cast(.constant(1), type: .string),
+        assertResolve(Expression.constant(1).casted(to: .string),
                       expect: .optional(.string))
         
-        assertResolve(Expression.cast(.identifier("Error Type"), type: .string),
+        assertResolve(Expression.identifier("Error Type").casted(to: .string),
                       expect: .errorType) // Propagate error types
     }
     
     func testCastWithTypeAlias() {
-        startScopedTest(with: Expression.cast(.constant("a"), type: .typeName("A")),
+        startScopedTest(with: Expression.constant("a").casted(to: .typeName("A")),
                         sut: ExpressionTypeResolver())
             .definingTypeAlias("A", type: .int)
             .resolve()
@@ -85,7 +85,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testAssignment() {
         // From C11 Standard, section 6.5.16:
         // An assignment expression has the value of the left operand after the assignment
-        let exp = Expression.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(1))
+        let exp = Expression.identifier("a").assignment(op: .assign, rhs: .constant(1))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "a", type: .int)
@@ -147,7 +147,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testBitwiseBinaryDeducesResultAsOperandTypes() {
         func test(_ op: SwiftOperator, line: Int = #line) {
-            assertResolve(.binary(lhs: .constant(1), op: op, rhs: .constant(2)),
+            assertResolve(Expression.constant(1).binary(op: op, rhs: .constant(2)),
                           expect: .int, line: line)
             
             assertResolve(.binary(lhs: Expression.constant(1).typed("UInt32"),
@@ -260,7 +260,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testSubscriptionInArray() {
-        let exp = Expression.postfix(.identifier("value"), .subscript(.constant(1)))
+        let exp = Expression.identifier("value").sub(.constant(1))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .array(.string))
@@ -269,7 +269,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testSubscriptionInArrayWithNonInteger() {
-        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("Not an integer!")))
+        let exp = Expression.identifier("value").sub(.constant("Not an integer!"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsArray)
@@ -278,7 +278,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testSubscriptionInNSArray() {
-        let exp = Expression.postfix(.identifier("value"), .subscript(.constant(1)))
+        let exp = Expression.identifier("value").sub(.constant(1))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsArray)
@@ -292,7 +292,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testSubscriptionInNSArrayWithNonInteger() {
-        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("Not an integer!")))
+        let exp = Expression.identifier("value").sub(.constant("Not an integer!"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsArray)
@@ -306,7 +306,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testSubscriptionInDictionary() {
-        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("abc")))
+        let exp = Expression.identifier("value").sub(.constant("abc"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .dictionary(key: .string, value: .string))
@@ -315,7 +315,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testSubscriptionInNSDictionary() {
-        let exp = Expression.postfix(.identifier("value"), .subscript(.constant("abc")))
+        let exp = Expression.identifier("value").sub(.constant("abc"))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsDictionary)
@@ -360,7 +360,10 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testDefinitionCollecting() {
         let stmt = Statement.variableDeclarations([
-            StatementVariableDeclaration(identifier: "a", type: .int, ownership: .strong, isConstant: false, initialization: nil)
+            StatementVariableDeclaration(identifier: "a", type: .int,
+                                         ownership: .strong,
+                                         isConstant: false,
+                                         initialization: nil)
         ])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
@@ -380,7 +383,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         // ...so should be `TypeName.self`...
         startScopedTest(with:
-                Expression.postfix(.identifier("TypeName"), .member("self")),
+                Expression.identifier("TypeName").dot("self"),
                 sut: ExpressionTypeResolver()
             )
             .definingEmptyType(named: "TypeName")
@@ -389,7 +392,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         
         // ...or `TypeName.self.self`, and so on.
         startScopedTest(with:
-                Expression.postfix(.postfix(.identifier("TypeName"), .member("self")), .member("self")),
+                Expression.identifier("TypeName").dot("self").dot("self"),
                 sut: ExpressionTypeResolver()
             )
             .definingEmptyType(named: "TypeName")
@@ -400,17 +403,17 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testMetatypeFetchingOnNonMetatype() {
         // Invoking `.self` on an expression that is _not_ of Swift.metatype type
         // should return the same type as the expression, as well.
-        assertResolve(.postfix(.constant(1), .member("self")),
+        assertResolve(Expression.constant(1).dot("self"),
                       expect: .int)
         
-        assertResolve(.postfix(.identifier("Error Type"), .member("self")),
+        assertResolve(Expression.identifier("Error Type").dot("self"),
                       expect: .errorType)
     }
     
     func testConstructorInvocation() {
         // Invoking `TypeName()` for a type with an empty constructor should
         // return an instance of that type
-        let exp = Expression.postfix(.identifier("TypeName"), .functionCall(arguments: []))
+        let exp = Expression.identifier("TypeName").call()
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "TypeName") { builder in
@@ -423,7 +426,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testConstructorInvocationOnTypeWithNoMatchingConstructor() {
         // Invoking `TypeName()` for a type _without_ an empty constructor should
         // return an .errorType
-        let exp = Expression.postfix(.identifier("TypeName"), .functionCall(arguments: []))
+        let exp = Expression.identifier("TypeName").call()
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingEmptyType(named: "TypeName")
@@ -509,7 +512,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testMemberLookup() {
         // a.b
-        let exp = Expression.postfix(.identifier("a"), .member("b"))
+        let exp = Expression.identifier("a").dot("b")
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "A") { builder in
@@ -525,12 +528,12 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testMethodLookup() {
         // a.aMethod(1, secondParameter: 1)
-        let exp = Expression.postfix(.postfix(.identifier("a"),
-                                              .member("aMethod")),
-                                     .functionCall(arguments: [
-                                        .unlabeled(.constant(1)),
-                                        .labeled("secondParam", .constant(1))
-                                        ]))
+        let exp = Expression
+            .identifier("a")
+            .dot("aMethod").call([
+                .unlabeled(.constant(1)),
+                .labeled("secondParam", .constant(1))
+            ])
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingType(named: "A") { builder in
@@ -551,7 +554,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testStaticMemberLookup() {
         // A.a
-        let asClass = Expression.postfix(.identifier("A"), .member("a"))
+        let asClass = Expression.identifier("A").dot("a")
         
         let Atype =
             KnownTypeBuilder(typeName: "A")
@@ -571,9 +574,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         // Test that instance accessing doesn't work
         // A().a
         let asInstance =
-            Expression.postfix(.postfix(.identifier("A"),
-                                        .functionCall(arguments: [])),
-                               .member("a"))
+            Expression.identifier("A").call().dot("a")
         
         startScopedTest(with: asInstance, sut: ExpressionTypeResolver())
             .definingType(Atype)
@@ -599,7 +600,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testCallClosureType() {
         // closure()
-        let exp = Expression.postfix(.identifier("closure"), .functionCall())
+        let exp = Expression.identifier("closure").call()
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "closure", type: .block(returnType: .void, parameters: []))
@@ -609,7 +610,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testCallOptionalClosureType() {
         // closure()
-        let exp = Expression.postfix(.identifier("closure"), .functionCall())
+        let exp = Expression.identifier("closure").call()
         exp.exp.resolvedType = .optional(.block(returnType: .void, parameters: []))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
@@ -620,7 +621,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     func testEnumCaseLookup() {
         // A.a
-        let exp = Expression.postfix(.identifier("A"), .member("a"))
+        let exp = Expression.identifier("A").dot("a")
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingEnum(named: "A", rawValueType: .int) { builder in
@@ -634,7 +635,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testLocalLookupOnDeepNestedStatement() {
-        // { { A.a } }
+        // { { a } }
         let a = Expression.identifier("a")
         let stmt = Statement.compound([.compound([.expression(a)])])
         
@@ -656,29 +657,20 @@ class ExpressionTypeResolverTests: XCTestCase {
         let exp = Expression
             .identifier("self").dot("member").call()
             .dot("then").call([
-                .unlabeled(
-                    .block(parameters: [],
-                           return: .void,
-                           body: [
-                            .expression(makeCallback())
-                        ]))
+                .block(body: [
+                    .expression(makeCallback())
                 ])
+            ])
             .dot("then").call([
-                .unlabeled(
-                    .block(parameters: [],
-                           return: .void,
-                           body: [
-                            .expression(makeCallback())
-                        ]))
+                .block(body: [
+                    .expression(makeCallback())
                 ])
+            ])
             .dot("always").call([
-                .unlabeled(
-                    .block(parameters: [],
-                           return: .void,
-                           body: [
-                            .expression(makeCallback())
-                        ]))
+                .block(body: [
+                    .expression(makeCallback())
                 ])
+            ])
         
         _=startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "callback", type: .optional(.block(returnType: .void, parameters: [])))
@@ -758,7 +750,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// is set to expect the type from the left-hand-side.
     func testAssignmentExpectedType() {
         _=startScopedTest(with:
-            Expression.assignment(lhs: .identifier("a"), op: .assign, rhs: .constant(false)),
+            Expression.identifier("a").assignment(op: .assign, rhs: .constant(false)),
                           sut: ExpressionTypeResolver())
             .definingLocal(name: "a", type: .int)
             .resolve()
@@ -838,13 +830,13 @@ class ExpressionTypeResolverTests: XCTestCase {
     /// expect the type resolver to mark both operands as expecting to be resolved
     /// as boolean types.
     func testLogicalBinaryExpressionSetsOperandsToBooleanExpectedTypes() {
-        _=startScopedTest(with: Expression.binary(lhs: .constant(0), op: .and, rhs: .constant(0)),
+        _=startScopedTest(with: Expression.constant(0).binary(op: .and, rhs: .constant(0)),
                           sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(at: \Expression.asBinary?.lhs, expectsType: .bool)
             .thenAssertExpression(at: \Expression.asBinary?.rhs, expectsType: .bool)
         
-        _=startScopedTest(with: Expression.binary(lhs: .constant(0), op: .or, rhs: .constant(0)),
+        _=startScopedTest(with: Expression.constant(0).binary(op: .or, rhs: .constant(0)),
                           sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(at: \Expression.asBinary?.lhs, expectsType: .bool)

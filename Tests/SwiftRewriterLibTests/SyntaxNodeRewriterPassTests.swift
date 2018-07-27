@@ -5,11 +5,12 @@ import SwiftAST
 class ASTRewriterPassTests: XCTestCase {
     
     func testTraverseThroughPostfixFunctionArgument() {
-        let exp: Expression =
-            .postfix(.identifier("a"),
-                     .functionCall(arguments: [
-                        .unlabeled(.postfix(.identifier("function"), .functionCall(arguments: [])))
-                        ]))
+        let exp =
+            Expression
+                .identifier("a")
+                .call([
+                    Expression.identifier("function").call()
+                ])
         
         let sut = TestExpressionPass()
         
@@ -17,24 +18,27 @@ class ASTRewriterPassTests: XCTestCase {
         
         XCTAssert(sut.foundNeedle)
         XCTAssertEqual(result,
-                       .postfix(.identifier("a"),
-                                .functionCall(arguments: [
-                                    .unlabeled(.postfix(.identifier("function2"), .functionCall(arguments: [])))
-                                    ])))
+                       Expression
+                        .identifier("a")
+                        .call([
+                            Expression.identifier("function2").call()
+                        ]))
     }
     
     func testTraverseThroughPostfixSubscriptArgument() {
         let exp: Expression =
-            .postfix(.identifier("a"),
-                     .subscript(.postfix(.identifier("function"), .functionCall(arguments: []))))
+            Expression
+                .identifier("a")
+                .sub(Expression.identifier("function").call())
         
         let sut = TestExpressionPass()
         let result = exp.accept(sut)
         
         XCTAssert(sut.foundNeedle)
         XCTAssertEqual(result,
-                       .postfix(.identifier("a"),
-                                .subscript(.postfix(.identifier("function2"), .functionCall(arguments: [])))))
+                       Expression
+                        .identifier("a")
+                        .sub(Expression.identifier("function2").call()))
     }
     
     func testTraverseStatement() {
@@ -67,91 +71,94 @@ class ASTRewriterPassTests: XCTestCase {
         """
         _=equivalent
         
-        let stmt: Statement =
-            .compound([
-                .expression(
-                    .postfix(
-                        .identifier("describe"),
-                        .functionCall(arguments: [
-                            .unlabeled(.constant("A thing")),
-                            .unlabeled(
-                                .block(parameters: [],
-                                       return: .void,
-                                       body: [
-                                        .expression(
-                                            .postfix(
-                                                .identifier("context"),
-                                                .functionCall(arguments: [
-                                                    .unlabeled(.constant("A context")),
-                                                    .unlabeled(
-                                                        .block(parameters: [],
-                                                               return: .void,
-                                                               body: [
+        let exp =
+            Expression
+                .identifier("describe")
+                .call([
+                    .constant("A thing"),
+                    .block(
+                        body: [
+                            .expressions([
+                                Expression
+                                    .identifier("context")
+                                    .call([
+                                        .constant("A context"),
+                                        .block(
+                                            body: [
+                                                .expressions([
+                                                    Expression
+                                                        .block(
+                                                            body: [
                                                                 .expression(
-                                                                    .postfix(
-                                                                        .identifier("it"),
-                                                                        .functionCall(arguments: [
-                                                                            .unlabeled(.constant("must do X")),
-                                                                            .unlabeled(
-                                                                                .block(parameters: [],
-                                                                                       return: .void,
-                                                                                       body: [
-                                                                                        .expression(.postfix(.identifier("statement"), .functionCall()))
-                                                                                    ]))
-                                                                            ]))
-                                                                ),
-                                                                .expression(
-                                                                    .postfix(
-                                                                        .identifier("it"),
-                                                                        .functionCall(arguments: [
-                                                                            .unlabeled(.constant("must also do Y")),
-                                                                            .unlabeled(
-                                                                                .block(parameters: [],
-                                                                                       return: .void,
-                                                                                       body: [
-                                                                                        .expression(.postfix(.identifier("otherStatement"), .functionCall()))
-                                                                                    ]
-                                                                                )
+                                                                    Expression
+                                                                        .identifier("it")
+                                                                        .call([
+                                                                            .constant("must do X"),
+                                                                            .block(
+                                                                                body: [
+                                                                                    .expression(
+                                                                                        Expression.identifier("statement").call()
+                                                                                    )
+                                                                                ]
                                                                             )
-                                                                            ]
-                                                                        )
-                                                                    )
+                                                                        ])
                                                                 )
-                                                            ]
-                                                        )
-                                                    )
+                                                            ]),
+                                                    Expression
+                                                        .block(
+                                                            body: [
+                                                                .expression(
+                                                                    Expression
+                                                                        .identifier("it")
+                                                                        .call([
+                                                                            .constant("must also do Y"),
+                                                                            .block(
+                                                                                body: [
+                                                                                    .expression(
+                                                                                        Expression.identifier("otherStatement").call()
+                                                                                    )
+                                                                                ]
+                                                                            )
+                                                                        ])
+                                                                )
+                                                            ])
                                                     ]
                                                 )
-                                            )
-                                        ),
-                                        .expression(
-                                            .postfix(
-                                                .identifier("context"),
-                                                .functionCall(arguments: [
-                                                    .unlabeled(.constant("Another context")),
-                                                    .unlabeled(
-                                                        .block(parameters: [],
-                                                               return: .void,
-                                                               body: [
+                                            ])
+                                    ]),
+                                Expression
+                                    .identifier("context")
+                                    .call([
+                                        .constant("Another context"),
+                                        .block(
+                                            body: [
+                                                .expression(
+                                                    Expression
+                                                        .block(
+                                                            body: [
                                                                 .expression(
-                                                                    .postfix(
-                                                                        .identifier("beforeEach"),
-                                                                        .functionCall(arguments: [
-                                                                            .unlabeled(
-                                                                                .block(parameters: [],
-                                                                                       return: .void,
-                                                                                       body: [
-                                                                                        .expression(.postfix(.identifier("function"), .functionCall()))
-                                                                                    ]))
-                                                                            ]))
+                                                                    Expression
+                                                                        .identifier("beforeEach")
+                                                                        .call([
+                                                                            .block(
+                                                                                body: [
+                                                                                    .expression(
+                                                                                        Expression.identifier("function").call()
+                                                                                    )
+                                                                                ]
+                                                                            )
+                                                                        ])
                                                                 )
-                                                            ]))
-                                                    ])
-                                            )
-                                        )
-                                    ]))
-                            ])))
-                ])
+                                                            ])
+                                                )
+                                            ])
+                                        ])
+                                ]
+                            )
+                        ])
+                    ])
+        
+        let stmt = Statement.expression(exp)
         
         let sut = TestExpressionPass()
         _=stmt.accept(sut)

@@ -96,6 +96,10 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
         return visitor.visitExpression(self)
     }
     
+    open override func copy() -> Expression {
+        fatalError("Must be overriden by subclasses")
+    }
+    
     open func isEqual(to other: Expression) -> Bool {
         return false
     }
@@ -145,6 +149,10 @@ public class AssignmentExpression: Expression {
         
         lhs.parent = self
         rhs.parent = self
+    }
+    
+    public override func copy() -> AssignmentExpression {
+        return AssignmentExpression(lhs: lhs.copy(), op: op, rhs: rhs.copy()).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -217,6 +225,10 @@ public class BinaryExpression: Expression {
         self.rhs.parent = self
     }
     
+    public override func copy() -> BinaryExpression {
+        return BinaryExpression(lhs: lhs.copy(), op: op, rhs: rhs.copy()).copyTypeAndMetadata(from: self)
+    }
+    
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitBinary(self)
     }
@@ -270,6 +282,10 @@ public class UnaryExpression: Expression {
         super.init()
         
         exp.parent = self
+    }
+    
+    public override func copy() -> UnaryExpression {
+        return UnaryExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -337,6 +353,10 @@ public class SizeOfExpression: Expression {
         super.init()
     }
     
+    public override func copy() -> SizeOfExpression {
+        return SizeOfExpression(value: value.copy()).copyTypeAndMetadata(from: self)
+    }
+    
     public override func accept<V>(_ visitor: V) -> V.ExprResult where V : ExpressionVisitor {
         return visitor.visitSizeOf(self)
     }
@@ -358,6 +378,15 @@ public class SizeOfExpression: Expression {
     public enum Value: Equatable {
         case type(SwiftType)
         case expression(Expression)
+        
+        public func copy() -> Value {
+            switch self {
+            case .type:
+                return self
+            case .expression(let exp):
+                return .expression(exp.copy())
+            }
+        }
     }
 }
 extension Expression {
@@ -396,6 +425,10 @@ public class PrefixExpression: Expression {
         super.init()
         
         exp.parent = self
+    }
+    
+    public override func copy() -> PrefixExpression {
+        return PrefixExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -456,6 +489,11 @@ public class PostfixExpression: Expression {
         exp.parent = self
         
         op.subExpressions.forEach { $0.parent = self }
+        op.postfixExpression = self
+    }
+    
+    public override func copy() -> PostfixExpression {
+        return PostfixExpression(exp: exp.copy(), op: op.copy()).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -504,6 +542,10 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
     
     public init(constant: Constant) {
         self.constant = constant
+    }
+    
+    public override func copy() -> ConstantExpression {
+        return ConstantExpression(constant: constant).copyTypeAndMetadata(from: self)
     }
     
     public required init(stringLiteral value: String) {
@@ -564,6 +606,10 @@ public class ParensExpression: Expression {
         exp.parent = self
     }
     
+    public override func copy() -> ParensExpression {
+        return ParensExpression(exp: exp.copy()).copyTypeAndMetadata(from: self)
+    }
+    
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitParens(self)
     }
@@ -600,15 +646,23 @@ public extension Expression {
     }
 }
 
-public class IdentifierExpression: Expression {
+public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
     public var identifier: String
     
     public override var description: String {
         return identifier
     }
     
+    public required init(stringLiteral value: String) {
+        self.identifier = value
+    }
+    
     public init(identifier: String) {
         self.identifier = identifier
+    }
+    
+    public override func copy() -> IdentifierExpression {
+        return IdentifierExpression(identifier: identifier).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -661,6 +715,10 @@ public class CastExpression: Expression {
         exp.parent = self
     }
     
+    public override func copy() -> CastExpression {
+        return CastExpression(exp: exp.copy(), type: type).copyTypeAndMetadata(from: self)
+    }
+    
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitCast(self)
     }
@@ -706,6 +764,10 @@ public class ArrayLiteralExpression: Expression {
         super.init()
         
         items.forEach { $0.parent = self }
+    }
+    
+    public override func copy() -> ArrayLiteralExpression {
+        return ArrayLiteralExpression(items: items.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -757,6 +819,10 @@ public class DictionaryLiteralExpression: Expression {
         super.init()
         
         pairs.forEach { $0.key.parent = self; $0.value.parent = self }
+    }
+    
+    public override func copy() -> DictionaryLiteralExpression {
+        return DictionaryLiteralExpression(pairs: pairs.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -821,6 +887,10 @@ public class TernaryExpression: Expression {
         ifFalse.parent = self
     }
     
+    public override func copy() -> TernaryExpression {
+        return TernaryExpression(exp: exp.copy(), ifTrue: ifTrue.copy(), ifFalse: ifFalse.copy()).copyTypeAndMetadata(from: self)
+    }
+    
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitTernary(self)
     }
@@ -881,6 +951,12 @@ public class BlockLiteralExpression: Expression {
         self.body.parent = self
     }
     
+    public override func copy() -> BlockLiteralExpression {
+        return BlockLiteralExpression(parameters: parameters,
+                                      returnType: returnType,
+                                      body: body.copy()).copyTypeAndMetadata(from: self)
+    }
+    
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitBlock(self)
     }
@@ -915,6 +991,10 @@ public class UnknownExpression: Expression {
     
     public init(context: UnknownASTContext) {
         self.context = context
+    }
+    
+    public override func copy() -> UnknownExpression {
+        return UnknownExpression(context: context).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -1032,6 +1112,10 @@ public struct ExpressionDictionaryPair: Equatable {
         self.key = key
         self.value = value
     }
+    
+    public func copy() -> ExpressionDictionaryPair {
+        return ExpressionDictionaryPair(key: key.copy(), value: value.copy())
+    }
 }
 
 /// A postfix operation of a PostfixExpression
@@ -1061,6 +1145,10 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         
     }
     
+    public func copy() -> Postfix {
+        fatalError("Must be overriden by subclasses")
+    }
+    
     public func isEqual(to other: Postfix) -> Bool {
         return false
     }
@@ -1079,6 +1167,10 @@ public final class MemberPostfix: Postfix {
     
     public init(name: String) {
         self.name = name
+    }
+    
+    public override func copy() -> MemberPostfix {
+        return MemberPostfix(name: name).copyTypeAndMetadata(from: self)
     }
     
     public override func isEqual(to other: Postfix) -> Bool {
@@ -1123,6 +1215,12 @@ public final class SubscriptPostfix: Postfix {
     
     public init(expression: Expression) {
         self.expression = expression
+    }
+    
+    public override func copy() -> SubscriptPostfix {
+        return
+            SubscriptPostfix(expression: expression.copy())
+                .copyTypeAndMetadata(from: self)
     }
     
     public func replacingExpression(_ exp: Expression) -> SubscriptPostfix {
@@ -1181,6 +1279,14 @@ public final class FunctionCallPostfix: Postfix {
         self.arguments = arguments
     }
     
+    public override func copy() -> FunctionCallPostfix {
+        let copy =
+            FunctionCallPostfix(arguments: arguments.map { $0.copy() })
+                .copyTypeAndMetadata(from: self)
+        copy.callableSignature = callableSignature
+        return copy
+    }
+    
     /// Returns a new function call postfix with the arguments replaced to a given
     /// arguments array, while keeping argument labels and resolved type information.
     ///
@@ -1198,9 +1304,9 @@ public final class FunctionCallPostfix: Postfix {
                 return FunctionArgument(label: arg.label, expression: exp)
             }
         
-        let new = FunctionCallPostfix(arguments: newArgs)
-        new.hasOptionalAccess = hasOptionalAccess
-        new.returnType = returnType
+        let new =
+            FunctionCallPostfix(arguments: newArgs)
+                .copyTypeAndMetadata(from: self)
         new.callableSignature = callableSignature
         
         return new
@@ -1248,6 +1354,10 @@ public struct FunctionArgument: Equatable {
     public init(label: String?, expression: Expression) {
         self.label = label
         self.expression = expression
+    }
+    
+    public func copy() -> FunctionArgument {
+        return FunctionArgument(label: label, expression: expression.copy())
     }
     
     public static func unlabeled(_ exp: Expression) -> FunctionArgument {
@@ -1540,4 +1650,28 @@ public extension Expression {
     public static func & (lhs: Expression, rhs: Expression) -> Expression {
         return .binary(lhs: lhs, op: .bitwiseAnd, rhs: rhs)
     }
+}
+
+extension Expression {
+    
+    public func copyTypeAndMetadata(from other: Expression) -> Self {
+        self.metadata = other.metadata
+        self.resolvedType = other.resolvedType
+        self.expectedType = other.expectedType
+        
+        return self
+    }
+    
+}
+
+extension Postfix {
+    
+    public func copyTypeAndMetadata(from other: Postfix) -> Self {
+        self.metadata = other.metadata
+        self.returnType = other.returnType
+        self.hasOptionalAccess = other.hasOptionalAccess
+        
+        return self
+    }
+    
 }

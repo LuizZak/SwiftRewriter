@@ -26,8 +26,8 @@ import SwiftAST
 /// ```
 ///
 /// Conversion is conservative in that it always moves the initialization code
-/// within the if check to before the `super.init` call; this could be wrong in
-/// some scenarios, however.
+/// within the if check to before the `super.init` call; however, this can lead
+/// to invalid code in some scenarios.
 public class InitRewriterExpressionPass: ASTRewriterPass {
     
     public override func apply(on statement: Statement, context: ASTRewriterPassContext) -> Statement {
@@ -91,8 +91,8 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         
         // Create a new init body, now
         let result: [Statement] =
-            ifSelf.body.statements + [
-                .expression(superInitExp)
+            ifSelf.body.copy().statements + [
+                .expression(superInitExp.copy())
             ]
         
         notifyChange()
@@ -128,10 +128,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         }
         
         let matchSelfEqualsNil =
-            Expression.matcher(
-                ident("self")
-                    .binary(op: .equals, rhs: .nil)
-                    .anyExpression())
+            Expression.matcher(.nilCheck(against: .identifier("self")))
         
         return matchSelfEqualsNil.matches(exp)
     }

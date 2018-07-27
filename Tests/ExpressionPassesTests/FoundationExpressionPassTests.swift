@@ -383,15 +383,15 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         valueExp.resolvedType = .int
         
         let res = assertTransform(
-            expression: typeNameExp.dot("class").call(),
-            into: typeNameExp.dot("self")
+            expression: typeNameExp.copy().dot("class").call(),
+            into: typeNameExp.copy().dot("self")
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .metatype(for: .typeName("aTypeName")))
         
         assertTransform(
-            expression: valueExp.dot("class").call(),
-            into: Expression.identifier("type").call([.labeled("of", valueExp)])
+            expression: valueExp.copy().dot("class").call(),
+            into: Expression.identifier("type").call([.labeled("of", valueExp.copy())])
         ); assertNotifiedChange()
     }
     

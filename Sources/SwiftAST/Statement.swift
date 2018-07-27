@@ -10,6 +10,10 @@ open class Statement: SyntaxNode, Equatable {
     /// This statement label's (parsed from C's goto labels), if any.
     public var label: String?
     
+    open override func copy() -> Statement {
+        fatalError("Must be overriden by subclasses")
+    }
+    
     /// Accepts the given visitor instance, calling the appropriate visiting method
     /// according to this statement's type.
     ///
@@ -35,6 +39,10 @@ open class Statement: SyntaxNode, Equatable {
 
 /// An empty semicolon statement with no semantic functionality.
 public class SemicolonStatement: Statement {
+    public override func copy() -> SemicolonStatement {
+        return SemicolonStatement().copyMetadata(from: self)
+    }
+    
     public override func isEqual(to other: Statement) -> Bool {
         return other is SemicolonStatement
     }
@@ -53,7 +61,9 @@ public extension Statement {
 /// within braces.
 public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     /// An empty compound statement.
-    public static var empty = CompoundStatement()
+    public static var empty: CompoundStatement {
+        return CompoundStatement()
+    }
     
     public var isEmpty: Bool {
         return statements.isEmpty
@@ -84,6 +94,10 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         super.init()
         
         statements.forEach { $0.parent = self }
+    }
+    
+    public override func copy() -> CompoundStatement {
+        return CompoundStatement(statements: statements.map { $0.copy() }).copyMetadata(from: self)
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -152,6 +166,16 @@ public class IfStatement: Statement {
         elseBody?.parent = self
     }
     
+    public override func copy() -> IfStatement {
+        let copy =
+            IfStatement(exp: exp.copy(), body: body.copy(), elseBody: elseBody?.copy())
+                .copyMetadata(from: self)
+        
+        copy.pattern = pattern?.copy()
+        
+        return copy
+    }
+    
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitIf(self)
     }
@@ -199,6 +223,10 @@ public class WhileStatement: Statement {
         body.parent = self
     }
     
+    public override func copy() -> WhileStatement {
+        return WhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
+    }
+    
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitWhile(self)
     }
@@ -244,6 +272,10 @@ public class DoWhileStatement: Statement {
         
         exp.parent = self
         body.parent = self
+    }
+    
+    public override func copy() -> DoWhileStatement {
+        return DoWhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -308,6 +340,12 @@ public class ForStatement: Statement {
         pattern.setParent(self)
         exp.parent = self
         body.parent = self
+    }
+    
+    public override func copy() -> ForStatement {
+        return
+            ForStatement(pattern: pattern.copy(), exp: exp.copy(), body: body.copy())
+                .copyMetadata(from: self)
     }
     
     private func reloadChildrenNodes() {
@@ -408,6 +446,13 @@ public class SwitchStatement: Statement {
         reloadChildrenNodes()
     }
     
+    public override func copy() -> SwitchStatement {
+        return
+            SwitchStatement(exp: exp.copy(),
+                            cases: cases.map { $0.copy() },
+                            defaultCase: defaultCase?.map { $0.copy() }).copyMetadata(from: self)
+    }
+    
     private func reloadChildrenNodes() {
         _childrenNodes.removeAll()
         
@@ -464,6 +509,10 @@ public class DoStatement: Statement {
         body.parent = self
     }
     
+    public override func copy() -> DoStatement {
+        return DoStatement(body: body.copy()).copyMetadata(from: self)
+    }
+    
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitDo(self)
     }
@@ -501,6 +550,10 @@ public class DeferStatement: Statement {
         super.init()
         
         body.parent = self
+    }
+    
+    public override func copy() -> DeferStatement {
+        return DeferStatement(body: body.copy()).copyMetadata(from: self)
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -550,6 +603,10 @@ public class ReturnStatement: Statement {
         exp?.parent = self
     }
     
+    public override func copy() -> ReturnStatement {
+        return ReturnStatement(exp: exp?.copy()).copyMetadata(from: self)
+    }
+    
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitReturn(self)
     }
@@ -574,6 +631,10 @@ public class BreakStatement: Statement {
         return true
     }
     
+    public override func copy() -> BreakStatement {
+        return BreakStatement().copyMetadata(from: self)
+    }
+    
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitBreak(self)
     }
@@ -591,6 +652,10 @@ public extension Statement {
 public class ContinueStatement: Statement {
     public override var isUnconditionalJump: Bool {
         return true
+    }
+    
+    public override func copy() -> ContinueStatement {
+        return ContinueStatement().copyMetadata(from: self)
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -625,6 +690,12 @@ public class ExpressionsStatement: Statement {
         super.init()
         
         expressions.forEach { $0.parent = self }
+    }
+    
+    public override func copy() -> ExpressionsStatement {
+        return
+            ExpressionsStatement(expressions: expressions.map { $0.copy() })
+                .copyMetadata(from: self)
     }
     
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
@@ -672,6 +743,10 @@ public class VariableDeclarationsStatement: Statement {
         }
     }
     
+    public override func copy() -> VariableDeclarationsStatement {
+        return VariableDeclarationsStatement(decl: decl.map { $0.copy() }).copyMetadata(from: self)
+    }
+    
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitVariableDeclarations(self)
     }
@@ -698,6 +773,10 @@ public class UnknownStatement: Statement {
         self.context = context
     }
     
+    public override func copy() -> UnknownStatement {
+        return UnknownStatement(context: context).copyMetadata(from: self)
+    }
+    
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitUnknown(self)
     }
@@ -719,13 +798,17 @@ public extension Statement {
     public static func compound(_ cpd: [Statement]) -> CompoundStatement {
         return CompoundStatement(statements: cpd)
     }
-    public static func `if`(_ exp: Expression, body: CompoundStatement,
+    public static func `if`(_ exp: Expression,
+                            body: CompoundStatement,
                             else elseBody: CompoundStatement?) -> IfStatement {
         
         return IfStatement(exp: exp, body: body, elseBody: elseBody)
     }
-    public static func ifLet(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement,
+    public static func ifLet(_ pattern: Pattern,
+                             _ exp: Expression,
+                             body: CompoundStatement,
                              else elseBody: CompoundStatement?) -> IfStatement {
+        
         let stmt = IfStatement(exp: exp, body: body, elseBody: elseBody)
         stmt.pattern = pattern
         
@@ -740,7 +823,8 @@ public extension Statement {
     public static func `for`(_ pattern: Pattern, _ exp: Expression, body: CompoundStatement) -> ForStatement {
         return ForStatement(pattern: pattern, exp: exp, body: body)
     }
-    public static func `switch`(_ exp: Expression, cases: [SwitchCase],
+    public static func `switch`(_ exp: Expression,
+                                cases: [SwitchCase],
                                 default defaultCase: [Statement]?) -> SwitchStatement {
         
         return SwitchStatement(exp: exp, cases: cases, defaultCase: defaultCase)
@@ -773,15 +857,19 @@ public extension Statement {
         return .expressions([expr])
     }
     
-    public static func variableDeclaration(
-        identifier: String, type: SwiftType, ownership: Ownership = .strong,
-        isConstant: Bool = false, initialization: Expression?) -> Statement {
+    public static func variableDeclaration(identifier: String,
+                                           type: SwiftType,
+                                           ownership: Ownership = .strong,
+                                           isConstant: Bool = false,
+                                           initialization: Expression?) -> Statement {
         
         return .variableDeclarations([
-            StatementVariableDeclaration(identifier: identifier, type: type,
-                                         ownership: ownership, isConstant: isConstant,
+            StatementVariableDeclaration(identifier: identifier,
+                                         type: type,
+                                         ownership: ownership,
+                                         isConstant: isConstant,
                                          initialization: initialization)
-            ])
+        ])
     }
 }
 
@@ -794,6 +882,11 @@ public struct SwitchCase: Equatable {
     public init(patterns: [Pattern], statements: [Statement]) {
         self.patterns = patterns
         self.statements = statements
+    }
+    
+    public func copy() -> SwitchCase {
+        return SwitchCase(patterns: patterns.map { $0.copy() },
+                          statements: statements.map { $0.copy() })
     }
 }
 
@@ -825,6 +918,17 @@ public enum Pattern: Equatable {
         }
         
         return .tuple(expr.map { .expression($0) })
+    }
+    
+    public func copy() -> Pattern {
+        switch self {
+        case .identifier:
+            return self
+        case .expression(let exp):
+            return .expression(exp.copy())
+        case .tuple(let patterns):
+            return .tuple(patterns.map { $0.copy() })
+        }
     }
     
     internal func setParent(_ node: SyntaxNode?) {
@@ -874,6 +978,12 @@ public struct StatementVariableDeclaration: Equatable {
         self.isConstant = isConstant
         self.initialization = initialization
     }
+    
+    public func copy() -> StatementVariableDeclaration {
+        var new = self
+        new.initialization = self.initialization?.copy()
+        return new
+    }
 }
 
 extension Pattern: CustomStringConvertible {
@@ -887,4 +997,14 @@ extension Pattern: CustomStringConvertible {
             return ident
         }
     }
+}
+
+public extension Statement {
+    
+    func copyMetadata(from other: Statement) -> Self {
+        self.label = other.label
+        
+        return self
+    }
+    
 }

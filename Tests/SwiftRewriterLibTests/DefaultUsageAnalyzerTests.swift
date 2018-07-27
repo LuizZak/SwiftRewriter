@@ -9,16 +9,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let body: CompoundStatement = [
             // B().b()
             .expression(
-                .postfix(
-                    .postfix(
-                        .postfix(
-                            .identifier("B"),
-                            .functionCall(arguments: [])
-                        ),
-                        .member("b")
-                    ),
-                    .functionCall(arguments: [])
-                )
+                Expression
+                    .identifier("B").call()
+                    .dot("b").call()
             )
         ]
         
@@ -43,13 +36,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let usages = sut.findUsagesOf(method: method)
         
         XCTAssertEqual(usages[0].expression,
-                        .postfix(
-                            .postfix(
-                                .identifier("B"),
-                                .functionCall(arguments: [])
-                            ),
-                            .member("b")
-                        ))
+                       Expression
+                        .identifier("B").call()
+                        .dot("b"))
         
         XCTAssertEqual(usages.count, 1)
     }
@@ -60,22 +49,10 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let body: CompoundStatement = [
             // B().b().b()
             .expression(
-                .postfix(
-                    .postfix(
-                        .postfix(
-                            .postfix(
-                                .postfix(
-                                    .identifier("B"),
-                                    .functionCall(arguments: [])
-                                ),
-                                .member("b")
-                            ),
-                            .functionCall(arguments: [])
-                        ),
-                        .member("b")
-                    ),
-                    .functionCall(arguments: [])
-                )
+                Expression
+                    .identifier("B").call()
+                    .dot("b").call()
+                    .dot("b").call()
             )
         ]
         
@@ -109,13 +86,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let body: CompoundStatement = [
             // B().b()
             .expression(
-                .postfix(
-                    .postfix(
-                        .identifier("B"),
-                        .functionCall(arguments: [])
-                    ),
-                    .member("b")
-                )
+                Expression
+                    .identifier("B").call()
+                    .dot("b").call()
             )
         ]
         
@@ -148,10 +121,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let body: CompoundStatement = [
             // B.B_a
             .expression(
-                .postfix(
-                    .identifier("B"),
-                    .member("B_a")
-                )
+                Expression.identifier("B").dot("B_a")
             )
         ]
         

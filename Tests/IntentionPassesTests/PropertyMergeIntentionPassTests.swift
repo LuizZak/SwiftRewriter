@@ -257,9 +257,9 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         
         switch cls.properties[0].mode {
         case let .property(get, set):
-            XCTAssertEqual(get.body, [.return(.postfix(.identifier("self"), .member("_a")))])
+            XCTAssertEqual(get.body, [.return(Expression.identifier("self").dot("_a"))])
             XCTAssertEqual(set.valueIdentifier, "newValue")
-            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: .postfix(.identifier("self"), .member("_a")),
+            XCTAssertEqual(set.body.body, [.expression(.assignment(lhs: Expression.identifier("self").dot("_a"),
                                                                    op: .assign,
                                                                    rhs: .identifier("newValue")))])
         default:

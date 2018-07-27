@@ -142,7 +142,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             ])
         )
         
-        doBody.statements.append(contentsOf: compoundStatement.statements)
+        doBody.statements.append(contentsOf: compoundStatement.statements.map { $0.copy() })
         
         return .do(doBody)
     }
@@ -569,7 +569,7 @@ private class ForStatementGenerator {
             body.statements.append(.defer([iteration]))
         }
         
-        body.statements.append(contentsOf: compoundStatement.statements)
+        body.statements.append(contentsOf: compoundStatement.statements.map { $0.copy() })
         
         let whileBody = Statement.while(condition ?? .constant(true),
                                         body: body)

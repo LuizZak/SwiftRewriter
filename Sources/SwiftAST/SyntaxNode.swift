@@ -3,7 +3,12 @@ open class SyntaxNode {
     /// Custom metadata that can be associated with this node
     public var metadata: [String: Any] = [:]
     
-    internal(set) public weak var parent: SyntaxNode?
+    internal(set) public weak var parent: SyntaxNode? {
+        willSet {
+            assert(newValue == nil || parent == nil || parent === newValue,
+                   "Reassigning node that already has parent")
+        }
+    }
     
     open var children: [SyntaxNode] {
         return []
@@ -11,6 +16,10 @@ open class SyntaxNode {
     
     public init() {
         
+    }
+    
+    open func copy() -> SyntaxNode {
+        fatalError("Must be overriden by subclasses")
     }
     
     /// Returns `true` if this node's parent chain contains a given node.

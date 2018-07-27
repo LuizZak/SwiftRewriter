@@ -90,7 +90,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
             return nil
         }
         
-        let res = postfix.exp.binary(op: .equals, rhs: args[0].expression)
+        let res = postfix.exp.copy().binary(op: .equals, rhs: args[0].expression.copy())
         
         res.resolvedType = .bool
         
@@ -109,7 +109,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
         
         guard (typename == "NSString" || typename == "NSMutableString")
             && postfix.op.asMember?.name == "stringWithFormat",
-            let args = exp.functionCall?.arguments, !args.isEmpty else {
+            let args = exp.functionCall?.copy().arguments, !args.isEmpty else {
             return nil
         }
         
@@ -117,12 +117,14 @@ public class FoundationExpressionPass: BaseExpressionPass {
             .labeled("format", args[0].expression)
         ] + args.dropFirst()
         
-        exp.exp = .identifier(typename == "NSMutableString" ? "NSMutableString" : "String")
-        exp.op = .functionCall(arguments: newArgs)
+        var newExp = exp.copy()
         
-        exp.resolvedType = .string
+        newExp.exp = .identifier(typename == "NSMutableString" ? "NSMutableString" : "String")
+        newExp.op = .functionCall(arguments: newArgs)
         
-        return exp
+        newExp.resolvedType = .string
+        
+        return newExp
     }
     
     /// Converts [<array> addObjectsFromArray:<exp>] -> <array>.addObjects(from: <exp>)
@@ -132,19 +134,21 @@ public class FoundationExpressionPass: BaseExpressionPass {
             return nil
         }
         
-        exp.op = .functionCall(arguments: [
-            .labeled("from", args[0].expression)
+        let newExp = exp.copy()
+        
+        newExp.op = .functionCall(arguments: [
+            .labeled("from", args[0].expression.copy())
         ])
         
-        exp.exp = .postfix(postfix.exp, .member("addObjects"))
-        exp.resolvedType = .void
+        newExp.exp = .postfix(postfix.exp.copy(), .member("addObjects"))
+        newExp.resolvedType = .void
         
         if postfix.op.hasOptionalAccess {
-            exp.exp.asPostfix?.member?.hasOptionalAccess = true
-            exp.resolvedType = .optional(.void)
+            newExp.exp.asPostfix?.member?.hasOptionalAccess = true
+            newExp.resolvedType = .optional(.void)
         }
         
-        return exp
+        return newExp
     }
     
     /// Converts [Type class] and [expression class] expressions
@@ -158,25 +162,25 @@ public class FoundationExpressionPass: BaseExpressionPass {
         
         // Use resolved expression type, if available
         if case .metatype? = classMember.exp.resolvedType {
-            let exp = Expression.postfix(classMember.exp, .member("self"))
+            let exp = Expression.postfix(classMember.exp.copy(), .member("self"))
             exp.resolvedType = classMember.exp.resolvedType
             
             return exp
         } else if !classMember.exp.isErrorTyped && classMember.exp.resolvedType != nil {
             return Expression.postfix(.identifier("type"),
                                       .functionCall(arguments: [
-                                        .labeled("of", classMember.exp)
+                                        .labeled("of", classMember.exp.copy())
                                         ]))
         }
         
         // Deduce using identifier or expression capitalization
         switch classMember.exp {
         case let ident as IdentifierExpression where ident.identifier.startsUppercased:
-            return Expression.postfix(classMember.exp, .member("self"))
+            return Expression.postfix(classMember.exp.copy(), .member("self"))
         default:
             return Expression.postfix(.identifier("type"),
                                       .functionCall(arguments: [
-                                        .labeled("of", classMember.exp)
+                                        .labeled("of", classMember.exp.copy())
                                         ]))
         }
     }
