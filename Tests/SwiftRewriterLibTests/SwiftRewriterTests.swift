@@ -2395,7 +2395,30 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteFailableInit() throws {
+    func testRewriteExplicitFailableInit() throws {
+        try assertObjcParse(
+            objc: """
+            @interface A
+            @end
+
+            @implementation A
+            - (nullable instancetype)initWithThing:(NSInteger)thing {
+                return self;
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: NSObject {
+                @objc
+                init?(thing: Int) {
+                    return self
+                }
+            }
+            """)
+    }
+    
+    func testRewriteDetectedFailableInit() throws {
         try assertObjcParse(
             objc: """
             @interface A

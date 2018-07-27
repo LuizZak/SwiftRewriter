@@ -1,5 +1,19 @@
 public typealias SyntaxMatcher<T> = ValueMatcher<T> where T: SyntaxNode
 
+public extension ValueMatcher where T: SyntaxNode {
+    
+    public func anySyntaxNode() -> ValueMatcher<SyntaxNode> {
+        return ValueMatcher<SyntaxNode>().match { (value) -> Bool in
+            if let value = value as? T {
+                return self.matches(value)
+            }
+            
+            return false
+        }
+    }
+    
+}
+
 public func ident(_ string: String) -> SyntaxMatcher<IdentifierExpression> {
     return SyntaxMatcher().keyPath(\.identifier, equals: string)
 }
@@ -91,12 +105,47 @@ public extension ValueMatcher where T: Expression {
 public extension ValueMatcher where T: Expression {
     
     public static var `nil`: ValueMatcher<Expression> {
-        return ValueMatcher<Expression>().match { exp -> Bool in
+        return ValueMatcher<Expression>().match { exp in
             guard let constant = exp as? ConstantExpression else {
                 return false
             }
             
             return constant.constant == .nil
+        }
+    }
+    
+    public static func nilCheck(against value: Expression) -> ValueMatcher<Expression> {
+        return ValueMatcher<Expression>().match { exp in
+            
+            // <exp> == nil
+            if exp == .binary(lhs: value, op: .equals, rhs: .constant(.nil)) {
+                return true
+            }
+            // nil == <exp>
+            if exp == .binary(lhs: .constant(.nil), op: .equals, rhs: value) {
+                return true
+            }
+            // !<exp>
+            if exp == .unary(op: .negate, value) {
+                return true
+            }
+            
+            return false
+        }
+    }
+    
+    public static func findAny(thatMatches matcher: ValueMatcher<Expression>) -> ValueMatcher<Expression> {
+        return ValueMatcher<Expression>().match { exp in
+            
+            let sequence = SyntaxNodeSequence(node: exp, inspectBlocks: false)
+            
+            for e in sequence.compactMap({ $0 as? Expression }) {
+                if matcher.matches(e) {
+                    return true
+                }
+            }
+            
+            return false
         }
     }
     

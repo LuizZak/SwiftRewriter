@@ -180,4 +180,42 @@ class TypeFormatterTests: XCTestCase {
         
         XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
     }
+    
+    func testAsStringEmptyInitializer() {
+        let initializer = InitGenerationIntention(parameters: [])
+        
+        let result = TypeFormatter.asString(initializer: initializer)
+        let expected = """
+            init()
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
+    
+    func testAsStringFailableInitializer() {
+        let initializer = InitGenerationIntention(parameters: [])
+        initializer.isFailableInitializer = true
+        
+        let result = TypeFormatter.asString(initializer: initializer)
+        let expected = """
+            init?()
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
+    
+    func testAsStringParameteredInitializer() {
+        let initializer =
+            InitGenerationIntention(
+                parameters: [
+                    ParameterSignature(label: "label", name: "name", type: .int)
+                ])
+        
+        let result = TypeFormatter.asString(initializer: initializer)
+        let expected = """
+            init(label name: Int)
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
 }

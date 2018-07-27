@@ -5,6 +5,7 @@ import SwiftAST
 public enum TypeFormatter {
     /// Generates a string representation of a given known type
     public static func asString(knownType type: KnownType) -> String {
+        
         let o = StringRewriterOutput(settings: .defaults)
         
         o.outputInline("\(type.kind.rawValue) \(type.typeName)")
@@ -79,8 +80,10 @@ public enum TypeFormatter {
     }
     
     /// Generates a string representation of a given method's signature
-    public static func asString(method: KnownMethod, ofType type: KnownType,
+    public static func asString(method: KnownMethod,
+                                ofType type: KnownType,
                                 withTypeName typeName: Bool = true) -> String {
+        
         var result = ""
         
         result += method.isStatic ? "static " : ""
@@ -99,10 +102,12 @@ public enum TypeFormatter {
     
     /// Generates a string representation of a given property's signature, with
     /// type name, property name and property type.
-    public static func asString(property: KnownProperty, ofType type: KnownType,
+    public static func asString(property: KnownProperty,
+                                ofType type: KnownType,
                                 withTypeName typeName: Bool = true,
                                 includeVarKeyword: Bool = false,
                                 includeAccessors: Bool = false) -> String {
+        
         var result = ""
         
         result += property.isStatic ? "static " : ""
@@ -135,9 +140,11 @@ public enum TypeFormatter {
     
     /// Generates a string representation of a given field's signature, with
     /// type name, field name and field type.
-    public static func asString(field: KnownProperty, ofType type: KnownType,
+    public static func asString(field: KnownProperty,
+                                ofType type: KnownType,
                                 withTypeName typeName: Bool = true,
                                 includeVarKeyword: Bool = false) -> String {
+        
         var result = ""
         
         result += field.isStatic ? "static " : ""
@@ -159,8 +166,10 @@ public enum TypeFormatter {
     /// Generates a string representation of a given instance field's signature,
     /// with type name, property name and property type.
     public static func asString(field: InstanceVariableGenerationIntention,
-                                ofType type: KnownType, withTypeName typeName: Bool = true,
+                                ofType type: KnownType,
+                                withTypeName typeName: Bool = true,
                                 includeVarKeyword: Bool = false) -> String {
+        
         var result = ""
         
         result += field.isStatic ? "static " : ""
@@ -188,8 +197,10 @@ public enum TypeFormatter {
     
     /// Generates a string representation of a given function signature.
     /// The signature's name can be optionally include during conversion.
-    public static func asString(signature: FunctionSignature, includeName: Bool = false,
+    public static func asString(signature: FunctionSignature,
+                                includeName: Bool = false,
                                 includeFuncKeyword: Bool = false) -> String {
+        
         var result = ""
         
         if signature.isStatic {
@@ -235,6 +246,19 @@ public enum TypeFormatter {
         }
         
         return result + ")"
+    }
+    
+    /// Generates a string representation of a given initializer.
+    public static func asString(initializer: InitGenerationIntention) -> String {
+        var result = "init"
+        
+        if initializer.isFailableInitializer {
+            result += "?"
+        }
+        
+        result += asString(parameters: initializer.parameters)
+        
+        return result
     }
     
     private static func stringify(_ trait: TraitType) -> String {

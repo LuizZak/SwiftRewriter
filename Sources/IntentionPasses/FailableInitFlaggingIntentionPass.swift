@@ -24,7 +24,7 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         visitor.visit(intentions: intentionCollection)
     }
     
-    func analyzeInit(_ initializer: InitGenerationIntention) {
+    private func analyzeInit(_ initializer: InitGenerationIntention) {
         guard let body = initializer.functionBody?.body else {
             return
         }
@@ -37,10 +37,61 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         let nodes = SyntaxNodeSequence(node: body, inspectBlocks: false)
         
         for node in nodes.compactMap({ $0 as? ReturnStatement }) {
-            if node.exp?.matches(.nil) == true {
+            if analyzeReturnStatement(node) {
                 initializer.isFailableInitializer = true
                 return
             }
         }
+    }
+    
+    private func analyzeReturnStatement(_ stmt: ReturnStatement) -> Bool {
+        guard stmt.exp?.matches(.nil) == true else {
+            return false
+        }
+        
+        // Check if we're not in one of the following patterns, which signify
+        // an early exit that is not neccessarily from a failable initializer
+        
+        // 1.:
+        // if(self == nil) {
+        //     return nil;
+        // }
+        let ifSelfIsNil =
+            Statement.matcher(
+                ValueMatcher<IfStatement>()
+                    .keyPath(\.exp, .nilCheck(against: .identifier("self")))
+                    .keyPath(\.body.statements.count, equals: 1)
+                    .keyPath(\.body.statements[0], equals: stmt)
+                ).anySyntaxNode()
+        
+        if ifSelfIsNil.matchNil().matches(stmt.parent?.parent) {
+            return false
+        }
+        
+        // 2.:
+        // if(!(self = [super init])) {
+        //     return nil;
+        // }
+        let ifSelfSuperInit =
+            Statement.matcher(
+                ValueMatcher<IfStatement>()
+                    .keyPath(\.exp, ValueMatcher<UnaryExpression>()
+                        .keyPath(\.op, equals: .negate)
+                        .keyPath(\.exp,
+                                 ValueMatcher<AssignmentExpression>()
+                                    .keyPath(\.lhs, ident("self").anyExpression())
+                                    // Being very broad here: any rhs that mentions 'super'
+                                    // at all is accepted.
+                                    .keyPath(\.rhs, .findAny(thatMatches: ident("super").anyExpression()))
+                                    .anyExpression()
+                        ).anyExpression()
+                    )
+            ).anySyntaxNode()
+        
+        if ifSelfSuperInit.matchNil().matches(stmt.parent?.parent) {
+            return false
+        }
+        
+        return true
     }
 }

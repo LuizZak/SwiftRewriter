@@ -150,6 +150,17 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
                                             isStatic: false)
         )
     }
+    
+    func testConvertNullableReturnInitsIntoFailableInits() {
+        let sut = SwiftifyMethodSignaturesIntentionPass()
+        
+        testThat(typeName: "Squeak", sut: sut)
+            .method(withSignature: FunctionSignature(name: "initWithValue",
+                                                     parameters: [ParameterSignature(label: "_", name: "value", type: .int)],
+                                                     returnType: .optional(.typeName("Squeak")),
+                                                     isStatic: false))
+            .converts(toInitializer: "init?(value: Int)")
+    }
 }
 
 private extension SwiftifyMethodSignaturesIntentionPassTests {
@@ -275,7 +286,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                 return
             }
             
-            let result = "init" + TypeFormatter.asString(parameters: ctor.parameters)
+            let result = TypeFormatter.asString(initializer: ctor)
             
             guard result != expected else {
                 return
