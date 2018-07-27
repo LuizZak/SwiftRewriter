@@ -112,7 +112,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         let matcher =
             Statement.matcher(
                 ValueMatcher<ExpressionsStatement>()
-                    .keyPath(\.expressions.count, equals: 1)
+                    .keyPath(\.expressions, equals: hasCount(1))
                     .keyPath(\.expressions[0], selfInit.anyExpression()))
         
         if matcher.matches(exp), let superInit = superInit {

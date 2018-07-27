@@ -4,6 +4,8 @@ import SwiftAST
 // TODO: Also support failable init detection by inspecting `nullable` in the
 // return type of intializers in Objective-C.
 
+// TODO: Add history tracking to affected initializer intentions.
+
 /// An intention pass that searches for failable initializers based on statement
 /// AST analysis and flags them appropriately.
 public class FailableInitFlaggingIntentionPass: IntentionPass {
@@ -60,7 +62,7 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
             Statement.matcher(
                 ValueMatcher<IfStatement>()
                     .keyPath(\.exp, .nilCheck(against: .identifier("self")))
-                    .keyPath(\.body.statements.count, equals: 1)
+                    .keyPath(\.body.statements, hasCount(1))
                     .keyPath(\.body.statements[0], equals: stmt)
                 ).anySyntaxNode()
         
