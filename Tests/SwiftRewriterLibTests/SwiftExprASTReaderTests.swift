@@ -89,13 +89,12 @@ class SwiftExprASTReaderTests: XCTestCase {
                 .unlabeled(
                     Expression
                         .identifier("CGRectMake")
-                        .call(
-                            [
-                                .constant(0),
-                                .identifier("kCPDefaultTimelineRowHeight"),
-                                Expression.identifier("self").dot("ganttWidth"),
-                                Expression.identifier("self").dot("ganttHeight")
-                            ]))
+                        .call([
+                            .constant(0),
+                            .identifier("kCPDefaultTimelineRowHeight"),
+                            Expression.identifier("self").dot("ganttWidth"),
+                            Expression.identifier("self").dot("ganttHeight")
+                        ]))
                 ])
         
         assert(objcExpr: """

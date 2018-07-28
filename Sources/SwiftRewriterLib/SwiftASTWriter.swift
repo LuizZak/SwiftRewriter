@@ -84,7 +84,7 @@ class SwiftASTWriter {
     }
 }
 
-private class ExpressionWriter: ExpressionVisitor {
+internal class ExpressionWriter: ExpressionVisitor {
     typealias ExprResult = Void
     
     let options: ASTWriterOptions
@@ -92,8 +92,11 @@ private class ExpressionWriter: ExpressionVisitor {
     let typeMapper: TypeMapper
     let typeSystem: TypeSystem
     
-    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper,
+    init(options: ASTWriterOptions,
+         target: RewriterOutputTarget,
+         typeMapper: TypeMapper,
          typeSystem: TypeSystem) {
+        
         self.options = options
         self.target = target
         self.typeMapper = typeMapper
@@ -382,7 +385,7 @@ private class ExpressionWriter: ExpressionVisitor {
     }
 }
 
-private class StatementWriter: StatementVisitor {
+internal class StatementWriter: StatementVisitor {
     public typealias StmtResult = Void
     
     let options: ASTWriterOptions
@@ -390,8 +393,11 @@ private class StatementWriter: StatementVisitor {
     let typeMapper: TypeMapper
     let typeSystem: TypeSystem
     
-    init(options: ASTWriterOptions, target: RewriterOutputTarget, typeMapper: TypeMapper,
+    init(options: ASTWriterOptions,
+         target: RewriterOutputTarget,
+         typeMapper: TypeMapper,
          typeSystem: TypeSystem) {
+        
         self.options = options
         self.target = target
         self.typeMapper = typeMapper

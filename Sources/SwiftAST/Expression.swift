@@ -105,6 +105,10 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
     }
     
     public static func == (lhs: Expression, rhs: Expression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.isEqual(to: rhs)
     }
     

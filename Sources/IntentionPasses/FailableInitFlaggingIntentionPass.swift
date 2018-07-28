@@ -58,15 +58,25 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         // if(self == nil) {
         //     return nil;
         // }
-        let ifSelfIsNil =
-            Statement.matcher(
-                ValueMatcher<IfStatement>()
-                    .keyPath(\.exp, .nilCompare(against: .identifier("self")))
-                    .keyPath(\.body.statements, hasCount(1))
-                    .keyPath(\.body.statements[0], equals: stmt)
-                ).anySyntaxNode()
+//        let ifSelfIsNil =
+//            Statement.matcher(
+//                ValueMatcher<IfStatement>()
+//                    .keyPath(\.exp, .nilCompare(against: .identifier("self")))
+//                    .keyPath(\.body.statements, hasCount(1))
+//                    .keyPath(\.body.statements[0], equals: stmt)
+//                ).anySyntaxNode()
         
-        if ifSelfIsNil.matchNil().matches(stmt.parent?.parent) {
+        guard let ifStatement = stmt.parent?.parent as? IfStatement else {
+            return true
+        }
+        guard ifStatement.body.statements.count == 1 else {
+            return true
+        }
+        guard ifStatement.body.statements[0] == stmt else {
+            return true
+        }
+        
+        if ifStatement.exp.matches(.nilCompare(against: .identifier("self"))) {
             return false
         }
         

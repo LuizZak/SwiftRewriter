@@ -29,6 +29,10 @@ open class Statement: SyntaxNode, Equatable {
     }
     
     public static func == (lhs: Statement, rhs: Statement) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.isEqual(to: rhs)
     }
     

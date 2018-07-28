@@ -50,13 +50,20 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
     
     private func analyzeStatementBody(_ compoundStatement: CompoundStatement) -> [Statement] {
         if let statements = analyzeTraditionalIfSelfInit(compoundStatement) {
+            notifyChange()
+            
+            return statements
+        }
+        if let statements = analyzeEarlyExitIfStatement(compoundStatement) {
+            notifyChange()
+            
             return statements
         }
         
         return compoundStatement.statements
     }
     
-    func analyzeTraditionalIfSelfInit(_ compoundStatement: CompoundStatement) -> [Statement]? {
+    private func analyzeTraditionalIfSelfInit(_ compoundStatement: CompoundStatement) -> [Statement]? {
         // Detect more common
         //
         // self = [super init];
@@ -95,36 +102,88 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                 .expression(superInitExp.copy())
             ]
         
-        notifyChange()
+        return result
+    }
+    
+    private func analyzeEarlyExitIfStatement(_ compoundStatement: CompoundStatement) -> [Statement]? {
+        // Detect an early-exit pattern
+        //
+        // if(!(self = [super init]))) {
+        //   return nil;
+        // }
+        //
+        // // Initializer code...
+        //
+        // return self;
+        //
+        
+        guard let ifSelfInit = compoundStatement.statements.first?.asIf else {
+            return nil
+        }
+        
+        // if(!(self = [super init]))
+        guard ifSelfInit.body == [.return(.constant(.nil))] else {
+            return nil
+        }
+        guard let superInit = superInitExpressionFrom(exp: ifSelfInit.exp) else {
+            return nil
+        }
+        guard superInit.matches(ValueMatcher<Expression>.nilCheck(against: superInit)) else {
+            return nil
+        }
+        
+        // return self;
+        guard compoundStatement.statements.last == .return(.identifier("self")) else {
+            return nil
+        }
+        
+        // Initializer code
+        let initializerCode = compoundStatement.dropFirst().dropLast()
+        
+        let result: [Statement] =
+            Array(initializerCode) + [
+                .expression(superInit.copy())
+            ]
         
         return result
     }
     
-    func superInitExpressionFrom(exp: ExpressionsStatement) -> Expression? {
-        
-        var superInit: Expression?
-        
-        let selfInit =
-            Expression.matcher(
-                ident("self")
-                    .assignment(op: .assign,
-                                rhs: .findAny(thatMatches: ident("super" || "self").anyExpression())
-                                        ->> &superInit)
-            )
+    private func superInitExpressionFrom(exp: ExpressionsStatement) -> Expression? {
         
         let matcher =
             ValueMatcher<ExpressionsStatement>()
                 .keyPath(\.expressions, hasCount(1))
-                .keyPath(\.expressions[0], selfInit.anyExpression())
         
-        if matcher.matches(exp), let superInit = superInit {
+        if matcher.matches(exp), let superInit = superInitExpressionFrom(exp: exp.expressions[0]) {
             return superInit
         }
         
         return nil
     }
     
-    static func isNullCheckingSelf(_ exp: Expression) -> Bool {
+    private func superInitExpressionFrom(exp: Expression) -> Expression? {
+        
+        var superInit: Expression?
+        
+        let selfInit =
+            Expression.matcher(
+                .findAny(thatMatches:
+                    ident("self")
+                        .assignment(op: .assign,
+                                    rhs: .findAny(thatMatches: ident("super" || "self").anyExpression())
+                                        ->> &superInit)
+                        .anyExpression()
+                )
+            )
+        
+        if selfInit.anyExpression().matches(exp) {
+            return superInit
+        }
+        
+        return nil
+    }
+    
+    private static func isNullCheckingSelf(_ exp: Expression) -> Bool {
         let matchSelfEqualsNil =
             Expression.matcher(.nilCheck(against: .identifier("self")))
         

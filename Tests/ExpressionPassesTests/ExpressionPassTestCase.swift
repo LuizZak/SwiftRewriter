@@ -2,7 +2,7 @@ import XCTest
 import Antlr4
 import ObjcParser
 import ObjcParserAntlr
-import SwiftRewriterLib
+@testable import SwiftRewriterLib
 import SwiftAST
 
 class ExpressionPassTestCase: XCTestCase {
@@ -110,10 +110,28 @@ class ExpressionPassTestCase: XCTestCase {
             var expString = ""
             var resString = ""
             
+            let prettyPrintExpWriter =
+                StatementWriter(options: .default,
+                                target: StringRewriterOutput(settings: .defaults),
+                                typeMapper: DefaultTypeMapper(),
+                                typeSystem: DefaultTypeSystem())
+            
+            let prettyPrintResWriter =
+                StatementWriter(options: .default,
+                                target: StringRewriterOutput(settings: .defaults),
+                                typeMapper: DefaultTypeMapper(),
+                                typeSystem: DefaultTypeSystem())
+            
+            prettyPrintExpWriter.visitStatement(statement)
+            prettyPrintResWriter.visitStatement(statement)
+            
             dump(expected, to: &expString)
             dump(result, to: &resString)
             
-            recordFailure(withDescription: "Failed to convert: Expected to convert statement into\n\(expString)\nbut received\n\(resString)",
+            expString = (prettyPrintExpWriter.target as! StringRewriterOutput).buffer + "\n" + expString
+            resString = (prettyPrintResWriter.target as! StringRewriterOutput).buffer + "\n" + resString
+            
+            recordFailure(withDescription: "Failed to convert: Expected to convert statement into\n\n\(expString)\nbut received\n\n\(resString)",
                           inFile: file, atLine: line, expected: true)
         }
         
