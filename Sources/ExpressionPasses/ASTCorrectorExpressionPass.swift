@@ -41,23 +41,16 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     
     public override func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
         // TODO: Deal with multiple expressions on a single line, maybe.
-//        guard stmt.expressions.count == 1, let exp = stmt.expressions.first else {
-//            return super.visitExpressions(stmt)
-//        }
-        
-//        guard let postfix = exp.asPostfix else {
-//            return super.visitExpressions(stmt)
-//        }
         
         var pf: PostfixExpression?
-        var pfFunctionCall: FunctionCallPostfix?
+        var functionCall = FunctionCallPostfix(arguments: [])
         let matcher =
             ExpressionsStatement.matcher()
                 .keyPath(\.expressions, hasCount(1))
                 .keyPath(\.expressions[0].asPostfix) { postfix in
                     postfix
                         .bind(to: &pf)
-                        .keyPath(\.functionCall, !isNil() ->> &pfFunctionCall)
+                        .keyPath(\.functionCall, !isNil() ->> &functionCall)
                         .keyPath(\.functionCall?.arguments, hasCount(1))
                 }
         
@@ -66,9 +59,6 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         }
         
         // Apply potential if-let patterns to simple 1-parameter function calls
-        guard let functionCall = pfFunctionCall else {
-            return super.visitExpressions(stmt)
-        }
         guard case .block(_, let args)? = functionCall.callableSignature else {
             return super.visitExpressions(stmt)
         }

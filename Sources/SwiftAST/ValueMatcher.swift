@@ -137,7 +137,7 @@ public extension ValueMatcher {
     
     /// Returns a new matcher with the given optional-valued keypath matcher to
     /// use with a specifically-built matcher that is only triggered if the value
-    /// of they key-path is non-nil at the time of evaluation.
+    /// for the key-path is non-nil at the time of evaluation.
     ///
     /// - Parameters:
     ///   - kp: The keypath to evaluate.
@@ -273,6 +273,8 @@ public enum MatchRule<U: Equatable> {
     case lazyEquals(() -> U)
     case lazyEqualsNullable(() -> U?)
     case isType(U.Type)
+    indirect case all([MatchRule])
+    indirect case anyOf([MatchRule])
     indirect case negated(MatchRule)
     case closure((U) -> Bool)
     indirect case extract(MatchRule, UnsafeMutablePointer<U>)
@@ -309,6 +311,24 @@ public enum MatchRule<U: Equatable> {
         case .isType(let t):
             return type(of: value) == t
             
+        case .all(let rules):
+            for r in rules {
+                if !r.evaluate(value) {
+                    return false
+                }
+            }
+            
+            return true
+            
+        case .anyOf(let rules):
+            for r in rules {
+                if r.evaluate(value) {
+                    return true
+                }
+            }
+            
+            return false
+            
         case .negated(let rule):
             return !rule.evaluate(value)
             
@@ -342,6 +362,49 @@ public enum MatchRule<U: Equatable> {
     public static func ->> (lhs: MatchRule, rhs: UnsafeMutablePointer<U?>) -> MatchRule {
         return .extractOptional(lhs, rhs)
     }
+    
+    public static func && (lhs: MatchRule, rhs: MatchRule) -> MatchRule {
+        switch (lhs, rhs) {
+        case (.all(let l), .all(let r)):
+            return .all(l + r)
+        case (.all(let l), let r):
+            return .all(l + [r])
+        case (let l, .all(let r)):
+            return .all([l] + r)
+        default:
+            return .all([lhs, rhs])
+        }
+    }
+    
+    public static func || (lhs: MatchRule, rhs: MatchRule) -> MatchRule {
+        switch (lhs, rhs) {
+        case (.anyOf(let l), .anyOf(let r)):
+            return .anyOf(l + r)
+        case (.anyOf(let l), let r):
+            return .anyOf(l + [r])
+        case (let l, .anyOf(let r)):
+            return .anyOf([l] + r)
+        default:
+            return .anyOf([lhs, rhs])
+        }
+    }
+    
+}
+
+extension MatchRule {
+    
+    public static func ->> <Z>(lhs: MatchRule, rhs: UnsafeMutablePointer<Z>) -> MatchRule where U == Z? {
+        return .closure { v in
+            if let value = v, lhs.evaluate(v) {
+                rhs.pointee = value
+                
+                return true
+            }
+            
+            return false
+        }
+    }
+    
 }
 
 extension MatchRule: ExpressibleByIntegerLiteral where U == Int {

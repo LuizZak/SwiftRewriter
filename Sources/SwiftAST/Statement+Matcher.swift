@@ -2,6 +2,24 @@ public protocol Matchable {
     
 }
 
+public protocol ValueMatcherConvertible {
+    associatedtype Target
+    
+    func asMatcher() -> ValueMatcher<Target>
+}
+
+extension ValueMatcher: ValueMatcherConvertible {
+    public func asMatcher() -> ValueMatcher<T> {
+        return self
+    }
+}
+
+extension ValueMatcherConvertible where Target == Self, Self: Equatable {
+    public func asMatcher() -> ValueMatcher<Self> {
+        return ValueMatcher<Self>().match { $0 == self }
+    }
+}
+
 public extension Matchable {
     
     public static func matcher() -> ValueMatcher<Self> {

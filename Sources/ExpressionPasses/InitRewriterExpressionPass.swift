@@ -107,13 +107,15 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         let selfInit =
             Expression.matcher(
                 ident("self")
-                    .assignment(op: .assign, rhs: .any ->> &superInit))
+                    .assignment(op: .assign,
+                                rhs: .findAny(thatMatches: ident("super" || "self").anyExpression())
+                                        ->> &superInit)
+            )
         
         let matcher =
-            Statement.matcher(
-                ValueMatcher<ExpressionsStatement>()
-                    .keyPath(\.expressions, hasCount(1))
-                    .keyPath(\.expressions[0], selfInit.anyExpression()))
+            ValueMatcher<ExpressionsStatement>()
+                .keyPath(\.expressions, hasCount(1))
+                .keyPath(\.expressions[0], selfInit.anyExpression())
         
         if matcher.matches(exp), let superInit = superInit {
             return superInit
@@ -123,10 +125,6 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
     }
     
     static func isNullCheckingSelf(_ exp: Expression) -> Bool {
-        if exp.asIdentifier?.identifier == "self" {
-            return true
-        }
-        
         let matchSelfEqualsNil =
             Expression.matcher(.nilCheck(against: .identifier("self")))
         

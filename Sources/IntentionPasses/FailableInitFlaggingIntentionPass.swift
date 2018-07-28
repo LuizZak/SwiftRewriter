@@ -61,7 +61,7 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         let ifSelfIsNil =
             Statement.matcher(
                 ValueMatcher<IfStatement>()
-                    .keyPath(\.exp, .nilCheck(against: .identifier("self")))
+                    .keyPath(\.exp, .nilCompare(against: .identifier("self")))
                     .keyPath(\.body.statements, hasCount(1))
                     .keyPath(\.body.statements[0], equals: stmt)
                 ).anySyntaxNode()
@@ -82,9 +82,9 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
                         .keyPath(\.exp,
                                  ValueMatcher<AssignmentExpression>()
                                     .keyPath(\.lhs, ident("self").anyExpression())
-                                    // Being very broad here: any rhs that mentions 'super'
+                                    // Being very broad here: any rhs that mentions 'super' or 'self'
                                     // at all is accepted.
-                                    .keyPath(\.rhs, .findAny(thatMatches: ident("super").anyExpression()))
+                                    .keyPath(\.rhs, .findAny(thatMatches: ident("super" || "self").anyExpression()))
                                     .anyExpression()
                         ).anyExpression()
                     )

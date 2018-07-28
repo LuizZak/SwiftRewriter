@@ -35,7 +35,10 @@ public extension ValueMatcher where T: Equatable {
 }
 
 public extension ValueMatcher where T: Expression {
-    public func dot(_ member: String) -> SyntaxMatcher<PostfixExpression> {
+    
+    public func dot<S>(_ member: S) -> SyntaxMatcher<PostfixExpression>
+        where S: ValueMatcherConvertible, S.Target == String {
+        
         return SyntaxMatcher<PostfixExpression>()
             .match(.closure { postfix -> Bool in
                 guard let exp = postfix.exp as? T else {
@@ -44,10 +47,12 @@ public extension ValueMatcher where T: Expression {
                 
                 return self.matches(exp)
             })
-            .keyPath(\.op.asMember?.name, equals: member)
+            .keyPath(\.op.asMember?.name, member.asMatcher())
     }
     
-    public func subscribe(_ matcher: SyntaxMatcher<Expression>) -> SyntaxMatcher<PostfixExpression> {
+    public func subscribe<E>(_ matcher: E) -> SyntaxMatcher<PostfixExpression>
+        where E: ValueMatcherConvertible, E.Target == Expression {
+            
         return SyntaxMatcher<PostfixExpression>()
             .match(.closure { postfix -> Bool in
                 guard let exp = postfix.exp as? T else {
@@ -56,7 +61,7 @@ public extension ValueMatcher where T: Expression {
                 
                 return self.matches(exp)
             })
-            .keyPath(\.op.asSubscription?.expression, matcher)
+            .keyPath(\.op.asSubscription?.expression, matcher.asMatcher())
     }
     
     public func call(_ args: [FunctionArgument]) -> SyntaxMatcher<PostfixExpression> {
@@ -75,16 +80,20 @@ public extension ValueMatcher where T: Expression {
         return dot(method).call([])
     }
     
-    public func binary(op: SwiftOperator, rhs: SyntaxMatcher<Expression>) -> SyntaxMatcher<BinaryExpression> {
+    public func binary<E>(op: SwiftOperator, rhs: E) -> SyntaxMatcher<BinaryExpression>
+        where E: ValueMatcherConvertible, E.Target == Expression {
+                
         return SyntaxMatcher<BinaryExpression>()
             .keyPath(\.op, .equals(op))
-            .keyPath(\.rhs, rhs)
+            .keyPath(\.rhs, rhs.asMatcher())
     }
     
-    public func assignment(op: SwiftOperator, rhs: SyntaxMatcher<Expression>) -> SyntaxMatcher<AssignmentExpression> {
+    public func assignment<E>(op: SwiftOperator, rhs: E) -> SyntaxMatcher<AssignmentExpression>
+        where E: ValueMatcherConvertible, E.Target == Expression {
+            
         return SyntaxMatcher<AssignmentExpression>()
             .keyPath(\.op, .equals(op))
-            .keyPath(\.rhs, rhs)
+            .keyPath(\.rhs, rhs.asMatcher())
     }
 }
 
@@ -117,16 +126,16 @@ public extension ValueMatcher where T: Expression {
     public static func nilCheck(against value: Expression) -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in
             
-            // <exp> == nil
-            if exp == .binary(lhs: value, op: .equals, rhs: .constant(.nil)) {
+            // <exp> != nil
+            if exp.asMatchable() == .binary(lhs: value, op: SwiftOperator.unequals, rhs: .constant(.nil)) {
                 return true
             }
-            // nil == <exp>
-            if exp == .binary(lhs: .constant(.nil), op: .equals, rhs: value) {
+            // nil != <exp>
+            if exp.asMatchable() == .binary(lhs: .constant(.nil), op: SwiftOperator.unequals, rhs: value) {
                 return true
             }
-            // !<exp>
-            if exp == .unary(op: .negate, value) {
+            // <exp>
+            if exp == value {
                 return true
             }
             
@@ -134,12 +143,33 @@ public extension ValueMatcher where T: Expression {
         }
     }
     
-    public static func findAny(thatMatches matcher: ValueMatcher<Expression>) -> ValueMatcher<Expression> {
+    public static func nilCompare(against value: Expression) -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in
+            
+            // <exp> == nil
+            if exp.asMatchable() == .binary(lhs: value, op: SwiftOperator.equals, rhs: .constant(.nil)) {
+                return true
+            }
+            // nil == <exp>
+            if exp.asMatchable() == .binary(lhs: .constant(.nil), op: SwiftOperator.equals, rhs: value) {
+                return true
+            }
+            // !<exp>
+            if exp.asMatchable() == .unary(op: SwiftOperator.negate, value) {
+                return true
+            }
+            
+            return false
+        }
+    }
+    
+    public static func findAny(thatMatches matcher: ValueMatcher) -> ValueMatcher {
+        return ValueMatcher().match { exp in
             
             let sequence = SyntaxNodeSequence(node: exp, inspectBlocks: false)
             
-            for e in sequence.compactMap({ $0 as? Expression }) {
+            for e in sequence.compactMap({ $0 as? T }) {
+                print(e)
                 if matcher.matches(e) {
                     return true
                 }
@@ -151,7 +181,36 @@ public extension ValueMatcher where T: Expression {
     
 }
 
+public extension ValueMatcher where T == Expression {
+    
+    public static func unary<O, E>(op: O, _ exp: E) -> ValueMatcher<Expression>
+        where O: ValueMatcherConvertible, E: ValueMatcherConvertible, O.Target == SwiftOperator, E.Target == Expression {
+        
+        return
+            ValueMatcher<UnaryExpression>()
+                .keyPath(\.op, op.asMatcher())
+                .keyPath(\.exp, exp.asMatcher())
+                .anyExpression()
+    }
+    
+    public static func binary<O, E>(lhs: E, op: O, rhs: E) -> ValueMatcher<Expression>
+        where O: ValueMatcherConvertible, E: ValueMatcherConvertible, O.Target == SwiftOperator, E.Target == Expression {
+        
+        return
+            ValueMatcher<BinaryExpression>()
+                .keyPath(\.lhs, lhs.asMatcher())
+                .keyPath(\.op, op.asMatcher())
+                .keyPath(\.rhs, rhs.asMatcher())
+                .anyExpression()
+    }
+    
+}
+
 public extension Expression {
+    
+    public func asMatchable() -> ExpressionMatchable {
+        return ExpressionMatchable(exp: self)
+    }
     
     public static func matcher<T: Expression>(_ matcher: SyntaxMatcher<T>) -> SyntaxMatcher<T> {
         return matcher
@@ -159,6 +218,27 @@ public extension Expression {
     
 }
 
+public struct ExpressionMatchable {
+    public var exp: Expression
+    
+    public static func ==(lhs: ExpressionMatchable, rhs: ValueMatcher<Expression>) -> Bool {
+        return lhs.exp.matches(rhs)
+    }
+}
+
 extension Expression: Matchable {
+    
+}
+
+extension Expression: ValueMatcherConvertible {
+    
+}
+extension SwiftOperator: ValueMatcherConvertible {
+    
+}
+extension SwiftType: ValueMatcherConvertible {
+    
+}
+extension String: ValueMatcherConvertible {
     
 }

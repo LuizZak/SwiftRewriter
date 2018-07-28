@@ -97,6 +97,52 @@ class ValueMatcherTests: XCTestCase {
         XCTAssertFalse(MatchRule<String>.none.evaluate("b"))
     }
     
+    func testMatchRuleAll() {
+        XCTAssert(MatchRule<String>.all(["a", .any]).evaluate("a"))
+        XCTAssertFalse(MatchRule<String>.all(["a", .none]).evaluate("a"))
+    }
+    
+    func testMatchRuleAnyOf() {
+        XCTAssert(MatchRule<String>.anyOf([.none, "a"]).evaluate("a"))
+        XCTAssertFalse(MatchRule<String>.anyOf([.none]).evaluate("a"))
+    }
+    
+    func testMatchRuleAllOperator() {
+        let rule: MatchRule<String> = "a" && ("b" && "c")
+        
+        switch rule {
+        case .all(let r) where r.count == 3:
+            if case .equals("a") = r[0],
+                case .equals("b") = r[1],
+                case .equals("c") = r[2] {
+                // Success!
+                return
+            }
+        default:
+            break
+        }
+        
+        XCTFail("Expected && to compose into MatchRule.all")
+    }
+    
+    func testMatchRuleAnyOfOperator() {
+        let rule: MatchRule<String> = "a" || ("b" || "c")
+        
+        switch rule {
+        case .anyOf(let r) where r.count == 3:
+            if case .equals("a") = r[0],
+                case .equals("b") = r[1],
+                case .equals("c") = r[2] {
+                // Success!
+                return
+            }
+        default:
+            break
+        }
+        
+        XCTFail("Expected && to compose into MatchRule.anyOf")
+    }
+    
     func testMatchRuleExtract() {
         var result: String = ""
         
@@ -139,6 +185,20 @@ class ValueMatcherTests: XCTestCase {
         
         switch rule {
         case .extractOptional(.any, _):
+            // Success!
+            break
+        default:
+            XCTFail("Expected ->> to produce `.extractOptional` rule, but produced \(rule) instead.")
+        }
+    }
+    
+    func testMatchRuleExtractOptionalToNonOptionalOperator() {
+        var output = TestEquatable()
+        
+        let rule = MatchRule<TestEquatable?>.any ->> &output
+        
+        switch rule {
+        case .closure:
             // Success!
             break
         default:
