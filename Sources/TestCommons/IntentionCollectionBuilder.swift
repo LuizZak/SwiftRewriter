@@ -150,7 +150,8 @@ public class FileIntentionBuilder {
     
     @discardableResult
     public func createExtension(
-        forClassNamed name: String, categoryName: String? = nil,
+        forClassNamed name: String,
+        categoryName: String? = nil,
         initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
         
         let classIntention = ClassExtensionGenerationIntention(typeName: name)
@@ -174,9 +175,8 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
-    public func createEnum(
-        withName name: String, rawValue: SwiftType,
-        initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+    public func createEnum(withName name: String, rawValue: SwiftType,
+                           initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
         
         let enumIntention = EnumGenerationIntention(typeName: name, rawValueType: rawValue)
         let builder = EnumTypeBuilder(targetEnum: enumIntention)
@@ -226,7 +226,7 @@ public class MemberBuilder<T: MemberGenerationIntention> {
     }
     
     @discardableResult
-    public func setAccessLevel(_ accessLevel: AccessLevel) -> MemberBuilder  {
+    public func setAccessLevel(_ accessLevel: AccessLevel) -> MemberBuilder {
         targetMember.accessLevel = accessLevel
         return self
     }
@@ -317,18 +317,19 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     }
     
     @discardableResult
-    public func createProperty(named name: String, type: SwiftType,
+    public func createProperty(named name: String,
+                               type: SwiftType,
                                attributes: [PropertyAttribute] = []) -> TypeBuilder {
+        
         return createProperty(named: name, type: type, mode: .asField, attributes: attributes)
     }
     
     @discardableResult
-    public func createProperty(
-        named name: String,
-        type: SwiftType,
-        mode: PropertyGenerationIntention.Mode = .asField,
-        attributes: [PropertyAttribute] = [],
-        builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+    public func createProperty(named name: String,
+                               type: SwiftType,
+                               mode: PropertyGenerationIntention.Mode = .asField,
+                               attributes: [PropertyAttribute] = [],
+                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
@@ -347,6 +348,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     @discardableResult
     public func createConstructor(withParameters parameters: [ParameterSignature] = [],
                                   builder: (MemberBuilder<InitGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+        
         let ctor = InitGenerationIntention(parameters: parameters)
         let mbuilder = MemberBuilder(targetMember: ctor)
         
@@ -372,6 +374,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
                              parameters: [ParameterSignature] = [],
                              isStatic: Bool = false,
                              builder: (MemberBuilder<MethodGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+        
         let signature = FunctionSignature(name: name, parameters: parameters,
                                           returnType: returnType, isStatic: isStatic)
         
@@ -381,6 +384,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     @discardableResult
     public func createMethod(_ signature: FunctionSignature,
                              builder: (MemberBuilder<MethodGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+        
         let method = MethodGenerationIntention(signature: signature)
         method.functionBody = FunctionBodyIntention(body: [])
         
@@ -422,8 +426,10 @@ public extension TypeBuilder where T: BaseClassIntention {
     public func createSynthesize(propertyName: String, variableName: String? = nil) -> TypeBuilder {
         let intent =
             PropertySynthesizationIntention(
-                propertyName: propertyName, ivarName: variableName ?? propertyName,
-                isExplicit: false, type: .synthesize)
+                propertyName: propertyName,
+                ivarName: variableName ?? propertyName,
+                isExplicit: false,
+                type: .synthesize)
         
         targetType.addSynthesization(intent)
         
