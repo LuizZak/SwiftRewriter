@@ -69,6 +69,28 @@ class FailableInitFlaggingIntentionPassTests: XCTestCase {
                 ], else: nil)
             ])
     }
+    
+    func testIgnoreWithinIfWithNilCheckSelfEqualsSelfInit() {
+        // Tests that the following case does not trigger the failable init detector:
+        //
+        // if(!(self = [self init])) {
+        //     return nil;
+        // }
+        
+        testDoesNotFlagsBody([
+            .if(.unary(op: .negate,
+                       Expression
+                        .identifier("self")
+                        .assignment(
+                            op: .assign,
+                            rhs: Expression.identifier("self").dot("init").call()
+                        )
+                ),
+                body: [
+                    .return(.constant(.nil))
+                ], else: nil)
+            ])
+    }
 }
 
 private extension FailableInitFlaggingIntentionPassTests {
