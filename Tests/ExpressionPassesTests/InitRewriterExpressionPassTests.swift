@@ -48,6 +48,43 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testEmptyIfInInitWithDelegatedSelfInit() {
+        // Tests an empty init pattern rewrite with a delegated initializer call
+        //
+        //   self = [self init];
+        //   if(self) {
+        //
+        //   }
+        //   return self;
+        //
+        // is rewritten as:
+        //
+        //   self.init()
+        //
+        
+        intentionContext = .initializer(InitGenerationIntention(parameters: []))
+        
+        assertTransform(
+            statement: .compound([
+                .expression(
+                    Expression
+                        .identifier("self")
+                        .assignment(
+                            op: .assign,
+                            rhs: Expression
+                                .identifier("self").dot("init").call())
+                ),
+                
+                .if(.identifier("self"), body: [], else: nil),
+                
+                .return(.identifier("self"))
+            ]),
+            into: .compound([
+                .expression(Expression.identifier("self").dot("init").call())
+            ])
+        ); assertNotifiedChange()
+    }
+    
     func testNonEmptyIfInInit() {
         // Tests an empty common init pattern rewrite with initializer code
         //

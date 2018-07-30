@@ -241,7 +241,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                 .inverted { inverted in
                     inverted
                         .hasCount(3)
-                        .atIndex(0, equals: .root(.identifier("super")))
+                        .atIndex(0, rule: .equals(.root(.identifier("super"))) || equals(.root(.identifier("self"))))
                         .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
                         .atIndex(2, matcher: .isFunctionCall)
                 }.anyExpression()
