@@ -38,11 +38,11 @@ public extension ValueMatcher where T: Collection {
     
 }
 
-public extension ValueMatcher where T: Collection, T.Index == Int {
+public extension ValueMatcher where T: Collection {
     
-    public func atIndex(_ index: Int, matcher: ValueMatcher<T.Element>) -> ValueMatcher<T> {
+    public func atIndex(_ index: T.Index, matcher: ValueMatcher<T.Element>) -> ValueMatcher<T> {
         return match { value in
-            guard index < value.count else {
+            guard index < value.endIndex else {
                 return false
             }
             
@@ -52,15 +52,15 @@ public extension ValueMatcher where T: Collection, T.Index == Int {
     
 }
 
-public extension ValueMatcher where T: Collection, T.Element: Equatable, T.Index == Int {
+public extension ValueMatcher where T: Collection, T.Element: Equatable {
     
-    public func atIndex(_ index: Int, equals value: T.Element) -> ValueMatcher<T> {
+    public func atIndex(_ index: T.Index, equals value: T.Element) -> ValueMatcher<T> {
         return atIndex(index, rule: .equals(value))
     }
     
-    public func atIndex(_ index: Int, rule: MatchRule<T.Element>) -> ValueMatcher<T> {
+    public func atIndex(_ index: T.Index, rule: MatchRule<T.Element>) -> ValueMatcher<T> {
         return match { value in
-            guard index < value.count else {
+            guard index < value.endIndex else {
                 return false
             }
             
