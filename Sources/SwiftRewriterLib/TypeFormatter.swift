@@ -249,10 +249,16 @@ public enum TypeFormatter {
     }
     
     /// Generates a string representation of a given initializer.
-    public static func asString(initializer: InitGenerationIntention) -> String {
-        var result = "init"
+    public static func asString(initializer: KnownConstructor) -> String {
+        var result: String = ""
         
-        if initializer.isFailableInitializer {
+        if initializer.isConvenience {
+            result = "convenience "
+        }
+        
+        result += "init"
+        
+        if initializer.isFailable {
             result += "?"
         }
         

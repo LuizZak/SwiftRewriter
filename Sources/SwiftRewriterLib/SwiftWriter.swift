@@ -677,7 +677,7 @@ class InternalSwiftWriter {
         
         target.outputInline("init", style: .keyword)
         
-        if initMethod.isFailableInitializer {
+        if initMethod.isFailable {
             target.outputInline("?")
         }
         

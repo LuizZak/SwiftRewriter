@@ -23,7 +23,8 @@ public struct KnownTypeBuilder {
         for ctor in existingType.knownConstructors {
             self = self.constructor(withParameters: ctor.parameters,
                                     semantics: ctor.semantics,
-                                    isFailable: ctor.isFailable)
+                                    isFailable: ctor.isFailable,
+                                    isConvenience: ctor.isConvenience)
         }
         
         for field in existingType.knownFields {
@@ -115,7 +116,8 @@ public struct KnownTypeBuilder {
     /// Adds a new constructor to this type
     public func constructor(shortParameters shortParams: [ParameterTuple],
                             semantics: Set<Semantic> = [],
-                            isFailable: Bool = false) -> KnownTypeBuilder {
+                            isFailable: Bool = false,
+                            isConvenience: Bool = false) -> KnownTypeBuilder {
         
         let parameters =
             shortParams.map { tuple in
@@ -124,18 +126,21 @@ public struct KnownTypeBuilder {
         
         return constructor(withParameters: parameters,
                            semantics: semantics,
-                           isFailable: isFailable)
+                           isFailable: isFailable,
+                           isConvenience: isConvenience)
     }
     
     /// Adds a new constructor to this type
     public func constructor(withParameters parameters: [ParameterSignature],
                             semantics: Set<Semantic> = [],
-                            isFailable: Bool = false) -> KnownTypeBuilder {
+                            isFailable: Bool = false,
+                            isConvenience: Bool = false) -> KnownTypeBuilder {
         
         var new = clone()
         let ctor = BuildingKnownConstructor(parameters: parameters,
                                             semantics: semantics,
-                                            isFailable: isFailable)
+                                            isFailable: isFailable,
+                                            isConvenience: isConvenience)
         
         new.type.constructors.append(ctor)
         
@@ -498,6 +503,7 @@ private struct BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var semantics: Set<Semantic>
     var isFailable: Bool
+    var isConvenience: Bool
 }
 
 private struct BuildingKnownMethod: KnownMethod, Codable {

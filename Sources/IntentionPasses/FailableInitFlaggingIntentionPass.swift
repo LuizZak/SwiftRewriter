@@ -9,6 +9,18 @@ import SwiftAST
 /// An intention pass that searches for failable initializers based on statement
 /// AST analysis and flags them appropriately.
 public class FailableInitFlaggingIntentionPass: IntentionPass {
+    
+    let invertedMatchSelfOrSuperInit =
+        ValueMatcher<PostfixExpression>()
+            .inverted { inverted in
+                inverted
+                    .hasCount(3)
+                    .atIndex(0, rule: .equals(.root(.identifier("super"))) || equals(.root(.identifier("self"))))
+                    .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
+                    .atIndex(2, matcher: .isFunctionCall)
+            }.anyExpression()
+    
+    
     var context: IntentionPassContext?
     
     public init() {
@@ -40,7 +52,7 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         
         for node in nodes.compactMap({ $0 as? ReturnStatement }) {
             if analyzeReturnStatement(node) {
-                initializer.isFailableInitializer = true
+                initializer.isFailable = true
                 return
             }
         }
@@ -58,13 +70,6 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         // if(self == nil) {
         //     return nil;
         // }
-//        let ifSelfIsNil =
-//            Statement.matcher(
-//                ValueMatcher<IfStatement>()
-//                    .keyPath(\.exp, .nilCompare(against: .identifier("self")))
-//                    .keyPath(\.body.statements, hasCount(1))
-//                    .keyPath(\.body.statements[0], equals: stmt)
-//                ).anySyntaxNode()
         
         guard let ifStatement = stmt.parent?.parent as? IfStatement else {
             return true
@@ -81,29 +86,48 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         }
         
         // 2.:
-        // if(!(self = [super init])) {
+        // if(!(self = [super|self init])) {
         //     return nil;
         // }
-        let ifSelfSuperInit =
-            Statement.matcher(
-                ValueMatcher<IfStatement>()
-                    .keyPath(\.exp, ValueMatcher<UnaryExpression>()
-                        .keyPath(\.op, equals: .negate)
-                        .keyPath(\.exp,
-                                 ValueMatcher<AssignmentExpression>()
-                                    .keyPath(\.lhs, ident("self").anyExpression())
-                                    // Being very broad here: any rhs that mentions 'super' or 'self'
-                                    // at all is accepted.
-                                    .keyPath(\.rhs, .findAny(thatMatches: ident("super" || "self").anyExpression()))
-                                    .anyExpression()
-                        ).anyExpression()
-                    )
-            ).anySyntaxNode()
+        let negatedSelfIsSelfOrSuperInit =
+            ValueMatcher<UnaryExpression>()
+                .keyPath(\.op, equals: .negate)
+                .keyPath(\.exp,
+                         ValueMatcher<AssignmentExpression>()
+                            .keyPath(\.lhs, ident("self").anyExpression())
+                            .keyPath(\.op, equals: .assign)
+                            .keyPath(\.rhs, invertedMatchSelfOrSuperInit)
+                            .anyExpression()
+                ).anyExpression()
         
-        if ifSelfSuperInit.matchNil().matches(stmt.parent?.parent) {
+        if negatedSelfIsSelfOrSuperInit.matches(ifStatement.exp) {
             return false
         }
         
         return true
     }
+    
+    private func superOrSelfInitExpressionFrom(exp: Expression) -> Expression? {
+        
+        var superInit: Expression?
+        
+        let selfInit =
+            Expression.matcher(
+                .findAny(thatMatches:
+                    ident("self")
+                        .assignment(
+                            op: .assign,
+                            rhs: invertedMatchSelfOrSuperInit ->> &superInit
+                        )
+                        .anyExpression()
+                )
+        )
+        
+        if selfInit.anyExpression().matches(exp) {
+            return superInit
+        }
+        
+        return nil
+    }
+    
 }

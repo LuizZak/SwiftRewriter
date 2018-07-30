@@ -106,6 +106,9 @@ public protocol KnownConstructor: SemanticalObject {
     
     /// Gets whether this initializer can fail (i.e. return nil)
     var isFailable: Bool { get }
+    
+    /// Gets whether this initializer is a convenience initializer
+    var isConvenience: Bool { get }
 }
 
 /// Describes a known member of a type

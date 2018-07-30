@@ -41,7 +41,7 @@ class SwiftWriterTests: XCTestCase {
     func testWriteFailableInit() {
         let type = KnownTypeBuilder(typeName: "A").build()
         let initMethod = InitGenerationIntention(parameters: [])
-        initMethod.isFailableInitializer = true
+        initMethod.isFailable = true
         initMethod.functionBody = FunctionBodyIntention(body: [])
         
         sut.outputInitMethod(initMethod, selfType: type, target: output.outputTarget())

@@ -57,7 +57,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                 initIntention.isOverride = method.isOverride
                 initIntention.inNonnullContext = method.inNonnullContext
                 initIntention.functionBody = method.functionBody
-                initIntention.isFailableInitializer =
+                initIntention.isFailable =
                     method.returnType.isOptional
                         && !method.returnType.isImplicitlyUnwrapped
                 

@@ -86,7 +86,7 @@ private extension FailableInitFlaggingIntentionPassTests {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        if !ctor.isFailableInitializer {
+        if !ctor.isFailable {
             recordFailure(withDescription: """
                 Expected to flag initializer as failable
                 """, inFile: #file, atLine: line, expected: true)
@@ -106,7 +106,7 @@ private extension FailableInitFlaggingIntentionPassTests {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        if ctor.isFailableInitializer {
+        if ctor.isFailable {
             recordFailure(withDescription: """
                 Expected to not flag initializer as failable
                 """, inFile: #file, atLine: line, expected: true)

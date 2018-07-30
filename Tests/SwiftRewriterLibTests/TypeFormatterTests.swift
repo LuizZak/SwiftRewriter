@@ -194,11 +194,23 @@ class TypeFormatterTests: XCTestCase {
     
     func testAsStringFailableInitializer() {
         let initializer = InitGenerationIntention(parameters: [])
-        initializer.isFailableInitializer = true
+        initializer.isFailable = true
         
         let result = TypeFormatter.asString(initializer: initializer)
         let expected = """
             init?()
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
+    
+    func testAsStringConvenienceInitializer() {
+        let initializer = InitGenerationIntention(parameters: [])
+        initializer.isConvenience = true
+        
+        let result = TypeFormatter.asString(initializer: initializer)
+        let expected = """
+            convenience init()
             """
         
         XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))

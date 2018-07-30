@@ -7,7 +7,8 @@ public class InitGenerationIntention: MemberGenerationIntention, FunctionIntenti
     public var functionBody: FunctionBodyIntention?
     
     public var isOverride: Bool = false
-    public var isFailableInitializer: Bool = false
+    public var isFailable: Bool = false
+    public var isConvenience: Bool = false
     
     public init(parameters: [ParameterSignature],
                 accessLevel: AccessLevel = .internal,
@@ -19,7 +20,5 @@ public class InitGenerationIntention: MemberGenerationIntention, FunctionIntenti
 }
 
 extension InitGenerationIntention: KnownConstructor {
-    public var isFailable: Bool {
-        return isFailableInitializer
-    }
+    
 }

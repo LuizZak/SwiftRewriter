@@ -142,7 +142,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         guard ifSelfInit.body == [.return(.constant(.nil))] else {
             return nil
         }
-        guard let superInit = superInitExpressionFrom(exp: ifSelfInit.exp) else {
+        guard let superInit = superOrSelfInitExpressionFrom(exp: ifSelfInit.exp) else {
             return nil
         }
         guard superInit.matches(ValueMatcher<Expression>.nilCheck(against: superInit)) else {
@@ -171,7 +171,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
             ValueMatcher<ExpressionsStatement>()
                 .keyPath(\.expressions, hasCount(1))
         
-        if matcher.matches(exp), let superInit = superInitExpressionFrom(exp: exp.expressions[0]) {
+        if matcher.matches(exp), let superInit = superOrSelfInitExpressionFrom(exp: exp.expressions[0]) {
             return superInit
         }
         
@@ -233,7 +233,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         return nil
     }
     
-    private func superInitExpressionFrom(exp: Expression) -> Expression? {
+    private func superOrSelfInitExpressionFrom(exp: Expression) -> Expression? {
         
         var superInit: Expression?
         
