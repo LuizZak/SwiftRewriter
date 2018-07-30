@@ -179,7 +179,8 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
     }
     
     /// In case a given `super.init` invocation is a failable initializer invocation,
-    /// automatically transform
+    /// return a transformed, failable init invocation (`super.init?()`) matching
+    /// the original invocation.
     private func validateFailableSuperInit(_ exp: Expression) -> Expression? {
         guard let ownerType = ownerType else {
             return nil
