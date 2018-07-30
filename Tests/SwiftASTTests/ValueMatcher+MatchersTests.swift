@@ -159,4 +159,42 @@ class ValueMatcher_MatchersTests: XCTestCase {
         XCTAssertFalse(sut.matches(1))
         XCTAssert(sut.matches(2))
     }
+    
+    func testCollectionHasCount() {
+        let sut = ValueMatcher<[Int]>().hasCount(2)
+        
+        XCTAssertFalse(sut.matches([1]))
+        XCTAssert(sut.matches([1, 2]))
+        XCTAssertFalse(sut.matches([1, 2, 3]))
+    }
+    
+    func testCollectionAtIndexRule() {
+        let sut =
+            ValueMatcher<[Int]>()
+                .atIndex(1, rule: .differentThan(1))
+        
+        XCTAssert(sut.matches([0, 2]))
+        XCTAssertFalse(sut.matches([0, 1]))
+        XCTAssertFalse(sut.matches([0]))
+    }
+    
+    func testCollectionAtIndexEquals() {
+        let sut =
+            ValueMatcher<[Int]>()
+                .atIndex(1, equals: 1)
+        
+        XCTAssert(sut.matches([0, 1]))
+        XCTAssertFalse(sut.matches([0]))
+        XCTAssertFalse(sut.matches([0, 2]))
+    }
+    
+    func testCollectionAtIndexMatcher() {
+        let sut =
+            ValueMatcher<[Int]>()
+                .atIndex(1, matcher: ValueMatcher<Int>().match(if: .equals(1)))
+        
+        XCTAssert(sut.matches([0, 1]))
+        XCTAssertFalse(sut.matches([0]))
+        XCTAssertFalse(sut.matches([0, 2]))
+    }
 }

@@ -162,6 +162,60 @@ public extension ValueMatcher {
         copy.matchers.append(anyMatcher)
         return copy
     }
+    
+    /// Returns a new matcher with the given keypath matching rule.
+    ///
+    /// - Parameters:
+    ///   - keyPath: The keypath onto the value to retrieve the value to match.
+    ///   - value: A value to match under equality.
+    /// - Returns: A new matcher with the specified matcher rule.
+    public static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, equals value: U) -> ValueMatcher {
+        return ValueMatcher().keyPath(kp, equals: value)
+    }
+    
+    /// Returns a new matcher with the given keypath matching rule.
+    ///
+    /// - Parameters:
+    ///   - keyPath: The keypath onto the value to retrieve the value to match.
+    ///   - rule: A rule to match the value with.
+    /// - Returns: A new matcher with the specified matcher rule.
+    public static func keyPath<U: Equatable>(_ kp: KeyPath<T, U>, _ rule: MatchRule<U>) -> ValueMatcher {
+        return ValueMatcher().keyPath(kp, rule)
+    }
+    
+    /// Returns a new matcher with the given keypath matcher.
+    ///
+    /// - Parameters:
+    ///   - keyPath: The keypath onto the value to retrieve the value to match.
+    ///   - matcher: A matcher to apply to the keypath.
+    /// - Returns: A new matcher with the specified matcher.
+    public static func keyPath<U>(_ kp: KeyPath<T, U>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
+        return ValueMatcher().keyPath(kp, matcher)
+    }
+    
+    /// Returns a new matcher with the given keypath matcher.
+    ///
+    /// - Parameters:
+    ///   - keyPath: The keypath onto the value to retrieve the value to match.
+    ///   - matcher: A matcher to apply to the keypath.
+    /// - Returns: A new matcher with the specified matcher.
+    public static func keyPath<U>(_ kp: KeyPath<T, U?>, _ matcher: ValueMatcher<U>) -> ValueMatcher {
+        return ValueMatcher().keyPath(kp, matcher)
+    }
+    
+    /// Returns a new matcher with the given optional-valued keypath matcher to
+    /// use with a specifically-built matcher that is only triggered if the value
+    /// for the key-path is non-nil at the time of evaluation.
+    ///
+    /// - Parameters:
+    ///   - kp: The keypath to evaluate.
+    ///   - closure: A closure that receives an empty value-matcher, and must
+    /// return a newly constructed value matcher that will work on the non-nil
+    /// value of the key-path.
+    /// - Returns: A new matcher with the specified matcher.
+    public static func keyPath<U>(_ kp: KeyPath<T, U?>, _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
+        return ValueMatcher().keyPath(kp, closure)
+    }
 }
 
 extension ValueMatcher {

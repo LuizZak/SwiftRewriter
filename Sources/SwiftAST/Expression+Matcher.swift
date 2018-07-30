@@ -97,6 +97,44 @@ public extension ValueMatcher where T: Expression {
     }
 }
 
+public extension ValueMatcher where T: PostfixExpression {
+    
+    public func inverted(_ closure: (ValueMatcher<[PostfixChainInverter.Postfix]>) -> ValueMatcher<[PostfixChainInverter.Postfix]>)
+        -> ValueMatcher<T> {
+        
+        let matcher = closure(ValueMatcher<[PostfixChainInverter.Postfix]>())
+        
+        return match { value -> Bool in
+            let chain = PostfixChainInverter(expression: value).invert()
+            
+            return matcher.matches(chain)
+        }
+    }
+    
+}
+
+public extension ValueMatcher where T == PostfixChainInverter.Postfix {
+    
+    public static var isFunctionCall: ValueMatcher<T> {
+        return
+            ValueMatcher<T>()
+                .keyPath(\.postfix, .isType(FunctionCallPostfix.self))
+    }
+    
+    public static var isMemberAccess: ValueMatcher<T> {
+        return
+            ValueMatcher<T>()
+                .keyPath(\.postfix, .isType(MemberPostfix.self))
+    }
+    
+    public static var isSubscription: ValueMatcher<T> {
+        return
+            ValueMatcher<T>()
+                .keyPath(\.postfix, .isType(SubscriptPostfix.self))
+    }
+    
+}
+
 public extension ValueMatcher where T: Expression {
     
     public func anyExpression() -> ValueMatcher<Expression> {

@@ -187,20 +187,20 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         
         var _functionCall: FunctionCallPostfix?
         
-        let matchSuperInit =
-            Expression.matcher(
-                ValueMatcher<PostfixExpression>()
-                    .keyPath(\.functionCall, !isNil() ->> &_functionCall)
-                    .keyPath(\.exp.asPostfix) { postfix in
-                        postfix
-                            .keyPath(\.exp, ident("super").anyExpression())
-                            .keyPath(\.member) { member in
-                                member.keyPath(\.name, equals: "init")
-                            }
-                    }
-                ).anyExpression()
+        let invertedMatchSuperInit =
+            ValueMatcher<PostfixExpression>()
+                .inverted { inverted in
+                    inverted
+                        .hasCount(3)
+                        .atIndex(0, equals: .root(.identifier("super")))
+                        .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
+                        .atIndex(2, rule: .closure {
+                            _functionCall = $0.postfix?.asFunctionCall
+                            return $0.postfix is FunctionCallPostfix
+                        })
+                }.anyExpression()
         
-        guard exp.matches(matchSuperInit), let functionCall = _functionCall else {
+        guard exp.matches(invertedMatchSuperInit), let functionCall = _functionCall else {
             return nil
         }
         
@@ -236,16 +236,23 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         
         var superInit: Expression?
         
+        let invertedMatchSuperInit =
+            ValueMatcher<PostfixExpression>()
+                .inverted { inverted in
+                    inverted
+                        .hasCount(3)
+                        .atIndex(0, equals: .root(.identifier("super")))
+                        .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
+                        .atIndex(2, matcher: .isFunctionCall)
+                }.anyExpression()
+        
         let selfInit =
             Expression.matcher(
                 .findAny(thatMatches:
                     ident("self")
                         .assignment(
                             op: .assign,
-                            rhs:
-                            .findAny(thatMatches:
-                                ident("super" || "self").anyExpression()
-                            ) ->> &superInit
+                            rhs: invertedMatchSuperInit ->> &superInit
                         )
                     .anyExpression()
                 )

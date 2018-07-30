@@ -12,7 +12,7 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
         
         // [Type new]
         var typeName: String = ""
-        if Expression.matcher(ident(.any ->> &typeName).call("new")).matches(exp) {
+        if exp.matches(ident(.any ->> &typeName).call("new")) {
             var result: Expression = Expression.identifier(typeName)
                 
             if typeName == "self" {
@@ -27,7 +27,7 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
         }
         
         // Type.new
-        if Expression.matcher(ident(.any ->> &typeName).dot("new")).matches(exp) {
+        if exp.matches(ident(.any ->> &typeName).dot("new")) {
             let result: Expression
             if typeName == "self" {
                 result = Expression.identifier(typeName).dot("init").call()
