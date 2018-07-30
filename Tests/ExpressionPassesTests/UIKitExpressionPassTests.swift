@@ -256,7 +256,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                 FunctionArgument(label: "green", expression: .constant(1)),
                 FunctionArgument(label: "blue", expression: .constant(1)),
                 FunctionArgument(label: "alpha", expression: .constant(1))
-                ])
+            ])
         )
     }
     

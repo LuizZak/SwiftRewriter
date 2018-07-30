@@ -15,8 +15,11 @@ public struct FunctionSignature: Equatable, Codable {
         )
     }
     
-    public init(name: String, parameters: [ParameterSignature] = [],
-                returnType: SwiftType = .void, isStatic: Bool = false) {
+    public init(name: String,
+                parameters: [ParameterSignature] = [],
+                returnType: SwiftType = .void,
+                isStatic: Bool = false) {
+        
         self.isStatic = isStatic
         self.name = name
         self.returnType = returnType
@@ -84,7 +87,7 @@ public struct FunctionSignature: Equatable, Codable {
 }
 
 public struct ParameterSignature: Equatable, Codable {
-    public var label: String
+    public var label: String?
     public var name: String
     public var type: SwiftType
     
@@ -94,7 +97,7 @@ public struct ParameterSignature: Equatable, Codable {
         self.type = type
     }
     
-    public init(label: String, name: String, type: SwiftType) {
+    public init(label: String?, name: String, type: SwiftType) {
         self.label = label
         self.name = name
         self.type = type

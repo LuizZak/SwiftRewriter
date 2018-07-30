@@ -29,23 +29,40 @@ import SwiftAST
 /// within the if check to before the `super.init` call; however, this can lead
 /// to invalid code in some scenarios.
 public class InitRewriterExpressionPass: ASTRewriterPass {
+    private var ownerType: KnownTypeReference?
     
     public override func apply(on statement: Statement, context: ASTRewriterPassContext) -> Statement {
+        ownerType = nil
         
         // Can only apply to initializers
         switch context.source {
-        case .initializer?:
+        case .initializer(let initializer)?:
             self.context = context
             
             if let compound = statement.asCompound {
                 compound.statements = analyzeStatementBody(compound)
             }
             
+            // Next step is recursive failable super.init analysis- if we lack the
+            // context needed to figure out the superclass, quit now
+            if initializer.ownerType != nil {
+                ownerType = initializer.ownerType
+                return super.apply(on: statement, context: context)
+            }
+            
             return statement
         default:
             return statement
         }
+    }
+    
+    public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
+        if let newExp = validateFailableSuperInit(exp) {
+            notifyChange()
+            return newExp
+        }
         
+        return exp
     }
     
     private func analyzeStatementBody(_ compoundStatement: CompoundStatement) -> [Statement] {
@@ -161,6 +178,60 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
         return nil
     }
     
+    /// In case a given `super.init` invocation is a failable initializer invocation,
+    /// automatically transform
+    private func validateFailableSuperInit(_ exp: Expression) -> Expression? {
+        guard let ownerType = ownerType else {
+            return nil
+        }
+        
+        var _functionCall: FunctionCallPostfix?
+        
+        let matchSuperInit =
+            Expression.matcher(
+                ValueMatcher<PostfixExpression>()
+                    .keyPath(\.functionCall, !isNil() ->> &_functionCall)
+                    .keyPath(\.exp.asPostfix) { postfix in
+                        postfix
+                            .keyPath(\.exp, ident("super").anyExpression())
+                            .keyPath(\.member) { member in
+                                member.keyPath(\.name, equals: "init")
+                            }
+                    }
+                ).anyExpression()
+        
+        guard exp.matches(matchSuperInit), let functionCall = _functionCall else {
+            return nil
+        }
+        
+        // Try to find the containing type now
+        
+        let _constructor =
+            context
+                .typeSystem
+                .constructor(withArgumentLabels: functionCall.argumentKeywords,
+                             in: .typeName(ownerType.asTypeName))
+        
+        guard let constructor = _constructor else {
+            return nil
+        }
+        
+        if constructor.isFailable {
+            let newExp =
+                Expression
+                    .identifier("super")
+                    .dot("init")
+                    .optional()
+                    .call(functionCall.arguments,
+                          type: functionCall.returnType,
+                          callableSignature: functionCall.callableSignature)
+            
+            return newExp
+        }
+        
+        return nil
+    }
+    
     private func superInitExpressionFrom(exp: Expression) -> Expression? {
         
         var superInit: Expression?
@@ -169,10 +240,14 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
             Expression.matcher(
                 .findAny(thatMatches:
                     ident("self")
-                        .assignment(op: .assign,
-                                    rhs: .findAny(thatMatches: ident("super" || "self").anyExpression())
-                                        ->> &superInit)
-                        .anyExpression()
+                        .assignment(
+                            op: .assign,
+                            rhs:
+                            .findAny(thatMatches:
+                                ident("super" || "self").anyExpression()
+                            ) ->> &superInit
+                        )
+                    .anyExpression()
                 )
             )
         

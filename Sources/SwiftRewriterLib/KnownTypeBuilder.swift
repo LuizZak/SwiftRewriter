@@ -21,7 +21,9 @@ public struct KnownTypeBuilder {
         self.type = type
         
         for ctor in existingType.knownConstructors {
-            self = self.constructor(withParameters: ctor.parameters)
+            self = self.constructor(withParameters: ctor.parameters,
+                                    semantics: ctor.semantics,
+                                    isFailable: ctor.isFailable)
         }
         
         for field in existingType.knownFields {
@@ -52,9 +54,12 @@ public struct KnownTypeBuilder {
         self.type.traits = existingType.knownTraits
     }
     
-    public init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil,
-                kind: KnownTypeKind = .class, file: String = #file,
+    public init(typeName: String,
+                supertype: KnownTypeReferenceConvertible? = nil,
+                kind: KnownTypeKind = .class,
+                file: String = #file,
                 line: Int = #line) {
+        
         var type =
             BuildingKnownType(typeName: typeName,
                               supertype: supertype?.asKnownTypeReference)
@@ -100,32 +105,37 @@ public struct KnownTypeBuilder {
     }
     
     /// Adds a parameter-less constructor to this type
-    public func constructor() -> KnownTypeBuilder {
+    public func constructor(isFailable: Bool = false) -> KnownTypeBuilder {
         assert(!type.knownConstructors.contains { $0.parameters.isEmpty },
                "An empty constructor is already provided")
         
-        return constructor(withParameters: [])
+        return constructor(withParameters: [], isFailable: isFailable)
     }
     
     /// Adds a new constructor to this type
     public func constructor(shortParameters shortParams: [ParameterTuple],
-                            semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                            semantics: Set<Semantic> = [],
+                            isFailable: Bool = false) -> KnownTypeBuilder {
         
         let parameters =
             shortParams.map { tuple in
                 ParameterSignature(name: tuple.label, type: tuple.type)
             }
         
-        return constructor(withParameters: parameters, semantics: semantics)
+        return constructor(withParameters: parameters,
+                           semantics: semantics,
+                           isFailable: isFailable)
     }
     
     /// Adds a new constructor to this type
     public func constructor(withParameters parameters: [ParameterSignature],
-                            semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                            semantics: Set<Semantic> = [],
+                            isFailable: Bool = false) -> KnownTypeBuilder {
         
         var new = clone()
         let ctor = BuildingKnownConstructor(parameters: parameters,
-                                            semantics: semantics)
+                                            semantics: semantics,
+                                            isFailable: isFailable)
         
         new.type.constructors.append(ctor)
         
@@ -487,6 +497,7 @@ extension BuildingKnownType: KnownType {
 private struct BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var semantics: Set<Semantic>
+    var isFailable: Bool
 }
 
 private struct BuildingKnownMethod: KnownMethod, Codable {

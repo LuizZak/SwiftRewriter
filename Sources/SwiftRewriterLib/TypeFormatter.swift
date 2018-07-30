@@ -237,7 +237,7 @@ public enum TypeFormatter {
             }
             
             if param.label != param.name {
-                result += "\(param.label) "
+                result += "\(param.label ?? "_") "
             }
             
             result += param.name

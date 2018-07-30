@@ -809,7 +809,7 @@ class InternalSwiftWriter {
             let typeName = typeMapper.typeNameString(for: param.type)
             
             if param.label != param.name {
-                target.outputInlineWithSpace(param.label, style: .plain)
+                target.outputInlineWithSpace(param.label ?? "_", style: .plain)
             }
             
             target.outputInline(param.name)

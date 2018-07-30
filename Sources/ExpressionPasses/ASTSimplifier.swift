@@ -42,13 +42,17 @@ public class ASTSimplifier: ASTRewriterPass {
         let matcher =
             ValueMatcher<IfStatement>()
                 .match(if: !hasElse())
-                .keyPath(\.nullCheckMember?.asIdentifier, .differentThan(nil) ->> &nullCheckM)
+                .keyPath(\.nullCheckMember?.asIdentifier,
+                         .differentThan(nil)
+                            ->> &nullCheckM
+                )
                 .keyPath(\.body.statements, hasCount(1))
                 .keyPath(\.body.statements[0].asExpressions,
                          ValueMatcher()
                             .keyPath(\.expressions, hasCount(1))
                             .keyPath(\.expressions[0].asPostfix,
-                                     ValueMatcher().keyPath(\.exp, lazyEquals(nullCheckM)) ->> &postfix
+                                     ValueMatcher().keyPath(\.exp, lazyEquals(nullCheckM))
+                                        ->> &postfix
                             ))
         
         if matcher.matches(stmt), let postfix = postfix?.copy() {
@@ -60,31 +64,6 @@ public class ASTSimplifier: ASTRewriterPass {
             
             return super.visitStatement(statement)
         }
-        
-//        nullCheck:
-//        if stmt.elseBody == nil, let nullCheckMember = stmt.nullCheckMember, nullCheckMember.asIdentifier != nil {
-//            guard stmt.body.statements.count == 1 else {
-//                break nullCheck
-//            }
-//            let body = stmt.body.statements[0]
-//            guard body.asExpressions?.expressions.count == 1, let exp = body.asExpressions?.expressions.first else {
-//                break nullCheck
-//            }
-//            guard let postfix = exp.asPostfix, postfix.exp == nullCheckMember else {
-//                break nullCheck
-//            }
-//            guard postfix.functionCall != nil else {
-//                break nullCheck
-//            }
-//
-//            postfix.op.hasOptionalAccess = true
-//
-//            let statement = Statement.expression(exp)
-//
-//            notifyChange()
-//
-//            return super.visitStatement(statement)
-//        }
         
         return super.visitIf(stmt)
     }

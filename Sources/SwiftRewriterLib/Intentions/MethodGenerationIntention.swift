@@ -54,7 +54,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, OverridableMe
     }
 }
 
-extension MethodGenerationIntention: KnownMethod, KnownConstructor {
+extension MethodGenerationIntention: KnownMethod {
     public var body: KnownMethodBody? {
         return functionBody
     }

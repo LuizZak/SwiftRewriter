@@ -122,7 +122,7 @@ class ExpressionPassTestCase: XCTestCase {
                                 typeMapper: DefaultTypeMapper(),
                                 typeSystem: DefaultTypeSystem())
             
-            prettyPrintExpWriter.visitStatement(statement)
+            prettyPrintExpWriter.visitStatement(expected)
             prettyPrintResWriter.visitStatement(statement)
             
             dump(expected, to: &expString)

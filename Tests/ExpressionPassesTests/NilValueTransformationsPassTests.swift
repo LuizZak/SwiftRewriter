@@ -136,7 +136,10 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             statement: .expression(exp),
             // { a(b?()) }
             into: .expression(
-                Expression.identifier("a").call([.unlabeled(Expression.identifier("b").optional().call())])
+                Expression
+                    .identifier("a").call([
+                        .unlabeled(Expression.identifier("b").optional().call())
+                    ])
             )
         ); assertNotifiedChange()
     }
@@ -155,7 +158,12 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             // { a(b.c()) }
             statement: .expression(exp),
             // { a(b?.c()) }
-            into: .expression(Expression.identifier("a").call([Expression.identifier("b").optional().dot("c").call()]))
+            into: .expression(
+                Expression
+                    .identifier("a").call([
+                        Expression.identifier("b").optional().dot("c").call()
+                    ])
+            )
         ); assertNotifiedChange()
     }
     
@@ -167,9 +175,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             .identifier("takesBlock")
             .call([
                 .unlabeled(
-                    .block(parameters: [],
-                           return: .void,
-                           body: [
+                    .block(body: [
                             .expression(
                                 Expression
                                     .identifier("block1")
@@ -181,17 +187,15 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                                     .call([
                                         .unlabeled(
                                             Expression.block(
-                                                parameters: [],
-                                                return: .void,
                                                 body: [
                                                     .expression(nilBlock)
                                                 ])
                                         )
-                                        ])
+                                    ])
                             )
-                        ])
+                    ])
                 )
-                ])
+            ])
         
         assertTransform(
             // takesBlock({ block1(); block2() })
@@ -201,9 +205,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                 .identifier("takesBlock")
                 .call([
                     .unlabeled(
-                        .block(parameters: [],
-                               return: .void,
-                               body: [
+                        .block(body: [
                                 .expression(Expression.identifier("block1").call()),
                                 .expression(
                                     Expression
@@ -211,8 +213,6 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                                         .call([
                                             .unlabeled(
                                                 Expression.block(
-                                                    parameters: [],
-                                                    return: .void,
                                                     body: [
                                                         .expression(Expression.identifier("block2").optional().call())
                                                     ]))
@@ -220,7 +220,8 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                                 )
                             ])
                     )
-                    ]))
+                ])
+        )
     }
     
     func testLookupIntoChainedBlockExpressions() {
@@ -246,28 +247,25 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             .identifier("self").dot("member").call()
             .dot("then").call([
                 .unlabeled(
-                    .block(parameters: [],
-                           return: .void,
-                           body: [
+                    .block(body: [
                             .expression(makeCallback(/* coalesced: */ false, /* argCount: */ 0))
-                        ]))
-                ])
+                        ])
+                    )
+            ])
             .dot("then").call([
                 .unlabeled(
-                    .block(parameters: [],
-                           return: .void,
-                           body: [
+                    .block(body: [
                             .expression(makeCallback(/* coalesced: */ false, /* argCount: */ 1))
-                        ]))
-                ])
+                        ])
+                    )
+            ])
             .dot("always").call([
                 .unlabeled(
-                    .block(parameters: [],
-                           return: .void,
-                           body: [
+                    .block(body: [
                             .expression(makeCallback(/* coalesced: */ false, /* argCount: */ 2))
-                        ]))
-                ])
+                        ])
+                    )
+            ])
         
         assertTransform(
             // self.member().then({
@@ -290,28 +288,25 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                 .dot("member").call()
                 .dot("then").call([
                     .unlabeled(
-                        .block(parameters: [],
-                               return: .void,
-                               body: [
+                        .block(body: [
                                 .expression(makeCallback(/* coalesced: */ true, /* argCount: */ 0))
-                            ]))
-                    ])
+                            ])
+                    )
+                ])
                 .dot("then").call([
                     .unlabeled(
-                        .block(parameters: [],
-                               return: .void,
-                               body: [
+                        .block(body: [
                                 .expression(makeCallback(/* coalesced: */ true, /* argCount: */ 1))
-                            ]))
-                    ])
+                            ])
+                    )
+                ])
                 .dot("always").call([
                     .unlabeled(
-                        .block(parameters: [],
-                               return: .void,
-                               body: [
+                        .block(body: [
                                 .expression(makeCallback(/* coalesced: */ true, /* argCount: */ 2))
-                            ]))
-                    ])
+                            ])
+                    )
+                ])
         )
     }
 }

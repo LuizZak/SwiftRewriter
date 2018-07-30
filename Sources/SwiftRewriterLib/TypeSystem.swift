@@ -86,7 +86,7 @@ public protocol TypeSystem {
     // MARK: Member searching methods - KnownType
     
     /// Gets a constructor matching a given argument label set on a given known type.
-    func constructor(withArgumentLabels labels: [String], in type: KnownType) -> KnownConstructor?
+    func constructor(withArgumentLabels labels: [String?], in type: KnownType) -> KnownConstructor?
     
     /// Gets a protocol conformance to a given protocol name on a given known type.
     func conformance(toProtocolName name: String, in type: KnownType) -> KnownProtocolConformance?
@@ -94,13 +94,17 @@ public protocol TypeSystem {
     /// Searches for a method with a given Objective-C equivalent selector, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
-    func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
-                includeOptional: Bool, in type: KnownType) -> KnownMethod?
+    func method(withObjcSelector selector: SelectorSignature,
+                static isStatic: Bool,
+                includeOptional: Bool,
+                in type: KnownType) -> KnownMethod?
     
     /// Gets a property with a given name on a given known type, also specifying
     /// whether to include optional methods (from optional protocol methods that
     /// where not implemented by a concrete class).
-    func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+    func property(named name: String,
+                  static isStatic: Bool,
+                  includeOptional: Bool,
                   in type: KnownType) -> KnownProperty?
     
     /// Gets an instance field with a given name on a given known type.
@@ -109,7 +113,7 @@ public protocol TypeSystem {
     // MARK: Member searching methods - SwiftType
     
     /// Gets a constructor matching a given argument label set on a given known type.
-    func constructor(withArgumentLabels labels: [String], in type: SwiftType) -> KnownConstructor?
+    func constructor(withArgumentLabels labels: [String?], in type: SwiftType) -> KnownConstructor?
     
     /// Gets a protocol conformance to a given protocol name on a given known type.
     func conformance(toProtocolName name: String, in type: SwiftType) -> KnownProtocolConformance?
@@ -117,13 +121,17 @@ public protocol TypeSystem {
     /// Searches for a method with a given Objective-C equivalent selector, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
-    func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
-                includeOptional: Bool, in type: SwiftType) -> KnownMethod?
+    func method(withObjcSelector selector: SelectorSignature,
+                static isStatic: Bool,
+                includeOptional: Bool,
+                in type: SwiftType) -> KnownMethod?
     
     /// Gets a property with a given name on a given known type, also specifying
     /// whether to include optional methods (from optional protocol methods that
     /// where not implemented by a concrete class).
-    func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+    func property(named name: String,
+                  static isStatic: Bool,
+                  includeOptional: Bool,
                   in type: SwiftType) -> KnownProperty?
     
     /// Gets an instance field with a given name on a given known type.

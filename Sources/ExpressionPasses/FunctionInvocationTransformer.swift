@@ -391,7 +391,7 @@ public extension Sequence where Element == FunctionInvocationTransformer.Argumen
     }
 }
 
-public extension Array where Element == FunctionInvocationTransformer.ArgumentStrategy {
+public extension Sequence where Element == FunctionInvocationTransformer.ArgumentStrategy {
     public static func addingLabels(_ labels: String?...) -> [Element] {
         return labels.map { $0.map { .labeled($0, .asIs) } ?? .asIs }
     }

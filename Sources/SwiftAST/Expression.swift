@@ -156,7 +156,12 @@ public class AssignmentExpression: Expression {
     }
     
     public override func copy() -> AssignmentExpression {
-        return AssignmentExpression(lhs: lhs.copy(), op: op, rhs: rhs.copy()).copyTypeAndMetadata(from: self)
+        return
+            AssignmentExpression(
+                lhs: lhs.copy(),
+                op: op,
+                rhs: rhs.copy()
+            ).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -230,7 +235,12 @@ public class BinaryExpression: Expression {
     }
     
     public override func copy() -> BinaryExpression {
-        return BinaryExpression(lhs: lhs.copy(), op: op, rhs: rhs.copy()).copyTypeAndMetadata(from: self)
+        return
+            BinaryExpression(
+                lhs: lhs.copy(),
+                op: op,
+                rhs: rhs.copy()
+            ).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -892,7 +902,12 @@ public class TernaryExpression: Expression {
     }
     
     public override func copy() -> TernaryExpression {
-        return TernaryExpression(exp: exp.copy(), ifTrue: ifTrue.copy(), ifFalse: ifFalse.copy()).copyTypeAndMetadata(from: self)
+        return
+            TernaryExpression(
+                exp: exp.copy(),
+                ifTrue: ifTrue.copy(),
+                ifFalse: ifFalse.copy()
+            ).copyTypeAndMetadata(from: self)
     }
     
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
@@ -1076,7 +1091,12 @@ public extension Expression {
     public static func dictionaryLiteral(
         _ pairs: DictionaryLiteral<Expression, Expression>) -> DictionaryLiteralExpression {
         
-        return DictionaryLiteralExpression(pairs: pairs.map { ExpressionDictionaryPair(key: $0.key, value: $0.value) })
+        return
+            DictionaryLiteralExpression(
+                pairs: pairs.map {
+                    ExpressionDictionaryPair(key: $0.key, value: $0.value)
+                }
+            )
     }
     
     public static func ternary(_ exp: Expression,
@@ -1274,6 +1294,11 @@ public final class FunctionCallPostfix: Postfix {
     
     public override var subExpressions: [Expression] {
         return arguments.map { $0.expression }
+    }
+    
+    /// Gets the list of keywords for the arguments passed to this function call.
+    public var argumentKeywords: [String?] {
+        return arguments.map { $0.label }
     }
     
     /// A .block callable signature for this function call postfix.

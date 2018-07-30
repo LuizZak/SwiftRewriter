@@ -103,6 +103,9 @@ public extension KnownType {
 public protocol KnownConstructor: SemanticalObject {
     /// Gets the parameters for this constructor
     var parameters: [ParameterSignature] { get }
+    
+    /// Gets whether this initializer can fail (i.e. return nil)
+    var isFailable: Bool { get }
 }
 
 /// Describes a known member of a type

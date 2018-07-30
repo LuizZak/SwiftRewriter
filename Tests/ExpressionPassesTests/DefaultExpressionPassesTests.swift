@@ -8,9 +8,9 @@ class DefaultExpressionPassesTests: XCTestCase {
         
         XCTAssertEqual(source.syntaxNodePasses.count, 12)
         
+        XCTAssert(passes.next() == AllocInitExpressionPass.self)
         XCTAssert(passes.next() == InitRewriterExpressionPass.self)
         XCTAssert(passes.next() == ASTSimplifier.self)
-        XCTAssert(passes.next() == AllocInitExpressionPass.self)
         XCTAssert(passes.next() == CoreGraphicsExpressionPass.self)
         XCTAssert(passes.next() == FoundationExpressionPass.self)
         XCTAssert(passes.next() == UIKitExpressionPass.self)

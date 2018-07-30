@@ -405,7 +405,7 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
-    public func constructor(withArgumentLabels labels: [String], in type: KnownType) -> KnownConstructor? {
+    public func constructor(withArgumentLabels labels: [String?], in type: KnownType) -> KnownConstructor? {
         if let constructor =
             type.knownConstructors
                 .first(where: { $0.parameters.map { $0.label }.elementsEqual(labels) }) {
@@ -534,7 +534,7 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
-    public func constructor(withArgumentLabels labels: [String], in type: SwiftType) -> KnownConstructor? {
+    public func constructor(withArgumentLabels labels: [String?], in type: SwiftType) -> KnownConstructor? {
         guard let knownType = self.findType(for: type) else {
             return nil
         }

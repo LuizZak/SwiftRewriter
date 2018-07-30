@@ -19,5 +19,7 @@ public class InitGenerationIntention: MemberGenerationIntention, FunctionIntenti
 }
 
 extension InitGenerationIntention: KnownConstructor {
-    
+    public var isFailable: Bool {
+        return isFailableInitializer
+    }
 }
