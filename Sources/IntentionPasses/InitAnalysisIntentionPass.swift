@@ -16,7 +16,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
                 inverted
                     .hasCount(3)
                     .atIndex(0, rule: .equals(.root(.identifier("super"))) || equals(.root(.identifier("self"))))
-                    .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
+                    .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, .closure { $0?.hasPrefix("init") == true }))
                     .atIndex(2, matcher: .isFunctionCall)
             }.anyExpression()
     
@@ -129,7 +129,9 @@ public class InitAnalysisIntentionPass: IntentionPass {
                                                 || .equals(.root(.identifier("super")))
                                         ).bind(keyPath: \.expression, to: &selfOrSuper)
                                 )
-                                .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
+                                .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name,
+                                                              .closure { $0?.hasPrefix("init") == true })
+                                )
                                 .atIndex(2, matcher: .isFunctionCall)
                         }.anyExpression()
                     )

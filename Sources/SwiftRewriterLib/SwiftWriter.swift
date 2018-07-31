@@ -673,6 +673,10 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("override", style: .keyword)
         }
         
+        if initMethod.isConvenience {
+            target.outputInlineWithSpace("convenience", style: .keyword)
+        }
+        
         // TODO: Support protocol's '@optional' keyword on protocol initializers
         
         target.outputInline("init", style: .keyword)

@@ -54,4 +54,21 @@ class SwiftWriterTests: XCTestCase {
         
         XCTAssertEqual(output.buffer.trimmingCharacters(in: .whitespacesAndNewlines), expected)
     }
+    
+    func testWriteConvenienceInit() {
+        let type = KnownTypeBuilder(typeName: "A").build()
+        let initMethod = InitGenerationIntention(parameters: [])
+        initMethod.isConvenience = true
+        initMethod.functionBody = FunctionBodyIntention(body: [])
+        
+        sut.outputInitMethod(initMethod, selfType: type, target: output.outputTarget())
+        
+        let expected = """
+            @objc
+            convenience init() {
+            }
+            """
+        
+        XCTAssertEqual(output.buffer.trimmingCharacters(in: .whitespacesAndNewlines), expected)
+    }
 }

@@ -2475,7 +2475,7 @@ class SwiftRewriterTests: XCTestCase {
                     return self
                 }
                 @objc
-                init(b: B) {
+                convenience init(b: B) {
                     self.init(a: a)
                 }
             }
