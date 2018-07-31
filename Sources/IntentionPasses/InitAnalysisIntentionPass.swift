@@ -6,9 +6,9 @@ import SwiftAST
 
 // TODO: Add history tracking to affected initializer intentions.
 
-/// An intention pass that searches for failable initializers based on statement
-/// AST analysis and flags them appropriately.
-public class FailableInitFlaggingIntentionPass: IntentionPass {
+/// An intention pass that searches for failable and convenience initializers
+/// based on statement AST analysis and flags them appropriately.
+public class InitAnalysisIntentionPass: IntentionPass {
     
     let invertedMatchSelfOrSuperInit =
         ValueMatcher<PostfixExpression>()
@@ -51,14 +51,19 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         let nodes = SyntaxNodeSequence(node: body, inspectBlocks: false)
         
         for node in nodes.compactMap({ $0 as? ReturnStatement }) {
-            if analyzeReturnStatement(node) {
+            if analyzeIsReturnStatementFailable(node) {
                 initializer.isFailable = true
-                return
+                break
+            }
+        }
+        for node in nodes.compactMap({ $0 as? AssignmentExpression }) {
+            if let target = superOrSelfInitExpressionTargetFrom(exp: node) {
+                initializer.isConvenience = target == "self"
             }
         }
     }
     
-    private func analyzeReturnStatement(_ stmt: ReturnStatement) -> Bool {
+    private func analyzeIsReturnStatementFailable(_ stmt: ReturnStatement) -> Bool {
         guard stmt.exp?.matches(.nil) == true else {
             return false
         }
@@ -94,7 +99,7 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
                 .keyPath(\.op, equals: .negate)
                 .keyPath(\.exp,
                          ValueMatcher<AssignmentExpression>()
-                            .keyPath(\.lhs, ident("self").anyExpression())
+                            .keyPath(\.lhs, ident("self" || "super").anyExpression())
                             .keyPath(\.op, equals: .assign)
                             .keyPath(\.rhs, invertedMatchSelfOrSuperInit)
                             .anyExpression()
@@ -107,24 +112,31 @@ public class FailableInitFlaggingIntentionPass: IntentionPass {
         return true
     }
     
-    private func superOrSelfInitExpressionFrom(exp: Expression) -> Expression? {
+    private func superOrSelfInitExpressionTargetFrom(exp: Expression) -> String? {
         
-        var superInit: Expression?
-        
-        let selfInit =
+        var selfOrSuper: Expression?
+        let matchSelfOrSuper =
             Expression.matcher(
                 .findAny(thatMatches:
-                    ident("self")
-                        .assignment(
-                            op: .assign,
-                            rhs: invertedMatchSelfOrSuperInit ->> &superInit
-                        )
-                        .anyExpression()
+                    ValueMatcher<PostfixExpression>()
+                        .inverted { inverted in
+                            inverted
+                                .hasCount(3)
+                                .atIndex(0, matcher:
+                                    ValueMatcher()
+                                        .match(if:
+                                            .equals(.root(.identifier("self")))
+                                                || .equals(.root(.identifier("super")))
+                                        ).bind(keyPath: \.expression, to: &selfOrSuper)
+                                )
+                                .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, equals: "init"))
+                                .atIndex(2, matcher: .isFunctionCall)
+                        }.anyExpression()
+                    )
                 )
-        )
         
-        if selfInit.anyExpression().matches(exp) {
-            return superInit
+        if matchSelfOrSuper.matches(exp), let selfOrSuper = selfOrSuper?.asIdentifier?.identifier {
+            return selfOrSuper
         }
         
         return nil

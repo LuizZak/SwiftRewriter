@@ -46,28 +46,29 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
 
 /// Provides known type access via a simple backing array
 public class CollectionKnownTypeProvider: KnownTypeProvider {
+    // TODO: Cache by names in a dictionary, similar to
+    // `IntentionCollectionTypeSystem`
     private var knownTypes: [KnownType]
+    private var knownTypesByName: [String: [KnownType]] = [:]
     
     public init(knownTypes: [KnownType] = []) {
         self.knownTypes = knownTypes
+        
+        knownTypesByName = knownTypes.groupBy({ $0.typeName })
     }
     
     public func removeAllTypes() {
         knownTypes.removeAll()
+        knownTypesByName.removeAll()
     }
     
     public func addType(_ type: KnownType) {
         knownTypes.append(type)
+        knownTypesByName[type.typeName, default: []].append(type)
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        for type in knownTypes {
-            if type.typeName == name {
-                return type
-            }
-        }
-        
-        return nil
+        return knownTypesByName[name]?.first
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {

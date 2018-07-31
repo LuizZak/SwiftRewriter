@@ -10,7 +10,7 @@ public struct DefaultIntentionPasses: IntentionPassSource {
         PropertyMergeIntentionPass(),
         StoredPropertyToNominalTypesIntentionPass(),
         SwiftifyMethodSignaturesIntentionPass(),
-        FailableInitFlaggingIntentionPass(),
+        InitAnalysisIntentionPass(),
         ImportDirectiveIntentionPass(),
         UIKitCorrectorIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),

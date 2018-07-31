@@ -68,6 +68,15 @@ public final class PostfixChainInverter {
             }
         }
         
+        public var expression: Expression? {
+            switch self {
+            case .root(let exp):
+                return exp
+            default:
+                return nil
+            }
+        }
+        
         public var resolvedType: SwiftType? {
             switch self {
             case .root(let exp):

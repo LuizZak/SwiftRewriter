@@ -32,6 +32,22 @@ public extension ValueMatcher where T: Equatable {
         return self.match(.extractOptional(.any, target))
     }
     
+    public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U>) -> ValueMatcher {
+        return self.match { value -> Bool in
+            target.pointee = value[keyPath: keyPath]
+            
+            return true
+        }
+    }
+    
+    public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U?>) -> ValueMatcher {
+        return self.match { value -> Bool in
+            target.pointee = value[keyPath: keyPath]
+            
+            return true
+        }
+    }
+    
 }
 
 public extension ValueMatcher where T: Expression {
@@ -163,7 +179,7 @@ public extension ValueMatcher where T: Expression {
     
     // TODO: Revert implementation from both methods bellow to use `exp.asMatchable()`
     // and comparisons with dynamic matchers.
-    // Currently, they crash the compiler on Xcode 10 beta 4
+    // Currently, they crash the compiler on Xcode 10 beta 5.
     
     public static func nilCheck(against value: Expression) -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in

@@ -17,7 +17,7 @@ class DefaultIntentionPassesTests: XCTestCase {
         XCTAssert(intentsIterator.next() is PropertyMergeIntentionPass)
         XCTAssert(intentsIterator.next() is StoredPropertyToNominalTypesIntentionPass)
         XCTAssert(intentsIterator.next() is SwiftifyMethodSignaturesIntentionPass)
-        XCTAssert(intentsIterator.next() is FailableInitFlaggingIntentionPass)
+        XCTAssert(intentsIterator.next() is InitAnalysisIntentionPass)
         XCTAssert(intentsIterator.next() is ImportDirectiveIntentionPass)
         XCTAssert(intentsIterator.next() is UIKitCorrectorIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)

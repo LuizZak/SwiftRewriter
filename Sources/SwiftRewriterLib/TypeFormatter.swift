@@ -271,9 +271,15 @@ public enum TypeFormatter {
         switch trait {
         case .swiftType(let type):
             return stringify(type)
+        case .semantics(let semantics):
+            return stringify(semantics)
         }
     }
     
+    private static func stringify(_ semantics: [Semantic]) -> String {
+        return semantics.map { $0.name }.joined(separator: ", ")
+    }
+
     private static func stringify(_ type: SwiftType) -> String {
         return type.description
     }

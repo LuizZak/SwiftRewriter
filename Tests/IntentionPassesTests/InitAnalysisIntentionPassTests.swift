@@ -4,27 +4,38 @@ import IntentionPasses
 import TestCommons
 import SwiftRewriterLib
 
-class FailableInitFlaggingIntentionPassTests: XCTestCase {
-    var sut: FailableInitFlaggingIntentionPass!
+class InitAnalysisIntentionPassTests: XCTestCase {
+    var sut: InitAnalysisIntentionPass!
     
     override func setUp() {
         super.setUp()
         
-        sut = FailableInitFlaggingIntentionPass()
+        sut = InitAnalysisIntentionPass()
     }
     
     func testEmptyInit() {
-        testDoesNotFlagsBody(CompoundStatement(statements: []))
+        testFlagsBody(as: .none, CompoundStatement(statements: []))
+    }
+    
+    func testFlagsInitAsConvenienceInit() {
+        testFlagsBody(as: .convenience, [
+            .expression(
+                Expression
+                    .identifier("self")
+                    .assignment(op: .assign,
+                                rhs: Expression.identifier("self").dot("init").call([.constant(1)]))
+            )
+        ])
     }
     
     func testInitThatReturnsNil() {
-        testFlagsBody([
+        testFlagsBody(as: .failable, [
             .return(.constant(.nil))
         ])
     }
     
     func testInitThatHasBlockThatReturnsNil() {
-        testDoesNotFlagsBody([
+        testFlagsBody(as: .none, [
             .expression(
                 .block(body: [
                     .return(.constant(.nil))
@@ -40,7 +51,7 @@ class FailableInitFlaggingIntentionPassTests: XCTestCase {
         //     return nil;
         // }
         
-        testDoesNotFlagsBody([
+        testFlagsBody(as: .none, [
             .if(Expression.identifier("self").binary(op: .equals, rhs: .constant(.nil)),
                 body: [
                     .return(.constant(.nil))
@@ -55,7 +66,7 @@ class FailableInitFlaggingIntentionPassTests: XCTestCase {
         //     return nil;
         // }
         
-        testDoesNotFlagsBody([
+        testFlagsBody(as: .none, [
             .if(.unary(op: .negate,
                        Expression
                         .identifier("self")
@@ -77,7 +88,7 @@ class FailableInitFlaggingIntentionPassTests: XCTestCase {
         //     return nil;
         // }
         
-        testDoesNotFlagsBody([
+        testFlagsBody(as: .convenience, [
             .if(.unary(op: .negate,
                        Expression
                         .identifier("self")
@@ -93,9 +104,9 @@ class FailableInitFlaggingIntentionPassTests: XCTestCase {
     }
 }
 
-private extension FailableInitFlaggingIntentionPassTests {
+private extension InitAnalysisIntentionPassTests {
     
-    func testFlagsBody(_ body: CompoundStatement, line: Int = #line) {
+    func testFlagsBody(as flags: InitFlags, _ body: CompoundStatement, line: Int = #line) {
         
         let intentions =
             IntentionCollectionBuilder()
@@ -108,30 +119,52 @@ private extension FailableInitFlaggingIntentionPassTests {
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
-        if !ctor.isFailable {
+        let actFlags = flagsFromConstructor(ctor)
+        
+        if actFlags != flags {
+            let actFlagsString = actFlags.description
+            let expFlagsString = flags.description
+            
             recordFailure(withDescription: """
-                Expected to flag initializer as failable
+                Expected to flag initializer as \(expFlagsString) but found \
+                \(actFlagsString) instead.
                 """, inFile: #file, atLine: line, expected: true)
         }
     }
     
-    func testDoesNotFlagsBody(_ body: CompoundStatement, line: Int = #line) {
-        
-        let intentions =
-            IntentionCollectionBuilder()
-                .createFileWithClass(named: "A") { type in
-                    type.createConstructor { ctor in
-                        ctor.setBody(body)
-                    }
-                }.build()
-        let ctor = intentions.classIntentions()[0].constructors[0]
-        
-        sut.apply(on: intentions, context: makeContext(intentions: intentions))
-        
+    func flagsFromConstructor(_ ctor: InitGenerationIntention) -> InitFlags {
+        var flags: InitFlags = []
         if ctor.isFailable {
-            recordFailure(withDescription: """
-                Expected to not flag initializer as failable
-                """, inFile: #file, atLine: line, expected: true)
+            flags.insert(.failable)
         }
+        if ctor.isConvenience {
+            flags.insert(.convenience)
+        }
+        
+        return flags
+    }
+    
+    struct InitFlags: Hashable, OptionSet, CustomStringConvertible {
+        let rawValue: Int
+        
+        var description: String {
+            var descs: [String] = []
+            
+            if self.contains(.none) {
+                descs.append("none")
+            }
+            if self.contains(.failable) {
+                descs.append("failable")
+            }
+            if self.contains(.convenience) {
+                descs.append("convenience")
+            }
+            
+            return descs.joined(separator: ", ")
+        }
+        
+        static let none = InitFlags(rawValue: 0)
+        static let failable = InitFlags(rawValue: 1)
+        static let convenience = InitFlags(rawValue: 2)
     }
 }
