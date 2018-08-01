@@ -82,7 +82,9 @@ public final class ASTRewriterPassApplier {
         
         let delegate =
             TypeResolvingQueueDelegate(
-                intentions: intentions, globals: globals, typeSystem: typeSystem,
+                intentions: intentions,
+                globals: globals,
+                typeSystem: typeSystem,
                 intentionGlobals: intentionGlobals)
         
         let bodyQueue =

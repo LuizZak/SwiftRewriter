@@ -42,7 +42,8 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     public func resolveExpressionTypes(in method: MethodGenerationIntention, force: Bool) {
         let queue =
-            FunctionBodyQueue.fromMethod(typeSystem.intentions, method: method,
+            FunctionBodyQueue.fromMethod(typeSystem.intentions,
+                                         method: method,
                                          delegate: makeQueueDelegate())
         
         resolveFromQueue(queue)
@@ -50,7 +51,8 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     public func resolveExpressionTypes(in property: PropertyGenerationIntention, force: Bool) {
         let queue =
-            FunctionBodyQueue.fromProperty(typeSystem.intentions, property: property,
+            FunctionBodyQueue.fromProperty(typeSystem.intentions,
+                                           property: property,
                                            delegate: makeQueueDelegate())
         
         resolveFromQueue(queue)
@@ -89,7 +91,9 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
     var typeSystem: TypeSystem
     var intentionGlobals: IntentionCollectionGlobals
     
-    init(intentions: IntentionCollection, globals: DefinitionsSource, typeSystem: TypeSystem,
+    init(intentions: IntentionCollection,
+         globals: DefinitionsSource,
+         typeSystem: TypeSystem,
          intentionGlobals: IntentionCollectionGlobals) {
         
         self.intentions = intentions
@@ -154,8 +158,10 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
     private func makeIntrinsics(typeResolver: ExpressionTypeResolver) -> TypeResolverIntrinsicsBuilder {
         let intrinsics =
             TypeResolverIntrinsicsBuilder(
-                typeResolver: typeResolver, globals: globals,
-                typeSystem: typeSystem, intentionGlobals: intentionGlobals)
+                typeResolver: typeResolver,
+                globals: globals,
+                typeSystem: typeSystem,
+                intentionGlobals: intentionGlobals)
         
         return intrinsics
     }

@@ -2,6 +2,8 @@ import SwiftAST
 import ObjcParser
 
 public final class ExpressionTypeResolver: SyntaxNodeRewriter {
+    private var nearestScopeCache: [HashablePointer<SyntaxNode>: CodeScopeNode] = [:]
+    
     /// In case the expression type resolver is resolving a function context,
     /// this stack is prepared with the expected return types for the current
     /// functions.
@@ -67,6 +69,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     
     /// Invocates the resolution of all expressions on a given statement recursively.
     public func resolveTypes(in statement: Statement) -> Statement {
+        nearestScopeCache = [:]
+        
         // First, clear all variable definitions found, and their usages too.
         for node in SyntaxNodeSequence(node: statement, inspectBlocks: true) {
             switch node {
@@ -113,7 +117,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             let definition = CodeDefinition(variableNamed: decl.identifier,
                                             type: type)
-            stmt.nearestScope?.recordDefinition(definition)
+            nearestScope(for: stmt)?.recordDefinition(definition)
         }
         
         return stmt
@@ -600,13 +604,28 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 }
 
 extension ExpressionTypeResolver {
+    
+    func nearestScope(for node: SyntaxNode) -> CodeScopeNode? {
+        if let scope = nearestScopeCache[HashablePointer(value: node)] {
+            return scope
+        }
+        
+        let scope = node.nearestScope
+        nearestScopeCache[HashablePointer(value: node)] = scope
+        
+        return scope
+    }
+    
+}
+
+extension ExpressionTypeResolver {
     func expandAliases(in type: SwiftType) -> SwiftType {
         return typeSystem.resolveAlias(in: type)
     }
     
     func searchIdentifierDefinition(_ exp: IdentifierExpression) -> IdentifierExpression.Definition? {
         // Visit identifier's type from current context
-        if let definition = exp.nearestScope?.definition(named: exp.identifier) {
+        if let definition = nearestScope(for: exp)?.definition(named: exp.identifier) {
             return .local(definition)
         }
         
@@ -875,5 +894,23 @@ private class MemberInvocationResolver {
         
         return typeSystem.method(withObjcSelector: selector, static: isStatic,
                                  includeOptional: true, in: type)
+    }
+}
+
+private struct HashablePointer<T: AnyObject>: Hashable {
+    var value: T
+    var identifier: ObjectIdentifier
+    
+    init(value: T) {
+        self.value = value
+        self.identifier = ObjectIdentifier(value)
+    }
+    
+    static func == (lhs: HashablePointer<T>, rhs: HashablePointer<T>) -> Bool {
+        return lhs.identifier == rhs.identifier
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        identifier.hash(into: &hasher)
     }
 }

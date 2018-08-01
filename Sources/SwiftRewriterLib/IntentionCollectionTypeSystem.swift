@@ -20,7 +20,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         typealiasProviders.providers.append(intentionsProvider)
     }
     
-    public func makeCache() {
+    public override func makeCache() {
+        super.makeCache()
+        
         var aliases: [String: SwiftType] = [:]
         var types: [String: [TypeGenerationIntention]] = [:]
         
@@ -46,7 +48,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                                               types: compoundTypes)
     }
     
-    public func tearDownCache() {
+    public override func tearDownCache() {
+        super.tearDownCache()
+        
         intentionsProvider.cache = nil
     }
     

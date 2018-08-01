@@ -40,20 +40,25 @@ public class FileInputSource: InputSource {
 }
 
 public class FileCodeSource: CodeSource {
+    private var _source: StringCodeSource
+    
     public var filePath: String
-    public var fileContents: String
+    public var fileContents: String {
+        return _source.source
+    }
     
     public init(filePath: String, fileContents: String) {
         self.filePath = filePath
-        self.fileContents = fileContents
+        
+        _source = StringCodeSource(source: fileContents)
     }
     
     public func fetchSource() -> String {
-        return fileContents
+        return _source.source
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
-        return fileContents.index(fileContents.startIndex, offsetBy: offset)
+        return _source.stringIndex(forCharOffset: offset)
     }
     
     public func isEqual(to other: Source) -> Bool {
@@ -65,24 +70,10 @@ public class FileCodeSource: CodeSource {
     }
     
     public func lineNumber(at index: String.Index) -> Int {
-        let line =
-            fileContents[..<index].reduce(0) {
-                $0 + ($1 == "\n" ? 1 : 0)
-            }
-        
-        return line + 1 // lines start at one
+        return _source.lineNumber(at: index)
     }
     
     public func columnNumber(at index: String.Index) -> Int {
-        // Figure out start of line at the given index
-        let lineStart =
-            zip(fileContents[..<index], fileContents.indices)
-                .reversed()
-                .first { $0.0 == "\n" }?.1
-        
-        let lineStartOffset =
-            lineStart.map(fileContents.index(after:)) ?? fileContents.startIndex
-        
-        return fileContents.distance(from: lineStartOffset, to: index) + 1 // columns start at one
+        return _source.columnNumber(at: index)
     }
 }

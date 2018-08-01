@@ -4,7 +4,7 @@ import ObjcParserAntlr
 
 /// Base node type
 open class ASTNode {
-    /// Location for this node
+    /// Location for this node within the original source code
     public var location: SourceLocation
     
     /// Original source for this node.
@@ -12,6 +12,9 @@ open class ASTNode {
     
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
+    
+    // TODO: Start stripping away references to ANTLR from ASTNodes so we can
+    // start considering serialization options for this type.
     
     /// If this node was parsed from an Antlr rule, this value is set to the original
     /// parser rule that originated this node.

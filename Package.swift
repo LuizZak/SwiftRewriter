@@ -42,7 +42,7 @@ let package = Package(
         .target(
             name: "ObjcParser",
             dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer",
-                           "TypeLexing"]),
+                           "TypeLexing", "Utils"]),
         .target(
             name: "SwiftAST",
             dependencies: ["GrammarModels", "MiniLexer"]),

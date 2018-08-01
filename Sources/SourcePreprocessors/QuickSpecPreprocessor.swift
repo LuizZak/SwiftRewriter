@@ -34,10 +34,10 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
         // Extract comment sections which will be useful to detect regions where
         // QuickSpecBegin/QuickSpecEnd are actually comments and are not to be
         // modified.
-        var commentSections = source.rangesOfCommentSections()
+        var commentSections = source.commentSectionRanges()
         var processed = source {
             didSet {
-                commentSections = processed.rangesOfCommentSections()
+                commentSections = processed.commentSectionRanges()
             }
         }
         

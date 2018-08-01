@@ -71,7 +71,7 @@ public extension String {
         return copy
     }
     
-    private func offsetForStartOfLine(_ line: Int) -> String.Index {
+    private func offsetForStartOfLine(_ line: Int) -> Index {
         var lineCount = 1
         for (i, char) in zip(indices, self) {
             if lineCount >= line {
@@ -86,8 +86,28 @@ public extension String {
         return endIndex
     }
     
+    /// Returns the ranges for all individual lines of text separated by a line-break
+    /// character `\n` within this string.
+    public func lineRanges() -> [Range<Index>] {
+        var lines: [Range<Index>] = []
+        var currentLineStart = startIndex
+        
+        for (index, char) in zip(indices, self) where char == "\n" {
+            lines.append(currentLineStart..<index)
+            
+            if index != endIndex {
+                // Skip past the linebreak char
+                currentLineStart = self.index(after: index)
+            }
+        }
+        
+        lines.append(currentLineStart..<endIndex)
+        
+        return lines
+    }
+    
     /// Gets the line number for the given index in this string
-    public func lineNumber(at index: String.Index) -> Int {
+    public func lineNumber(at index: Index) -> Int {
         let line =
             self[..<index].reduce(0) {
                 $0 + ($1 == "\n" ? 1 : 0)
@@ -99,7 +119,7 @@ public extension String {
     /// Gets the column offset number for the given index in this string.
     /// The column offset counts how many characters there are to the left to
     /// either the nearest newline or the beginning of the string.
-    public func columnOffset(at index: String.Index) -> Int {
+    public func columnOffset(at index: Index) -> Int {
         // Figure out start of line at the given index
         let lineStart =
             zip(self[..<index], indices)
@@ -116,7 +136,7 @@ public extension String {
 public extension String {
     /// Returns a range of sections of this string that represent single and mult-lined
     /// comments.
-    func rangesOfCommentSections() -> [Range<Index>] {
+    func commentSectionRanges() -> [Range<Index>] {
         if self.count < 2 {
             return []
         }

@@ -9,10 +9,19 @@ public final class SourceLocation {
     ///
     /// It always has a `SourceRange.invalid` range and a source pointing to an
     /// `InvalidSource` instance.
-    public static let invalid = SourceLocation(source: InvalidSource.invalid, range: .invalid)
+    public static let invalid = SourceLocation(source: InvalidSource.invalid,
+                                               range: .invalid)
     
     /// The original source this location references.
     public var source: Source
+    
+    /// Line at which this location starts within the source.
+    /// Valid source location lines start at 1.
+    public var line: Int = 0
+    
+    /// Column offset at which this location starts within the source.
+    /// Valid source location columns start at 1.
+    public var column: Int = 0
     
     /// Range within the original source this location points to.
     public var range: SourceRange {
@@ -26,6 +35,7 @@ public final class SourceLocation {
                 let range = SourceRange.range(start..<end)
                 _range = .range(range)
                 return range
+                
             case .range(let range):
                 return range
             }
@@ -35,14 +45,34 @@ public final class SourceLocation {
         }
     }
     
+    public init(source: Source, intRange: Range<Int>, line: Int, column: Int) {
+        self.source = source
+        _range = .intRange(intRange)
+        self.line = line
+        self.column = column
+    }
+    
     public init(source: Source, intRange: Range<Int>) {
         self.source = source
         _range = .intRange(intRange)
+        
+        computeLineAndColumn()
     }
     
     public init(source: Source, range: SourceRange) {
         self.source = source
         _range = .range(range)
+        
+        computeLineAndColumn()
+    }
+    
+    private func computeLineAndColumn() {
+        guard let loc = range.start else {
+            return
+        }
+        
+        self.line = source.lineNumber(at: loc)
+        self.column = source.columnNumber(at: loc)
     }
     
     private enum _SourceRange {

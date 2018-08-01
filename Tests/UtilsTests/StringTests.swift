@@ -108,12 +108,12 @@ class StringTests: XCTestCase {
             """, result)
     }
     
-    func testRangeOfCommentsInEmptyString() {
-        let ranges = "".rangesOfCommentSections()
+    func testCommentSectionRangesInEmptyString() {
+        let ranges = "".commentSectionRanges()
         XCTAssertEqual(ranges.count, 0)
     }
     
-    func testRangeOfComments() {
+    func testCommentSectionRanges() {
         let input = """
         // A comment!
         Not a comment.
@@ -123,7 +123,7 @@ class StringTests: XCTestCase {
         Not a comment again.
         """
         
-        let ranges = input.rangesOfCommentSections()
+        let ranges = input.commentSectionRanges()
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.range(of: "// A comment!\n"))
         XCTAssertEqual(ranges[1], input.range(of: """
@@ -133,56 +133,122 @@ class StringTests: XCTestCase {
             """))
     }
     
-    func testRangeOfCommentsEntireString() {
+    func testCommentSectionRangesEntireString() {
         let input = "// A comment!"
         
-        let ranges = input.rangesOfCommentSections()
+        let ranges = input.commentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
     
-    func testRangeOfCommentsEntireStringMultiLine() {
+    func testCommentSectionRangesEntireStringMultiLine() {
         let input = "/* A comment! \n*/"
         
-        let ranges = input.rangesOfCommentSections()
+        let ranges = input.commentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
     
-    func testRangeOfCommentsOpenMultiLineComment() {
+    func testCommentSectionRangesOpenMultiLineComment() {
         let input = "/* A comment! \n"
         
-        let ranges = input.rangesOfCommentSections()
+        let ranges = input.commentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
     
-    func testRangeOfCommentsIgnoresCommentsInStringLiterals() {
+    func testCommentSectionRangesIgnoresCommentsInStringLiterals() {
         let input = "\"A comment in a string: // etc.\""
         
-        let ranges = input.rangesOfCommentSections()
+        let ranges = input.commentSectionRanges()
         XCTAssertEqual(ranges.count, 0)
     }
     
-    func testRangeOfCommentsIgnoresStringLiteralsWithinSingleLineComments() {
+    func testCommentSectionRangesIgnoresStringLiteralsWithinSingleLineComments() {
         let input = "/* A comment! \"A string\" \n"
         
-        let ranges = input.rangesOfCommentSections()
+        let ranges = input.commentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
     }
     
-    func testRangeOfCommentsIgnoresStringLiteralsWithinMultiLineComments() {
+    func testCommentSectionRangesIgnoresStringLiteralsWithinMultiLineComments() {
         let input = """
             /* A comment! "An unterminated string literal
             */ "A string /* */"
             """
         
-        let ranges = input.rangesOfCommentSections()
+        let ranges = input.commentSectionRanges()
         XCTAssertEqual(ranges.count, 1)
         XCTAssertEqual(ranges[0], input.range(of: """
             /* A comment! "An unterminated string literal
             */
             """))
+    }
+    
+    func testLineRangesWithCountedLines() {
+        let input = """
+            1
+            2
+            3
+            """
+        
+        let ranges = input.lineRanges()
+        XCTAssertEqual(ranges.count, 3)
+        XCTAssertEqual(ranges[0], input.range(of: "1"))
+        XCTAssertEqual(ranges[1], input.range(of: "2"))
+        XCTAssertEqual(ranges[2], input.range(of: "3"))
+    }
+    
+    func testLineRangesWithEmptyLines() {
+        let input = """
+            1
+            
+            3
+            """
+        
+        let ranges = input.lineRanges()
+        XCTAssertEqual(ranges.count, 3)
+        XCTAssertEqual(ranges[0], input.range(of: "1"))
+        XCTAssertEqual(ranges[1],
+                       input.range(of: "1\n")!.upperBound..<input.range(of: "\n3")!.lowerBound)
+        XCTAssertEqual(ranges[2], input.range(of: "3"))
+    }
+    
+    func testLineRangesWithEmptyFinalLine() {
+        let input = """
+            1
+            
+            """
+        
+        let ranges = input.lineRanges()
+        XCTAssertEqual(ranges.count, 2)
+        XCTAssertEqual(ranges[0], input.range(of: "1"))
+        XCTAssertEqual(ranges[1], input.range(of: "1\n")!.upperBound..<input.endIndex)
+    }
+    
+    func testLineRangesWithSingleLine() {
+        let input = "123"
+        
+        let ranges = input.lineRanges()
+        XCTAssertEqual(ranges.count, 1)
+        XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+    }
+    
+    func testLineRangesWithEmptyString() {
+        let input = ""
+        
+        let ranges = input.lineRanges()
+        XCTAssertEqual(ranges.count, 1)
+        XCTAssertEqual(ranges[0], input.startIndex..<input.endIndex)
+    }
+    
+    func testLineRangesWithSingleEmptyLine() {
+        let input = "\n"
+        
+        let ranges = input.lineRanges()
+        XCTAssertEqual(ranges.count, 2)
+        XCTAssertEqual(ranges[0], input.startIndex..<input.startIndex)
+        XCTAssertEqual(ranges[1], input.endIndex..<input.endIndex)
     }
 }

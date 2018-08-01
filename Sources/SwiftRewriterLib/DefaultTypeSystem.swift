@@ -2,11 +2,15 @@ import SwiftAST
 import TypeDefinitions
 import Utils
 
+// TODO: Implement local caching on compound known types within the type system
+// to reduce burden of re-creating known types over and over during type resolving.
+
 /// Standard type system implementation
 public class DefaultTypeSystem: TypeSystem {
     /// A singleton instance to a default type system.
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
     
+    private var compoundKnownTypesCache: CompoundKnownTypesCache?
     private var baseClassTypesByName: [String: ClassType] = [:]
     private var initializedCache = false
     
@@ -25,6 +29,14 @@ public class DefaultTypeSystem: TypeSystem {
         knownTypeProviders = CompoundKnownTypeProvider(providers: [innerKnownTypes])
         
         registerInitialKnownTypes()
+    }
+    
+    public func makeCache() {
+        compoundKnownTypesCache = CompoundKnownTypesCache()
+    }
+    
+    public func tearDownCache() {
+        compoundKnownTypesCache = nil
     }
     
     public func addTypealiasProvider(_ provider: TypealiasProvider) {
@@ -114,6 +126,10 @@ public class DefaultTypeSystem: TypeSystem {
             return knownTypeWithName(typeNames[0])
         }
         
+        if let type = compoundKnownTypesCache?.fetch(names: typeNames) {
+            return type
+        }
+        
         var types: [KnownType] = []
         
         for typeName in typeNames {
@@ -126,7 +142,14 @@ public class DefaultTypeSystem: TypeSystem {
         
         // TODO: Expose a new protocol `KnownTypeComposition` to help expose
         // the type structure better, and get rid of this `typeName` hack-ish thing.
-        return CompoundKnownType(typeName: typeNames.joined(separator: " & "), types: types, typeSystem: self)
+        let compoundType =
+            CompoundKnownType(typeName: typeNames.joined(separator: " & "),
+                              types: types,
+                              typeSystem: self)
+        
+        compoundKnownTypesCache?.record(type: compoundType, names: typeNames)
+        
+        return compoundType
     }
     
     public func isClassInstanceType(_ typeName: String) -> Bool {
@@ -477,7 +500,9 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
-    public func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+    public func property(named name: String,
+                         static isStatic: Bool,
+                         includeOptional: Bool,
                          in type: KnownType) -> KnownProperty? {
         
         if let property = type.knownProperties.first(where: {
@@ -548,8 +573,11 @@ public class DefaultTypeSystem: TypeSystem {
         return conformance(toProtocolName: name, in: knownType)
     }
     
-    public func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
-                       includeOptional: Bool, in type: SwiftType) -> KnownMethod? {
+    public func method(withObjcSelector selector: SelectorSignature,
+                       static isStatic: Bool,
+                       includeOptional: Bool,
+                       in type: SwiftType) -> KnownMethod? {
+        
         guard let knownType = self.findType(for: type) else {
             return nil
         }
@@ -557,12 +585,17 @@ public class DefaultTypeSystem: TypeSystem {
                       in: knownType)
     }
     
-    public func property(named name: String, static isStatic: Bool, includeOptional: Bool,
+    public func property(named name: String,
+                         static isStatic: Bool,
+                         includeOptional: Bool,
                          in type: SwiftType) -> KnownProperty? {
+        
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        return property(named: name, static: isStatic, includeOptional: includeOptional,
+        return property(named: name,
+                        static: isStatic,
+                        includeOptional: includeOptional,
                         in: knownType)
     }
     
@@ -684,6 +717,22 @@ public class DefaultTypeSystem: TypeSystem {
             }
             
             return work()
+        }
+    }
+    
+    private final class CompoundKnownTypesCache {
+        private var types: [[String]: KnownType]
+        
+        init() {
+            types = [:]
+        }
+        
+        func fetch(names: [String]) -> KnownType? {
+            return types[names]
+        }
+        
+        func record(type: KnownType, names: [String]) {
+            types[names] = type
         }
     }
 }

@@ -914,8 +914,14 @@ private class GenericParseTreeContextMapper {
             let startIndex = rule.start?.getStartIndex() ?? 0
             let endIndex = rule.stop?.getStopIndex() ?? 0
             
+            let line = rule.start?.getLine() ?? 0
+            let column = (rule.start?.getCharPositionInLine()).map { $0 + 1 } ?? 0
+            
             node.location =
-                SourceLocation(source: source, intRange: startIndex..<endIndex)
+                SourceLocation(source: source,
+                               intRange: startIndex..<endIndex,
+                               line: line,
+                               column: column)
             
             node.sourceRuleContext = rule
             context.pushContext(node: node)
