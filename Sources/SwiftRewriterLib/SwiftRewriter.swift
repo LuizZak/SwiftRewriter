@@ -7,7 +7,7 @@ import Utils
 private typealias NonnullTokenRange = (start: Int, end: Int)
 
 /// Main front-end for Swift Rewriter
-public class SwiftRewriter {
+public final class SwiftRewriter {
     private static var _parserStatePool: ObjcParserStatePool = ObjcParserStatePool()
     
     private let sourcesProvider: InputSourcesProvider

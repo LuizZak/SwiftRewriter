@@ -355,28 +355,28 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorDefContext: DirectiveContext {
-		open func IFDEF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IFDEF.rawValue, 0) }
-		open func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
-		open func IFNDEF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IFNDEF.rawValue, 0) }
-		open func UNDEF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.UNDEF.rawValue, 0) }
+        public func IFDEF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IFDEF.rawValue, 0) }
+        public func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
+        public func IFNDEF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IFNDEF.rawValue, 0) }
+        public func UNDEF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.UNDEF.rawValue, 0) }
 		public init(_ ctx: DirectiveContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorDef(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorDef(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorDef(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -388,8 +388,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorErrorContext: DirectiveContext {
-		open func ERROR() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ERROR.rawValue, 0) }
-		open func directive_text() -> Directive_textContext? {
+        public func ERROR() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ERROR.rawValue, 0) }
+        public func directive_text() -> Directive_textContext? {
 			return getRuleContext(Directive_textContext.self,0)
 		}
 		public init(_ ctx: DirectiveContext) {
@@ -397,19 +397,19 @@ open class ObjectiveCPreprocessorParser: Parser {
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorError(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorError(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorError(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -421,31 +421,31 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorConditionalContext: DirectiveContext {
-		open func IF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IF.rawValue, 0) }
-		open func preprocessor_expression() -> Preprocessor_expressionContext? {
+        public func IF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IF.rawValue, 0) }
+        public func preprocessor_expression() -> Preprocessor_expressionContext? {
 			return getRuleContext(Preprocessor_expressionContext.self,0)
 		}
-		open func ELIF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ELIF.rawValue, 0) }
-		open func ELSE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ELSE.rawValue, 0) }
-		open func ENDIF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ENDIF.rawValue, 0) }
+        public func ELIF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ELIF.rawValue, 0) }
+        public func ELSE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ELSE.rawValue, 0) }
+        public func ENDIF() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.ENDIF.rawValue, 0) }
 		public init(_ ctx: DirectiveContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorConditional(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorConditional(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorConditional(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -457,29 +457,29 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorImportContext: DirectiveContext {
-		open func directive_text() -> Directive_textContext? {
+        public func directive_text() -> Directive_textContext? {
 			return getRuleContext(Directive_textContext.self,0)
 		}
-		open func IMPORT() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IMPORT.rawValue, 0) }
-		open func INCLUDE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.INCLUDE.rawValue, 0) }
+        public func IMPORT() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.IMPORT.rawValue, 0) }
+        public func INCLUDE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.INCLUDE.rawValue, 0) }
 		public init(_ ctx: DirectiveContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorImport(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorImport(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorImport(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -491,8 +491,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorPragmaContext: DirectiveContext {
-		open func PRAGMA() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.PRAGMA.rawValue, 0) }
-		open func directive_text() -> Directive_textContext? {
+        public func PRAGMA() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.PRAGMA.rawValue, 0) }
+        public func directive_text() -> Directive_textContext? {
 			return getRuleContext(Directive_textContext.self,0)
 		}
 		public init(_ ctx: DirectiveContext) {
@@ -500,19 +500,19 @@ open class ObjectiveCPreprocessorParser: Parser {
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorPragma(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorPragma(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorPragma(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -524,9 +524,9 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorDefineContext: DirectiveContext {
-		open func DEFINE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DEFINE.rawValue, 0) }
-		open func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
-		open func directive_text() -> Directive_textContext? {
+        public func DEFINE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DEFINE.rawValue, 0) }
+        public func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
+        public func directive_text() -> Directive_textContext? {
 			return getRuleContext(Directive_textContext.self,0)
 		}
 		public init(_ ctx: DirectiveContext) {
@@ -534,19 +534,19 @@ open class ObjectiveCPreprocessorParser: Parser {
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorDefine(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorDefine(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorDefine(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -558,8 +558,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorWarningContext: DirectiveContext {
-		open func WARNING() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.WARNING.rawValue, 0) }
-		open func directive_text() -> Directive_textContext? {
+        public func WARNING() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.WARNING.rawValue, 0) }
+        public func directive_text() -> Directive_textContext? {
 			return getRuleContext(Directive_textContext.self,0)
 		}
 		public init(_ ctx: DirectiveContext) {
@@ -567,19 +567,19 @@ open class ObjectiveCPreprocessorParser: Parser {
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorWarning(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorWarning(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorWarning(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -829,29 +829,29 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorParenthesisContext: Preprocessor_expressionContext {
-		open func LPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue, 0) }
-		open func preprocessor_expression() -> Preprocessor_expressionContext? {
+		public func LPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue, 0) }
+		public func preprocessor_expression() -> Preprocessor_expressionContext? {
 			return getRuleContext(Preprocessor_expressionContext.self,0)
 		}
-		open func RPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue, 0) }
+		public func RPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue, 0) }
 		public init(_ ctx: Preprocessor_expressionContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorParenthesis(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorParenthesis(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorParenthesis(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -863,8 +863,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorNotContext: Preprocessor_expressionContext {
-		open func BANG() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.BANG.rawValue, 0) }
-		open func preprocessor_expression() -> Preprocessor_expressionContext? {
+        public func BANG() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.BANG.rawValue, 0) }
+        public func preprocessor_expression() -> Preprocessor_expressionContext? {
 			return getRuleContext(Preprocessor_expressionContext.self,0)
 		}
 		public init(_ ctx: Preprocessor_expressionContext) {
@@ -872,19 +872,19 @@ open class ObjectiveCPreprocessorParser: Parser {
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorNot(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorNot(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorNot(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -897,38 +897,38 @@ open class ObjectiveCPreprocessorParser: Parser {
 	}
 	public  final class PreprocessorBinaryContext: Preprocessor_expressionContext {
 		public var op: Token!
-		open func preprocessor_expression() -> Array<Preprocessor_expressionContext> {
+        public func preprocessor_expression() -> Array<Preprocessor_expressionContext> {
 			return getRuleContexts(Preprocessor_expressionContext.self)
 		}
-		open func preprocessor_expression(_ i: Int) -> Preprocessor_expressionContext? {
+        public func preprocessor_expression(_ i: Int) -> Preprocessor_expressionContext? {
 			return getRuleContext(Preprocessor_expressionContext.self,i)
 		}
-		open func EQUAL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.EQUAL.rawValue, 0) }
-		open func NOTEQUAL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.NOTEQUAL.rawValue, 0) }
-		open func AND() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.AND.rawValue, 0) }
-		open func OR() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.OR.rawValue, 0) }
-		open func LT() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LT.rawValue, 0) }
-		open func GT() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.GT.rawValue, 0) }
-		open func LE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LE.rawValue, 0) }
-		open func GE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.GE.rawValue, 0) }
+        public func EQUAL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.EQUAL.rawValue, 0) }
+        public func NOTEQUAL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.NOTEQUAL.rawValue, 0) }
+        public func AND() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.AND.rawValue, 0) }
+        public func OR() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.OR.rawValue, 0) }
+        public func LT() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LT.rawValue, 0) }
+        public func GT() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.GT.rawValue, 0) }
+        public func LE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LE.rawValue, 0) }
+        public func GE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.GE.rawValue, 0) }
 		public init(_ ctx: Preprocessor_expressionContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorBinary(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorBinary(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorBinary(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -940,28 +940,28 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorConstantContext: Preprocessor_expressionContext {
-		open func TRUE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.TRUE.rawValue, 0) }
-		open func FALSE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.FALSE.rawValue, 0) }
-		open func DECIMAL_LITERAL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DECIMAL_LITERAL.rawValue, 0) }
-		open func DIRECTIVE_STRING() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_STRING.rawValue, 0) }
+        public func TRUE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.TRUE.rawValue, 0) }
+        public func FALSE() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.FALSE.rawValue, 0) }
+        public func DECIMAL_LITERAL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DECIMAL_LITERAL.rawValue, 0) }
+        public func DIRECTIVE_STRING() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DIRECTIVE_STRING.rawValue, 0) }
 		public init(_ ctx: Preprocessor_expressionContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorConstant(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorConstant(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorConstant(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -973,30 +973,30 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorConditionalSymbolContext: Preprocessor_expressionContext {
-		open func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
-		open func LPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue, 0) }
-		open func preprocessor_expression() -> Preprocessor_expressionContext? {
+        public func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
+        public func LPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue, 0) }
+        public func preprocessor_expression() -> Preprocessor_expressionContext? {
 			return getRuleContext(Preprocessor_expressionContext.self,0)
 		}
-		open func RPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue, 0) }
+        public func RPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue, 0) }
 		public init(_ ctx: Preprocessor_expressionContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorConditionalSymbol(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorConditionalSymbol(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorConditionalSymbol(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
@@ -1008,28 +1008,28 @@ open class ObjectiveCPreprocessorParser: Parser {
 		}
 	}
 	public  final class PreprocessorDefinedContext: Preprocessor_expressionContext {
-		open func DEFINED() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DEFINED.rawValue, 0) }
-		open func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
-		open func LPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue, 0) }
-		open func RPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue, 0) }
+        public func DEFINED() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.DEFINED.rawValue, 0) }
+        public func CONDITIONAL_SYMBOL() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.CONDITIONAL_SYMBOL.rawValue, 0) }
+        public func LPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.LPAREN.rawValue, 0) }
+        public func RPAREN() -> TerminalNode? { return getToken(ObjectiveCPreprocessorParser.Tokens.RPAREN.rawValue, 0) }
 		public init(_ ctx: Preprocessor_expressionContext) {
 			super.init()
 			copyFrom(ctx)
 		}
 		override
-		open func enterRule(_ listener: ParseTreeListener) {
+		public func enterRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).enterPreprocessorDefined(self)
 			}
 		}
 		override
-		open func exitRule(_ listener: ParseTreeListener) {
+		public func exitRule(_ listener: ParseTreeListener) {
 			if listener is ObjectiveCPreprocessorParserListener {
 			 	(listener as! ObjectiveCPreprocessorParserListener).exitPreprocessorDefined(self)
 			}
 		}
 		override
-		open func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
+		public func accept<T>(_ visitor: ParseTreeVisitor<T>) -> T? {
 			if visitor is ObjectiveCPreprocessorParserVisitor {
 			     return (visitor as! ObjectiveCPreprocessorParserVisitor<T>).visitPreprocessorDefined(self)
 			}else if visitor is ObjectiveCPreprocessorParserBaseVisitor {
