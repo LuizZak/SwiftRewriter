@@ -162,6 +162,8 @@ public class SwiftRewriter {
             typeSystem.tearDownCache()
         }
         
+        let antlrSettings = makeAntlrSettings()
+        
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
@@ -170,7 +172,7 @@ public class SwiftRewriter {
                 autoreleasepool {
                     let typeMapper = DefaultTypeMapper(typeSystem: self.typeSystem)
                     let state = SwiftRewriter._parserStatePool.pull()
-                    let typeParser = TypeParsing(state: state)
+                    let typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
                     defer {
                         SwiftRewriter._parserStatePool.repool(state)
                     }
@@ -485,10 +487,11 @@ public class SwiftRewriter {
         let processedSrc = applyPreprocessors(source: src)
         
         let parser = ObjcParser(string: processedSrc, fileName: src.filePath, state: state)
+        parser.antlrSettings = makeAntlrSettings()
         try parser.parse()
         
         let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem.defaultTypeSystem)
-        let typeParser = TypeParsing(state: state)
+        let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)
         
         let collectorDelegate =
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser,
@@ -550,10 +553,17 @@ public class SwiftRewriter {
         print("")
     }
     
+    private func makeAntlrSettings() -> AntlrSettings {
+        return AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
+    }
+    
     /// Settings for a `SwiftRewriter` instance
     public struct Settings {
         /// Gets the default settings for a `SwiftRewriter` invocation
-        public static var `default` = Settings(numThreads: 8, verbose: false, diagnoseFiles: [])
+        public static var `default` = Settings(numThreads: 8,
+                                               verbose: false,
+                                               diagnoseFiles: [],
+                                               forceUseLLPrediction: false)
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -571,10 +581,22 @@ public class SwiftRewriter {
         /// intention and expression passes are passed through the files.
         public var diagnoseFiles: [String]
         
-        public init(numThreads: Int, verbose: Bool, diagnoseFiles: [String]) {
+        /// Whether to indicate to parser instances to force usage of LL prediction
+        /// mode on the underlying ANTLR parser.
+        ///
+        /// Sometimes skipping SLL prediction mode straight to LL prediction can
+        /// be more effective.
+        public var forceUseLLPrediction: Bool
+        
+        public init(numThreads: Int,
+                    verbose: Bool,
+                    diagnoseFiles: [String],
+                    forceUseLLPrediction: Bool) {
+            
             self.numThreads = numThreads
             self.verbose = verbose
             self.diagnoseFiles = []
+            self.forceUseLLPrediction = forceUseLLPrediction
         }
     }
 }

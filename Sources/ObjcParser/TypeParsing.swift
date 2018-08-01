@@ -6,14 +6,17 @@ public class TypeParsing {
     public typealias Parser = ObjectiveCParser
     
     public let state: ObjcParserState
+    public let antlrSettings: AntlrSettings
     
-    public init(state: ObjcParserState) {
+    public init(state: ObjcParserState, antlrSettings: AntlrSettings = .default) {
         self.state = state
+        self.antlrSettings = antlrSettings
     }
     
     // Helper for mapping Objective-C types from raw strings into a structured types
     public func parseObjcType(_ source: String) -> ObjcType? {
         let parser = ObjcParser(source: StringCodeSource(source: source), state: state)
+        parser.antlrSettings = antlrSettings
         return try? parser.parseObjcType()
     }
     

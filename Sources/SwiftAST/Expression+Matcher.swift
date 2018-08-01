@@ -106,7 +106,7 @@ public extension ValueMatcher where T: Expression {
     
     public func assignment<E>(op: SwiftOperator, rhs: E) -> SyntaxMatcher<AssignmentExpression>
         where E: ValueMatcherConvertible, E.Target == Expression {
-            
+        
         return SyntaxMatcher<AssignmentExpression>()
             .keyPath(\.op, .equals(op))
             .keyPath(\.rhs, rhs.asMatcher())
@@ -115,10 +115,11 @@ public extension ValueMatcher where T: Expression {
 
 public extension ValueMatcher where T: PostfixExpression {
     
-    public func inverted(_ closure: (ValueMatcher<[PostfixChainInverter.Postfix]>) -> ValueMatcher<[PostfixChainInverter.Postfix]>)
-        -> ValueMatcher<T> {
+    public typealias PostfixMatcher = ValueMatcher<[PostfixChainInverter.Postfix]>
+    
+    public func inverted(_ closure: (PostfixMatcher) -> PostfixMatcher) -> ValueMatcher<T> {
         
-        let matcher = closure(ValueMatcher<[PostfixChainInverter.Postfix]>())
+        let matcher = closure(PostfixMatcher())
         
         return match { value -> Bool in
             let chain = PostfixChainInverter(expression: value).invert()

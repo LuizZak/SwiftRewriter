@@ -73,6 +73,18 @@ let numThreadsArg
         is defined by the system depending on usage conditions.
         """)
 
+// --force-ll
+let forceUseLLPredictionArg
+    = parser.add(
+        option: "--force-ll",
+        kind: Bool.self,
+        usage: """
+        Forces ANTLR parsing to use LL prediction context, instead of making an \
+        attempt at SLL first. \
+        May be more performant in some circumstances depending on complexity of \
+        original source code.
+        """)
+
 // --omit-objc-compatibility
 let omitObjcCompatibilityArg
     = parser.add(
@@ -169,6 +181,7 @@ do {
     Settings.astWriter.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false
     Settings.astWriter.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
     Settings.astWriter.omitObjcCompatibility = result.get(omitObjcCompatibilityArg) ?? false
+    Settings.rewriter.forceUseLLPrediction = result.get(forceUseLLPredictionArg) ?? false
     
     let target = result.get(targetArg) ?? .filedisk
     

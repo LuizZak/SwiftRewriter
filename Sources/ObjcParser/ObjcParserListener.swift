@@ -14,10 +14,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     /// marked @optional.
     private var inOptionalContext: Bool = false
     
-    init(sourceString: String, source: Source, state: ObjcParserState) {
+    init(sourceString: String,
+         source: Source,
+         state: ObjcParserState,
+         antlrSettings: AntlrSettings) {
+        
         self.sourceString = sourceString
         self.source = source
-        self.typeParser = TypeParsing(state: state)
+        self.typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
         
         context = NodeCreationContext()
         context.autoUpdatesSourceRange = false

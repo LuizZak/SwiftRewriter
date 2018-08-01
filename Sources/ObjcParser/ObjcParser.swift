@@ -18,6 +18,17 @@ public struct AntlrParser<Lexer: Antlr4.Lexer, Parser: Antlr4.Parser> {
     public var tokens: CommonTokenStream
 }
 
+/// Describes settings for ANTLR parsing for an `ObjcParser` instance.
+public struct AntlrSettings {
+    public static let `default` = AntlrSettings(forceUseLLPrediction: false)
+    
+    public var forceUseLLPrediction: Bool
+    
+    public init(forceUseLLPrediction: Bool) {
+        self.forceUseLLPrediction = forceUseLLPrediction
+    }
+}
+
 public typealias ObjectiveCParserAntlr = AntlrParser<ObjectiveCLexer, ObjectiveCParser>
 public typealias ObjectiveCPreprocessorAntlr = AntlrParser<ObjectiveCPreprocessorLexer, ObjectiveCPreprocessorParser>
 
@@ -86,11 +97,16 @@ public class ObjcParser {
     /// Preprocessor directives found on this file
     public var preprocessorDirectives: [String] = []
     
+    public var antlrSettings: AntlrSettings = .default
+    
     public convenience init(string: String, fileName: String = "") {
         self.init(source: StringCodeSource(source: string, fileName: fileName))
     }
     
-    public convenience init(string: String, fileName: String = "", state: ObjcParserState) {
+    public convenience init(string: String,
+                            fileName: String = "",
+                            state: ObjcParserState) {
+        
         self.init(source: StringCodeSource(source: string, fileName: fileName), state: state)
     }
     
@@ -157,19 +173,27 @@ public class ObjcParser {
             DiagnosticsErrorListener(source: source, diagnostics: diag)
         )
         
-        parser._interp.setPredictionMode(.SLL)
-        
         try parser.reset()
         
-        var root: T = try operation(parser)
+        var root: T
         
-        if !diag.errors.isEmpty {
-            diag.removeAll()
-            
-            try parser.reset()
+        if antlrSettings.forceUseLLPrediction {
             parser._interp.setPredictionMode(.LL)
             
             root = try operation(parser)
+        } else {
+            parser._interp.setPredictionMode(.SLL)
+            
+            root = try operation(parser)
+            
+            if !diag.errors.isEmpty {
+                diag.removeAll()
+                
+                try parser.reset()
+                parser._interp.setPredictionMode(.LL)
+                
+                root = try operation(parser)
+            }
         }
         
         diagnostics.merge(with: diag)
@@ -216,7 +240,11 @@ public class ObjcParser {
         
         let root = try tryParse(from: parser, { try $0.translationUnit() })
         
-        let listener = ObjcParserListener(sourceString: src, source: source, state: state)
+        let listener =
+            ObjcParserListener(sourceString: src,
+                               source: source,
+                               state: state,
+                               antlrSettings: antlrSettings)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)
