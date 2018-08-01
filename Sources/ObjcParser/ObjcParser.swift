@@ -35,9 +35,9 @@ public typealias ObjectiveCPreprocessorAntlr = AntlrParser<ObjectiveCPreprocesso
 /// Describes a parser state for a single `ObjcParser` instance, with internal
 /// fields that are used by the parser.
 ///
-/// - Note: States are not shareable across many `ObjcParser` instances at the same
-/// time.
-public class ObjcParserState {
+/// - Note: State instances do not support simultaneous usage across many
+/// `ObjcParser` instances concurrently.
+public final class ObjcParserState {
     var parserState = (lexer: ObjectiveCLexer.State(), parser: ObjectiveCParser.State())
     var preprocessorState = (lexer: ObjectiveCPreprocessorLexer.State(), parser: ObjectiveCPreprocessorParser.State())
     
