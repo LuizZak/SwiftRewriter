@@ -30,12 +30,14 @@ public final class SwiftWriter {
         self.typeSystem = typeSystem
     }
     
-    public func execute() {
+    public func execute() throws {
         let intentionTypeSystem = typeSystem as? IntentionCollectionTypeSystem
         intentionTypeSystem?.makeCache()
         
         var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
+        
+        var errors: [(String, Error)] = []
         
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = options.numThreads
@@ -62,10 +64,16 @@ public final class SwiftWriter {
             
             queue.addOperation {
                 autoreleasepool {
-                    writer.outputFile(file)
-                    
-                    synchronized(self) {
-                        self.diagnostics.merge(with: writer.diagnostics)
+                    do {
+                        try writer.outputFile(file)
+                        
+                        synchronized(self) {
+                            self.diagnostics.merge(with: writer.diagnostics)
+                        }
+                    } catch {
+                        synchronized(self) {
+                            errors.append((file.targetPath, error))
+                        }
                     }
                 }
             }
@@ -74,6 +82,11 @@ public final class SwiftWriter {
         queue.waitUntilAllOperationsAreFinished()
         
         intentionTypeSystem?.tearDownCache()
+        
+        for error in errors {
+            self.diagnostics.error("Error while saving file \(error.0): \(error.1)",
+                                   location: .invalid)
+        }
     }
 }
 
@@ -104,8 +117,8 @@ class InternalSwiftWriter {
                            typeSystem: typeSystem)
     }
     
-    func outputFile(_ fileIntent: FileGenerationIntention) {
-        let target = output.createFile(path: fileIntent.targetPath)
+    func outputFile(_ fileIntent: FileGenerationIntention) throws {
+        let target = try output.createFile(path: fileIntent.targetPath)
         
         outputFile(fileIntent, targetFile: target)
     }

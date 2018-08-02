@@ -2,8 +2,8 @@ import Foundation
 import SwiftRewriterLib
 
 class FileDiskWriterOutput: WriterOutput {
-    func createFile(path: String) -> FileOutput {
-        return FileOutputImpl(path: path)
+    func createFile(path: String) throws -> FileOutput {
+        return try FileOutputImpl(path: path)
     }
 }
 
@@ -11,15 +11,16 @@ class FileOutputImpl: FileOutput {
     let path: String
     let file: FileOutputTarget
     
-    init(path: String) {
+    init(path: String) throws {
+        let url = URL(fileURLWithPath: path)
+        
         if !FileManager.default.fileExists(atPath: path) {
             FileManager.default.createFile(atPath: path, contents: nil)
-        } else {
-            
         }
         
         // Open output stream
-        let handle = /* TODO: Deal with this force unwrap! */ FileHandle(forWritingAtPath: path)!
+        let handle = try FileHandle(forWritingTo: url)
+        
         handle.truncateFile(atOffset: 0)
         
         self.path = path

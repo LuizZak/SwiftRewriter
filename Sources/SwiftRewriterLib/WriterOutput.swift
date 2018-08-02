@@ -2,7 +2,7 @@
 /// output Swift code to.
 public protocol WriterOutput {
     /// Opens a file for outputting contents to
-    func createFile(path: String) -> FileOutput
+    func createFile(path: String) throws -> FileOutput
 }
 
 /// An output target that points to a file
