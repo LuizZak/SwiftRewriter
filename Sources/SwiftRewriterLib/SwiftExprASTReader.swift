@@ -194,6 +194,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 }
                 
                 result = .postfix(result, .functionCall(arguments: arguments))
+                
             } else if post.LBRACK() != nil, let expression = post.expression() {
                 guard let expr = expression.accept(self) else {
                     continue
@@ -201,8 +202,10 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 
                 // Subscription
                 result = .postfix(result, .subscript(expr))
+                
             } else if post.INC() != nil {
                 result = .assignment(lhs: result, op: .addAssign, rhs: .constant(1))
+                
             } else if post.DEC() != nil {
                 result = .assignment(lhs: result, op: .subtractAssign, rhs: .constant(1))
             }
@@ -231,10 +234,10 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         var name: String = ""
         
         var arguments: [FunctionArgument] = []
-        for (i, keyword) in keywordArguments.enumerated() {
+        for (keywordIndex, keyword) in keywordArguments.enumerated() {
             let selectorText = keyword.selector()?.getText() ?? ""
             
-            if i == 0 {
+            if keywordIndex == 0 {
                 // First keyword is always the method's name, Swift doesn't support
                 // 'nameless' methods!
                 if keyword.selector() == nil {
@@ -249,11 +252,14 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                     return .unknown(UnknownASTContext(context: ctx.getText()))
                 }
                 
-                for (j, expression) in expressions.expression().enumerated() {
+                for (expIndex, expression) in expressions.expression().enumerated() {
                     let exp = expression.accept(self) ?? .unknown(UnknownASTContext(context: expression.getText()))
                     
-                    // Every argument after the first one is unlabeled
-                    if j == 0 && i > 0 {
+                    // Every argument after the first one on a comma-separated
+                    // argument sequence is unlabeled.
+                    // We also don't label empty keyword-arguments due to them
+                    // not being representable in Swift.
+                    if expIndex == 0 && keywordIndex > 0 && !selectorText.isEmpty {
                         arguments.append(.labeled(selectorText, exp))
                     } else {
                         arguments.append(.unlabeled(exp))

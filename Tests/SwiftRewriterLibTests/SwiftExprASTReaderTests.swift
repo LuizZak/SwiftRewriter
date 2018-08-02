@@ -36,13 +36,15 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
     
     func testFunctionCall() {
-        assert(objcExpr: "print()", readsAs: .postfix(.identifier("print"), .functionCall(arguments: [])))
-        assert(objcExpr: "a.method()", readsAs: .postfix(.postfix(.identifier("a"), .member("method")), .functionCall(arguments: [])))
+        assert(objcExpr: "print()",
+               readsAs: Expression.identifier("print").call())
+        
+        assert(objcExpr: "a.method()",
+               readsAs: Expression.identifier("a").dot("method").call())
+        
         assert(objcExpr: "print(123, 456)",
-               readsAs: .postfix(.identifier("print"),
-                                 .functionCall(arguments: [.unlabeled(.constant(123)),
-                                                           .unlabeled(.constant(456))]))
-        )
+               readsAs: Expression.identifier("print").call([.constant(123),
+                                                             .constant(456)]))
     }
     
     func testSubscript() {
@@ -54,31 +56,39 @@ class SwiftExprASTReaderTests: XCTestCase {
     }
     
     func testSelectorMessage() {
-        assert(objcExpr: "[a selector]", readsAs: Expression.identifier("a").dot("selector").call())
+        assert(objcExpr: "[a selector]",
+               readsAs: Expression.identifier("a").dot("selector").call())
         
         assert(objcExpr: "[a selector:1, 2, 3]",
                readsAs: Expression
                 .identifier("a")
-                .dot("selector").call([.unlabeled(.constant(1)), .unlabeled(.constant(2)), .unlabeled(.constant(3))]))
+                .dot("selector").call([.unlabeled(.constant(1)),
+                                       .unlabeled(.constant(2)),
+                                       .unlabeled(.constant(3))]))
         
         assert(objcExpr: "[a selector:1 c:2, 3]",
                readsAs: Expression
                 .identifier("a")
-                .dot("selector").call([.unlabeled(.constant(1)), .labeled("c", .constant(2)), .unlabeled(.constant(3))]))
+                .dot("selector").call([.unlabeled(.constant(1)),
+                                       .labeled("c", .constant(2)),
+                                       .unlabeled(.constant(3))]))
+        
+        assert(objcExpr: "[a selector:1 :2 c:3]",
+               readsAs: Expression
+                .identifier("a")
+                .dot("selector").call([.unlabeled(.constant(1)),
+                                       .unlabeled(.constant(2)),
+                                       .labeled("c", .constant(3))]))
     }
     
     func testCastExpression() {
         assert(objcExpr: "(NSString*)abc",
-               readsAs: .cast(.identifier("abc"), type: .string))
+               readsAs: Expression.identifier("abc").casted(to: .string))
     }
     
     func testSelectorExpression() {
         assert(objcExpr: "@selector(abc:def:)",
-               readsAs: .postfix(.identifier("Selector"),
-                                 .functionCall(arguments: [
-                                    .unlabeled(.constant("abc:def:"))
-                                    ]))
-        )
+               readsAs: Expression.identifier("Selector").call([.constant("abc:def:")]))
     }
     
     func testAssignmentWithMethodCall() {
@@ -137,8 +147,9 @@ class SwiftExprASTReaderTests: XCTestCase {
     func testPostfixStructAccessWithAssignment() {
         let exp =
             Expression
-                .assignment(lhs: .postfix(.identifier("self"), .member("_ganttEndDate")),
-                            op: .assign,
+                .identifier("self")
+                .dot("_ganttEndDate")
+                .assignment(op: .assign,
                             rhs: .identifier("ganttEndDate"))
         
         assert(objcExpr: "self->_ganttEndDate = ganttEndDate",
@@ -212,9 +223,15 @@ class SwiftExprASTReaderTests: XCTestCase {
                readsAs: .binary(lhs: .identifier("ident"), op: .closedRange, rhs: .constant(20))
         )
     }
+}
+
+extension SwiftExprASTReaderTests {
     
-    func assert(objcExpr: String, parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() },
-                readsAs expected: Expression, file: String = #file, line: Int = #line) {
+    func assert(objcExpr: String,
+                parseWith: (ObjectiveCParser) throws -> ParserRuleContext = { parser in try parser.expression() },
+                readsAs expected: Expression,
+                file: String = #file,
+                line: Int = #line) {
         
         let typeSystem = DefaultTypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
@@ -254,7 +271,10 @@ class SwiftExprASTReaderTests: XCTestCase {
                     """, inFile: file, atLine: line, expected: true)
             }
         } catch {
-            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)", inFile: file, atLine: line, expected: false)
+            recordFailure(withDescription: "Unexpected error(s) parsing objective-c: \(error)",
+                          inFile: file,
+                          atLine: line,
+                          expected: false)
         }
     }
     
