@@ -135,6 +135,31 @@ class TypeResolverIntrinsicsBuilder {
                                storage: selfStorage)
             )
             
+            // Record 'super', if available
+            if let supertype = type.supertype {
+                let superType = SwiftType.typeName(supertype.asTypeName)
+                let superStorage: ValueStorage
+                
+                if member.isStatic {
+                    // Class `super` points to metatype of the class
+                    superStorage =
+                        ValueStorage(type: .metatype(for: superType),
+                                     ownership: .strong,
+                                     isConstant: true)
+                } else {
+                    // Instance `super` points to the actual instance's super type
+                    superStorage =
+                        ValueStorage(type: superType,
+                                     ownership: .strong,
+                                     isConstant: true)
+                }
+                
+                intrinsics.recordDefinition(
+                    CodeDefinition(variableNamed: "super",
+                                   storage: superStorage)
+                )
+            }
+            
             // Record all known static properties visible
             if let knownType = typeSystem.knownTypeWithName(type.typeName) {
                 for prop in knownType.knownProperties where prop.isStatic == member.isStatic {

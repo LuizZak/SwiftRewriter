@@ -80,11 +80,26 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
         typeNameExp.resolvedType = .metatype(for: .typeName("ClassName"))
         
         assertTransform(
-            expression: Expression
-                .identifier("self")
+            expression: typeNameExp.copy()
                 .dot("alloc").call()
                 .dot("init").call(),
-            into: typeNameExp.call()
+            into: typeNameExp.dot("init").call()
+        )
+        
+        assertNotifiedChange()
+    }
+    
+    /// Tests `[[super alloc] init]` where `super` is a metatype results in a
+    /// `Type.init()` call
+    func testInitSuperClassType() {
+        let typeNameExp = Expression.identifier("super")
+        typeNameExp.resolvedType = .metatype(for: .typeName("ClassName"))
+        
+        assertTransform(
+            expression: typeNameExp.copy()
+                .dot("alloc").call()
+                .dot("init").call(),
+            into: typeNameExp.dot("init").call()
         )
         
         assertNotifiedChange()
@@ -97,27 +112,41 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
         typeNameExp.resolvedType = .metatype(for: .typeName("ClassName"))
         
         assertTransform(
-            expression: Expression
-                .identifier("self")
+            expression: typeNameExp.copy()
                 .dot("alloc").call()
                 .dot("initWithThing")
                 .call([.unlabeled(.constant(1))]),
-            into: typeNameExp.call([.labeled("thing", .constant(1))])
+            into: typeNameExp.dot("init").call([.labeled("thing", .constant(1))])
+        )
+        
+        assertNotifiedChange()
+    }
+    
+    /// Tests `[[[super alloc] initWithThing:[...]]` where `super` is a metatype
+    /// results in a `Type.init(thing: [...])` call
+    func testInitWithThingSuperClassType() {
+        let typeNameExp = Expression.identifier("self")
+        typeNameExp.resolvedType = .metatype(for: .typeName("ClassName"))
+        
+        assertTransform(
+            expression: typeNameExp.copy()
+                .dot("alloc").call()
+                .dot("initWithThing")
+                .call([.unlabeled(.constant(1))]),
+            into: typeNameExp.dot("init").call([.labeled("thing", .constant(1))])
         )
         
         assertNotifiedChange()
     }
     
     /// Tests `[<nullable-exp> initWithThing:[...]]` transforms properly into
-    /// a still nullable-accessed `<nullable-exp>.init(thing: [...])`
+    /// a still nullable-accessed `<nullable-exp>?.init(thing: [...])`
     func testOptionalInitWithThing() {
         let typeNameExp = Expression.identifier("className")
         typeNameExp.resolvedType = .optional(.typeName("ClassName"))
         
         assertTransform(
-            expression: Expression
-                .identifier("className")
-                .typed(.optional(.typeName("ClassName")))
+            expression: typeNameExp.copy()
                 .optional()
                 .dot("initWithThing")
                 .call([.unlabeled(.constant(1))]),

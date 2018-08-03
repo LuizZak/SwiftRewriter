@@ -6,14 +6,17 @@ import XCTest
 /// type resolving results.
 class SwiftRewriter_TypingTests: XCTestCase {
     
-    /// Tests that the `self` identifier is properly assigned when resolving the
+    /// Tests that the `self`/`super` identifier is properly assigned when resolving the
     /// final types of statements in a class
-    func testSelfTypeInInstanceMethodsPointsToSelfInstance() throws {
+    func testSelfSuperTypeInInstanceMethodsPointsToSelfInstance() throws {
         try assertObjcParse(
             objc: """
+            @interface MyClass: NSObject
+            @end
             @implementation MyClass
             - (void)method {
                 (self);
+                (super);
             }
             @end
             """,
@@ -24,6 +27,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 func method() {
                     // type: MyClass
                     self
+                    // type: NSObject
+                    super
                 }
             }
             """,
@@ -32,9 +37,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
     
     /// Tests that the `self` identifier used in a method class context is properly
     /// assigned to the class' metatype
-    func testSelfTypeInClassMethodsPointsToMetatype() throws {
+    func testSelfSuperTypeInClassMethodsPointsToMetatype() throws {
         try assertObjcParse(
             objc: """
+            @interface MyClass: NSObject
+            @end
             @interface MyClass
             @property (class, readonly) BOOL a;
             @property (readonly) BOOL b;
@@ -42,17 +49,21 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @implementation MyClass
             + (BOOL)a {
                 (self);
+                (super);
             }
             - (BOOL)b {
                 (self);
+                (super);
             }
             + (void)classMethod {
                 (self);
+                (super);
             }
             // Here just to check the transpiler correctly switches between metatype
             // and instance type while iterating over methods to output
             - (void)instanceMethod {
                 (self);
+                (super);
             }
             @end
             """,
@@ -62,28 +73,36 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 @objc static var a: Bool {
                     // type: MyClass.Type
                     self
+                    // type: NSObject.Type
+                    super
                 }
                 @objc var b: Bool {
                     // type: MyClass
                     self
+                    // type: NSObject
+                    super
                 }
                 
                 @objc
                 static func classMethod() {
                     // type: MyClass.Type
                     self
+                    // type: NSObject.Type
+                    super
                 }
                 @objc
                 func instanceMethod() {
                     // type: MyClass
                     self
+                    // type: NSObject
+                    super
                 }
             }
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
-    func testSelfTypeInPropertySynthesizedGetterAndSetterBody() throws {
+    func testSelfSuperTypeInPropertySynthesizedGetterAndSetterBody() throws {
         try assertObjcParse(
             objc: """
             @interface MyClass : NSObject
@@ -93,9 +112,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @implementation MyClass
             - (void)setValue:(BOOL)newValue {
                 (self);
+                (super);
             }
             - (BOOL)value {
                 (self);
+                (super);
                 return NO;
             }
             @end
@@ -107,11 +128,15 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     get {
                         // type: MyClass
                         self
+                        // type: NSObject
+                        super
                         return false
                     }
                     set {
                         // type: MyClass
                         self
+                        // type: NSObject
+                        super
                     }
                 }
             }
@@ -119,7 +144,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
-    func testSelfInitInClassMethod() throws {
+    func testSelfSuperInitInClassMethod() throws {
         try assertObjcParse(
             objc: """
             @interface MyClass: NSObject // To inherit [self init] constructor
@@ -128,6 +153,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @implementation MyClass
             + (void)method {
                 [[self alloc] init];
+                [[super alloc] init];
             }
             @end
             """,
@@ -138,6 +164,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 static func method() {
                     // type: MyClass
                     self.init()
+                    // type: NSObject
+                    super.init()
                 }
             }
             """,

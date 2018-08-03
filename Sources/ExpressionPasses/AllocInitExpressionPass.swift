@@ -48,6 +48,11 @@ public class AllocInitExpressionPass: ASTRewriterPass {
             return alloc.exp.copy().dot("init").call()
         }
         
+        // super.alloc.init() -> super.init()
+        if alloc.exp.asIdentifier?.identifier == "super", case .metatype? = alloc.exp.resolvedType {
+            return alloc.exp.copy().dot("init").call()
+        }
+        
         return alloc.copy().exp.call()
     }
     
@@ -74,7 +79,12 @@ public class AllocInitExpressionPass: ASTRewriterPass {
         
         // self.alloc.init() -> self.init()
         if alloc.exp.asIdentifier?.identifier == "self", case .metatype? = alloc.exp.resolvedType {
-            return alloc.exp.dot("init").call(newArgs)
+            return alloc.exp.copy().dot("init").call(newArgs)
+        }
+        
+        // super.alloc.init() -> super.init()
+        if alloc.exp.asIdentifier?.identifier == "super", case .metatype? = alloc.exp.resolvedType {
+            return alloc.exp.copy().dot("init").call(newArgs)
         }
         
         return Expression.identifier(typeName).call(newArgs)
