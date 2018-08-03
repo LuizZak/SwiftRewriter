@@ -770,7 +770,9 @@ private class MemberInvocationResolver {
         postfix.exp = typeResolver.visitExpression(postfix.exp)
         
         defer {
-            postfix.op = functionCall.replacingArguments(functionCall.subExpressions.map(typeResolver.visitExpression))
+            postfix.op = functionCall.replacingArguments(
+                functionCall.subExpressions.map(typeResolver.visitExpression)
+            )
             
             if let expectedType = postfix.expectedType, let args = postfix.op.asFunctionCall?.arguments {
                 let argTypes = args.compactMap { $0.expression.resolvedType }

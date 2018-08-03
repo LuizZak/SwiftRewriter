@@ -17,7 +17,11 @@ class SingleFileTestBuilder {
         self.options = options
     }
     
-    func assertObjcParse(swift expectedSwift: String, expectsErrors: Bool = false, file: String = #file, line: Int = #line) throws {
+    func assertObjcParse(swift expectedSwift: String,
+                         expectsErrors: Bool = false,
+                         file: String = #file,
+                         line: Int = #line) throws {
+        
         let output = TestSingleFileWriterOutput()
         let input = TestSingleInputProvider(code: objc)
         
@@ -126,6 +130,7 @@ extension XCTestCase {
                          options: ASTWriterOptions = .default,
                          expectsErrors: Bool = false, file: String = #file,
                          line: Int = #line) throws -> SingleFileTestBuilder  {
+        
         let test = SingleFileTestBuilder(test: self, objc: objc, options: options)
         try test.assertObjcParse(swift: expectedSwift, expectsErrors: expectsErrors,
                                  file: file, line: line)

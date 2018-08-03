@@ -469,8 +469,15 @@ extension Expression {
 }
 
 public class PostfixExpression: Expression {
+    private var _subExpressions: [Expression] = []
+    
     public var exp: Expression {
-        didSet { oldValue.parent = nil; exp.parent = self; }
+        didSet {
+            oldValue.parent = nil;
+            exp.parent = self;
+            
+            _subExpressions = [exp] + op.subExpressions
+        }
     }
     public var op: Postfix {
         didSet {
@@ -478,11 +485,13 @@ public class PostfixExpression: Expression {
             oldValue.postfixExpression = nil
             op.subExpressions.forEach { $0.parent = self }
             op.postfixExpression = self
+            
+            _subExpressions = [exp] + op.subExpressions
         }
     }
     
     public override var subExpressions: [Expression] {
-        return [exp] + op.subExpressions
+        return _subExpressions
     }
     
     public override var description: String {
@@ -504,6 +513,8 @@ public class PostfixExpression: Expression {
         
         op.subExpressions.forEach { $0.parent = self }
         op.postfixExpression = self
+        
+        _subExpressions = [exp] + op.subExpressions
     }
     
     public override func copy() -> PostfixExpression {
@@ -808,15 +819,19 @@ public extension Expression {
 }
 
 public class DictionaryLiteralExpression: Expression {
+    private var _subExpressions: [Expression] = []
+    
     public var pairs: [ExpressionDictionaryPair] {
         didSet {
             oldValue.forEach { $0.key.parent = nil; $0.value.parent = nil }
             pairs.forEach { $0.key.parent = self; $0.value.parent = self }
+            
+            _subExpressions = pairs.flatMap { [$0.key, $0.value] }
         }
     }
     
     public override var subExpressions: [Expression] {
-        return pairs.flatMap { [$0.key, $0.value] }
+        return _subExpressions
     }
     
     public override var description: String {
@@ -833,6 +848,7 @@ public class DictionaryLiteralExpression: Expression {
         super.init()
         
         pairs.forEach { $0.key.parent = self; $0.value.parent = self }
+        _subExpressions = pairs.flatMap { [$0.key, $0.value] }
     }
     
     public override func copy() -> DictionaryLiteralExpression {

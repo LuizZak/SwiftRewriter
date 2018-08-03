@@ -1,3 +1,5 @@
+import Dispatch
+
 /// Gives support for querying an object for types by name.
 public protocol KnownTypeProvider {
     /// Returns a type with a given (unaliased) name to this type provider.
@@ -11,13 +13,32 @@ public protocol KnownTypeProvider {
 
 /// Gathers one or more type providers into a single `KnownTypeProvider` interface.
 public class CompoundKnownTypeProvider: KnownTypeProvider {
+    var cacheBarrier = DispatchQueue(label: "com.swiftrewriter.compoundtypeprovider.barrier",
+                                     qos: .default,
+                                     attributes: .concurrent,
+                                     autoreleaseFrequency: .inherit,
+                                     target: nil)
+    var cache: [Int: KnownType]?
+    
     public var providers: [KnownTypeProvider]
     
     public init(providers: [KnownTypeProvider]) {
         self.providers = providers
     }
     
+    func makeCache() {
+        cache = [:]
+    }
+    
+    func tearDownCache() {
+        cache = nil
+    }
+    
     public func knownType(withName name: String) -> KnownType? {
+        if cache != nil, let type = cacheBarrier.sync(execute: { cache?[name.hashValue] }) {
+            return type
+        }
+        
         var types: [KnownType] = []
         
         for provider in providers {
@@ -30,7 +51,15 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
             return nil
         }
         
-        return CompoundKnownType(typeName: name, types: types)
+        let type = CompoundKnownType(typeName: name, types: types)
+        
+        if cache != nil {
+            cacheBarrier.sync(flags: .barrier) {
+                cache?[name.hashValue] = type
+            }
+        }
+        
+        return type
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {

@@ -1,6 +1,7 @@
 import SwiftAST
 import TypeDefinitions
 import Utils
+import Dispatch
 
 // TODO: Implement local caching on compound known types within the type system
 // to reduce burden of re-creating known types over and over during type resolving.
@@ -32,10 +33,12 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func makeCache() {
+        knownTypeProviders.makeCache()
         compoundKnownTypesCache = CompoundKnownTypesCache()
     }
     
     public func tearDownCache() {
+        knownTypeProviders.tearDownCache()
         compoundKnownTypesCache = nil
     }
     
@@ -423,6 +426,7 @@ public class DefaultTypeSystem: TypeSystem {
         switch supertype {
         case .knownType(let type):
             return type
+            
         case .typeName(let type):
             return knownTypeWithName(type)
         }
@@ -471,13 +475,15 @@ public class DefaultTypeSystem: TypeSystem {
         return nil
     }
     
-    public func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
-                       includeOptional: Bool, in type: KnownType) -> KnownMethod? {
+    public func method(withObjcSelector selector: SelectorSignature,
+                       static isStatic: Bool,
+                       includeOptional: Bool,
+                       in type: KnownType) -> KnownMethod? {
         
         if let method = type.knownMethods.first(where: {
-            $0.signature.asSelector == selector
-                && $0.isStatic == isStatic
+            $0.isStatic == isStatic
                 && (includeOptional || !$0.optional)
+                && $0.signature.asSelector == selector
         }) {
             return method
         }
@@ -488,15 +494,21 @@ public class DefaultTypeSystem: TypeSystem {
                 continue
             }
             
-            if let method = method(withObjcSelector: selector, static: isStatic,
-                                   includeOptional: includeOptional, in: prot) {
+            if let method = method(withObjcSelector: selector,
+                                   static: isStatic,
+                                   includeOptional: includeOptional,
+                                   in: prot) {
+                
                 return method
             }
         }
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            method(withObjcSelector: selector, static: isStatic, includeOptional: includeOptional, in: $0)
+            method(withObjcSelector: selector,
+                   static: isStatic,
+                   includeOptional: includeOptional,
+                   in: $0)
         }
     }
     
@@ -721,6 +733,12 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     private final class CompoundKnownTypesCache {
+        private var barrier = DispatchQueue(label: "com.swiftrewriter.compoundtypescache.barrier",
+                                            qos: .default,
+                                            attributes: .concurrent,
+                                            autoreleaseFrequency: .inherit,
+                                            target: nil)
+        
         private var types: [[String]: KnownType]
         
         init() {
@@ -728,11 +746,13 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         func fetch(names: [String]) -> KnownType? {
-            return types[names]
+            return barrier.sync(execute: { types[names] })
         }
         
         func record(type: KnownType, names: [String]) {
-            types[names] = type
+            barrier.sync(flags: .barrier) {
+                types[names] = type
+            }
         }
     }
 }
