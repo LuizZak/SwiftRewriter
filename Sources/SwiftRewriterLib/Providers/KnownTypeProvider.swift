@@ -19,6 +19,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
                                      autoreleaseFrequency: .inherit,
                                      target: nil)
     var cache: [Int: KnownType]?
+    var usingCache = false
     
     public var providers: [KnownTypeProvider]
     
@@ -28,14 +29,16 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     
     func makeCache() {
         cache = [:]
+        usingCache = true
     }
     
     func tearDownCache() {
         cache = nil
+        usingCache = false
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        if cache != nil, let type = cacheBarrier.sync(execute: { cache?[name.hashValue] }) {
+        if usingCache, let type = cacheBarrier.sync(execute: { cache?[name.hashValue] }) {
             return type
         }
         
@@ -53,7 +56,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         let type = CompoundKnownType(typeName: name, types: types)
         
-        if cache != nil {
+        if usingCache {
             cacheBarrier.sync(flags: .barrier) {
                 cache?[name.hashValue] = type
             }
