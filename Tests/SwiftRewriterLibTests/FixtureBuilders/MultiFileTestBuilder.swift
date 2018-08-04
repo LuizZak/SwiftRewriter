@@ -7,10 +7,12 @@ import GlobalsProviders
 import Utils
 
 class MultiFileTestBuilder {
+    typealias File = (path: String, souce: String)
+    
     var test: XCTestCase
     var results: [TestFileOutput] = []
-    var files: [(path: String, souce: String)] = []
-    var expectedFiles: [(path: String, souce: String)] = []
+    var files: [File] = []
+    var expectedFiles: [File] = []
     var errors: String = ""
     
     init(test: XCTestCase) {
@@ -18,12 +20,12 @@ class MultiFileTestBuilder {
     }
     
     func file(name: String, _ contents: String) -> MultiFileTestBuilder {
-        files.append((name, contents))
+        files.append(File(name, contents))
         return self
     }
     
     func expectSwiftFile(name: String, _ contents: String) -> MultiFileTestBuilder {
-        expectedFiles.append((name, contents))
+        expectedFiles.append(File(name, contents))
         return self
     }
     
@@ -31,8 +33,10 @@ class MultiFileTestBuilder {
     // building the same rewriter structure every time.
     
     /// Executes a compilation step
-    func compile(expectsErrors: Bool = false, options: ASTWriterOptions = .default,
-                 file: String = #file, line: Int = #line) {
+    func compile(expectsErrors: Bool = false,
+                 options: ASTWriterOptions = .default,
+                 file: String = #file,
+                 line: Int = #line) {
         
         let inputs = files.map(TestInputSource.init)
         
@@ -62,13 +66,20 @@ class MultiFileTestBuilder {
     /// where produced correctly.
     ///
     /// Does not assert if unexpected files where produced during compilation.
-    func assertExpectedSwiftFiles(file: String = #file, line: Int = #line) {
+    func assertExpectedSwiftFiles(file: String = #file,
+                                  line: Int = #line) {
+        
         assertMatcheshWithExpectedFiles(results, file: file, line: line)
     }
     
     /// Assertion execution point
     @discardableResult
-    func translatesToSwift(_ expectedSwift: String, expectsErrors: Bool = false, options: ASTWriterOptions = .default, file: String = #file, line: Int = #line) -> MultiFileTestBuilder {
+    func translatesToSwift(_ expectedSwift: String,
+                           expectsErrors: Bool = false,
+                           options: ASTWriterOptions = .default,
+                           file: String = #file,
+                           line: Int = #line) -> MultiFileTestBuilder {
+        
         let inputs = files.map(TestInputSource.init)
         
         let output = TestWriterOutput()
@@ -121,7 +132,10 @@ class MultiFileTestBuilder {
         }
     }
     
-    private func assertMatcheshWithExpectedFiles(_ files: [TestFileOutput], file: String, line: Int) {
+    private func assertMatcheshWithExpectedFiles(_ files: [TestFileOutput],
+                                                 file: String,
+                                                 line: Int) {
+        
         let matches = files.sorted { $0.path < $1.path }.compactMap { file -> ResultMatch? in
             guard let expected = expectedFiles.first(where: { expected in file.path == expected.path }) else {
                 return nil
@@ -151,7 +165,10 @@ class MultiFileTestBuilder {
         }
     }
     
-    private func makeSut(with input: InputSourcesProvider, output: WriterOutput, options: ASTWriterOptions) -> SwiftRewriter {
+    private func makeSut(with input: InputSourcesProvider,
+                         output: WriterOutput,
+                         options: ASTWriterOptions) -> SwiftRewriter {
+        
         let sut = SwiftRewriter(input: input, output: output)
         sut.writerOptions = options
         sut.astRewriterPassSources = DefaultExpressionPasses()

@@ -119,5 +119,5 @@ let package = Package(
             dependencies: ["SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
                            "TestCommons"])
     ],
-    swiftLanguageVersions: [.v4, .v4_2]
+    swiftLanguageVersions: [.v4_2]
 )
