@@ -255,6 +255,26 @@ public extension ValueMatcher {
     
 }
 
+extension ValueMatcher {
+    
+    public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U>) -> ValueMatcher {
+        return self.match { value -> Bool in
+            target.pointee = value[keyPath: keyPath]
+            
+            return true
+        }
+    }
+    
+    public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U?>) -> ValueMatcher {
+        return self.match { value -> Bool in
+            target.pointee = value[keyPath: keyPath]
+            
+            return true
+        }
+    }
+    
+}
+
 extension ValueMatcher where T: Equatable {
     
     /// Returns a new matcher that matches the tested value against a given matcher.
@@ -277,6 +297,14 @@ extension ValueMatcher where T: Equatable {
     /// with all existing rules for this matcher.
     public func match(if rule: MatchRule<T>) -> ValueMatcher {
         return match(rule)
+    }
+    
+    public func bind(to target: UnsafeMutablePointer<T>) -> ValueMatcher {
+        return self.match(.extract(.any, target))
+    }
+    
+    public func bind(to target: UnsafeMutablePointer<T?>) -> ValueMatcher {
+        return self.match(.extractOptional(.any, target))
     }
     
     struct SelfMatcher: ValueMatcherProtocol {

@@ -22,34 +22,6 @@ public func ident(_ matcher: MatchRule<String>) -> SyntaxMatcher<IdentifierExpre
     return SyntaxMatcher().keyPath(\.identifier, matcher)
 }
 
-public extension ValueMatcher where T: Equatable {
-    
-    public func bind(to target: UnsafeMutablePointer<T>) -> ValueMatcher {
-        return self.match(.extract(.any, target))
-    }
-    
-    public func bind(to target: UnsafeMutablePointer<T?>) -> ValueMatcher {
-        return self.match(.extractOptional(.any, target))
-    }
-    
-    public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U>) -> ValueMatcher {
-        return self.match { value -> Bool in
-            target.pointee = value[keyPath: keyPath]
-            
-            return true
-        }
-    }
-    
-    public func bind<U>(keyPath: KeyPath<T, U>, to target: UnsafeMutablePointer<U?>) -> ValueMatcher {
-        return self.match { value -> Bool in
-            target.pointee = value[keyPath: keyPath]
-            
-            return true
-        }
-    }
-    
-}
-
 public extension ValueMatcher where T: Expression {
     
     public func dot<S>(_ member: S) -> SyntaxMatcher<PostfixExpression>

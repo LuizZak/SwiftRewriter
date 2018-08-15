@@ -205,6 +205,29 @@ class ValueMatcherTests: XCTestCase {
             XCTFail("Expected ->> to produce `.extractOptional` rule, but produced \(rule) instead.")
         }
     }
+    
+    func testBindKeypath() {
+        let test = TestNode(intField: 123, stringField: "")
+        var output: Int = 0
+        
+        let rule =
+            ValueMatcher<TestNode>()
+                .bind(keyPath: \.intField, to: &output)
+        
+        XCTAssert(rule.matches(test))
+        XCTAssertEqual(output, 123)
+    }
+    
+    func testBindMatch() {
+        var output: Int = 0
+        
+        let rule =
+            ValueMatcher<Int>()
+                .bind(to: &output)
+        
+        XCTAssert(rule.matches(123))
+        XCTAssertEqual(output, 123)
+    }
 }
 
 private class TestNodeWithField: SyntaxNode {
