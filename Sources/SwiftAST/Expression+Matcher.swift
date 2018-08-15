@@ -117,6 +117,17 @@ public extension ValueMatcher where T: PostfixExpression {
     
     public typealias PostfixMatcher = ValueMatcher<[PostfixChainInverter.Postfix]>
     
+    /// Opens a context for matching postfix operation chains using an inverted
+    /// traversal method (left-most to right-most).
+    ///
+    /// Inversion is required due to the disposition of the syntax tree of postfix
+    /// expressions: the top node is always the last postfix invocation of the
+    /// chain, while the bottom-most postfix node is the first invocation.
+    ///
+    /// - Parameter closure: A closure that matches postfix expressions from
+    /// leftmost to rightmost.
+    /// - Returns: A new `PostfixExpression` matcher with the left-to-right
+    /// postfix matcher constructed using the closure.
     public func inverted(_ closure: (PostfixMatcher) -> PostfixMatcher) -> ValueMatcher<T> {
         
         let matcher = closure(PostfixMatcher())
@@ -127,23 +138,25 @@ public extension ValueMatcher where T: PostfixExpression {
             return matcher.matches(chain)
         }
     }
-    
 }
 
 public extension ValueMatcher where T == PostfixChainInverter.Postfix {
     
+    /// Matches if the postfix is a function invocation.
     public static var isFunctionCall: ValueMatcher<T> {
         return
             ValueMatcher<T>()
                 .keyPath(\.postfix, .isType(FunctionCallPostfix.self))
     }
     
+    /// Matches if the postfix is a member access.
     public static var isMemberAccess: ValueMatcher<T> {
         return
             ValueMatcher<T>()
                 .keyPath(\.postfix, .isType(MemberPostfix.self))
     }
     
+    /// Matches if the postfix is a subscription.
     public static var isSubscription: ValueMatcher<T> {
         return
             ValueMatcher<T>()

@@ -114,6 +114,11 @@ public class InitAnalysisIntentionPass: IntentionPass {
     
     private func superOrSelfInitExpressionTargetFrom(exp: Expression) -> String? {
         
+        // Looks for
+        //
+        // self = [super init<...>]
+        //
+        // invocations
         var selfOrSuper: Expression?
         let matchSelfOrSuper =
             Expression.matcher(
