@@ -173,6 +173,11 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
             into: Expression.identifier("self").dot("frame").dot("isNull")
         ); assertNotifiedChange()
         
+        assertTransformParsed(
+            expression: "CGRectIsEmpty(self.frame)",
+            into: Expression.identifier("self").dot("frame").dot("isEmpty")
+        ); assertNotifiedChange()
+        
         // Test transformations keep unrecognized members alone
         assertTransformParsed(
             expression: "CGRectGetWidth(self.frame, self.frame)",
@@ -209,6 +214,10 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
         assertTransformParsed(
             expression: "CGRectIsNull(self.frame, self.frame)",
             into: "CGRectIsNull(self.frame, self.frame)"
+        ); assertDidNotNotifyChange()
+        assertTransformParsed(
+            expression: "CGRectIsEmpty(self.frame, self.frame)",
+            into: "CGRectIsEmpty(self.frame, self.frame)"
         ); assertDidNotNotifyChange()
     }
     

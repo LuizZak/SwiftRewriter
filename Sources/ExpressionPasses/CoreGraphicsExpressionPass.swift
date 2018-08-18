@@ -64,6 +64,10 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
         case (.identifier("CGRectIsNull"), _):
             convertMethodToField(field: "isNull", ifArgCountIs: 1, exp)
             
+        // CGRectIsEmpty(<path>) -> <path>.isEmpty
+        case (.identifier("CGRectIsEmpty"), _):
+            convertMethodToField(field: "isEmpty", ifArgCountIs: 1, exp)
+            
         // MARK: CGPath
             
         // CGPathCreateMutable() -> CGMutablePath()
