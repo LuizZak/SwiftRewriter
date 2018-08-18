@@ -237,10 +237,11 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         
         let typeA =
             KnownTypeBuilder(typeName: "A")
-                .constructor(isFailable: true)
+                .constructor(withParameters: [ParameterSignature(label: nil, name: "value", type: .int)],
+                             isFailable: true)
                 .build()
         let typeB =
-            KnownTypeBuilder(typeName: "B", supertype: KnownTypeReference.knownType(typeA))
+            KnownTypeBuilder(typeName: "B", supertype: typeA)
                 .build()
         typeSystem.addType(typeA)
         typeSystem.addType(typeB)
@@ -261,7 +262,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                         .assignment(
                             op: .assign,
                             rhs: Expression
-                                .identifier("super").dot("init").call())
+                                .identifier("super").dot("init").call([.constant(0)]))
                     )
                 ]),
             into: .compound([
@@ -271,7 +272,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
                         .assignment(
                             op: .assign,
                             rhs: Expression
-                                .identifier("super").dot("init").optional().call())
+                                .identifier("super").dot("init").optional().call([.constant(0)]))
                 )
             ])
         ); assertNotifiedChange()

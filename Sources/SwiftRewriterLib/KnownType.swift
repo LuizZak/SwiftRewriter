@@ -78,7 +78,7 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
     }
     
     public var asKnownTypeReference: KnownTypeReference {
-        return .typeName(asTypeName)
+        return self
     }
 }
 

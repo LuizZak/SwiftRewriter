@@ -223,7 +223,7 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                     .identifier("super")
                     .dot("init")
                     .optional()
-                    .call(functionCall.arguments,
+                    .call(functionCall.arguments.map { $0.copy() },
                           type: functionCall.returnType,
                           callableSignature: functionCall.callableSignature)
             

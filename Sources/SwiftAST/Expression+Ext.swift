@@ -19,16 +19,20 @@ public protocol ExpressionPostfixBuildable {
 }
 
 public extension ExpressionPostfixBuildable {
-    public func call(_ arguments: [FunctionArgument], type: SwiftType?,
+    public func call(_ arguments: [FunctionArgument],
+                     type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
+        
         let op = Postfix.functionCall(arguments: arguments)
         op.returnType = type
         op.callableSignature = callableSignature
         return .postfix(expressionToBuild, op)
     }
     
-    public func call(_ unlabeledArguments: [Expression], type: SwiftType?,
+    public func call(_ unlabeledArguments: [Expression],
+                     type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
+        
         let op = Postfix.functionCall(arguments: unlabeledArguments.map(FunctionArgument.unlabeled))
         op.returnType = type
         op.callableSignature = callableSignature
@@ -66,7 +70,9 @@ public extension ExpressionPostfixBuildable {
         return call(unlabeledArguments, type: nil, callableSignature: nil)
     }
     
-    public func call(_ unlabeledArguments: [Expression], callableSignature: SwiftType?) -> PostfixExpression {
+    public func call(_ unlabeledArguments: [Expression],
+                     callableSignature: SwiftType?) -> PostfixExpression {
+        
         return call(unlabeledArguments, type: nil, callableSignature: callableSignature)
     }
     
@@ -128,8 +134,10 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
         return OptionalAccessPostfixBuilder(exp: exp.copy())
     }
     
-    public func call(_ arguments: [FunctionArgument], type: SwiftType?,
+    public func call(_ arguments: [FunctionArgument],
+                     type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
+        
         let op = Postfix.functionCall(arguments: arguments)
         op.returnType = type
         op.callableSignature = callableSignature
@@ -138,8 +146,10 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
         return .postfix(expressionToBuild, op)
     }
     
-    public func call(_ unlabeledArguments: [Expression], type: SwiftType?,
+    public func call(_ unlabeledArguments: [Expression],
+                     type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
+        
         let op = Postfix.functionCall(arguments: unlabeledArguments.map(FunctionArgument.unlabeled))
         op.returnType = type
         op.callableSignature = callableSignature

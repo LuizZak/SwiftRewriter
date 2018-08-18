@@ -32,14 +32,18 @@ public enum TypeFormatter {
         // Type body
         o.idented {
             let outputField: (KnownProperty) -> Void = {
-                o.output(line: asString(field: $0, ofType: type, withTypeName: false,
+                o.output(line: asString(field: $0,
+                                        ofType: type,
+                                        withTypeName: false,
                                         includeVarKeyword: true))
             }
             let outputProperty: (KnownProperty) -> Void = {
                 if $0.isEnumCase {
                     o.output(line: "case \($0.name)")
                 } else {
-                    o.output(line: asString(property: $0, ofType: type, withTypeName: false,
+                    o.output(line: asString(property: $0,
+                                            ofType: type,
+                                            withTypeName: false,
                                             includeVarKeyword: true,
                                             includeAccessors: $0.accessor != .getterAndSetter))
                 }
@@ -271,6 +275,7 @@ public enum TypeFormatter {
         switch trait {
         case .swiftType(let type):
             return stringify(type)
+            
         case .semantics(let semantics):
             return stringify(semantics)
         }

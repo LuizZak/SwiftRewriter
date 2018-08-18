@@ -91,6 +91,7 @@ public class SwiftTypeParser {
     ///
     /// arg-attribute
     ///     : '@' identifier
+    ///     | '@' identifier '(' ..* ')'
     ///     ;
     ///
     /// -- Atoms
@@ -398,6 +399,7 @@ public class SwiftTypeParser {
     ///
     /// arg-attribute
     ///     : '@' identifier
+    ///     | '@' identifier '(' ..* ')'
     ///     ;
     /// ```
     private static func parseTupleOrBlock(_ lexer: Tokenizer) throws -> SwiftType {
@@ -575,7 +577,8 @@ public class SwiftTypeParser {
         
         // Implicitly unwrapped optional
         if lexer.consumeToken(ifTypeIs: .exclamationMark) != nil {
-            return try verifyTrailing(after: .implicitUnwrappedOptional(type), lexer: lexer)
+            return try verifyTrailing(after: .implicitUnwrappedOptional(type),
+                                      lexer: lexer)
         }
         
         return type
