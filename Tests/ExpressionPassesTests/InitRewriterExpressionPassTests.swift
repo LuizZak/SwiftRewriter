@@ -237,8 +237,11 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         
         let typeA =
             KnownTypeBuilder(typeName: "A")
-                .constructor(withParameters: [ParameterSignature(label: nil, name: "value", type: .int)],
-                             isFailable: true)
+                .constructor(
+                    withParameters: [
+                        ParameterSignature(label: nil, name: "value", type: .int)
+                    ],
+                    isFailable: true)
                 .build()
         let typeB =
             KnownTypeBuilder(typeName: "B", supertype: typeA)

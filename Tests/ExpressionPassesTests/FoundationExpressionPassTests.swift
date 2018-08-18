@@ -441,6 +441,23 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
         XCTAssertEqual(res.resolvedType, .optional(.bool))
     }
     
+    func testNSCompareResultConversions() {
+        assertTransform(
+            expression: .identifier("NSOrderedAscending"),
+            into: Expression.identifier("ComparisonResult").dot("orderedAscending")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSOrderedDescending"),
+            into: Expression.identifier("ComparisonResult").dot("orderedDescending")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("NSOrderedSame"),
+            into: Expression.identifier("ComparisonResult").dot("orderedSame")
+        ); assertNotifiedChange()
+    }
+    
     func testNSCalendarUnitConversions() {
         assertTransform(
             expression: .identifier("NSCalendarUnitEra"),

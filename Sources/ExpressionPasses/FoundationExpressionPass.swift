@@ -366,5 +366,14 @@ extension FoundationExpressionPass {
         enumMappings["NSCalendarUnitTimeZone"] = {
             Expression.identifier("Calendar").dot("Component").dot("timeZone")
         }
+        enumMappings["NSOrderedAscending"] = {
+            Expression.identifier("ComparisonResult").dot("orderedAscending")
+        }
+        enumMappings["NSOrderedDescending"] = {
+            Expression.identifier("ComparisonResult").dot("orderedDescending")
+        }
+        enumMappings["NSOrderedSame"] = {
+            Expression.identifier("ComparisonResult").dot("orderedSame")
+        }
     }
 }
