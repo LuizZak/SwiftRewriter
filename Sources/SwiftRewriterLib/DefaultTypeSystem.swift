@@ -194,51 +194,75 @@ public class DefaultTypeSystem: TypeSystem {
         return knownType.kind == .struct
     }
     
+    public func isType(_ type: SwiftType, conformingTo protocolName: String) -> Bool {
+        guard let typeName = typeNameIn(swiftType: type) else {
+            return false
+        }
+        
+        return isType(typeName, conformingTo: protocolName)
+    }
+    
+    public func isType(_ type: SwiftType, subtypeOf supertypeName: String) -> Bool {
+        guard let typeName = typeNameIn(swiftType: type) else {
+            return false
+        }
+        
+        return isType(typeName, subtypeOf: supertypeName)
+    }
+    
     public func isType(_ typeName: String, conformingTo protocolName: String) -> Bool {
-        guard let typeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
-            return false
-        }
-        guard let protocolName = typeNameIn(swiftType: resolveAlias(in: protocolName)) else {
-            return false
-        }
         if typeName == protocolName {
             return true
         }
         
-        guard let type = knownTypeWithName(typeName) else {
+        guard let unaliasedTypeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
+            return false
+        }
+        guard let unaliasedProtocolName = typeNameIn(swiftType: resolveAlias(in: protocolName)) else {
+            return false
+        }
+        if unaliasedTypeName == unaliasedProtocolName {
+            return true
+        }
+        
+        guard let type = knownTypeWithName(unaliasedTypeName) else {
             return false
         }
         
-        return conformance(toProtocolName: protocolName, in: type) != nil
+        return conformance(toProtocolName: unaliasedProtocolName, in: type) != nil
     }
     
     public func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool {
-        guard let typeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
-            return false
-        }
-        guard let supertypeName = typeNameIn(swiftType: resolveAlias(in: supertypeName)) else {
-            return false
-        }
-        
         if typeName == supertypeName {
             return true
         }
         
-        guard let type = knownTypeWithName(typeName) else {
+        guard let unaliasedTypeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
+            return false
+        }
+        guard let unaliasedSupertypeName = typeNameIn(swiftType: resolveAlias(in: supertypeName)) else {
+            return false
+        }
+        
+        if unaliasedTypeName == unaliasedSupertypeName {
+            return true
+        }
+        
+        guard let type = knownTypeWithName(unaliasedTypeName) else {
             return false
         }
         
         // Direct supertype name fetching
         switch type.supertype {
-        case .typeName(let tn)? where tn == supertypeName:
+        case .typeName(let tn)? where tn == unaliasedSupertypeName:
             return true
         case .knownType(let kt)?:
-            return isType(kt.typeName, subtypeOf: supertypeName)
+            return isType(kt.typeName, subtypeOf: unaliasedSupertypeName)
         default:
             break
         }
         
-        guard let supertype = knownTypeWithName(supertypeName) else {
+        guard let supertype = knownTypeWithName(unaliasedSupertypeName) else {
             return false
         }
         
@@ -259,9 +283,9 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         // Search type definitions
-        var currentClassType = classTypeDefinition(name: typeName)
+        var currentClassType = classTypeDefinition(name: unaliasedTypeName)
         while let c = currentClassType {
-            if c.typeName == supertypeName {
+            if c.typeName == unaliasedSupertypeName {
                 return true
             }
             

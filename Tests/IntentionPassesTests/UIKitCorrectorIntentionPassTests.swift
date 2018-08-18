@@ -7,9 +7,22 @@ import IntentionPasses
 class UIKitCorrectorIntentionPassTests: XCTestCase {
     func testDrawRect() {
         let inputSignature =
-            FunctionSignature(name: "drawRect", parameters: [ParameterSignature(label: "_", name: "rect", type: .typeName("CGRect"))])
+            FunctionSignature(
+                name: "drawRect",
+                parameters: [
+                    ParameterSignature(label: "_",
+                                       name: "rect",
+                                       type: .typeName("CGRect"))
+                ])
+        
         let expectedSignature =
-            FunctionSignature(name: "draw", parameters: [ParameterSignature(label: "_", name: "rect", type: .typeName("CGRect"))])
+            FunctionSignature(
+                name: "draw",
+                parameters: [
+                    ParameterSignature(label: "_",
+                                       name: "rect",
+                                       type: .typeName("CGRect"))
+                ])
         
         assert(sut: UIKitCorrectorIntentionPass(),
                convertsSignature: inputSignature, into: expectedSignature,

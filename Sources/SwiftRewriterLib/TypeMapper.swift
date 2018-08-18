@@ -559,7 +559,8 @@ public class DefaultTypeMapper: TypeMapper {
         "char16_t": .typeName("CChar16"),
         "char32_t": .typeName("CChar32"),
         "Bool": .typeName("CBool"),
-        "NSTimeInterval": .typeName("TimeInterval")
+        "NSTimeInterval": .typeName("TimeInterval"),
+        "NSComparisonResult": .typeName("ComparisonResult")
     ]
     
     /// For mapping pointer-reference structs (could be Objc-C classes) into

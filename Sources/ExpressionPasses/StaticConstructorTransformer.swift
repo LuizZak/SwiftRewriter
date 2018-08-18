@@ -80,10 +80,12 @@ final class StaticConstructorTransformer {
             }
             
             return leading()
+            
         case .method(let methodName, let args):
             let transformer =
                 FunctionInvocationTransformer(
-                    objcFunctionName: "", toSwiftFunction: "",
+                    objcFunctionName: "",
+                    toSwiftFunction: "",
                     firstArgumentBecomesInstance: false,
                     arguments: args)
             
@@ -103,6 +105,6 @@ final class StaticConstructorTransformer {
     
     enum Kind {
         case property(String)
-        case method(String, [FunctionInvocationTransformer.ArgumentStrategy])
+        case method(String, [ArgumentRewritingStrategy])
     }
 }

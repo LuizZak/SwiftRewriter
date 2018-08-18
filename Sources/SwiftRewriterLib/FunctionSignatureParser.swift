@@ -8,6 +8,7 @@ public final class FunctionSignatureParser {
     private typealias Tokenizer = TokenizerLexer<FullToken<Token>>
     
     /// Parses an array of parameter signatures from a given input string.
+    ///
     /// Input must contain the argument list enclosed within their respective
     /// parenthesis - e.g. the following string produces the following parameter
     /// signatures:

@@ -4,8 +4,8 @@ import SwiftRewriterLib
 /// Provides simple signature mapping support by alowing rewriting the signature
 /// keywords of a method signature or invocation
 public class SignatureMapper {
-    let from: FunctionSignature
-    let to: FunctionSignature
+    public let from: FunctionSignature
+    public let to: FunctionSignature
     
     /// Creates a new `SignatureConversion` instance with a given source and target
     /// signatures to convert.

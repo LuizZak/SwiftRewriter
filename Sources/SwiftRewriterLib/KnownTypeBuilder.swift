@@ -409,6 +409,14 @@ public struct KnownTypeBuilder {
     }
 }
 
+extension KnownTypeBuilder {
+    /// Returns a reference to the latest method added to this `KnownTypeBuilder`
+    /// via a `.method(...)` call
+    public var latestMethod: KnownMethod? {
+        return type.knownMethods.last
+    }
+}
+
 private class DummyType: KnownType {
     var origin: String
     var typeName: String

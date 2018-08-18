@@ -6,10 +6,11 @@ import SwiftRewriterLib
 // swiftlint:disable function_body_length
 public enum UIViewCompoundType {
     private static var singleton: CompoundedMappingType = {
-        let mappings = createMappings()
-        let type = createType()
+        let typeAndMappings = createType()
+        let mappings = createMappings() + typeAndMappings.1
         
-        return CompoundedMappingType(knownType: type, signatureMappings: mappings)
+        return CompoundedMappingType(knownType: typeAndMappings.0,
+                                     signatureMappings: mappings)
     }()
     
     public static func create() -> CompoundedMappingType {
@@ -20,11 +21,12 @@ public enum UIViewCompoundType {
         let mappings = SignatureMapperBuilder()
         
         return mappings
-            .mapKeywords(from: ["drawRect", nil], to: ["rect", nil])
+            //.mapKeywords(from: ["drawRect", nil], to: ["rect", nil])
             .build()
     }
     
-    static func createType() -> KnownType {
+    static func createType() -> (KnownType, [SignatureMapper]) {
+        var mappings: [SignatureMapper] = []
         var type = KnownTypeBuilder(typeName: "UIView", supertype: "UIResponder")
         
         type.useSwiftSignatureMatching = true
@@ -133,6 +135,14 @@ public enum UIViewCompoundType {
                         ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
+                ).makeSignatureMapping(
+                    fromFunctionNamed: "animateWithDuration",
+                    parameters: [
+                        ParameterSignature(label: "_", name: "duration", type: "TimeInterval"),
+                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                    ],
+                    in: &mappings
                 )
             )
             .method(withSignature:
@@ -143,6 +153,13 @@ public enum UIViewCompoundType {
                         ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: []))
                     ],
                     isStatic: true
+                ).makeSignatureMapping(
+                    fromFunctionNamed: "animateWithDuration",
+                    parameters: [
+                        ParameterSignature(label: "_", name: "duration", type: "TimeInterval"),
+                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                    ],
+                    in: &mappings
                 )
             )
             .method(withSignature:
@@ -156,6 +173,16 @@ public enum UIViewCompoundType {
                         ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
+                ).makeSignatureMapping(
+                    fromFunctionNamed: "animateWithDuration",
+                    parameters: [
+                        ParameterSignature(label: "_", name: "duration", type: "TimeInterval"),
+                        ParameterSignature(name: "delay", type: "TimeInterval"),
+                        ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
+                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                    ],
+                    in: &mappings
                 )
             )
             .method(withSignature:
@@ -543,6 +570,9 @@ public enum UIViewCompoundType {
                     parameters: [
                         ParameterSignature(label: "_", name: "rect", type: "CGRect")
                     ]
+                ).makeSignatureMapping(
+                    fromFunctionNamed: "drawRect",
+                    in: &mappings
                 )
             )
             .method(withSignature:
@@ -829,6 +859,61 @@ public enum UIViewCompoundType {
                 )
             )
         
-        return type.build()
+        return (type.build(), mappings)
+    }
+}
+
+extension FunctionSignature {
+    func makeSignatureMapping(fromFunctionNamed name: String,
+                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+        
+        let signature =
+            FunctionSignature(name: name,
+                              parameters: parameters,
+                              returnType: returnType,
+                              isStatic: isStatic)
+        
+        return makeSignatureMapping(from: signature, in: &mappings)
+        
+    }
+    
+    func makeSignatureMapping(fromFunctionNamed name: String,
+                              parameters: String,
+                              returnType: SwiftType = .void,
+                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+        
+        let params
+            = try! FunctionSignatureParser.parseParameters(from: parameters)
+        
+        let signature =
+            FunctionSignature(name: name,
+                              parameters: params,
+                              returnType: returnType,
+                              isStatic: isStatic)
+        
+        return makeSignatureMapping(from: signature, in: &mappings)
+    }
+    
+    func makeSignatureMapping(fromFunctionNamed name: String,
+                              parameters: [ParameterSignature],
+                              returnType: SwiftType = .void,
+                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+        
+        let signature =
+            FunctionSignature(name: name,
+                              parameters: parameters,
+                              returnType: returnType,
+                              isStatic: isStatic)
+        
+        return makeSignatureMapping(from: signature, in: &mappings)
+    }
+    
+    func makeSignatureMapping(from signature: FunctionSignature,
+                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+        
+        let mapping = SignatureMapper(from: signature, to: self)
+        mappings.append(mapping)
+        
+        return self
     }
 }

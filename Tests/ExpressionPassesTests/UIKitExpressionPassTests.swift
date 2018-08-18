@@ -298,4 +298,24 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
             into: Expression.identifier("UITableViewCellSelectionStyle").dot("default")
         ); assertNotifiedChange()
     }
+    
+    func testUIViewAnimateWithDuration() {
+        assertTransform(
+            expression: Expression
+                .identifier("UIView")
+                .typed(.metatype(for: .typeName("UIView")))
+                .dot("animateWithDuration")
+                .call([
+                    .unlabeled(.constant(0.3)),
+                    .labeled("animations", .block(body: []))
+                ]),
+            into: Expression
+                .identifier("UIView")
+                .dot("animate")
+                .call([
+                    .labeled("withDuration", .constant(0.3)),
+                    .labeled("animations", .block(body: []))
+                ])
+        ); assertNotifiedChange()
+    }
 }

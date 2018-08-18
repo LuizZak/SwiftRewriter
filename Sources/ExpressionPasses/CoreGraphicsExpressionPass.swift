@@ -211,10 +211,11 @@ extension CoreGraphicsExpressionPass {
     
     private func makeInstanceCall(_ name: String,
                                   swiftName: String,
-                                  arguments: [FunctionInvocationTransformer.ArgumentStrategy] = [.fromArgIndex(1)]) {
+                                  arguments: [ArgumentRewritingStrategy] = [.fromArgIndex(1)]) {
+        
         /// Default `transform` parameter handler
-        let transform: FunctionInvocationTransformer.ArgumentStrategy =
-            .omitIf(matches: .constant(.nil), .labeled("transform", .fromArgIndex(0)))
+        let transform: ArgumentRewritingStrategy =
+            .omitIf(matches: .equals(to: .constant(.nil)), .labeled("transform", .fromArgIndex(0)))
         
         let transformer =
             FunctionInvocationTransformer(objcFunctionName: name,
@@ -227,7 +228,7 @@ extension CoreGraphicsExpressionPass {
     
     private func makeCGContextCall(_ name: String,
                                    swiftName: String,
-                                   arguments: [FunctionInvocationTransformer.ArgumentStrategy] = []) {
+                                   arguments: [ArgumentRewritingStrategy] = []) {
         let transformer =
             FunctionInvocationTransformer(objcFunctionName: name,
                                           toSwiftFunction: swiftName,

@@ -89,6 +89,19 @@ public extension ValueMatcher {
     ///
     /// - Parameters:
     ///   - keyPath: The keypath onto the value to retrieve the value to match.
+    ///   - value: A value to match under equality.
+    /// - Returns: A new matcher with the specified matcher rule appended along
+    /// with all existing rules for this matcher.
+    public func keyPath<U: Equatable>(_ kp: KeyPath<T, U?>, equals value: U) -> ValueMatcher {
+        
+        return keyPath(kp, .equals(value))
+    }
+    
+    /// Returns a new matcher with the given keypath matching rule appended to
+    /// the existing rules of this matcher.
+    ///
+    /// - Parameters:
+    ///   - keyPath: The keypath onto the value to retrieve the value to match.
     ///   - rule: A rule to match the value with.
     /// - Returns: A new matcher with the specified matcher rule appended along
     /// with all existing rules for this matcher.
@@ -250,7 +263,7 @@ extension ValueMatcher {
 public extension ValueMatcher {
     
     public static var any: ValueMatcher {
-        return ValueMatcher().match(closure: { _ in true })
+        return ValueMatcher()
     }
     
 }

@@ -204,6 +204,7 @@ class DefaultTypeMapperTests: XCTestCase {
         expect(.pointer(.struct("NSNumberFormatter")), toConvertTo: "NumberFormatter")
         
         expect(.struct("NSTimeInterval"), toConvertTo: "TimeInterval")
+        expect(.struct("NSComparisonResult"), toConvertTo: "ComparisonResult")
         expect(.struct("NSInteger"), toConvertTo: "Int")
         expect(.struct("NSUInteger"), toConvertTo: "UInt")
     }

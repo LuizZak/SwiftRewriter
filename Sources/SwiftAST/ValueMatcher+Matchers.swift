@@ -30,6 +30,14 @@ public func hasCount<C: Collection>(_ count: MatchRule<Int>) -> ValueMatcher<C> 
     return ValueMatcher().keyPath(\.count, count)
 }
 
+public extension ValueMatcher where T: Equatable {
+    
+    public static func equals(to value: T) -> ValueMatcher<T> {
+        return ValueMatcher().match(if: SwiftAST.equals(value))
+    }
+    
+}
+
 public extension ValueMatcher where T: Collection {
     
     public func hasCount(_ count: MatchRule<Int>) -> ValueMatcher<T> {

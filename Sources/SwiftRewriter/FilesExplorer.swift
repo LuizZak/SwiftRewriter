@@ -34,7 +34,7 @@ func showSearchPathUi(in menu: MenuController) -> String? {
                 }
                 
                 return .success(pathInput)
-        })
+            })
     
     guard let path = _path else {
         return nil
@@ -341,13 +341,14 @@ private class FileFinderInterface {
 /// Presents a CLI-gui for navigating folders and selecting files to process
 /// into SwiftRewriter
 private class FilesExplorer: PagesCommandHandler {
+    var acceptsCommands: Bool = true
+    var canHandleEmptyInput: Bool = false
+    
     var commandPrompt: String? {
         return "Select a file above or input '0' to quit"
     }
     
     private var fileList: FileListConsoleProvider?
-    
-    public var commandClosure: ((String) throws -> Pages.PagesCommandResult)?
     
     public var console: ConsoleClient
     public var rewriterService: SwiftRewriterService
@@ -357,12 +358,10 @@ private class FilesExplorer: PagesCommandHandler {
         self.console = console
         self.rewriterService = rewriterService
         self.path = path
-        
-        commandClosure = { [weak self] input in
-            guard let sSelf = self else { return .quit(nil) }
-            
-            return sSelf.navigateOption(input)
-        }
+    }
+    
+    func executeCommand(_ input: String) throws -> Pages.PagesCommandResult {
+        return self.navigateOption(input)
     }
 
     public func getFileListProvider() throws -> FileListConsoleProvider {
@@ -426,8 +425,8 @@ private class FilesExplorer: PagesCommandHandler {
             path = newPath
             let newList = try self.getFileListProvider()
             
-            return .modifyList { pages in
-                pages.displayPages(withProvider: newList)
+            return .modifyList { _ in
+                newList
             }
         } catch {
             return .loop("Error during operation: \(error)".terminalColorize(.red))
@@ -520,7 +519,6 @@ private class FilesExplorer: PagesCommandHandler {
 }
 
 public class FileListConsoleProvider: ConsoleDataProvider {
-    public typealias Data = String
     
     let path: URL
     let fileList: [URL]
@@ -538,19 +536,19 @@ public class FileListConsoleProvider: ConsoleDataProvider {
         self.fileList = fileList
     }
     
-    public func data(atIndex index: Int) -> String {
-        let url = fileList[index]
+    public func displayTitles(forRow row: Int) -> [CustomStringConvertible] {
+        let url = fileList[row]
         let fullPath = url.standardizedFileURL.relativePath
         
         var isDirectory: ObjCBool = ObjCBool(false)
         guard FileManager.default.fileExists(atPath: fullPath, isDirectory: &isDirectory) else {
-            return ""
+            return [""]
         }
         
         if isDirectory.boolValue {
-            return url.lastPathComponent.terminalColorize(.magenta)
+            return [url.lastPathComponent.terminalColorize(.magenta)]
         }
         
-        return url.lastPathComponent
+        return [url.lastPathComponent]
     }
 }

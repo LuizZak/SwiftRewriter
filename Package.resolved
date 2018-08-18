@@ -15,8 +15,8 @@
         "repositoryURL": "https://bitbucket.org/cs-luiz-silva/console.git",
         "state": {
           "branch": null,
-          "revision": "bae04df99e56117fea0649b5749a5dd1a71c302b",
-          "version": "0.1.0"
+          "revision": "63e2dc4a87116715d90ce930124e916bdfbdd955",
+          "version": "0.4.1"
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
           "branch": "swift4.2",
-          "revision": "eae81dbdc6ffb96046457c7bf41e2fbcc33f9773",
+          "revision": "31744df3d33873f370e8b78931ca47add188ab47",
           "version": null
         }
       },

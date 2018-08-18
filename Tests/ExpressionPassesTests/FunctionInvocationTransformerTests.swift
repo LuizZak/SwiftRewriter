@@ -149,7 +149,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
                 objcFunctionName: "objc", toSwiftFunction: "swift",
                 firstArgumentBecomesInstance: false,
                 arguments: [
-                    .omitIf(matches: .identifier("A"), .asIs)
+                    .omitIf(matches: .equals(to: .identifier("A")), .asIs)
                 ]
             )
         

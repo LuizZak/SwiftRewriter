@@ -177,6 +177,22 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertFalse(sut.isType("A", subtypeOf: "C"))
     }
     
+    func testIsTypeSubtypeOf_SwiftType() {
+        let typeA = KnownTypeBuilder(typeName: "A").build()
+        let typeB = KnownTypeBuilder(typeName: "B", supertype: typeA).build()
+        let typeC = KnownTypeBuilder(typeName: "C", supertype: typeB).build()
+        
+        sut.addType(typeA)
+        sut.addType(typeB)
+        sut.addType(typeC)
+        
+        XCTAssertTrue(sut.isType("A" as SwiftType, subtypeOf: "A"))
+        XCTAssertTrue(sut.isType("B" as SwiftType, subtypeOf: "A"))
+        XCTAssertTrue(sut.isType("C" as SwiftType, subtypeOf: "A"))
+        XCTAssertFalse(sut.isType("A" as SwiftType, subtypeOf: "B"))
+        XCTAssertFalse(sut.isType("A" as SwiftType, subtypeOf: "C"))
+    }
+    
     func testNSObjectDefinition() {
         guard let type = sut.knownTypeWithName("NSObject") else {
             XCTFail("Expected NSObject to be present")
@@ -488,6 +504,40 @@ class DefaultTypeSystemTests: XCTestCase {
         sut.addType(z)
         
         XCTAssert(sut.isType("Z", conformingTo: "P"))
+    }
+    
+    func testIsTypeConformingToProtocol_SwiftType() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
+        let z = KnownTypeBuilder(typeName: "Z").build()
+        sut.addType(p)
+        sut.addType(q)
+        sut.addType(z)
+        
+        XCTAssert(sut.isType("Q" as SwiftType, conformingTo: "P"))
+        XCTAssertFalse(sut.isType("Z" as SwiftType, conformingTo: "P"))
+    }
+    
+    func testIsTypeConformingToProtocolSupertypeLookup_SwiftType() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q").protocolConformance(protocolName: "P").build()
+        let z = KnownTypeBuilder(typeName: "Z", supertype: "Q").build()
+        sut.addType(p)
+        sut.addType(q)
+        sut.addType(z)
+        
+        XCTAssert(sut.isType("Z" as SwiftType, conformingTo: "P"))
+    }
+    
+    func testIsTypeConformingToProtocolIndirectProtocolLookup_SwiftType() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(protocolName: "P").build()
+        let z = KnownTypeBuilder(typeName: "Z").protocolConformance(protocolName: "Q").build()
+        sut.addType(p)
+        sut.addType(q)
+        sut.addType(z)
+        
+        XCTAssert(sut.isType("Z" as SwiftType, conformingTo: "P"))
     }
     
     func testTypeCategoryPrimitives() {

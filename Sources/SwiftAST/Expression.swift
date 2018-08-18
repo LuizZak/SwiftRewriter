@@ -1720,3 +1720,15 @@ extension Postfix {
     }
     
 }
+
+extension FunctionCallPostfix {
+    
+    public func copyTypeAndMetadata(from other: FunctionCallPostfix) -> Self {
+        _ = (self as Postfix).copyTypeAndMetadata(from: other)
+        
+        self.callableSignature = callableSignature
+        
+        return self
+    }
+    
+}

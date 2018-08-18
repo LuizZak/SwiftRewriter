@@ -3,10 +3,9 @@ import Utils
 import SwiftAST
 
 public class BaseExpressionPass: ASTRewriterPass {
-    public typealias ArgumentStrategy = FunctionInvocationTransformer.ArgumentStrategy
     
     var staticConstructorTransformers: [StaticConstructorTransformer] = []
-    var transformers: [FunctionInvocationTransformer] = []
+    var transformers: [PostfixInvocationTransformer] = []
     var enumMappings: [String: () -> Expression] = [:]
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
@@ -54,7 +53,9 @@ public class BaseExpressionPass: ASTRewriterPass {
 }
 
 public extension BaseExpressionPass {
-    func makeInit(typeName: String, property: String, convertInto: @autoclosure @escaping () -> Expression,
+    func makeInit(typeName: String,
+                  property: String,
+                  convertInto: @autoclosure @escaping () -> Expression,
                   andTypeAs type: SwiftType? = nil) {
         
         let transformer
@@ -70,8 +71,10 @@ public extension BaseExpressionPass {
         staticConstructorTransformers.append(transformer)
     }
     
-    func makeInit(typeName: String, method: String, convertInto: @autoclosure @escaping () -> Expression,
-                  andCallWithArguments args: [FunctionInvocationTransformer.ArgumentStrategy],
+    func makeInit(typeName: String,
+                  method: String,
+                  convertInto: @autoclosure @escaping () -> Expression,
+                  andCallWithArguments args: [ArgumentRewritingStrategy],
                   andTypeAs type: SwiftType? = nil) {
         
         let transformer
@@ -89,7 +92,7 @@ public extension BaseExpressionPass {
     
     func makeFuncTransform(_ name: String,
                            swiftName: String,
-                           arguments: [ArgumentStrategy],
+                           arguments: [ArgumentRewritingStrategy],
                            firstArgIsInstance: Bool = false) {
         
         let transformer =
@@ -110,7 +113,7 @@ public extension BaseExpressionPass {
     }
     
     func makeFuncTransform(_ name: String, setterName: String,
-                           argumentTransformer: ArgumentStrategy) {
+                           argumentTransformer: ArgumentRewritingStrategy) {
         let transformer =
             FunctionInvocationTransformer(objcFunctionName: name,
                                           toSwiftPropertyGetter: setterName)
@@ -120,7 +123,7 @@ public extension BaseExpressionPass {
     
     func makeFuncTransform(getter: String, setter: String,
                            intoPropertyNamed swiftName: String,
-                           setterTransformer: ArgumentStrategy = .asIs) {
+                           setterTransformer: ArgumentRewritingStrategy = .asIs) {
         makeFuncTransform(getter, getterName: swiftName)
         makeFuncTransform(setter, setterName: swiftName, argumentTransformer: setterTransformer)
     }

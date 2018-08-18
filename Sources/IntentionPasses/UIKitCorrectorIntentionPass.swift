@@ -1,5 +1,6 @@
 import SwiftAST
 import SwiftRewriterLib
+import Commons
 
 /// Makes correction for signatures of subclasses and conformeds of known UIKit
 /// classes and protocols
@@ -15,7 +16,16 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
     }
     
     func createConversions() {
-        addConversion(.subtype("UIView"), fromKeywords: ["drawRect", nil], to: ["draw", nil])
+        let mappings
+            = UIViewCompoundType
+                .create()
+                .signatureMappings
+        
+        conversions.append(contentsOf:
+            mappings.map {
+                SignatureConversion(relationship: .subtype("UIView"),
+                                    signatureMapper: $0)
+            })
         
         // UITableViewDelegate
         addConversions(
@@ -157,6 +167,14 @@ private class SignatureConversion {
         self.relationship = relationship
         self.from = from
         self.to = to
+    }
+    
+    public init(relationship: Relationship, signatureMapper: SignatureMapper) {
+        
+        self.relationship = relationship
+        self.from = signatureMapper.from.asSelector
+        self.to = signatureMapper.to.asSelector
+        
     }
     
     public func canApply(to signature: FunctionSignature) -> Bool {

@@ -1,6 +1,7 @@
 import SwiftRewriterLib
 import Utils
 import SwiftAST
+import Commons
 
 /// Applies passes to simplify known UIKit methods and constructs
 public class UIKitExpressionPass: BaseExpressionPass {
@@ -167,12 +168,66 @@ public class UIKitExpressionPass: BaseExpressionPass {
 }
 
 extension UIKitExpressionPass {
+    func makeSignatureTransformers() {
+        let compoundType = UIViewCompoundType.create()
+        let mappings = compoundType.signatureMappings
+        
+        let typeSystem = context.typeSystem
+        
+        transformers.append(contentsOf:
+            mappings.map { mapping -> PostfixInvocationTransformer in
+                
+                let baseExpressionMatcher: ValueMatcher<Expression>
+                
+                if mapping.from.isStatic {
+                    
+                    baseExpressionMatcher =
+                        ValueMatcher()
+                            .keyPath(\Expression.resolvedType) {
+                                $0.match {
+                                    guard case .metatype(let type) = $0 else {
+                                        return false
+                                    }
+                                    
+                                    return typeSystem.isType(type, subtypeOf: compoundType.typeName)
+                                }
+                            }
+                    
+                } else {
+                    
+                    baseExpressionMatcher =
+                        ValueMatcher()
+                            .keyPath(\Expression.resolvedType) {
+                                $0.match {
+                                    typeSystem.isType($0, subtypeOf: compoundType.typeName)
+                                }
+                            }
+                    
+                }
+                
+                return
+                    MethodInvocationTransformer(
+                        baseExpressionMatcher: baseExpressionMatcher,
+                        methodSignature: mapping.from,
+                        newMethodName: mapping.to.name,
+                        argumentRewriters: mapping.to.parameters.map { arg in
+                            if let label = arg.label {
+                                return .labeled(label, .asIs)
+                            } else {
+                                return .asIs
+                            }
+                        })
+                
+            })
+    }
+    
     func makeEnumTransformers() {
         makeNSTextAlignmentTransformers()
         makeUIFontEnumTransformers()
     }
     
     func makeFunctionTransformers() {
+        makeSignatureTransformers()
         makeUIFontTransformers()
         makeUIColorTransformes()
     }
