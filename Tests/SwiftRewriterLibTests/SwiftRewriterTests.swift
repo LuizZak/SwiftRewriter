@@ -787,6 +787,22 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testDontOmitObjcAttributeOnNSObjectProtocolInheritingProtocols() throws {
+        try assertObjcParse(
+            objc: """
+            @protocol MyProtocol <NSObject>
+            - (void)myMethod;
+            @end
+            """,
+            swift: """
+            @objc
+            protocol MyProtocol: NSObjectProtocol {
+                func myMethod()
+            }
+            """,
+            options: ASTWriterOptions(omitObjcCompatibility: true))
+    }
+    
     func testRewriteProtocolConformance() throws {
         try assertObjcParse(
             objc: """

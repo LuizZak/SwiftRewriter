@@ -26,9 +26,11 @@ public struct ASTWriterOptions {
     /// Number of concurrent threads to use when saving files.
     public var numThreads: Int
     
-    public init(outputExpressionTypes: Bool = false, printIntentionHistory: Bool = false,
+    public init(outputExpressionTypes: Bool = false,
+                printIntentionHistory: Bool = false,
                 omitObjcCompatibility: Bool = false,
                 numThreads: Int = OperationQueue.defaultMaxConcurrentOperationCount) {
+        
         self.outputExpressionTypes = outputExpressionTypes
         self.printIntentionHistory = printIntentionHistory
         self.omitObjcCompatibility = omitObjcCompatibility

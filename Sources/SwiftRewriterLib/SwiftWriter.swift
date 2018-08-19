@@ -448,14 +448,23 @@ class InternalSwiftWriter {
         var inheritances: [String] = []
         inheritances.append(contentsOf: prot.protocols.map { p in p.protocolName })
         
+        var emitObjcAttribute = true
+        
         if !options.omitObjcCompatibility {
             // Always inherit form NSObjectProtocol in Objective-C compatibility mode
             if !inheritances.contains("NSObjectProtocol") {
                 inheritances.insert("NSObjectProtocol", at: 0)
             }
+            
+            emitObjcAttribute = true
+        } else if !inheritances.contains("NSObjectProtocol") {
+            emitObjcAttribute = false
+        }
         
+        if emitObjcAttribute {
             target.output(line: "@objc", style: .keyword)
         }
+        
         target.outputIdentation()
         target.outputInlineWithSpace("protocol", style: .keyword)
         target.outputInline(prot.typeName, style: .typeName)
