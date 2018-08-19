@@ -205,12 +205,7 @@ public class BinaryExpression: Expression {
     }
     
     public override var requiresParens: Bool {
-        switch op.category {
-        case .assignment:
-            return true
-        default:
-            return false
-        }
+        return true
     }
     
     public override var description: String {
