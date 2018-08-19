@@ -177,8 +177,12 @@ public class UIKitExpressionPass: BaseExpressionPass {
 
 extension UIKitExpressionPass {
     func makeSignatureTransformers() {
-        let compoundType = UIViewCompoundType.create()
-        let mappings = compoundType.signatureMappings
+        addCompoundedType(UIViewCompoundType.create())
+        addCompoundedType(UIGestureRecognizerCompoundType.create())
+    }
+    
+    func addCompoundedType(_ compoundedType: CompoundedMappingType) {
+        let mappings = compoundedType.signatureMappings
         
         let typeSystem = context.typeSystem
         
@@ -197,7 +201,7 @@ extension UIKitExpressionPass {
                                         return false
                                     }
                                     
-                                    return typeSystem.isType(type, subtypeOf: compoundType.typeName)
+                                    return typeSystem.isType(type, subtypeOf: compoundedType.typeName)
                                 }
                             }
                     
@@ -207,7 +211,7 @@ extension UIKitExpressionPass {
                         ValueMatcher()
                             .keyPath(\Expression.resolvedType) {
                                 $0.match {
-                                    typeSystem.isType($0, subtypeOf: compoundType.typeName)
+                                    typeSystem.isType($0, subtypeOf: compoundedType.typeName)
                                 }
                             }
                     

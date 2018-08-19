@@ -15,18 +15,23 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
         createConversions()
     }
     
-    func createConversions() {
-        let mappings
-            = UIViewCompoundType
-                .create()
-                .signatureMappings
+    fileprivate func addCompoundedTypeMapping(_ compoundedType: CompoundedMappingType) {
+        let mappings = compoundedType.signatureMappings
         
         conversions.append(contentsOf:
             mappings.map {
-                SignatureConversion(relationship: .subtype("UIView"),
-                                    signatureMapper: $0,
-                                    adjustNullability: true)
-            })
+                SignatureConversion(
+                    relationship: .subtype(compoundedType.typeName),
+                    signatureMapper: $0,
+                    adjustNullability: true
+                )
+            }
+        )
+    }
+    
+    func createConversions() {
+        addCompoundedTypeMapping(UIViewCompoundType.create())
+        addCompoundedTypeMapping(UIGestureRecognizerCompoundType.create())
         
         addConversions(
             .conformance(protocolName: "UITableViewDelegate"),

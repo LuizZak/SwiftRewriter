@@ -172,9 +172,12 @@ class UIViewCompoundTypeTests: XCTestCase {
     }
 }
 
-extension UIViewCompoundTypeTests {
-    func assertSignature(type: CompoundedMappingType, matches signature: String,
-                         file: String = #file, line: Int = #line) {
+extension XCTestCase {
+    func assertSignature(type: CompoundedMappingType,
+                         matches signature: String,
+                         file: String = #file,
+                         line: Int = #line) {
+        
         let typeString = TypeFormatter.asString(knownType: type)
         
         if typeString != signature {

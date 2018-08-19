@@ -134,6 +134,11 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
         types.append(type)
     }
     
+    func createUIGestureRecognizer() {
+        let type = UIGestureRecognizerCompoundType.create()
+        types.append(type)
+    }
+    
     func createUITableViewCell() {
         makeType(named: "UITableViewCell", supertype: "UIView") { type -> KnownType in
             type
