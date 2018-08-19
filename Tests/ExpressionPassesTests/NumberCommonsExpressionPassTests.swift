@@ -7,7 +7,7 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = NumberCommonsExpressionPass()
+        sut = NumberCommonsExpressionPass(context: makeContext())
     }
     
     func testConvertNumericCast() {

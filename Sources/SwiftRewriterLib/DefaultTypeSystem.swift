@@ -82,15 +82,10 @@ public class DefaultTypeSystem: TypeSystem {
         
         // Same structure, ignoring nullability
         if ignoreNullability {
-            if expanded1.deepUnwrapped == expanded2.deepUnwrapped {
-                return true
-            }
-        } else if expanded1 == expanded2 {
-            // Same structure, taking nullability into account
-            return true
+            return expanded1.deepUnwrapped == expanded2.deepUnwrapped
         }
         
-        return false
+        return expanded1 == expanded2
     }
     
     public func typeExists(_ name: String) -> Bool {

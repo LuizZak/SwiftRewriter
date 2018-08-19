@@ -201,8 +201,4 @@ extension TypeGenerationIntention: KnownType {
     public var knownProtocolConformances: [KnownProtocolConformance] {
         return protocols
     }
-    
-    public func setKnownTrait(_ traitName: String, value: TraitType) {
-        knownTraits[traitName] = value
-    }
 }

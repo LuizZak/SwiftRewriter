@@ -7,6 +7,7 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
     let methodSignature: FunctionSignature
     let newMethodName: String
     let argumentRewriters: [ArgumentRewritingStrategy]
+    let argumentTypes: [SwiftType]
     
     /// The number of arguments this method invocation transformer needs, exactly,
     /// in order to be fulfilled.
@@ -15,12 +16,14 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
     init(baseExpressionMatcher: ValueMatcher<Expression>,
          methodSignature: FunctionSignature,
          newMethodName: String,
-         argumentRewriters: [ArgumentRewritingStrategy]) {
+         argumentRewriters: [ArgumentRewritingStrategy],
+         argumentTypes: [SwiftType]) {
         
         self.baseExpressionMatcher = baseExpressionMatcher
         self.methodSignature = methodSignature
         self.newMethodName = newMethodName
         self.argumentRewriters = argumentRewriters
+        self.argumentTypes = argumentTypes
         
         requiredArgumentCount = argumentRewriters.requiredArgumentCount()
     }
@@ -66,10 +69,17 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
         let newArgs =
             argumentRewriters.rewrite(arguments: function.arguments)
         
-        return memberNameAccess
-            .exp.copy()
-            .dot(newMethodName)
-            .call(newArgs)
+        let newExp =
+            memberNameAccess
+                .exp.copy()
+                .dot(newMethodName)
+                .call(newArgs)
+        
+        newExp.op.asFunctionCall?.arguments.enumerated().forEach { (i, arg) in
+            arg.expression.expectedType = argumentTypes[i]
+        }
+        
+        return newExp
         
     }
     

@@ -12,7 +12,7 @@ class ASTRewriterPassTests: XCTestCase {
                     Expression.identifier("function").call()
                 ])
         
-        let sut = TestExpressionPass()
+        let sut = TestExpressionPass(context: .empty)
         
         let result = exp.accept(sut)
         
@@ -31,7 +31,7 @@ class ASTRewriterPassTests: XCTestCase {
                 .identifier("a")
                 .sub(Expression.identifier("function").call())
         
-        let sut = TestExpressionPass()
+        let sut = TestExpressionPass(context: .empty)
         let result = exp.accept(sut)
         
         XCTAssert(sut.foundNeedle)
@@ -44,7 +44,7 @@ class ASTRewriterPassTests: XCTestCase {
     func testTraverseStatement() {
         let stmt: Statement = Statement.compound([.continue, .break])
         
-        let sut = TestExpressionPass()
+        let sut = TestExpressionPass(context: .empty)
         let result = stmt.accept(sut)
         
         XCTAssert(sut.foundNeedle)
@@ -160,7 +160,7 @@ class ASTRewriterPassTests: XCTestCase {
         
         let stmt = Statement.expression(exp)
         
-        let sut = TestExpressionPass()
+        let sut = TestExpressionPass(context: .empty)
         _=stmt.accept(sut)
         
         XCTAssert(sut.foundNeedle)

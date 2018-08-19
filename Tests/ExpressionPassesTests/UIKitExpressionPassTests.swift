@@ -7,7 +7,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = UIKitExpressionPass()
+        sut = UIKitExpressionPass(context: makeContext())
     }
     
     func testNSTextAlignment() {

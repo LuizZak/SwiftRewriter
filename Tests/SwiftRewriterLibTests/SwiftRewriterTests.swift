@@ -2515,7 +2515,7 @@ class SwiftRewriterTests: XCTestCase {
             class A: UIView {
                 @objc
                 override func convert(_ point: CGPoint, to view: UIView?) -> CGPoint {
-                    return self.convertPoint(CGPoint(x: 0, y: 0), toView: nil)
+                    return self.convert(CGPoint(x: 0, y: 0), to: nil)
                 }
             }
             """)

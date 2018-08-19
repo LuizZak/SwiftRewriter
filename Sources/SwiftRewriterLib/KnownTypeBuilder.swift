@@ -346,7 +346,8 @@ public struct KnownTypeBuilder {
         var new = clone()
         precondition(type.kind == .enum)
         
-        new.type.setKnownTrait(KnownTypeTraits.enumRawValue, value: .swiftType(rawValueType))
+        new.type.setKnownTrait(KnownTypeTraits.enumRawValue,
+                               value: .swiftType(rawValueType))
         
         return new
     }

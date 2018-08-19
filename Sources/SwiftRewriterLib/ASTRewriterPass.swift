@@ -43,13 +43,13 @@ public struct ASTRewriterPassContext {
 /// Syntax rewriters are run on every method body found to apply transformations
 /// to source code before it is output on files.
 open class ASTRewriterPass: SyntaxNodeRewriter {
-    public var context: ASTRewriterPassContext = .empty
+    public var context: ASTRewriterPassContext
     public var typeSystem: TypeSystem {
         return context.typeSystem
     }
     
-    public override required init() {
-        
+    public required init(context: ASTRewriterPassContext) {
+        self.context = context
     }
     
     open func apply(on statement: Statement, context: ASTRewriterPassContext) -> Statement {

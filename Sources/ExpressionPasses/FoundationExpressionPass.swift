@@ -4,8 +4,8 @@ import SwiftAST
 
 /// Applies passes to simplify known Foundation methods
 public class FoundationExpressionPass: BaseExpressionPass {
-    public required init() {
-        super.init()
+    public required init(context: ASTRewriterPassContext) {
+        super.init(context: context)
         makeInitializerTransformers()
         makeEnumTransformers()
     }

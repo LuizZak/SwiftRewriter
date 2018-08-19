@@ -6,8 +6,8 @@ import Commons
 /// Applies passes to simplify known UIKit methods and constructs
 public class UIKitExpressionPass: BaseExpressionPass {
     
-    public required init() {
-        super.init()
+    public required init(context: ASTRewriterPassContext) {
+        super.init(context: context)
         
         makeEnumTransformers()
         makeFunctionTransformers()
@@ -224,7 +224,8 @@ extension UIKitExpressionPass {
                             } else {
                                 return .asIs
                             }
-                        })
+                        },
+                        argumentTypes: mapping.to.parameters.map { $0.type })
                 
             })
     }

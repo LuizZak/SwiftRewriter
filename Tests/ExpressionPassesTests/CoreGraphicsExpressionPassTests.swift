@@ -7,7 +7,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = CoreGraphicsExpressionPass()
+        sut = CoreGraphicsExpressionPass(context: makeContext())
     }
     
     func testCGRectMake() {

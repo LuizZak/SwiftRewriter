@@ -6,8 +6,8 @@ import SwiftAST
 import Utils
 
 public class CoreGraphicsExpressionPass: BaseExpressionPass {
-    public required init() {
-        super.init()
+    public required init(context: ASTRewriterPassContext) {
+        super.init(context: context)
         
         createTransformers()
     }

@@ -19,15 +19,20 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         if !(exp.parent is ExpressionsStatement), let type = exp.resolvedType,
             type.isOptional && typeSystem.isScalarType(type.deepUnwrapped) {
             
-            // If an expected type is present, sub-expression visitors will handle
-            // this expression for us.
-            guard exp.expectedType == nil else {
-                return exp
+            // If an expected type is present (and no resolved type is present,
+            // or the expected type matches the resolved type), leave it alone
+            // since sub-expression visitors will handle this expression for us.
+            if let expectedType = exp.expectedType {
+                guard let resolvedType = exp.resolvedType else {
+                    return exp
+                }
+                
+                if typeSystem.typesMatch(expectedType, resolvedType, ignoreNullability: true) {
+                    return exp
+                }
             }
             
-            exp.expectedType = exp.resolvedType?.deepUnwrapped
-            
-            if let newExp = correctToDefaultValue(exp) {
+            if let newExp = correctToDefaultValue(exp, targetType: exp.resolvedType?.deepUnwrapped) {
                 notifyChange()
                 
                 return super.visitExpression(newExp)
@@ -243,8 +248,10 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         return super.visitPostfix(exp)
     }
     
-    func correctToDefaultValue(_ exp: Expression) -> Expression? {
-        guard let expectedType = exp.expectedType else {
+    func correctToDefaultValue(_ exp: Expression,
+                               targetType: SwiftType? = nil) -> Expression? {
+        
+        guard let expectedType = targetType ?? exp.expectedType else {
             return nil
         }
         guard expectedType == exp.resolvedType?.deepUnwrapped else {
@@ -275,7 +282,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         converted.resolvedType = defValue.resolvedType
         converted.expectedType = converted.resolvedType
         
-        return .parens(converted)
+        return Expression.parens(converted).typed(defValue.resolvedType)
     }
     
     func correctToNumeric(_ exp: Expression) -> Expression? {

@@ -3,8 +3,8 @@ import SwiftAST
 import SwiftRewriterLib
 
 /// Represents a type that, as well as having a full type signature, describes
-/// information for converting invocations and implementations of methods on implementers
-/// and expression call sites.
+/// information for converting invocations and implementations of methods on
+/// implementers and expression call sites.
 public class CompoundedMappingType {
     public let signatureMappings: [SignatureMapper]
     
@@ -39,12 +39,7 @@ extension CompoundedMappingType: KnownType {
         return knownType.isExtension
     }
     public var knownTraits: [String : TraitType] {
-        get {
-            return knownType.knownTraits
-        }
-        set {
-            knownType.knownTraits = newValue
-        }
+        return knownType.knownTraits
     }
     public var knownConstructors: [KnownConstructor] {
         return knownType.knownConstructors

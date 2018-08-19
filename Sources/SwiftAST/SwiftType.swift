@@ -146,8 +146,8 @@ public extension SwiftType {
         }
     }
     
-    /// If this type is an `.optional` or `.implicitUnwrappedOptional` type, returns
-    /// an unwrapped version of self.
+    /// If this type is an `.optional` or `.implicitUnwrappedOptional` type,
+    /// returns an unwrapped version of self.
     /// The return is then recursively unwrapped again until a non-optional base
     /// type is reached.
     public var deepUnwrapped: SwiftType {
@@ -398,6 +398,7 @@ public enum OneOrMore<T> {
         switch self {
         case .list(_, let next):
             return 1 + next.count
+            
         case .tail:
             return 1
         }
@@ -437,6 +438,7 @@ public enum TwoOrMore<T> {
         switch self {
         case .list(_, let next):
             return 1 + next.count
+            
         case .tail:
             return 2
         }
@@ -481,12 +483,12 @@ extension OneOrMore: Sequence {
             switch current {
             case let .list(item, next)?:
                 current = next
-                
                 return item
+                
             case .tail(let item)?:
                 current = nil
-                
                 return item
+                
             case nil:
                 return nil
             }

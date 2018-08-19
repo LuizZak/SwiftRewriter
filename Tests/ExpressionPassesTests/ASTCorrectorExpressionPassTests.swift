@@ -8,7 +8,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = ASTCorrectorExpressionPass()
+        sut = ASTCorrectorExpressionPass(context: makeContext())
     }
     
     /// Tests inserting null-coalesces on optional numeric types on the left
@@ -796,19 +796,20 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// Test we don't require correcting implicitly unwrapped optionals on the
     /// rhs of an assignment
     func testDontCorrectImplicitlyUnwrappedOptionalRightHandSideOnAssignment() {
-        let type = KnownTypeBuilder(typeName: "Value", kind: .struct)
-            .constructor()
-            .build()
+        let type =
+            KnownTypeBuilder(typeName: "Value", kind: .struct)
+                .constructor()
+                .build()
         typeSystem.addType(type)
         let rhsMaker: () -> Expression = {
             let e = Expression.identifier("self")
-                .dot("value", type: .implicitUnwrappedOptional(.typeName("Value")))
-            e.resolvedType = .implicitUnwrappedOptional(.typeName("Value"))
-            e.expectedType = .typeName("Value")
+                .dot("value", type: .implicitUnwrappedOptional("Value"))
+            e.resolvedType = .implicitUnwrappedOptional("Value")
+            e.expectedType = "Value"
             return e
         }
         let exp =
-            Expression.identifier("a").typed(.typeName("Value")).assignment(op: .assign, rhs: rhsMaker())
+            Expression.identifier("a").typed("Value").assignment(op: .assign, rhs: rhsMaker())
         
         assertTransform(
             // a = self.value
@@ -816,5 +817,28 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // a = self.value
             into: Statement.expression(Expression.identifier("a").assignment(op: .assign, rhs: rhsMaker()))
         ); assertDidNotNotifyChange()
+    }
+    
+    func testCorrectExpressionsWithExpectedTypeDifferentThanTheirResolvedType() {
+        let valueType =
+            KnownTypeBuilder(typeName: "Value", kind: .struct)
+                .constructor()
+                .build()
+        typeSystem.addType(valueType)
+        let expMaker = {
+            Expression
+                .identifier("a")
+                .typed(.optional("Value"))
+                .typed(expected: .int)
+        }
+        
+        let exp = expMaker()
+        
+        assertTransform(
+            // a
+            expression: exp,
+            // (a ?? Value())
+            into: Expression.parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("Value").call()))
+        ); assertNotifiedChange()
     }
 }

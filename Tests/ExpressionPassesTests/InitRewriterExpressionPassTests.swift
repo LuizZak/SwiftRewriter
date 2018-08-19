@@ -8,7 +8,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = InitRewriterExpressionPass()
+        sut = InitRewriterExpressionPass(context: makeContext())
     }
     
     func testEmptyIfInInit() {

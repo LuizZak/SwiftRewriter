@@ -53,7 +53,7 @@ public final class ASTRewriterPassApplier {
                                    notifyChangedTree: notifyChangedTree,
                                    source: item.intention)
         
-        let pass = passType.init()
+        let pass = passType.init(context: expContext)
         _=pass.apply(on: item.body.body, context: expContext)
     }
     

@@ -24,7 +24,7 @@ public protocol KnownType: KnownTypeReferenceConvertible, SemanticalObject {
     var kind: KnownTypeKind { get }
     
     /// Gets a set of known type traits for this type
-    var knownTraits: [String: TraitType] { get set }
+    var knownTraits: [String: TraitType] { get }
     
     /// Gets an array of all known constructors for this type
     var knownConstructors: [KnownConstructor] { get }
@@ -43,9 +43,6 @@ public protocol KnownType: KnownTypeReferenceConvertible, SemanticalObject {
     
     /// Gets a known type trait from this type
     func knownTrait(_ traitName: String) -> TraitType?
-    
-    /// Sets a known type trait with a given value for this type
-    mutating func setKnownTrait(_ traitName: String, value: TraitType)
 }
 
 /// The kind of a known type
@@ -201,10 +198,6 @@ public enum KnownTypeTraits {
 public extension KnownType {
     public func knownTrait(_ traitName: String) -> TraitType? {
         return knownTraits[traitName]
-    }
-    
-    public mutating func setKnownTrait(_ traitName: String, value: TraitType) {
-        knownTraits[traitName] = value
     }
 }
 

@@ -7,7 +7,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = FoundationExpressionPass()
+        sut = FoundationExpressionPass(context: makeContext())
     }
     
     func testIsEqualToString() {

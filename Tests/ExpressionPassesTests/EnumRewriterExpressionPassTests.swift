@@ -8,7 +8,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = EnumRewriterExpressionPass()
+        sut = EnumRewriterExpressionPass(context: makeContext())
     }
     
     func testReplaceEnum() {
