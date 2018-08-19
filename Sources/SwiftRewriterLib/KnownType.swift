@@ -106,6 +106,10 @@ public protocol KnownConstructor: SemanticalObject {
     
     /// Gets whether this initializer is a convenience initializer
     var isConvenience: Bool { get }
+    
+    /// Miscellaneous semantical annotations that do not affect this initializer's
+    /// signature.
+    var annotations: [String] { get }
 }
 
 /// Describes a known member of a type
@@ -121,6 +125,10 @@ public protocol KnownMember: SemanticalObject {
     /// of the variable, and if this is a method member, this is the signature of
     /// the method.
     var memberType: SwiftType { get }
+    
+    /// Miscellaneous semantical annotations that do not affect this member's
+    /// signature.
+    var annotations: [String] { get }
 }
 
 /// Describes a known method to the transpiler

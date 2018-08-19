@@ -18,12 +18,13 @@ public enum UIGestureRecognizerCompoundType {
     
     static func createType() -> (KnownType, [SignatureMapper]) {
         var mappings: [SignatureMapper] = []
+        let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIGestureRecognizer", supertype: "NSObject")
         
         type.useSwiftSignatureMatching = true
         
-        type =
-            type.method(withSignature:
+        type = type
+            .method(withSignature:
                 FunctionSignature(
                     name: "location",
                     parameters: [
@@ -35,8 +36,10 @@ public enum UIGestureRecognizerCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "view", type: .optional("UIView"))
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
         
         return (type.build(), mappings)

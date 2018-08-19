@@ -27,6 +27,7 @@ public enum UIViewCompoundType {
     
     static func createType() -> (KnownType, [SignatureMapper]) {
         var mappings: [SignatureMapper] = []
+        let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIView", supertype: "UIResponder")
         
         type.useSwiftSignatureMatching = true
@@ -142,8 +143,10 @@ public enum UIViewCompoundType {
                         ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
                         ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -159,8 +162,10 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -182,8 +187,10 @@ public enum UIViewCompoundType {
                         ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
                         ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -518,8 +525,10 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "point", type: "CGPoint"),
                         ParameterSignature(label: "fromView", name: "view", type: .optional("UIView"))
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -535,8 +544,10 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "point", type: "CGPoint"),
                         ParameterSignature(label: "toView", name: "view", type: .optional("UIView"))
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -552,8 +563,10 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "rect", type: "CGRect"),
                         ParameterSignature(label: "fromView", name: "view", type: .optional("UIView"))
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -569,8 +582,10 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "rect", type: "CGRect"),
                         ParameterSignature(label: "toView", name: "view", type: .optional("UIView"))
                     ],
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
         
         type = type
@@ -600,8 +615,10 @@ public enum UIViewCompoundType {
                     ]
                 ).makeSignatureMapping(
                     fromMethodNamed: "drawRect",
-                    in: &mappings
-                )
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -893,7 +910,8 @@ public enum UIViewCompoundType {
 
 extension FunctionSignature {
     func makeSignatureMapping(fromMethodNamed name: String,
-                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+                              in mappings: inout [SignatureMapper],
+                              annotations: AnnotationsSink) -> FunctionSignature {
         
         let signature =
             FunctionSignature(name: name,
@@ -901,14 +919,15 @@ extension FunctionSignature {
                               returnType: returnType,
                               isStatic: isStatic)
         
-        return makeSignatureMapping(from: signature, in: &mappings)
+        return makeSignatureMapping(from: signature, in: &mappings, annotations: annotations)
         
     }
     
     func makeSignatureMapping(fromMethodNamed name: String,
                               parameters: String,
                               returnType: SwiftType = .void,
-                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+                              in mappings: inout [SignatureMapper],
+                              annotations: AnnotationsSink) -> FunctionSignature {
         
         let params
             = try! FunctionSignatureParser.parseParameters(from: parameters)
@@ -919,13 +938,14 @@ extension FunctionSignature {
                               returnType: returnType,
                               isStatic: isStatic)
         
-        return makeSignatureMapping(from: signature, in: &mappings)
+        return makeSignatureMapping(from: signature, in: &mappings, annotations: annotations)
     }
     
     func makeSignatureMapping(fromMethodNamed name: String,
                               parameters: [ParameterSignature],
                               returnType: SwiftType? = nil,
-                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+                              in mappings: inout [SignatureMapper],
+                              annotations: AnnotationsSink) -> FunctionSignature {
         
         let signature =
             FunctionSignature(name: name,
@@ -933,15 +953,52 @@ extension FunctionSignature {
                               returnType: returnType ?? self.returnType,
                               isStatic: isStatic)
         
-        return makeSignatureMapping(from: signature, in: &mappings)
+        return makeSignatureMapping(from: signature, in: &mappings, annotations: annotations)
     }
     
     func makeSignatureMapping(from signature: FunctionSignature,
-                              in mappings: inout [SignatureMapper]) -> FunctionSignature {
+                              in mappings: inout [SignatureMapper],
+                              annotations: AnnotationsSink) -> FunctionSignature {
         
         let mapping = SignatureMapper(from: signature, to: self)
         mappings.append(mapping)
         
+        let annotation =
+            "Convert from \(TypeFormatter.asString(signature: signature, includeName: true))"
+        
+        annotations.addAnnotation(annotation, newTag: AnyEquatable(self))
+        
         return self
+    }
+}
+
+struct AnyEquatable: Equatable {
+    var object: Any
+    var equate: (Any) -> Bool
+    
+    init<E: Equatable>(_ object: E) {
+        self.object = object
+        equate = {
+            $0 as? E == object
+        }
+    }
+    
+    static func == (lhs: AnyEquatable, rhs: AnyEquatable) -> Bool {
+        return lhs.equate(rhs.object)
+    }
+}
+
+class AnnotationsSink {
+    /// Tag used to detect when to flush and reset annotations.
+    var tag: AnyEquatable?
+    var annotations: [String] = []
+    
+    func addAnnotation(_ annotation: String, newTag: AnyEquatable) {
+        if tag != newTag {
+            tag = newTag
+            annotations.removeAll()
+        }
+        
+        annotations.append(annotation)
     }
 }

@@ -77,8 +77,13 @@ class UIViewCompoundTypeTests: XCTestCase {
                 
                 init(frame: CGRect)
                 static func addKeyframe(withRelativeStartTime frameStartTime: Double, relativeDuration frameDuration: Double, animations: () -> Void)
+                // Convert from static animateWithDuration(_ duration: TimeInterval, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animate(withDuration duration: TimeInterval, animations: () -> Void, completion: ((Bool) -> Void)?)
+                
+                // Convert from static animateWithDuration(_ duration: TimeInterval, animations: () -> Void)
                 static func animate(withDuration duration: TimeInterval, animations: () -> Void)
+                
+                // Convert from static animateWithDuration(_ duration: TimeInterval, delay: TimeInterval, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, usingSpringWithDamping dampingRatio: CGFloat, initialSpringVelocity velocity: CGFloat, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animateKeyframes(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewKeyframeAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
@@ -113,14 +118,24 @@ class UIViewCompoundTypeTests: XCTestCase {
                 func constraintsAffectingLayout(for axis: UILayoutConstraintAxis) -> [NSLayoutConstraint]
                 func contentCompressionResistancePriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
                 func contentHuggingPriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
+                
+                // Convert from convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint
                 func convert(_ point: CGPoint, from view: UIView?) -> CGPoint
+                
+                // Convert from convertPoint(_ point: CGPoint, toView view: UIView?) -> CGPoint
                 func convert(_ point: CGPoint, to view: UIView?) -> CGPoint
+                
+                // Convert from convertRect(_ rect: CGRect, fromView view: UIView?) -> CGRect
                 func convert(_ rect: CGRect, from view: UIView?) -> CGRect
+                
+                // Convert from convertRect(_ rect: CGRect, toView view: UIView?) -> CGRect
                 func convert(_ rect: CGRect, to view: UIView?) -> CGRect
                 func decodeRestorableState(with coder: NSCoder)
                 func didAddSubview(_ subview: UIView)
                 func didMoveToSuperview()
                 func didMoveToWindow()
+                
+                // Convert from drawRect(_ rect: CGRect)
                 func draw(_ rect: CGRect)
                 func drawHierarchy(in rect: CGRect, afterScreenUpdates afterUpdates: Bool) -> Bool
                 func encodeRestorableState(with coder: NSCoder)

@@ -31,21 +31,43 @@ public enum TypeFormatter {
         
         // Type body
         o.idented {
-            let outputField: (KnownProperty) -> Void = {
-                o.output(line: asString(field: $0,
+            var _onFirstAnnotation = true
+            
+            let outputAnnotations: ([String]) -> Void = { annotations in
+                guard !annotations.isEmpty else {
+                    return
+                }
+                
+                if !_onFirstAnnotation {
+                    o.output(line: "")
+                }
+                
+                _onFirstAnnotation = false
+                
+                for annotation in annotations {
+                    o.output(line: "// \(annotation)")
+                }
+            }
+            
+            let outputField: (KnownProperty) -> Void = { field in
+                outputAnnotations(field.annotations)
+                
+                o.output(line: asString(field: field,
                                         ofType: type,
                                         withTypeName: false,
                                         includeVarKeyword: true))
             }
-            let outputProperty: (KnownProperty) -> Void = {
-                if $0.isEnumCase {
-                    o.output(line: "case \($0.name)")
+            let outputProperty: (KnownProperty) -> Void = { property in
+                outputAnnotations(property.annotations)
+                
+                if property.isEnumCase {
+                    o.output(line: "case \(property.name)")
                 } else {
-                    o.output(line: asString(property: $0,
+                    o.output(line: asString(property: property,
                                             ofType: type,
                                             withTypeName: false,
                                             includeVarKeyword: true,
-                                            includeAccessors: $0.accessor != .getterAndSetter))
+                                            includeAccessors: property.accessor != .getterAndSetter))
                 }
             }
             
@@ -70,6 +92,8 @@ public enum TypeFormatter {
                 o.output(line: "init" + asString(parameters: ctor.parameters))
             }
             for method in type.knownMethods {
+                outputAnnotations(method.annotations)
+                
                 o.output(line:
                     asString(signature: method.signature, includeName: true,
                              includeFuncKeyword: true)

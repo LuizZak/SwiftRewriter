@@ -10,6 +10,7 @@ public class MemberGenerationIntention: FromSourceIntention {
     public var isStatic: Bool { return false }
     
     public var semantics: Set<Semantic> = []
+    public var annotations: [String] = []
     
     public var memberType: SwiftType {
         fatalError("Must be overriden by subtypes")

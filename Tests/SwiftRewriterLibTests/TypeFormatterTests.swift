@@ -132,30 +132,38 @@ class TypeFormatterTests: XCTestCase {
         let type = KnownTypeBuilder(typeName: "A", kind: .struct)
             .constructor()
             .constructor(shortParameters: [("a", .int), ("b", .int)])
-            .field(named: "readOnlyField", type: .string, isConstant: true)
+            .field(named: "readOnlyField", type: .string, isConstant: true, annotations: ["Annotation"])
             .field(named: "field", type: .string)
-            .property(named: "prop", type: .optional(.nsArray))
-            .property(named: "readOnlyProp", type: "A", accessor: .getter)
+            .property(named: "prop", type: .optional(.nsArray), annotations: ["Annotation"])
+            .property(named: "readOnlyProp", type: "A", accessor: .getter, annotations: ["Annotation"])
             .protocolConformance(protocolName: "Protocol")
             .method(withSignature: FunctionSignature(
                 name: "methodA",
                 parameters: [
                     ParameterSignature(label: "_", name: "c", type: .int)
                 ],
-                returnType: .string)
+                returnType: .string),
+                    annotations: ["Annotation"]
             )
             .build()
         
         let result = TypeFormatter.asString(knownType: type)
         let expected = """
             struct A: Protocol {
+                // Annotation
                 let readOnlyField: String
                 var field: String
+                
+                // Annotation
                 var prop: NSArray?
+                
+                // Annotation
                 var readOnlyProp: A { get }
                 
                 init()
                 init(a: Int, b: Int)
+                
+                // Annotation
                 func methodA(_ c: Int) -> String
             }
             """

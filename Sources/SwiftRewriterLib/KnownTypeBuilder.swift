@@ -141,12 +141,14 @@ public struct KnownTypeBuilder {
     /// Adds a new constructor to this type
     public func constructor(withParameters parameters: [ParameterSignature],
                             semantics: Set<Semantic> = [],
+                            annotations: [String] = [],
                             isFailable: Bool = false,
                             isConvenience: Bool = false) -> KnownTypeBuilder {
         
         var new = clone()
         let ctor = BuildingKnownConstructor(parameters: parameters,
                                             semantics: semantics,
+                                            annotations: annotations,
                                             isFailable: isFailable,
                                             isConvenience: isConvenience)
         
@@ -162,7 +164,8 @@ public struct KnownTypeBuilder {
                        returning returnType: SwiftType = .void,
                        isStatic: Bool = false,
                        optional: Bool = false,
-                       semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                       semantics: Set<Semantic> = [],
+                       annotations: [String] = []) -> KnownTypeBuilder {
         
         let parameters =
             shortParams.map { tuple in
@@ -174,14 +177,18 @@ public struct KnownTypeBuilder {
                                           returnType: returnType,
                                           isStatic: isStatic)
         
-        return method(withSignature: signature, optional: optional, semantics: semantics)
+        return method(withSignature: signature,
+                      optional: optional,
+                      semantics: semantics,
+                      annotations: annotations)
     }
     
     /// Adds a method with a given signature, and a flag specifying whether the
     /// method is an optional protocol conformance method
     public func method(withSignature signature: FunctionSignature,
                        optional: Bool = false,
-                       semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                       semantics: Set<Semantic> = [],
+                       annotations: [String] = []) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -205,7 +212,8 @@ public struct KnownTypeBuilder {
                                          body: nil,
                                          signature: signature,
                                          optional: optional,
-                                         semantics: semantics)
+                                         semantics: semantics,
+                                         annotations: annotations)
         
         new.type.methods.append(method)
         
@@ -221,7 +229,8 @@ public struct KnownTypeBuilder {
                        isStatic: Bool = false,
                        returning returnType: SwiftType = .void,
                        optional: Bool = false,
-                       semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                       semantics: Set<Semantic> = [],
+                       annotations: [String] = []) -> KnownTypeBuilder {
         
         let params = try! FunctionSignatureParser.parseParameters(from: signature)
         
@@ -231,7 +240,10 @@ public struct KnownTypeBuilder {
                               returnType: returnType,
                               isStatic: isStatic)
         
-        return method(withSignature: signature, optional: optional, semantics: semantics)
+        return method(withSignature: signature,
+                      optional: optional,
+                      semantics: semantics,
+                      annotations: annotations)
     }
     
     /// Adds a strong property with no attributes with a given name and type, and
@@ -243,7 +255,8 @@ public struct KnownTypeBuilder {
                          isStatic: Bool = false,
                          optional: Bool = false,
                          accessor: KnownPropertyAccessor = .getterAndSetter,
-                         semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                         semantics: Set<Semantic> = [],
+                         annotations: [String] = []) -> KnownTypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: ownership, isConstant: false)
         
@@ -252,7 +265,8 @@ public struct KnownTypeBuilder {
                         isStatic: isStatic,
                         optional: optional,
                         accessor: accessor,
-                        semantics: semantics)
+                        semantics: semantics,
+                        annotations: annotations)
     }
     
     /// Adds a property with no attributes with a given name and storage, and a
@@ -265,7 +279,8 @@ public struct KnownTypeBuilder {
                          accessor: KnownPropertyAccessor = .getterAndSetter,
                          attributes: [PropertyAttribute] = [],
                          isEnumCase: Bool = false,
-                         semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                         semantics: Set<Semantic> = [],
+                         annotations: [String] = []) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -285,7 +300,8 @@ public struct KnownTypeBuilder {
                                   optional: optional,
                                   accessor: accessor,
                                   isEnumCase: isEnumCase,
-                                  semantics: semantics)
+                                  semantics: semantics,
+                                  annotations: annotations)
         
         new.type.properties.append(property)
         
@@ -297,18 +313,24 @@ public struct KnownTypeBuilder {
                       type: SwiftType,
                       isConstant: Bool = false,
                       isStatic: Bool = false,
-                      semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                      semantics: Set<Semantic> = [],
+                      annotations: [String] = []) -> KnownTypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: isConstant)
         
-        return field(named: name, storage: storage, isStatic: isStatic, semantics: semantics)
+        return field(named: name,
+                     storage: storage,
+                     isStatic: isStatic,
+                     semantics: semantics,
+                     annotations: annotations)
     }
     
     /// Adds a property with no attributes with a given name and storage
     public func field(named name: String,
                       storage: ValueStorage,
                       isStatic: Bool = false,
-                      semantics: Set<Semantic> = []) -> KnownTypeBuilder {
+                      semantics: Set<Semantic> = [],
+                      annotations: [String] = []) -> KnownTypeBuilder {
         
         var new = clone()
         
@@ -328,7 +350,8 @@ public struct KnownTypeBuilder {
                                   optional: false,
                                   accessor: .getterAndSetter,
                                   isEnumCase: false,
-                                  semantics: semantics)
+                                  semantics: semantics,
+                                  annotations: annotations)
         
         new.type.fields.append(property)
         
@@ -390,7 +413,8 @@ public struct KnownTypeBuilder {
                                   optional: false,
                                   accessor: .getter,
                                   isEnumCase: true,
-                                  semantics: semantics)
+                                  semantics: semantics,
+                                  annotations: [])
         
         new.type.properties.append(cs)
         
@@ -528,6 +552,7 @@ extension BuildingKnownType: KnownType {
 private struct BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var semantics: Set<Semantic>
+    var annotations: [String]
     var isFailable: Bool
     var isConvenience: Bool
 }
@@ -538,12 +563,14 @@ private struct BuildingKnownMethod: KnownMethod, Codable {
     var signature: FunctionSignature
     var optional: Bool
     var semantics: Set<Semantic>
+    var annotations: [String]
     
     public enum CodingKeys: String, CodingKey {
         case ownerType
         case signature
         case optional
         case semantics
+        case annotations
     }
 }
 
@@ -557,6 +584,7 @@ private struct BuildingKnownProperty: KnownProperty, Codable {
     var accessor: KnownPropertyAccessor
     var isEnumCase: Bool
     var semantics: Set<Semantic>
+    var annotations: [String]
 }
 
 private struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {

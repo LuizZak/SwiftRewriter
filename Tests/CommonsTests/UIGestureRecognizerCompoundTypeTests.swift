@@ -10,6 +10,7 @@ class UIGestureRecognizerCompoundTypeTests: XCTestCase {
         
         assertSignature(type: type, matches: """
             class UIGestureRecognizer: NSObject {
+                // Convert from locationInView(_ view: UIView?) -> CGPoint
                 func location(in view: UIView?) -> CGPoint
             }
             """)
