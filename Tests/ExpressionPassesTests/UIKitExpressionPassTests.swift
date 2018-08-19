@@ -240,7 +240,7 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
-    func testUIColorStaticInitializer() {
+    func testUIColorStaticInitializers() {
         assertTransform(
             expression: Expression
                 .identifier("UIColor")
@@ -256,6 +256,20 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                 FunctionArgument(label: "green", expression: .constant(1)),
                 FunctionArgument(label: "blue", expression: .constant(1)),
                 FunctionArgument(label: "alpha", expression: .constant(1))
+            ])
+        )
+        
+        assertTransform(
+            expression: Expression
+                .identifier("UIColor")
+                .dot("colorWithWhite")
+                .call([
+                    FunctionArgument(label: nil, expression: .constant(1)),
+                    FunctionArgument(label: "alpha", expression: .constant(0.5))
+                ]),
+            into: Expression.identifier("UIColor").call([
+                FunctionArgument(label: "white", expression: .constant(1)),
+                FunctionArgument(label: "alpha", expression: .constant(0.5))
             ])
         )
     }

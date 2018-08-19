@@ -294,6 +294,13 @@ extension UIKitExpressionPass {
                 .labeled("alpha", .asIs)
             ]
         )
+        makeInit(
+            typeName: "UIColor", method: "colorWithWhite", convertInto: .identifier("UIColor"),
+            andCallWithArguments: [
+                .labeled("white", .asIs),
+                .labeled("alpha", .asIs)
+            ]
+        )
     }
     
     func makeUIFontTransformers() {
