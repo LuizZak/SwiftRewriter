@@ -28,13 +28,27 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func makeCache() {
-        cache = [:]
-        usingCache = true
+        cacheBarrier.sync(flags: .barrier) {
+            cache = [:]
+            usingCache = true
+        }
     }
     
     func tearDownCache() {
-        cache = nil
-        usingCache = false
+        cacheBarrier.sync(flags: .barrier) {
+            cache = nil
+            usingCache = false
+        }
+    }
+    
+    public func addKnownTypeProvider(_ typeProvider: KnownTypeProvider) {
+        providers.append(typeProvider)
+        
+        // Reset cache to allow types from this type provider to be considered.
+        if usingCache {
+            tearDownCache()
+            makeCache()
+        }
     }
     
     public func knownType(withName name: String) -> KnownType? {

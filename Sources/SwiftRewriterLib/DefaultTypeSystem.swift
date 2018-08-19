@@ -3,9 +3,6 @@ import TypeDefinitions
 import Utils
 import Dispatch
 
-// TODO: Implement local caching on compound known types within the type system
-// to reduce burden of re-creating known types over and over during type resolving.
-
 /// Standard type system implementation
 public class DefaultTypeSystem: TypeSystem {
     /// A singleton instance to a default type system.
@@ -26,9 +23,10 @@ public class DefaultTypeSystem: TypeSystem {
     private var typesByName: [String: KnownType] = [:]
     
     public init() {
-        typealiasProviders = CompoundTypealiasProvider(providers: [innerAliasesProvider])
-        knownTypeProviders = CompoundKnownTypeProvider(providers: [innerKnownTypes])
+        typealiasProviders = CompoundTypealiasProvider(providers: [])
+        knownTypeProviders = CompoundKnownTypeProvider(providers: [])
         
+        registerInitialTypeProviders()
         registerInitialKnownTypes()
     }
     
@@ -60,6 +58,7 @@ public class DefaultTypeSystem: TypeSystem {
         typealiasProviders.providers.removeAll()
         
         typesByName.removeAll()
+        registerInitialTypeProviders()
         registerInitialKnownTypes()
     }
     
@@ -170,8 +169,10 @@ public class DefaultTypeSystem: TypeSystem {
         switch type.unwrapped {
         case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
             return isClassInstanceType(typeName)
+            
         case .protocolComposition:
             return true
+            
         default:
             return false
         }
@@ -774,11 +775,108 @@ public class DefaultTypeSystem: TypeSystem {
             }
         }
     }
+    
+    private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider {
+        
+        private var barrier =
+            DispatchQueue(label: "com.swiftrewriter.typedefinitionsprotocolknowntypeprovider.barrier",
+                          qos: .default,
+                          attributes: .concurrent,
+                          autoreleaseFrequency: .inherit,
+                          target: nil)
+        
+        private var cache: [String: KnownType] = [:]
+        
+        // For remembering attempts to look for protocols that where not found on
+        // the protocols list.
+        // Avoids repetitive linear lookups on the protocols list over and over.
+        private var negativeLookupResults: Set<String> = []
+        
+        func knownType(withName name: String) -> KnownType? {
+            if let cached = barrier.sync(execute: { cache[name] }) {
+                return cached
+            }
+            if barrier.sync(execute: { negativeLookupResults.contains(name) }) {
+                return nil
+            }
+            
+            guard let prot = TypeDefinitions.protocolsList.protocols.first(where: { $0.protocolName == name }) else {
+                barrier.sync(flags: .barrier) {
+                    _ = negativeLookupResults.insert(name)
+                }
+                
+                return nil
+            }
+            
+            let type = makeType(from: prot)
+            
+            barrier.sync(flags: .barrier) {
+                cache[name] = type
+            }
+            
+            return type
+        }
+        
+        func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
+            guard kind == .protocol else {
+                return []
+            }
+            
+            // TODO: Return all protocols listed within TypeDefinitions.protocolsList
+            return []
+        }
+        
+        func makeType(from prot: ProtocolType) -> KnownType {
+            let type = ProtocolType_KnownType(protocolType: prot)
+            return type
+        }
+        
+        private class ProtocolType_KnownType: KnownType {
+            let protocolType: ProtocolType
+            
+            let origin = "\(TypeDefinitionsProtocolKnownTypeProvider.self)"
+            let isExtension = false
+            let supertype: KnownTypeReference? = nil
+            let typeName: String
+            let kind: KnownTypeKind = .protocol
+            let knownTraits: [String : TraitType] = [:]
+            let knownConstructors: [KnownConstructor] = []
+            let knownMethods: [KnownMethod] = []
+            let knownProperties: [KnownProperty] = []
+            let knownFields: [KnownProperty] = []
+            let knownProtocolConformances: [KnownProtocolConformance]
+            let semantics: Set<Semantic> = []
+            
+            init(protocolType: ProtocolType) {
+                self.typeName = protocolType.protocolName
+                self.protocolType = protocolType
+                
+                knownProtocolConformances =
+                    protocolType.conformances.map {
+                        _KnownProtocolConformance(protocolName: $0)
+                    }
+            }
+            
+            private struct _KnownProtocolConformance: KnownProtocolConformance {
+                var protocolName: String
+            }
+        }
+    }
 }
 
 extension DefaultTypeSystem {
     public func addTypealias(aliasName: String, originalType: SwiftType) {
         self.innerAliasesProvider.addTypealias(aliasName, originalType)
+    }
+}
+
+extension DefaultTypeSystem {
+    /// Registers the default type providers needed for the type system to work
+    /// properly.
+    func registerInitialTypeProviders() {
+        typealiasProviders.addTypealiasProvider(innerAliasesProvider)
+        knownTypeProviders.addKnownTypeProvider(innerKnownTypes)
+        knownTypeProviders.addKnownTypeProvider(TypeDefinitionsProtocolKnownTypeProvider())
     }
 }
 

@@ -26,6 +26,10 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         
         return nil
     }
+    
+    public func addTypealiasProvider(_ typealiasProvider: TypealiasProvider) {
+        providers.append(typealiasProvider)
+    }
 }
 
 /// Provides typealiases by mapping them from a stored dictionary

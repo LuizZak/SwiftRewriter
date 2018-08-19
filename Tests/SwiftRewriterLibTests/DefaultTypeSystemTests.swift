@@ -650,11 +650,26 @@ class DefaultTypeSystemTests: XCTestCase {
         
         XCTAssert(type.knownMethods.contains(where: { $0.signature.name == "fromExtension" }))
         XCTAssertNotNil(
-            sut.method(withObjcSelector: SelectorSignature(isStatic:false, keywords: ["fromExtension"]),
-                       static: false, includeOptional: false, in: .typeName("UIView")))
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["fromExtension"]),
+                       static: false,
+                       includeOptional: false,
+                       in: .typeName("UIView")
+            )
+        )
         
         XCTAssert(type.knownProperties.contains(where: { $0.name == "window" }))
         XCTAssertNotNil(sut.property(named: "window", static: false,
                                      includeOptional: false, in: .typeName("UIView")))
+    }
+    
+    func testDeepLookupProtocolConformanceInTypeDefinitions() {
+        // {"protocolName":"UIViewControllerTransitionCoordinator","conformances":["UIViewControllerTransitionCoordinatorContext"]}
+        let type =
+            KnownTypeBuilder(typeName: "Test", kind: .class)
+                .protocolConformance(protocolName: "UIViewControllerTransitionCoordinator")
+                .build()
+        sut.addType(type)
+        
+        XCTAssert(sut.isType("Test", conformingTo: "UIViewControllerTransitionCoordinatorContext"))
     }
 }
