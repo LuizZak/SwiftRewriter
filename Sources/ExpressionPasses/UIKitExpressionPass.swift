@@ -43,6 +43,13 @@ public class UIKitExpressionPass: BaseExpressionPass {
             
             return super.visitExpression(exp)
         }
+        if let exp = enumify(ident: exp.identifier,
+                             enumPrefix: "UIViewAnimationOption",
+                             swiftEnumName: "UIViewAnimationOptions") {
+            notifyChange()
+            
+            return super.visitExpression(exp)
+        }
         
         return super.visitIdentifier(exp)
     }
@@ -68,6 +75,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
     }
     
     /// Corrects boolean getters `.hidden` -> `.isHidden`, `.editable` -> `.isEditable`, etc.
+    // TODO: Use compounded mapping type to deal with property renaming
     func convertBooleanGetters(_ exp: PostfixExpression) -> Expression? {
         // Make sure we're handling a UIView subclass here
         guard let typeName = exp.exp.resolvedType?.deepUnwrapped.typeName else {

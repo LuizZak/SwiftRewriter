@@ -318,4 +318,182 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
                 ])
         ); assertNotifiedChange()
     }
+    
+    func testEnumifyUIViewAnimationOptions() {
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionLayoutSubviews"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("layoutSubviews")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionAllowUserInteraction"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("allowUserInteraction")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionBeginFromCurrentState"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("beginFromCurrentState")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionRepeat"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("repeat")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionAutoreverse"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("autoreverse")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionOverrideInheritedDuration"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("overrideInheritedDuration")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionOverrideInheritedCurve"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("overrideInheritedCurve")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionAllowAnimatedContent"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("allowAnimatedContent")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionShowHideTransitionViews"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("showHideTransitionViews")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionOverrideInheritedOptions"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("overrideInheritedOptions")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionCurveEaseInOut"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("curveEaseInOut")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionCurveEaseIn"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("curveEaseIn")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionCurveEaseOut"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("curveEaseOut")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionCurveLinear"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("curveLinear")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionNone"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionNone")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionFlipFromLeft"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionFlipFromLeft")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionFlipFromRight"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionFlipFromRight")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionCurlUp"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionCurlUp")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionCurlDown"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionCurlDown")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionCrossDissolve"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionCrossDissolve")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionFlipFromTop"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionFlipFromTop")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionTransitionFlipFromBottom"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("transitionFlipFromBottom")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecondDefault"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("preferredFramesPerSecondDefault")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecond60"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("preferredFramesPerSecond60")
+        ); assertNotifiedChange()
+        
+        assertTransform(
+            expression: .identifier("UIViewAnimationOptionPreferredFramesPerSecond30"),
+            into: Expression
+                .identifier("UIViewAnimationOptions")
+                .dot("preferredFramesPerSecond30")
+        ); assertNotifiedChange()
+        
+    }
 }
