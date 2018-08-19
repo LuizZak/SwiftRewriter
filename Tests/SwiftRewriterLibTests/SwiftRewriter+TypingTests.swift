@@ -1146,4 +1146,47 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testOverloadResolution() {
+        assertObjcParse(
+            objc: """
+            @interface A : UIView
+            @property (nullable) UIView *a;
+            @end
+            
+            @implementation A
+            - (void)method {
+                ([self convertRect:CGRectZero toView:nil]);
+                ([self convertPoint:CGPointZero toView:nil]);
+                ([self convertRect:a.frame toView:nil]);
+                ([self convertPoint:a.center toView:nil]);
+                ([self convertRect:a.frame toView:a]);
+                ([self convertPoint:a.center toView:a]);
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: UIView {
+                @objc var a: UIView?
+                
+                @objc
+                func method() {
+                    // type: CGRect
+                    self.convert(CGRect.zero, to: nil)
+                    // type: CGPoint
+                    self.convert(CGPoint.zero, to: nil)
+                    // type: CGRect
+                    self.convert(a?.frame ?? CGRect(), to: nil)
+                    // type: CGPoint
+                    self.convert(a?.center ?? CGPoint(), to: nil)
+                    // type: CGRect
+                    self.convert(a?.frame ?? CGRect(), to: a)
+                    // type: CGPoint
+                    self.convert(a?.center ?? CGPoint(), to: a)
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

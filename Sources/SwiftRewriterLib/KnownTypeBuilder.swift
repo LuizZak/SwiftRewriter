@@ -76,6 +76,14 @@ public struct KnownTypeBuilder {
         self.useSwiftSignatureMatching = useSwiftSignatureMatching
     }
     
+    /// Sets the value of `useSwiftSignatureMatching` to be used for the remaining
+    /// type builder invocations.
+    public func settingUseSwiftSignatureMatching(_ value: Bool) -> KnownTypeBuilder {
+        var new = clone()
+        new.useSwiftSignatureMatching = value
+        return new
+    }
+    
     /// Adds a new semantical annotation
     public func addingSemanticAnnotation(_ semantic: Semantic) -> KnownTypeBuilder {
         var new = clone()
@@ -183,6 +191,13 @@ public struct KnownTypeBuilder {
                 return self
             }
         } else if type.knownMethods.contains(where: { $0.signature.matchesAsSelector(signature) }) {
+            assertionFailure("""
+                Found duplicated Objective-C function signature while adding method \
+                with signature \(TypeFormatter.asString(signature: signature)) to \
+                the current type.
+                
+                Did you mean to turn on 'KnownTypeBuilder.useSwiftSignatureMatching'?
+                """)
             return self
         }
         
@@ -211,7 +226,9 @@ public struct KnownTypeBuilder {
         let params = try! FunctionSignatureParser.parseParameters(from: signature)
         
         let signature =
-            FunctionSignature(name: name, parameters: params, returnType: returnType,
+            FunctionSignature(name: name,
+                              parameters: params,
+                              returnType: returnType,
                               isStatic: isStatic)
         
         return method(withSignature: signature, optional: optional, semantics: semantics)

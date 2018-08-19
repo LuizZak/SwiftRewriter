@@ -10,7 +10,8 @@ public protocol TypeSystem {
     /// Returns nil, in case no default values are known
     func defaultValue(for type: SwiftType) -> Expression?
     
-    /// Returns `true` if `type` represents a numerical type (int, float, CGFloat, etc.).
+    /// Returns `true` if `type` represents a numerical type (int, float, CGFloat,
+    /// etc.).
     func isNumeric(_ type: SwiftType) -> Bool
     
     /// Returns `true` is an integer (signed or unsigned) type.
@@ -93,7 +94,8 @@ public protocol TypeSystem {
     
     // MARK: Member searching methods - KnownType
     
-    /// Gets a constructor matching a given argument label set on a given known type.
+    /// Gets a constructor matching a given argument label set on a given known
+    /// type.
     func constructor(withArgumentLabels labels: [String?], in type: KnownType) -> KnownConstructor?
     
     /// Gets a protocol conformance to a given protocol name on a given known type.
@@ -102,7 +104,11 @@ public protocol TypeSystem {
     /// Searches for a method with a given Objective-C equivalent selector, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
+    ///
+    /// An optional list of types which correlate to the type of each argument
+    /// passed to the function can be provided to allow overload detection.
     func method(withObjcSelector selector: SelectorSignature,
+                invocationTypeHints: [SwiftType?]?,
                 static isStatic: Bool,
                 includeOptional: Bool,
                 in type: KnownType) -> KnownMethod?
@@ -120,7 +126,8 @@ public protocol TypeSystem {
     
     // MARK: Member searching methods - SwiftType
     
-    /// Gets a constructor matching a given argument label set on a given known type.
+    /// Gets a constructor matching a given argument label set on a given known
+    /// type.
     func constructor(withArgumentLabels labels: [String?], in type: SwiftType) -> KnownConstructor?
     
     /// Gets a protocol conformance to a given protocol name on a given known type.
@@ -129,7 +136,11 @@ public protocol TypeSystem {
     /// Searches for a method with a given Objective-C equivalent selector, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).
+    ///
+    /// An optional list of types which correlate to the type of each argument
+    /// passed to the function can be provided to allow overload detection.
     func method(withObjcSelector selector: SelectorSignature,
+                invocationTypeHints: [SwiftType?]?,
                 static isStatic: Bool,
                 includeOptional: Bool,
                 in type: SwiftType) -> KnownMethod?

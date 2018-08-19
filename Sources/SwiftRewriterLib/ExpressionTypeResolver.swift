@@ -889,13 +889,21 @@ private class MemberInvocationResolver {
         return arguments.map { $0.label }
     }
     
-    func method(isStatic: Bool, memberName: String, arguments: [FunctionArgument], in type: SwiftType) -> KnownMethod? {
+    func method(isStatic: Bool,
+                memberName: String,
+                arguments: [FunctionArgument],
+                in type: SwiftType) -> KnownMethod? {
+        
         let selector
             = SelectorSignature(isStatic: isStatic,
                                 keywords: [memberName] + arguments.map { $0.label })
+        let types = arguments.map { $0.expression.resolvedType }
         
-        return typeSystem.method(withObjcSelector: selector, static: isStatic,
-                                 includeOptional: true, in: type)
+        return typeSystem.method(withObjcSelector: selector,
+                                 invocationTypeHints: types,
+                                 static: isStatic,
+                                 includeOptional: true,
+                                 in: type)
     }
 }
 

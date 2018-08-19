@@ -155,8 +155,10 @@ class MandatoryIntentionPass: IntentionPass {
         // Check supertypes for overrides
         if let supertype = context.typeSystem.supertype(of: type) {
             for method in type.methods {
+                // TODO: Pass `invocationTypeHints`
                 let superMethod
                     = context.typeSystem.method(withObjcSelector: method.selector,
+                                                invocationTypeHints: nil,
                                                 static: method.isStatic,
                                                 includeOptional: false,
                                                 in: supertype)

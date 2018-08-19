@@ -496,16 +496,36 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func method(withObjcSelector selector: SelectorSignature,
+                       invocationTypeHints: [SwiftType?]?,
                        static isStatic: Bool,
                        includeOptional: Bool,
                        in type: KnownType) -> KnownMethod? {
         
-        if let method = type.knownMethods.first(where: {
-            $0.isStatic == isStatic
-                && (includeOptional || !$0.optional)
-                && $0.signature.asSelector == selector
-        }) {
-            return method
+        let methods =
+            type.knownMethods
+                .filter {
+                    $0.isStatic == isStatic
+                        && (includeOptional || !$0.optional)
+                        && $0.signature.asSelector == selector
+                }
+        
+        if !methods.isEmpty {
+            if methods.count == 1 || invocationTypeHints == nil {
+                return methods[0]
+            }
+            
+            // Attempt overload resolution based on argument type information
+            if let invocationTypeHints = invocationTypeHints,
+                selector.keywords.count - 1 == invocationTypeHints.count {
+                
+                if let method =
+                    _applyOverloadResolution(methods: methods,
+                                             argumentTypes: invocationTypeHints,
+                                             typeSystem: self) {
+                    
+                    return method
+                }
+            }
         }
         
         // Search on protocol conformances
@@ -515,6 +535,7 @@ public class DefaultTypeSystem: TypeSystem {
             }
             
             if let method = method(withObjcSelector: selector,
+                                   invocationTypeHints: invocationTypeHints,
                                    static: isStatic,
                                    includeOptional: includeOptional,
                                    in: prot) {
@@ -526,6 +547,7 @@ public class DefaultTypeSystem: TypeSystem {
         // Search on supertypes
         return supertype(of: type).flatMap {
             method(withObjcSelector: selector,
+                   invocationTypeHints: invocationTypeHints,
                    static: isStatic,
                    includeOptional: includeOptional,
                    in: $0)
@@ -606,6 +628,7 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func method(withObjcSelector selector: SelectorSignature,
+                       invocationTypeHints: [SwiftType?]?,
                        static isStatic: Bool,
                        includeOptional: Bool,
                        in type: SwiftType) -> KnownMethod? {
@@ -613,7 +636,10 @@ public class DefaultTypeSystem: TypeSystem {
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        return method(withObjcSelector: selector, static: isStatic, includeOptional: includeOptional,
+        return method(withObjcSelector: selector,
+                      invocationTypeHints: invocationTypeHints,
+                      static: isStatic,
+                      includeOptional: includeOptional,
                       in: knownType)
     }
     
@@ -1029,4 +1055,79 @@ func typeNameIn(swiftType: SwiftType) -> String? {
     default:
         return nil
     }
+}
+
+// TODO: Consider moving this to a separate object to better expose it to testing
+// and allow caching and other stateful niceties.
+
+///
+/// - precondition:
+///     for all methods `M` in `methods`,
+///     `M.signature.parameters.count == argumentTypes.count`
+///
+func _applyOverloadResolution(methods: [KnownMethod],
+                              argumentTypes: [SwiftType?],
+                              typeSystem: TypeSystem) -> KnownMethod? {
+    
+    if methods.isEmpty {
+        return nil
+    }
+    
+    // All argument types are nil, or no argument types are available: no best
+    // candidate can be decided.
+    if argumentTypes.isEmpty || argumentTypes.allSatisfy({ $0 == nil }) {
+        return methods.first
+    }
+    
+    // Start with a linear search for the first fully matching method signature
+    outerLoop:
+    for method in methods {
+        for (i, argumentType) in argumentTypes.enumerated() {
+            guard let argumentType = argumentType else {
+                break outerLoop
+            }
+            
+            let parameterType = method.signature.parameters[i].type
+            
+            if !typeSystem.typesMatch(argumentType, parameterType, ignoreNullability: false) {
+                break
+            }
+            
+            if i == argumentTypes.count - 1 {
+                // Candidate matches fully
+                return method
+            }
+        }
+    }
+    
+    // Do a lookup ignoring type nullability to attempt to find best-matching
+    // candidates, now
+    var methods = methods
+    
+    for (argIndex, argumentType) in argumentTypes.enumerated() {
+        guard methods.count > 1, let argumentType = argumentType else {
+            continue
+        }
+        
+        var doWork = true
+        
+        repeat {
+            doWork = false
+            
+            for (i, method) in methods.enumerated() {
+                // TODO: Support sub-type matching as well here
+                if !typeSystem.typesMatch(argumentType,
+                                          method.signature.parameters[argIndex].type,
+                                          ignoreNullability: true) {
+                    
+                    methods.remove(at: i)
+                    doWork = true
+                    break
+                }
+            }
+        } while doWork && methods.count > 1
+    }
+    
+    // No best-match found; return first result
+    return methods.first
 }

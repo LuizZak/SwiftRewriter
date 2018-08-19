@@ -207,6 +207,7 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssertNotNil(
             sut.method(withObjcSelector: SelectorSignature(isStatic: false,
                                                            keywords: ["responds", "to"]),
+                       invocationTypeHints: nil,
                        static: false,
                        includeOptional: true,
                        in: type)
@@ -215,6 +216,7 @@ class DefaultTypeSystemTests: XCTestCase {
             sut.method(withObjcSelector:
                 SelectorSignature(isStatic: false,
                                   keywords: ["isEqual", nil]),
+                       invocationTypeHints: nil,
                        static: false,
                        includeOptional: true,
                        in: type)
@@ -403,13 +405,28 @@ class DefaultTypeSystemTests: XCTestCase {
         sut.addType(cls)
         
         XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["nonOptional"]),
-                                   static: false, includeOptional: false, in: cls))
+                                   invocationTypeHints: nil,
+                                   static: false,
+                                   includeOptional: false,
+                                   in: cls))
+        
         XCTAssertNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optional"]),
-                                static: false, includeOptional: false, in: cls))
+                                invocationTypeHints: nil,
+                                static: false,
+                                includeOptional: false,
+                                in: cls))
+        
         XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optional"]),
-                                static: false, includeOptional: true, in: cls))
+                                   invocationTypeHints: nil,
+                                   static: false,
+                                   includeOptional: true,
+                                   in: cls))
+        
         XCTAssertNotNil(sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["optionalImplemented"]),
-                                   static: false, includeOptional: false, in: cls))
+                                   invocationTypeHints: nil,
+                                   static: false,
+                                   includeOptional: false,
+                                   in: cls))
     }
     
     func testDefaultValueForClassTypeIsAlwaysNil() {
@@ -651,6 +668,7 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(type.knownMethods.contains(where: { $0.signature.name == "fromExtension" }))
         XCTAssertNotNil(
             sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["fromExtension"]),
+                       invocationTypeHints: nil,
                        static: false,
                        includeOptional: false,
                        in: .typeName("UIView")
@@ -663,7 +681,7 @@ class DefaultTypeSystemTests: XCTestCase {
     }
     
     func testDeepLookupProtocolConformanceInTypeDefinitions() {
-        // {"protocolName":"UIViewControllerTransitionCoordinator","conformances":["UIViewControllerTransitionCoordinatorContext"]}
+        // These protocols are defined within TypeDefinitions
         let type =
             KnownTypeBuilder(typeName: "Test", kind: .class)
                 .protocolConformance(protocolName: "UIViewControllerTransitionCoordinator")
@@ -671,5 +689,87 @@ class DefaultTypeSystemTests: XCTestCase {
         sut.addType(type)
         
         XCTAssert(sut.isType("Test", conformingTo: "UIViewControllerTransitionCoordinatorContext"))
+    }
+    
+    func testMethodArgumentTypeBasedOverloadResolution() {
+        let type =
+            KnownTypeBuilder(typeName: "Test")
+                .settingUseSwiftSignatureMatching(true)
+                .method(named: "method", parsingSignature: "(value: Int)")
+                .method(named: "method", parsingSignature: "(value: String)")
+                .build()
+        sut.addType(type)
+        
+        // No type hinting: Return first method found
+        XCTAssertEqual(
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+                       invocationTypeHints: nil,
+                       static: false,
+                       includeOptional: false,
+                       in: type)?.signature.parameters[0].type,
+            
+            SwiftType.int
+        )
+        
+        // With type hinting
+        XCTAssertEqual(
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+                       invocationTypeHints: [.int],
+                       static: false,
+                       includeOptional: false,
+                       in: type)?.signature.parameters[0].type,
+            
+            SwiftType.int
+        )
+        XCTAssertEqual(
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+                       invocationTypeHints: [.string],
+                       static: false,
+                       includeOptional: false,
+                       in: type)?.signature.parameters[0].type,
+            
+            SwiftType.string
+        )
+    }
+    
+    func testMethodArgumentTypeBasedOverloadResolutionWithOptionalArgumentType() {
+        let type =
+            KnownTypeBuilder(typeName: "Test")
+                .settingUseSwiftSignatureMatching(true)
+                .method(named: "method", parsingSignature: "(value: Int)")
+                .method(named: "method", parsingSignature: "(value: String)")
+                .build()
+        sut.addType(type)
+        
+        // No type hinting: Return first method found
+        XCTAssertEqual(
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+                       invocationTypeHints: nil,
+                       static: false,
+                       includeOptional: false,
+                       in: type)?.signature.parameters[0].type,
+            
+            SwiftType.int
+        )
+        
+        // With type hinting
+        XCTAssertEqual(
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+                       invocationTypeHints: [.optional(.int)],
+                       static: false,
+                       includeOptional: false,
+                       in: type)?.signature.parameters[0].type,
+            
+            SwiftType.int
+        )
+        XCTAssertEqual(
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+                       invocationTypeHints: [.optional(.string)],
+                       static: false,
+                       includeOptional: false,
+                       in: type)?.signature.parameters[0].type,
+            
+            SwiftType.string
+        )
     }
 }

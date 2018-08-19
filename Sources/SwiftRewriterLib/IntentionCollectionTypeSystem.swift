@@ -144,32 +144,56 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         return super.field(named: name, static: isStatic, in: type)
     }
     
-    public override func method(withObjcSelector selector: SelectorSignature, static isStatic: Bool,
-                                includeOptional: Bool, in type: SwiftType) -> KnownMethod? {
+    public override func method(withObjcSelector selector: SelectorSignature,
+                                invocationTypeHints: [SwiftType?]?,
+                                static isStatic: Bool,
+                                includeOptional: Bool,
+                                in type: SwiftType) -> KnownMethod? {
+        
         guard let typeName = typeNameIn(swiftType: type) else {
-            return super.method(withObjcSelector: selector, static: isStatic,
-                                includeOptional: includeOptional, in: type)
+            return super.method(withObjcSelector: selector,
+                                invocationTypeHints: invocationTypeHints,
+                                static: isStatic,
+                                includeOptional: includeOptional,
+                                in: type)
         }
         
         if let type = intentionsProvider.knownType(withName: typeName) {
-            if let method = method(matchingSelector: selector, in: type.knownMethods), method.isStatic == isStatic {
+            if let method = method(matchingSelector: selector,
+                                   invocationTypeHints: invocationTypeHints,
+                                   in: type.knownMethods), method.isStatic == isStatic {
+                
                 return method
             }
         }
         
-        return super.method(withObjcSelector: selector, static: isStatic,
-                            includeOptional: includeOptional, in: type)
+        return super.method(withObjcSelector: selector,
+                            invocationTypeHints: invocationTypeHints,
+                            static: isStatic,
+                            includeOptional: includeOptional,
+                            in: type)
     }
     
     /// Finds a method on a given array of methods that matches a given
     /// Objective-C selector signature.
     ///
     /// Ignores method variable names and types of return/parameters.
+    // TODO: Apply parameter type overload resolution
     private func method(matchingSelector selector: SelectorSignature,
+                        invocationTypeHints: [SwiftType?]?,
                         in methods: [KnownMethod]) -> KnownMethod? {
-        return methods.first {
-            return $0.signature.asSelector == selector
+        
+        guard let invocationTypeHints = invocationTypeHints else {
+            return methods.first { $0.signature.asSelector == selector }
         }
+        
+        let methods = methods.filter {
+            $0.signature.asSelector == selector
+        }
+        
+        return _applyOverloadResolution(methods: methods,
+                                        argumentTypes: invocationTypeHints,
+                                        typeSystem: self)
     }
     
     private class IntentionCollectionProvider: TypealiasProvider, KnownTypeProvider {
