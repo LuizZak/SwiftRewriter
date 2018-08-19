@@ -122,20 +122,24 @@ public final class FunctionSignatureParser {
     }
     
     private static func parseParameter(tokenizer: Tokenizer) throws -> ParameterSignature {
-        let label: Substring
+        let label: String?
         if tokenizer.tokenType(is: .underscore) {
             try tokenizer.advance(overTokenType: .underscore)
-            label = "_"
+            label = nil
         } else {
-            label = try tokenizer.advance(overTokenType: .identifier).value
+            label = String(try tokenizer.advance(overTokenType: .identifier).value)
         }
         
         if tokenizer.consumeToken(ifTypeIs: .colon) != nil {
+            guard let label = label else {
+                throw tokenizer.lexer.syntaxError("Expected argument name after '_'")
+            }
+            
             try skipTypeAnnotations(tokenizer: tokenizer)
             
             let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
             
-            return ParameterSignature(name: String(label), type: type)
+            return ParameterSignature(name: label, type: type)
         }
         
         let name = try tokenizer.advance(overTokenType: .identifier).value
@@ -145,7 +149,7 @@ public final class FunctionSignatureParser {
         try skipTypeAnnotations(tokenizer: tokenizer)
         let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
         
-        return ParameterSignature(label: String(label), name: String(name), type: type)
+        return ParameterSignature(label: label, name: String(name), type: type)
     }
     
     private enum Token: String, TokenProtocol {
@@ -193,11 +197,15 @@ public final class FunctionSignatureParser {
             }
             
             if lexer.safeIsNextChar(equalTo: "_") {
-                if lexer.safeNextCharPasses(with: { !Lexer.isLetter($0) && !Lexer.isDigit($0) && $0 != "_" }) {
-                    return .underscore
+                return lexer.withTemporaryIndex {
+                    try? lexer.advance()
+                    
+                    if lexer.safeNextCharPasses(with: { !Lexer.isLetter($0) && !Lexer.isDigit($0) && $0 != "_" }) {
+                        return .underscore
+                    }
+                    
+                    return .identifier
                 }
-                
-                return .identifier
             }
             
             guard let next = try? lexer.peek() else {

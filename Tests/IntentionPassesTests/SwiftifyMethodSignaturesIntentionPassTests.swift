@@ -14,7 +14,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "doThingWithColor",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "color", type: .typeName("CGColor"))
+                                    ParameterSignature(label: nil, name: "color", type: .typeName("CGColor"))
                     ]))
             .converts(to:
                 FunctionSignature(name: "doThing",
@@ -30,12 +30,12 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "doThingWithColor",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "color", type: .int)
+                                    ParameterSignature(label: nil, name: "color", type: .int)
                     ]))
             .converts(to:
                 FunctionSignature(name: "doThingWithColor",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "color", type: .int)
+                                    ParameterSignature(label: nil, name: "color", type: .int)
                     ]))
     }
     
@@ -46,12 +46,12 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "doThingWith",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "color", type: .any)
+                                    ParameterSignature(label: nil, name: "color", type: .any)
                     ]))
             .converts(to:
                 FunctionSignature(name: "doThingWith",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "color", type: .any)
+                                    ParameterSignature(label: nil, name: "color", type: .any)
                     ]))
     }
     
@@ -74,12 +74,12 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "doThingWithin",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "thing", type: .any)
+                                    ParameterSignature(label: nil, name: "thing", type: .any)
                     ]))
             .converts(to:
                 FunctionSignature(name: "doThingWithin",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "thing", type: .any)
+                                    ParameterSignature(label: nil, name: "thing", type: .any)
                     ]))
     }
     
@@ -102,12 +102,12 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "initWithInt",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "int", type: .int)],
+                                    ParameterSignature(label: nil, name: "int", type: .int)],
                                   returnType: .anyObject,
                                   isStatic: false))
             .converts(toInitializer: [
                 ParameterSignature(label: "int", name: "int", type: .int)
-                ])
+            ])
     }
     
     func testConvertVeryShortTypeName() {
@@ -117,7 +117,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "initWithB",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "b", type: .typeName("B"))],
+                                    ParameterSignature(label: nil, name: "b", type: .typeName("B"))],
                                   returnType: .instancetype,
                                   isStatic: false))
             .converts(toInitializer: [
@@ -132,7 +132,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withSignature:
                 FunctionSignature(name: "initWithObjectList",
                                   parameters: [
-                                    ParameterSignature(label: "_", name: "objects", type: .array(.typeName("Object")))
+                                    ParameterSignature(label: nil, name: "objects", type: .array(.typeName("Object")))
                                   ],
                                   returnType: .instancetype,
                                   isStatic: false))
@@ -145,7 +145,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         testThat(typeName: "Squeak", sut: sut)
             .method(withObjcSignature: "- (Squeak*)getSqueakWithID:(NSInteger)id;")
             .converts(to: FunctionSignature(name: "getSqueakWithID",
-                                            parameters: [ParameterSignature(label: "_", name: "id", type: .int)],
+                                            parameters: [ParameterSignature(label: nil, name: "id", type: .int)],
                                             returnType: .implicitUnwrappedOptional(.typeName("Squeak")),
                                             isStatic: false)
         )
@@ -156,7 +156,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
         
         testThat(typeName: "Squeak", sut: sut)
             .method(withSignature: FunctionSignature(name: "initWithValue",
-                                                     parameters: [ParameterSignature(label: "_", name: "value", type: .int)],
+                                                     parameters: [ParameterSignature(label: nil, name: "value", type: .int)],
                                                      returnType: .optional(.typeName("Squeak")),
                                                      isStatic: false))
             .converts(toInitializer: "init?(value: Int)")

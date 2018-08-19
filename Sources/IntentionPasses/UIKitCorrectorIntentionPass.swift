@@ -24,10 +24,10 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
         conversions.append(contentsOf:
             mappings.map {
                 SignatureConversion(relationship: .subtype("UIView"),
-                                    signatureMapper: $0)
+                                    signatureMapper: $0,
+                                    adjustNullability: true)
             })
         
-        // UITableViewDelegate
         addConversions(
             .conformance(protocolName: "UITableViewDelegate"),
             keywordPairs: [
@@ -80,20 +80,36 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
     
     private func addConversion(_ relationship: SignatureConversion.Relationship,
                                fromKeywords k1: [String?], to k2: [String?]) {
+        
+        let functionSignature1 =
+            FunctionSignature(name: k1[0] ?? "__",
+                              parameters: k1.dropFirst().map { ParameterSignature(label: $0, name: $0 ?? "_", type: .any) },
+                              returnType: .any,
+                              isStatic: false)
+        
+        let functionSignature2 =
+            FunctionSignature(name: k2[0] ?? "__",
+                              parameters: k2.dropFirst().map { ParameterSignature(label: $0, name: $0 ?? "_", type: .any) },
+                              returnType: .any,
+                              isStatic: false)
+        
         conversions.append(
             SignatureConversion(
                 relationship: relationship,
-                from: SelectorSignature(isStatic: false, keywords: k1),
-                to: SelectorSignature(isStatic: false, keywords: k2)
+                from: functionSignature1,
+                to: functionSignature2,
+                adjustNullability: false
             )
         )
     }
     
     private func addConversions(_ relationship: SignatureConversion.Relationship,
                                 keywordPairs: [([String?], [String?])]) {
+        
         for pair in keywordPairs {
             addConversion(relationship, fromKeywords: pair.0, to: pair.1)
         }
+        
     }
     
     override func applyOnMethod(_ method: MethodGenerationIntention) {
@@ -111,6 +127,7 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
                 }
                 
                 isProtocol = false
+                
             case .conformance(let protocolName):
                 if !context.typeSystem.isType(type.typeName, conformingTo: protocolName) {
                     continue
@@ -149,8 +166,9 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
 
 private class SignatureConversion {
     let relationship: Relationship
-    let from: SelectorSignature
-    let to: SelectorSignature
+    let from: FunctionSignature
+    let to: FunctionSignature
+    let adjustNullability: Bool
     
     /// Creates a new `SignatureConversion` instance with a given source and target
     /// signatures to convert.
@@ -158,38 +176,55 @@ private class SignatureConversion {
     /// Count of keywords on both signatures must match (i.e. cannot change the
     /// number of arguments of a method)
     ///
+    /// If `adjustNullability == true`, parameter and return types will be inspected
+    /// and nullability annotations will be matched on the target method signature.
+    ///
     /// - precondition: `from.count == to.count`
     /// - precondition: `!from.isEmpty`
-    public init(relationship: Relationship, from: SelectorSignature, to: SelectorSignature) {
-        precondition(from.keywords.count == to.keywords.count, "from.keywords.count == to.keywords.count")
-        precondition(!from.keywords.isEmpty, "!from.keywords.isEmpty")
+    public init(relationship: Relationship,
+                from: FunctionSignature,
+                to: FunctionSignature,
+                adjustNullability: Bool) {
+        
+        precondition(from.parameters.count == to.parameters.count,
+                     "from.parameters.count == to.parameters.count")
+        precondition(!from.parameters.isEmpty,
+                     "!from.parameters.isEmpty")
         
         self.relationship = relationship
         self.from = from
         self.to = to
+        self.adjustNullability = adjustNullability
     }
     
-    public init(relationship: Relationship, signatureMapper: SignatureMapper) {
+    public init(relationship: Relationship,
+                signatureMapper: SignatureMapper,
+                adjustNullability: Bool) {
         
         self.relationship = relationship
-        self.from = signatureMapper.from.asSelector
-        self.to = signatureMapper.to.asSelector
+        self.from = signatureMapper.from
+        self.to = signatureMapper.to
+        self.adjustNullability = adjustNullability
         
     }
     
     public func canApply(to signature: FunctionSignature) -> Bool {
-        return signature.asSelector == from
+        return signature.matchesAsSelector(from)
     }
     
     public func apply(to signature: inout FunctionSignature) -> Bool {
-        guard signature.asSelector == from else {
+        guard signature.matchesAsSelector(from) else {
             return false
         }
         
-        signature.name = to.keywords[0] ?? "__"
+        signature.name = to.name
         
-        for i in 0..<to.keywords.count - 1 {
-            signature.parameters[i].label = to.keywords[i + 1] ?? "_"
+        for i in to.parameters.indices {
+            signature.parameters[i].label = to.parameters[i].label
+        }
+        
+        if adjustNullability {
+            signature = mergeSignatures(to, signature)
         }
         
         return true

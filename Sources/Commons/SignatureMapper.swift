@@ -61,7 +61,7 @@ public struct SignatureMapperBuilder {
             FunctionSignature(
                 name: from.keywords[0] ?? "__",
                 parameters: from.keywords.dropFirst().map {
-                    ParameterSignature(label: $0 ?? "_", name: $0 ?? "param", type: .int)
+                    ParameterSignature(label: $0, name: $0 ?? "param", type: .int)
                 },
                 returnType: .void,
                 isStatic: from.isStatic)
@@ -70,7 +70,7 @@ public struct SignatureMapperBuilder {
             FunctionSignature(
                 name: to.keywords[0] ?? "__",
                 parameters: to.keywords.dropFirst().map {
-                    ParameterSignature(label: $0 ?? "_", name: $0 ?? "param", type: .int)
+                    ParameterSignature(label: $0, name: $0 ?? "param", type: .int)
                 },
                 returnType: .void,
                 isStatic: to.isStatic)
@@ -96,7 +96,7 @@ public struct SignatureMapperBuilder {
             FunctionSignature(
                 name: fromKeywords[0] ?? "__",
                 parameters: fromKeywords.dropFirst().map {
-                    ParameterSignature(label: $0 ?? "_",
+                    ParameterSignature(label: $0,
                                        name: $0 ?? "param",
                                        type: .ignoredMappingType)
                 },
@@ -107,7 +107,7 @@ public struct SignatureMapperBuilder {
             FunctionSignature(
                 name: toKeywords[0] ?? "__",
                 parameters: toKeywords.dropFirst().map {
-                    ParameterSignature(label: $0 ?? "_",
+                    ParameterSignature(label: $0,
                                        name: $0 ?? "param",
                                        type: .ignoredMappingType)
                 },

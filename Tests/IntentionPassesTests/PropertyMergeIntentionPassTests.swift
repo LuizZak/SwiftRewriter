@@ -39,7 +39,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                 .createFileWithClass(named: "A") { type in
                     type.createProperty(named:  "a", type: .int)
                         .createMethod(named: "a", returnType: .typeName("AliasedInt"))
-                        .createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .typeName("OtherAliasedInt"))])
+                        .createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .typeName("OtherAliasedInt"))])
                 }.build()
         let cls = intentions.classIntentions()[0]
         let sut = PropertyMergeIntentionPass()
@@ -149,7 +149,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             ])
                         }.createMethod(named: "setA",
                                        parameters: [
-                                        ParameterSignature(label: "_", name: "a", type: .int)]) { method in
+                                        ParameterSignature(label: nil, name: "a", type: .int)]) { method in
                                             method.setBody([
                                                 .expression(
                                                     Expression
@@ -463,12 +463,12 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         .createProperty(named: "a", type: .int, attributes: [.attribute("class")])
                         .createMethod(named: "a", returnType: .int)
                         .createMethod(named: "setA", parameters: [
-                            ParameterSignature(label: "_", name: "a", type: .int)
+                            ParameterSignature(label: nil, name: "a", type: .int)
                         ])
                         .createProperty(named: "b", type: .int)
                         .createMethod(named: "b", returnType: .int, isStatic: true)
                         .createMethod(named: "setB", parameters: [
-                            ParameterSignature(label: "_", name: "a", type: .int)
+                            ParameterSignature(label: nil, name: "a", type: .int)
                         ], isStatic: true)
                 }.build()
         let cls = intentions.classIntentions()[0]
@@ -504,7 +504,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                         }.createExtension(forClassNamed: "A") { ext in
                             ext.createMethod(named: "a", returnType: .int)
                                 .createMethod(named: "setA", parameters: [
-                                    ParameterSignature(label: "_", name: "a", type: .int)
+                                    ParameterSignature(label: nil, name: "a", type: .int)
                                 ])
                         }
                 }.build()
@@ -535,7 +535,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     file.createExtension(forClassNamed: "A") { ext in
                         ext.createMethod(named: "a", returnType: .int)
                             .createMethod(named: "setA", parameters: [
-                                ParameterSignature(label: "_", name: "a", type: .int)
+                                ParameterSignature(label: nil, name: "a", type: .int)
                             ])
                     }
                 }.build()
@@ -570,7 +570,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                                 member.setBody([.expression(.identifier("test"))])
                             }
                             .createMethod(named: "setA",
-                                          parameters: [ParameterSignature(label: "_", name: "a", type: .int)]) { member in
+                                          parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { member in
                                             member.setBody([.expression(.identifier("test"))])
                                         }
                         }.createExtension(forClassNamed: "A") { ext in
@@ -614,7 +614,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     file.createClass(withName: "A") { type in
                         type.createInstanceVariable(named: "backing", type: .int)
                             .createProperty(named: "a", type: .int)
-                            .createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .int)]) { method in
+                            .createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { method in
                                 method.setBody([
                                     // self.backing = a
                                     .expression(
@@ -716,7 +716,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in
                     file.createExtension(forClassNamed: "A") { type in
-                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .int)]) { method in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { method in
                                     method.setBody([
                                         .expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))
                                     ])
@@ -807,7 +807,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             IntentionCollectionBuilder()
                 .createFile(named: "A+Ext.m") { file in
                     file.createExtension(forClassNamed: "A") { type in
-                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .int)])  { method in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .int)])  { method in
                             method.setBody([.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
                         }
                     }
@@ -847,7 +847,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             IntentionCollectionBuilder()
                 .createFile(named: "A+Ext.m") { file in
                     file.createExtension(forClassNamed: "A") { type in
-                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: "_", name: "a", type: .implicitUnwrappedOptional(.string))])  { method in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .implicitUnwrappedOptional(.string))])  { method in
                             method.setBody([.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
                         }
                     }
@@ -897,7 +897,7 @@ private extension TypeBuilder {
         return
             self.createProperty(named: name, type: type)
                 .createMethod(named: "set\(name.uppercasedFirstLetter)",
-                              parameters: [ParameterSignature(label: "_", name: name, type: type)])
+                              parameters: [ParameterSignature(label: nil, name: name, type: type)])
                 .createMethod(named: name, returnType: type)
     }
     
@@ -906,6 +906,6 @@ private extension TypeBuilder {
         return
             self.createProperty(named: name, type: type)
                 .createMethod(named: "set\(name.uppercasedFirstLetter)",
-                    parameters: [ParameterSignature(label: "_", name: name, type: type)])
+                    parameters: [ParameterSignature(label: nil, name: name, type: type)])
     }
 }

@@ -20,7 +20,7 @@ class FunctionSignatureParserTests: XCTestCase {
     func testParseSingleParameterWithLabel() {
         assert(
             string: "(_ arg0: Int)",
-            parseInto: [ParameterSignature(label: "_", name: "arg0", type: .int)]
+            parseInto: [ParameterSignature(label: nil, name: "arg0", type: .int)]
         )
     }
     
@@ -28,7 +28,7 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: Int, arg1: String)",
             parseInto: [
-                ParameterSignature(label: "_", name: "arg0", type: .int),
+                ParameterSignature(label: nil, name: "arg0", type: .int),
                 ParameterSignature(name: "arg1", type: .string)
             ]
         )
@@ -38,7 +38,7 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: inout Int)",
             parseInto: [
-                ParameterSignature(label: "_", name: "arg0", type: .int)
+                ParameterSignature(label: nil, name: "arg0", type: .int)
             ]
         )
     }
@@ -47,14 +47,14 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: @escaping () -> Void)",
             parseInto: [
-                ParameterSignature(label: "_", name: "arg0", type: .block(returnType: .void, parameters: []))
+                ParameterSignature(label: nil, name: "arg0", type: .block(returnType: .void, parameters: []))
             ]
         )
         
         assert(
             string: "(_ arg0: @autoclosure @escaping () -> Void)",
             parseInto: [
-                ParameterSignature(label: "_", name: "arg0", type: .block(returnType: .void, parameters: []))
+                ParameterSignature(label: nil, name: "arg0", type: .block(returnType: .void, parameters: []))
             ]
         )
     }
@@ -63,7 +63,7 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: @escaping inout () -> Void)",
             parseInto: [
-                ParameterSignature(label: "_", name: "arg0", type: .block(returnType: .void, parameters: []))
+                ParameterSignature(label: nil, name: "arg0", type: .block(returnType: .void, parameters: []))
             ]
         )
     }
@@ -74,6 +74,15 @@ class FunctionSignatureParserTests: XCTestCase {
             XCTFail("Expected to throw error")
         } catch {
             XCTAssertEqual("\(error)", "Error: Extraneous input ')'")
+        }
+    }
+    
+    func testExpectedArgumentNameError() {
+        do {
+            _=try FunctionSignatureParser.parseParameters(from: "(_: Int)")
+            XCTFail("Expected to throw error")
+        } catch {
+            XCTAssertEqual("\(error)", "Error: Expected argument name after '_'")
         }
     }
     

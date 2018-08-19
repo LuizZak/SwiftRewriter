@@ -11,8 +11,8 @@ public struct FunctionSignature: Equatable, Codable {
         return
             SelectorSignature(
                 isStatic: isStatic,
-                keywords: [name] + parameters.map { $0.label == "_" ? nil : $0.label }
-        )
+                keywords: [name] + parameters.map { $0.label }
+            )
     }
     
     public init(name: String,
@@ -44,6 +44,9 @@ public struct FunctionSignature: Equatable, Codable {
     
     /// Returns `true` iff `self` and `other` match using Swift signature matching
     /// rules.
+    ///
+    /// Along with label names, argument and return types are also checked for
+    /// equality, effectively allowing 'overloads' of functions to be described.
     ///
     /// No alias checking is performed, so parameters/returns with different type
     /// names will always differ.

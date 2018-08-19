@@ -310,7 +310,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 .createFile(named: "A.h") { file in
                     file.createGlobalFunction(withName: "a",
                                               parameters: [
-                                                ParameterSignature(label: "_", name: "a", type: .int)
+                                                ParameterSignature(label: nil, name: "a", type: .int)
                                               ])
                 }
                 .createFile(named: "A.m") { file in
@@ -554,14 +554,14 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                         type.setAsInterfaceSource()
                         type.createMethod(
                             named: "a",
-                            parameters: [ParameterSignature(label: "_", name: "a", type: headerBlock)]
+                            parameters: [ParameterSignature(label: nil, name: "a", type: headerBlock)]
                         )
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { type in
                         type.createMethod(
                             named: "a",
-                            parameters: [ParameterSignature(label: "_", name: "a", type: implBlock)]
+                            parameters: [ParameterSignature(label: nil, name: "a", type: implBlock)]
                         )
                     }
                 }.build()

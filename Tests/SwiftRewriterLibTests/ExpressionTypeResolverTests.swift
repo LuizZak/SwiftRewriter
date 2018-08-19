@@ -541,7 +541,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                     builder.method(withSignature:
                         FunctionSignature(name: "aMethod",
                                           parameters: [
-                                            ParameterSignature(label: "_", name: "arg0", type: .int),
+                                            ParameterSignature(label: nil, name: "arg0", type: .int),
                                             ParameterSignature(label: "secondParam", name: "arg1", type: .int)],
                                           returnType: .int
                         )
@@ -765,7 +765,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                           sut: ExpressionTypeResolver())
             .definingType(named: "A") { type in
                 type.method(withSignature:
-                        FunctionSignature(name: "a", parameters: [.init(label: "_", name: "a", type: .int)])
+                        FunctionSignature(name: "a", parameters: [.init(label: nil, name: "a", type: .int)])
                     ).build()
             }
             .definingIntrinsic(name: "self", type: .typeName("A"))
@@ -792,7 +792,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                           sut: ExpressionTypeResolver())
             .definingType(named: "A", with: { builder -> KnownType in
                 builder
-                    .constructor(withParameters: [.init(label: "_", name: "a", type: .int)])
+                    .constructor(withParameters: [.init(label: nil, name: "a", type: .int)])
                     .build()
             })
             .resolve()
@@ -1052,7 +1052,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let signature =
             FunctionSignature(
                 name: "f",
-                parameters: [.init(label: "_", name: "b", type: .int)],
+                parameters: [.init(label: nil, name: "b", type: .int)],
                 returnType: .void,
                 isStatic: false)
         

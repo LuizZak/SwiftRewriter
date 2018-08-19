@@ -185,8 +185,8 @@ public class TypeParsing {
                 type = .specified(specifiers: qualifiers, type)
             }
             // Verify nullability specifiers
-            if let nullabillitySpecifier = directDeclarator.nullabilitySpecifier() {
-                type = .qualified(type, qualifiers: [nullabillitySpecifier.getText()])
+            if let nullabilitySpecifier = directDeclarator.nullabilitySpecifier() {
+                type = .qualified(type, qualifiers: [nullabilitySpecifier.getText()])
             }
             
             return type

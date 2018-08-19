@@ -136,9 +136,9 @@ public enum UIViewCompoundType {
                     ],
                     isStatic: true
                 ).makeSignatureMapping(
-                    fromFunctionNamed: "animateWithDuration",
+                    fromMethodNamed: "animateWithDuration",
                     parameters: [
-                        ParameterSignature(label: "_", name: "duration", type: "TimeInterval"),
+                        ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
                         ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
                     ],
@@ -154,9 +154,9 @@ public enum UIViewCompoundType {
                     ],
                     isStatic: true
                 ).makeSignatureMapping(
-                    fromFunctionNamed: "animateWithDuration",
+                    fromMethodNamed: "animateWithDuration",
                     parameters: [
-                        ParameterSignature(label: "_", name: "duration", type: "TimeInterval"),
+                        ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
                     ],
                     in: &mappings
@@ -174,9 +174,9 @@ public enum UIViewCompoundType {
                     ],
                     isStatic: true
                 ).makeSignatureMapping(
-                    fromFunctionNamed: "animateWithDuration",
+                    fromMethodNamed: "animateWithDuration",
                     parameters: [
-                        ParameterSignature(label: "_", name: "duration", type: "TimeInterval"),
+                        ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "delay", type: "TimeInterval"),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
                         ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
@@ -217,7 +217,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "beginAnimations",
                     parameters: [
-                        ParameterSignature(label: "_", name: "animationID", type: .optional(.string)),
+                        ParameterSignature(label: nil, name: "animationID", type: .optional(.string)),
                         ParameterSignature(name: "context", type: .optional("UnsafeMutableRawPointer"))
                     ],
                     isStatic: true
@@ -228,7 +228,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "perform",
                     parameters: [
-                        ParameterSignature(label: "_", name: "animation", type: "UISystemAnimation"),
+                        ParameterSignature(label: nil, name: "animation", type: "UISystemAnimation"),
                         ParameterSignature(label: "on", name: "views", type: .array("UIView")),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
                         ParameterSignature(label: "animations", name: "parallelAnimations", type: .optional(.block(returnType: .void, parameters: []))),
@@ -241,7 +241,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "performWithoutAnimation",
                     parameters: [
-                        ParameterSignature(label: "_", name: "actionsWithoutAnimation", type: .block(returnType: .void, parameters: []))
+                        ParameterSignature(label: nil, name: "actionsWithoutAnimation", type: .block(returnType: .void, parameters: []))
                     ],
                     isStatic: true
                 )
@@ -252,7 +252,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationBeginsFromCurrentState",
                     parameters: [
-                        ParameterSignature(label: "_", name: "fromCurrentState", type: .bool)
+                        ParameterSignature(label: nil, name: "fromCurrentState", type: .bool)
                     ],
                     isStatic: true
                 )
@@ -261,7 +261,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationCurve",
                     parameters: [
-                        ParameterSignature(label: "_", name: "curve", type: "UIViewAnimationCurve")
+                        ParameterSignature(label: nil, name: "curve", type: "UIViewAnimationCurve")
                     ],
                     isStatic: true
                 )
@@ -270,7 +270,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationDelay",
                     parameters: [
-                        ParameterSignature(label: "_", name: "delay", type: "TimeInterval")
+                        ParameterSignature(label: nil, name: "delay", type: "TimeInterval")
                     ],
                     isStatic: true
                 )
@@ -279,7 +279,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationDelegate",
                     parameters: [
-                        ParameterSignature(label: "_", name: "delegate", type: .optional(.any))
+                        ParameterSignature(label: nil, name: "delegate", type: .optional(.any))
                     ],
                     isStatic: true
                 )
@@ -288,7 +288,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationDidStop",
                     parameters: [
-                        ParameterSignature(label: "_", name: "selector", type: .optional("Selector"))
+                        ParameterSignature(label: nil, name: "selector", type: .optional("Selector"))
                     ],
                     isStatic: true
                 )
@@ -297,7 +297,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationDuration",
                     parameters: [
-                        ParameterSignature(label: "_", name: "duration", type: "TimeInterval")
+                        ParameterSignature(label: nil, name: "duration", type: "TimeInterval")
                     ],
                     isStatic: true
                 )
@@ -306,7 +306,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationRepeatAutoreverses",
                     parameters: [
-                        ParameterSignature(label: "_", name: "repeatAutoreverses", type: .bool)
+                        ParameterSignature(label: nil, name: "repeatAutoreverses", type: .bool)
                     ],
                     isStatic: true
                 )
@@ -315,7 +315,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationRepeatCount",
                     parameters: [
-                        ParameterSignature(label: "_", name: "repeatCount", type: .float)
+                        ParameterSignature(label: nil, name: "repeatCount", type: .float)
                     ],
                     isStatic: true
                 )
@@ -324,7 +324,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationsEnabled",
                     parameters: [
-                        ParameterSignature(label: "_", name: "enabled", type: .bool)
+                        ParameterSignature(label: nil, name: "enabled", type: .bool)
                     ],
                     isStatic: true
                 )
@@ -333,7 +333,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationStart",
                     parameters: [
-                        ParameterSignature(label: "_", name: "startDate", type: "Date")
+                        ParameterSignature(label: nil, name: "startDate", type: "Date")
                     ],
                     isStatic: true
                 )
@@ -342,7 +342,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationTransition",
                     parameters: [
-                        ParameterSignature(label: "_", name: "transition", type: "UIViewAnimationTransition"),
+                        ParameterSignature(label: nil, name: "transition", type: "UIViewAnimationTransition"),
                         ParameterSignature(label: "for", name: "view", type: "UIView"),
                         ParameterSignature(name: "cache", type: .bool)
                     ],
@@ -355,7 +355,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setAnimationWillStart",
                     parameters: [
-                        ParameterSignature(label: "_", name: "selector", type: .optional("Selector"))
+                        ParameterSignature(label: nil, name: "selector", type: .optional("Selector"))
                     ],
                     isStatic: true
                 )
@@ -414,7 +414,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "addConstraint",
                     parameters: [
-                        ParameterSignature(label: "_", name: "constraint", type: "NSLayoutConstraint")
+                        ParameterSignature(label: nil, name: "constraint", type: "NSLayoutConstraint")
                     ]
                 )
             )
@@ -422,7 +422,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "addConstraints",
                     parameters: [
-                        ParameterSignature(label: "_", name: "constraints", type: .array("NSLayoutConstraint"))
+                        ParameterSignature(label: nil, name: "constraints", type: .array("NSLayoutConstraint"))
                     ]
                 )
             )
@@ -430,7 +430,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "addGestureRecognizer",
                     parameters: [
-                        ParameterSignature(label: "_", name: "gestureRecognizer", type: "UIGestureRecognizer")
+                        ParameterSignature(label: nil, name: "gestureRecognizer", type: "UIGestureRecognizer")
                     ]
                 )
             )
@@ -438,7 +438,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "addLayoutGuide",
                     parameters: [
-                        ParameterSignature(label: "_", name: "layoutGuide", type: "UILayoutGuide")
+                        ParameterSignature(label: nil, name: "layoutGuide", type: "UILayoutGuide")
                     ]
                 )
             )
@@ -446,7 +446,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "addMotionEffect",
                     parameters: [
-                        ParameterSignature(label: "_", name: "effect", type: "UIMotionEffect")
+                        ParameterSignature(label: nil, name: "effect", type: "UIMotionEffect")
                     ]
                 )
             )
@@ -454,7 +454,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "addSubview",
                     parameters: [
-                        ParameterSignature(label: "_", name: "view", type: "UIView")
+                        ParameterSignature(label: nil, name: "view", type: "UIView")
                     ]
                 )
             )
@@ -508,40 +508,68 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "convert",
                     parameters: [
-                        ParameterSignature(label: "_", name: "point", type: "CGPoint"),
+                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
                         ParameterSignature(label: "from", name: "view", type: .optional("UIView"))
                     ],
                     returnType: "CGPoint"
+                ).makeSignatureMapping(
+                    fromMethodNamed: "convertPoint",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
+                        ParameterSignature(label: "fromView", name: "view", type: .optional("UIView"))
+                    ],
+                    in: &mappings
                 )
             )
             .method(withSignature:
                 FunctionSignature(
                     name: "convert",
                     parameters: [
-                        ParameterSignature(label: "_", name: "point", type: "CGPoint"),
+                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
                         ParameterSignature(label: "to", name: "view", type: .optional("UIView"))
                     ],
                     returnType: "CGPoint"
+                ).makeSignatureMapping(
+                    fromMethodNamed: "convertPoint",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
+                        ParameterSignature(label: "toView", name: "view", type: .optional("UIView"))
+                    ],
+                    in: &mappings
                 )
             )
             .method(withSignature:
                 FunctionSignature(
                     name: "convert",
                     parameters: [
-                        ParameterSignature(label: "_", name: "rect", type: "CGRect"),
+                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
                         ParameterSignature(label: "from", name: "view", type: .optional("UIView"))
                     ],
                     returnType: "CGRect"
+                ).makeSignatureMapping(
+                    fromMethodNamed: "convertRect",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
+                        ParameterSignature(label: "fromView", name: "view", type: .optional("UIView"))
+                    ],
+                    in: &mappings
                 )
             )
             .method(withSignature:
                 FunctionSignature(
                     name: "convert",
                     parameters: [
-                        ParameterSignature(label: "_", name: "rect", type: "CGRect"),
+                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
                         ParameterSignature(label: "to", name: "view", type: .optional("UIView"))
                     ],
                     returnType: "CGRect"
+                ).makeSignatureMapping(
+                    fromMethodNamed: "convertRect",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
+                        ParameterSignature(label: "toView", name: "view", type: .optional("UIView"))
+                    ],
+                    in: &mappings
                 )
             )
         
@@ -558,7 +586,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "didAddSubview",
                     parameters: [
-                        ParameterSignature(label: "_", name: "subview", type: "UIView")
+                        ParameterSignature(label: nil, name: "subview", type: "UIView")
                     ]
                 )
             )
@@ -568,10 +596,10 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "draw",
                     parameters: [
-                        ParameterSignature(label: "_", name: "rect", type: "CGRect")
+                        ParameterSignature(label: nil, name: "rect", type: "CGRect")
                     ]
                 ).makeSignatureMapping(
-                    fromFunctionNamed: "drawRect",
+                    fromMethodNamed: "drawRect",
                     in: &mappings
                 )
             )
@@ -619,7 +647,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "gestureRecognizerShouldBegin",
                     parameters: [
-                        ParameterSignature(label: "_", name: "gestureRecognizer", type: "UIGestureRecognizer")
+                        ParameterSignature(label: nil, name: "gestureRecognizer", type: "UIGestureRecognizer")
                     ],
                     returnType: .bool
                 )
@@ -628,7 +656,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "hitTest",
                     parameters: [
-                        ParameterSignature(label: "_", name: "point", type: "CGPoint"),
+                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
                         ParameterSignature(label: "with", name: "event", type: .optional("UIEvent"))
                     ],
                     returnType: .optional("UIView")
@@ -640,7 +668,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "insertSubview",
                     parameters: [
-                        ParameterSignature(label: "_", name: "view", type: "UIView"),
+                        ParameterSignature(label: nil, name: "view", type: "UIView"),
                         ParameterSignature(label: "aboveSubview", name: "siblingSubview", type: "UIView")
                     ]
                 )
@@ -649,7 +677,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "insertSubview",
                     parameters: [
-                        ParameterSignature(label: "_", name: "view", type: "UIView"),
+                        ParameterSignature(label: nil, name: "view", type: "UIView"),
                         ParameterSignature(label: "at", name: "index", type: .int)
                     ]
                 )
@@ -658,7 +686,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "insertSubview",
                     parameters: [
-                        ParameterSignature(label: "_", name: "view", type: "UIView"),
+                        ParameterSignature(label: nil, name: "view", type: "UIView"),
                         ParameterSignature(label: "belowSubview", name: "siblingSubview", type: "UIView")
                     ]
                 )
@@ -693,7 +721,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "removeConstraint",
                     parameters: [
-                        ParameterSignature(label: "_", name: "constraint", type: "NSLayoutConstraint")
+                        ParameterSignature(label: nil, name: "constraint", type: "NSLayoutConstraint")
                     ]
                 )
             )
@@ -701,7 +729,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "removeConstraints",
                     parameters: [
-                        ParameterSignature(label: "_", name: "constraints", type: .array("NSLayoutConstraint"))
+                        ParameterSignature(label: nil, name: "constraints", type: .array("NSLayoutConstraint"))
                     ]
                 )
             )
@@ -710,7 +738,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "removeGestureRecognizer",
                     parameters: [
-                        ParameterSignature(label: "_", name: "gestureRecognizer", type: "UIGestureRecognizer")
+                        ParameterSignature(label: nil, name: "gestureRecognizer", type: "UIGestureRecognizer")
                     ]
                 )
             )
@@ -718,7 +746,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "removeLayoutGuide",
                     parameters: [
-                        ParameterSignature(label: "_", name: "layoutGuide", type: "UILayoutGuide")
+                        ParameterSignature(label: nil, name: "layoutGuide", type: "UILayoutGuide")
                     ]
                 )
             )
@@ -726,7 +754,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "removeMotionEffect",
                     parameters: [
-                        ParameterSignature(label: "_", name: "effect", type: "UIMotionEffect")
+                        ParameterSignature(label: nil, name: "effect", type: "UIMotionEffect")
                     ]
                 )
             )
@@ -756,7 +784,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setContentCompressionResistancePriority",
                     parameters: [
-                        ParameterSignature(label: "_", name: "priority", type: "UILayoutPriority"),
+                        ParameterSignature(label: nil, name: "priority", type: "UILayoutPriority"),
                         ParameterSignature(label: "for", name: "axis", type: "UILayoutConstraintAxis")
                     ]
                 )
@@ -765,7 +793,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setContentHuggingPriority",
                     parameters: [
-                        ParameterSignature(label: "_", name: "priority", type: "UILayoutPriority"),
+                        ParameterSignature(label: nil, name: "priority", type: "UILayoutPriority"),
                         ParameterSignature(label: "for", name: "axis", type: "UILayoutConstraintAxis")
                     ]
                 )
@@ -774,7 +802,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "setNeedsDisplay",
                     parameters: [
-                        ParameterSignature(label: "_", name: "rect", type: "CGRect")
+                        ParameterSignature(label: nil, name: "rect", type: "CGRect")
                     ]
                 )
             )
@@ -785,7 +813,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "sizeThatFits",
                     parameters: [
-                        ParameterSignature(label: "_", name: "size", type: "CGSize")
+                        ParameterSignature(label: nil, name: "size", type: "CGSize")
                     ],
                     returnType: "CGSize"
                 )
@@ -804,7 +832,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "systemLayoutSizeFitting",
                     parameters: [
-                        ParameterSignature(label: "_", name: "targetSize", type: "CGSize"),
+                        ParameterSignature(label: nil, name: "targetSize", type: "CGSize"),
                         ParameterSignature(label: "withHorizontalFittingPriority", name: "horizontalFittingPriority", type: "UILayoutPriority"),
                         ParameterSignature(name: "verticalFittingPriority", type: "UILayoutPriority")
                     ],
@@ -815,7 +843,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "systemLayoutSizeFitting",
                     parameters: [
-                        ParameterSignature(label: "_", name: "targetSize", type: "CGSize")
+                        ParameterSignature(label: nil, name: "targetSize", type: "CGSize")
                     ],
                     returnType: "CGSize"
                 )
@@ -829,7 +857,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "viewWithTag",
                     parameters: [
-                        ParameterSignature(label: "_", name: "tag", type: .int)
+                        ParameterSignature(label: nil, name: "tag", type: .int)
                     ],
                     returnType: .optional("UIView")
                 )
@@ -854,7 +882,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "willRemoveSubview",
                     parameters: [
-                        ParameterSignature(label: "_", name: "subview", type: "UIView")
+                        ParameterSignature(label: nil, name: "subview", type: "UIView")
                     ]
                 )
             )
@@ -864,7 +892,7 @@ public enum UIViewCompoundType {
 }
 
 extension FunctionSignature {
-    func makeSignatureMapping(fromFunctionNamed name: String,
+    func makeSignatureMapping(fromMethodNamed name: String,
                               in mappings: inout [SignatureMapper]) -> FunctionSignature {
         
         let signature =
@@ -877,7 +905,7 @@ extension FunctionSignature {
         
     }
     
-    func makeSignatureMapping(fromFunctionNamed name: String,
+    func makeSignatureMapping(fromMethodNamed name: String,
                               parameters: String,
                               returnType: SwiftType = .void,
                               in mappings: inout [SignatureMapper]) -> FunctionSignature {
@@ -894,15 +922,15 @@ extension FunctionSignature {
         return makeSignatureMapping(from: signature, in: &mappings)
     }
     
-    func makeSignatureMapping(fromFunctionNamed name: String,
+    func makeSignatureMapping(fromMethodNamed name: String,
                               parameters: [ParameterSignature],
-                              returnType: SwiftType = .void,
+                              returnType: SwiftType? = nil,
                               in mappings: inout [SignatureMapper]) -> FunctionSignature {
         
         let signature =
             FunctionSignature(name: name,
                               parameters: parameters,
-                              returnType: returnType,
+                              returnType: returnType ?? self.returnType,
                               isStatic: isStatic)
         
         return makeSignatureMapping(from: signature, in: &mappings)

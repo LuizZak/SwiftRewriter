@@ -885,8 +885,8 @@ private class MemberInvocationResolver {
         return innerType
     }
     
-    func labels(in arguments: [FunctionArgument]) -> [String] {
-        return arguments.map { $0.label ?? "_" }
+    func labels(in arguments: [FunctionArgument]) -> [String?] {
+        return arguments.map { $0.label }
     }
     
     func method(isStatic: Bool, memberName: String, arguments: [FunctionArgument], in type: SwiftType) -> KnownMethod? {

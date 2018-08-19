@@ -86,7 +86,7 @@ public class DefaultTypeSystem: TypeSystem {
                 return true
             }
         } else if expanded1 == expanded2 {
-            // Same structure, taking nullabillity into account
+            // Same structure, taking nullability into account
             return true
         }
         
@@ -804,7 +804,7 @@ extension DefaultTypeSystem {
                 .method(withSignature:
                     FunctionSignature(
                         name: "isEqual",
-                        parameters: [ParameterSignature(label: "_",
+                        parameters: [ParameterSignature(label: nil,
                                                         name: "object",
                                                         type: .anyObject)],
                         returnType: .bool,
@@ -828,7 +828,7 @@ extension DefaultTypeSystem {
                     FunctionSignature(
                         name: "addObject",
                         parameters: [
-                            ParameterSignature(label: "_",
+                            ParameterSignature(label: nil,
                                                name: "object",
                                                type: .anyObject)
                         ],
@@ -849,7 +849,7 @@ extension DefaultTypeSystem {
                     FunctionSignature(
                         name: "setObject",
                         parameters: [
-                            ParameterSignature(label: "_", name: "anObject", type: .anyObject),
+                            ParameterSignature(label: nil, name: "anObject", type: .anyObject),
                             ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)
                         ],
                         returnType: .void,
@@ -869,7 +869,7 @@ extension DefaultTypeSystem {
                     FunctionSignature(
                         name: "add",
                         parameters: [
-                            ParameterSignature(label: "_", name: "object", type: .anyObject)
+                            ParameterSignature(label: nil, name: "object", type: .anyObject)
                         ]
                     ),
                         semantics: Semantics.collectionMutator

@@ -85,7 +85,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "viewWillAppear",
                         parameters: [
-                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                            ParameterSignature(label: nil, name: "animated", type: .bool)
                         ]
                     )
                 )
@@ -93,7 +93,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "viewDidAppear",
                         parameters: [
-                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                            ParameterSignature(label: nil, name: "animated", type: .bool)
                         ]
                     )
                 )
@@ -101,7 +101,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "viewWillDisappear",
                         parameters: [
-                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                            ParameterSignature(label: nil, name: "animated", type: .bool)
                         ]
                     )
                 )
@@ -109,7 +109,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "viewDidDisappear",
                         parameters: [
-                            ParameterSignature(label: "_", name: "animated", type: .bool)
+                            ParameterSignature(label: nil, name: "animated", type: .bool)
                         ]
                     )
                 )
@@ -179,7 +179,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "dragStateDidChange",
                         parameters: [
-                            ParameterSignature(label: "_", name: "dragState", type: "UITableViewCellDragState")
+                            ParameterSignature(label: nil, name: "dragState", type: "UITableViewCellDragState")
                         ])
                 )
                 .method(named: "prepareForReuse")
@@ -187,7 +187,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "setEditing",
                         parameters: [
-                            ParameterSignature(label: "_", name: "editing", type: "Bool"),
+                            ParameterSignature(label: nil, name: "editing", type: "Bool"),
                             ParameterSignature(name: "animated", type: "Bool")
                         ])
                 )
@@ -195,7 +195,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "setHighlighted",
                         parameters: [
-                            ParameterSignature(label: "_", name: "highlighted", type: "Bool"),
+                            ParameterSignature(label: nil, name: "highlighted", type: "Bool"),
                             ParameterSignature(name: "animated", type: "Bool")
                         ])
                 )
@@ -203,7 +203,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "setSelected",
                         parameters: [
-                            ParameterSignature(label: "_", name: "selected", type: "Bool"),
+                            ParameterSignature(label: nil, name: "selected", type: "Bool"),
                             ParameterSignature(name: "animated", type: "Bool")
                         ])
                 )
@@ -270,7 +270,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "scrollRectToVisible", parameters: [
-                            ParameterSignature(label: "_", name: "rect", type: "CGRect"),
+                            ParameterSignature(label: nil, name: "rect", type: "CGRect"),
                             ParameterSignature(name: "animated", type: "Bool")
                         ]
                     )
@@ -278,7 +278,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "setContentOffset", parameters: [
-                            ParameterSignature(label: "_", name: "contentOffset", type: "CGPoint"),
+                            ParameterSignature(label: nil, name: "contentOffset", type: "CGPoint"),
                             ParameterSignature(name: "animated", type: "Bool")
                         ]
                     )
@@ -286,7 +286,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "setZoomScale", parameters: [
-                            ParameterSignature(label: "_", name: "scale", type: "CGFloat"),
+                            ParameterSignature(label: nil, name: "scale", type: "CGFloat"),
                             ParameterSignature(name: "animated", type: "Bool")
                         ]
                     )
@@ -295,7 +295,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                     FunctionSignature(
                         name: "touchesShouldBegin",
                         parameters: [
-                            ParameterSignature(label: "_", name: "touches",
+                            ParameterSignature(label: nil, name: "touches",
                                                type: .generic("Set", parameters: ["UITouch"])),
                             ParameterSignature(label: "with", name: "event",
                                                type: .optional("UIEvent")),
@@ -399,7 +399,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "deleteSections", parameters: [
-                            ParameterSignature(label: "_", name: "sections", type: "IndexSet"),
+                            ParameterSignature(label: nil, name: "sections", type: "IndexSet"),
                             ParameterSignature(label: "with", name: "animation", type: "UITableViewRowAnimation")
                         ]
                     )
@@ -491,7 +491,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "insertSections", parameters: [
-                            ParameterSignature(label: "_", name: "sections", type: "IndexSet"),
+                            ParameterSignature(label: nil, name: "sections", type: "IndexSet"),
                             ParameterSignature(label: "with", name: "animation", type: "UITableViewRowAnimation")
                         ]
                     )
@@ -507,7 +507,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "moveSection", parameters: [
-                            ParameterSignature(label: "_", name: "section", type: .int),
+                            ParameterSignature(label: nil, name: "section", type: .int),
                             ParameterSignature(label: "toSection", name: "newSection", type: .int)
                         ]
                     )
@@ -525,7 +525,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "performBatchUpdates", parameters: [
-                            ParameterSignature(label: "_", name: "updates", type: .optional(.block(returnType: .void, parameters: []))),
+                            ParameterSignature(label: nil, name: "updates", type: .optional(.block(returnType: .void, parameters: []))),
                             ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
                         ]
                     )
@@ -565,7 +565,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "register", parameters: [
-                            ParameterSignature(label: "_", name: "aClass", type: .optional("AnyClass")),
+                            ParameterSignature(label: nil, name: "aClass", type: .optional("AnyClass")),
                             ParameterSignature(label: "forHeaderFooterViewReuseIdentifier",
                                                name: "identifier", type: .string)
                         ]
@@ -574,7 +574,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "register", parameters: [
-                            ParameterSignature(label: "_", name: "cellClass", type: .optional("AnyClass")),
+                            ParameterSignature(label: nil, name: "cellClass", type: .optional("AnyClass")),
                             ParameterSignature(label: "forCellReuseIdentifier",
                                                name: "identifier", type: .string)
                         ]
@@ -583,7 +583,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "register", parameters: [
-                            ParameterSignature(label: "_", name: "nib", type: .optional("UINib")),
+                            ParameterSignature(label: nil, name: "nib", type: .optional("UINib")),
                             ParameterSignature(label: "forCellReuseIdentifier",
                                                name: "identifier", type: .string)
                         ]
@@ -592,7 +592,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "register", parameters: [
-                            ParameterSignature(label: "_", name: "nib", type: .optional("UINib")),
+                            ParameterSignature(label: nil, name: "nib", type: .optional("UINib")),
                             ParameterSignature(label: "forHeaderFooterViewReuseIdentifier",
                                                name: "identifier", type: .string)
                         ]
@@ -612,7 +612,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "reloadSections", parameters: [
-                            ParameterSignature(label: "_", name: "sections", type: "IndexSet"),
+                            ParameterSignature(label: nil, name: "sections", type: "IndexSet"),
                             ParameterSignature(label: "with",
                                                name: "animation", type: "UITableViewRowAnimation")
                         ]
@@ -649,7 +649,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "setEditing", parameters: [
-                            ParameterSignature(label: "_", name: "editing", type: .bool),
+                            ParameterSignature(label: nil, name: "editing", type: .bool),
                             ParameterSignature(name: "animated", type: .bool)
                         ]
                     )

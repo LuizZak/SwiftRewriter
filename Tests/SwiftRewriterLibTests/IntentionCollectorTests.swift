@@ -47,7 +47,7 @@ class IntentionCollectorTests: XCTestCase {
         XCTAssertEqual(file.globalFunctionIntentions.first?.signature,
                        FunctionSignature(name: "global",
                                          parameters: [
-                                            ParameterSignature(label: "_", name: "a", type: .int)
+                                            ParameterSignature(label: nil, name: "a", type: .int)
                                          ],
                                          isStatic: false))
     }

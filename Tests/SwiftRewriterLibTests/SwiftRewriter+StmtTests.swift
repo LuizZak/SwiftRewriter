@@ -1,158 +1,158 @@
 import XCTest
 
 class SwiftRewriter_StmtTests: XCTestCase {
-    func testTranslateSingleSelectorMessage() throws {
-        try assertSingleStatement(
+    func testTranslateSingleSelectorMessage() {
+        assertSingleStatement(
             objc: "[self thing];",
             swift: "self.thing()"
         )
     }
     
-    func testTranslateTwoSelectorMessage() throws {
-        try assertSingleStatement(
+    func testTranslateTwoSelectorMessage() {
+        assertSingleStatement(
             objc: "[self thing:a b:c];",
             swift: "self.thing(a, b: c)"
         )
     }
     
-    func testTranslateBinaryExpression() throws {
-        try assertSingleStatement(
+    func testTranslateBinaryExpression() {
+        assertSingleStatement(
             objc: "10 + 26;",
             swift: "10 + 26"
         )
     }
     
-    func testTranslateParenthesizedExpression() throws {
-        try assertSingleStatement(
+    func testTranslateParenthesizedExpression() {
+        assertSingleStatement(
             objc: "((10 + 26) * (15 + 15));",
             swift: "(10 + 26) * (15 + 15)"
         )
     }
     
-    func testTernaryExpression() throws {
-        try assertSingleStatement(
+    func testTernaryExpression() {
+        assertSingleStatement(
             objc: "aValue ? 123 : 456;",
             swift: "aValue ? 123 : 456"
         )
         
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "aNullableValue ?: anotherValue;",
             swift: "aNullableValue ?? anotherValue"
         )
     }
     
-    func testMemberAccess() throws {
-        try assertSingleStatement(
+    func testMemberAccess() {
+        assertSingleStatement(
             objc: "self.member.subMember;",
             swift: "self.member.subMember"
         )
     }
     
-    func testStringLiteral() throws {
-        try assertSingleStatement(
+    func testStringLiteral() {
+        assertSingleStatement(
             objc: "@\"literal abc\";",
             swift: "\"literal abc\""
         )
         
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "@\"literal \\n abc\";",
             swift: "\"literal \\n abc\""
         )
     }
     
-    func testFloatLiteral() throws {
-        try assertSingleStatement(
+    func testFloatLiteral() {
+        assertSingleStatement(
             objc: "123.456e+99f;",
             swift: "123.456e+99"
         )
     }
     
-    func testFreeFunctionCall() throws {
-        try assertSingleStatement(
+    func testFreeFunctionCall() {
+        assertSingleStatement(
             objc: "aFunction();",
             swift: "aFunction()"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "aFunction(123);",
             swift: "aFunction(123)"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "aFunction(123, 456);",
             swift: "aFunction(123, 456)"
         )
     }
     
-    func testSubscription() throws {
-        try assertSingleStatement(
+    func testSubscription() {
+        assertSingleStatement(
             objc: "aSubscriptable[1];",
             swift: "aSubscriptable[1]"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "aDictionary[@\"key\"];",
             swift: "aDictionary[\"key\"]"
         )
     }
     
-    func testPrefixAndPostfixIncrementAndDecrement() throws {
-        try assertSingleStatement(
+    func testPrefixAndPostfixIncrementAndDecrement() {
+        assertSingleStatement(
             objc: "value++;",
             swift: "value += 1"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "value--;",
             swift: "value -= 1"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "++value;",
             swift: "value += 1"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "--value;",
             swift: "value -= 1"
         )
     }
     
-    func testUnaryOperator() throws {
-        try assertSingleStatement(
+    func testUnaryOperator() {
+        assertSingleStatement(
             objc: "-value;",
             swift: "-value"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "+value;",
             swift: "+value"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "!value;",
             swift: "!value"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "!value;",
             swift: "!value"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "~value;",
             swift: "~value"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "&value;",
             swift: "&value"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "*value;",
             swift: "*value"
         )
     }
     
-    func testVarDeclaration() throws {
-        try assertObjcParse(
+    func testVarDeclaration() {
+        assertObjcParse(
             objc: "NSInteger myInt = 5;",
             swift: "var myInt: Int = 5"
         )
-        try assertObjcParse(
+        assertObjcParse(
             objc: "const NSInteger myInt = 5;",
             swift: "let myInt: Int = 5"
         )
-        try assertObjcParse(
+        assertObjcParse(
             objc: "NSInteger a = 5, b, c = 6;",
             swift: """
                 var a: Int = 5
@@ -160,23 +160,23 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 var c: Int = 6
                 """
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "CGFloat x = [self offsetForDate:cell.startDate];",
             swift: "var x: CGFloat = self.offsetForDate(cell.startDate)"
         )
     }
     
     /// Tests __block specifier on local variable declaration
-    func testParseBlockVarDeclaration() throws {
-        try assertSingleStatement(
+    func testParseBlockVarDeclaration() {
+        assertSingleStatement(
             objc: "__block id value;",
             swift: "var value: AnyObject!"
         )
     }
     
     /// Tests __unused specifier on local variable declaration
-    func testParseUnusedVarDeclaration() throws {
-        try assertSingleStatement(
+    func testParseUnusedVarDeclaration() {
+        assertSingleStatement(
             objc: "__unused id value;",
             swift: "var value: AnyObject!"
         )
@@ -186,127 +186,127 @@ class SwiftRewriter_StmtTests: XCTestCase {
     /// sometimes, as it may not get the correct Float/Integer types while inferring
     /// initial expressions.
     /// Aid the compiler by keeping the type patterns for int/float literals.
-    func testKeepVarTypePatternsOnNumericTypes() throws {
-        try assertSingleStatement(
+    func testKeepVarTypePatternsOnNumericTypes() {
+        assertSingleStatement(
             objc: "NSInteger x = 10;",
             swift: "var x: Int = 10"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "NSUInteger x = 10;",
             swift: "var x: UInt = 10"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "CGFloat x = 10;",
             swift: "var x: CGFloat = 10"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "double x = 10;",
             swift: "var x: CDouble = 10"
         )
         // Should avoid omitting types for nil values, as well
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "NSString *x = nil;",
             swift: "var x: String! = nil"
         )
         
         // Keep inferring on for literal-based expressions as well
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "NSInteger x = 10 + 5;",
             swift: "var x: Int = 10 + 5"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "NSUInteger x = 10 + 5;",
             swift: "var x: UInt = 10 + 5"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "CGFloat x = 10 + 5.0;",
             swift: "var x: CGFloat = 10 + 5.0"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "double x = 10 + 5.0;",
             swift: "var x: CDouble = 10 + 5.0"
         )
         
         // Don't remove type signature from error-typed initializer expressions
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "NSInteger x = nonExistant;",
             swift: "var x: Int = nonExistant"
         )
         
         // Type expressions from non-literal sources are not needed as they can
         // be inferred
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "CGFloat x = self.frame.size.width;",
             swift: "var x = self.frame.size.width"
         )
 
         // Initializers from expressions with non-literal operands should also
         // omit type
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "CGFloat x = self.frame.size.width - 1;",
             swift: "var x = self.frame.size.width - 1"
         )
 
         // No need to keep inferrence for Boolean or String types
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "BOOL x = YES;",
             swift: "var x = true"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "NSString *x = @\"A string\";",
             swift: "var x = \"A string\""
         )
     }
     
-    func testArrayLiterals() throws {
-        try assertSingleStatement(
+    func testArrayLiterals() {
+        assertSingleStatement(
             objc: "@[];",
             swift: "[]"
         )
         
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "@[@\"a\", @\"b\"];",
             swift: "[\"a\", \"b\"]"
         )
     }
     
-    func testDictionaryLiterals() throws {
-        try assertSingleStatement(
+    func testDictionaryLiterals() {
+        assertSingleStatement(
             objc: "@{};",
             swift: "[:]"
         )
         
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "@{@\"a\": @\"b\", @\"c\": @\"d\"};",
             swift: "[\"a\": \"b\", \"c\": \"d\"]"
         )
     }
     
-    func testEmitTypeCast() throws {
-        try assertSingleStatement(
+    func testEmitTypeCast() {
+        assertSingleStatement(
             objc: "((UIButtonType)aThing);",
             swift: "aThing as? UIButtonType"
         )
         
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "(NSDictionary*)aThing;",
             swift: "aThing as? NSDictionary"
         )
     }
     
-    func testEmitSizeOf() throws {
-        try assertSingleStatement(
+    func testEmitSizeOf() {
+        assertSingleStatement(
             objc: "sizeof(int);",
             swift: "MemoryLayout<CInt>.size"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "sizeof(abc);",
             swift: "MemoryLayout.size(ofValue: abc)"
         )
     }
     
-    func testEmitSizeOfForKnownTypes() throws {
-        try assertObjcParse(
+    func testEmitSizeOfForKnownTypes() {
+        assertObjcParse(
             objc: """
             typedef struct {
                 int field;
@@ -340,8 +340,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testSingleBlockArgument() throws {
-        try assertObjcParse(
+    func testSingleBlockArgument() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -366,8 +366,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testBlockLiteral() throws {
-        try assertObjcParse(
+    func testBlockLiteral() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -385,7 +385,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 }
             }
             """)
-        try assertObjcParse(
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -403,7 +403,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 }
             }
             """)
-        try assertObjcParse(
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -426,8 +426,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testVarDeclarationOmitsTypeOnLocalWithInitialValue() throws {
-        try assertObjcParse(
+    func testVarDeclarationOmitsTypeOnLocalWithInitialValue() {
+        assertObjcParse(
             objc: """
             NSInteger myInt;
             NSInteger myInt2 = 5;
@@ -457,26 +457,26 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testAssignmentOperation() throws {
-        try assertSingleStatement(
+    func testAssignmentOperation() {
+        assertSingleStatement(
             objc: "a = 5;", swift: "a = 5"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "a += 5;", swift: "a += 5"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "a -= 5;", swift: "a -= 5"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "a /= 5;", swift: "a /= 5"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "a *= 5;", swift: "a *= 5"
         )
     }
     
-    func testIfStatement() throws {
-        try assertObjcParse(
+    func testIfStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -504,8 +504,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testElseStatement() throws {
-        try assertObjcParse(
+    func testElseStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -532,8 +532,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testIfElseStatement() throws {
-        try assertObjcParse(
+    func testIfElseStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -564,8 +564,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testBracelessIfElseStatement() throws {
-        try assertObjcParse(
+    func testBracelessIfElseStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -595,8 +595,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testBracelessIfWithinIf() throws {
-        try assertObjcParse(
+    func testBracelessIfWithinIf() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -622,8 +622,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testIfStatementWithExpressions() throws {
-        try assertObjcParse(
+    func testIfStatementWithExpressions() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -649,8 +649,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testSwitchStatement() throws {
-        try assertObjcParse(
+    func testSwitchStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -682,8 +682,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testSwitchStatementWithFallthroughCases() throws {
-        try assertObjcParse(
+    func testSwitchStatementWithFallthroughCases() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -716,8 +716,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testSwitchStatementAvoidFallthroghIfLastStatementIsUnconditionalJump() throws {
-        try assertObjcParse(
+    func testSwitchStatementAvoidFallthroghIfLastStatementIsUnconditionalJump() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -753,8 +753,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testSwitchStatementWithCompoundStatementCases() throws {
-        try assertObjcParse(
+    func testSwitchStatementWithCompoundStatementCases() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -788,8 +788,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testWhileStatement() throws {
-        try assertObjcParse(
+    func testWhileStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -817,8 +817,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testForStatement() throws {
-        try assertObjcParse(
+    func testForStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -840,8 +840,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    func testForStatementWithNonLiteralCount() throws {
-        try assertObjcParse(
+    func testForStatementWithNonLiteralCount() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -865,8 +865,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    func testForStatementWithNonConstantCount() throws {
-        try assertObjcParse(
+    func testForStatementWithNonConstantCount() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -890,8 +890,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    func testForStatementWithArrayCount() throws {
-        try assertObjcParse(
+    func testForStatementWithArrayCount() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -915,8 +915,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    func testForStatementWithNonConstantCountModifiedWithinLoop() throws {
-        try assertObjcParse(
+    func testForStatementWithNonConstantCountModifiedWithinLoop() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -946,8 +946,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    func testForStatementWithNonInitializerStatement() throws {
-        try assertObjcParse(
+    func testForStatementWithNonInitializerStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -975,8 +975,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    func testDoWhileStatement() throws {
-        try assertObjcParse(
+    func testDoWhileStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1000,8 +1000,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
-    func testSynchronizedStatement() throws {
-        try assertObjcParse(
+    func testSynchronizedStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1027,8 +1027,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testAutoreleasePoolStatement() throws {
-        try assertObjcParse(
+    func testAutoreleasePoolStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1051,8 +1051,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testForInStatement() throws {
-        try assertObjcParse(
+    func testForInStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1073,26 +1073,26 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testReturnStatement() throws {
-        try assertSingleStatement(
+    func testReturnStatement() {
+        assertSingleStatement(
             objc: "return;", swift: "return"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "return 10;", swift: "return 10"
         )
     }
     
-    func testContinueBreakStatements() throws {
-        try assertSingleStatement(
+    func testContinueBreakStatements() {
+        assertSingleStatement(
             objc: "continue;", swift: "continue"
         )
-        try assertSingleStatement(
+        assertSingleStatement(
             objc: "break;", swift: "break"
         )
     }
     
-    func testLabeledStatement() throws {
-        try assertObjcParse(
+    func testLabeledStatement() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1121,8 +1121,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testLabeledStatementNested() throws {
-        try assertObjcParse(
+    func testLabeledStatementNested() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -1151,7 +1151,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
 }
 
 private extension SwiftRewriter_StmtTests {
-    func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) throws {
+    func assertSingleStatement(objc: String, swift: String, file: String = #file, line: Int = #line) {
         let objc = """
             @implementation MyClass: UIView
             - (void)myMethod {
@@ -1169,6 +1169,6 @@ private extension SwiftRewriter_StmtTests {
             }
             """
         
-        try assertObjcParse(objc: objc, swift: swift, file: file, line: line)
+        assertObjcParse(objc: objc, swift: swift, file: file, line: line)
     }
 }

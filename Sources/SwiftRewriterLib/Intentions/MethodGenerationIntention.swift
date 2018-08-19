@@ -37,18 +37,28 @@ public class MethodGenerationIntention: MemberGenerationIntention, OverridableMe
         return signature.swiftClosureType
     }
     
-    public init(isStatic: Bool, name: String, returnType: SwiftType, parameters: [ParameterSignature],
-                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
-        self.signature =
+    public convenience init(isStatic: Bool,
+                            name: String,
+                            returnType: SwiftType,
+                            parameters: [ParameterSignature],
+                            accessLevel: AccessLevel = .internal,
+                            source: ASTNode? = nil) {
+        
+        let signature =
             FunctionSignature(name: name,
                               parameters: parameters,
                               returnType: returnType,
                               isStatic: isStatic)
-        super.init(accessLevel: accessLevel, source: source)
+        
+        self.init(signature: signature,
+                  accessLevel: accessLevel,
+                  source: source)
     }
     
-    public init(signature: FunctionSignature, accessLevel: AccessLevel = .internal,
+    public init(signature: FunctionSignature,
+                accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
+        
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)
     }

@@ -368,6 +368,7 @@ func mergeFunction(_ source: GlobalFunctionGenerationIntention,
 /// defined on the first signature, but undefined on the second.
 func mergeSignatures(_ sign1: FunctionSignature,
                      _ sign2: FunctionSignature) -> FunctionSignature {
+    
     var result = sign2
     
     mergeTypeNullability(sign1.returnType, &result.returnType)

@@ -80,7 +80,7 @@ public class SwiftMethodSignatureGen {
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type, context: context)
                 
-                let p = ParameterSignature(label: "_", name: name, type: swiftType)
+                let p = ParameterSignature(label: nil, name: name, type: swiftType)
                 sign.parameters.append(p)
             }
         }
@@ -100,7 +100,7 @@ public class SwiftMethodSignatureGen {
         target.name = keywords[0].selector?.name ?? "__"
         
         for (i, kw) in keywords.enumerated() {
-            var label = kw.selector?.name ?? "_"
+            var label = kw.selector?.name
             let identifier = kw.identifier?.name ?? "_\(i)"
             var nullability: TypeNullability? = nil
             let type = kw.type?.type?.type ?? ObjcType.id(protocols: [])
@@ -110,7 +110,7 @@ public class SwiftMethodSignatureGen {
             // keyword as the method's name and the remaining keywords as labels
             // more closely.
             if i == 0 {
-                label = "_"
+                label = nil
             }
             
             if let nullSpecs = kw.type?.nullabilitySpecifiers {

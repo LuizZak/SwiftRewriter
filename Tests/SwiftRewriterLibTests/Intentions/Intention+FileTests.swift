@@ -13,13 +13,13 @@ class Intention_FileTests: XCTestCase {
             SelectorSignature(isStatic: true, keywords: ["test"])
         )
         XCTAssertEqual(
-            FunctionSignature(name: "test", parameters: [.init(label: "_", name: "arg", type: .int)]).asSelector,
+            FunctionSignature(name: "test", parameters: [.init(label: nil, name: "arg", type: .int)]).asSelector,
             SelectorSignature(isStatic: false, keywords: ["test", nil])
         )
         XCTAssertEqual(
             FunctionSignature(name: "addObserver",
                               parameters: [
-                                .init(label: "_", name: "observer", type: .anyObject),
+                                .init(label: nil, name: "observer", type: .anyObject),
                                 .init(label: "forEventType", name: "eventType", type: .string)
                               ]).asSelector,
             SelectorSignature(isStatic: false, keywords: ["addObserver", nil, "forEventType"])

@@ -9,8 +9,8 @@ import XCTest
 import SwiftRewriterLib
 
 class PropertyMergeIntentionPassTests: XCTestCase {
-    func testPassWithGetterAndSetter() throws {
-        try assertObjcParse(
+    func testPassWithGetterAndSetter() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             @property BOOL value;
@@ -40,8 +40,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """)
     }
     
-    func testPassWithGetter() throws {
-        try assertObjcParse(
+    func testPassWithGetter() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             @property (readonly) BOOL value;
@@ -63,8 +63,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """)
     }
     
-    func testPassWithGetterAndSetterWithSynthesizedField() throws {
-        try assertObjcParse(
+    func testPassWithGetterAndSetterWithSynthesizedField() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             {
@@ -98,8 +98,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """)
     }
     
-    func testCollapsePropertiesAndMethods() throws {
-        try assertObjcParse(
+    func testCollapsePropertiesAndMethods() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             @property (readonly) BOOL value;
@@ -120,8 +120,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """)
     }
     
-    func testCollapsePropertiesAndMethodsWithTypeSignatureMatching() throws {
-        try assertObjcParse(
+    func testCollapsePropertiesAndMethodsWithTypeSignatureMatching() {
+        assertObjcParse(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             
@@ -155,8 +155,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             """)
     }
     
-    func testSetterOnly() throws {
-        try assertObjcParse(
+    func testSetterOnly() {
+        assertObjcParse(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             

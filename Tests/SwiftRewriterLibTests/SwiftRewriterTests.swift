@@ -5,16 +5,16 @@ import GrammarModels
 
 class SwiftRewriterTests: XCTestCase {
     
-    func testParseNonnullMacros() throws {
-        try assertObjcParse(objc: """
+    func testParseNonnullMacros() {
+        assertObjcParse(objc: """
             NS_ASSUME_NONNULL_BEGIN
             NS_ASSUME_NONNULL_END
             """, swift: """
             """)
     }
     
-    func testRewriteEmptyClass() throws {
-        try assertObjcParse(
+    func testRewriteEmptyClass() {
+        assertObjcParse(
             objc: """
             @interface MyClass: NSObject
             @end
@@ -26,8 +26,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInfersNSObjectSuperclass() throws {
-        try assertObjcParse(
+    func testRewriteInfersNSObjectSuperclass() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             @end
@@ -39,8 +39,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInheritance() throws {
-        try assertObjcParse(
+    func testRewriteInheritance() {
+        assertObjcParse(
             objc: """
             @interface MyClass : UIView
             @end
@@ -52,8 +52,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteSubclassInInterface() throws {
-        try assertObjcParse(
+    func testRewriteSubclassInInterface() {
+        assertObjcParse(
             objc: """
             @interface MyClass : MyBaseClass
             @end
@@ -68,8 +68,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteProtocolSpecification() throws {
-        try assertObjcParse(
+    func testRewriteProtocolSpecification() {
+        assertObjcParse(
             objc: """
             @interface MyClass : UIView <UITableViewDelegate>
             @end
@@ -81,8 +81,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteEnumDeclaration() throws {
-        try assertObjcParse(
+    func testRewriteEnumDeclaration() {
+        assertObjcParse(
             objc: """
             typedef NS_ENUM(NSInteger, MyEnum) {
                 MyEnumCase1 = 0,
@@ -97,8 +97,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteWeakProperty() throws {
-        try assertObjcParse(
+    func testRewriteWeakProperty() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             @property (weak) MyClass *myClass;
@@ -112,8 +112,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteClassProperty() throws {
-        try assertObjcParse(
+    func testRewriteClassProperty() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             @property (class) MyClass *myClass;
@@ -127,8 +127,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteClassProperties() throws {
-        try assertObjcParse(
+    func testRewriteClassProperties() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             @property BOOL someField;
@@ -162,8 +162,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteNSArray() throws {
-        try assertObjcParse(
+    func testRewriteNSArray() {
+        assertObjcParse(
             objc: """
             @interface SomeType : NSObject
             @end
@@ -193,8 +193,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInstanceVariables() throws {
-        try assertObjcParse(
+    func testRewriteInstanceVariables() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             {
@@ -212,8 +212,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteEmptyMethod() throws {
-        try assertObjcParse(
+    func testRewriteEmptyMethod() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             - (void)myMethod;
@@ -229,8 +229,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteEmptyClassMethod() throws {
-        try assertObjcParse(
+    func testRewriteEmptyClassMethod() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             + (void)myMethod;
@@ -246,8 +246,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteMethodSignatures() throws {
-        try assertObjcParse(
+    func testRewriteMethodSignatures() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             - (void)myMethod;
@@ -283,8 +283,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInitMethods() throws {
-        try assertObjcParse(
+    func testRewriteInitMethods() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)init;
@@ -308,8 +308,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteDeallocMethod() throws {
-        try assertObjcParse(
+    func testRewriteDeallocMethod() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)dealloc {
@@ -328,8 +328,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteIVarsWithAccessControls() throws {
-        try assertObjcParse(objc: """
+    func testRewriteIVarsWithAccessControls() {
+        assertObjcParse(objc: """
             @interface MyClass
             {
                 NSString *_myString;
@@ -350,8 +350,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteIVarBetweenAssumeNonNulls() throws {
-        try assertObjcParse(
+    func testRewriteIVarBetweenAssumeNonNulls() {
+        assertObjcParse(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             @interface MyClass
@@ -369,8 +369,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInterfaceWithImplementation() throws {
-        try assertObjcParse(
+    func testRewriteInterfaceWithImplementation() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)initWithThing:(id)thing;
@@ -401,8 +401,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInterfaceWithCategoryWithImplementation() throws {
-        try assertObjcParse(
+    func testRewriteInterfaceWithCategoryWithImplementation() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)initWithThing:(id)thing;
@@ -452,8 +452,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testWhenRewritingMethodsSignaturesWithNullabilityOverrideSignaturesWithout() throws {
-        try assertObjcParse(
+    func testWhenRewritingMethodsSignaturesWithNullabilityOverrideSignaturesWithout() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             - (instancetype)initWithThing:(nonnull id)thing;
@@ -484,8 +484,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteClassThatImplementsProtocolOverridesSignatureNullabilityOnImplementation() throws {
-        try assertObjcParse(
+    func testRewriteClassThatImplementsProtocolOverridesSignatureNullabilityOnImplementation() {
+        assertObjcParse(
             objc: """
             @protocol MyProtocol
             - (nonnull NSString*)myMethod:(nullable NSObject*)object;
@@ -510,8 +510,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInterfaceWithImplementationPerformsSelectorMatchingIgnoringArgumentNames() throws {
-        try assertObjcParse(
+    func testRewriteInterfaceWithImplementationPerformsSelectorMatchingIgnoringArgumentNames() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             - (void)myMethod:(BOOL)aParam;
@@ -534,8 +534,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteSignatureContainingWithKeyword() throws {
-        try assertObjcParse(
+    func testRewriteSignatureContainingWithKeyword() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)doSomethingWithColor:(CGColor)color {
@@ -552,8 +552,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteGlobalVariableDeclaration() throws {
-        try assertObjcParse(
+    func testRewriteGlobalVariableDeclaration() {
+        assertObjcParse(
             objc: """
             const NSInteger myGlobal;
             NSInteger myOtherGlobal;
@@ -566,8 +566,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteGlobalVariableDeclarationWithInitialValue() throws {
-        try assertObjcParse(
+    func testRewriteGlobalVariableDeclarationWithInitialValue() {
+        assertObjcParse(
             objc: """
             const CGFloat kMyConstantValue = 45;
             NSString *_Nonnull kMyNotConstantValue;
@@ -578,8 +578,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteBlockTypeDef() throws {
-        try assertObjcParse(
+    func testRewriteBlockTypeDef() {
+        assertObjcParse(
             objc: """
             typedef void(^_Nonnull errorBlock)();
             """,
@@ -588,8 +588,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testNSAssumeNonnullContextCollectionWorksWithCompilerDirectivesInFile() throws {
-        try assertObjcParse(
+    func testNSAssumeNonnullContextCollectionWorksWithCompilerDirectivesInFile() {
+        assertObjcParse(
             objc: """
             //
             // Text for padding
@@ -607,8 +607,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteManyTypeliasSequentially() throws {
-        try assertObjcParse(
+    func testRewriteManyTypeliasSequentially() {
+        assertObjcParse(
             objc: """
             typedef NSInteger MyInteger;
             typedef NSInteger OtherInt;
@@ -619,8 +619,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteBlockParameters() throws {
-        try assertObjcParse(
+    func testRewriteBlockParameters() {
+        assertObjcParse(
             objc: """
             @interface AClass
             - (void)aBlocky:(void(^)())blocky;
@@ -640,8 +640,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteBlockIvars() throws {
-        try assertObjcParse(
+    func testRewriteBlockIvars() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             {
@@ -661,8 +661,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteBlockWithinBlocksIvars() throws {
-        try assertObjcParse(
+    func testRewriteBlockWithinBlocksIvars() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             {
@@ -678,8 +678,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriterUsesNonnullMacrosForNullabilityInferring() throws {
-        try assertObjcParse(
+    func testRewriterUsesNonnullMacrosForNullabilityInferring() {
+        assertObjcParse(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             @interface MyClass1
@@ -706,8 +706,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriterMergesNonnullMacrosForNullabilityInferring() throws {
-        try assertObjcParse(
+    func testRewriterMergesNonnullMacrosForNullabilityInferring() {
+        assertObjcParse(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             @interface MyClass
@@ -729,8 +729,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteStaticConstantValuesInClass() throws {
-        try assertObjcParse(
+    func testRewriteStaticConstantValuesInClass() {
+        assertObjcParse(
             objc: """
             @interface MyClass
             static NSString *const _Nonnull kMethodKey = @"method";
@@ -747,8 +747,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteSelectorExpression() throws {
-        try assertObjcParse(
+    func testRewriteSelectorExpression() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)myMethod {
@@ -771,8 +771,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteProtocol() throws {
-        try assertObjcParse(
+    func testRewriteProtocol() {
+        assertObjcParse(
             objc: """
             @protocol MyProtocol
             - (void)myMethod;
@@ -787,8 +787,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testDontOmitObjcAttributeOnNSObjectProtocolInheritingProtocols() throws {
-        try assertObjcParse(
+    func testDontOmitObjcAttributeOnNSObjectProtocolInheritingProtocols() {
+        assertObjcParse(
             objc: """
             @protocol MyProtocol <NSObject>
             - (void)myMethod;
@@ -803,8 +803,8 @@ class SwiftRewriterTests: XCTestCase {
             options: ASTWriterOptions(omitObjcCompatibility: true))
     }
     
-    func testRewriteProtocolConformance() throws {
-        try assertObjcParse(
+    func testRewriteProtocolConformance() {
+        assertObjcParse(
             objc: """
             @protocol MyProtocol
             @optional
@@ -834,8 +834,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteProtocolOptionalRequiredSections() throws {
-        try assertObjcParse(
+    func testRewriteProtocolOptionalRequiredSections() {
+        assertObjcParse(
             objc: """
             @protocol MyProtocol
             - (void)f1;
@@ -860,8 +860,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteProtocolPropertiesWithGetSetSpecifiers() throws {
-        try assertObjcParse(
+    func testRewriteProtocolPropertiesWithGetSetSpecifiers() {
+        assertObjcParse(
             objc: """
             @protocol MyProtocol
             @property BOOL value1;
@@ -876,8 +876,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testConvertAssignProperty() throws {
-        try assertObjcParse(
+    func testConvertAssignProperty() {
+        assertObjcParse(
             objc: """
             @interface AClass : NSObject
             @end
@@ -905,8 +905,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testKeepPreprocessorDirectives() throws {
-        try assertObjcParse(
+    func testKeepPreprocessorDirectives() {
+        assertObjcParse(
             objc: """
             #import "File.h"
             #import <File.h>
@@ -925,8 +925,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testIfFalseDirectivesHideCodeWithin() throws {
-        try assertObjcParse(
+    func testIfFalseDirectivesHideCodeWithin() {
+        assertObjcParse(
             objc: """
             #if 0
             @interface MyClass
@@ -940,8 +940,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testPostfixAfterCastOnSubscriptionUsesOptionalPostfix() throws {
-        try assertObjcParse(
+    func testPostfixAfterCastOnSubscriptionUsesOptionalPostfix() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)method {
@@ -960,8 +960,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testPostfixAfterCastUsesOptionalPostfix() throws {
-        try assertObjcParse(
+    func testPostfixAfterCastUsesOptionalPostfix() {
+        assertObjcParse(
             objc: """
             @implementation MyClass
             - (void)method {
@@ -984,8 +984,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteGenericsWithinGenerics() throws {
-        try assertObjcParse(
+    func testRewriteGenericsWithinGenerics() {
+        assertObjcParse(
             objc: """
             @interface B: NSObject
             @end
@@ -1006,8 +1006,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteStructTypedefs() throws {
-        try assertObjcParse(
+    func testRewriteStructTypedefs() {
+        assertObjcParse(
             objc: """
             typedef struct {
                 float x;
@@ -1086,8 +1086,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriterPointerToStructTypeDef() throws {
-        try assertObjcParse(
+    func testRewriterPointerToStructTypeDef() {
+        assertObjcParse(
             objc: """
             typedef struct {
                 float x;
@@ -1162,8 +1162,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteAliasedTypedefStruct() throws {
-        try assertObjcParse(
+    func testRewriteAliasedTypedefStruct() {
+        assertObjcParse(
             objc: """
             typedef struct a {
                 int b;
@@ -1185,8 +1185,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteAliasedTypedefStructWithPointers() throws {
-        try assertObjcParse(
+    func testRewriteAliasedTypedefStructWithPointers() {
+        assertObjcParse(
             objc: """
             typedef struct a {
                 int b;
@@ -1208,8 +1208,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteOpaqueTypealias() throws {
-        try assertObjcParse(
+    func testRewriteOpaqueTypealias() {
+        assertObjcParse(
             objc: """
             typedef struct {
                 int a;
@@ -1220,8 +1220,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteFuncDeclaration() throws {
-        try assertObjcParse(
+    func testRewriteFuncDeclaration() {
+        assertObjcParse(
             objc: """
             void global();
             """,
@@ -1231,8 +1231,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testLazyTypeResolveFuncDeclaration() throws {
-        try assertObjcParse(
+    func testLazyTypeResolveFuncDeclaration() {
+        assertObjcParse(
             objc: """
             A* global();
             
@@ -1249,8 +1249,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testAddNullCoalesceToCompletionBlockInvocationsDeepIntoBlockExpressions() throws {
-        try assertObjcParse(
+    func testAddNullCoalesceToCompletionBlockInvocationsDeepIntoBlockExpressions() {
+        assertObjcParse(
             objc: """
             @implementation A
             - (void)finishRequested:(void (^)())completion
@@ -1282,8 +1282,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testApplyNilCoalesceInDeeplyNestedExpressionsProperly() throws {
-        try assertObjcParse(
+    func testApplyNilCoalesceInDeeplyNestedExpressionsProperly() {
+        assertObjcParse(
             objc: """
             @implementation A
             - (void)loadDataWithCallback:(void(^)(NSArray *data, NSError *error))callback
@@ -1316,8 +1316,8 @@ class SwiftRewriterTests: XCTestCase {
     
     /// Regression test for a very shameful oversight related to ordering the parser
     /// read the statements and variable declarations within a compound statement.
-    func testParsingKeepsOrderingOfStatementsAndDeclarations() throws {
-        try assertObjcParse(
+    func testParsingKeepsOrderingOfStatementsAndDeclarations() {
+        assertObjcParse(
             objc: """
             @implementation A
             - (void)recreatePath
@@ -1384,8 +1384,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testEnumAccessRewriting() throws {
-        try assertObjcParse(
+    func testEnumAccessRewriting() {
+        assertObjcParse(
             objc: """
             typedef NS_ENUM(NSInteger, MyEnum) {
                 MyEnumCase
@@ -1411,8 +1411,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testAppliesTypenameConversionToCategories() throws {
-        try assertObjcParse(
+    func testAppliesTypenameConversionToCategories() {
+        assertObjcParse(
             objc: """
             @interface NSString (Extension)
             @end
@@ -1434,8 +1434,8 @@ class SwiftRewriterTests: XCTestCase {
     /// Make sure scalar stored properties always initialize with zero, so the
     /// class mimics more closely the behavior of the original Objective-C class
     /// (which initializes all fields to zero on `init`)
-    func testScalarTypeStoredPropertiesAlwaysInitializeAtZero() throws {
-        try assertObjcParse(
+    func testScalarTypeStoredPropertiesAlwaysInitializeAtZero() {
+        assertObjcParse(
             objc: """
             typedef NS_ENUM(NSInteger, E) {
                 E_1
@@ -1494,8 +1494,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewritesNew() throws {
-        try assertObjcParse(
+    func testRewritesNew() {
+        assertObjcParse(
             objc: """
             @implementation A
             - (void)method {
@@ -1525,8 +1525,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testOmitObjcAttribute() throws {
-        try assertObjcParse(
+    func testOmitObjcAttribute() {
+        assertObjcParse(
             objc: """
             typedef NS_ENUM(NSInteger, Enum) {
                 Enum_A
@@ -1569,8 +1569,8 @@ class SwiftRewriterTests: XCTestCase {
     
     /// Tests calls that override a super call by detection of a `super` call on
     /// a super method with the same signature as the method being analyzed.
-    func testMarkOverrideIfSuperCallIsDetected() throws {
-        try assertObjcParse(
+    func testMarkOverrideIfSuperCallIsDetected() {
+        assertObjcParse(
             objc: """
             @implementation A
             - (instancetype)initWithThing:(A*)thing {
@@ -1618,8 +1618,8 @@ class SwiftRewriterTests: XCTestCase {
     }
     
     /// Test methods are marked as overrideusing type lookup of supertypes as well
-    func testMarksOverrideBasedOnTypeLookup() throws {
-        try assertObjcParse(
+    func testMarksOverrideBasedOnTypeLookup() {
+        assertObjcParse(
             objc: """
             @interface A
             - (void)method;
@@ -1646,8 +1646,8 @@ class SwiftRewriterTests: XCTestCase {
     
     /// Test the override detection doesn't confuse protocol implementations with
     /// overrides
-    func testDontMarkProtocolImplementationsAsOverride() throws {
-        try assertObjcParse(
+    func testDontMarkProtocolImplementationsAsOverride() {
+        assertObjcParse(
             objc: """
             @protocol A
             - (void)method;
@@ -1672,8 +1672,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
 
-    func testCorrectsNullabilityOfMethodParameters() throws {
-        try assertObjcParse(
+    func testCorrectsNullabilityOfMethodParameters() {
+        assertObjcParse(
             objc: """
             @interface A
             @property (nullable) A *a;
@@ -1713,8 +1713,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testOptionalCoalesceNullableStructAccess() throws {
-        try assertObjcParse(
+    func testOptionalCoalesceNullableStructAccess() {
+        assertObjcParse(
             objc: """
             typedef struct {
                 int a;
@@ -1761,8 +1761,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testOptionalInAssignmentLeftHandSide() throws {
-        try assertObjcParse(
+    func testOptionalInAssignmentLeftHandSide() {
+        assertObjcParse(
             objc: """
             @interface A
             @property (weak) B* b;
@@ -1805,8 +1805,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testAutomaticIfLetPatternSimple() throws {
-        try assertObjcParse(
+    func testAutomaticIfLetPatternSimple() {
+        assertObjcParse(
             objc: """
             @interface B
             @end
@@ -1843,8 +1843,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testInstanceTypeOnStaticConstructor() throws {
-        try assertObjcParse(
+    func testInstanceTypeOnStaticConstructor() {
+        assertObjcParse(
             objc: """
             @interface A
             + (instancetype)makeA;
@@ -1860,8 +1860,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testPropagateNullabilityOfBlockArgumentsInTypealiasedBlock() throws {
-        try assertObjcParse(
+    func testPropagateNullabilityOfBlockArgumentsInTypealiasedBlock() {
+        assertObjcParse(
             objc: """
             NS_ASSUME_NONNULL_BEGIN
             typedef void(^block)(NSString*);
@@ -1893,8 +1893,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testNullCoalesceInChainedValueTypePostfix() throws {
-        try assertObjcParse(
+    func testNullCoalesceInChainedValueTypePostfix() {
+        assertObjcParse(
             objc: """
             @interface A
             @property CGRect bounds;
@@ -1922,8 +1922,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testApplyCastOnNumericalVariableDeclarationInits() throws {
-        try assertObjcParse(
+    func testApplyCastOnNumericalVariableDeclarationInits() {
+        assertObjcParse(
             objc: """
             @interface B
             @property CGFloat value;
@@ -1956,8 +1956,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testFunctionParameterTakesPrecedenceOverPropertyDuringDefinitionLookup() throws {
-        try assertObjcParse(
+    func testFunctionParameterTakesPrecedenceOverPropertyDuringDefinitionLookup() {
+        assertObjcParse(
             objc: """
             @interface B
             @property CGFloat value;
@@ -1996,8 +1996,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testFloorMethodRecastingIssue() throws {
-        try assertObjcParse(
+    func testFloorMethodRecastingIssue() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             @property CGFloat b;
@@ -2022,8 +2022,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriterSynthesizesBackingFieldOnReadonlyPropertyIfAnUsageIsDetected() throws {
-        try assertObjcParse(
+    func testRewriterSynthesizesBackingFieldOnReadonlyPropertyIfAnUsageIsDetected() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             @property (readonly) NSInteger a;
@@ -2051,8 +2051,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testSynthesizePropertyBackingField() throws {
-        try assertObjcParse(
+    func testSynthesizePropertyBackingField() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             @property NSInteger a;
@@ -2078,8 +2078,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testSynthesizeReadonlyPropertyBackingField() throws {
-        try assertObjcParse(
+    func testSynthesizeReadonlyPropertyBackingField() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             @property (readonly) NSInteger a;
@@ -2100,8 +2100,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testDontSynthesizeDynamicDeclaration() throws {
-        try assertObjcParse(
+    func testDontSynthesizeDynamicDeclaration() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             @property NSInteger a;
@@ -2119,8 +2119,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testSynthesizeReadonlyPropertyOnExistingIVar() throws {
-        try assertObjcParse(
+    func testSynthesizeReadonlyPropertyOnExistingIVar() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             {
@@ -2149,8 +2149,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testCollapsePropertySynthesisWhenPropertyAndBackingFieldMatchTypesAndName() throws {
-        try assertObjcParse(
+    func testCollapsePropertySynthesisWhenPropertyAndBackingFieldMatchTypesAndName() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             @property NSInteger a;
@@ -2168,8 +2168,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testReadOnlyPropertyWithBackingFieldWithSameNameGetsCollapedAsPrivateSetProperty() throws {
-        try assertObjcParse(
+    func testReadOnlyPropertyWithBackingFieldWithSameNameGetsCollapedAsPrivateSetProperty() {
+        assertObjcParse(
             objc: """
             @interface A : NSObject
             {
@@ -2203,8 +2203,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testBackingFieldUsageAnalysisWithSynthesizedBackingFieldIsOrderIndependent() throws {
-        try assertObjcParse(
+    func testBackingFieldUsageAnalysisWithSynthesizedBackingFieldIsOrderIndependent() {
+        assertObjcParse(
             objc: """
             @implementation A (category)
             - (void)setA:(NSInteger)a {
@@ -2244,8 +2244,8 @@ class SwiftRewriterTests: XCTestCase {
     /// Tests that we ignore lookup for explicit usages of backing fields on types
     /// when the backing field name matches the property's: This is ambiguous on
     /// Swift and we should just collapse the property/ivar into a single property.
-    func testBackingFieldAnalysisForSynthesizedPropertyIsIgnoredIfSynthesizedNameMatchesPropertyName() throws {
-        try assertObjcParse(
+    func testBackingFieldAnalysisForSynthesizedPropertyIsIgnoredIfSynthesizedNameMatchesPropertyName() {
+        assertObjcParse(
             objc: """
             @interface A: NSObject
             {
@@ -2275,8 +2275,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testApplyIntegerCastOnTypealiasedPropertyInVariableDeclaration() throws {
-        try assertObjcParse(
+    func testApplyIntegerCastOnTypealiasedPropertyInVariableDeclaration() {
+        assertObjcParse(
             objc: """
             typedef UInt32 GLenum;
 
@@ -2305,8 +2305,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testParseAliasedTypealias() throws {
-        try assertObjcParse(
+    func testParseAliasedTypealias() {
+        assertObjcParse(
             objc: """
             typedef UInt32 GLenum;
             typedef GLenum Alias;
@@ -2337,8 +2337,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteChainedSubscriptAccess() throws {
-        try assertObjcParse(
+    func testRewriteChainedSubscriptAccess() {
+        assertObjcParse(
             objc: """
             @implementation A
             - (void)method {
@@ -2359,8 +2359,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testDetectBooleanGettersInUIViewSubclasses() throws {
-        try assertObjcParse(
+    func testDetectBooleanGettersInUIViewSubclasses() {
+        assertObjcParse(
             objc: """
             @interface A: UITableViewCell
             @end
@@ -2381,8 +2381,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteInitBody() throws {
-        try assertObjcParse(
+    func testRewriteInitBody() {
+        assertObjcParse(
             objc: """
             @interface A
             @property NSInteger a;
@@ -2411,8 +2411,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteExplicitFailableInit() throws {
-        try assertObjcParse(
+    func testRewriteExplicitFailableInit() {
+        assertObjcParse(
             objc: """
             @interface A
             @end
@@ -2434,8 +2434,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteDetectedFailableInit() throws {
-        try assertObjcParse(
+    func testRewriteDetectedFailableInit() {
+        assertObjcParse(
             objc: """
             @interface A
             @end
@@ -2457,8 +2457,8 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testRewriteDelegatedInitializer() throws {
-        try assertObjcParse(
+    func testRewriteDelegatedInitializer() {
+        assertObjcParse(
             objc: """
             @interface A
             @end
@@ -2493,6 +2493,29 @@ class SwiftRewriterTests: XCTestCase {
                 @objc
                 convenience init(b: B) {
                     self.init(a: a)
+                }
+            }
+            """)
+    }
+    
+    func testConvertImplementationAndCallSiteUsingKnownTypeInformation() {
+        assertObjcParse(
+            objc: """
+            @interface A : UIView
+            @end
+            
+            @implementation A
+            - (CGPoint)convertPoint:(CGPoint)point toView:(UIView*)view {
+                return [self convertPoint:CGPointMake(0, 0) toView:nil];
+            }
+            @end
+            """,
+            swift: """
+            @objc
+            class A: UIView {
+                @objc
+                override func convert(_ point: CGPoint, to view: UIView?) -> CGPoint {
+                    return self.convertPoint(CGPoint(x: 0, y: 0), toView: nil)
                 }
             }
             """)
