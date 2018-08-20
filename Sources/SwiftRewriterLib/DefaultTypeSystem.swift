@@ -1038,27 +1038,6 @@ extension DefaultTypeSystem {
                 .protocolConformance(protocolName: "NSObjectProtocol")
                 .build()
         
-        let nsArray =
-            KnownTypeBuilder(typeName: "NSArray", supertype: nsObject)
-                .build()
-        
-        let nsMutableArray =
-            KnownTypeBuilder(typeName: "NSMutableArray", supertype: nsArray)
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "addObject",
-                        parameters: [
-                            ParameterSignature(label: nil,
-                                               name: "object",
-                                               type: .anyObject)
-                        ],
-                        returnType: .void,
-                        isStatic: false
-                    ),
-                        semantics: Semantics.collectionMutator
-                )
-                .build()
-        
         let nsDictionary =
             KnownTypeBuilder(typeName: "NSDictionary", supertype: nsObject)
                 .build()
@@ -1098,8 +1077,6 @@ extension DefaultTypeSystem {
         
         addType(nsObjectProtocol)
         addType(nsObject)
-        addType(nsArray)
-        addType(nsMutableArray)
         addType(nsDictionary)
         addType(nsMutableDictionary)
         addType(nsSet)

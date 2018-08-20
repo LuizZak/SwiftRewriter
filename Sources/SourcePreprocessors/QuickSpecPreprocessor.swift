@@ -76,7 +76,9 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
                     
                     processed =
                         processed
-                            .replacingCharacters(in: specBeginRange.lowerBound..<lexer.inputIndex, with: replace)
+                            .replacingCharacters(in: specBeginRange.lowerBound..<lexer.inputIndex,
+                                                 with: replace)
+                    
                 } else if let specEndRange = processed.range(of: specEndName), !overlapsComments(specEndRange) {
                     let replace = """
                     }

@@ -2,6 +2,7 @@ import XCTest
 import SwiftRewriterLib
 import SwiftAST
 import TestCommons
+import Commons
 
 protocol ExpressionTestResolverTestFixture {
     var scope: CodeScopeNode { get }
@@ -21,6 +22,9 @@ protocol ExpressionTestResolverTestFixture {
     
     /// Defines a given type to the test fixture's mock type system
     func definingType(_ type: KnownType) -> Self
+    
+    /// Registers a given compounded type within the type system
+    func usingCompoundedType(_ type: CompoundedMappingType) -> Self
     
     /// Defines an empty type with a given name on this fixture's mock type system
     func definingEmptyType(named name: String) -> Self
@@ -63,6 +67,12 @@ extension ExpressionTestResolverTestFixture {
     }
     
     func definingType(_ type: KnownType) -> Self {
+        typeSystem.addType(type)
+        
+        return self
+    }
+    
+    func usingCompoundedType(_ type: CompoundedMappingType) -> Self {
         typeSystem.addType(type)
         
         return self

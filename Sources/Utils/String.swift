@@ -134,8 +134,8 @@ public extension String {
 }
 
 public extension String {
-    /// Returns a range of sections of this string that represent single and mult-lined
-    /// comments.
+    /// Returns a range of sections of this string that represent single and
+    /// multi-lined comments.
     func commentSectionRanges() -> [Range<Index>] {
         if self.count < 2 {
             return []

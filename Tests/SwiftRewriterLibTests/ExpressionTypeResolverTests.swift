@@ -1,6 +1,7 @@
 import XCTest
 import SwiftRewriterLib
 import SwiftAST
+import Commons
 
 class ExpressionTypeResolverTests: XCTestCase {
     func testStatementResolve() {
@@ -446,7 +447,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testForLoopArrayTypeResolving_NSArray() {
-        // Iterating over an NSArray should produce `AnyObject` values
+        // Iterating over an NSArray should produce `Any` values
         
         let exp = Expression.identifier("")
         exp.resolvedType = .nsArray
@@ -455,11 +456,13 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .anyObject)
+            .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
+            .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .any)
     }
 
     func testForLoopArrayTypeResolving_NSMutableArray() {
-        // Iterating over an NSMutableArray should produce `AnyObject` values
+        // Iterating over an NSMutableArray should produce `Any` values
         
         let exp = Expression.identifier("")
         exp.resolvedType = .typeName("NSMutableArray")
@@ -468,7 +471,9 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .anyObject)
+            .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
+            .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
+            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .any)
     }
     
     func testForLoopArrayTypeResolving_OpenRange() {

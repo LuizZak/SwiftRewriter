@@ -103,7 +103,9 @@ public class FoundationExpressionPass: BaseExpressionPass {
         return exp
     }
     
-    /// Converts [<lhs> isEqualToString:<rhs>] -> <lhs> <operator> <rhs>
+    /// Converts [<lhs> isEqualToString:<rhs>] -> <lhs> <operator> <rhs> (where
+    /// <operator> is usually '==' (equality). see usages above in visitPostfix
+    /// and visitUnary)
     func convertIsEqualToString(_ exp: PostfixExpression, op: SwiftOperator) -> Expression? {
         guard let postfix = exp.exp.asPostfix, postfix.member?.name == "isEqualToString",
             let args = exp.functionCall?.arguments, args.count == 1 && !args.hasLabeledArguments() else {
@@ -171,7 +173,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
         return newExp
     }
     
-    /// Converts [Type class] and [expression class] expressions
+    /// Converts [Type class] and [<expression> class] expressions
     func convertClassCall(_ exp: PostfixExpression) -> Expression? {
         guard let args = exp.functionCall?.arguments, args.isEmpty else {
             return nil
@@ -182,7 +184,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
         
         // Use resolved expression type, if available
         if case .metatype? = classMember.exp.resolvedType {
-            let exp = Expression.postfix(classMember.exp.copy(), .member("self"))
+            let exp = classMember.exp.copy().dot("self")
             exp.resolvedType = classMember.exp.resolvedType
             
             return exp
@@ -296,6 +298,8 @@ public class FoundationExpressionPass: BaseExpressionPass {
 extension FoundationExpressionPass {
     func makeSignatureTransformers() {
         addCompoundedType(FoundationCompoundTypes.nsCalendar.create())
+        addCompoundedType(FoundationCompoundTypes.nsArray.create())
+        addCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
     }
     
     func makeFunctionTransformers() {
