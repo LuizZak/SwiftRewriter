@@ -14,7 +14,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
     }
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        if let new = convertIsEqualToString(exp) {
+        if let new = convertIsEqualToString(exp, op: .equals) {
             notifyChange()
             
             return super.visitExpression(new)
@@ -46,6 +46,23 @@ public class FoundationExpressionPass: BaseExpressionPass {
         }
         
         return super.visitPostfix(exp)
+    }
+    
+    public override func visitUnary(_ exp: UnaryExpression) -> Expression {
+        // Handle negated ![<exp> isEqualToString:<exps>] by creating an inequality
+        // test early here instead of allowing awkward !(<string> == <string>)
+        // expressions to form
+        // TODO: This can be generalized in ASTSimplifier later for all expression
+        // types by simplifying !(<exp1> == <exp2>) constructs.
+        if exp.op == .negate, let postfix = exp.exp.asPostfix {
+            if let new = convertIsEqualToString(postfix, op: .unequals) {
+                notifyChange()
+                
+                return super.visitExpression(new)
+            }
+        }
+        
+        return super.visitUnary(exp)
     }
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {
@@ -86,14 +103,14 @@ public class FoundationExpressionPass: BaseExpressionPass {
         return exp
     }
     
-    /// Converts [<lhs> isEqualToString:<rhs>] -> <lhs> == <rhs>
-    func convertIsEqualToString(_ exp: PostfixExpression) -> Expression? {
+    /// Converts [<lhs> isEqualToString:<rhs>] -> <lhs> <operator> <rhs>
+    func convertIsEqualToString(_ exp: PostfixExpression, op: SwiftOperator) -> Expression? {
         guard let postfix = exp.exp.asPostfix, postfix.member?.name == "isEqualToString",
             let args = exp.functionCall?.arguments, args.count == 1 && !args.hasLabeledArguments() else {
             return nil
         }
         
-        let res = postfix.exp.copy().binary(op: .equals, rhs: args[0].expression.copy())
+        let res = postfix.exp.copy().binary(op: op, rhs: args[0].expression.copy())
         
         res.resolvedType = .bool
         

@@ -252,8 +252,10 @@ public class DefaultTypeSystem: TypeSystem {
         switch type.supertype {
         case .typeName(let tn)? where tn == unaliasedSupertypeName:
             return true
+            
         case .knownType(let kt)?:
             return isType(kt.typeName, subtypeOf: unaliasedSupertypeName)
+            
         default:
             break
         }
@@ -308,14 +310,18 @@ public class DefaultTypeSystem: TypeSystem {
         
         switch aliasedType {
         case .nominal(.typeName(let typeName)):
+            
             switch typeName {
             case "Bool", "ObjCBool", "CBool":
                 return .boolean
+                
             case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
                 return .float
+                
             default:
                 break
             }
+            
         default:
             break
         }
@@ -324,10 +330,13 @@ public class DefaultTypeSystem: TypeSystem {
             switch type.kind {
             case .class:
                 return .class
+                
             case .enum:
                 return .enum
+                
             case .protocol:
                 return .protocol
+                
             case .struct:
                 return .struct
             }
@@ -694,7 +703,8 @@ public class DefaultTypeSystem: TypeSystem {
         func expand(in type: SwiftType) -> SwiftType {
             switch type {
             case let .block(returnType, parameters):
-                return .block(returnType: expand(in: returnType), parameters: parameters.map(expand))
+                return .block(returnType: expand(in: returnType),
+                              parameters: parameters.map(expand))
                 
             case .nominal(.typeName(let name)):
                 if let type = source.unalias(name) {
@@ -745,6 +755,7 @@ public class DefaultTypeSystem: TypeSystem {
             switch composition {
             case .nested(let nested):
                 return .nested(.fromCollection(nested.map(expand(inNominal:))))
+                
             case .nominal(let nominal):
                 return .nominal(expand(inNominal: nominal))
             }
@@ -754,6 +765,7 @@ public class DefaultTypeSystem: TypeSystem {
             switch nominal {
             case .typeName(let name):
                 return .typeName(expand(inString: name))
+                
             case let .generic(name, parameters):
                 if case .tail = parameters { } // Here to avoid a weird crash due
                                                // to a compiler bug when accessing
@@ -1126,7 +1138,8 @@ func typeNameIn(swiftType: SwiftType) -> String? {
     let swiftType = swiftType.deepUnwrapped
     
     switch swiftType {
-    case .nominal(.typeName(let typeName)), .nominal(.generic(let typeName, _)):
+    case .nominal(.typeName(let typeName)),
+         .nominal(.generic(let typeName, _)):
         return typeName
         
     // Meta-types recurse on themselves

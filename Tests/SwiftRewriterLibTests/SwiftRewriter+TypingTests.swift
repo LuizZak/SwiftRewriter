@@ -6,8 +6,8 @@ import XCTest
 /// type resolving results.
 class SwiftRewriter_TypingTests: XCTestCase {
     
-    /// Tests that the `self`/`super` identifier is properly assigned when resolving the
-    /// final types of statements in a class
+    /// Tests that the `self`/`super` identifier is properly assigned when resolving
+    /// the final types of statements in a class
     func testSelfSuperTypeInInstanceMethodsPointsToSelfInstance() {
         assertObjcParse(
             objc: """

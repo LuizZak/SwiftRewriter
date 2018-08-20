@@ -146,4 +146,43 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         
         XCTAssertEqual(usages.count, 1)
     }
+    
+    /// Tests that we can properly find usages of class members on subclass
+    /// instances
+    func testFindUsagesOfSuperclassMemberInSubclassInstances() {
+        let builder = IntentionCollectionBuilder()
+        
+        let body: CompoundStatement = [
+            // self.a
+            .expression(
+                Expression
+                    .identifier("self")
+                    .dot("a")
+            )
+        ]
+        
+        builder
+            .createFile(named: "A.m") { file in
+                file
+                    .createClass(withName: "A") { builder in
+                        builder.createProperty(named: "a", type: .int)
+                    }
+                    .createClass(withName: "B") { builder in
+                        builder
+                            .createConstructor()
+                            .inherit(from: "A")
+                            .createVoidMethod(named: "test") { method in
+                                method.setBody(body)
+                            }
+                    }
+            }
+        
+        let intentions = builder.build(typeChecked: true)
+        let sut = DefaultUsageAnalyzer(intentions: intentions)
+        let property = intentions.fileIntentions()[0].classIntentions[0].properties[0]
+        
+        let usages = sut.findUsagesOf(property: property)
+        
+        XCTAssertEqual(usages.count, 1)
+    }
 }

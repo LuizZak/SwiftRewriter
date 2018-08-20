@@ -1013,19 +1013,24 @@ class ExpressionTypeResolverTests: XCTestCase {
             sut: ExpressionTypeResolver())
             .resolve()
             // First return
-            .thenAssertExpression(at: \Expression.asBlock?.body.statements[0].asReturn?.exp,
-                                  expectsType: .int)
+            .thenAssertExpression(
+                at: \Expression.asBlock?.body.statements[0].asReturn?.exp,
+                expectsType: .int
+            )
             //
-            .thenAssertExpression(at:
-                \Expression.asBlock?
+            .thenAssertExpression(
+                at: \Expression.asBlock?
                     .body.statements[1]
                     .asExpressions?
                     .expressions[0]
                     .asBlock?.body.statements[0]
                     .asReturn?.exp,
-                                  expectsType: .bool)
-            .thenAssertExpression(at: \Expression.asBlock?.body.statements[2].asReturn?.exp,
-                                  expectsType: .int)
+                expectsType: .bool
+            )
+            .thenAssertExpression(
+                at: \Expression.asBlock?.body.statements[2].asReturn?.exp,
+                expectsType: .int
+            )
     }
     
     func testResolvesTypeAliasWhenPropagatingExpectedTypeOfFunctionArguments() {
@@ -1045,7 +1050,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     
     /// Tests that function invocation expressions such as `function(myBlock())`,
     /// where the expected type of `myBlock` is set from the surrounding context,
-    /// have their expected types set to be a block signature that takes in as
+    /// have this expected types set to be a block signature that takes in as
     /// parameters all the parameters from the function invocation arguments, and
     /// as return type the expected type from the surrounding context.
     func testBackPropagatesBlockTypes() {

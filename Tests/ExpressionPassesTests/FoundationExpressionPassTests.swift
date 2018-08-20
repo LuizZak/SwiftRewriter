@@ -13,9 +13,22 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
     func testIsEqualToString() {
         let res = assertTransformParsed(
             expression: "[self.aString isEqualToString:@\"abc\"]",
-            into: .binary(lhs: .postfix(.identifier("self"), .member("aString")),
-                          op: .equals,
-                          rhs: .constant("abc"))
+            into: Expression
+                .identifier("self")
+                .dot("aString")
+                .binary(op: .equals, rhs: .constant("abc"))
+        ); assertNotifiedChange()
+        
+        XCTAssertEqual(res.resolvedType, .bool)
+    }
+    
+    func testNegatedIsEqualToString() {
+        let res = assertTransformParsed(
+            expression: "![self.aString isEqualToString:@\"abc\"]",
+            into: Expression
+                .identifier("self")
+                .dot("aString")
+                .binary(op: .unequals, rhs: .constant("abc"))
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .bool)
@@ -46,7 +59,7 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
                 .call([
                     .labeled("format", .constant("%@")),
                     .unlabeled(.identifier("self"))
-                    ])
+                ])
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .string)

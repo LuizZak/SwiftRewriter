@@ -41,9 +41,12 @@ public class IntentionCollectionBuilder {
         if typeChecked {
             let system = IntentionCollectionTypeSystem(intentions: intentions)
             
-            let invoker = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(),
-                                                     typeSystem: system,
-                                                     numThreads: 8)
+            let invoker =
+                DefaultTypeResolverInvoker(
+                    globals: ArrayDefinitionsSource(),
+                    typeSystem: system,
+                    numThreads: 8
+                )
             
             invoker.resolveAllExpressionTypes(in: intentions, force: true)
         }
@@ -69,7 +72,8 @@ public class FileIntentionBuilder {
         let storage =
             ValueStorage(type: type, ownership: ownership, isConstant: isConstant)
         
-        return createGlobalVariable(withName: name, storage: storage,
+        return createGlobalVariable(withName: name,
+                                    storage: storage,
                                     accessLevel: accessLevel,
                                     initialExpression: initialExpression)
     }
@@ -101,8 +105,10 @@ public class FileIntentionBuilder {
                                      parameters: [ParameterSignature] = [],
                                      body: CompoundStatement? = nil) -> FileIntentionBuilder {
         let signature =
-            FunctionSignature(name: name, parameters: parameters,
-                              returnType: returnType, isStatic: true)
+            FunctionSignature(name: name,
+                              parameters: parameters,
+                              returnType: returnType,
+                              isStatic: true)
         
         return createGlobalFunction(withSignature: signature, body: body)
     }
@@ -139,8 +145,8 @@ public class FileIntentionBuilder {
             DefaultTypeMapper(typeSystem: DefaultTypeSystem())
                 .swiftType(forObjcType: type, context: .empty)
         
-        
-        let intent = TypealiasIntention(originalObjcType: type, fromType: swiftType,
+        let intent = TypealiasIntention(originalObjcType: type,
+                                        fromType: swiftType,
                                         named: name)
         
         intention.addTypealias(intent)
@@ -333,7 +339,9 @@ public class TypeBuilder<T: TypeGenerationIntention> {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
-        let prop = PropertyGenerationIntention(name: name, storage: storage, attributes: attributes)
+        let prop = PropertyGenerationIntention(name: name,
+                                               storage: storage,
+                                               attributes: attributes)
         prop.mode = mode
         
         let mbuilder = MemberBuilder(targetMember: prop)
@@ -375,8 +383,10 @@ public class TypeBuilder<T: TypeGenerationIntention> {
                              isStatic: Bool = false,
                              builder: (MemberBuilder<MethodGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
         
-        let signature = FunctionSignature(name: name, parameters: parameters,
-                                          returnType: returnType, isStatic: isStatic)
+        let signature = FunctionSignature(name: name,
+                                          parameters: parameters,
+                                          returnType: returnType,
+                                          isStatic: isStatic)
         
         return createMethod(signature, builder: builder)
     }
