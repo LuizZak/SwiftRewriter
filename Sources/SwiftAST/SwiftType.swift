@@ -22,6 +22,12 @@ public enum NominalSwiftType: Equatable {
     case generic(String, parameters: GenericArgumentSwiftType)
 }
 
+extension NominalSwiftType: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .typeName(value)
+    }
+}
+
 /// A component for a protocol composition
 public enum ProtocolCompositionComponent: Equatable {
     case nominal(NominalSwiftType)

@@ -129,7 +129,9 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         } else if expectedType == .bool {
             // Parenthesize depending on parent expression type to avoid issues
             // with operator precedence
-            let shouldParenthesize = exp.parent is UnaryExpression || exp.parent is BinaryExpression
+            let shouldParenthesize =
+                exp.parent is UnaryExpression
+                    || exp.parent is BinaryExpression
             
             if var corrected = correctToBoolean(exp) {
                 notifyChange()
@@ -195,10 +197,14 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             // Mark left hand side and right hand side of comparison expressions
             // to expect non-optional of numeric values, in case they are numeric
             // themselves.
-            if let lhsType = exp.lhs.resolvedType?.unwrapped, context.typeSystem.isNumeric(lhsType) {
+            if let lhsType = exp.lhs.resolvedType?.unwrapped,
+                context.typeSystem.isNumeric(lhsType) {
+                
                 exp.lhs.expectedType = lhsType
             }
-            if let rhsType = exp.rhs.resolvedType?.unwrapped, context.typeSystem.isNumeric(rhsType) {
+            if let rhsType = exp.rhs.resolvedType?.unwrapped,
+                context.typeSystem.isNumeric(rhsType) {
+                
                 exp.rhs.expectedType = rhsType
             }
         default:
@@ -225,8 +231,12 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                 return super.visitPostfix(exp)
             }
             
-            var res: Expression = Expression.parens(member.copy().typed(expected: nil).binary(op: .nullCoalesce, rhs: initValue))
-            res.resolvedType = memberType.deepUnwrapped
+            var res: Expression =
+                Expression
+                    .parens(
+                        member.copy().typed(expected: nil)
+                            .binary(op: .nullCoalesce, rhs: initValue)
+                    ).typed(memberType.deepUnwrapped)
             
             res = Expression.postfix(res, memberPostfix.op.copy())
             
@@ -300,7 +310,11 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             let newExp: Expression
             
             if expCopy.requiresParens {
-                newExp = Expression.parens(expCopy).binary(op: .nullCoalesce, rhs: defaultExp)
+                newExp =
+                    Expression
+                        .parens(expCopy)
+                        .binary(op: .nullCoalesce,
+                                rhs: defaultExp)
             } else {
                 newExp = .parens(expCopy.binary(op: .nullCoalesce, rhs: defaultExp))
             }
@@ -328,7 +342,10 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             if context.typeSystem.isNumeric(type.deepUnwrapped) {
                 newExp.expectedType = nil
                 
-                let outer = newExp.binary(op: negated ? .equals : .unequals, rhs: .constant(0))
+                let outer =
+                    newExp.binary(op: negated ? .equals : .unequals,
+                                  rhs: .constant(0))
+                
                 outer.resolvedType = .bool
                 
                 return outer
@@ -340,7 +357,10 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             case .optional(.bool):
                 newExp.expectedType = nil
                 
-                let outer = newExp.binary(op: negated ? .unequals : .equals, rhs: .constant(true))
+                let outer =
+                    newExp.binary(op: negated ? .unequals : .equals,
+                                  rhs: .constant(true))
+                
                 outer.resolvedType = .bool
                 
                 return outer
@@ -350,7 +370,10 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             case .optional:
                 newExp.expectedType = nil
                 
-                let outer = newExp.binary(op: negated ? .equals : .unequals, rhs: .constant(.nil))
+                let outer =
+                    newExp.binary(op: negated ? .equals : .unequals,
+                                  rhs: .constant(.nil))
+                
                 outer.resolvedType = .bool
                 
                 return outer

@@ -7,22 +7,13 @@ import SwiftRewriterLib
 public enum UIViewCompoundType {
     private static var singleton: CompoundedMappingType = {
         let typeAndMappings = createType()
-        let mappings = createMappings() + typeAndMappings.1
         
         return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     signatureMappings: mappings)
+                                     signatureMappings: typeAndMappings.1)
     }()
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createMappings() -> [SignatureMapper] {
-        let mappings = SignatureMapperBuilder()
-        
-        return mappings
-            //.mapKeywords(from: ["drawRect", nil], to: ["rect", nil])
-            .build()
     }
     
     static func createType() -> (KnownType, [SignatureMapper]) {

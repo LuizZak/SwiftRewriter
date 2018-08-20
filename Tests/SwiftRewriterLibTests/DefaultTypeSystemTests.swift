@@ -691,6 +691,11 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.isType("Test", conformingTo: "UIViewControllerTransitionCoordinatorContext"))
     }
     
+    func testTypeLookupInClassesList() {
+        // This type is defined within TypeDefinitions.classesList
+        XCTAssert(sut.isType("UILabel", subtypeOf: "UIView"))
+    }
+    
     func testMethodArgumentTypeBasedOverloadResolution() {
         let type =
             KnownTypeBuilder(typeName: "Test")

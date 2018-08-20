@@ -1,12 +1,15 @@
 import SwiftRewriterLib
 import Utils
 import SwiftAST
+import Commons
 
 /// Applies passes to simplify known Foundation methods
 public class FoundationExpressionPass: BaseExpressionPass {
+    
     public required init(context: ASTRewriterPassContext) {
         super.init(context: context)
-        makeInitializerTransformers()
+        
+        makeFunctionTransformers()
         makeEnumTransformers()
     }
     
@@ -274,42 +277,59 @@ public class FoundationExpressionPass: BaseExpressionPass {
 // MARK: - Transformations
 
 extension FoundationExpressionPass {
+    func makeSignatureTransformers() {
+        addCompoundedType(FoundationCompoundTypes.nsCalendar.create())
+    }
+    
+    func makeFunctionTransformers() {
+        makeSignatureTransformers()
+        makeInitializerTransformers()
+    }
+    
     func makeInitializerTransformers() {
         // MARK: NSTimeZone
         
-        makeInit(typeName: "NSTimeZone", property: "localTimeZone",
+        makeInit(typeName: "NSTimeZone",
+                 property: "localTimeZone",
                  convertInto: Expression.identifier("TimeZone").dot("autoupdatingCurrent"),
-                andTypeAs: .typeName("TimeZone"))
+                 andTypeAs: .typeName("TimeZone"))
         
-        makeInit(typeName: "NSTimeZone", property: "defaultTimeZone",
+        makeInit(typeName: "NSTimeZone",
+                 property: "defaultTimeZone",
                  convertInto: Expression.identifier("TimeZone").dot("current"),
                  andTypeAs: .typeName("TimeZone"))
         
-        makeInit(typeName: "NSTimeZone", property: "systemTimeZone",
+        makeInit(typeName: "NSTimeZone",
+                 property: "systemTimeZone",
                  convertInto: Expression.identifier("TimeZone").dot("current"),
                  andTypeAs: .typeName("TimeZone"))
         
         // MARK: NSLocale
         
-        makeInit(typeName: "NSLocale", method: "localeWithLocaleIdentifier",
+        makeInit(typeName: "NSLocale",
+                 method: "localeWithLocaleIdentifier",
                  convertInto: Expression.identifier("Locale"),
                  andCallWithArguments: [.labeled("identifier", .asIs)],
                  andTypeAs: .typeName("Locale"))
         
-        makeInit(typeName: "NSLocale", property: "currentLocale",
+        makeInit(typeName: "NSLocale",
+                 property: "currentLocale",
                  convertInto: Expression.identifier("Locale").dot("current"),
                  andTypeAs: .typeName("Locale"))
         
-        makeInit(typeName: "NSLocale", property: "systemLocale",
+        makeInit(typeName: "NSLocale",
+                 property: "systemLocale",
                  convertInto: Expression.identifier("Locale").dot("current"),
                  andTypeAs: .typeName("Locale"))
         
-        makeInit(typeName: "NSLocale", property: "autoupdatingCurrentLocale",
+        makeInit(typeName: "NSLocale",
+                 property: "autoupdatingCurrentLocale",
                  convertInto: Expression.identifier("Locale").dot("autoupdatingCurrent"),
                  andTypeAs: .typeName("Locale"))
         
         // MARK: NSNotificationCenter
-        makeInit(typeName: "NSNotificationCenter", property: "defaultCenter",
+        makeInit(typeName: "NSNotificationCenter",
+                 property: "defaultCenter",
                  convertInto: Expression.identifier("NotificationCenter").dot("default"),
                  andTypeAs: .typeName("NotificationCenter"))
     }

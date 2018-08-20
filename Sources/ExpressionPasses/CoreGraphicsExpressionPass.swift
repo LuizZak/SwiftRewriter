@@ -156,31 +156,35 @@ extension CoreGraphicsExpressionPass {
     }
     
     func createBasicTransformers() {
+        func typing(as type: SwiftType) -> ArgumentRewritingStrategy {
+            return .transformed({ $0.typed(expected: type) }, .asIs)
+        }
+        
         // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>)
         // -> UIEdgeInsets(top: <top>, left: <left>, bottom: <bottom>, right: <right>)
         makeFuncTransform("UIEdgeInsetsMake", swiftName: "UIEdgeInsets",
                           arguments: [
-                            .labeled("top", .asIs), .labeled("left", .asIs),
-                            .labeled("bottom", .asIs), .labeled("right", .asIs)
+                            .labeled("top", typing(as: .cgFloat)), .labeled("left", typing(as: .cgFloat)),
+                            .labeled("bottom", typing(as: .cgFloat)), .labeled("right", typing(as: .cgFloat))
                           ])
         
         // CGointMake(<x>, <y>) -> CGPoint(x: <x>, y: <y>)
         makeFuncTransform("CGPointMake", swiftName: "CGPoint",
                           arguments: [
-                            .labeled("x", .asIs), .labeled("y", .asIs)
+                            .labeled("x", typing(as: .cgFloat)), .labeled("y", typing(as: .cgFloat))
                           ])
         
         // CGRectMake(<x>, <y>, <width>, <height>) -> CGRect(x: <x>, y: <y>, width: <width>, height: <height>)
         makeFuncTransform("CGRectMake", swiftName: "CGRect",
                           arguments: [
-                            .labeled("x", .asIs), .labeled("y", .asIs),
-                            .labeled("width", .asIs), .labeled("height", .asIs)
+                            .labeled("x", typing(as: .cgFloat)), .labeled("y", typing(as: .cgFloat)),
+                            .labeled("width", typing(as: .cgFloat)), .labeled("height", typing(as: .cgFloat))
                           ])
         
         // CGSizeMake(<width>, <height>) -> CGSize(width: <width>, height: <height>)
         makeFuncTransform("CGSizeMake", swiftName: "CGSize",
                           arguments: [
-                            .labeled("width", .asIs), .labeled("height", .asIs)
+                            .labeled("width", typing(as: .cgFloat)), .labeled("height", typing(as: .cgFloat))
                           ])
         
         // CGRectIntersectsRect(<r1>, <r2>) -> <r1>.intersects(<r2>)
@@ -197,11 +201,11 @@ extension CoreGraphicsExpressionPass {
                           firstArgIsInstance: true)
         // CGRectOffset(<r>, <x>, <y>) -> <r>.offsetBy(dx: <x>, dy: <y>)
         makeFuncTransform("CGRectOffset", swiftName: "offsetBy",
-                          arguments: [.labeled("dx", .asIs), .labeled("dy", .asIs)],
+                          arguments: [.labeled("dx", typing(as: .cgFloat)), .labeled("dy", typing(as: .cgFloat))],
                           firstArgIsInstance: true)
         // CGRectInset(<r>, <x>, <y>) -> <r>.insetBy(dx: <x>, dy: <y>)
         makeFuncTransform("CGRectInset", swiftName: "insetBy",
-                          arguments: [.labeled("dx", .asIs), .labeled("dy", .asIs)],
+                          arguments: [.labeled("dx", typing(as: .cgFloat)), .labeled("dy", typing(as: .cgFloat))],
                           firstArgIsInstance: true)
         // CGRectEqualToRect(<r>, <r2>) -> <r>.equalTo(<r2>)
         makeFuncTransform("CGRectEqualToRect", swiftName: "equalTo",

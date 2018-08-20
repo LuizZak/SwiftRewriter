@@ -888,6 +888,94 @@ public class DefaultTypeSystem: TypeSystem {
             }
         }
     }
+    
+    private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
+        
+        private var barrier =
+            DispatchQueue(label: "com.swiftrewriter.typedefinitionsclassknowntypeprovider.barrier",
+                          qos: .default,
+                          attributes: .concurrent,
+                          autoreleaseFrequency: .inherit,
+                          target: nil)
+        
+        private var cache: [String: KnownType] = [:]
+        
+        // For remembering attempts to look for classes that where not found on
+        // the classes list.
+        // Avoids repetitive linear lookups on the classes list over and over.
+        private var negativeLookupResults: Set<String> = []
+        
+        func knownType(withName name: String) -> KnownType? {
+            if let cached = barrier.sync(execute: { cache[name] }) {
+                return cached
+            }
+            if barrier.sync(execute: { negativeLookupResults.contains(name) }) {
+                return nil
+            }
+            
+            guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
+                barrier.sync(flags: .barrier) {
+                    _ = negativeLookupResults.insert(name)
+                }
+                
+                return nil
+            }
+            
+            let type = makeType(from: prot)
+            
+            barrier.sync(flags: .barrier) {
+                cache[name] = type
+            }
+            
+            return type
+        }
+        
+        func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
+            guard kind == .class else {
+                return []
+            }
+            
+            // TODO: Return all classes listed within TypeDefinitions.classesList
+            return []
+        }
+        
+        func makeType(from prot: ClassType) -> KnownType {
+            let type = ClassType_KnownType(classType: prot)
+            return type
+        }
+        
+        private class ClassType_KnownType: KnownType {
+            let classType: ClassType
+            
+            let origin = "\(TypeDefinitionsProtocolKnownTypeProvider.self)"
+            let isExtension = false
+            let supertype: KnownTypeReference?
+            let typeName: String
+            let kind: KnownTypeKind = .protocol
+            let knownTraits: [String : TraitType] = [:]
+            let knownConstructors: [KnownConstructor] = []
+            let knownMethods: [KnownMethod] = []
+            let knownProperties: [KnownProperty] = []
+            let knownFields: [KnownProperty] = []
+            let knownProtocolConformances: [KnownProtocolConformance]
+            let semantics: Set<Semantic> = []
+            
+            init(classType: ClassType) {
+                self.typeName = classType.typeName
+                self.supertype = .typeName(classType.superclass)
+                self.classType = classType
+                
+                knownProtocolConformances =
+                    classType.protocols.map {
+                        _KnownProtocolConformance(protocolName: $0)
+                    }
+            }
+            
+            private struct _KnownProtocolConformance: KnownProtocolConformance {
+                var protocolName: String
+            }
+        }
+    }
 }
 
 extension DefaultTypeSystem {
@@ -903,6 +991,7 @@ extension DefaultTypeSystem {
         typealiasProviders.addTypealiasProvider(innerAliasesProvider)
         knownTypeProviders.addKnownTypeProvider(innerKnownTypes)
         knownTypeProviders.addKnownTypeProvider(TypeDefinitionsProtocolKnownTypeProvider())
+        knownTypeProviders.addKnownTypeProvider(TypeDefinitionsClassKnownTypeProvider())
     }
 }
 

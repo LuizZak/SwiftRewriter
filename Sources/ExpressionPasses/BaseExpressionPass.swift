@@ -1,6 +1,7 @@
 import SwiftRewriterLib
 import Utils
 import SwiftAST
+import Commons
 
 public class BaseExpressionPass: ASTRewriterPass {
     
@@ -49,6 +50,59 @@ public class BaseExpressionPass: ASTRewriterPass {
         }
         
         return nil
+    }
+    
+    func addCompoundedType(_ compoundedType: CompoundedMappingType) {
+        let mappings = compoundedType.signatureMappings
+        
+        let typeSystem = context.typeSystem
+        
+        transformers.append(contentsOf:
+            mappings.map { mapping -> PostfixInvocationTransformer in
+                
+                let baseExpressionMatcher: ValueMatcher<Expression>
+                
+                if mapping.from.isStatic {
+                    
+                    baseExpressionMatcher =
+                        ValueMatcher()
+                            .keyPath(\Expression.resolvedType) {
+                                $0.match {
+                                    guard case .metatype(let type) = $0 else {
+                                        return false
+                                    }
+                                    
+                                    return typeSystem.isType(type, subtypeOf: compoundedType.typeName)
+                                }
+                            }
+                    
+                } else {
+                    
+                    baseExpressionMatcher =
+                        ValueMatcher()
+                            .keyPath(\Expression.resolvedType) {
+                                $0.match {
+                                    typeSystem.isType($0, subtypeOf: compoundedType.typeName)
+                                }
+                            }
+                    
+                }
+                
+                return
+                    MethodInvocationTransformer(
+                        baseExpressionMatcher: baseExpressionMatcher,
+                        methodSignature: mapping.from,
+                        newMethodName: mapping.to.name,
+                        argumentRewriters: mapping.to.parameters.map { arg in
+                            if let label = arg.label {
+                                return .labeled(label, .asIs)
+                            } else {
+                                return .asIs
+                            }
+                        },
+                        argumentTypes: mapping.to.parameters.map { $0.type })
+                
+            })
     }
 }
 

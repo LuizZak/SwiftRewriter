@@ -1,7 +1,11 @@
 import SwiftAST
 import SwiftRewriterLib
 
-public enum UIGestureRecognizerCompoundType {
+public enum FoundationCompoundTypes {
+    public static let nsCalendar = CalendarCompoundType.self
+}
+
+public enum CalendarCompoundType {
     private static var singleton: CompoundedMappingType = {
         let typeAndMappings = createType()
         
@@ -16,22 +20,27 @@ public enum UIGestureRecognizerCompoundType {
     static func createType() -> (KnownType, [SignatureMapper]) {
         var mappings: [SignatureMapper] = []
         let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "UIGestureRecognizer", supertype: "NSObject")
+        var type = KnownTypeBuilder(typeName: "Calendar", supertype: "NSObject")
         
         type.useSwiftSignatureMatching = true
+        // calendar.component(Calendar.Component.month, fromDate: date)
         
         type = type
             .method(withSignature:
                 FunctionSignature(
-                    name: "location",
+                    name: "component",
                     parameters: [
-                        ParameterSignature(label: "in", name: "view", type: .optional("UIView"))
+                        ParameterSignature(label: nil, name: "component",
+                                           type: .nested(["Calendar", "Component"])),
+                        ParameterSignature(label: "from", name: "date", type: "Date")
                     ],
-                    returnType: "CGPoint"
+                    returnType: .int
                 ).makeSignatureMapping(
-                    fromMethodNamed: "locationInView",
+                    fromMethodNamed: "component",
                     parameters: [
-                        ParameterSignature(label: nil, name: "view", type: .optional("UIView"))
+                        ParameterSignature(label: nil, name: "component",
+                                           type: .nested(["Calendar", "Component"])),
+                        ParameterSignature(label: "fromDate", name: "date", type: "Date")
                     ],
                     in: &mappings,
                     annotations: annotations

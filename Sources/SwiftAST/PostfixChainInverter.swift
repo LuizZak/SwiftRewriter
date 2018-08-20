@@ -7,13 +7,13 @@ public final class PostfixChainInverter {
     }
     
     public func invert() -> [Postfix] {
-        var stack: [SwiftAST.Postfix] = []
+        var stack: [PostfixExpression] = []
         
         var next: PostfixExpression? = expression
         var last: Expression = expression
         
         while let current = next {
-            stack.append(current.op)
+            stack.append(current)
             
             last = current.exp
             next = current.exp.asPostfix
@@ -26,15 +26,15 @@ public final class PostfixChainInverter {
         
         loop:
             while let pop = stack.popLast() {
-                switch pop {
+                switch pop.op {
                 case let op as MemberPostfix:
-                    result.append(.member(op.name, original: op))
+                    result.append(.member(op.name, original: op, pop))
                     
                 case let op as SubscriptPostfix:
-                    result.append(.subscript(op.expression, original: op))
+                    result.append(.subscript(op.expression, original: op, pop))
                     
                 case let op as FunctionCallPostfix:
-                    result.append(.call(op.arguments, original: op))
+                    result.append(.call(op.arguments, original: op, pop))
                     
                 default:
                     break loop
@@ -51,20 +51,35 @@ public final class PostfixChainInverter {
     
     public enum Postfix: Equatable {
         case root(Expression)
-        case member(String, original: MemberPostfix)
-        case `subscript`(Expression, original: SubscriptPostfix)
-        case call([FunctionArgument], original: FunctionCallPostfix)
+        case member(String, original: MemberPostfix, PostfixExpression)
+        case `subscript`(Expression, original: SubscriptPostfix, PostfixExpression)
+        case call([FunctionArgument], original: FunctionCallPostfix, PostfixExpression)
         
         public var postfix: SwiftAST.Postfix? {
             switch self {
             case .root:
                 return nil
-            case .member(_, let original):
+                
+            case .member(_, let original, _):
                 return original
-            case .call(_, let original):
+                
+            case .call(_, let original, _):
                 return original
-            case .subscript(_, let original):
+                
+            case .subscript(_, let original, _):
                 return original
+            }
+        }
+        
+        public var postfixExpression: PostfixExpression? {
+            switch self {
+            case .root:
+                return nil
+                
+            case .member(_, _, let exp),
+                 .subscript(_, _, let exp),
+                 .call(_, _, let exp):
+                return exp
             }
         }
         
@@ -72,6 +87,7 @@ public final class PostfixChainInverter {
             switch self {
             case .root(let exp):
                 return exp
+                
             default:
                 return nil
             }
@@ -81,6 +97,7 @@ public final class PostfixChainInverter {
             switch self {
             case .root(let exp):
                 return exp.resolvedType
+                
             default:
                 return postfix?.returnType
             }
