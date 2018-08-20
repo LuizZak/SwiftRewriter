@@ -75,7 +75,8 @@ public class UIKitExpressionPass: BaseExpressionPass {
     }
     
     /// Corrects boolean getters `.hidden` -> `.isHidden`, `.editable` -> `.isEditable`, etc.
-    // TODO: Use compounded mapping type to deal with property renaming
+    // TODO: Extend compounded mapping types to support property renaming and record
+    // these directly in UIViewCompoundType
     func convertBooleanGetters(_ exp: PostfixExpression) -> Expression? {
         // Make sure we're handling a UIView subclass here
         guard let typeName = exp.exp.resolvedType?.deepUnwrapped.typeName else {
