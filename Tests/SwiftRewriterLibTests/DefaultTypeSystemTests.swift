@@ -597,7 +597,6 @@ class DefaultTypeSystemTests: XCTestCase {
         
         XCTAssert(sut.isClassInstanceType(.typeName("NSObject")))
         XCTAssert(sut.isClassInstanceType(.typeName("NSSet")))
-        XCTAssert(sut.isClassInstanceType(.typeName("NSArray")))
         XCTAssert(sut.isClassInstanceType(classType.typeName))
         XCTAssert(sut.isClassInstanceType(protocolType.typeName))
         XCTAssertFalse(sut.isClassInstanceType(structType.typeName))
