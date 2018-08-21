@@ -729,7 +729,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
-    /// Same as above, but as a member access
+    /// Same as above, but as a member access.
     func testCorrectMemberAccessNullableValueInNonnullParameterToIfLet() {
         let funcType = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
         
@@ -747,6 +747,53 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
                 Pattern.identifier("c"), Expression.identifier("b").dot("c"),
                 body: [
                     .expression(Expression.identifier("a").call([Expression.identifier("c")]))
+                ], else: nil)
+        ); assertNotifiedChange()
+    }
+    
+    /// Use the member name of a nullable-method invocation as the name of the
+    /// pattern local variable.
+    func testCorrectMethodInvocationNullableValueInNonnullParameterToIfLet() {
+        let funcType = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+        
+        let exp =
+            Expression
+                .identifier("a").typed(funcType)
+                .call([Expression.identifier("b").dot("c").call().typed(.optional(.typeName("A")))],
+                      callableSignature: funcType)
+        
+        assertTransform(
+            // a(b.c())
+            statement: Statement.expression(exp),
+            // if let c = b.c() { a(c) }
+            into: Statement.ifLet(
+                Pattern.identifier("c"), Expression.identifier("b").dot("c").call(),
+                body: [
+                    .expression(Expression.identifier("a").call([Expression.identifier("c")]))
+                ], else: nil)
+        ); assertNotifiedChange()
+    }
+    
+    /// Correct method invocation returns as well by assigning the return value
+    /// to a `value` local variable using an if-let.
+    func testCorrectMethodReturnNullableValueInNonnullParameterToIfLet() {
+        let funcTypeA = SwiftType.block(returnType: .void, parameters: ["A"])
+        let funcTypeB = SwiftType.block(returnType: .optional("A"), parameters: [])
+        
+        let exp =
+            Expression
+                .identifier("a").typed(funcTypeA)
+                .call([Expression.identifier("b").typed(funcTypeB).call().typed(.optional("A"))],
+                      callableSignature: funcTypeA)
+        
+        assertTransform(
+            // a(b())
+            statement: Statement.expression(exp),
+            // if let value = b() { a(value) }
+            into: Statement.ifLet(
+                Pattern.identifier("value"), Expression.identifier("b").call(),
+                body: [
+                    .expression(Expression.identifier("a").call([Expression.identifier("value")]))
                 ], else: nil)
         ); assertNotifiedChange()
     }

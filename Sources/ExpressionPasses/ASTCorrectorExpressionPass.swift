@@ -2,15 +2,19 @@ import SwiftRewriterLib
 import SwiftAST
 
 public class ASTCorrectorExpressionPass: ASTRewriterPass {
-    private func varNameForExpression(_ exp: Expression) -> String? {
+    private func varNameForExpression(_ exp: Expression) -> String {
         if let identifier = exp.asIdentifier {
             return identifier.identifier
         }
         if let member = exp.asPostfix?.member {
             return member.name
         }
+        if let callPostfix = exp.asPostfix, callPostfix.functionCall != nil,
+            let memberPostfix = callPostfix.exp.asPostfix, let member = memberPostfix.member {
+            return member.name
+        }
         
-        return nil
+        return "value"
     }
     
     public override func visitBaseExpression(_ exp: Expression) -> Expression {
@@ -64,7 +68,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         }
         
         // Apply potential if-let patterns to simple 1-parameter function calls
-        guard case .block(_, let args)? = functionCall.callableSignature else {
+        guard case .block(_, let params)? = functionCall.callableSignature else {
             return super.visitExpressions(stmt)
         }
         
@@ -73,7 +77,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         // Check the receiving argument is non-optional, but the argument's type
         // in the expression is an optional (but not an implicitly unwrapped, since
         // Swift takes care of unwrapping that automatically)
-        guard let resolvedType = argument.resolvedType, !args[0].isOptional
+        guard let resolvedType = argument.resolvedType, !params[0].isOptional
             && resolvedType.isOptional == true
             && argument.resolvedType?.isImplicitlyUnwrapped == false else {
             return super.visitExpressions(stmt)
@@ -84,14 +88,12 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             return super.visitExpressions(stmt)
         }
         
-        guard let name = varNameForExpression(argument) else {
-            return super.visitExpressions(stmt)
-        }
+        let name = varNameForExpression(argument)
         
         // if let <name> = <arg0> {
         //   func(<name>)
         // }
-        let newOp = functionCall.replacingArguments([.identifier(name)])
+        let newOp = functionCall.replacingArguments([Expression.identifier(name).typed(resolvedType.deepUnwrapped)])
         let newPostfix = postfix.copy()
         newPostfix.op = newOp
         
