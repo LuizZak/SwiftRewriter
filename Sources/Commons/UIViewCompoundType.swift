@@ -151,7 +151,7 @@ public enum UIViewCompoundType {
                     fromMethodNamed: "animateWithDuration",
                     parameters: [
                         ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: []))
                     ],
                     in: &mappings,
                     annotations: annotations
@@ -473,7 +473,15 @@ public enum UIViewCompoundType {
                     parameters: [
                         ParameterSignature(label: "toFront", name: "view", type: "UIView")
                     ]
-                )
+                ).makeSignatureMapping(
+                    fromMethodNamed: "bringSubviewToFront",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "view", type: "UIView")
+                    ],
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
@@ -688,7 +696,15 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "view", type: "UIView"),
                         ParameterSignature(label: "at", name: "index", type: .int)
                     ]
-                )
+                ).makeSignatureMapping(fromMethodNamed: "insertSubview",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "view", type: "UIView"),
+                        ParameterSignature(label: "atIndex", name: "index", type: .int)
+                    ],
+                    in: &mappings,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
             )
             .method(withSignature:
                 FunctionSignature(
