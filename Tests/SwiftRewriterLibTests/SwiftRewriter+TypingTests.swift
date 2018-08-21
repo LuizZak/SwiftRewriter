@@ -1189,4 +1189,24 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testTypeLookupInFoundationType() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                NSMutableArray *array = [NSMutableArray array];
+                NSObject *object = array;
+                [array addObject:object];
+            }
+            """,
+            swift: """
+            func test() {
+                var array = NSMutableArray()
+                var object = array
+                // type: Void
+                array.add(object)
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

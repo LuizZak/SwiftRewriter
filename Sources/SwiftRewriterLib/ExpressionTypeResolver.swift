@@ -700,17 +700,17 @@ private class MemberInvocationResolver {
             case .nominal(.generic("Dictionary", let params)) where Array(params).count == 2:
                 exp.resolvedType = .optional(Array(params)[1])
                 
-            // Sub-types of NSArray index as .anyObject
+            // Sub-types of NSArray index as .any
             case .nominal(.typeName(let typeName)) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
                 if subType != .int {
                     return exp.makeErrorTyped()
                 }
                 
-                exp.resolvedType = .anyObject
+                exp.resolvedType = .any
                 
-            // Sub-types of NSDictionary index as .anyObject
+            // Sub-types of NSDictionary index as .any
             case .nominal(.typeName(let typeName)) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
-                exp.resolvedType = .optional(.anyObject)
+                exp.resolvedType = .optional(.any)
                 
             default:
                 break
@@ -737,21 +737,23 @@ private class MemberInvocationResolver {
             exp.exp = typeResolver.visitExpression(exp.exp)
             
             // Propagate error type
-            if exp.exp.isErrorTyped {
+            guard !exp.exp.isErrorTyped, let innerType = exp.exp.resolvedType else {
                 return exp.makeErrorTyped()
             }
             
-            guard let innerType = exp.exp.resolvedType else {
-                return exp.makeErrorTyped()
-            }
-            
-            if let property = typeSystem.property(named: member.name, static: innerType.isMetatype,
-                                                  includeOptional: true, in: innerType) {
+            if let property = typeSystem.property(named: member.name,
+                                                  static: innerType.isMetatype,
+                                                  includeOptional: true,
+                                                  in: innerType) {
+                
                 member.memberDefinition = property
                 exp.resolvedType = property.storage.type
                 exp.op.returnType = exp.resolvedType
-            } else if let field = typeSystem.field(named: member.name, static: innerType.isMetatype,
+                
+            } else if let field = typeSystem.field(named: member.name,
+                                                   static: innerType.isMetatype,
                                                    in: innerType) {
+                
                 member.memberDefinition = field
                 exp.resolvedType = field.storage.type
                 exp.op.returnType = exp.resolvedType

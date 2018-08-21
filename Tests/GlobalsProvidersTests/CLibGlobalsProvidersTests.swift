@@ -4,6 +4,7 @@ import SwiftRewriterLib
 import GlobalsProviders
 
 class CLibGlobalsProvidersTests: BaseGlobalsProviderTestCase {
+    
     override func setUp() {
         super.setUp()
         

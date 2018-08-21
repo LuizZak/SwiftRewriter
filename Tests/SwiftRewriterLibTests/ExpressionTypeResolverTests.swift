@@ -284,12 +284,12 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsArray)
             .resolve()
-            .thenAssertExpression(resolvedAs: .anyObject)
+            .thenAssertExpression(resolvedAs: .any)
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .typeName("NSMutableArray"))
             .resolve()
-            .thenAssertExpression(resolvedAs: .anyObject)
+            .thenAssertExpression(resolvedAs: .any)
     }
     
     func testSubscriptionInNSArrayWithNonInteger() {
@@ -321,12 +321,12 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .nsDictionary)
             .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.anyObject))
+            .thenAssertExpression(resolvedAs: .optional(.any))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
             .definingLocal(name: "value", type: .typeName("NSMutableDictionary"))
             .resolve()
-            .thenAssertExpression(resolvedAs: .optional(.anyObject))
+            .thenAssertExpression(resolvedAs: .optional(.any))
     }
     
     func testIdentifier() {

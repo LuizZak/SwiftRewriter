@@ -19,8 +19,10 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         typealiases = nil
     }
     
-    func assertDefined(typealiasFrom typealiasName: String, to type: SwiftType, file: String = #file,
-                       line: Int = #line) {
+    func assertDefined(typealiasFrom typealiasName: String,
+                       to type: SwiftType,
+                       file: String = #file, line: Int = #line) {
+        
         guard let actual = typealiases.unalias(typealiasName) else {
             recordFailure(withDescription: "Expected to find typealias with name \(typealiasName)",
                 inFile: file, atLine: line, expected: true)
@@ -34,8 +36,10 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         }
     }
     
-    func assertDefined(variable: String, type: SwiftType, file: String = #file,
-                       line: Int = #line) {
+    func assertDefined(variable: String,
+                       type: SwiftType,
+                       file: String = #file, line: Int = #line) {
+        
         guard let definition = globals.definition(named: variable) else {
             recordFailure(withDescription: "Expected to find definition \(variable)",
                 inFile: file, atLine: line, expected: true)
@@ -56,8 +60,11 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         }
     }
     
-    func assertDefined(function: String, paramTypes: [SwiftType], returnType: SwiftType,
+    func assertDefined(function: String,
+                       paramTypes: [SwiftType],
+                       returnType: SwiftType,
                        file: String = #file, line: Int = #line) {
+        
         guard let definition = globals.definition(named: function) else {
             recordFailure(withDescription: "Expected to find definition \(function)",
                 inFile: file, atLine: line, expected: true)
@@ -105,8 +112,10 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         }
     }
     
-    func assertDefined(typeName: String, signature: String,
+    func assertDefined(typeName: String,
+                       signature: String,
                        file: String = #file, line: Int = #line) {
+        
         guard let type = types.knownType(withName: typeName) else {
             recordFailure(withDescription: "Expected to find type \(typeName)",
                 inFile: file, atLine: line, expected: true)

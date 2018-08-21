@@ -2,6 +2,7 @@ import XCTest
 import GlobalsProviders
 
 class CoreGraphicsGlobalsProviderTests: BaseGlobalsProviderTestCase {
+    
     override func setUp() {
         super.setUp()
         

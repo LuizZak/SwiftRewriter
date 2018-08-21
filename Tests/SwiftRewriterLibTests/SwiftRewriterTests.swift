@@ -2520,4 +2520,24 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testCorrectsNullableArgumentInFoundationTypeFunctionCall() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                NSMutableArray *array = [NSMutableArray array];
+                NSObject *_Nullable object;
+                [array addObject:object];
+            }
+            """,
+            swift: """
+            func test() {
+                var array = NSMutableArray()
+                var object: NSObject?
+                if let object = object {
+                    array.add(object)
+                }
+            }
+            """)
+    }
 }

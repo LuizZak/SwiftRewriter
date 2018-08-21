@@ -2,6 +2,7 @@ import XCTest
 import GlobalsProviders
 
 class OpenGLESGlobalsProviderTests: BaseGlobalsProviderTestCase {
+    
     override func setUp() {
         super.setUp()
         
