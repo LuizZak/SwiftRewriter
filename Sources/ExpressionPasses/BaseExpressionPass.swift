@@ -53,39 +53,50 @@ public class BaseExpressionPass: ASTRewriterPass {
     }
     
     func addCompoundedType(_ compoundedType: CompoundedMappingType) {
-        let mappings = compoundedType.signatureMappings
-        
         let typeSystem = context.typeSystem
         
+        let instanceExpressionMatcher =
+                ValueMatcher()
+                    .keyPath(\Expression.resolvedType) {
+                        $0.match {
+                            typeSystem.isType($0, subtypeOf: compoundedType.typeName)
+                        }
+                    }
+        
+        let staticTypeExpressionMatcher =
+            ValueMatcher()
+                .keyPath(\Expression.resolvedType) {
+                    $0.match {
+                        guard case .metatype(let type) = $0 else {
+                            return false
+                        }
+                        
+                        return typeSystem.isType(type, subtypeOf: compoundedType.typeName)
+                    }
+                }
+        
+        let methodMappings = compoundedType.transformations.compactMap { $0.signatureMapping }
+        let propertyMappings = compoundedType.transformations.compactMap { $0.propertyMapping }
+        
         transformers.append(contentsOf:
-            mappings.map { mapping -> PostfixInvocationTransformer in
-                
+            propertyMappings.map { mapping -> PostfixInvocationTransformer in
+                return
+                    PropertyInvocationTransformer(
+                        baseExpressionMatcher: instanceExpressionMatcher,
+                        oldName: mapping.old,
+                        newName: mapping.new)
+            }
+        )
+        
+        transformers.append(contentsOf:
+            methodMappings.map { mapping -> PostfixInvocationTransformer in
                 let baseExpressionMatcher: ValueMatcher<Expression>
                 
                 if mapping.from.isStatic {
-                    
-                    baseExpressionMatcher =
-                        ValueMatcher()
-                            .keyPath(\Expression.resolvedType) {
-                                $0.match {
-                                    guard case .metatype(let type) = $0 else {
-                                        return false
-                                    }
-                                    
-                                    return typeSystem.isType(type, subtypeOf: compoundedType.typeName)
-                                }
-                            }
-                    
+                    baseExpressionMatcher = staticTypeExpressionMatcher
                 } else {
                     
-                    baseExpressionMatcher =
-                        ValueMatcher()
-                            .keyPath(\Expression.resolvedType) {
-                                $0.match {
-                                    typeSystem.isType($0, subtypeOf: compoundedType.typeName)
-                                }
-                            }
-                    
+                    baseExpressionMatcher = instanceExpressionMatcher
                 }
                 
                 return
@@ -101,7 +112,6 @@ public class BaseExpressionPass: ASTRewriterPass {
                             }
                         },
                         argumentTypes: mapping.to.parameters.map { $0.type })
-                
             })
     }
 }

@@ -16,7 +16,7 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
     }
     
     fileprivate func addCompoundedTypeMapping(_ compoundedType: CompoundedMappingType) {
-        let mappings = compoundedType.signatureMappings
+        let mappings = compoundedType.transformations.compactMap { $0.signatureMapping }
         
         conversions.append(contentsOf:
             mappings.map {

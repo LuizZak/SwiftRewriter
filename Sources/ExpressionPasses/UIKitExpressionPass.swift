@@ -180,6 +180,7 @@ extension UIKitExpressionPass {
     func makeSignatureTransformers() {
         addCompoundedType(UIViewCompoundType.create())
         addCompoundedType(UIGestureRecognizerCompoundType.create())
+        addCompoundedType(UIColorCompoundType.create())
     }
     
     func makeEnumTransformers() {

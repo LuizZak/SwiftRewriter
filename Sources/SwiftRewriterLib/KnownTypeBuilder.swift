@@ -455,7 +455,13 @@ extension KnownTypeBuilder {
     /// Returns a reference to the latest method added to this `KnownTypeBuilder`
     /// via a `.method(...)` call
     public var latestMethod: KnownMethod? {
-        return type.knownMethods.last
+        return type.methods.last
+    }
+    
+    /// Returns a reference to the latest property added to this `KnownTypeBuilder`
+    /// via a `.property(...)` call
+    public var lastProperty: KnownProperty? {
+        return type.properties.last
     }
 }
 

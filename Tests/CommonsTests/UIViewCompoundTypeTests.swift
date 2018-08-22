@@ -114,6 +114,8 @@ class UIViewCompoundTypeTests: XCTestCase {
                 func addMotionEffect(_ effect: UIMotionEffect)
                 func addSubview(_ view: UIView)
                 func alignmentRect(forFrame frame: CGRect) -> CGRect
+                
+                // Convert from bringSubviewToFront(_ view: UIView)
                 func bringSubview(toFront view: UIView)
                 func constraintsAffectingLayout(for axis: UILayoutConstraintAxis) -> [NSLayoutConstraint]
                 func contentCompressionResistancePriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
@@ -146,6 +148,8 @@ class UIViewCompoundTypeTests: XCTestCase {
                 func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool
                 func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView?
                 func insertSubview(_ view: UIView, aboveSubview siblingSubview: UIView)
+                
+                // Convert from insertSubview(_ view: UIView, atIndex index: Int)
                 func insertSubview(_ view: UIView, at index: Int)
                 func insertSubview(_ view: UIView, belowSubview siblingSubview: UIView)
                 func invalidateIntrinsicContentSize()

@@ -6,18 +6,18 @@ import SwiftRewriterLib
 /// information for converting invocations and implementations of methods on
 /// implementers and expression call sites.
 public class CompoundedMappingType {
-    public let signatureMappings: [SignatureMapper]
+    public let transformations: [PostfixTransformation]
     
     var knownType: KnownType
     
     public var semantics: Set<Semantic>
     
     public init(knownType: KnownType,
-                signatureMappings: [SignatureMapper],
+                transformations: [PostfixTransformation],
                 semantics: Set<Semantic> = []) {
         
         self.knownType = knownType
-        self.signatureMappings = signatureMappings
+        self.transformations = transformations
         self.semantics = semantics
     }
 }

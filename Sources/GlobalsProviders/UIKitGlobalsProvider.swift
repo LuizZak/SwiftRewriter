@@ -43,6 +43,7 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
         createUITableViewCell()
         createUIScrollView()
         createUITableView()
+        createUIColor()
     }
     
     override func createDefinitions() {
@@ -61,6 +62,11 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     
     func createUIResponder() {
         let type = UIResponderCompoundType.create()
+        types.append(type)
+    }
+    
+    func createUIColor() {
+        let type = UIColorCompoundType.create()
         types.append(type)
     }
     

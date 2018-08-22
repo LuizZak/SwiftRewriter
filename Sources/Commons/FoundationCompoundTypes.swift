@@ -12,15 +12,15 @@ public enum CalendarCompoundType {
         let typeAndMappings = createType()
         
         return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     signatureMappings: typeAndMappings.1)
+                                     transformations: typeAndMappings.1)
     }()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [SignatureMapper]) {
-        var mappings: [SignatureMapper] = []
+    static func createType() -> (KnownType, [PostfixTransformation]) {
+        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "Calendar", supertype: "NSObject")
         
@@ -43,13 +43,13 @@ public enum CalendarCompoundType {
                                            type: .nested(["Calendar", "Component"])),
                         ParameterSignature(label: "fromDate", name: "date", type: "Date")
                     ],
-                    in: &mappings,
+                    in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
             )
         
-        return (type.build(), mappings)
+        return (type.build(), transformations.transformations)
     }
 }
 
@@ -58,15 +58,15 @@ public enum NSArrayCompoundType {
         let typeAndMappings = createType()
         
         return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     signatureMappings: typeAndMappings.1)
+                                     transformations: typeAndMappings.1)
     }()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [SignatureMapper]) {
-        var mappings: [SignatureMapper] = []
+    static func createType() -> (KnownType, [PostfixTransformation]) {
+        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "NSArray", supertype: "NSObject")
         
@@ -96,7 +96,7 @@ public enum NSArrayCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "index", type: .int)
                     ],
-                    in: &mappings,
+                    in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
@@ -112,13 +112,13 @@ public enum NSArrayCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "anObject", type: .any)
                     ],
-                    in: &mappings,
+                    in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
             )
         
-        return (type.build(), mappings)
+        return (type.build(), transformations.transformations)
     }
 }
 
@@ -127,15 +127,15 @@ public enum NSMutableArrayCompoundType {
         let typeAndMappings = createType()
         
         return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     signatureMappings: typeAndMappings.1)
+                                     transformations: typeAndMappings.1)
     }()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [SignatureMapper]) {
-        var mappings: [SignatureMapper] = []
+    static func createType() -> (KnownType, [PostfixTransformation]) {
+        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "NSMutableArray", supertype: "NSArray")
         
@@ -153,7 +153,7 @@ public enum NSMutableArrayCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "anObject", type: .any)
                     ],
-                    in: &mappings,
+                    in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
@@ -168,7 +168,7 @@ public enum NSMutableArrayCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "otherArray", type: .array(.any))
                     ],
-                    in: &mappings,
+                    in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
@@ -183,12 +183,12 @@ public enum NSMutableArrayCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "anObject", type: .any)
                     ],
-                    in: &mappings,
+                    in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
             )
         
-        return (type.build(), mappings)
+        return (type.build(), transformations.transformations)
     }
 }

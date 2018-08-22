@@ -6,15 +6,15 @@ public enum UIGestureRecognizerCompoundType {
         let typeAndMappings = createType()
         
         return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     signatureMappings: typeAndMappings.1)
+                                     transformations: typeAndMappings.1)
     }()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [SignatureMapper]) {
-        var mappings: [SignatureMapper] = []
+    static func createType() -> (KnownType, [PostfixTransformation]) {
+        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIGestureRecognizer", supertype: "NSObject")
         
@@ -33,12 +33,12 @@ public enum UIGestureRecognizerCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "view", type: .optional("UIView"))
                     ],
-                    in: &mappings,
+                    in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
             )
         
-        return (type.build(), mappings)
+        return (type.build(), transformations.transformations)
     }
 }

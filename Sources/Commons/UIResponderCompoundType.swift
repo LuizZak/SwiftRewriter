@@ -3,20 +3,13 @@ import SwiftRewriterLib
 
 public enum UIResponderCompoundType {
     private static var singleton: CompoundedMappingType = {
-        let mappings = createMappings()
         let type = createType()
     
-        return CompoundedMappingType(knownType: type, signatureMappings: mappings)
+        return CompoundedMappingType(knownType: type, transformations: [])
     }()
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createMappings() -> [SignatureMapper] {
-        let mappings = SignatureMapperBuilder()
-        
-        return mappings.build()
     }
     
     static func createType() -> KnownType {

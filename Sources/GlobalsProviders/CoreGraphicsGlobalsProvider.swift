@@ -54,7 +54,7 @@ private class InnerCoreGraphicsGlobalsProvider: BaseGlobalsProvider {
                 .constructor()
                 .constructor(shortParameters: [
                     ("x", type: .cgFloat), ("y", type: .cgFloat)
-                    ])
+                ])
                 .build()
         }
     }
