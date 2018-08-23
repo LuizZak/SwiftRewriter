@@ -1,31 +1,17 @@
 import SwiftAST
 import SwiftRewriterLib
+import Commons
 
 public final class MethodInvocationTransformer: PostfixInvocationTransformer {
     
     let baseExpressionMatcher: ValueMatcher<Expression>
-    let methodSignature: FunctionSignature
-    let newMethodName: String
-    let argumentRewriters: [ArgumentRewritingStrategy]
-    let argumentTypes: [SwiftType]
-    
-    /// The number of arguments this method invocation transformer needs, exactly,
-    /// in order to be fulfilled.
-    public let requiredArgumentCount: Int
+    let invocationMatcher: MethodInvocationTransformerMatcher
     
     init(baseExpressionMatcher: ValueMatcher<Expression>,
-         methodSignature: FunctionSignature,
-         newMethodName: String,
-         argumentRewriters: [ArgumentRewritingStrategy],
-         argumentTypes: [SwiftType]) {
+         invocationMatcher: MethodInvocationTransformerMatcher) {
         
         self.baseExpressionMatcher = baseExpressionMatcher
-        self.methodSignature = methodSignature
-        self.newMethodName = newMethodName
-        self.argumentRewriters = argumentRewriters
-        self.argumentTypes = argumentTypes
-        
-        requiredArgumentCount = argumentRewriters.requiredArgumentCount()
+        self.invocationMatcher = invocationMatcher
     }
     
     func canApply(to postfix: PostfixExpression) -> Bool {
@@ -39,12 +25,13 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
             return false
         }
         
-        if function.arguments.count != requiredArgumentCount {
+        if function.arguments.count < invocationMatcher.transformer.requiredArgumentCount {
             return false
         }
         
-        let selector = function.selectorWith(methodName: memberName.name)
-        guard methodSignature.asSelector.keywords == selector.keywords else {
+        let identifier = function.identifierWith(methodName: memberName.name)
+        
+        guard invocationMatcher.identifier == identifier else {
             return false
         }
         
@@ -62,25 +49,16 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
         guard let memberNameAccess = postfix.exp.asPostfix else {
             return nil
         }
+        guard let memberName = memberNameAccess.op.asMember else {
+            return nil
+        }
         guard let function = postfix.op.asFunctionCall else {
             return nil
         }
         
-        let newArgs =
-            argumentRewriters.rewrite(arguments: function.arguments)
+        let name = invocationMatcher.transformer.rewriteName(memberName.name)
+        let call = invocationMatcher.transformer.rewriteFunctionCall(function)
         
-        let newExp =
-            memberNameAccess
-                .exp.copy()
-                .dot(newMethodName)
-                .call(newArgs)
-        
-        newExp.op.asFunctionCall?.arguments.enumerated().forEach { (i, arg) in
-            arg.expression.expectedType = argumentTypes[i]
-        }
-        
-        return newExp
-        
+        return .postfix(memberNameAccess.exp.copy().dot(name), call)
     }
-    
 }

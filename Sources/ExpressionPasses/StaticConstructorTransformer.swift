@@ -1,4 +1,5 @@
 import SwiftAST
+import Commons
 
 /// Transforms static type initializers into other expression constructs.
 ///

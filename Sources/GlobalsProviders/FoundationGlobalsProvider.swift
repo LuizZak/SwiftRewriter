@@ -31,6 +31,8 @@ private class InnerFoundationGlobalsProvider: BaseGlobalsProvider {
         createNSArray()
         createNSMutableArray()
         createNSCalendar()
+        createNSDateFormatter()
+        createNSDate()
     }
     
     func createNSArray() {
@@ -45,6 +47,16 @@ private class InnerFoundationGlobalsProvider: BaseGlobalsProvider {
     
     func createNSCalendar() {
         let type = FoundationCompoundTypes.nsCalendar.create()
+        types.append(type)
+    }
+    
+    func createNSDateFormatter() {
+        let type = FoundationCompoundTypes.nsDateFormatter.create()
+        types.append(type)
+    }
+    
+    func createNSDate() {
+        let type = FoundationCompoundTypes.nsDate.create()
         types.append(type)
     }
     

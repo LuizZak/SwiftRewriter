@@ -16,14 +16,21 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
     }
     
     fileprivate func addCompoundedTypeMapping(_ compoundedType: CompoundedMappingType) {
-        let mappings = compoundedType.transformations.compactMap { $0.signatureMapping }
+        let mappings = compoundedType.transformations.compactMap { transform -> SignatureMapper? in
+            switch transform {
+            case .method(let mapping):
+                return SignatureMapper(transformer: mapping)
+                
+            default:
+                return nil
+            }
+        }
         
         conversions.append(contentsOf:
             mappings.map {
                 SignatureConversion(
                     relationship: .subtype(compoundedType.typeName),
-                    signatureMapper: $0,
-                    adjustNullability: true
+                    signatureMapper: $0
                 )
             }
         )
@@ -86,24 +93,33 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
     private func addConversion(_ relationship: SignatureConversion.Relationship,
                                fromKeywords k1: [String?], to k2: [String?]) {
         
-        let functionSignature1 =
-            FunctionSignature(name: k1[0] ?? "__",
-                              parameters: k1.dropFirst().map { ParameterSignature(label: $0, name: $0 ?? "_", type: .any) },
-                              returnType: .any,
-                              isStatic: false)
+        let identifier =
+            FunctionIdentifier(name: k1[0] ?? "__", parameterNames: Array(k1.dropFirst()))
         
-        let functionSignature2 =
-            FunctionSignature(name: k2[0] ?? "__",
-                              parameters: k2.dropFirst().map { ParameterSignature(label: $0, name: $0 ?? "_", type: .any) },
-                              returnType: .any,
-                              isStatic: false)
+        let transformerBuilder = MethodInvocationRewriterBuilder()
+        
+        transformerBuilder.renaming(to: k2[0])
+        
+        for k2 in k2.dropFirst() {
+            if let k2 = k2 {
+                transformerBuilder.addingArgument(strategy: .labeled(k2, .asIs))
+            } else {
+                transformerBuilder.addingArgument(strategy: .asIs)
+            }
+        }
+        
+        let transformer = transformerBuilder.build()
+        
+        let mapper =
+            SignatureMapper(transformer:
+                MethodInvocationTransformerMatcher(identifier: identifier,
+                                                   isStatic: false,
+                                                   transformer: transformer))
         
         conversions.append(
             SignatureConversion(
                 relationship: relationship,
-                from: functionSignature1,
-                to: functionSignature2,
-                adjustNullability: false
+                signatureMapper: mapper
             )
         )
     }
@@ -171,66 +187,30 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
 
 private class SignatureConversion {
     let relationship: Relationship
-    let from: FunctionSignature
-    let to: FunctionSignature
-    let adjustNullability: Bool
-    
-    /// Creates a new `SignatureConversion` instance with a given source and target
-    /// signatures to convert.
-    ///
-    /// Count of keywords on both signatures must match (i.e. cannot change the
-    /// number of arguments of a method)
-    ///
-    /// If `adjustNullability == true`, parameter and return types will be inspected
-    /// and nullability annotations will be matched on the target method signature.
-    ///
-    /// - precondition: `from.count == to.count`
-    /// - precondition: `!from.isEmpty`
-    public init(relationship: Relationship,
-                from: FunctionSignature,
-                to: FunctionSignature,
-                adjustNullability: Bool) {
-        
-        precondition(from.parameters.count == to.parameters.count,
-                     "from.parameters.count == to.parameters.count")
-        precondition(!from.parameters.isEmpty,
-                     "!from.parameters.isEmpty")
-        
-        self.relationship = relationship
-        self.from = from
-        self.to = to
-        self.adjustNullability = adjustNullability
-    }
+    let signatureMapper: SignatureMapper
     
     public init(relationship: Relationship,
-                signatureMapper: SignatureMapper,
-                adjustNullability: Bool) {
+                signatureMapper: SignatureMapper) {
         
         self.relationship = relationship
-        self.from = signatureMapper.from
-        self.to = signatureMapper.to
-        self.adjustNullability = adjustNullability
+        self.signatureMapper = signatureMapper
         
     }
     
     public func canApply(to signature: FunctionSignature) -> Bool {
-        return signature.matchesAsSelector(from)
+        return signature.asIdentifier == signatureMapper.transformer.identifier
     }
     
     public func apply(to signature: inout FunctionSignature) -> Bool {
-        guard signature.matchesAsSelector(from) else {
+        if !canApply(to: signature) {
             return false
         }
         
-        signature.name = to.name
-        
-        for i in to.parameters.indices {
-            signature.parameters[i].label = to.parameters[i].label
-        }
-        
-        if adjustNullability {
-            signature = mergeSignatures(to, signature)
-        }
+        signature
+            = signatureMapper
+                .transformer
+                .transformer
+                .rewriteSignature(signature)
         
         return true
     }

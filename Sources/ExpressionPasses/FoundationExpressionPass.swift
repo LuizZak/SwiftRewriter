@@ -300,6 +300,8 @@ extension FoundationExpressionPass {
         addCompoundedType(FoundationCompoundTypes.nsCalendar.create())
         addCompoundedType(FoundationCompoundTypes.nsArray.create())
         addCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
+        addCompoundedType(FoundationCompoundTypes.nsDateFormatter.create())
+        addCompoundedType(FoundationCompoundTypes.nsDate.create())
     }
     
     func makeFunctionTransformers() {

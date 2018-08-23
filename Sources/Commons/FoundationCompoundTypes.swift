@@ -5,6 +5,8 @@ public enum FoundationCompoundTypes {
     public static let nsCalendar = CalendarCompoundType.self
     public static let nsArray = NSArrayCompoundType.self
     public static let nsMutableArray = NSMutableArrayCompoundType.self
+    public static let nsDateFormatter = NSDateFormatterCompoundType.self
+    public static let nsDate = NSDateCompoundType.self
 }
 
 public enum CalendarCompoundType {
@@ -42,6 +44,38 @@ public enum CalendarCompoundType {
                         ParameterSignature(label: nil, name: "component",
                                            type: .nested(["Calendar", "Component"])),
                         ParameterSignature(label: "fromDate", name: "date", type: "Date")
+                    ],
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
+            .method(withSignature:
+                FunctionSignature(
+                    name: "date",
+                    parameters: [
+                        ParameterSignature(label: "byAdding", name: "component",
+                                           type: .nested(["Calendar", "Component"])),
+                        ParameterSignature(name: "value", type: "Int"),
+                        ParameterSignature(label: "to", name: "date", type: "Date")
+                    ],
+                    returnType: .optional("Date")
+                ).makeSignatureMapping(
+                    from:
+                    FunctionSignature(
+                        name: "dateByAddingUnit",
+                        parameters: [
+                            ParameterSignature(label: nil, name: "component",
+                                               type: .nested(["Calendar", "Component"])),
+                            ParameterSignature(name: "value", type: "Int"),
+                            ParameterSignature(label: "toDate", name: "date", type: "Date"),
+                            ParameterSignature(name: "options", type: "NSCalendarOptions")
+                        ], returnType: .optional("Date")
+                    ),
+                    arguments: [
+                        .asIs,
+                        .labeled("value", .asIs),
+                        .labeled("to", .asIs)
                     ],
                     in: transformations,
                     annotations: annotations
@@ -183,6 +217,112 @@ public enum NSMutableArrayCompoundType {
                     parameters: [
                         ParameterSignature(label: nil, name: "anObject", type: .any)
                     ],
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
+        
+        return (type.build(), transformations.transformations)
+    }
+}
+
+public enum NSDateFormatterCompoundType {
+    private static var singleton: CompoundedMappingType = {
+        let typeAndMappings = createType()
+        
+        return CompoundedMappingType(knownType: typeAndMappings.0,
+                                     transformations: typeAndMappings.1)
+    }()
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func createType() -> (KnownType, [PostfixTransformation]) {
+        let transformations = TransformationsSink()
+        let annotations: AnnotationsSink = AnnotationsSink()
+        var type = KnownTypeBuilder(typeName: "DateFormatter", supertype: "Formatter")
+        
+        type.useSwiftSignatureMatching = true
+        
+        type = type
+            .property(named: "dateFormat", type: .implicitUnwrappedOptional(.string))
+            .createPropertyFromMethods(getterName: "dateFormat",
+                                       setterName: "setDateFormat",
+                                       in: transformations)
+        
+        type = type
+            .method(withSignature:
+                FunctionSignature(
+                    name: "string",
+                    parameters: [
+                        ParameterSignature(label: "from", name: "date", type: "Date")
+                    ],
+                    returnType: .string
+                ).makeSignatureMapping(
+                    fromMethodNamed: "stringFromDate",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "date", type: "Date")
+                    ],
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            ).method(withSignature:
+                FunctionSignature(
+                    name: "date",
+                    parameters: [
+                        ParameterSignature(label: "from", name: "string", type: "Date")
+                    ],
+                    returnType: .optional("Date")
+                ).makeSignatureMapping(
+                    fromMethodNamed: "dateFromString",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "date", type: "Date")
+                    ],
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
+        
+        return (type.build(), transformations.transformations)
+    }
+}
+
+public enum NSDateCompoundType {
+    private static var singleton: CompoundedMappingType = {
+        let typeAndMappings = createType()
+        
+        return CompoundedMappingType(knownType: typeAndMappings.0,
+                                     transformations: typeAndMappings.1)
+    }()
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func createType() -> (KnownType, [PostfixTransformation]) {
+        let transformations = TransformationsSink()
+        let annotations: AnnotationsSink = AnnotationsSink()
+        var type = KnownTypeBuilder(typeName: "Date", supertype: "NSObject")
+        
+        type.useSwiftSignatureMatching = true
+        
+        type = type
+            .property(named: "timeIntervalSince1970", type: "TimeInterval")
+        
+        type = type
+            .method(withSignature:
+                FunctionSignature(
+                    name: "addingTimeInterval",
+                    parameters: [
+                        ParameterSignature(label: nil, name: "timeInterval", type: "TimeInterval")
+                    ],
+                    returnType: "Date"
+                ).makeSignatureMapping(
+                    fromMethodNamed: "dateByAddingTimeInterval",
                     in: transformations,
                     annotations: annotations
                 ),

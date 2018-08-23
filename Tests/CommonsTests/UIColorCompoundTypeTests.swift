@@ -25,7 +25,10 @@ class UIColorCompoundTypeTests: XCTestCase {
                 static var purple: UIColor { get }
                 static var brown: UIColor { get }
                 static var clear: UIColor { get }
+                // Convert from 'CGColor'
                 var cgColor: CGColor { get }
+                
+                // Convert from 'CIColor'
                 var ciColor: CGColor { get }
             }
             """)

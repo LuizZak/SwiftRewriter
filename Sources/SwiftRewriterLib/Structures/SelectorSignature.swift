@@ -12,6 +12,12 @@ public struct SelectorSignature: Equatable, Codable {
 }
 
 public extension FunctionCallPostfix {
+    public func identifierWith(methodName: String) -> FunctionIdentifier {
+        let arguments = self.arguments.map { $0.label }
+        
+        return FunctionIdentifier(name: methodName, parameterNames: arguments)
+    }
+    
     /// Generates an Objective-C selector from this function call united with
     /// a given method name.
     public func selectorWith(methodName: String) -> SelectorSignature {

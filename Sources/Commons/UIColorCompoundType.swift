@@ -15,7 +15,6 @@ public enum UIColorCompoundType {
     
     static func createType() -> (KnownType, [PostfixTransformation]) {
         let transformations = TransformationsSink()
-        let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIColor", supertype: "NSObject")
         
         type.useSwiftSignatureMatching = true
@@ -61,6 +60,31 @@ extension KnownTypeBuilder {
         
         transformations.addPropertyRenaming(old: old, new: property.name)
         
-        return self
+        let annotation = "Convert from '\(old)'"
+        
+        return self.annotationgLastProperty(annotation: annotation)
+    }
+    
+    func createPropertyFromMethods(getterName: String,
+                                   setterName: String?,
+                                   in transformations: TransformationsSink) -> KnownTypeBuilder {
+        
+        guard let property = lastProperty else {
+            assertionFailure("Must be called after a call to `.property`")
+            return self
+        }
+        
+        transformations
+            .addPropertyFromMethods(property: property.name,
+                                    getter: getterName,
+                                    setter: setterName)
+        
+        var annotation = "Convert from func \(getterName)()"
+        
+        if let setterName = setterName {
+            annotation += " / func \(setterName)(\(property.storage.type))"
+        }
+        
+        return self.annotationgLastProperty(annotation: annotation)
     }
 }

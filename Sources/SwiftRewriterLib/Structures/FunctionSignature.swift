@@ -7,6 +7,10 @@ public struct FunctionSignature: Equatable, Codable {
     public var returnType: SwiftType
     public var parameters: [ParameterSignature]
     
+    public var asIdentifier: FunctionIdentifier {
+        return FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
+    }
+    
     public var asSelector: SelectorSignature {
         return
             SelectorSignature(

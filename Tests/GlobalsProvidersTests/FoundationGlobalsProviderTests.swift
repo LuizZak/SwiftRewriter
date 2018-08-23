@@ -25,5 +25,13 @@ class FoundationGlobalsProviderTests: BaseGlobalsProviderTestCase {
     func testDefinedCalendar() {
         assertDefined(typeName: "Calendar")
     }
+    
+    func testDefinedDateFormatter() {
+        assertDefined(typeName: "DateFormatter")
+    }
+    
+    func testDefinedDate() {
+        assertDefined(typeName: "Date")
+    }
 
 }

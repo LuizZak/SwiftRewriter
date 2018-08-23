@@ -358,6 +358,13 @@ public struct KnownTypeBuilder {
         return new
     }
     
+    public func annotationgLastProperty(annotation: String) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.properties[new.type.properties.count - 1].annotations.append(annotation)
+        
+        return new
+    }
+    
     public func protocolConformance(protocolName: String) -> KnownTypeBuilder {
         var new = clone()
         

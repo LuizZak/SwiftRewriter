@@ -6,7 +6,7 @@ open class SyntaxNode {
     internal(set) public weak var parent: SyntaxNode? {
         willSet {
             assert(newValue == nil || parent == nil || parent === newValue,
-                   "Reassigning node that already has parent")
+                   "Reassigning node that already has a parent")
         }
     }
     

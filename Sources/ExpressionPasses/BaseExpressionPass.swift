@@ -75,44 +75,47 @@ public class BaseExpressionPass: ASTRewriterPass {
                     }
                 }
         
-        let methodMappings = compoundedType.transformations.compactMap { $0.signatureMapping }
-        let propertyMappings = compoundedType.transformations.compactMap { $0.propertyMapping }
-        
         transformers.append(contentsOf:
-            propertyMappings.map { mapping -> PostfixInvocationTransformer in
-                return
-                    PropertyInvocationTransformer(
-                        baseExpressionMatcher: instanceExpressionMatcher,
-                        oldName: mapping.old,
-                        newName: mapping.new)
+            compoundedType.transformations.map { transform in
+                switch transform {
+                // Property rename from value.<old> -> value.<new>
+                case let .property(old, new):
+                    return
+                        PropertyInvocationTransformer(
+                            baseExpressionMatcher: instanceExpressionMatcher,
+                            oldName: old,
+                            newName: new
+                        )
+                
+                // Method renaming/argument rearranging
+                case .method(let mapping):
+                    let baseExpressionMatcher: ValueMatcher<Expression>
+                    
+                    if mapping.isStatic {
+                        baseExpressionMatcher = staticTypeExpressionMatcher
+                    } else {
+                        
+                        baseExpressionMatcher = instanceExpressionMatcher
+                    }
+                    
+                    return
+                        MethodInvocationTransformer(
+                            baseExpressionMatcher: baseExpressionMatcher,
+                            invocationMatcher: mapping
+                        )
+                    
+                // Getter or getter/setter pair conversion to property name
+                case let .propertyFromMethods(property, getterName, setterName):
+                    return
+                        MethodsToPropertyTransformer(
+                            baseExpressionMatcher: instanceExpressionMatcher,
+                            getterName: getterName,
+                            setterName: setterName,
+                            propertyName: property
+                        )
+                }
             }
         )
-        
-        transformers.append(contentsOf:
-            methodMappings.map { mapping -> PostfixInvocationTransformer in
-                let baseExpressionMatcher: ValueMatcher<Expression>
-                
-                if mapping.from.isStatic {
-                    baseExpressionMatcher = staticTypeExpressionMatcher
-                } else {
-                    
-                    baseExpressionMatcher = instanceExpressionMatcher
-                }
-                
-                return
-                    MethodInvocationTransformer(
-                        baseExpressionMatcher: baseExpressionMatcher,
-                        methodSignature: mapping.from,
-                        newMethodName: mapping.to.name,
-                        argumentRewriters: mapping.to.parameters.map { arg in
-                            if let label = arg.label {
-                                return .labeled(label, .asIs)
-                            } else {
-                                return .asIs
-                            }
-                        },
-                        argumentTypes: mapping.to.parameters.map { $0.type })
-            })
     }
 }
 

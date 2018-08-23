@@ -916,6 +916,7 @@ public enum UIViewCompoundType {
 }
 
 extension FunctionSignature {
+    
     func makeSignatureMapping(fromMethodNamed name: String,
                               in transformsSink: TransformationsSink,
                               annotations: AnnotationsSink) -> FunctionSignature {
@@ -926,7 +927,9 @@ extension FunctionSignature {
                               returnType: returnType,
                               isStatic: isStatic)
         
-        return makeSignatureMapping(from: signature, in: transformsSink, annotations: annotations)
+        return makeSignatureMapping(from: signature,
+                                    in: transformsSink,
+                                    annotations: annotations)
         
     }
     
@@ -945,7 +948,9 @@ extension FunctionSignature {
                               returnType: returnType,
                               isStatic: isStatic)
         
-        return makeSignatureMapping(from: signature, in: transformsSink, annotations: annotations)
+        return makeSignatureMapping(from: signature,
+                                    in: transformsSink,
+                                    annotations: annotations)
     }
     
     func makeSignatureMapping(fromMethodNamed name: String,
@@ -960,15 +965,85 @@ extension FunctionSignature {
                               returnType: returnType ?? self.returnType,
                               isStatic: isStatic)
         
-        return makeSignatureMapping(from: signature, in: transformsSink, annotations: annotations)
+        return makeSignatureMapping(from: signature,
+                                    in: transformsSink,
+                                    annotations: annotations)
     }
     
     func makeSignatureMapping(from signature: FunctionSignature,
                               in transformsSink: TransformationsSink,
                               annotations: AnnotationsSink) -> FunctionSignature {
         
-        let mapping = SignatureMapper(from: signature, to: self)
-        transformsSink.addMethodMapping(mapping)
+        let builder = MethodInvocationRewriterBuilder()
+        
+        builder.renaming(to: name)
+        builder.returnType(returnType)
+        
+        for param in parameters {
+            if let label = param.label {
+                builder.addingArgument(strategy: .labeled(label, .asIs),
+                                       type: param.type)
+            } else {
+                builder.addingArgument(strategy: .asIs,
+                                       type: param.type)
+            }
+        }
+        
+        transformsSink.addMethodTransform(identifier: signature.asIdentifier,
+                                          isStatic: signature.isStatic,
+                                          transformer: builder.build())
+        
+        let annotation =
+        "Convert from \(TypeFormatter.asString(signature: signature, includeName: true))"
+        
+        annotations.addAnnotation(annotation, newTag: AnyEquatable(self))
+        
+        return self
+    }
+    
+    func makeSignatureMapping(from signature: FunctionSignature,
+                              arguments: [ArgumentRewritingStrategy],
+                              in transformsSink: TransformationsSink,
+                              annotations: AnnotationsSink) -> FunctionSignature {
+        
+        let builder = MethodInvocationRewriterBuilder()
+        
+        builder.renaming(to: name)
+        builder.returnType(returnType)
+        
+        for (param, type) in zip(arguments, parameters.map { $0.type }) {
+            builder.addingArgument(strategy: param, type: type)
+        }
+        
+        transformsSink.addMethodTransform(identifier: signature.asIdentifier,
+                                          isStatic: signature.isStatic,
+                                          transformer: builder.build())
+        
+        let annotation =
+            "Convert from \(TypeFormatter.asString(signature: signature, includeName: true))"
+        
+        annotations.addAnnotation(annotation, newTag: AnyEquatable(self))
+        
+        return self
+    }
+    
+    func makeSignatureMapping(from signature: FunctionSignature,
+                              argumentGenerators: [SignatureMapper.ArgumentGenerator],
+                              in transformsSink: TransformationsSink,
+                              annotations: AnnotationsSink) -> FunctionSignature {
+        
+        let builder = MethodInvocationRewriterBuilder()
+        
+        builder.renaming(to: name)
+        builder.returnType(returnType)
+        
+        for param in argumentGenerators {
+            builder.addingArgument(strategy: param.argumentStrategy, type: param.type)
+        }
+        
+        transformsSink.addMethodTransform(identifier: signature.asIdentifier,
+                                          isStatic: signature.isStatic,
+                                          transformer: builder.build())
         
         let annotation =
             "Convert from \(TypeFormatter.asString(signature: signature, includeName: true))"
@@ -1013,18 +1088,37 @@ class AnnotationsSink {
 /// Collects expression transformations created during type creation
 class TransformationsSink {
     private var propertyRenames: [(old: String, new: String)] = []
-    private var mappings: [SignatureMapper] = []
+    private var mappings: [MethodInvocationTransformerMatcher] = []
+    private var postfixTransformations: [PostfixTransformation] = []
     
     var transformations: [PostfixTransformation] {
         return propertyRenames.map { .property(old: $0.old, new: $0.new) }
-            + mappings.map { .method($0) }
+            + mappings.map { .method($0) } + postfixTransformations
     }
     
     func addPropertyRenaming(old: String, new: String) {
         propertyRenames.append((old, new))
     }
     
-    func addMethodMapping(_ mapping: SignatureMapper) {
-        mappings.append(mapping)
+    func addMethodTransform(identifier: FunctionIdentifier,
+                            isStatic: Bool,
+                            transformer: MethodInvocationRewriter) {
+        
+        let matcher =
+            MethodInvocationTransformerMatcher(
+                identifier: identifier,
+                isStatic: isStatic,
+                transformer: transformer)
+        
+        mappings.append(matcher)
+        
+    }
+    
+    func addPropertyFromMethods(property: String, getter: String, setter: String?) {
+        postfixTransformations.append(
+            .propertyFromMethods(property: property,
+                                 getterName: getter,
+                                 setterName: setter)
+        )
     }
 }

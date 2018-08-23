@@ -4,6 +4,7 @@ import Foundation
 import SwiftRewriterLib
 import SwiftAST
 import Utils
+import Commons
 
 public class CoreGraphicsExpressionPass: BaseExpressionPass {
     public required init(context: ASTRewriterPassContext) {

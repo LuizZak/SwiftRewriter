@@ -12,6 +12,8 @@ class FoundationCompoundTypesTests: XCTestCase {
             class Calendar: NSObject {
                 // Convert from component(_ component: Calendar.Component, fromDate date: Date) -> Int
                 func component(_ component: Calendar.Component, from date: Date) -> Int
+                // Convert from dateByAddingUnit(_ unit: Calendar.Component, value: Int, toDate: Date, options: Int) -> Date?
+                func date(byAdding: Calendar.Component, value: Int, to: Date) -> Date?
             }
             """)
     }
@@ -45,6 +47,24 @@ class FoundationCompoundTypesTests: XCTestCase {
                 
                 // Convert from removeObject(_ anObject: Any)
                 func remove(_ anObject: Any)
+            }
+            """)
+    }
+    
+    func testNSDateFormatterDefinition() {
+        let type = FoundationCompoundTypes.nsDateFormatter.create()
+        
+        assertSignature(type: type, matches: """
+            class DateFormatter: Formatter {
+                // Convert from func dateFormat() / func setDateFormat(String!)
+                var dateFormat: String!
+                
+                
+                // Convert from stringFromDate(_ date: Date) -> String
+                func string(from date: Date) -> String
+                
+                // Convert from dateFromString(_ date: Date) -> Date?
+                func date(from string: Date) -> Date?
             }
             """)
     }
