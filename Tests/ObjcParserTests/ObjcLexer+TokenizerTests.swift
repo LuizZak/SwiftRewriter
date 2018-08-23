@@ -1,10 +1,3 @@
-//
-//  ObjcLexer+TokenizerTests.swift
-//  ObjcParserTests
-//
-//  Created by Luiz Silva on 22/01/2018.
-//
-
 import XCTest
 import GrammarModels
 @testable import ObjcParser

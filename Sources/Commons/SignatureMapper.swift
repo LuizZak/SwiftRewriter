@@ -11,28 +11,4 @@ public class SignatureMapper {
     public init(transformer: MethodInvocationTransformerMatcher) {
         self.transformer = transformer
     }
-    
-    func canApply(to signature: FunctionSignature) -> Bool {
-        return signature.asIdentifier == transformer.identifier
-    }
-    
-    func apply(to signature: inout FunctionSignature) -> Bool {
-        if !canApply(to: signature) {
-            return false
-        }
-        
-        signature = transformer.transformer.rewriteSignature(signature)
-        
-        return true
-    }
-    
-    public class ArgumentGenerator {
-        public let argumentStrategy: ArgumentRewritingStrategy
-        public let type: SwiftType
-        
-        public init(argumentStrategy: ArgumentRewritingStrategy, type: SwiftType) {
-            self.argumentStrategy = argumentStrategy
-            self.type = type
-        }
-    }
 }

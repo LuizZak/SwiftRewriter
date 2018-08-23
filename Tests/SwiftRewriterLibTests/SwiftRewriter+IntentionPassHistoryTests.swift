@@ -1,10 +1,3 @@
-//
-//  SwiftRewriter+IntentionPassHistoryTests.swift
-//  SwiftRewriterLibTests
-//
-//  Created by Luiz Silva on 27/02/2018.
-//
-
 import XCTest
 import SwiftRewriterLib
 import SwiftAST

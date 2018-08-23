@@ -1,10 +1,3 @@
-//
-//  FunctionInvocationTransformerTests.swift
-//  ExpressionPassesTests
-//
-//  Created by Luiz Fernando Silva on 06/03/2018.
-//
-
 import XCTest
 import SwiftAST
 import SwiftRewriterLib

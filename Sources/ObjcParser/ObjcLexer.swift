@@ -1,10 +1,3 @@
-//
-//  ObjcLexer.swift
-//  ObjcParser
-//
-//  Created by Luiz Silva on 22/01/2018.
-//
-
 import MiniLexer
 import GrammarModels
 

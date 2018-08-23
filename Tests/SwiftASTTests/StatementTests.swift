@@ -1,10 +1,3 @@
-//
-//  StatementTests.swift
-//  SwiftASTTests
-//
-//  Created by Luiz Fernando Silva on 03/03/2018.
-//
-
 import XCTest
 import SwiftAST
 

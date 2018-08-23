@@ -1,10 +1,3 @@
-//
-//  ValueMatcher+MatchersTests.swift
-//  SwiftASTTests
-//
-//  Created by Luiz Fernando Silva on 21/05/2018.
-//
-
 import XCTest
 import SwiftAST
 

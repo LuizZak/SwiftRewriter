@@ -1,10 +1,3 @@
-//
-//  SwiftWriterTests.swift
-//  SwiftRewriterLibTests
-//
-//  Created by Luiz Fernando Silva on 26/07/2018.
-//
-
 import XCTest
 import ObjcParser
 import SwiftAST

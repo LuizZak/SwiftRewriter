@@ -994,32 +994,6 @@ extension FunctionSignature {
         
         return self
     }
-    
-    func makeSignatureMapping(from signature: FunctionSignature,
-                              argumentGenerators: [SignatureMapper.ArgumentGenerator],
-                              in transformsSink: TransformationsSink,
-                              annotations: AnnotationsSink) -> FunctionSignature {
-        
-        let builder = MethodInvocationRewriterBuilder()
-        
-        builder.renaming(to: name)
-        builder.returnType(returnType)
-        
-        for param in argumentGenerators {
-            builder.addingArgument(strategy: param.argumentStrategy, type: param.type)
-        }
-        
-        transformsSink.addMethodTransform(identifier: signature.asIdentifier,
-                                          isStatic: signature.isStatic,
-                                          transformer: builder.build())
-        
-        let annotation =
-            "Convert from \(TypeFormatter.asString(signature: signature, includeName: true))"
-        
-        annotations.addAnnotation(annotation, newTag: AnyEquatable(self))
-        
-        return self
-    }
 }
 
 struct AnyEquatable: Equatable {

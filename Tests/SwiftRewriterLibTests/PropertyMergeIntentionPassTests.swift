@@ -1,10 +1,3 @@
-//
-//  PropertyMergeIntentionPassTests.swift
-//  SwiftRewriterLibTests
-//
-//  Created by Luiz Silva on 15/02/2018.
-//
-
 import XCTest
 import SwiftRewriterLib
 
