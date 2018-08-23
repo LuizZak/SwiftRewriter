@@ -655,8 +655,8 @@ enum SwiftTypeToken: String, TokenProtocol {
     case ellipsis = "..."
     case functionArrow = "->"
     /// An arbitrary identifier token
-    case identifier = "identifier"
-    case `inout` = "inout"
+    case identifier
+    case `inout`
     case questionMark = "?"
     case exclamationMark = "!"
     case colon = ":"

@@ -248,9 +248,9 @@ public enum NSDateFormatterCompoundType {
         
         type = type
             .property(named: "dateFormat", type: .implicitUnwrappedOptional(.string))
-            .createPropertyFromMethods(getterName: "dateFormat",
-                                       setterName: "setDateFormat",
-                                       in: transformations)
+            ._createPropertyFromMethods(getterName: "dateFormat",
+                                        setterName: "setDateFormat",
+                                        in: transformations)
         
         type = type
             .method(withSignature:

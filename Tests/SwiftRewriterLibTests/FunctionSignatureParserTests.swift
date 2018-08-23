@@ -68,9 +68,99 @@ class FunctionSignatureParserTests: XCTestCase {
         )
     }
     
+    func testParseEmptyFunctionSignature() {
+        assert(string: "function()",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+    }
+    
+    func testFunctionSignatureWithReturn() {
+        assert(string: "function() -> Int",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [],
+                returnType: .int,
+                isStatic: false
+            )
+        )
+    }
+    
+    func testFunctionSignatureWithParameters() {
+        assert(string: "function(_ int: Int)",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [
+                    ParameterSignature(label: nil, name: "int", type: .int)
+                ],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+        assert(string: "function(_ int: Int) -> Double",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [
+                    ParameterSignature(label: nil, name: "int", type: .int)
+                ],
+                returnType: .double,
+                isStatic: false
+            )
+        )
+    }
+    
+    func testFunctionSignatureWithThrows() {
+        assert(string: "function() throws",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+        assert(string: "function() throws -> Int",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [],
+                returnType: .int,
+                isStatic: false
+            )
+        )
+    }
+    
+    func testFunctionSignatureWithRethrows() {
+        assert(string: "function() rethrows",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+        assert(string: "function() rethrows -> Int",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [],
+                returnType: .int,
+                isStatic: false
+            )
+        )
+    }
+    
     func testExtraneousInputError() {
         do {
             _=try FunctionSignatureParser.parseParameters(from: "())")
+            XCTFail("Expected to throw error")
+        } catch {
+            XCTAssertEqual("\(error)", "Error: Extraneous input ')'")
+        }
+        
+        do {
+            _=try FunctionSignatureParser.parseSignature(from: "func())")
             XCTFail("Expected to throw error")
         } catch {
             XCTAssertEqual("\(error)", "Error: Extraneous input ')'")
@@ -100,7 +190,8 @@ class FunctionSignatureParserTests: XCTestCase {
             _=try FunctionSignatureParser.parseParameters(from: "(=)")
             XCTFail("Expected to throw error")
         } catch let lexError as LexerError {
-            XCTAssertEqual(lexError.description(withOffsetsIn: "(=)"), "Error at line 1 column 2: Expected token ')' but found 'eof'")
+            XCTAssertEqual(lexError.description(withOffsetsIn: "(=)"),
+                           "Error at line 1 column 2: Expected token ')' but found 'eof'")
         } catch {
             XCTFail("Wrong error type \(type(of: error))")
         }
@@ -117,6 +208,24 @@ extension FunctionSignatureParserTests {
                     Expected to parse '\(string)' into parameter signature \
                     \(TypeFormatter.asString(parameters: expected)) but received \
                     \(TypeFormatter.asString(parameters: parsed))
+                    """,
+                    inFile: #file, atLine: line, expected: true)
+            }
+        } catch {
+            recordFailure(withDescription: "Error parsing signature: \(error)",
+                          inFile: #file, atLine: line, expected: true)
+        }
+    }
+    
+    func assert(string: String, parseInto expected: FunctionSignature, line: Int = #line) {
+        do {
+            let parsed = try FunctionSignatureParser.parseSignature(from: string)
+            
+            if parsed != expected {
+                recordFailure(withDescription: """
+                    Expected to parse '\(string)' into function signature \
+                    \(TypeFormatter.asString(signature: expected)) but received \
+                    \(TypeFormatter.asString(signature: parsed))
                     """,
                     inFile: #file, atLine: line, expected: true)
             }

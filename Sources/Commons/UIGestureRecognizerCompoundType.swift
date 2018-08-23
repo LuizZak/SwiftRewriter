@@ -38,6 +38,16 @@ public enum UIGestureRecognizerCompoundType {
                 ),
                     annotations: annotations.annotations
             )
+            .method(withSignature:
+                FunctionSignature(signatureString:
+                    "require(toFail otherGestureRecognizer: UIGestureRecognizer)"
+                ).makeSignatureMapping(fromSignature:
+                    "requireGestureRecognizerToFail(_ otherGestureRecognizer: UIGestureRecognizer)",
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
         
         return (type.build(), transformations.transformations)
     }

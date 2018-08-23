@@ -25,9 +25,9 @@ public enum UIColorCompoundType {
         // Properties
         type = type
             .property(named: "cgColor", type: "CGColor", accessor: .getter)
-            .createPropertyRename(from: "CGColor", in: transformations)
+            ._createPropertyRename(from: "CGColor", in: transformations)
             .property(named: "ciColor", type: "CGColor", accessor: .getter)
-            .createPropertyRename(from: "CIColor", in: transformations)
+            ._createPropertyRename(from: "CIColor", in: transformations)
         
         // Static constants
         type = type
@@ -52,7 +52,7 @@ public enum UIColorCompoundType {
 }
 
 extension KnownTypeBuilder {
-    func createPropertyRename(from old: String, in transformations: TransformationsSink) -> KnownTypeBuilder {
+    func _createPropertyRename(from old: String, in transformations: TransformationsSink) -> KnownTypeBuilder {
         guard let property = lastProperty else {
             assertionFailure("Must be called after a call to `.property`")
             return self
@@ -65,9 +65,9 @@ extension KnownTypeBuilder {
         return self.annotationgLastProperty(annotation: annotation)
     }
     
-    func createPropertyFromMethods(getterName: String,
-                                   setterName: String?,
-                                   in transformations: TransformationsSink) -> KnownTypeBuilder {
+    func _createPropertyFromMethods(getterName: String,
+                                    setterName: String?,
+                                    in transformations: TransformationsSink) -> KnownTypeBuilder {
         
         guard let property = lastProperty else {
             assertionFailure("Must be called after a call to `.property`")

@@ -42,10 +42,17 @@ class UIViewCompoundTypeTests: XCTestCase {
                 var insetsLayoutMarginsFromSafeArea: Bool
                 var intrinsicContentSize: CGSize { get }
                 var isExclusiveTouch: Bool
+                // Convert from 'focused'
                 var isFocused: Bool { get }
+                
+                // Convert from 'hidden'
                 var isHidden: Bool
                 var isMultipleTouchEnabled: Bool
+                
+                // Convert from 'opaque'
                 var isOpaque: Bool
+                
+                // Convert from 'userInteractionEnabled'
                 var isUserInteractionEnabled: Bool
                 var lastBaselineAnchor: NSLayoutYAxisAnchor { get }
                 var layer: CALayer { get }
@@ -77,6 +84,7 @@ class UIViewCompoundTypeTests: XCTestCase {
                 
                 init(frame: CGRect)
                 static func addKeyframe(withRelativeStartTime frameStartTime: Double, relativeDuration frameDuration: Double, animations: () -> Void)
+                
                 // Convert from static animateWithDuration(_ duration: TimeInterval, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animate(withDuration duration: TimeInterval, animations: () -> Void, completion: ((Bool) -> Void)?)
                 

@@ -42,7 +42,8 @@ class UIKitCorrectorIntentionPassTests: XCTestCase {
                     ParameterSignature(label: "toView",
                                        name: "view",
                                        type: .implicitUnwrappedOptional("UIView"))
-                ])
+                ],
+                returnType: "CGPoint")
         
         let expectedSignature =
             FunctionSignature(
@@ -55,7 +56,8 @@ class UIKitCorrectorIntentionPassTests: XCTestCase {
                     ParameterSignature(label: "to",
                                        name: "view",
                                        type: .optional("UIView"))
-                ])
+                ],
+                returnType: "CGPoint")
         
         assert(sut: UIKitCorrectorIntentionPass(),
                convertsSignature: inputSignature,

@@ -12,8 +12,9 @@ class FoundationCompoundTypesTests: XCTestCase {
             class Calendar: NSObject {
                 // Convert from component(_ component: Calendar.Component, fromDate date: Date) -> Int
                 func component(_ component: Calendar.Component, from date: Date) -> Int
-                // Convert from dateByAddingUnit(_ unit: Calendar.Component, value: Int, toDate: Date, options: Int) -> Date?
-                func date(byAdding: Calendar.Component, value: Int, to: Date) -> Date?
+                
+                // Convert from dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?
+                func date(byAdding component: Calendar.Component, value: Int, to date: Date) -> Date?
             }
             """)
     }

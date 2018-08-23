@@ -69,10 +69,14 @@ public enum UIViewCompoundType {
             .property(named: "intrinsicContentSize", type: "CGSize", accessor: .getter)
             .property(named: "isExclusiveTouch", type: .bool)
             .property(named: "isFocused", type: .bool, accessor: .getter)
+            ._createPropertyRename(from: "focused", in: transformations)
             .property(named: "isHidden", type: .bool)
+            ._createPropertyRename(from: "hidden", in: transformations)
             .property(named: "isMultipleTouchEnabled", type: .bool)
             .property(named: "isOpaque", type: .bool)
+            ._createPropertyRename(from: "opaque", in: transformations)
             .property(named: "isUserInteractionEnabled", type: .bool)
+            ._createPropertyRename(from: "userInteractionEnabled", in: transformations)
             .property(named: "lastBaselineAnchor", type: "NSLayoutYAxisAnchor", accessor: .getter)
             .property(named: "layer", type: "CALayer", accessor: .getter)
             .property(named: "layoutGuides", type: .array("UILayoutGuide"), accessor: .getter)
@@ -409,19 +413,13 @@ public enum UIViewCompoundType {
         type = type
             // Methods
             .method(withSignature:
-                FunctionSignature(
-                    name: "addConstraint",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "constraint", type: "NSLayoutConstraint")
-                    ]
+                FunctionSignature(signatureString:
+                    "addConstraint(_ constraint: NSLayoutConstraint)"
                 )
             )
             .method(withSignature:
-                FunctionSignature(
-                    name: "addConstraints",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "constraints", type: .array("NSLayoutConstraint"))
-                    ]
+                FunctionSignature(signatureString:
+                    "addConstraints(_ constraints: [NSLayoutConstraint])"
                 )
             )
             .method(withSignature:
@@ -468,16 +466,10 @@ public enum UIViewCompoundType {
                 )
             )
             .method(withSignature:
-                FunctionSignature(
-                    name: "bringSubview",
-                    parameters: [
-                        ParameterSignature(label: "toFront", name: "view", type: "UIView")
-                    ]
+                FunctionSignature(signatureString:
+                    "bringSubview(toFront view: UIView)"
                 ).makeSignatureMapping(
-                    fromMethodNamed: "bringSubviewToFront",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "view", type: "UIView")
-                    ],
+                    fromSignature: "bringSubviewToFront(_ view: UIView)",
                     in: transformations,
                     annotations: annotations
                 ),
@@ -511,76 +503,44 @@ public enum UIViewCompoundType {
                 )
             )
             .method(withSignature:
-                FunctionSignature(
-                    name: "convert",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
-                        ParameterSignature(label: "from", name: "view", type: .optional("UIView"))
-                    ],
-                    returnType: "CGPoint"
+                FunctionSignature(signatureString:
+                    "convert(_ point: CGPoint, from view: UIView?) -> CGPoint"
                 ).makeSignatureMapping(
-                    fromMethodNamed: "convertPoint",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
-                        ParameterSignature(label: "fromView", name: "view", type: .optional("UIView"))
-                    ],
+                    fromSignature:
+                    "convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint",
                     in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
             )
             .method(withSignature:
-                FunctionSignature(
-                    name: "convert",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
-                        ParameterSignature(label: "to", name: "view", type: .optional("UIView"))
-                    ],
-                    returnType: "CGPoint"
+                FunctionSignature(signatureString:
+                    "convert(_ point: CGPoint, to view: UIView?) -> CGPoint"
                 ).makeSignatureMapping(
-                    fromMethodNamed: "convertPoint",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "point", type: "CGPoint"),
-                        ParameterSignature(label: "toView", name: "view", type: .optional("UIView"))
-                    ],
+                    fromSignature:
+                    "convertPoint(_ point: CGPoint, toView view: UIView?) -> CGPoint",
                     in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
             )
             .method(withSignature:
-                FunctionSignature(
-                    name: "convert",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
-                        ParameterSignature(label: "from", name: "view", type: .optional("UIView"))
-                    ],
-                    returnType: "CGRect"
+                FunctionSignature(signatureString:
+                    "convert(_ rect: CGRect, from view: UIView?) -> CGRect"
                 ).makeSignatureMapping(
-                    fromMethodNamed: "convertRect",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
-                        ParameterSignature(label: "fromView", name: "view", type: .optional("UIView"))
-                    ],
+                    fromSignature:
+                    "convertRect(_ rect: CGRect, fromView view: UIView?) -> CGRect",
                     in: transformations,
                     annotations: annotations
                 ),
                     annotations: annotations.annotations
             )
             .method(withSignature:
-                FunctionSignature(
-                    name: "convert",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
-                        ParameterSignature(label: "to", name: "view", type: .optional("UIView"))
-                    ],
-                    returnType: "CGRect"
+                FunctionSignature(signatureString:
+                    "convert(_ rect: CGRect, to view: UIView?) -> CGRect"
                 ).makeSignatureMapping(
-                    fromMethodNamed: "convertRect",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "rect", type: "CGRect"),
-                        ParameterSignature(label: "toView", name: "view", type: .optional("UIView"))
-                    ],
+                    fromSignature:
+                    "convertRect(_ rect: CGRect, toView view: UIView?) -> CGRect",
                     in: transformations,
                     annotations: annotations
                 ),
@@ -607,11 +567,8 @@ public enum UIViewCompoundType {
             .method(named: "didMoveToSuperview")
             .method(named: "didMoveToWindow")
             .method(withSignature:
-                FunctionSignature(
-                    name: "draw",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "rect", type: "CGRect")
-                    ]
+                FunctionSignature(signatureString:
+                    "draw(_ rect: CGRect)"
                 ).makeSignatureMapping(
                     fromMethodNamed: "drawRect",
                     in: transformations,
@@ -939,14 +896,25 @@ extension FunctionSignature {
                               in transformsSink: TransformationsSink,
                               annotations: AnnotationsSink) -> FunctionSignature {
         
-        let params
-            = try! FunctionSignatureParser.parseParameters(from: parameters)
+        let params = try! FunctionSignatureParser.parseParameters(from: parameters)
         
         let signature =
             FunctionSignature(name: name,
                               parameters: params,
                               returnType: returnType,
                               isStatic: isStatic)
+        
+        return makeSignatureMapping(from: signature,
+                                    in: transformsSink,
+                                    annotations: annotations)
+    }
+    
+    func makeSignatureMapping(fromSignature signature: String,
+                              in transformsSink: TransformationsSink,
+                              annotations: AnnotationsSink) -> FunctionSignature {
+        
+        var signature = try! FunctionSignatureParser.parseSignature(from: signature)
+        signature.isStatic = isStatic
         
         return makeSignatureMapping(from: signature,
                                     in: transformsSink,
@@ -1120,5 +1088,12 @@ class TransformationsSink {
                                  getterName: getter,
                                  setterName: setter)
         )
+    }
+}
+
+extension FunctionSignature {
+    init(isStatic: Bool = false, signatureString: String) {
+        self = try! FunctionSignatureParser.parseSignature(from: signatureString)
+        self.isStatic = isStatic
     }
 }

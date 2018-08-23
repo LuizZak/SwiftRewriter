@@ -130,28 +130,8 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
         }
         
         assertTransform(
-            expression: makeGetter("opaque"),
-            into: exp.dot("isOpaque")
-        ); assertNotifiedChange()
-        
-        assertTransform(
-            expression: makeGetter("hidden"),
-            into: exp.dot("isHidden")
-        ); assertNotifiedChange()
-        
-        assertTransform(
             expression: makeGetter("editable"),
             into: exp.dot("isEditable")
-        ); assertNotifiedChange()
-        
-        assertTransform(
-            expression: makeGetter("userInteractionEnabled"),
-            into: exp.dot("isUserInteractionEnabled")
-        ); assertNotifiedChange()
-        
-        assertTransform(
-            expression: makeGetter("focused"),
-            into: exp.dot("isFocused")
         ); assertNotifiedChange()
         
         assertTransform(

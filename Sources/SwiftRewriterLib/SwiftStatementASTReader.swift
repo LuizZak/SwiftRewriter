@@ -706,6 +706,7 @@ private class ForStatementGenerator {
             }
             
             return .propertyAccess(local, property: member.name)
+            
         default:
             return nil
         }

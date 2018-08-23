@@ -7,6 +7,66 @@ import Utils
 public final class FunctionSignatureParser {
     private typealias Tokenizer = TokenizerLexer<FullToken<Token>>
     
+    /// Parses a function signature from a given input string.
+    ///
+    /// Parsing begins at the function name and the input should not start with
+    /// a `func` keyword.
+    ///
+    /// formal grammar of a function signature:
+    ///
+    /// ```
+    /// function-signature
+    ///     : identifier parameter-signature return-type?
+    ///     : identifier parameter-signature 'throws' return-type?
+    ///     : identifier parameter-signature 'rethrows' return-type?
+    ///     ;
+    ///
+    /// return-type
+    ///     : swift-type
+    /// ```
+    ///
+    /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
+    ///
+    /// - Parameter string: The input string to parse, containing the function
+    /// signature, starting at the function identifier name.
+    /// - Returns: A function signature, with name, parameters and a return type.
+    /// - Throws: Lexing errors, if string is malformed.
+    public static func parseSignature(from string: String) throws -> FunctionSignature {
+        let tokenizer = Tokenizer(input: string)
+        
+        let identifier = try tokenizer.advance(overTokenType: .identifier)
+        let parameters = try parseParameterList(tokenizer: tokenizer)
+        
+        // `throws` | `rethrows`
+        if tokenizer.tokenType(is: .throws) || tokenizer.tokenType(is: .rethrows) {
+            tokenizer.skipToken()
+        }
+        
+        // Return type (optional)
+        var returnType: SwiftType = .void
+        if tokenizer.tokenType(is: .functionArrow) {
+            tokenizer.skipToken()
+            
+            returnType = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        }
+        
+        // Verify extraneous input
+        if !tokenizer.lexer.isEof() {
+            let index = tokenizer.lexer.inputIndex
+            let rem = tokenizer.lexer.consumeRemaining()
+            
+            throw LexerError.syntaxError(index, "Extraneous input '\(rem)'")
+        }
+        
+        return
+            FunctionSignature(
+                name: String(identifier.value),
+                parameters: parameters,
+                returnType: returnType,
+                isStatic: false
+            )
+    }
+    
     /// Parses an array of parameter signatures from a given input string.
     ///
     /// Input must contain the argument list enclosed within their respective
@@ -64,9 +124,22 @@ public final class FunctionSignatureParser {
     /// - Returns: An array of parameter signatures from the input string.
     /// - Throws: Lexing errors, if string is malformed.
     public static func parseParameters(from string: String) throws -> [ParameterSignature] {
-        var parameters: [ParameterSignature] = []
-        
         let tokenizer = Tokenizer(input: string)
+        let params = try parseParameterList(tokenizer: tokenizer)
+        
+        // Verify extraneous input
+        if !tokenizer.lexer.isEof() {
+            let index = tokenizer.lexer.inputIndex
+            let rem = tokenizer.lexer.consumeRemaining()
+            
+            throw LexerError.syntaxError(index, "Extraneous input '\(rem)'")
+        }
+        
+        return params
+    }
+    
+    private static func parseParameterList(tokenizer: Tokenizer) throws -> [ParameterSignature] {
+        var parameters: [ParameterSignature] = []
         
         try tokenizer.advance(overTokenType: .openParens)
         
@@ -100,14 +173,6 @@ public final class FunctionSignatureParser {
         }
         
         try tokenizer.advance(overTokenType: .closeParens)
-        
-        // Verify extraneous input
-        if !tokenizer.lexer.isEof() {
-            let index = tokenizer.lexer.inputIndex
-            let rem = tokenizer.lexer.consumeRemaining()
-            
-            throw LexerError.syntaxError(index, "Extraneous input '\(rem)'")
-        }
         
         return parameters
     }
@@ -163,6 +228,9 @@ public final class FunctionSignatureParser {
         case underscore = "_"
         case `inout`
         case identifier
+        case `throws`
+        case `rethrows`
+        case functionArrow
         case eof
         
         func advance(in lexer: Lexer) throws {
@@ -178,8 +246,14 @@ public final class FunctionSignatureParser {
             switch self {
             case .openParens, .closeParens, .colon, .comma, .underscore, .at:
                 return 1
+            case .functionArrow:
+                return 2
             case .inout:
                 return 5
+            case .throws:
+                return 6
+            case .rethrows:
+                return 8
             case .identifier:
                 return Token.identifierLexer.maximumLength(in: lexer) ?? 0
             case .eof:
@@ -208,14 +282,29 @@ public final class FunctionSignatureParser {
                 }
             }
             
+            if lexer.checkNext(matches: "->") {
+                return .functionArrow
+            }
+            
             guard let next = try? lexer.peek() else {
                 return nil
             }
             
             if Lexer.isLetter(next) {
-                let ident = try? lexer.withTemporaryIndex { try identifierLexer.consume(from: lexer) }
+                guard let ident = try? lexer.withTemporaryIndex(changes: {
+                    try identifierLexer.consume(from: lexer)
+                }) else {
+                    return nil
+                }
+                
                 if ident == "inout" {
                     return .inout
+                }
+                if ident == "throws" {
+                    return .throws
+                }
+                if ident == "rethrows" {
+                    return .rethrows
                 }
                 
                 return .identifier

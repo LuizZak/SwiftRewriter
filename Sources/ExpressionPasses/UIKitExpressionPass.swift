@@ -87,12 +87,8 @@ public class UIKitExpressionPass: BaseExpressionPass {
         }
         
         let conversions: [String: String] = [
-            "hidden": "isHidden",
             "editable": "isEditable",
-            "focused": "isFocused",
-            "firstResponder": "isFirstResponder",
-            "userInteractionEnabled": "isUserInteractionEnabled",
-            "opaque": "isOpaque"
+            "firstResponder": "isFirstResponder"
         ]
         
         guard let converted = conversions[member.name] else {

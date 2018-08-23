@@ -12,6 +12,9 @@ class UIGestureRecognizerCompoundTypeTests: XCTestCase {
             class UIGestureRecognizer: NSObject {
                 // Convert from locationInView(_ view: UIView?) -> CGPoint
                 func location(in view: UIView?) -> CGPoint
+                
+                // Convert from requireGestureRecognizerToFail(_ otherGestureRecognizer: UIGestureRecognizer)
+                func require(toFail otherGestureRecognizer: UIGestureRecognizer)
             }
             """)
     }
