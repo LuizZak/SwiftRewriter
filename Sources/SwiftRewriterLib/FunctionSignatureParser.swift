@@ -22,7 +22,7 @@ public final class FunctionSignatureParser {
     ///     ;
     ///
     /// return-type
-    ///     : swift-type
+    ///     : '->' swift-type
     /// ```
     ///
     /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
