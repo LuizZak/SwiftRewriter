@@ -2,18 +2,13 @@ import SwiftAST
 import SwiftRewriterLib
 
 public enum UIGestureRecognizerCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIGestureRecognizer", supertype: "NSObject")
@@ -49,6 +44,8 @@ public enum UIGestureRecognizerCompoundType {
                     annotations: annotations.annotations
             )
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
     }
 }

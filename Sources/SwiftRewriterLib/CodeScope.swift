@@ -343,6 +343,34 @@ extension IdentifierExpression {
         return self
     }
     
+    public func setDefinition(globalName: String,
+                              type: SwiftType,
+                              isConstant: Bool = false) -> Self {
+        
+        let storage =
+            ValueStorage(type: type,
+                         ownership: .strong,
+                         isConstant: isConstant)
+        
+        definition =
+            Definition
+                .global(CodeDefinition(variableNamed: globalName,
+                                       storage: storage))
+        
+        return self
+    }
+    
+    public func setDefinition(typeName: String) -> Self {
+        definition = Definition.type(named: typeName)
+        
+        return self
+    }
+    
+    public func setDefinition(memberOf type: KnownType, member: KnownMember) -> Self {
+        definition = Definition.member(type: type, member: member)
+        
+        return self
+    }
 }
 
 public extension MemberPostfix {

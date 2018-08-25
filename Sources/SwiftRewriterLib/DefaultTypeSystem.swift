@@ -115,6 +115,15 @@ public class DefaultTypeSystem: TypeSystem {
         return knownTypeProviders.knownType(withName: name)
     }
     
+    public func canonicalName(forTypeName typeName: String) -> String? {
+        let type = resolveAlias(in: typeName)
+        guard let name = typeNameIn(swiftType: type) else {
+            return nil
+        }
+        
+        return knownTypeProviders.canonicalName(for: name)
+    }
+    
     public func composeTypeWithKnownTypes(_ typeNames: [String]) -> KnownType? {
         if typeNames.isEmpty {
             return nil
@@ -428,10 +437,6 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         return internalIsInteger(type) || internalIsInteger(resolveAlias(in: type))
-    }
-    
-    func unalias(typeName: String) -> SwiftType? {
-        return typealiasProviders.unalias(typeName)
     }
     
     public func resolveAlias(in typeName: String) -> SwiftType {
@@ -864,6 +869,10 @@ public class DefaultTypeSystem: TypeSystem {
             return []
         }
         
+        func canonicalName(for typeName: String) -> String? {
+            return nil
+        }
+        
         func makeType(from prot: ProtocolType) -> KnownType {
             let type = ProtocolType_KnownType(protocolType: prot)
             return type
@@ -949,6 +958,10 @@ public class DefaultTypeSystem: TypeSystem {
             
             // TODO: Return all classes listed within TypeDefinitions.classesList
             return []
+        }
+        
+        func canonicalName(for typeName: String) -> String? {
+            return nil
         }
         
         func makeType(from prot: ClassType) -> KnownType {

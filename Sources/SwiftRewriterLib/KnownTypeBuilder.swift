@@ -114,18 +114,22 @@ public struct KnownTypeBuilder {
     }
     
     /// Adds a parameter-less constructor to this type
-    public func constructor(isFailable: Bool = false) -> KnownTypeBuilder {
+    public func constructor(isFailable: Bool = false,
+                            annotations: [String] = []) -> KnownTypeBuilder {
         assert(!type.knownConstructors.contains { $0.parameters.isEmpty },
                "An empty constructor is already provided")
         
-        return constructor(withParameters: [], isFailable: isFailable)
+        return constructor(withParameters: [],
+                           isFailable: isFailable,
+                           annotations: annotations)
     }
     
     /// Adds a new constructor to this type
     public func constructor(shortParameters shortParams: [ParameterTuple],
                             semantics: Set<Semantic> = [],
                             isFailable: Bool = false,
-                            isConvenience: Bool = false) -> KnownTypeBuilder {
+                            isConvenience: Bool = false,
+                            annotations: [String] = []) -> KnownTypeBuilder {
         
         let parameters =
             shortParams.map { tuple in
@@ -135,22 +139,23 @@ public struct KnownTypeBuilder {
         return constructor(withParameters: parameters,
                            semantics: semantics,
                            isFailable: isFailable,
-                           isConvenience: isConvenience)
+                           isConvenience: isConvenience,
+                           annotations: annotations)
     }
     
     /// Adds a new constructor to this type
     public func constructor(withParameters parameters: [ParameterSignature],
                             semantics: Set<Semantic> = [],
-                            annotations: [String] = [],
                             isFailable: Bool = false,
-                            isConvenience: Bool = false) -> KnownTypeBuilder {
+                            isConvenience: Bool = false,
+                            annotations: [String] = []) -> KnownTypeBuilder {
         
         var new = clone()
         let ctor = BuildingKnownConstructor(parameters: parameters,
                                             semantics: semantics,
-                                            annotations: annotations,
                                             isFailable: isFailable,
-                                            isConvenience: isConvenience)
+                                            isConvenience: isConvenience,
+                                            annotations: annotations)
         
         new.type.constructors.append(ctor)
         
@@ -358,7 +363,14 @@ public struct KnownTypeBuilder {
         return new
     }
     
-    public func annotationgLastProperty(annotation: String) -> KnownTypeBuilder {
+    public func annotationgLatestConstructor(annotation: String) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.constructors[new.type.constructors.count - 1].annotations.append(annotation)
+        
+        return new
+    }
+    
+    public func annotationgLatestProperty(annotation: String) -> KnownTypeBuilder {
         var new = clone()
         new.type.properties[new.type.properties.count - 1].annotations.append(annotation)
         
@@ -459,6 +471,12 @@ public struct KnownTypeBuilder {
 }
 
 extension KnownTypeBuilder {
+    /// Returns a reference to the latest constructor added to this `KnownTypeBuilder`
+    /// via a `.constructor(...)` call
+    public var lastConstructor: KnownConstructor? {
+        return type.constructors.last
+    }
+    
     /// Returns a reference to the latest method added to this `KnownTypeBuilder`
     /// via a `.method(...)` call
     public var latestMethod: KnownMethod? {
@@ -565,9 +583,9 @@ extension BuildingKnownType: KnownType {
 private struct BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var semantics: Set<Semantic>
-    var annotations: [String]
     var isFailable: Bool
     var isConvenience: Bool
+    var annotations: [String]
 }
 
 private struct BuildingKnownMethod: KnownMethod, Codable {

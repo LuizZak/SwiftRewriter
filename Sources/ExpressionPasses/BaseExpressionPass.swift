@@ -113,6 +113,15 @@ public class BaseExpressionPass: ASTRewriterPass {
                             setterName: setterName,
                             propertyName: property
                         )
+                    
+                case let .initializer(_, new):
+                    return
+                        FunctionInvocationTransformer(
+                            objcFunctionName: compoundedType.typeName,
+                            toSwiftFunction: compoundedType.typeName,
+                            firstArgumentBecomesInstance: false,
+                            arguments: new.map { $0.argumentRewritingStrategy }
+                        )
                 }
             }
         )
@@ -193,5 +202,15 @@ public extension BaseExpressionPass {
                            setterTransformer: ArgumentRewritingStrategy = .asIs) {
         makeFuncTransform(getter, getterName: swiftName)
         makeFuncTransform(setter, setterName: swiftName, argumentTransformer: setterTransformer)
+    }
+}
+
+private extension ParameterSignature {
+    var argumentRewritingStrategy: ArgumentRewritingStrategy {
+        if let label = label {
+            return .labeled(label, .asIs)
+        }
+        
+        return .asIs
     }
 }

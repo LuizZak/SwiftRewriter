@@ -200,6 +200,10 @@ public extension Sequence where Element == ArgumentRewritingStrategy {
         return requiredArgs
     }
     
+    public func argumentLabels() -> [String?] {
+        return map { $0.label }
+    }
+    
     public static func addingLabels(_ labels: String?...) -> [Element] {
         return labels.map { $0.map { .labeled($0, .asIs) } ?? .asIs }
     }

@@ -5,18 +5,13 @@ import SwiftRewriterLib
 // swiftlint:disable type_body_length
 // swiftlint:disable function_body_length
 public enum UIViewCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIView", supertype: "UIResponder")
@@ -868,7 +863,9 @@ public enum UIViewCompoundType {
                 )
             )
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
     }
 }
 
@@ -1042,6 +1039,10 @@ class TransformationsSink {
         propertyRenames.append((old, new))
     }
     
+    func addInitTransform(from old: [ParameterSignature], to new: [ParameterSignature]) {
+        postfixTransformations.append(.initializer(old: old, new: new))
+    }
+    
     func addMethodTransform(identifier: FunctionIdentifier,
                             isStatic: Bool,
                             transformer: MethodInvocationRewriter) {
@@ -1053,7 +1054,6 @@ class TransformationsSink {
                 transformer: transformer)
         
         mappings.append(matcher)
-        
     }
     
     func addPropertyFromMethods(property: String, getter: String, setter: String?) {
@@ -1069,5 +1069,11 @@ extension FunctionSignature {
     init(isStatic: Bool = false, signatureString: String) {
         self = try! FunctionSignatureParser.parseSignature(from: signatureString)
         self.isStatic = isStatic
+    }
+}
+
+extension Array where Element == ParameterSignature {
+    init(parsingParameters parametersString: String) {
+        self = try! FunctionSignatureParser.parseParameters(from: parametersString)
     }
 }

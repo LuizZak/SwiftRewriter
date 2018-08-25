@@ -6,6 +6,10 @@ import SwiftRewriterLib
 /// information for converting invocations and implementations of methods on
 /// implementers and expression call sites.
 public class CompoundedMappingType {
+    /// Set of alternative names this class can be referenced as, but which are
+    /// not the primary, canonical name.
+    public let nonCanonicalNames: [String]
+    
     public let transformations: [PostfixTransformation]
     
     var knownType: KnownType
@@ -14,11 +18,13 @@ public class CompoundedMappingType {
     
     public init(knownType: KnownType,
                 transformations: [PostfixTransformation],
-                semantics: Set<Semantic> = []) {
+                semantics: Set<Semantic> = [],
+                aliases: [String] = []) {
         
         self.knownType = knownType
         self.transformations = transformations
         self.semantics = semantics
+        self.nonCanonicalNames = aliases
     }
 }
 

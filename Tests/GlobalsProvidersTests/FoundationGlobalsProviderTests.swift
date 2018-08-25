@@ -33,5 +33,10 @@ class FoundationGlobalsProviderTests: BaseGlobalsProviderTestCase {
     func testDefinedDate() {
         assertDefined(typeName: "Date")
     }
+    
+    func testDefinedLocale() {
+        assertDefined(typeName: "Locale")
+        assertDefined(canonicalTypeName: "Locale", forNonCanon: "NSLocale")
+    }
 
 }

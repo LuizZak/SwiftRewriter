@@ -754,4 +754,25 @@ class DefaultTypeSystemTests: XCTestCase {
             SwiftType.string
         )
     }
+    
+    func testCanonicalTypeName() {
+        let provider = CollectionKnownTypeProvider()
+        provider.addCanonicalMapping(nonCanonical: "NSLocale", canonical: "Locale")
+        sut.addKnownTypeProvider(provider)
+        
+        XCTAssertEqual(sut.canonicalName(forTypeName: "NSLocale"), "Locale")
+        XCTAssertNil(sut.canonicalName(forTypeName: "Locale"))
+        XCTAssertNil(sut.canonicalName(forTypeName: "SomeOtherUnexistingTypeName"))
+    }
+    
+    func testCanonicalTypeNameIsResolvedAfterTypealiasExpansion() {
+        let knownTypeProvider = CollectionKnownTypeProvider()
+        let typealiasProvider = CollectionTypealiasProvider()
+        knownTypeProvider.addCanonicalMapping(nonCanonical: "NonCanon", canonical: "Canon")
+        typealiasProvider.addTypealias("NonCanonAlias", "NonCanon")
+        sut.addKnownTypeProvider(knownTypeProvider)
+        sut.addTypealiasProvider(typealiasProvider)
+        
+        XCTAssertEqual(sut.canonicalName(forTypeName: "NonCanonAlias"), "Canon")
+    }
 }

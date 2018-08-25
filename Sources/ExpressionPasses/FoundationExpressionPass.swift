@@ -302,6 +302,7 @@ extension FoundationExpressionPass {
         addCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
         addCompoundedType(FoundationCompoundTypes.nsDateFormatter.create())
         addCompoundedType(FoundationCompoundTypes.nsDate.create())
+        addCompoundedType(FoundationCompoundTypes.nsLocale.create())
     }
     
     func makeFunctionTransformers() {

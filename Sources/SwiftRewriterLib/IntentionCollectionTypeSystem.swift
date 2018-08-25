@@ -254,6 +254,10 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return types
         }
         
+        func canonicalName(for typeName: String) -> String? {
+            return nil
+        }
+        
         func unalias(_ typeName: String) -> SwiftType? {
             if let cache = cache {
                 if let alias = cache.typeAliases[typeName] {

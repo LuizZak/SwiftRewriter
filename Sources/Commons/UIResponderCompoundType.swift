@@ -2,17 +2,13 @@ import SwiftAST
 import SwiftRewriterLib
 
 public enum UIResponderCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let type = createType()
-    
-        return CompoundedMappingType(knownType: type, transformations: [])
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> KnownType {
+    static func createType() -> CompoundedMappingType {
         var type = KnownTypeBuilder(typeName: "UIResponder", supertype: "NSObject")
         
         type.useSwiftSignatureMatching = true
@@ -65,6 +61,6 @@ public enum UIResponderCompoundType {
             .method(named: "touchesMoved",
                     parsingSignature: "(_ touches: Set<UITouch>, with event: UIEvent?)")
         
-        return type.build()
+        return CompoundedMappingType(knownType: type.build(), transformations: [])
     }
 }

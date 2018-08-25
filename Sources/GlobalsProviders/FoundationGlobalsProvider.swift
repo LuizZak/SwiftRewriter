@@ -10,7 +10,14 @@ public class FoundationGlobalsProvider: GlobalsProvider {
     }
     
     public func knownTypeProvider() -> KnownTypeProvider {
-        return CollectionKnownTypeProvider(knownTypes: FoundationGlobalsProvider.provider.types)
+        let provider =
+            CollectionKnownTypeProvider(knownTypes: FoundationGlobalsProvider.provider.types)
+        
+        for (nonCanon, canon) in FoundationGlobalsProvider.provider.canonicalMapping {
+            provider.addCanonicalMapping(nonCanonical: nonCanon, canonical: canon)
+        }
+        
+        return provider
     }
     
     public func typealiasProvider() -> TypealiasProvider {
@@ -31,33 +38,39 @@ private class InnerFoundationGlobalsProvider: BaseGlobalsProvider {
         createNSArray()
         createNSMutableArray()
         createNSCalendar()
+        createNSLocale()
         createNSDateFormatter()
         createNSDate()
     }
     
     func createNSArray() {
         let type = FoundationCompoundTypes.nsArray.create()
-        types.append(type)
+        add(type)
     }
     
     func createNSMutableArray() {
         let type = FoundationCompoundTypes.nsMutableArray.create()
-        types.append(type)
+        add(type)
     }
     
     func createNSCalendar() {
         let type = FoundationCompoundTypes.nsCalendar.create()
-        types.append(type)
+        add(type)
+    }
+    
+    func createNSLocale() {
+        let type = FoundationCompoundTypes.nsLocale.create()
+        add(type)
     }
     
     func createNSDateFormatter() {
         let type = FoundationCompoundTypes.nsDateFormatter.create()
-        types.append(type)
+        add(type)
     }
     
     func createNSDate() {
         let type = FoundationCompoundTypes.nsDate.create()
-        types.append(type)
+        add(type)
     }
     
 }

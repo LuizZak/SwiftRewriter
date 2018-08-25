@@ -44,8 +44,8 @@ class FunctionInvocationTransformerTests: XCTestCase {
     }
     
     /// Tests that the required argument count value also takes into consideration
-    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
-    /// actual number of target arguments.
+    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past
+    /// the actual number of target arguments.
     func testRequiredArgumentCountFromArgIndexInference() {
         let sut =
             FunctionInvocationTransformer(
@@ -65,8 +65,8 @@ class FunctionInvocationTransformerTests: XCTestCase {
     }
     
     /// Tests that the required argument count value also takes into consideration
-    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
-    /// actual number of target arguments.
+    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past
+    /// the actual number of target arguments.
     func testRequiredArgumentCounWithFirstArgumentIsInstanceInference() {
         let sut =
             FunctionInvocationTransformer(
@@ -86,8 +86,8 @@ class FunctionInvocationTransformerTests: XCTestCase {
     }
     
     /// Tests that the required argument count value also takes into consideration
-    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past the
-    /// actual number of target arguments.
+    /// .firstArgIndex's that skip arguments and fetch the n'th argument, past
+    /// the actual number of target arguments.
     func testRequiredArgumentCountFromArgIndexWithFirstArgumentIsInstanceInference() {
         let sut =
             FunctionInvocationTransformer(
@@ -121,8 +121,8 @@ class FunctionInvocationTransformerTests: XCTestCase {
     }
     
     func testFromArgIndex() {
-        // Use the .fromArgIndex argument creation strategy to flip the two arguments
-        // of a function invocation
+        // Use the .fromArgIndex argument creation strategy to flip the two
+        // arguments of a function invocation
         let sut =
             FunctionInvocationTransformer(
                 objcFunctionName: "objc", toSwiftFunction: "swift",
@@ -278,6 +278,8 @@ class FunctionInvocationTransformerTests: XCTestCase {
                 argumentTransformer: .mergingArguments(arg0: 0, arg1: 1, { $0.binary(op: .add, rhs: $1) })
         )
         
+        XCTAssertEqual(sut.requiredArgumentCount, 3)
+        
         XCTAssertEqual(
             // objc(a, b, c)
             sut.attemptApply(on:
@@ -304,5 +306,34 @@ class FunctionInvocationTransformerTests: XCTestCase {
                 Expression
                     .identifier("objc")
                     .call([.identifier("a"), .identifier("b")])))
+    }
+    
+    func testIgnoreFunctionWithExpectedLabeling() {
+        let sut =
+            FunctionInvocationTransformer(
+                objcFunctionName: "function", toSwiftFunction: "function",
+                firstArgumentBecomesInstance: false,
+                arguments: [.asIs, .labeled("label", .asIs)]
+        )
+        
+        XCTAssertEqual(
+            // function(0, 1)
+            sut.attemptApply(on: Expression
+                .identifier("function")
+                .call([.constant(0), .constant(1)])
+            ),
+            // function(0, label: 1)
+            Expression
+                .identifier("function")
+                .call([.unlabeled(.constant(0)), .labeled("label", .constant(1))])
+        )
+        
+        XCTAssertNil(
+            // function(0, label: 1)
+            sut.attemptApply(on: Expression
+                .identifier("function")
+                .call([.unlabeled(.constant(0)), .labeled("label", .constant(1))])
+            )
+        )
     }
 }

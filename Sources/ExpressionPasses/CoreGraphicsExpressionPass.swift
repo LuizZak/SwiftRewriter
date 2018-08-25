@@ -816,4 +816,8 @@ internal extension Sequence where Element == FunctionArgument {
     func hasLabeledArguments() -> Bool {
         return any { $0.isLabeled }
     }
+    
+    func argumentLabels() -> [String?] {
+        return map { $0.label }
+    }
 }

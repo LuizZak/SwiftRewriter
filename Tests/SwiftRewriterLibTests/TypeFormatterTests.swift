@@ -131,7 +131,7 @@ class TypeFormatterTests: XCTestCase {
     func testAsStringKnownType() {
         let type = KnownTypeBuilder(typeName: "A", kind: .struct)
             .constructor()
-            .constructor(shortParameters: [("a", .int), ("b", .int)])
+            .constructor(shortParameters: [("a", .int), ("b", .int)], annotations: ["Annotation"])
             .field(named: "readOnlyField", type: .string, isConstant: true, annotations: ["Annotation"])
             .field(named: "field", type: .string)
             .property(named: "prop", type: .optional(.nsArray), annotations: ["Annotation"])
@@ -161,6 +161,8 @@ class TypeFormatterTests: XCTestCase {
                 var readOnlyProp: A { get }
                 
                 init()
+                
+                // Annotation
                 init(a: Int, b: Int)
                 
                 // Annotation

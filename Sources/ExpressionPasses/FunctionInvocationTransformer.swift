@@ -74,8 +74,8 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
         case .propertyGetter:
             requiredArgumentCount = 1
             
-        case .propertySetter:
-            requiredArgumentCount = 2
+        case .propertySetter(_, let argument):
+            requiredArgumentCount = 2 + (argument.maxArgumentReferenced ?? 0)
         }
     }
     
@@ -149,10 +149,28 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
             return false
         }
         
+        // If a function transformation matches the same exact labels, quit early
+        // as the transformation is already done.
+        switch destinationMember {
+        case .method(let name, _, let args) where objcFunctionName == name:
+            let args = args.argumentLabels()
+            
+            if args == functionCall.arguments.argumentLabels() {
+                return false
+            }
+            
+        default:
+            break
+        }
+        
         return true
     }
     
     public func attemptApply(on postfix: PostfixExpression) -> Expression? {
+        if !canApply(to: postfix) {
+            return nil
+        }
+        
         guard postfix.exp.asIdentifier?.identifier == objcFunctionName else {
             return nil
         }

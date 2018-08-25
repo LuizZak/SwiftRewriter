@@ -89,6 +89,8 @@ public enum TypeFormatter {
             }
             
             for ctor in type.knownConstructors {
+                outputAnnotations(ctor.annotations)
+                
                 o.output(line: "init" + asString(parameters: ctor.parameters))
             }
             for method in type.knownMethods {

@@ -7,21 +7,17 @@ public enum FoundationCompoundTypes {
     public static let nsMutableArray = NSMutableArrayCompoundType.self
     public static let nsDateFormatter = NSDateFormatterCompoundType.self
     public static let nsDate = NSDateCompoundType.self
+    public static let nsLocale = NSLocaleCompoundType.self
 }
 
 public enum CalendarCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "Calendar", supertype: "NSObject")
@@ -83,23 +79,20 @@ public enum CalendarCompoundType {
                     annotations: annotations.annotations
             )
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
     }
 }
 
 public enum NSArrayCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "NSArray", supertype: "NSObject")
@@ -152,23 +145,20 @@ public enum NSArrayCompoundType {
                     annotations: annotations.annotations
             )
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
     }
 }
 
 public enum NSMutableArrayCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "NSMutableArray", supertype: "NSArray")
@@ -223,23 +213,20 @@ public enum NSMutableArrayCompoundType {
                     annotations: annotations.annotations
             )
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
     }
 }
 
 public enum NSDateFormatterCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "DateFormatter", supertype: "Formatter")
@@ -287,31 +274,34 @@ public enum NSDateFormatterCompoundType {
                     annotations: annotations.annotations
             )
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
     }
 }
 
 public enum NSDateCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "Date", supertype: "NSObject")
+        var type = KnownTypeBuilder(typeName: "Date", kind: .struct)
         
         type.useSwiftSignatureMatching = true
         
         type = type
+            .protocolConformances(protocolNames: ["Hashable", "Equatable"])
+        
+        type = type
             .property(named: "timeIntervalSince1970", type: "TimeInterval")
+        
+        type = type
+            .constructor()
         
         type = type
             .method(withSignature:
@@ -329,6 +319,39 @@ public enum NSDateCompoundType {
                     annotations: annotations.annotations
             )
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
+    }
+}
+
+public enum NSLocaleCompoundType {
+    private static var singleton = createType()
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func createType() -> CompoundedMappingType {
+        let transformations = TransformationsSink()
+        let aliases = ["NSLocale"]
+        var type = KnownTypeBuilder(typeName: "Locale", kind: .struct)
+        
+        type.useSwiftSignatureMatching = true
+        
+        type = type
+            .protocolConformances(protocolNames: ["Hashable", "Equatable"])
+        
+        type = type
+            .constructor(shortParameters: [("identifier", .string)])
+            ._createConstructorMapping(fromParameters:
+                Array(parsingParameters: "(localeIdentifier: String)"),
+                in: transformations
+            )
+        
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations,
+                                  aliases: aliases)
     }
 }

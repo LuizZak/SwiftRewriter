@@ -118,7 +118,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
         
         guard let type = types.knownType(withName: typeName) else {
             recordFailure(withDescription: "Expected to find type \(typeName)",
-                inFile: file, atLine: line, expected: true)
+                          inFile: file, atLine: line, expected: true)
             return
         }
         
@@ -134,6 +134,26 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                 but found signature
                 
                 \(typeString.makeDifferenceMarkString(against: signature))
+                """,
+                inFile: file, atLine: line, expected: true)
+        }
+    }
+    
+    func assertDefined(canonicalTypeName: String,
+                       forNonCanon nonCanon: String,
+                       file: String = #file, line: Int = #line) {
+        
+        guard let canonName = types.canonicalName(for: nonCanon) else {
+            recordFailure(withDescription: "Expected to find canonical type mapping for \(nonCanon)",
+                          inFile: file, atLine: line, expected: true)
+            return
+        }
+        
+        if canonName != canonicalTypeName {
+            recordFailure(
+                withDescription: """
+                Expected canonical type '\(nonCanon)' to map to \(canonicalTypeName), \
+                but it maps to \(canonName)
                 """,
                 inFile: file, atLine: line, expected: true)
         }

@@ -62,12 +62,12 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     
     func createUIResponder() {
         let type = UIResponderCompoundType.create()
-        types.append(type)
+        add(type)
     }
     
     func createUIColor() {
         let type = UIColorCompoundType.create()
-        types.append(type)
+        add(type)
     }
     
     func createUIViewController() {
@@ -137,12 +137,12 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     
     func createUIView() {
         let type = UIViewCompoundType.create()
-        types.append(type)
+        add(type)
     }
     
     func createUIGestureRecognizer() {
         let type = UIGestureRecognizerCompoundType.create()
-        types.append(type)
+        add(type)
     }
     
     func createUITableViewCell() {

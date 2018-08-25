@@ -9,17 +9,17 @@ public protocol KnownTypeProvider {
     /// Requests all types contained within this known type provider that match
     /// a given type kind.
     func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType]
+    
+    /// Gets the canonical name for a given type name, in case it has an auxiliary
+    /// canonical name available.
+    func canonicalName(for typeName: String) -> String?
 }
 
 /// Gathers one or more type providers into a single `KnownTypeProvider` interface.
 public class CompoundKnownTypeProvider: KnownTypeProvider {
-    var cacheBarrier = DispatchQueue(label: "com.swiftrewriter.compoundtypeprovider.barrier",
-                                     qos: .default,
-                                     attributes: .concurrent,
-                                     autoreleaseFrequency: .inherit,
-                                     target: nil)
-    var cache: [Int: KnownType]?
-    var usingCache = false
+    
+    private var typesCache = ConcurrentValue<[Int: KnownType]>()
+    private var canonicalTypenameCache = ConcurrentValue<[String: String]>()
     
     public var providers: [KnownTypeProvider]
     
@@ -28,16 +28,24 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func makeCache() {
-        cacheBarrier.sync(flags: .barrier) {
-            cache = [:]
-            usingCache = true
+        typesCache.modifyingState { state in
+            state.value = [:]
+            typesCache.usingCache = true
+        }
+        canonicalTypenameCache.modifyingState { state in
+            state.value = [:]
+            canonicalTypenameCache.usingCache = true
         }
     }
     
     func tearDownCache() {
-        cacheBarrier.sync(flags: .barrier) {
-            cache = nil
-            usingCache = false
+        typesCache.modifyingState { state in
+            state.value = nil
+            typesCache.usingCache = false
+        }
+        canonicalTypenameCache.modifyingState { state in
+            state.value = nil
+            canonicalTypenameCache.usingCache = false
         }
     }
     
@@ -45,14 +53,14 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         providers.append(typeProvider)
         
         // Reset cache to allow types from this type provider to be considered.
-        if usingCache {
+        if typesCache.usingCache {
             tearDownCache()
             makeCache()
         }
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        if usingCache, let type = cacheBarrier.sync(execute: { cache?[name.hashValue] }) {
+        if typesCache.usingCache, let type = typesCache.readingValue({ $0?[name.hashValue] }) {
             return type
         }
         
@@ -70,9 +78,9 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         let type = CompoundKnownType(typeName: name, types: types)
         
-        if usingCache {
-            cacheBarrier.sync(flags: .barrier) {
-                cache?[name.hashValue] = type
+        if typesCache.usingCache {
+            typesCache.modifyingState { state in
+                state.value?[name.hashValue] = type
             }
         }
         
@@ -88,6 +96,30 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         return backing
     }
+    
+    public func canonicalName(for typeName: String) -> String? {
+        if canonicalTypenameCache.usingCache {
+            if let canonical = canonicalTypenameCache.readingValue({ $0?[typeName] }) {
+                return canonical
+            }
+        }
+        
+        for provider in providers {
+            guard let canonical = provider.canonicalName(for: typeName) else {
+                continue
+            }
+            
+            if canonicalTypenameCache.usingCache {
+                canonicalTypenameCache.modifyingState { state in
+                    state.value?[typeName] = canonical
+                }
+            }
+            
+            return canonical
+        }
+        
+        return nil
+    }
 }
 
 /// Provides known type access via a simple backing array
@@ -96,6 +128,7 @@ public class CollectionKnownTypeProvider: KnownTypeProvider {
     // `IntentionCollectionTypeSystem`
     private var knownTypes: [KnownType]
     private var knownTypesByName: [String: [KnownType]] = [:]
+    private var canonicalMappings: [String: String] = [:]
     
     public init(knownTypes: [KnownType] = []) {
         self.knownTypes = knownTypes
@@ -113,11 +146,56 @@ public class CollectionKnownTypeProvider: KnownTypeProvider {
         knownTypesByName[type.typeName, default: []].append(type)
     }
     
+    public func addCanonicalMapping(nonCanonical: String, canonical: String) {
+        assert(nonCanonical != canonical,
+               "Cannot map a non-canonical type name as a canonical of itself.")
+        
+        canonicalMappings[nonCanonical] = canonical
+    }
+    
     public func knownType(withName name: String) -> KnownType? {
         return knownTypesByName[name]?.first
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
         return knownTypes.filter { $0.kind == kind }
+    }
+    
+    public func canonicalName(for typeName: String) -> String? {
+        return canonicalMappings[typeName]
+    }
+}
+
+private class ConcurrentValue<T> {
+    struct CacheState {
+        var value: T?
+    }
+    
+    private var cacheBarrier =
+        DispatchQueue(
+            label: "com.swiftrewriter.compoundtypeprovider.barriervalue_$\(T.self)",
+            qos: .default,
+            attributes: .concurrent,
+            autoreleaseFrequency: .inherit,
+            target: nil)
+    
+    var usingCache = false
+    
+    private var state = CacheState()
+    
+    func readingValue<U>(_ block: (T?) -> U) -> U {
+        return readingState { block($0.value) }
+    }
+    
+    func readingState<U>(_ block: (CacheState) -> U) -> U {
+        return cacheBarrier.sync {
+            block(state)
+        }
+    }
+    
+    func modifyingState<U>(_ block: (inout CacheState) -> U) -> U {
+        return cacheBarrier.sync(flags: .barrier) {
+            block(&state)
+        }
     }
 }

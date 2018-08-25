@@ -69,4 +69,29 @@ class FoundationCompoundTypesTests: XCTestCase {
             }
             """)
     }
+    
+    func testNSDateDefinition() {
+        let type = FoundationCompoundTypes.nsDate.create()
+        
+        assertSignature(type: type, matches: """
+            struct Date: Hashable, Equatable {
+                var timeIntervalSince1970: TimeInterval
+                
+                init()
+                // Convert from dateByAddingTimeInterval(_ timeInterval: TimeInterval) -> Date
+                func addingTimeInterval(_ timeInterval: TimeInterval) -> Date
+            }
+            """)
+    }
+    
+    func testNSLocaleDefinition() {
+        let type = FoundationCompoundTypes.nsLocale.create()
+        
+        assertSignature(type: type, matches: """
+            struct Locale: Hashable, Equatable {
+                // Convert from 'init(localeIdentifier: String)'
+                init(identifier: String)
+            }
+            """)
+    }
 }

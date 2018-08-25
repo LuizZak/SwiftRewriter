@@ -1,15 +1,18 @@
 import SwiftAST
 import SwiftRewriterLib
+import Commons
 
 public class BaseGlobalsProvider: GlobalsProvider {
     var globals: [CodeDefinition] = []
-    var types: [KnownType] = []
+    private(set) var types: [KnownType] = []
     var typealiases: [String: SwiftType] = [:]
+    var canonicalMapping: [String: String] = [:]
     
     init() {
         createDefinitions()
         createTypes()
         createTypealiases()
+        createCanonicalMappings()
     }
     
     public func definitionsSource() -> DefinitionsSource {
@@ -36,6 +39,12 @@ public class BaseGlobalsProvider: GlobalsProvider {
         
     }
     
+    func createCanonicalMappings() {
+        for case let compoundedType as CompoundedMappingType in types {
+            addCanonicalMappings(from: compoundedType)
+        }
+    }
+    
     func addTypealias(from source: String, to target: SwiftType) {
         typealiases[source] = target
     }
@@ -48,7 +57,14 @@ public class BaseGlobalsProvider: GlobalsProvider {
         types.append(type)
     }
     
-    func makeType(named name: String, supertype: KnownTypeReferenceConvertible? = nil,
+    func addCanonicalMappings(from type: CompoundedMappingType) {
+        for alias in type.nonCanonicalNames {
+            canonicalMapping[alias] = type.typeName
+        }
+    }
+    
+    func makeType(named name: String,
+                  supertype: KnownTypeReferenceConvertible? = nil,
                   kind: KnownTypeKind = .class,
                   initializer: (KnownTypeBuilder) -> (KnownType) = { $0.build() }) {
         

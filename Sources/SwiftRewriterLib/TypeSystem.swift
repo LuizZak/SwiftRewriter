@@ -29,6 +29,15 @@ public protocol TypeSystem {
     /// Gets a known type with a given name from this type system.
     func knownTypeWithName(_ name: String) -> KnownType?
     
+    /// Given a non-canonical type name, returns the matching canonical name.
+    ///
+    /// The given typename is unaliased before canonical form replacing is
+    /// performed.
+    ///
+    /// In case the type name is already canonical, or no canonical form is found
+    /// for a given type name, `nil` is returned, instead.
+    func canonicalName(forTypeName typeName: String) -> String?
+    
     /// Returns a composition of a set of types as a single known type.
     /// Returns nil, if any of the types is unknown, or the list is empty.
     func composeTypeWithKnownTypes(_ typeNames: [String]) -> KnownType?

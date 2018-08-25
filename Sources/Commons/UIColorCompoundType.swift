@@ -2,18 +2,13 @@ import SwiftAST
 import SwiftRewriterLib
 
 public enum UIColorCompoundType {
-    private static var singleton: CompoundedMappingType = {
-        let typeAndMappings = createType()
-        
-        return CompoundedMappingType(knownType: typeAndMappings.0,
-                                     transformations: typeAndMappings.1)
-    }()
+    private static var singleton: CompoundedMappingType = createType()
     
     public static func create() -> CompoundedMappingType {
         return singleton
     }
     
-    static func createType() -> (KnownType, [PostfixTransformation]) {
+    static func createType() -> CompoundedMappingType {
         let transformations = TransformationsSink()
         var type = KnownTypeBuilder(typeName: "UIColor", supertype: "NSObject")
         
@@ -47,11 +42,29 @@ public enum UIColorCompoundType {
             .property(named: "brown", type: "UIColor", isStatic: true, accessor: .getter)
             .property(named: "clear", type: "UIColor", isStatic: true, accessor: .getter)
         
-        return (type.build(), transformations.transformations)
+        return
+            CompoundedMappingType(knownType: type.build(),
+                                  transformations: transformations.transformations)
     }
 }
 
 extension KnownTypeBuilder {
+    func _createConstructorMapping(fromParameters parameters: [ParameterSignature],
+                                   in transformations: TransformationsSink) -> KnownTypeBuilder {
+        
+        guard let constructor = lastConstructor else {
+            assertionFailure("Must be called after a call to `.constructor`")
+            return self
+        }
+        
+        transformations.addInitTransform(from: parameters,
+                                         to: constructor.parameters)
+        
+        let annotation = "Convert from 'init\(TypeFormatter.asString(parameters: parameters))'"
+        
+        return self.annotationgLatestConstructor(annotation: annotation)
+    }
+    
     func _createPropertyRename(from old: String, in transformations: TransformationsSink) -> KnownTypeBuilder {
         guard let property = lastProperty else {
             assertionFailure("Must be called after a call to `.property`")
@@ -62,7 +75,7 @@ extension KnownTypeBuilder {
         
         let annotation = "Convert from '\(old)'"
         
-        return self.annotationgLastProperty(annotation: annotation)
+        return self.annotationgLatestProperty(annotation: annotation)
     }
     
     func _createPropertyFromMethods(getterName: String,
@@ -85,6 +98,6 @@ extension KnownTypeBuilder {
             annotation += " / func \(setterName)(\(property.storage.type))"
         }
         
-        return self.annotationgLastProperty(annotation: annotation)
+        return self.annotationgLatestProperty(annotation: annotation)
     }
 }
