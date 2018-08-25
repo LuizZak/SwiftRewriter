@@ -4,7 +4,7 @@ A program that aims to aid in automatization of conversion of Objective-C code i
 
 #### Requirements
 
-Xcode 9.3 & Swift 4.1
+Xcode 10.0 & Swift 4.2
 
 #### Usage
 
