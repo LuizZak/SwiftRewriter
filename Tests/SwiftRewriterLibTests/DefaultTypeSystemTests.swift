@@ -56,6 +56,9 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.typesMatch(.typeName("C"),
                                  .generic("D", parameters: .one(.typeName("A"))),
                                  ignoreNullability: false))
+        XCTAssert(sut.typesMatch(.typeName("C"),
+                                 .generic("D", parameters: .one(.typeName("B"))),
+                                 ignoreNullability: false))
     }
     
     func testTypesMatchExpandingAliasesInBlockType() {

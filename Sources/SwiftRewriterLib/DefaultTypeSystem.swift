@@ -627,14 +627,18 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
-    public func constructor(withArgumentLabels labels: [String?], in type: SwiftType) -> KnownConstructor? {
+    public func constructor(withArgumentLabels labels: [String?],
+                            in type: SwiftType) -> KnownConstructor? {
+        
         guard let knownType = self.findType(for: type) else {
             return nil
         }
         return constructor(withArgumentLabels: labels, in: knownType)
     }
     
-    public func conformance(toProtocolName name: String, in type: SwiftType) -> KnownProtocolConformance? {
+    public func conformance(toProtocolName name: String,
+                            in type: SwiftType) -> KnownProtocolConformance? {
+        
         guard let knownType = self.findType(for: type) else {
             return nil
         }
@@ -783,7 +787,10 @@ public class DefaultTypeSystem: TypeSystem {
         
         private func pushingAlias<T>(_ name: String, do work: () -> T) -> T {
             if aliasesInStack.contains(name) {
-                fatalError("Cycle found while expanding typealises: \(aliasesInStack.joined(separator: " -> ")) -> \(name)")
+                fatalError("""
+                    Cycle found while expanding typealises: \
+                    \(aliasesInStack.joined(separator: " -> ")) -> \(name)
+                    """)
             }
             
             aliasesInStack.append(name)
@@ -843,7 +850,8 @@ public class DefaultTypeSystem: TypeSystem {
                 return nil
             }
             
-            guard let prot = TypeDefinitions.protocolsList.protocols.first(where: { $0.protocolName == name }) else {
+            let protocols = TypeDefinitions.protocolsList.protocols
+            guard let prot = protocols.first(where: { $0.protocolName == name }) else {
                 barrier.sync(flags: .barrier) {
                     _ = negativeLookupResults.insert(name)
                 }
