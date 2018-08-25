@@ -468,8 +468,8 @@ public class PostfixExpression: Expression {
     
     public var exp: Expression {
         didSet {
-            oldValue.parent = nil;
-            exp.parent = self;
+            oldValue.parent = nil
+            exp.parent = self
             
             _subExpressions = [exp] + op.subExpressions
         }

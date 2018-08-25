@@ -64,6 +64,29 @@ public extension ValueMatcher where T: Expression {
             .keyPath(\.op.asFunctionCall?.arguments, equals: args)
     }
     
+    public func call(arguments matchers: [ValueMatcher<FunctionArgument>]) -> SyntaxMatcher<PostfixExpression> {
+        return SyntaxMatcher<PostfixExpression>()
+            .match { postfix -> Bool in
+                guard let exp = postfix.exp as? T else {
+                    return false
+                }
+                
+                return self.matches(exp)
+            }
+            .keyPath(\.op.asFunctionCall?.arguments.count, equals: matchers.count)
+            .keyPath(\.op.asFunctionCall?.arguments) { args -> ValueMatcher<[FunctionArgument]> in
+                args.match(closure: { args -> Bool in
+                    for (matcher, arg) in zip(matchers, args) {
+                        if !matcher.matches(arg) {
+                            return false
+                        }
+                    }
+                    
+                    return true
+                })
+            }
+    }
+    
     public func call(_ method: String) -> SyntaxMatcher<PostfixExpression> {
         return dot(method).call([])
     }
@@ -82,6 +105,16 @@ public extension ValueMatcher where T: Expression {
         return SyntaxMatcher<AssignmentExpression>()
             .keyPath(\.op, .equals(op))
             .keyPath(\.rhs, rhs.asMatcher())
+    }
+}
+
+public extension ValueMatcher where T == FunctionArgument {
+    public static func isLabeled(as label: String) -> ValueMatcher {
+        return ValueMatcher().keyPath(\.label, equals: label)
+    }
+    
+    public static var isNotLabeled: ValueMatcher {
+        return ValueMatcher().keyPath(\.label, isNil())
     }
 }
 

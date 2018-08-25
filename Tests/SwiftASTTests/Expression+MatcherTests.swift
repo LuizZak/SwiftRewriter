@@ -63,7 +63,20 @@ class Expression_MatcherTests: XCTestCase {
                 Expression.identifier("a").sub(.identifier("b")).sub(.constant(0)).dot("c")
             )
         )
-        
     }
     
+    func testMatchFunctionArgumentIsLabeled() {
+        let sut = ValueMatcher<FunctionArgument>.isLabeled(as: "label")
+        
+        XCTAssert(sut.matches(FunctionArgument(label: "label", expression: .identifier("a"))))
+        XCTAssertFalse(sut.matches(FunctionArgument(label: nil, expression: .identifier("a"))))
+    }
+    
+    func testMatchFunctionArgumentIsNotLabeled() {
+        let sut = ValueMatcher<FunctionArgument>.isNotLabeled
+        
+        XCTAssertFalse(sut.matches(FunctionArgument(label: "", expression: .identifier("a"))))
+        XCTAssertFalse(sut.matches(FunctionArgument(label: "label", expression: .identifier("a"))))
+        XCTAssert(sut.matches(FunctionArgument(label: nil, expression: .identifier("a"))))
+    }
 }

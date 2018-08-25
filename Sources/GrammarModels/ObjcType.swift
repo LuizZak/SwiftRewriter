@@ -81,7 +81,11 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     public var normalized: ObjcType {
         switch self {
         case let .pointer(ptr):
-            return ptr.normalized
+            return .pointer(ptr.normalized)
+            
+        case let .generic(type, parameters) where parameters.isEmpty:
+            return .struct(type)
+            
         case let .generic(type, parameters):
             return .generic(type, parameters: parameters.map { $0.normalized })
             
@@ -94,16 +98,19 @@ public enum ObjcType: Equatable, CustomStringConvertible {
         // Nested specified and qualified types can be unwrapped into one single
         // qualified/specified type with all annotations in a row
         case let .qualified(.qualified(innerType, innerQualifiers), qualifiers):
-            return .qualified(innerType, qualifiers: qualifiers + innerQualifiers)
+            return .qualified(innerType.normalized, qualifiers: qualifiers + innerQualifiers)
+            
         case let .specified(specifiers, .specified(innerSpecifiers, innerType)):
-            return .specified(specifiers: specifiers + innerSpecifiers, innerType)
+            return .specified(specifiers: specifiers + innerSpecifiers, innerType.normalized)
             
         case let .blockType(name, returnType, parameters):
-            return .blockType(name: name, returnType: returnType.normalized,
+            return .blockType(name: name,
+                              returnType: returnType.normalized,
                               parameters: parameters.map { $0.normalized })
             
         case let .fixedArray(inner, length):
             return .fixedArray(inner.normalized, length: length)
+            
         default:
             return self
         }
