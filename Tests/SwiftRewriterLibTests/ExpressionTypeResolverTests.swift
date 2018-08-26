@@ -926,6 +926,48 @@ class ExpressionTypeResolverTests: XCTestCase {
         XCTAssertEqual(exp.parameters[0].type, .typeName("A"))
     }
     
+    /// Tests that on contexts where the expected type of a block literal type is
+    /// set, try to infer the nullability of that block's parameters based on the
+    /// expected type signature, even if the expected type signature is in fact
+    /// optional.
+    func testPropagateBlockParameterNullabilityFromExpectedTypeWhenOptional() {
+        let exp =
+            Expression.block(
+                parameters: [
+                    BlockParameter(name: "a", type: .implicitUnwrappedOptional(.typeName("A")))
+                ],
+                return: .void,
+                body: []
+            )
+        exp.expectedType = .optional(.block(returnType: .void, parameters: [.typeName("A")]))
+        let sut = ExpressionTypeResolver()
+        
+        _=sut.resolveType(exp)
+        
+        XCTAssertEqual(exp.parameters[0].type, .typeName("A"))
+    }
+    
+    /// Tests that on contexts where the expected type of a block literal type is
+    /// set, try to infer the nullability of that block's parameters based on the
+    /// expected type signature, even if the expected type signature is in fact
+    /// implicitly unwrapped.
+    func testPropagateBlockParameterNullabilityFromExpectedTypeWhenImplicitlyUnwrapped() {
+        let exp =
+            Expression.block(
+                parameters: [
+                    BlockParameter(name: "a", type: .implicitUnwrappedOptional(.typeName("A")))
+                ],
+                return: .void,
+                body: []
+        )
+        exp.expectedType = .implicitUnwrappedOptional(.block(returnType: .void, parameters: [.typeName("A")]))
+        let sut = ExpressionTypeResolver()
+        
+        _=sut.resolveType(exp)
+        
+        XCTAssertEqual(exp.parameters[0].type, .typeName("A"))
+    }
+    
     /// Tests propagation of expected block type to block expression doesn't alter
     /// parameters that are not implicitly unwrapped optionals.
     func testDontPropagateBlockParameterNullabilityFromExpectedTypeWhenNotImplicitlyUnwrapped() {
