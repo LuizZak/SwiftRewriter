@@ -1876,7 +1876,7 @@ class SwiftRewriterTests: XCTestCase {
                 [self takesBlock:^(NSString* a){
                 }];
             }
-            - (void)takesBlock:(block)a {
+            - (void)takesBlock:(nonnull block)a {
             }
             @end
             """,
@@ -2559,6 +2559,34 @@ class SwiftRewriterTests: XCTestCase {
                 Date() == Date()
                 var date: Date?
                 date == Date()
+            }
+            """
+        )
+    }
+    
+    func testMergeNullabilityOfTypealiasedBlockType() {
+        assertObjcParse(
+            objc: """
+            typedef void(^callback)();
+            
+            @interface A
+            - (void)doWork:(nullable callback)call;
+            @end
+            @implementation A
+            - (void)doWork:(callback)call {
+                call();
+            }
+            @end
+            """,
+            swift: """
+            typealias callback = () -> Void
+            
+            @objc
+            class A: NSObject {
+                @objc
+                func doWork(_ call: callback?) {
+                    call?()
+                }
             }
             """
         )

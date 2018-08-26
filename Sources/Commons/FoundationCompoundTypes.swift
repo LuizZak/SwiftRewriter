@@ -109,6 +109,10 @@ public enum NSArrayCompoundType {
         
         type = type
             .property(named: "count", type: .int, accessor: .getter)
+            .property(named: "firstObject", type: .optional(.any), accessor: .getter)
+            ._createPropertyFromMethods(getterName: "firstObject", setterName: nil, in: transformations)
+            .property(named: "lastObject", type: .optional(.any), accessor: .getter)
+            ._createPropertyFromMethods(getterName: "lastObject", setterName: nil, in: transformations)
         
         type = type
             .method(withSignature:

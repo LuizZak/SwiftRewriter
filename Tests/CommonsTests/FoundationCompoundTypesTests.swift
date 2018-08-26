@@ -25,6 +25,12 @@ class FoundationCompoundTypesTests: XCTestCase {
         assertSignature(type: type, matches: """
             class NSArray: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
                 var count: Int { get }
+                // Convert from func firstObject()
+                var firstObject: Any? { get }
+                
+                // Convert from func lastObject()
+                var lastObject: Any? { get }
+                
                 
                 // Convert from objectAtIndex(_ index: Int) -> Any
                 func object(at index: Int) -> Any

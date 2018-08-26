@@ -258,6 +258,7 @@ public class DefaultTypeMapper: TypeMapper {
         switch composition {
         case .nested(let types):
             return types.map { typeNameString(for: $0) }.joined(separator: ".")
+            
         case .nominal(let nominal):
             return typeNameString(for: nominal)
         }
@@ -271,6 +272,7 @@ public class DefaultTypeMapper: TypeMapper {
         // Simplify known generic types
         case .generic("Array", let parameters) where Array(parameters).count == 1:
             return "[" + typeNameString(for: Array(parameters)[0]) + "]"
+            
         case .generic("Dictionary", let parameters) where Array(parameters).count == 2:
             let parameters = Array(parameters)
             return "[" + typeNameString(for: parameters[0]) + ": " + typeNameString(for: parameters[1]) + "]"
@@ -336,7 +338,7 @@ public class DefaultTypeMapper: TypeMapper {
             return scalar
         }
         
-        return .typeName(structType)
+        return _verifyStructTypeCanBeNullable(.typeName(structType), context: context)
     }
     
     private func swiftType(forIdWithProtocols protocols: [String], context: TypeMappingContext) -> SwiftType {
@@ -353,7 +355,8 @@ public class DefaultTypeMapper: TypeMapper {
         return swiftType(type: type, withNullability: context.nullability())
     }
     
-    private func swiftType(forGenericObjcType name: String, parameters: [ObjcType],
+    private func swiftType(forGenericObjcType name: String,
+                           parameters: [ObjcType],
                            context: TypeMappingContext) -> SwiftType {
         
         if parameters.isEmpty {
@@ -464,15 +467,20 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
-    private func swiftType(forObjcType type: ObjcType, withSpecifiers specifiers: [String],
+    private func swiftType(forObjcType type: ObjcType,
+                           withSpecifiers specifiers: [String],
                            context: TypeMappingContext) -> SwiftType {
+        
         let locSpecifiers = context.withSpecifiers(specifiers)
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
         switch type {
-        case .struct, .void:
+        case .void:
             return final; // <- Semicolon needed to avoid a parse error
+            
+        case .struct:
+            return _verifyStructTypeCanBeNullable(final, context: locSpecifiers)
             
         case .qualified:
             return swiftType(forObjcType: type, context: locSpecifiers)
@@ -482,15 +490,20 @@ public class DefaultTypeMapper: TypeMapper {
         }
     }
     
-    private func swiftType(forObjcType type: ObjcType, withQualifiers qualifiers: [String],
+    private func swiftType(forObjcType type: ObjcType,
+                           withQualifiers qualifiers: [String],
                            context: TypeMappingContext) -> SwiftType {
+        
         let locQualifiers = context.withQualifiers(qualifiers)
         
         let final = swiftType(forObjcType: type, context: context.asAlwaysNonNull())
         
         switch type {
-        case .struct, .void:
+        case .void:
             return final; // <- Semicolon needed to avoid a parse error
+            
+        case .struct:
+            return _verifyStructTypeCanBeNullable(final, context: locQualifiers)
             
         case .specified:
             return swiftType(forObjcType: type, context: locQualifiers)
@@ -498,6 +511,16 @@ public class DefaultTypeMapper: TypeMapper {
         default:
             return swiftType(type: final, withNullability: locQualifiers.nullability())
         }
+    }
+    
+    private func _verifyStructTypeCanBeNullable(_ type: SwiftType,
+                                                context: TypeMappingContext) -> SwiftType {
+        
+        if typeSystem.resolveAlias(in: type).isBlock {
+            return swiftType(type: type, withNullability: context.nullability())
+        }
+        
+        return type
     }
     
     private func swiftBlockType(forReturnType returnType: ObjcType,

@@ -5,6 +5,14 @@ import GrammarModels
 import SwiftAST
 
 class DefaultTypeMapperTests: XCTestCase {
+    var typeSystem = DefaultTypeSystem()
+    
+    override func setUp() {
+        super.setUp()
+        
+        typeSystem = DefaultTypeSystem()
+    }
+    
     func testTypeNameString() {
         expectSwift(.typeName("MyType"), toConvertTo: "MyType")
         expectSwift(.optional(.typeName("MyType")), toConvertTo: "MyType?")
@@ -328,6 +336,17 @@ class DefaultTypeMapperTests: XCTestCase {
         )
     }
     
+    func testNullableBlockViaTypealias() {
+        typeSystem.addTypealias(aliasName: "callback",
+                                originalType: .block(returnType: .void, parameters: []))
+        
+        expect(.qualified(.struct("callback"),
+                          qualifiers: ["_Nullable"]),
+               withExplicitNullability: nil,
+               toConvertTo: "callback?"
+        )
+    }
+    
     func testBlockWithNoNullabilityAnnotationInfersAsImplicitlyUnwrappedOptional() {
         // Blocks should behave like pointer types and be properly annotated as
         // implicitly unwrapped optional, if lacking type annotations.
@@ -359,9 +378,14 @@ class DefaultTypeMapperTests: XCTestCase {
 }
 
 extension DefaultTypeMapperTests {
-    private func expect(_ type: ObjcType, withExplicitNullability nullability: TypeNullability? = .nonnull,
-                        toConvertTo expected: String, file: String = #file, line: Int = #line) {
-        let converted = typeMapperConvert(type, nullability: nullability, typeSystem: DefaultTypeSystem())
+    private func expect(_ type: ObjcType,
+                        withExplicitNullability nullability: TypeNullability? = .nonnull,
+                        toConvertTo expected: String,
+                        file: String = #file, line: Int = #line) {
+        
+        let converted = typeMapperConvert(type,
+                                          nullability: nullability,
+                                          typeSystem: typeSystem)
         
         if converted != expected {
             recordFailure(withDescription: """
@@ -372,9 +396,11 @@ extension DefaultTypeMapperTests {
         }
     }
     
-    private func expectSwift(_ type: SwiftType, toConvertTo expected: String,
+    private func expectSwift(_ type: SwiftType,
+                             toConvertTo expected: String,
                              file: String = #file, line: Int = #line) {
-        let converted = typeMapperConvert(type, typeSystem: DefaultTypeSystem())
+        
+        let converted = typeMapperConvert(type, typeSystem: typeSystem)
         
         if converted != expected {
             recordFailure(withDescription: """
@@ -391,7 +417,10 @@ extension DefaultTypeMapperTests {
         return mapper.typeNameString(for: type)
     }
     
-    private func typeMapperConvert(_ type: ObjcType, nullability: TypeNullability?, typeSystem: TypeSystem) -> String {
+    private func typeMapperConvert(_ type: ObjcType,
+                                   nullability: TypeNullability?,
+                                   typeSystem: TypeSystem) -> String {
+        
         let mapper = DefaultTypeMapper(typeSystem: typeSystem)
         
         var ctx: TypeMappingContext = .empty

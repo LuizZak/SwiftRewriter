@@ -220,9 +220,6 @@ public final class SwiftRewriter {
         }
         
         typeSystem.makeCache()
-        defer {
-            typeSystem.tearDownCache()
-        }
         
         let typeMapper = self.typeMapper
         
@@ -260,6 +257,13 @@ public final class SwiftRewriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
+        
+        typeSystem.tearDownCache()
+        
+        typeSystem.makeCache()
+        defer {
+            typeSystem.tearDownCache()
+        }
         
         // Now resolve all remaining items
         for item in lazyResolve {
