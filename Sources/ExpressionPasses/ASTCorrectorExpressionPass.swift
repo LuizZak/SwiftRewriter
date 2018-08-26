@@ -240,7 +240,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                             .binary(op: .nullCoalesce, rhs: initValue)
                     ).typed(memberType.deepUnwrapped)
             
-            res = Expression.postfix(res, memberPostfix.op.copy())
+            res = Expression.postfix(res, memberPostfix.op.copy().withOptionalAccess(enabled: false))
             
             res.resolvedType = memberPostfix.resolvedType
             
@@ -294,7 +294,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         converted.resolvedType = defValue.resolvedType
         converted.expectedType = converted.resolvedType
         
-        return Expression.parens(converted).typed(defValue.resolvedType)
+        return Expression.parens(converted).typed(defValue.resolvedType?.deepUnwrapped)
     }
     
     func correctToNumeric(_ exp: Expression) -> Expression? {

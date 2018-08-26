@@ -1209,4 +1209,20 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testCastTyping() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                ((NSObject*)[[UIView alloc] init]).description;
+            }
+            """,
+            swift: """
+            func test() {
+                // type: String
+                (UIView() as NSObject).description
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

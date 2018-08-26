@@ -75,6 +75,24 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .errorType) // Propagate error types
     }
     
+    func testCastOfSameTypeResultsInNonOptionalCast() {
+        // Non-optional cast due to same-type in expression and cast
+        startScopedTest(with: Expression.constant(1).casted(to: .int),
+                        sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssert { expression in
+                XCTAssertFalse(expression.isOptionalCast)
+            }
+        
+        // Optional cast due to different types
+        startScopedTest(with: Expression.constant(1).casted(to: .string),
+                        sut: ExpressionTypeResolver())
+            .resolve()
+            .thenAssert { expression in
+                XCTAssert(expression.isOptionalCast)
+            }
+    }
+    
     func testCastWithTypeAlias() {
         startScopedTest(with: Expression.constant("a").casted(to: .typeName("A")),
                         sut: ExpressionTypeResolver())
@@ -83,9 +101,44 @@ class ExpressionTypeResolverTests: XCTestCase {
             .thenAssertExpression(resolvedAs: .optional("A"))
     }
     
+    /// Tests that upcasting (casting a type to one of its supertypes) results
+    /// in non-optional casts
+    func testUpcasting() {
+        // Base type
+        startScopedTest(with: Expression.identifier("b").casted(to: "A"),
+                        sut: ExpressionTypeResolver())
+            .definingType(KnownTypeBuilder(typeName: "A").build())
+            .definingType(named: "B") { type in
+                type.settingSupertype(KnownTypeReference.typeName("A"))
+                    .build()
+            }
+            .definingLocal(name: "b", type: "B")
+            .resolve()
+            .thenAssertExpression(resolvedAs: "A")
+            .thenAssert { expression in
+                XCTAssertFalse(expression.isOptionalCast)
+            }
+        
+        // Protocol
+        startScopedTest(with: Expression.identifier("b").casted(to: "P"),
+                        sut: ExpressionTypeResolver())
+            .definingType(KnownTypeBuilder(typeName: "P", kind: .protocol).build())
+            .definingType(named: "B") { type in
+                type.protocolConformance(protocolName: "P")
+                    .build()
+            }
+            .definingLocal(name: "b", type: "B")
+            .resolve()
+            .thenAssertExpression(resolvedAs: "P")
+            .thenAssert { expression in
+                XCTAssertFalse(expression.isOptionalCast)
+            }
+    }
+    
     func testAssignment() {
         // From C11 Standard, section 6.5.16:
-        // An assignment expression has the value of the left operand after the assignment
+        // An assignment expression has the value of the left operand after the
+        // assignment
         let exp = Expression.identifier("a").assignment(op: .assign, rhs: .constant(1))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())

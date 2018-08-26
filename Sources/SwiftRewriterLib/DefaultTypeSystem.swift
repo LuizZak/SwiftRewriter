@@ -230,6 +230,13 @@ public class DefaultTypeSystem: TypeSystem {
             return true
         }
         
+        return _unaliasedIsType(unaliasedTypeName,
+                                conformingTo: unaliasedProtocolName)
+    }
+    
+    private func _unaliasedIsType(_ unaliasedTypeName: String,
+                                  conformingTo unaliasedProtocolName: String) -> Bool {
+        
         guard let type = knownTypeWithName(unaliasedTypeName) else {
             return false
         }
@@ -253,6 +260,10 @@ public class DefaultTypeSystem: TypeSystem {
             return true
         }
         
+        return _unaliasedIsType(unaliasedTypeName, subtypeOf: unaliasedSupertypeName)
+    }
+    
+    private func _unaliasedIsType(_ unaliasedTypeName: String, subtypeOf unaliasedSupertypeName: String) -> Bool {
         guard let type = knownTypeWithName(unaliasedTypeName) else {
             return false
         }
@@ -298,6 +309,47 @@ public class DefaultTypeSystem: TypeSystem {
             
             currentClassType = classTypeDefinition(name: c.superclass)
         }
+        
+        return false
+    }
+    
+    public func isType(_ type: SwiftType, assignableTo baseTypeName: SwiftType) -> Bool {
+        if type == baseTypeName {
+            return true
+        }
+        
+        let unaliasedType = resolveAlias(in: type)
+        let unaliasedBaseType = resolveAlias(in: baseTypeName)
+        
+        if unaliasedType == unaliasedBaseType {
+            return true
+        }
+        
+        // For nominal types, check for subtyping conformance
+        if case .nominal(let nominalType) = unaliasedType,
+            case .nominal(let nominalBaseType) = unaliasedBaseType {
+            
+            let typeName = typeNameIn(nominalType: nominalType)
+            let baseTypeName = typeNameIn(nominalType: nominalBaseType)
+            
+            return isType(typeName, subtypeOf: baseTypeName) ||
+                isType(typeName, conformingTo: baseTypeName)
+        }
+        
+        // TODO: Convert into this switch later; currently it crashes during
+        // runtime, most likely due to a compiler bug.
+        #if false
+        
+        switch (unaliasedType, unaliasedBaseType) {
+        case (.nominal(let nominalType), .nominal(let nominalBaseType)):
+            let typeName = typeNameIn(nominalType: nominalType)
+            let baseTypeName = typeNameIn(nominalType: nominalBaseType)
+            
+            return isType(typeName, subtypeOf: baseTypeName) ||
+                isType(typeName, conformingTo: baseTypeName)
+        }
+        
+        #endif
         
         return false
     }
@@ -1057,6 +1109,7 @@ extension DefaultTypeSystem {
             KnownTypeBuilder(typeName: "NSObject")
                 .constructor()
                 .protocolConformance(protocolName: "NSObjectProtocol")
+                .property(named: "description", type: .string)
                 .build()
         
         let nsDictionary =
@@ -1136,9 +1189,8 @@ func typeNameIn(swiftType: SwiftType) -> String? {
     let swiftType = swiftType.deepUnwrapped
     
     switch swiftType {
-    case .nominal(.typeName(let typeName)),
-         .nominal(.generic(let typeName, _)):
-        return typeName
+    case .nominal(let nominalType):
+        return typeNameIn(nominalType: nominalType)
         
     // Meta-types recurse on themselves
     case .metatype(for: let inner):
@@ -1155,6 +1207,10 @@ func typeNameIn(swiftType: SwiftType) -> String? {
     default:
         return nil
     }
+}
+
+func typeNameIn(nominalType: NominalSwiftType) -> String {
+    return nominalType.typeNameValue
 }
 
 // TODO: Consider moving this to a separate object to better expose it to testing

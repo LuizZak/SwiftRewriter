@@ -713,13 +713,14 @@ public class CastExpression: Expression {
         didSet { oldValue.parent = nil; exp.parent = self }
     }
     public var type: SwiftType
+    public var isOptionalCast: Bool = true
     
     public override var subExpressions: [Expression] {
         return [exp]
     }
     
     public override var description: String {
-        return "\(exp) as? \(type)"
+        return "\(exp) \(isOptionalCast ? "as?" : "as") \(type)"
     }
     
     public override var requiresParens: Bool {
@@ -753,7 +754,9 @@ public class CastExpression: Expression {
     }
     
     public static func == (lhs: CastExpression, rhs: CastExpression) -> Bool {
-        return lhs.exp == rhs.exp && lhs.type == rhs.type
+        return lhs.exp == rhs.exp &&
+            lhs.type == rhs.type &&
+            lhs.isOptionalCast == rhs.isOptionalCast
     }
 }
 public extension Expression {
@@ -1182,6 +1185,11 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
     
     public func copy() -> Postfix {
         fatalError("Must be overriden by subclasses")
+    }
+    
+    public func withOptionalAccess(enabled: Bool) -> Postfix {
+        hasOptionalAccess = enabled
+        return self
     }
     
     public func isEqual(to other: Postfix) -> Bool {
@@ -1697,6 +1705,17 @@ extension Expression {
         self.metadata = other.metadata
         self.resolvedType = other.resolvedType
         self.expectedType = other.expectedType
+        
+        return self
+    }
+    
+}
+
+extension CastExpression {
+    
+    public func copyTypeAndMetadata(from other: CastExpression) -> Self {
+        _ = (self as Expression).copyTypeAndMetadata(from: other)
+        self.isOptionalCast = other.isOptionalCast
         
         return self
     }

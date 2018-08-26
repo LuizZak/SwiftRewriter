@@ -90,7 +90,10 @@ extension ExpressionTestResolverTestFixture {
         return definingType(type)
     }
     
-    func definingEnum(named name: String, rawValueType: SwiftType, with block: (EnumTypeBuilder) -> KnownType) -> Self {
+    func definingEnum(named name: String,
+                      rawValueType: SwiftType,
+                      with block: (EnumTypeBuilder) -> KnownType) -> Self {
+        
         let en = EnumGenerationIntention(typeName: name, rawValueType: rawValueType)
         let builder = EnumTypeBuilder(targetEnum: en)
         let type = block(builder)
@@ -118,7 +121,8 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
-        func thenAssertDefined(localNamed name: String, type: SwiftType,
+        func thenAssertDefined(localNamed name: String,
+                               type: SwiftType,
                                file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: .strong, isConstant: false)
@@ -132,8 +136,10 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the given scope.
         @discardableResult
-        func thenAssertDefined(in scope: CodeScopeNode, localNamed name: String,
-                               type: SwiftType, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(in scope: CodeScopeNode,
+                               localNamed name: String,
+                               type: SwiftType,
+                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
                 ValueStorage(type: type, ownership: .strong, isConstant: false)
                 
@@ -147,16 +153,21 @@ extension ExpressionTypeResolverTests {
         
         /// Asserts a definition was created on the top-most scope.
         @discardableResult
-        func thenAssertDefined(localNamed name: String, storage: ValueStorage,
+        func thenAssertDefined(localNamed name: String,
+                               storage: ValueStorage,
                                file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+            
             return thenAssertDefined(in: scope, localNamed: name, storage: storage,
                                      file: file, line: line)
         }
         
         /// Asserts a definition was created on the given scope.
         @discardableResult
-        func thenAssertDefined(in scope: CodeScopeNode, localNamed name: String,
-                               storage: ValueStorage, file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+        func thenAssertDefined(in scope: CodeScopeNode,
+                               localNamed name: String,
+                               storage: ValueStorage,
+                               file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
+            
             // Make sure to apply definitions just before starting assertions
             if !applied {
                 sut.typeSystem = typeSystem
@@ -201,8 +212,10 @@ extension ExpressionTypeResolverTests {
         /// set to expect a given type
         @discardableResult
         func thenAssertExpression(at keyPath: KeyPath<Statement, Expression?>,
-                                  expectsType type: SwiftType?, file: String = #file,
+                                  expectsType type: SwiftType?,
+                                  file: String = #file,
                                   line: Int = #line) -> StatementTypeTestBuilder {
+            
             // Make sure to apply definitions just before starting assertions
             if !applied {
                 sut.typeSystem = typeSystem
@@ -237,8 +250,10 @@ extension ExpressionTypeResolverTests {
         /// resolved to a specified type
         @discardableResult
         func thenAssertExpression(at keyPath: KeyPath<Statement, Expression?>,
-                                  resolvedAs type: SwiftType?, file: String = #file,
+                                  resolvedAs type: SwiftType?,
+                                  file: String = #file,
                                   line: Int = #line) -> StatementTypeTestBuilder {
+            
             // Make sure to apply definitions just before starting assertions
             if !applied {
                 sut.typeSystem = typeSystem
@@ -318,8 +333,10 @@ extension ExpressionTypeResolverTests {
             
             /// Makes an assertion the initial expression resolved to a given type
             @discardableResult
-            func thenAssertExpression(resolvedAs type: SwiftType?, file: String = #file,
+            func thenAssertExpression(resolvedAs type: SwiftType?,
+                                      file: String = #file,
                                       line: Int = #line) -> Asserter {
+                
                 if expression.resolvedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve as \(type?.description ?? "nil"), \
@@ -334,8 +351,10 @@ extension ExpressionTypeResolverTests {
             /// Makes an assertion the initial expression was set to expect a given
             /// type
             @discardableResult
-            func thenAssertExpression(expectsType type: SwiftType?, file: String = #file,
+            func thenAssertExpression(expectsType type: SwiftType?,
+                                      file: String = #file,
                                       line: Int = #line) -> Asserter {
+                
                 if expression.expectedType != type {
                     testCase.recordFailure(withDescription: """
                         Expected expression to resolve as expecting type \(type?.description ?? "nil"), \
@@ -351,7 +370,8 @@ extension ExpressionTypeResolverTests {
             /// resolved as having a specified type
             @discardableResult
             func thenAssertExpression(at keyPath: KeyPath<Expression, Expression?>,
-                                      resolvedAs type: SwiftType?, file: String = #file,
+                                      resolvedAs type: SwiftType?,
+                                      file: String = #file,
                                       line: Int = #line) -> Asserter {
                 
                 guard let exp = expression[keyPath: keyPath] else {
@@ -377,7 +397,8 @@ extension ExpressionTypeResolverTests {
             /// set to expect a given type
             @discardableResult
             func thenAssertExpression(at keyPath: KeyPath<Expression, Expression?>,
-                                      expectsType type: SwiftType?, file: String = #file,
+                                      expectsType type: SwiftType?,
+                                      file: String = #file,
                                       line: Int = #line) -> Asserter {
                 
                 guard let exp = expression[keyPath: keyPath] else {

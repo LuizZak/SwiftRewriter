@@ -4,6 +4,14 @@ import SwiftAST
 /// constructs that are not valid Swift syntax yet.
 class MandatorySyntaxNodePass: ASTRewriterPass {
     
+    override func visitCast(_ exp: CastExpression) -> Expression {
+        if let resolvedType = exp.resolvedType, !resolvedType.isOptional {
+            exp.resolvedType = .optional(resolvedType)
+        }
+        
+        return super.visitCast(exp)
+    }
+    
     override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         // Optionalize access to casted value's members
         if exp.exp.unwrappingParens is CastExpression {

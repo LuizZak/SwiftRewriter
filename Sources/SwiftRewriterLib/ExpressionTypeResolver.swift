@@ -279,12 +279,16 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         let type = exp.type
         
         // Same-type casts always succeed
-        if exp.exp.resolvedType == type {
+        if let resolvedType = exp.exp.resolvedType,
+            typeSystem.isType(resolvedType, assignableTo: type) {
+            
             exp.resolvedType = type
+            exp.isOptionalCast = false
             return exp
         }
         
         exp.resolvedType = .optional(type)
+        exp.isOptionalCast = true
         
         return exp
     }

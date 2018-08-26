@@ -888,4 +888,11 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             into: Expression.parens(expMaker().binary(op: .nullCoalesce, rhs: Expression.identifier("Value").call()))
         ); assertNotifiedChange()
     }
+    
+    func testDontRemoveNullableAccessFromCastExpressions() {
+        assertTransform(
+            expression: Expression.identifier("exp").casted(to: .string).optional().dot("count"),
+            into: Expression.identifier("exp").casted(to: .string).optional().dot("count")
+        ); assertDidNotNotifyChange()
+    }
 }

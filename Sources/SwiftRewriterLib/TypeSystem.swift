@@ -72,6 +72,9 @@ public protocol TypeSystem {
     /// another type.
     func isType(_ typeName: String, subtypeOf supertypeName: String) -> Bool
     
+    /// Returns `true` if a given type can be assigned to a value of another type.
+    func isType(_ type: SwiftType, assignableTo baseTypeName: SwiftType) -> Bool
+    
     /// Returns the category for a given type.
     func category(forType type: SwiftType) -> TypeCategory
     

@@ -290,6 +290,15 @@ extension NominalSwiftType: CustomStringConvertible {
             }
         }
     }
+    
+    public var typeNameValue: String {
+        switch self {
+        case .typeName(let typeName),
+             .generic(let typeName, _):
+            
+            return typeName
+        }
+    }
 }
 
 extension ProtocolCompositionComponent: CustomStringConvertible {

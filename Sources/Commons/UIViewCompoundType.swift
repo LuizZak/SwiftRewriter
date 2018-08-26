@@ -875,6 +875,8 @@ extension FunctionSignature {
                            in transformsSink: TransformationsSink,
                            annotations: AnnotationsSink) -> FunctionSignature {
         
+        let typeName = transformsSink.typeName
+        
         assert(parameters.count == 1, """
             Trying to create a binary operator mapping with a function call that \
             does not have exactly one parameter?
@@ -895,7 +897,7 @@ extension FunctionSignature {
                     )
                     .removingMemberAccess()
                     .validate(matcher: ValueMatcher()
-                        .isTyped(.typeName(transformsSink.typeName))
+                        .isTyped(.typeName(typeName), ignoringNullability: true)
                     )
             )
             // Re-shape it into a binary expression

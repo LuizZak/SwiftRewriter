@@ -24,12 +24,20 @@ public func ident(_ matcher: MatchRule<String>) -> SyntaxMatcher<IdentifierExpre
 
 public extension ValueMatcher where T: Expression {
     
-    public func isTyped(_ type: SwiftType) -> ValueMatcher {
-        return keyPath(\.resolvedType, equals: type)
+    public func isTyped(_ type: SwiftType, ignoringNullability: Bool = false) -> ValueMatcher {
+        if !ignoringNullability {
+            return keyPath(\.resolvedType, equals: type)
+        }
+        
+        return keyPath(\.resolvedType, .closure { $0?.deepUnwrapped == type })
     }
     
-    public func isTyped(expected type: SwiftType) -> ValueMatcher {
-        return keyPath(\.expectedType, equals: type)
+    public func isTyped(expected type: SwiftType, ignoringNullability: Bool = false) -> ValueMatcher {
+        if !ignoringNullability {
+            return keyPath(\.expectedType, equals: type)
+        }
+        
+        return keyPath(\.expectedType, .closure { $0?.deepUnwrapped == type })
     }
     
     public func dot<S>(_ member: S) -> SyntaxMatcher<PostfixExpression>

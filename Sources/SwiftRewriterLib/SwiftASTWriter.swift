@@ -277,7 +277,11 @@ internal class ExpressionWriter: ExpressionVisitor {
         let typeName = typeMapper.typeNameString(for: exp.type)
         
         target.outputInline(" ")
-        target.outputInline("as?", style: .keyword)
+        if exp.isOptionalCast {
+            target.outputInline("as?", style: .keyword)
+        } else {
+            target.outputInline("as", style: .keyword)
+        }
         target.outputInline(" ")
         target.outputInline("\(typeName)", style: .typeName)
     }

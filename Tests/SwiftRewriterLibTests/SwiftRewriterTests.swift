@@ -945,6 +945,7 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @implementation MyClass
             - (void)method {
+                NSObject *aValue;
                 ((NSString*)aValue)[123];
             }
             @end
@@ -954,6 +955,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func method() {
+                    var aValue: NSObject!
                     (aValue as? String)?[123]
                 }
             }
@@ -965,6 +967,7 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             @implementation MyClass
             - (void)method {
+                NSObject *aValue;
                 [(NSString*)aValue someMethod];
                 ((NSString*)aValue).property;
                 ((NSString*)aValue)[123];
@@ -976,6 +979,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func method() {
+                    var aValue: NSObject!
                     (aValue as? String)?.someMethod()
                     (aValue as? String)?.property
                     (aValue as? String)?[123]
@@ -2546,11 +2550,15 @@ class SwiftRewriterTests: XCTestCase {
             objc: """
             void test() {
                 [[NSDate date] isEqual:[NSDate date]];
+                NSDate *_Nullable date;
+                [date isEqualToDate:[NSDate date]];
             }
             """,
             swift: """
             func test() {
                 Date() == Date()
+                var date: Date?
+                date == Date()
             }
             """
         )

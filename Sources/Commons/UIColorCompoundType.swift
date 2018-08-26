@@ -68,7 +68,8 @@ extension KnownTypeBuilder {
             .transformIndex(index: 0, transformer: ValueTransformer()
                 .removingMemberAccess()
                 .validate(matcher: ValueMatcher()
-                    .isTyped(.metatype(for: .typeName(typeName)))
+                    .isTyped(.metatype(for: .typeName(typeName)),
+                             ignoringNullability: true)
                 )
             )
             .asFunctionCall(labels: constructor.parameters.argumentLabels())

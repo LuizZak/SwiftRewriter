@@ -538,6 +538,53 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.isType("Z" as SwiftType, conformingTo: "P"))
     }
     
+    func testIsTypeAssignableToChecksSubclassTyping() {
+        let a = KnownTypeBuilder(typeName: "A").build()
+        let b = KnownTypeBuilder(typeName: "B", supertype: "A").build()
+        let c = KnownTypeBuilder(typeName: "C", supertype: "B").build()
+        let d = KnownTypeBuilder(typeName: "D", supertype: "A").build()
+        sut.addType(a)
+        sut.addType(b)
+        sut.addType(c)
+        sut.addType(d)
+        
+        XCTAssert(sut.isType("B", assignableTo: "A"))
+        XCTAssert(sut.isType("C", assignableTo: "A"))
+        XCTAssert(sut.isType("C", assignableTo: "B"))
+        XCTAssert(sut.isType("D", assignableTo: "A"))
+        XCTAssertFalse(sut.isType("A", assignableTo: "B"))
+        XCTAssertFalse(sut.isType("D", assignableTo: "B"))
+        XCTAssertFalse(sut.isType("D", assignableTo: "C"))
+    }
+    
+    func testIsTypeAssignableToChecksProtocolConformance() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).build()
+        let a = KnownTypeBuilder(typeName: "A").protocolConformance(protocolName: "P").build()
+        sut.addType(p)
+        sut.addType(a)
+        sut.addType(q)
+        
+        XCTAssert(sut.isType("A", assignableTo: "P"))
+        XCTAssertFalse(sut.isType("A", assignableTo: "Q"))
+    }
+    
+    func testIsTypeAssignableToChecksProtocolConformanceChain() {
+        let p = KnownTypeBuilder(typeName: "P", kind: .protocol).build()
+        let q = KnownTypeBuilder(typeName: "Q", kind: .protocol).protocolConformance(protocolName: "P").build()
+        let z = KnownTypeBuilder(typeName: "Z").protocolConformance(protocolName: "Q").build()
+        sut.addType(p)
+        sut.addType(q)
+        sut.addType(z)
+        
+        XCTAssert(sut.isType("Z", assignableTo: "Z"))
+        XCTAssert(sut.isType("Z", assignableTo: "P"))
+        XCTAssert(sut.isType("Z", assignableTo: "Q"))
+        XCTAssert(sut.isType("Q", assignableTo: "P"))
+        XCTAssertFalse(sut.isType("P", assignableTo: "Q"))
+        XCTAssertFalse(sut.isType("Q", assignableTo: "Z"))
+    }
+    
     func testTypeCategoryPrimitives() {
         XCTAssertEqual(sut.category(forType: "Bool"), .boolean)
         XCTAssertEqual(sut.category(forType: "ObjCBool"), .boolean)
