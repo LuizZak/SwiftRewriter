@@ -543,7 +543,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         var blockReturnType = exp.returnType
         
         // Adjust signatures of block parameters based on expected type
-        // TODO: Also accept nullable/implicitly-unwrapped expected block types
         if case let .block(ret, params)? = (exp.expectedType?.deepUnwrapped).map(expandAliases),
             params.count == exp.parameters.count {
             
