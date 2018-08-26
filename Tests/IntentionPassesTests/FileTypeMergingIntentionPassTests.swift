@@ -3,6 +3,7 @@ import IntentionPasses
 import SwiftRewriterLib
 import SwiftAST
 import TestCommons
+import GrammarModels
 
 class FileTypeMergingIntentionPassTests: XCTestCase {
     
@@ -18,7 +19,11 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "fromImplementation") { method in
-                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
+                            method.setBody([
+                                .expression(
+                                    Expression.identifier("stmt").call()
+                                )
+                            ])
                         }
                     }
                 }.build()
@@ -45,7 +50,11 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "fromImplementation") { method in
-                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
+                            method.setBody([
+                                .expression(
+                                    Expression.identifier("stmt").call()
+                                )
+                            ])
                         }
                     }
                 }.build()
@@ -89,7 +98,11 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 }.createFile(named: "B.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "fromImplementation") { method in
-                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
+                            method.setBody([
+                                .expression(
+                                    Expression.identifier("stmt").call()
+                                )
+                            ])
                         }
                     }
                 }.build()
@@ -118,7 +131,11 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "amImplementation") { method in
-                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
+                            method.setBody([
+                                .expression(
+                                    Expression.identifier("stmt").call()
+                                )
+                            ])
                         }
                     }
                 }.build()
@@ -158,7 +175,11 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "fromImplementation") { method in
-                            method.setBody([.expression(.postfix(.identifier("stmt"), .functionCall()))])
+                            method.setBody([
+                                .expression(
+                                    Expression.identifier("stmt").call()
+                                )
+                            ])
                         }
                     }
                 }.build()
@@ -276,10 +297,9 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                                               returnType: .implicitUnwrappedOptional(.typeName("A")),
                                               body: [
                                                 .expression(
-                                                    .postfix(
-                                                        .identifier("a"),
-                                                        .functionCall()
-                                                    )
+                                                    Expression
+                                                        .identifier("a")
+                                                        .call()
                                                 )])
                 }.build()
         let sut = FileTypeMergingIntentionPass()
@@ -296,12 +316,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                                          isStatic: true)
                        )
         XCTAssertEqual(files[0].globalFunctionIntentions.first?.functionBody?.body,
-                       [.expression(
-                        .postfix(
-                            .identifier("a"),
-                            .functionCall()
-                        )
-                        )])
+                       [.expression(Expression.identifier("a").call())])
     }
     
     func testDontMergeSimilarButNotActuallyMatchingGlobalFunctions() {
@@ -317,10 +332,9 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     file.createGlobalFunction(withName: "a",
                                               body: [
                                                 .expression(
-                                                    .postfix(
-                                                        .identifier("a"),
-                                                        .functionCall()
-                                                    )
+                                                    Expression
+                                                        .identifier("a")
+                                                        .call()
                                                 )])
                 }.build()
         let sut = FileTypeMergingIntentionPass()
@@ -335,13 +349,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         // a()
         XCTAssertEqual(functions[0].functionBody?.body,
-                       [
-                        .expression(
-                            .postfix(
-                                .identifier("a"),
-                                .functionCall()
-                            )
-                        )])
+                       [.expression(Expression.identifier("a").call())])
         
         // a(int)
         XCTAssertNil(functions[1].functionBody?.body)
@@ -572,5 +580,37 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let cls = intentions.fileIntentions()[0].typeIntentions[0]
         XCTAssertEqual(cls.methods[0].parameters[0].type,
                        .block(returnType: .void, parameters: [.typeName("A")]))
+    }
+    
+    func testKeepsAliasInMergedBlockSignatures() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "Aliases.h") { file in
+                    file.beginNonnulContext()
+                        .createTypealias(
+                            withName: "ABlock",
+                            swiftType: .block(returnType: .void, parameters: ["A"]),
+                            type: .blockType(name: "ABlock",
+                                             returnType: .void,
+                                             parameters: [.pointer(.struct("A"))])
+                        )
+                        .endNonnullContext()
+                }
+                .createFile(named: "A.h") { file in
+                    file.createClass(withName: "A") { type in
+                        type.setAsInterfaceSource()
+                            .createMethod("a(_ a: ABlock)")
+                    }
+                }.createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") { type in
+                        type.createMethod("a(_ a: ((A!) -> Void)!)")
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let cls = intentions.fileIntentions()[1].typeIntentions[0]
+        XCTAssertEqual(cls.methods[0].parameters[0].type, "ABlock")
     }
 }

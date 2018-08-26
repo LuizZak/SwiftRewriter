@@ -8,6 +8,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        let typeMerger = TypeMerger(typeSystem: context.typeSystem)
+        
         // Collect .h/.m pairs
         let intentions = intentionCollection.fileIntentions()
         
@@ -25,10 +27,10 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         // files.
         implementations.forEach { implementation in
             // First, merge within implementations themselves
-            mergeDuplicatedTypesInFile(implementation)
+            typeMerger.mergeDuplicatedTypesInFile(implementation)
             
             headers.forEach { header in
-                mergeTypesToMatchingImplementations(from: header, into: implementation)
+                typeMerger.mergeTypesToMatchingImplementations(from: header, into: implementation)
             }
         }
         
@@ -80,7 +82,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         
         // Find all global function declarations and match them to their matching
         // implementation
-        mergeGlobalFunctionDefinitions(in: intentionCollection)
+        typeMerger.mergeGlobalFunctionDefinitions(in: intentionCollection)
         
         // Merge remaining global functions
         for header in headers {

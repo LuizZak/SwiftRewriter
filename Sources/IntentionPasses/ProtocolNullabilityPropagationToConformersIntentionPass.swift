@@ -13,11 +13,13 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
-        let typeSystem = context.typeSystem as? IntentionCollectionTypeSystem
+        let typeSystem = context.typeSystem as? DefaultTypeSystem
         typeSystem?.makeCache()
         defer {
             typeSystem?.tearDownCache()
         }
+        
+        let typeMerger = TypeMerger(typeSystem: context.typeSystem)
         
         // Collect protocols
         let protocols = intentionCollection.protocolIntentions()
@@ -40,7 +42,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                 }
             
             for prot in knownProtocols {
-                mergeMethodSignatures(from: prot, into: cls)
+                typeMerger.mergeMethodSignatures(from: prot, into: cls)
             }
         }
         

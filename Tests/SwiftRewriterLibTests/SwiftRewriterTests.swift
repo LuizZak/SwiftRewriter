@@ -2591,4 +2591,52 @@ class SwiftRewriterTests: XCTestCase {
             """
         )
     }
+    
+    func testMergeNullabilityOfAliasedBlockFromNonAliasedDeclaration() {
+        assertObjcParse(
+            objc: """
+            typedef void(^callback)();
+            typedef BOOL(^predicate)(NSString*_Nullable);
+            typedef BOOL(^other_predicate)(NSString*_Nullable);
+            
+            @interface A
+            - (void)doWork:(nullable callback)call;
+            - (void)doMoreWork:(nullable predicate)predicate;
+            - (void)doOtherWork:(nonnull other_predicate)predicate;
+            @end
+            @implementation A
+             - (void)doWork:(void(^callback)())call {
+                 call();
+             }
+             - (void)doMoreWork:(BOOL(^predicate)(NSString*))predicate {
+                 predicate();
+             }
+            - (void)doOtherWork:(BOOL(^predicate)(NSString*_Nonnull))predicate {
+                predicate();
+            }
+            @end
+            """,
+            swift: """
+            typealias callback = () -> Void
+            typealias predicate = (String?) -> Bool
+            typealias other_predicate = (String?) -> Bool
+            
+            @objc
+            class A: NSObject {
+                @objc
+                func doWork(_ call: callback?) {
+                    call?()
+                }
+                @objc
+                func doMoreWork(_ predicate: predicate?) {
+                    predicate?()
+                }
+                @objc
+                func doOtherWork(_ predicate: ((String) -> Bool)!) {
+                    predicate?()
+                }
+            }
+            """
+        )
+    }
 }

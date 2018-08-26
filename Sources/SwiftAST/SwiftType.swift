@@ -252,15 +252,35 @@ public extension SwiftType {
     /// .implicitUnwrappedOptional types unwrapped to non optional, inclusing
     /// block parameters.
     ///
-    /// - Parameter type: The input type
+    /// - Parameters:
+    ///   - type: The input type
+    ///   - removeImplicitsOnly: Whether to only remove implicit unwrapped optionals,
+    /// keeping optionals in place.
     /// - Returns: The deeply unwrapped version of the input type.
-    public static func asNonnullDeep(_ type: SwiftType) -> SwiftType {
-        var result = type.deepUnwrapped
+    public static func asNonnullDeep(_ type: SwiftType,
+                                     removeImplicitsOnly: Bool = false) -> SwiftType {
+        
+        var result: SwiftType = type
+        
+        if removeImplicitsOnly {
+            if case .implicitUnwrappedOptional(let inner) = type {
+                result = inner
+            }
+        } else {
+            result = type.deepUnwrapped
+        }
         
         switch result {
         case let .block(returnType, parameters):
-            result = .block(returnType: asNonnullDeep(returnType),
-                            parameters: parameters.map(asNonnullDeep))
+            let returnType =
+                asNonnullDeep(returnType,
+                              removeImplicitsOnly: removeImplicitsOnly)
+            
+            let parameters = parameters.map {
+                asNonnullDeep($0, removeImplicitsOnly: removeImplicitsOnly)
+            }
+            
+            result = .block(returnType: returnType, parameters: parameters)
         default:
             break
         }
