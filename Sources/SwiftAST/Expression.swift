@@ -1305,6 +1305,7 @@ public extension PostfixExpression {
 
 /// Postfix access that invokes an expression as a function.
 public final class FunctionCallPostfix: Postfix {
+    private let _subExpressions: [Expression]
     public let arguments: [FunctionArgument]
     
     public override var description: String {
@@ -1312,7 +1313,7 @@ public final class FunctionCallPostfix: Postfix {
     }
     
     public override var subExpressions: [Expression] {
-        return arguments.map { $0.expression }
+        return _subExpressions
     }
     
     /// Gets the list of keywords for the arguments passed to this function call.
@@ -1325,6 +1326,7 @@ public final class FunctionCallPostfix: Postfix {
     
     public init(arguments: [FunctionArgument]) {
         self.arguments = arguments
+        self._subExpressions = arguments.map { $0.expression }
     }
     
     public override func copy() -> FunctionCallPostfix {

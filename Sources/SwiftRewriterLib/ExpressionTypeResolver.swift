@@ -72,21 +72,24 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         nearestScopeCache = [:]
         
         // First, clear all variable definitions found, and their usages too.
-        for node in SyntaxNodeSequence(node: statement, inspectBlocks: true) {
-            switch node {
-            case let scoped as CodeScopeNode:
-                scoped.removeAllDefinitions()
-            
-            case let ident as IdentifierExpression:
-                ident.definition = nil
-            
-            case let postfix as PostfixExpression:
-                postfix.op.returnType = nil
-                
-            default:
-                break
+        let visitor =
+            AnonymousSyntaxNodeVisitor { node in
+                switch node {
+                case let scoped as CodeScopeNode:
+                    scoped.removeAllDefinitions()
+                    
+                case let ident as IdentifierExpression:
+                    ident.definition = nil
+                    
+                case let postfix as PostfixExpression:
+                    postfix.op.returnType = nil
+                    
+                default:
+                    break
+                }
             }
-        }
+        
+        visitor.visitStatement(statement)
         
         // Now visit the nodes
         return visitStatement(statement)

@@ -1,5 +1,3 @@
-import Dispatch
-
 /// Gives support for querying an object for types by name.
 public protocol KnownTypeProvider {
     /// Returns a type with a given (unaliased) name to this type provider.
@@ -39,14 +37,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func tearDownCache() {
-        typesCache.modifyingState { state in
-            state.value = nil
-            typesCache.usingCache = false
-        }
-        canonicalTypenameCache.modifyingState { state in
-            state.value = nil
-            canonicalTypenameCache.usingCache = false
-        }
+        typesCache.tearDown()
+        canonicalTypenameCache.tearDown()
     }
     
     public func addKnownTypeProvider(_ typeProvider: KnownTypeProvider) {
@@ -79,8 +71,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         let type = CompoundKnownType(typeName: name, types: types)
         
         if typesCache.usingCache {
-            typesCache.modifyingState { state in
-                state.value?[name.hashValue] = type
+            typesCache.modifyingValue { value in
+                value?[name.hashValue] = type
             }
         }
         
@@ -163,39 +155,5 @@ public class CollectionKnownTypeProvider: KnownTypeProvider {
     
     public func canonicalName(for typeName: String) -> String? {
         return canonicalMappings[typeName]
-    }
-}
-
-private class ConcurrentValue<T> {
-    struct CacheState {
-        var value: T?
-    }
-    
-    private var cacheBarrier =
-        DispatchQueue(
-            label: "com.swiftrewriter.compoundtypeprovider.barriervalue_$\(T.self)",
-            qos: .default,
-            attributes: .concurrent,
-            autoreleaseFrequency: .inherit,
-            target: nil)
-    
-    var usingCache = false
-    
-    private var state = CacheState()
-    
-    func readingValue<U>(_ block: (T?) -> U) -> U {
-        return readingState { block($0.value) }
-    }
-    
-    func readingState<U>(_ block: (CacheState) -> U) -> U {
-        return cacheBarrier.sync {
-            block(state)
-        }
-    }
-    
-    func modifyingState<U>(_ block: (inout CacheState) -> U) -> U {
-        return cacheBarrier.sync(flags: .barrier) {
-            block(&state)
-        }
     }
 }

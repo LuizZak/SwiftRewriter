@@ -11,16 +11,58 @@ public protocol TypealiasProvider {
 /// Gathers one or more typealias providers into a single `TypealiasProvider`
 /// interface.
 public class CompoundTypealiasProvider: TypealiasProvider {
+    private var aliasesCache = ConcurrentValue<[Int: SwiftType]>()
+    private var negativeLookups = ConcurrentValue<Set<String>>()
+    
     public var providers: [TypealiasProvider]
     
     public init(providers: [TypealiasProvider]) {
         self.providers = providers
     }
     
+    func makeCache() {
+        aliasesCache.modifyingState { state in
+            state.value = [:]
+            aliasesCache.usingCache = true
+        }
+        negativeLookups.modifyingState { state in
+            state.value = []
+            negativeLookups.usingCache = true
+        }
+    }
+    
+    func tearDownCache() {
+        aliasesCache.tearDown()
+        negativeLookups.tearDown()
+    }
+    
     public func unalias(_ typeName: String) -> SwiftType? {
+        if aliasesCache.usingCache, let type = aliasesCache.readingValue({ $0?[typeName.hashValue] }) {
+            return type
+        }
+        
+        // Negative lookups
+        if negativeLookups.usingCache, negativeLookups.readingValue({ $0?.contains(typeName) == true }) {
+            return nil
+        }
+        
         for provider in providers {
             if let type = provider.unalias(typeName) {
+                
+                if aliasesCache.usingCache {
+                    aliasesCache.modifyingValue { value in
+                        value?[typeName.hashValue] = type
+                    }
+                }
+                
                 return type
+            }
+        }
+        
+        // Store negative lookups
+        if negativeLookups.usingCache {
+            negativeLookups.modifyingValue { value -> Void in
+                value?.insert(typeName)
             }
         }
         
@@ -29,6 +71,13 @@ public class CompoundTypealiasProvider: TypealiasProvider {
     
     public func addTypealiasProvider(_ typealiasProvider: TypealiasProvider) {
         providers.append(typealiasProvider)
+        
+        // Reset cache to allow types from this type alias provider to be
+        // considered.
+        if aliasesCache.usingCache {
+            tearDownCache()
+            makeCache()
+        }
     }
 }
 

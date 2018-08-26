@@ -32,11 +32,13 @@ public class DefaultTypeSystem: TypeSystem {
     
     public func makeCache() {
         knownTypeProviders.makeCache()
+        typealiasProviders.makeCache()
         compoundKnownTypesCache = CompoundKnownTypesCache()
     }
     
     public func tearDownCache() {
         knownTypeProviders.tearDownCache()
+        typealiasProviders.tearDownCache()
         compoundKnownTypesCache = nil
     }
     
@@ -112,6 +114,10 @@ public class DefaultTypeSystem: TypeSystem {
             return nil
         }
         
+        return _knownTypeWithNameUnaliased(name)
+    }
+    
+    private func _knownTypeWithNameUnaliased(_ name: String) -> KnownType? {
         return knownTypeProviders.knownType(withName: name)
     }
     
@@ -237,7 +243,7 @@ public class DefaultTypeSystem: TypeSystem {
     private func _unaliasedIsType(_ unaliasedTypeName: String,
                                   conformingTo unaliasedProtocolName: String) -> Bool {
         
-        guard let type = knownTypeWithName(unaliasedTypeName) else {
+        guard let type = _knownTypeWithNameUnaliased(unaliasedTypeName) else {
             return false
         }
         
@@ -264,7 +270,7 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     private func _unaliasedIsType(_ unaliasedTypeName: String, subtypeOf unaliasedSupertypeName: String) -> Bool {
-        guard let type = knownTypeWithName(unaliasedTypeName) else {
+        guard let type = _knownTypeWithNameUnaliased(unaliasedTypeName) else {
             return false
         }
         
@@ -280,7 +286,7 @@ public class DefaultTypeSystem: TypeSystem {
             break
         }
         
-        guard let supertype = knownTypeWithName(unaliasedSupertypeName) else {
+        guard let supertype = _knownTypeWithNameUnaliased(unaliasedSupertypeName) else {
             return false
         }
         
