@@ -116,7 +116,7 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
     public init(definitions: [CodeDefinition] = []) {
         self.definitions = definitions
         self.definitionsByName = definitions
-            .groupBy{ $0.name }
+            .groupBy { $0.name }
             .mapValues { $0[0] }
     }
     
