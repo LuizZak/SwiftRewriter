@@ -1,5 +1,21 @@
 public struct ValueTransformer<T, U> {
-    var transformer: (T) -> U?
+    let transformer: (T) -> U?
+    
+    public init(transformer: @escaping (T) -> U?) {
+        self.transformer = transformer
+    }
+    
+    public init(keyPath: KeyPath<T, U>) {
+        self.transformer = {
+            $0[keyPath: keyPath]
+        }
+    }
+    
+    public init(keyPath: KeyPath<T, U?>) {
+        self.transformer = {
+            $0[keyPath: keyPath]
+        }
+    }
     
     public func transform(value: T) -> U? {
         return transformer(value)
@@ -12,6 +28,26 @@ public struct ValueTransformer<T, U> {
             }
             
             return callback(value)
+        }
+    }
+    
+    public func validate(_ predicate: @escaping (U) -> Bool) -> ValueTransformer<T, U> {
+        return ValueTransformer<T, U> { [transformer] value in
+            guard let value = transformer(value) else {
+                return nil
+            }
+            
+            return predicate(value) ? value : nil
+        }
+    }
+    
+    public func validate(matcher: ValueMatcher<U>) -> ValueTransformer<T, U> {
+        return ValueTransformer<T, U> { [transformer] value in
+            guard let value = transformer(value) else {
+                return nil
+            }
+            
+            return matcher.matches(value) ? value : nil
         }
     }
 }

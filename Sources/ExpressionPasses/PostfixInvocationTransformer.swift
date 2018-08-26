@@ -8,6 +8,12 @@ protocol PostfixInvocationTransformer {
     /// Returns whether this postfix transformer can do rewriting work on a given
     /// postfix expression.
     ///
+    /// A return of `true` indicates this transformer _could_ return a non-nil
+    /// transformed expression, but does not guarantee it.
+    ///
+    /// A return of `false` indicates this transformer will definitely return
+    /// `nil`.
+    ///
     /// - Parameter postfix: The postfix expression to analyze.
     /// - Returns: True if this postfix transformer can do useful work on the given
     /// expression, false otherwise.

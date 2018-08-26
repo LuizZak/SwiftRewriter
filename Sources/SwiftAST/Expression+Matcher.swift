@@ -24,6 +24,14 @@ public func ident(_ matcher: MatchRule<String>) -> SyntaxMatcher<IdentifierExpre
 
 public extension ValueMatcher where T: Expression {
     
+    public func isTyped(_ type: SwiftType) -> ValueMatcher {
+        return keyPath(\.resolvedType, equals: type)
+    }
+    
+    public func isTyped(expected type: SwiftType) -> ValueMatcher {
+        return keyPath(\.expectedType, equals: type)
+    }
+    
     public func dot<S>(_ member: S) -> SyntaxMatcher<PostfixExpression>
         where S: ValueMatcherConvertible, S.Target == String {
         
@@ -122,6 +130,29 @@ public extension ValueMatcher where T: PostfixExpression {
     
     public typealias PostfixMatcher = ValueMatcher<[PostfixChainInverter.Postfix]>
     
+    /// Matches if the postfix is a function invocation.
+    public static var isFunctionCall: ValueMatcher<T> {
+        return ValueMatcher<T>()
+            .keyPath(\.op, .isType(FunctionCallPostfix.self))
+    }
+    
+    /// Matches if the postfix is a member access.
+    public static var isMemberAccess: ValueMatcher<T> {
+        return ValueMatcher<T>()
+            .keyPath(\.op, .isType(MemberPostfix.self))
+    }
+    
+    /// Matches if the postfix is a subscription.
+    public static var isSubscription: ValueMatcher<T> {
+        return ValueMatcher<T>()
+            .keyPath(\.op, .isType(SubscriptPostfix.self))
+    }
+    
+    public static func isMemberAccess(forMember name: String) -> ValueMatcher<T> {
+        return ValueMatcher<T>()
+            .keyPath(\.op, .isType(MemberPostfix.self))
+    }
+    
     /// Opens a context for matching postfix operation chains using an inverted
     /// traversal method (left-most to right-most).
     ///
@@ -149,23 +180,20 @@ public extension ValueMatcher where T == PostfixChainInverter.Postfix {
     
     /// Matches if the postfix is a function invocation.
     public static var isFunctionCall: ValueMatcher<T> {
-        return
-            ValueMatcher<T>()
-                .keyPath(\.postfix, .isType(FunctionCallPostfix.self))
+        return ValueMatcher<T>()
+            .keyPath(\.postfix, .isType(FunctionCallPostfix.self))
     }
     
     /// Matches if the postfix is a member access.
     public static var isMemberAccess: ValueMatcher<T> {
-        return
-            ValueMatcher<T>()
-                .keyPath(\.postfix, .isType(MemberPostfix.self))
+        return ValueMatcher<T>()
+            .keyPath(\.postfix, .isType(MemberPostfix.self))
     }
     
     /// Matches if the postfix is a subscription.
     public static var isSubscription: ValueMatcher<T> {
-        return
-            ValueMatcher<T>()
-                .keyPath(\.postfix, .isType(SubscriptPostfix.self))
+        return ValueMatcher<T>()
+            .keyPath(\.postfix, .isType(SubscriptPostfix.self))
     }
     
 }

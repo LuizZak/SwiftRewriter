@@ -122,6 +122,9 @@ public class BaseExpressionPass: ASTRewriterPass {
                             firstArgumentBecomesInstance: false,
                             arguments: new.map { $0.argumentRewritingStrategy }
                         )
+                    
+                case let .valueTransformer(transformer):
+                    return transformer
                 }
             }
         )

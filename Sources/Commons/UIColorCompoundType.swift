@@ -9,8 +9,8 @@ public enum UIColorCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         var type = KnownTypeBuilder(typeName: "UIColor", supertype: "NSObject")
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
@@ -49,6 +49,42 @@ public enum UIColorCompoundType {
 }
 
 extension KnownTypeBuilder {
+    func _createConstructorMapping(fromStaticMethod signature: FunctionSignature,
+                                   in transformations: TransformationsSink) -> KnownTypeBuilder {
+        
+        guard let constructor = lastConstructor else {
+            assertionFailure("Must be called after a call to `.constructor`")
+            return self
+        }
+        
+        let transformer = ValueTransformer<PostfixExpression, Expression> { $0 }
+            .validate { exp in
+                exp.asPostfix?
+                    .functionCall?
+                    .identifierWith(methodName: signature.name)
+                        == signature.asIdentifier
+            }
+            .decompose()
+            .transformIndex(index: 0, transformer: ValueTransformer()
+                .removingMemberAccess()
+                .validate(matcher: ValueMatcher()
+                    .isTyped(.metatype(for: .typeName(typeName)))
+                )
+            )
+            .asFunctionCall(labels: constructor.parameters.argumentLabels())
+            .typed(.typeName(typeName))
+        
+        transformations.addValueTransformer(transformer)
+        
+        let annotation = """
+            Convert from '\(
+                TypeFormatter.asString(signature: signature, includeName: true)
+            )'
+            """
+        
+        return self.annotationgLatestConstructor(annotation: annotation)
+    }
+    
     func _createConstructorMapping(fromParameters parameters: [ParameterSignature],
                                    in transformations: TransformationsSink) -> KnownTypeBuilder {
         

@@ -2540,4 +2540,19 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testCorrectsDateIsEqualIntoBinaryExpression() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                [[NSDate date] isEqual:[NSDate date]];
+            }
+            """,
+            swift: """
+            func test() {
+                Date() == Date()
+            }
+            """
+        )
+    }
 }

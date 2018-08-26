@@ -18,9 +18,9 @@ public enum CalendarCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "Calendar", supertype: "NSObject")
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
@@ -93,9 +93,9 @@ public enum NSArrayCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "NSArray", supertype: "NSObject")
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
@@ -159,9 +159,9 @@ public enum NSMutableArrayCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "NSMutableArray", supertype: "NSArray")
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
@@ -227,9 +227,9 @@ public enum NSDateFormatterCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "DateFormatter", supertype: "Formatter")
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
@@ -288,9 +288,10 @@ public enum NSDateCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
+        let aliases = ["NSDate"]
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "Date", kind: .struct)
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
@@ -302,17 +303,57 @@ public enum NSDateCompoundType {
         
         type = type
             .constructor()
+            ._createConstructorMapping(
+                fromStaticMethod:
+                    FunctionSignature(isStatic: true,
+                                      signatureString: "date() -> Date"),
+                in: transformations
+            )
         
         type = type
             .method(withSignature:
                 FunctionSignature(
-                    name: "addingTimeInterval",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "timeInterval", type: "TimeInterval")
-                    ],
-                    returnType: "Date"
+                    isStatic: true,
+                    signatureString: "date() -> Date"
+                )
+            )
+        
+        type = type
+            .method(withSignature:
+                FunctionSignature(
+                    signatureString: "addingTimeInterval(_ timeInterval: TimeInterval) -> Date"
                 ).makeSignatureMapping(
                     fromMethodNamed: "dateByAddingTimeInterval",
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
+            .method(withSignature:
+                FunctionSignature(
+                    signatureString: "timeIntervalSince(_ date: Date) -> TimeInterval"
+                ).makeSignatureMapping(
+                    fromMethodNamed: "timeIntervalSinceDate",
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
+            .method(withSignature:
+                FunctionSignature(
+                    signatureString: "isEqual(_ other: AnyObject) -> Bool"
+                ).toBinaryOperation(
+                    op: .equals,
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
+            .method(withSignature:
+                FunctionSignature(
+                    signatureString: "isEqualToDate(_ other: Date) -> Bool"
+                ).toBinaryOperation(
+                    op: .equals,
                     in: transformations,
                     annotations: annotations
                 ),
@@ -321,7 +362,8 @@ public enum NSDateCompoundType {
         
         return
             CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+                                  transformations: transformations.transformations,
+                                  aliases: aliases)
     }
 }
 
@@ -333,9 +375,9 @@ public enum NSLocaleCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         let aliases = ["NSLocale"]
         var type = KnownTypeBuilder(typeName: "Locale", kind: .struct)
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         

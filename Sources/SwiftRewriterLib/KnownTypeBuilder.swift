@@ -9,6 +9,10 @@ public struct KnownTypeBuilder {
     private var type: BuildingKnownType
     public var useSwiftSignatureMatching: Bool = false
     
+    public var typeName: String {
+        return type.typeName
+    }
+    
     public init(from existingType: KnownType, file: String = #file, line: Int = #line) {
         var type =
             BuildingKnownType(typeName: existingType.typeName,

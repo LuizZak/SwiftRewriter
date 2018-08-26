@@ -19,17 +19,6 @@ public struct FunctionSignature: Equatable, Codable {
             )
     }
     
-    public init(name: String,
-                parameters: [ParameterSignature] = [],
-                returnType: SwiftType = .void,
-                isStatic: Bool = false) {
-        
-        self.isStatic = isStatic
-        self.name = name
-        self.returnType = returnType
-        self.parameters = parameters
-    }
-    
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
         return .block(returnType: returnType, parameters: parameters.map { $0.type })
@@ -44,6 +33,17 @@ public struct FunctionSignature: Equatable, Codable {
                                  parameters: parameters,
                                  returnType: returnType.deepUnwrapped,
                                  isStatic: isStatic)
+    }
+    
+    public init(name: String,
+                parameters: [ParameterSignature] = [],
+                returnType: SwiftType = .void,
+                isStatic: Bool = false) {
+        
+        self.isStatic = isStatic
+        self.name = name
+        self.returnType = returnType
+        self.parameters = parameters
     }
     
     /// Returns `true` iff `self` and `other` match using Swift signature matching
@@ -110,3 +110,11 @@ public struct ParameterSignature: Equatable, Codable {
         self.type = type
     }
 }
+
+public extension Sequence where Element == ParameterSignature {
+    
+    public func argumentLabels() -> [String?] {
+        return map { $0.label }
+    }
+}
+

@@ -77,9 +77,19 @@ class FoundationCompoundTypesTests: XCTestCase {
             struct Date: Hashable, Equatable {
                 var timeIntervalSince1970: TimeInterval
                 
+                // Convert from 'static date() -> Date'
                 init()
+                static func date() -> Date
+                
                 // Convert from dateByAddingTimeInterval(_ timeInterval: TimeInterval) -> Date
                 func addingTimeInterval(_ timeInterval: TimeInterval) -> Date
+                // Convert from timeIntervalSinceDate(_ date: Date) -> TimeInterval
+                func timeIntervalSince(_ date: Date) -> TimeInterval
+                
+                // Convert to binary operator '=='
+                func isEqual(_ other: AnyObject) -> Bool
+                // Convert to binary operator '=='
+                func isEqualToDate(_ other: Date) -> Bool
             }
             """)
     }

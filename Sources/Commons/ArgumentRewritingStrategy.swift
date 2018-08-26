@@ -264,3 +264,19 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
     }
     
 }
+
+public extension ValueTransformer where U == [FunctionArgument] {
+    
+    public func rewritingArguments(_ transformers: [ArgumentRewritingStrategy]) -> ValueTransformer {
+        let required = transformers.requiredArgumentCount()
+        
+        return transforming { args in
+            if args.count < required {
+                return nil
+            }
+            
+            return transformers.rewrite(arguments: args)
+        }
+    }
+    
+}

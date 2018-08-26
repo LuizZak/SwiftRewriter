@@ -12,9 +12,9 @@ public enum UIViewCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIView", supertype: "UIResponder")
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
@@ -871,6 +871,46 @@ public enum UIViewCompoundType {
 
 extension FunctionSignature {
     
+    func toBinaryOperation(op: SwiftOperator,
+                           in transformsSink: TransformationsSink,
+                           annotations: AnnotationsSink) -> FunctionSignature {
+        
+        assert(parameters.count == 1, """
+            Trying to create a binary operator mapping with a function call that \
+            does not have exactly one parameter?
+            Binary operation mapping requires two parameters (the base type
+            """)
+        
+        let transformer = ValueTransformer<PostfixExpression, Expression> { $0 }
+            // Flatten expressions (breaks postfix expressions into sub-expressions)
+            .decompose()
+            .validate { $0.count == 2 }
+            // Verify first expression is a member access to the type we expect
+            .transformIndex(
+                index: 0,
+                transformer: ValueTransformer()
+                    .validate(matcher: ValueMatcher()
+                        .keyPath(\.asPostfix, .isMemberAccess(forMember: name))
+                        .keyPath(\.resolvedType, equals: swiftClosureType)
+                    )
+                    .removingMemberAccess()
+                    .validate(matcher: ValueMatcher()
+                        .isTyped(.typeName(transformsSink.typeName))
+                    )
+            )
+            // Re-shape it into a binary expression
+            .asBinaryExpression(operator: .equals)
+        
+        transformsSink.addValueTransformer(transformer)
+        
+        let annotation =
+            "Convert to binary operator '\(op)'"
+        
+        annotations.addAnnotation(annotation, newTag: AnyEquatable(self))
+        
+        return self
+    }
+    
     func makeSignatureMapping(fromMethodNamed name: String,
                               in transformsSink: TransformationsSink,
                               annotations: AnnotationsSink) -> FunctionSignature {
@@ -959,7 +999,7 @@ extension FunctionSignature {
                                           transformer: builder.build())
         
         let annotation =
-        "Convert from \(TypeFormatter.asString(signature: signature, includeName: true))"
+            "Convert from \(TypeFormatter.asString(signature: signature, includeName: true))"
         
         annotations.addAnnotation(annotation, newTag: AnyEquatable(self))
         
@@ -1026,13 +1066,23 @@ class AnnotationsSink {
 
 /// Collects expression transformations created during type creation
 class TransformationsSink {
+    var typeName: String
+    
     private var propertyRenames: [(old: String, new: String)] = []
     private var mappings: [MethodInvocationTransformerMatcher] = []
     private var postfixTransformations: [PostfixTransformation] = []
+    private var valueTransformers: [ValueTransformer<PostfixExpression, Expression>] = []
     
     var transformations: [PostfixTransformation] {
-        return propertyRenames.map { .property(old: $0.old, new: $0.new) }
-            + mappings.map { .method($0) } + postfixTransformations
+        return
+            propertyRenames.map(PostfixTransformation.property)
+                + mappings.map(PostfixTransformation.method)
+                + postfixTransformations
+                + valueTransformers.map(PostfixTransformation.valueTransformer)
+    }
+    
+    init(typeName: String) {
+        self.typeName = typeName
     }
     
     func addPropertyRenaming(old: String, new: String) {
@@ -1062,6 +1112,10 @@ class TransformationsSink {
                                  getterName: getter,
                                  setterName: setter)
         )
+    }
+    
+    func addValueTransformer<T: Expression>(_ transformer: ValueTransformer<PostfixExpression, T>) {
+        valueTransformers.append(transformer.anyExpression())
     }
 }
 

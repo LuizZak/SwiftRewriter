@@ -1,8 +1,12 @@
-//
-//  ValueTransformer+PostfixTransformer.swift
-//  ExpressionPasses
-//
-//  Created by Luiz Fernando Silva on 25/08/2018.
-//
+import SwiftAST
+import SwiftRewriterLib
 
-import Foundation
+extension ValueTransformer: PostfixInvocationTransformer where T == PostfixExpression, U == Expression {
+    func canApply(to postfix: PostfixExpression) -> Bool {
+        return true
+    }
+    
+    func attemptApply(on postfix: PostfixExpression) -> Expression? {
+        return transform(value: postfix)
+    }
+}

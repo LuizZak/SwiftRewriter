@@ -8,4 +8,5 @@ public enum PostfixTransformation {
     case property(old: String, new: String)
     case propertyFromMethods(property: String, getterName: String, setterName: String?)
     case initializer(old: [ParameterSignature], new: [ParameterSignature])
+    case valueTransformer(ValueTransformer<PostfixExpression, Expression>)
 }

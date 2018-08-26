@@ -9,9 +9,9 @@ public enum UIGestureRecognizerCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let transformations = TransformationsSink()
         let annotations: AnnotationsSink = AnnotationsSink()
         var type = KnownTypeBuilder(typeName: "UIGestureRecognizer", supertype: "NSObject")
+        let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
         
