@@ -567,10 +567,14 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         // Apply definitions for function parameters
         for param in exp.parameters {
-            exp.recordDefinition(
-                CodeDefinition(variableNamed: param.name,
-                               storage: ValueStorage(type: param.type, ownership: .strong, isConstant: true))
-            )
+            let storage = ValueStorage(type: param.type,
+                                       ownership: .strong,
+                                       isConstant: true)
+            
+            let definition = CodeDefinition(variableNamed: param.name,
+                                            storage: storage)
+            
+            exp.recordDefinition(definition)
         }
         
         // Push context of return type during expression resolving
@@ -707,7 +711,8 @@ private class MemberInvocationResolver {
                 exp.resolvedType = .optional(Array(params)[1])
                 
             // Sub-types of NSArray index as .any
-            case .nominal(.typeName(let typeName)) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
+            case .nominal(.typeName(let typeName))
+                where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSArray"):
                 if subType != .int {
                     return exp.makeErrorTyped()
                 }
@@ -715,7 +720,9 @@ private class MemberInvocationResolver {
                 exp.resolvedType = .any
                 
             // Sub-types of NSDictionary index as .any
-            case .nominal(.typeName(let typeName)) where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
+            case .nominal(.typeName(let typeName))
+                where typeResolver.typeSystem.isType(typeName, subtypeOf: "NSDictionary"):
+                
                 exp.resolvedType = .optional(.any)
                 
             default:
@@ -795,8 +802,8 @@ private class MemberInvocationResolver {
         
         // Parameterless type constructor on type metadata (i.e. `MyClass.init()`)
         if let target = postfix.exp.asPostfix?.exp.asIdentifier,
-            postfix.exp.asPostfix?.op == .member("init") && arguments.isEmpty
-        {
+            postfix.exp.asPostfix?.op == .member("init") && arguments.isEmpty {
+            
             guard let metatype = extractMetatype(from: target) else {
                 return postfix.makeErrorTyped()
             }
