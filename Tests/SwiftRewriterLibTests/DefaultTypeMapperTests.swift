@@ -303,7 +303,7 @@ class DefaultTypeMapperTests: XCTestCase {
                           returnType: .struct("NSInteger"),
                           parameters: [.pointer(.struct("NSString")),
                                        .pointer(.struct("NSString"))]),
-               withExplicitNullability: .nonnull,
+               inNonnullContext: true,
                toConvertTo: "(String, String) -> Int")
         
         expect(.blockType(name: "block",
@@ -322,10 +322,17 @@ class DefaultTypeMapperTests: XCTestCase {
         
         expect(.blockType(name: "block",
                           returnType: .struct("NSInteger"),
+                          parameters: [.specified(specifiers: ["nonnull"], .pointer(.struct("NSString"))),
+                                       .specified(specifiers: ["nullable"], .pointer(.struct("NSString")))]),
+               withExplicitNullability: .nonnull,
+               toConvertTo: "(String, String?) -> Int")
+        
+        expect(.blockType(name: "block",
+                          returnType: .struct("NSInteger"),
                           parameters: [.pointer(.struct("NSString")),
                                        .pointer(.struct("NSString"))]),
                withExplicitNullability: .nonnull,
-               toConvertTo: "(String, String) -> Int")
+               toConvertTo: "(String!, String!) -> Int")
     }
     
     func testNullableBlock() {
@@ -379,11 +386,13 @@ class DefaultTypeMapperTests: XCTestCase {
 
 extension DefaultTypeMapperTests {
     private func expect(_ type: ObjcType,
+                        inNonnullContext: Bool = false,
                         withExplicitNullability nullability: TypeNullability? = .nonnull,
                         toConvertTo expected: String,
                         file: String = #file, line: Int = #line) {
         
         let converted = typeMapperConvert(type,
+                                          inNonnullContext: inNonnullContext,
                                           nullability: nullability,
                                           typeSystem: typeSystem)
         
@@ -418,6 +427,7 @@ extension DefaultTypeMapperTests {
     }
     
     private func typeMapperConvert(_ type: ObjcType,
+                                   inNonnullContext: Bool,
                                    nullability: TypeNullability?,
                                    typeSystem: TypeSystem) -> String {
         
@@ -427,6 +437,7 @@ extension DefaultTypeMapperTests {
         if let nul = nullability {
             ctx = TypeMappingContext(explicitNullability: nul)
         }
+        ctx.inNonnullContext = inNonnullContext
         
         return mapper.typeNameString(for: type, context: ctx)
     }

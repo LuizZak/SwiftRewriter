@@ -524,9 +524,11 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     private func swiftBlockType(forReturnType returnType: ObjcType,
-                                parameters: [ObjcType], context: TypeMappingContext) -> SwiftType {
+                                parameters: [ObjcType],
+                                context: TypeMappingContext) -> SwiftType {
         
-        let ctx = context.asAlwaysNonNull(isOn: false)
+        var ctx = context.asAlwaysNonNull(isOn: false)
+        ctx.explicitNullability = nil
         let type: SwiftType =
             .block(returnType: swiftType(forObjcType: returnType, context: ctx),
                    parameters: parameters.map { swiftType(forObjcType: $0, context: ctx) })

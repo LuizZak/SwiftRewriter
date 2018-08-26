@@ -2603,16 +2603,22 @@ class SwiftRewriterTests: XCTestCase {
             - (void)doWork:(nullable callback)call;
             - (void)doMoreWork:(nullable predicate)predicate;
             - (void)doOtherWork:(nonnull other_predicate)predicate;
+            NS_ASSUME_NONNULL_BEGIN
+            + (void)rawQuery:(NSString*)query handler:(void(^)(id _Nullable results, NSError*_Nullable error))handler;
+            NS_ASSUME_NONNULL_END
             @end
             @implementation A
-             - (void)doWork:(void(^callback)())call {
-                 call();
-             }
-             - (void)doMoreWork:(BOOL(^predicate)(NSString*))predicate {
-                 predicate();
-             }
+            - (void)doWork:(void(^callback)())call {
+                call();
+            }
+            - (void)doMoreWork:(BOOL(^predicate)(NSString*))predicate {
+                predicate();
+            }
             - (void)doOtherWork:(BOOL(^predicate)(NSString*_Nonnull))predicate {
                 predicate();
+            }
+            + (void)rawQuery:(NSString *)query handler:(void (^)(id _Nullable, NSError * _Nullable))handler {
+                handler(nil, nil);
             }
             @end
             """,
@@ -2634,6 +2640,10 @@ class SwiftRewriterTests: XCTestCase {
                 @objc
                 func doOtherWork(_ predicate: ((String) -> Bool)!) {
                     predicate?()
+                }
+                @objc
+                static func rawQuery(_ query: String, handler: (AnyObject?, Error?) -> Void) {
+                    handler(nil, nil)
                 }
             }
             """

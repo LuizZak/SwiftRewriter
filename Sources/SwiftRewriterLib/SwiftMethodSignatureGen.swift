@@ -92,6 +92,7 @@ public class SwiftMethodSignatureGen {
     
     private func processKeywords(_ keywords: [KeywordDeclarator],
                                  _ target: inout FunctionSignature) {
+        
         guard !keywords.isEmpty else {
             return
         }
@@ -118,6 +119,7 @@ public class SwiftMethodSignatureGen {
             }
             
             var context = TypeMappingContext(explicitNullability: nullability)
+            context.inNonnullContext = inNonnullContext
             context.instanceTypeAlias = instanceTypeAlias
             
             let swiftType = typeMapper.swiftType(forObjcType: type, context: context)
