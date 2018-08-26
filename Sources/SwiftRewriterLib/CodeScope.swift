@@ -115,7 +115,9 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
     
     public init(definitions: [CodeDefinition] = []) {
         self.definitions = definitions
-        self.definitionsByName = definitions.groupBy({ $0.name }).mapValues({ $0[0] })
+        self.definitionsByName = definitions
+            .groupBy{ $0.name }
+            .mapValues { $0[0] }
     }
     
     public func definition(named name: String) -> CodeDefinition? {
@@ -166,7 +168,9 @@ public final class DefaultCodeScope: CodeScope {
     
     public init(definitions: [CodeDefinition] = []) {
         self.definitions = definitions
-        self.definitionsByName = definitions.groupBy({ $0.name }).mapValues({ $0[0] })
+        self.definitionsByName = definitions
+            .groupBy { $0.name }
+            .mapValues { $0[0] }
     }
     
     public func definition(named name: String) -> CodeDefinition? {
