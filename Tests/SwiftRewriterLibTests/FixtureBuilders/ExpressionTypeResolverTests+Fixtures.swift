@@ -178,7 +178,7 @@ extension ExpressionTypeResolverTests {
                 applied = true
             }
             
-            guard let defined = scope.definitions.definition(named: name) else {
+            guard let defined = scope.definitions.firstDefinition(named: name) else {
                 testCase.recordFailure(withDescription: """
                     Failed to find expected local definition '\(name)' on scope.
                     """,

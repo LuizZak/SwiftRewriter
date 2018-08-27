@@ -1231,43 +1231,66 @@ func _applyOverloadResolution(methods: [KnownMethod],
                               argumentTypes: [SwiftType?],
                               typeSystem: TypeSystem) -> KnownMethod? {
     
-    if methods.isEmpty {
+    let signatures = methods.map { $0.signature }
+    if let index = _applyOverloadResolution(signatures: signatures,
+                                            argumentTypes: argumentTypes,
+                                            typeSystem: typeSystem) {
+        return methods[index]
+    }
+    
+    return nil
+}
+
+/// Returns a matching resolution by index on a given array of signatures.
+///
+/// - precondition:
+///     for all methods `M` in `methods`,
+///     `M.signature.parameters.count == argumentTypes.count`
+///
+func _applyOverloadResolution(signatures: [FunctionSignature],
+                              argumentTypes: [SwiftType?],
+                              typeSystem: TypeSystem) -> Int? {
+    
+    if signatures.isEmpty {
         return nil
     }
     
     // All argument types are nil, or no argument types are available: no best
     // candidate can be decided.
     if argumentTypes.isEmpty || argumentTypes.allSatisfy({ $0 == nil }) {
-        return methods.first
+        return 0
     }
     
     // Start with a linear search for the first fully matching method signature
-    outerLoop:
-    for method in methods {
-        for (i, argumentType) in argumentTypes.enumerated() {
-            guard let argumentType = argumentType else {
-                break outerLoop
-            }
-            
-            let parameterType = method.signature.parameters[i].type
-            
-            if !typeSystem.typesMatch(argumentType, parameterType, ignoreNullability: false) {
-                break
-            }
-            
-            if i == argumentTypes.count - 1 {
-                // Candidate matches fully
-                return method
+    let allArgumentsPresent = argumentTypes.allSatisfy { $0 != nil }
+    if allArgumentsPresent {
+        outerLoop:
+        for (i, signature) in signatures.enumerated() {
+            for (argIndex, argumentType) in argumentTypes.enumerated() {
+                guard let argumentType = argumentType else {
+                    break outerLoop
+                }
+                
+                let parameterType = signature.parameters[argIndex].type
+                
+                if !typeSystem.typesMatch(argumentType, parameterType, ignoreNullability: false) {
+                    break
+                }
+                
+                if argIndex == argumentTypes.count - 1 {
+                    // Candidate matches fully
+                    return i
+                }
             }
         }
     }
     
     // Do a lookup ignoring type nullability to attempt to find best-matching
     // candidates, now
-    var methods = methods
+    var candidates = Array(signatures.enumerated())
     
     for (argIndex, argumentType) in argumentTypes.enumerated() {
-        guard methods.count > 1, let argumentType = argumentType else {
+        guard candidates.count > 1, let argumentType = argumentType else {
             continue
         }
         
@@ -1276,20 +1299,23 @@ func _applyOverloadResolution(methods: [KnownMethod],
         repeat {
             doWork = false
             
-            for (i, method) in methods.enumerated() {
+            for (i, signature) in candidates.enumerated() {
+                let parameterType =
+                    signature.element.parameters[argIndex].type
+                
                 // TODO: Support sub-type matching as well here
                 if !typeSystem.typesMatch(argumentType,
-                                          method.signature.parameters[argIndex].type,
+                                          parameterType,
                                           ignoreNullability: true) {
                     
-                    methods.remove(at: i)
+                    candidates.remove(at: i)
                     doWork = true
                     break
                 }
             }
-        } while doWork && methods.count > 1
+        } while doWork && candidates.count > 1
     }
     
-    // No best-match found; return first result
-    return methods.first
+    // Return first candidate found
+    return candidates.first?.offset
 }

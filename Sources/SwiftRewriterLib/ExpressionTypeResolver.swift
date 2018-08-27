@@ -638,12 +638,12 @@ extension ExpressionTypeResolver {
     
     func searchIdentifierDefinition(_ exp: IdentifierExpression) -> IdentifierExpression.Definition? {
         // Visit identifier's type from current context
-        if let definition = nearestScope(for: exp)?.definition(named: exp.identifier) {
+        if let definition = nearestScope(for: exp)?.firstDefinition(named: exp.identifier) {
             return .local(definition)
         }
         
         // Look into intrinsics first, since they always take precedence
-        if let intrinsic = intrinsicVariables.definition(named: exp.identifier) {
+        if let intrinsic = intrinsicVariables.firstDefinition(named: exp.identifier) {
             return .local(intrinsic)
         }
         
@@ -653,6 +653,21 @@ extension ExpressionTypeResolver {
         }
         
         return nil
+    }
+    
+    func searchFunctionDefinitions(matching identifier: FunctionIdentifier,
+                                   _ exp: IdentifierExpression) -> [IdentifierExpression.Definition] {
+        
+        var definitions: [IdentifierExpression.Definition] = []
+        
+        if let def = nearestScope(for: exp)?.functionDefinitions(matching: identifier) {
+            definitions.append(contentsOf: def.map { .local($0) })
+        }
+        
+        let intrinsics = intrinsicVariables.functionDefinitions(matching: identifier)
+        definitions.append(contentsOf: intrinsics.map { .local($0) })
+        
+        return definitions
     }
 }
 
@@ -784,7 +799,11 @@ private class MemberInvocationResolver {
         return exp
     }
     
-    func handleFunctionCall(postfix: PostfixExpression, functionCall: FunctionCallPostfix) -> Expression {
+    func handleFunctionCall(postfix: PostfixExpression,
+                            functionCall: FunctionCallPostfix) -> Expression {
+        
+        var functionCall = functionCall
+        
         postfix.exp = typeResolver.visitExpression(postfix.exp)
         
         defer {
@@ -861,15 +880,35 @@ private class MemberInvocationResolver {
             return postfix
         }
         // Local closure/global function type
-        if let target = postfix.exp.asIdentifier,
-            let type = target.resolvedType,
-            case let .block(ret, args) = type.deepUnwrapped {
+        if let target = postfix.exp.asIdentifier {
             
-            postfix.resolvedType = type.wrappingOther(ret)
-            functionCall.returnType = postfix.resolvedType
-            functionCall.callableSignature = .block(returnType: ret, parameters: args)
+            let identifier =
+                FunctionIdentifier(name: target.identifier,
+                                   parameterNames: arguments.map { $0.label })
             
-            matchParameterTypes(types: args, callArguments: functionCall.arguments)
+            let definitions =
+                typeResolver.searchFunctionDefinitions(matching: identifier, target)
+            let signatures = definitions.compactMap { $0.asFunctionSignature }
+            
+            functionCall = functionCall.replacingArguments(
+                functionCall.subExpressions.map(typeResolver.visitExpression)
+            )
+            
+            let bestMatch =
+                findBestMatch(signatures, matching: functionCall.arguments)?.swiftClosureType
+                    ?? postfix.exp.resolvedType
+            
+            if let type = bestMatch,
+                case let .block(ret, args) = type.deepUnwrapped {
+                
+                let type = type
+                
+                postfix.resolvedType = type.wrappingOther(ret)
+                functionCall.returnType = postfix.resolvedType
+                functionCall.callableSignature = type
+                
+                matchParameterTypes(types: args, callArguments: functionCall.arguments)
+            }
         }
         
         return postfix
@@ -905,6 +944,23 @@ private class MemberInvocationResolver {
     
     func labels(in arguments: [FunctionArgument]) -> [String?] {
         return arguments.map { $0.label }
+    }
+    
+    func findBestMatch(_ functions: [FunctionSignature],
+                       matching arguments: [FunctionArgument]) -> FunctionSignature? {
+        
+        // TODO: Matching a best candidate out of an overload set should be the
+        // type system's job.
+        let argTypes = arguments.map { $0.expression.resolvedType }
+        
+        if let index = _applyOverloadResolution(signatures: functions,
+                                                argumentTypes: argTypes,
+                                                typeSystem: typeSystem) {
+            
+            return functions[index]
+        }
+        
+        return nil
     }
     
     func method(isStatic: Bool,

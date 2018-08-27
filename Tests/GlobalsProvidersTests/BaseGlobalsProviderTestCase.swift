@@ -40,7 +40,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                        type: SwiftType,
                        file: String = #file, line: Int = #line) {
         
-        guard let definition = globals.definition(named: variable) else {
+        guard let definition = globals.firstDefinition(named: variable) else {
             recordFailure(withDescription: "Expected to find definition \(variable)",
                 inFile: file, atLine: line, expected: true)
             return
@@ -65,7 +65,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                        returnType: SwiftType,
                        file: String = #file, line: Int = #line) {
         
-        guard let definition = globals.definition(named: function) else {
+        guard let definition = globals.firstDefinition(named: function) else {
             recordFailure(withDescription: "Expected to find definition \(function)",
                 inFile: file, atLine: line, expected: true)
             return

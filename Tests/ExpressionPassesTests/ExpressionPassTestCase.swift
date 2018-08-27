@@ -44,7 +44,8 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     @discardableResult
-    func assertTransformParsed(expression original: String, into expected: String,
+    func assertTransformParsed(expression original: String,
+                               into expected: String,
                                file: String = #file, line: Int = #line) -> Expression {
         notified = false
         let exp = parse(original, file: file, line: line)
@@ -61,15 +62,19 @@ class ExpressionPassTestCase: XCTestCase {
     }
     
     @discardableResult
-    func assertTransformParsed(expression original: String, into expected: Expression,
+    func assertTransformParsed(expression original: String,
+                               into expected: Expression,
                                file: String = #file, line: Int = #line) -> Expression {
+        
         let exp = parse(original, file: file, line: line)
         return assertTransform(expression: exp, into: expected, file: file, line: line)
     }
     
     @discardableResult
-    func assertTransformParsed(statement original: String, into expected: Statement,
+    func assertTransformParsed(statement original: String,
+                               into expected: Statement,
                                file: String = #file, line: Int = #line) -> Statement {
+        
         let stmt = parseStmt(original, file: file, line: line)
         return assertTransform(statement: stmt, into: expected, file: file, line: line)
     }

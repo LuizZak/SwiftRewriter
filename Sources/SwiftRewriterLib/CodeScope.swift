@@ -19,12 +19,21 @@ public extension CodeScopeNode where Self: SyntaxNode {
         return scope
     }
     
-    public func definition(named name: String) -> CodeDefinition? {
-        if let def = definitions.definition(named: name) {
+    public func firstDefinition(named name: String) -> CodeDefinition? {
+        if let def = definitions.firstDefinition(named: name) {
             return def
         }
         
-        return nearestScopeThatIsNotSelf?.definition(named: name)
+        return nearestScopeThatIsNotSelf?.firstDefinition(named: name)
+    }
+    
+    public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        let defs =
+            nearestScopeThatIsNotSelf?
+                .functionDefinitions(matching: identifier)
+                    ?? []
+        
+        return definitions.functionDefinitions(matching: identifier) + defs
     }
     
     public func allDefinitions() -> [CodeDefinition] {
@@ -82,8 +91,11 @@ extension BlockLiteralExpression: CodeScopeNode { }
 /// A no-op code scope to return when requesting code scope for statements that
 /// are not contained within a valid compound statement.
 class EmptyCodeScope: CodeScope {
-    func definition(named name: String) -> CodeDefinition? {
+    func firstDefinition(named name: String) -> CodeDefinition? {
         return nil
+    }
+    func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        return []
     }
     func allDefinitions() -> [CodeDefinition] {
         return []
@@ -95,7 +107,10 @@ class EmptyCodeScope: CodeScope {
 
 /// An object that can provide definitions for a type resolver
 public protocol DefinitionsSource {
-    func definition(named name: String) -> CodeDefinition?
+    func firstDefinition(named name: String) -> CodeDefinition?
+    
+    /// Returns all function definitions that match a given function identifier
+    func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition]
     
     /// Returns all definitions from this local scope only
     func allDefinitions() -> [CodeDefinition]
@@ -111,6 +126,7 @@ public protocol CodeScope: DefinitionsSource {
 
 public struct ArrayDefinitionsSource: DefinitionsSource {
     private var definitionsByName: [String: CodeDefinition] = [:]
+    private var functionDefinitions: [FunctionIdentifier: [CodeDefinition]] = [:]
     private var definitions: [CodeDefinition]
     
     public init(definitions: [CodeDefinition] = []) {
@@ -118,10 +134,26 @@ public struct ArrayDefinitionsSource: DefinitionsSource {
         self.definitionsByName = definitions
             .groupBy { $0.name }
             .mapValues { $0[0] }
+        
+        self.functionDefinitions =
+            definitions
+                .compactMap { def -> (FunctionIdentifier, CodeDefinition)? in
+                    switch def.kind {
+                    case .function(let signature):
+                        return (signature.asIdentifier, def)
+                    case .variable:
+                        return nil
+                    }
+                }.groupBy({ $0.0 })
+                .mapValues { $0.map { $0.1 } }
     }
     
-    public func definition(named name: String) -> CodeDefinition? {
+    public func firstDefinition(named name: String) -> CodeDefinition? {
         return definitionsByName[name]
+    }
+    
+    public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        return functionDefinitions[identifier] ?? []
     }
     
     public func allDefinitions() -> [CodeDefinition] {
@@ -146,14 +178,26 @@ public class CompoundDefinitionsSource: DefinitionsSource {
         sources.append(definitionSource)
     }
     
-    public func definition(named name: String) -> CodeDefinition? {
+    public func firstDefinition(named name: String) -> CodeDefinition? {
         for source in sources {
-            if let def = source.definition(named: name) {
+            if let def = source.firstDefinition(named: name) {
                 return def
             }
         }
         
         return nil
+    }
+    
+    public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        var definitions: [CodeDefinition] = []
+        
+        for source in sources {
+            let defs = source.functionDefinitions(matching: identifier)
+            
+            definitions.append(contentsOf: defs)
+        }
+        
+        return definitions
     }
     
     public func allDefinitions() -> [CodeDefinition] {
@@ -164,6 +208,7 @@ public class CompoundDefinitionsSource: DefinitionsSource {
 /// A default implementation of a code scope
 public final class DefaultCodeScope: CodeScope {
     private var definitionsByName: [String: CodeDefinition] = [:]
+    private var functionDefinitions: [FunctionIdentifier: [CodeDefinition]] = [:]
     internal var definitions: [CodeDefinition]
     
     public init(definitions: [CodeDefinition] = []) {
@@ -171,10 +216,26 @@ public final class DefaultCodeScope: CodeScope {
         self.definitionsByName = definitions
             .groupBy { $0.name }
             .mapValues { $0[0] }
+        
+        self.functionDefinitions =
+            definitions
+                .compactMap { def -> (FunctionIdentifier, CodeDefinition)? in
+                    switch def.kind {
+                    case .function(let signature):
+                        return (signature.asIdentifier, def)
+                    case .variable:
+                        return nil
+                    }
+                }.groupBy({ $0.0 })
+                .mapValues { $0.map { $0.1 } }
     }
     
-    public func definition(named name: String) -> CodeDefinition? {
+    public func firstDefinition(named name: String) -> CodeDefinition? {
         return definitionsByName[name]
+    }
+    
+    public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        return functionDefinitions[identifier] ?? []
     }
     
     public func allDefinitions() -> [CodeDefinition] {
@@ -184,10 +245,20 @@ public final class DefaultCodeScope: CodeScope {
     public func recordDefinition(_ definition: CodeDefinition) {
         definitions.append(definition)
         definitionsByName[definition.name] = definition
+        
+        switch definition.kind {
+        case .function(let signature):
+            functionDefinitions[signature.asIdentifier, default: []].append(definition)
+            
+        case .variable:
+            break
+        }
     }
     
     public func recordDefinitions(_ definitions: [CodeDefinition]) {
-        self.definitions.append(contentsOf: definitions)
+        for def in definitions {
+            recordDefinition(def)
+        }
     }
     
     public func removeAllDefinitions() {
@@ -253,6 +324,7 @@ public class CodeDefinition {
                 switch self {
                 case .variable(let name, _):
                     return name
+                    
                 case .function(let signature):
                     return signature.name
                 }
@@ -261,6 +333,7 @@ public class CodeDefinition {
                 switch self {
                 case .variable(_, let storage):
                     self = .variable(name: newValue, storage: storage)
+                    
                 case .function(var signature):
                     signature.name = newValue
                     self = .function(signature: signature)
@@ -288,6 +361,25 @@ public extension IdentifierExpression {
         case local(CodeDefinition)
         case member(type: KnownType, member: KnownMember)
         case type(named: String)
+        
+        public var asFunctionSignature: FunctionSignature? {
+            switch self {
+            case .local(let def), .global(let def):
+                switch def.kind {
+                case .function(let signature):
+                    return signature
+                    
+                case .variable:
+                    return nil
+                }
+                
+            case .member(_, let member as KnownMethod):
+                return member.signature
+                
+            default:
+                return nil
+            }
+        }
         
         public var global: CodeDefinition? {
             switch self {

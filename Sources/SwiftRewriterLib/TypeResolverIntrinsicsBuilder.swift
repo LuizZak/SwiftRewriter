@@ -202,16 +202,6 @@ class TypeResolverIntrinsicsBuilder {
     }
 }
 
-struct IntentionCollectionGlobals {
-    let funcMap: [String: [GlobalFunctionGenerationIntention]]
-    let varMap: [String: [GlobalVariableGenerationIntention]]
-    
-    init(intentions: IntentionCollection) {
-        funcMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.name })
-        varMap = Dictionary(grouping: intentions.globalVariables(), by: { $0.name })
-    }
-}
-
 class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
     var globals: IntentionCollectionGlobals
     var symbol: FromSourceIntention
@@ -221,7 +211,7 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
         self.symbol = symbol
     }
     
-    func definition(named name: String) -> CodeDefinition? {
+    func firstDefinition(named name: String) -> CodeDefinition? {
         if let functions = globals.funcMap[name] {
             for function in functions {
                 if function.isVisible(for: symbol) {
@@ -245,6 +235,21 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
         return nil
     }
     
+    func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        guard let functions = globals.funcIdentMap[identifier] else {
+            return []
+        }
+        
+        return
+            functions.compactMap { function in
+                if function.isVisible(for: symbol) {
+                    return CodeDefinition(functionSignature: function.signature)
+                }
+                
+                return nil
+            }
+    }
+    
     func allDefinitions() -> [CodeDefinition] {
         let variables =
             globals.varMap.flatMap { $0.value }
@@ -264,5 +269,17 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
                 }
         
         return variables + functions
+    }
+}
+
+struct IntentionCollectionGlobals {
+    let funcMap: [String: [GlobalFunctionGenerationIntention]]
+    let funcIdentMap: [FunctionIdentifier: [GlobalFunctionGenerationIntention]]
+    let varMap: [String: [GlobalVariableGenerationIntention]]
+    
+    init(intentions: IntentionCollection) {
+        funcMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.name })
+        funcIdentMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.signature.asIdentifier })
+        varMap = Dictionary(grouping: intentions.globalVariables(), by: { $0.name })
     }
 }

@@ -1,7 +1,7 @@
 import XCTest
 import SwiftRewriterLib
 import SwiftAST
-import Commons
+@testable import Commons
 
 class ExpressionTypeResolverTests: XCTestCase {
     func testStatementResolve() {
@@ -734,9 +734,9 @@ class ExpressionTypeResolverTests: XCTestCase {
             .definingLocal(name: "callback", type: .optional(.block(returnType: .void, parameters: [])))
             .resolve()
         
-        XCTAssertEqual(callbacks[0].asPostfix?.resolvedType, .optional(.void))
-        XCTAssertEqual(callbacks[1].asPostfix?.resolvedType, .optional(.void))
-        XCTAssertEqual(callbacks[2].asPostfix?.resolvedType, .optional(.void))
+        XCTAssertEqual(callbacks[0].resolvedType, .optional(.void))
+        XCTAssertEqual(callbacks[1].resolvedType, .optional(.void))
+        XCTAssertEqual(callbacks[2].resolvedType, .optional(.void))
     }
     
     func testChainedOptionalAccess() {
@@ -1196,6 +1196,34 @@ class ExpressionTypeResolverTests: XCTestCase {
                 at: \Statement.asIf?.exp.asPostfix?.exp,
                 resolvedAs: .block(returnType: .bool, parameters: [.int])
             )
+    }
+    
+    func testFunctionOverloadingResolution() {
+        startScopedTest(with: Expression.identifier("f").call([.constant(0)]),
+                        sut: ExpressionTypeResolver())
+            .definingIntrinsic(
+                CodeDefinition(functionSignature:
+                    FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
+            )
+            .definingIntrinsic(
+                CodeDefinition(functionSignature:
+                    FunctionSignature(signatureString: "f(_ d: Double) -> String"))
+            )
+            .resolve()
+            .thenAssertExpression(resolvedAs: .bool)
+        
+        startScopedTest(with: Expression.identifier("f").call([.constant(0.0)]),
+                        sut: ExpressionTypeResolver())
+            .definingIntrinsic(
+                CodeDefinition(functionSignature:
+                    FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
+            )
+            .definingIntrinsic(
+                CodeDefinition(functionSignature:
+                    FunctionSignature(signatureString: "f(_ d: Double) -> String"))
+            )
+            .resolve()
+            .thenAssertExpression(resolvedAs: .string)
     }
 }
 
