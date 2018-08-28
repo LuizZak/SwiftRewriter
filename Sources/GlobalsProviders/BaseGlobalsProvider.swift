@@ -98,7 +98,7 @@ public class BaseGlobalsProvider: GlobalsProvider {
     func function(name: String, paramTypes: [SwiftType], returnType: SwiftType = .void) -> CodeDefinition {
         let paramSignatures = paramTypes.enumerated().map { (arg) -> ParameterSignature in
             let (i, type) = arg
-            return ParameterSignature(label: "_", name: "p\(i)", type: type)
+            return ParameterSignature(label: nil, name: "p\(i)", type: type)
         }
         
         let signature =

@@ -64,10 +64,19 @@ private class InnerCLibGlobalsProviders: BaseGlobalsProvider {
         add(function(name: "sqrt", paramTypes: [cDouble], returnType: cDouble))
         
         add(function(name: "ceilf", paramTypes: [cFloat], returnType: cFloat))
+        add(function(name: "ceilf", paramTypes: [.cgFloat], returnType: .cgFloat))
         add(function(name: "ceil", paramTypes: [cDouble], returnType: cDouble))
+        add(function(name: "ceil", paramTypes: [.cgFloat], returnType: .cgFloat))
         
         add(function(name: "floorf", paramTypes: [cFloat], returnType: cFloat))
+        add(function(name: "floorf", paramTypes: [.cgFloat], returnType: .cgFloat))
         add(function(name: "floor", paramTypes: [cDouble], returnType: cDouble))
+        add(function(name: "floor", paramTypes: [.cgFloat], returnType: .cgFloat))
+        
+        add(function(name: "roundf", paramTypes: [cFloat], returnType: cFloat))
+        add(function(name: "roundf", paramTypes: [.cgFloat], returnType: .cgFloat))
+        add(function(name: "round", paramTypes: [cDouble], returnType: cDouble))
+        add(function(name: "round", paramTypes: [.cgFloat], returnType: .cgFloat))
         
         add(function(name: "fmodf", paramTypes: [cFloat, cFloat], returnType: cFloat))
         add(function(name: "fmod", paramTypes: [cDouble, cDouble], returnType: cDouble))

@@ -1225,4 +1225,22 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testCLibOverloadResolution() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                CGFloat f = 0;
+                floorf(f);
+            }
+            """,
+            swift: """
+            func test() {
+                var f: CGFloat = 0
+                // type: CGFloat
+                floor(f)
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

@@ -8,7 +8,7 @@ class TypeFormatterTests: XCTestCase {
             KnownTypeBuilder(typeName: "A")
                 .method(withSignature:
                     FunctionSignature(name: "a",
-                                      parameters: [ParameterSignature(label: "_", name: "a", type: .int)],
+                                      parameters: [ParameterSignature(label: nil, name: "a", type: .int)],
                                       returnType: .void,
                                       isStatic: false)
                 ).build()
@@ -140,7 +140,7 @@ class TypeFormatterTests: XCTestCase {
             .method(withSignature: FunctionSignature(
                 name: "methodA",
                 parameters: [
-                    ParameterSignature(label: "_", name: "c", type: .int)
+                    ParameterSignature(label: nil, name: "c", type: .int)
                 ],
                 returnType: .string),
                     annotations: ["Annotation"]
