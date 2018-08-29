@@ -3,16 +3,16 @@
     "pins": [
       {
         "package": "Antlr4",
-        "repositoryURL": "https://bitbucket.org/cs-luiz-silva/antlr4-swift.git",
+        "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
         "state": {
           "branch": "swift4.2",
-          "revision": "6e385332fb9562df2e857f601a958a60612be1b8",
+          "revision": "c9426b50d257c9638b71cad46bf6c9b00162b8a4",
           "version": null
         }
       },
       {
         "package": "Console",
-        "repositoryURL": "https://bitbucket.org/cs-luiz-silva/console.git",
+        "repositoryURL": "https://github.com/LuizZak/console.git",
         "state": {
           "branch": null,
           "revision": "63e2dc4a87116715d90ce930124e916bdfbdd955",
