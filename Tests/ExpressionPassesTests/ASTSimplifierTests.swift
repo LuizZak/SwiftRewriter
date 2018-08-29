@@ -8,7 +8,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = ASTSimplifier(context: makeContext())
+        sutType = ASTSimplifier.self
     }
     
     func testSimplifyDoWithinCompound() {

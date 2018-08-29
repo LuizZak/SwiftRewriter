@@ -7,7 +7,7 @@ class AllocInitExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = AllocInitExpressionPass(context: makeContext())
+        sutType = AllocInitExpressionPass.self
     }
     
     func testPlainInit() {

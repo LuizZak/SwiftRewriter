@@ -185,4 +185,165 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         
         XCTAssertEqual(usages.count, 1)
     }
+    
+    func testFindUsagesOfLocalVariable() {
+        let body: CompoundStatement = [
+            // var a: Int
+            .variableDeclaration(
+                identifier: "a",
+                type: .int,
+                initialization: nil
+            ),
+            // a
+            .expression(
+                Expression
+                    .identifier("a")
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 1)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+    }
+    
+    func testFindUsagesOfLocalVariableDetectingWritingUsages() {
+        let body: CompoundStatement = [
+            // var a: Int
+            .variableDeclaration(
+                identifier: "a",
+                type: .int,
+                initialization: nil
+            ),
+            // a
+            .expression(
+                Expression
+                    .identifier("a")
+            ),
+            // a = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .assignment(op: .assign, rhs: .constant(0))
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 2)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+        XCTAssertEqual(usages[1].isReadOnlyUsage, false)
+    }
+    
+    func testFindUsagesOfLocalVariableDetectingWritingUsagesOfPostfixType() {
+        // Writing to a local's member or member-of-member should be detected
+        // as a writing usage
+        
+        let body: CompoundStatement = [
+            // var a: Int
+            .variableDeclaration(
+                identifier: "a",
+                type: .int,
+                initialization: nil
+            ),
+            // a.b = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .assignment(op: .assign, rhs: .constant(0))
+            ),
+            // a.b?.c = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .optional()
+                    .dot("c")
+                    .assignment(op: .assign, rhs: .constant(0))
+            ),
+            // a.b[0].c = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .sub(.constant(0))
+                    .dot("c")
+                    .assignment(op: .assign, rhs: .constant(0))
+            ),
+            //
+            // Usages where we write to the result of a function call's member
+            // should not result in a write access, since the function call return
+            // is independent of the local variable's structure.
+            //
+            // a.b().c = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .call()
+                    .dot("c")
+                    .assignment(op: .assign, rhs: .constant(0))
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 4)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, false)
+        XCTAssertEqual(usages[1].isReadOnlyUsage, false)
+        XCTAssertEqual(usages[2].isReadOnlyUsage, false)
+        XCTAssertEqual(usages[3].isReadOnlyUsage, true)
+    }
+    
+    func testFindUsagesOfLocalVariableDetectingWritingUsagesOfPointerReferenceType() {
+        let body: CompoundStatement = [
+            // var a: Int
+            .variableDeclaration(
+                identifier: "a",
+                type: .int,
+                initialization: nil
+            ),
+            // f(a)
+            .expression(
+                Expression
+                    .identifier("f")
+                    .call([
+                        .identifier("a")
+                    ])
+            ),
+            // f(&a)
+            .expression(
+                Expression
+                    .identifier("f")
+                    .call([
+                        Expression
+                            .unary(op: .bitwiseAnd,
+                                   .identifier("a"))
+                    ])
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 2)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+        XCTAssertEqual(usages[1].isReadOnlyUsage, false)
+    }
 }

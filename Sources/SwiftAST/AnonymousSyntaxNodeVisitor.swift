@@ -14,8 +14,6 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     ///
     /// - Parameter exp: An Expression to visit
     public func visitExpression(_ exp: Expression) {
-        listener(exp)
-        
         exp.accept(self)
     }
     
@@ -191,9 +189,7 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     ///
     /// - Parameter stmt: A Statement to visit
     public func visitStatement(_ stmt: Statement) {
-        listener(stmt)
-        
-        return stmt.accept(self)
+        stmt.accept(self)
     }
     
     /// Visits a semicolon node

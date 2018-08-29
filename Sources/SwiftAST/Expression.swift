@@ -498,6 +498,30 @@ public class PostfixExpression: Expression {
         return "\(exp)\(op)"
     }
     
+    /// Returns the first ancestor of this postfix which is not a postfix node
+    /// itself.
+    public var firstNonPostfixAncestor: SyntaxNode? {
+        if let postfix = parent as? PostfixExpression {
+            return postfix.firstNonPostfixAncestor
+        }
+        
+        return parent
+    }
+    
+    /// In case this postfix expression is contained within another postfix
+    /// expression, returns the parent postfix's top postfix, until the top-most
+    /// postfix entry is found.
+    ///
+    /// This can be useful to traverse from an inner postfix access until the
+    /// outermost access, wherein a postfix access chain finishes.
+    public var topPostfixExpression: PostfixExpression {
+        if let postfix = parent as? PostfixExpression {
+            return postfix.topPostfixExpression
+        }
+        
+        return self
+    }
+    
     public init(exp: Expression, op: Postfix) {
         self.exp = exp
         self.op = op

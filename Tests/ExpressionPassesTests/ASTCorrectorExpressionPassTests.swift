@@ -8,7 +8,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = ASTCorrectorExpressionPass(context: makeContext())
+        sutType = ASTCorrectorExpressionPass.self
     }
     
     /// Tests inserting null-coalesces on optional numeric types on the left
