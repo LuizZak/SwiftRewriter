@@ -9,9 +9,10 @@ class ExpressionPassTestCase: XCTestCase {
     static var _state: ObjcParserState = ObjcParserState()
     
     var notified: Bool = false
-    var sut: ASTRewriterPass!
+    var sutType: ASTRewriterPass.Type!
     var typeSystem: DefaultTypeSystem!
     var intentionContext: FunctionBodyCarryingIntention?
+    var functionBodyContext: FunctionBodyIntention?
     
     override func setUp() {
         super.setUp()
@@ -19,13 +20,14 @@ class ExpressionPassTestCase: XCTestCase {
         typeSystem = DefaultTypeSystem()
         notified = false
         intentionContext = nil
+        functionBodyContext = nil
     }
     
     func assertNotifiedChange(file: String = #file, line: Int = #line) {
         if !notified {
             recordFailure(withDescription:
                 """
-                Expected syntax rewriter \(type(of: sut!)) to notify change via \
+                Expected syntax rewriter \(sutType!) to notify change via \
                 \(\ASTRewriterPassContext.notifyChangedTree), but it did not.
                 """,
                 inFile: file, atLine: line, expected: true)
@@ -36,7 +38,7 @@ class ExpressionPassTestCase: XCTestCase {
         if notified {
             recordFailure(withDescription:
                 """
-                Expected syntax rewriter \(type(of: sut!)) to not notify any changes \
+                Expected syntax rewriter \(sutType!) to not notify any changes \
                 via \(\ASTRewriterPassContext.notifyChangedTree), but it did.
                 """,
                 inFile: file, atLine: line, expected: true)
@@ -50,11 +52,20 @@ class ExpressionPassTestCase: XCTestCase {
         notified = false
         let exp = parse(original, file: file, line: line)
         
+        let sut = makeSut()
         let result = sut.apply(on: exp, context: makeContext())
         
         if expected != result.description {
             recordFailure(withDescription:
-                "Failed to convert: Expected to convert expression\n\n\(expected)\n\nbut received\n\n\(result.description)",
+                """
+                Failed to convert: Expected to convert expression
+                
+                \(expected)
+                
+                but received
+                
+                \(result.description)
+                """,
                 inFile: file, atLine: line, expected: true)
         }
         
@@ -86,6 +97,7 @@ class ExpressionPassTestCase: XCTestCase {
                          line: Int = #line) -> Expression {
         
         notified = false
+        let sut = makeSut()
         let result = sut.apply(on: expression, context: makeContext())
         
         if expected != result {
@@ -95,7 +107,12 @@ class ExpressionPassTestCase: XCTestCase {
             dump(expected, to: &expString)
             dump(result, to: &resString)
             
-            recordFailure(withDescription: "Failed to convert: Expected to convert expression into\n\(expString)\nbut received\n\(resString)",
+            recordFailure(withDescription: """
+                            Failed to convert: Expected to convert expression into
+                            \(expString)
+                            but received
+                            \(resString)
+                            """,
                           inFile: file, atLine: line, expected: true)
         }
         
@@ -109,6 +126,7 @@ class ExpressionPassTestCase: XCTestCase {
                          line: Int = #line) -> Statement {
         
         notified = false
+        let sut = makeSut()
         let result = sut.apply(on: statement, context: makeContext())
         
         if expected != result {
@@ -136,7 +154,15 @@ class ExpressionPassTestCase: XCTestCase {
             expString = (prettyPrintExpWriter.target as! StringRewriterOutput).buffer + "\n" + expString
             resString = (prettyPrintResWriter.target as! StringRewriterOutput).buffer + "\n" + resString
             
-            recordFailure(withDescription: "Failed to convert: Expected to convert statement into\n\n\(expString)\nbut received\n\n\(resString)",
+            recordFailure(withDescription: """
+                            Failed to convert: Expected to convert statement into
+
+                            \(expString)
+
+                            but received
+
+                            \(resString)
+                            """,
                           inFile: file, atLine: line, expected: true)
         }
         
@@ -210,13 +236,20 @@ class ExpressionPassTestCase: XCTestCase {
         return (parser.tokens, parser.parser)
     }
     
-    func makeContext() -> ASTRewriterPassContext {
+    func makeSut() -> ASTRewriterPass {
+        return sutType.init(context: makeContext())
+    }
+    
+    func makeContext(functionBody: CompoundStatement? = nil) -> ASTRewriterPassContext {
         let block: () -> Void = { [weak self] in
             self?.notified = true
         }
         
+        
+        
         return ASTRewriterPassContext(typeSystem: typeSystem,
                                       notifyChangedTree: block,
-                                      source: intentionContext)
+                                      source: intentionContext,
+                                      functionBodyIntention: functionBodyContext)
     }
 }

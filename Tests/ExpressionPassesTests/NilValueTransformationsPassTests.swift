@@ -6,7 +6,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = NilValueTransformationsPass(context: makeContext())
+        sutType = NilValueTransformationsPass.self
     }
     
     func testTopLevelBlockInvocation() {

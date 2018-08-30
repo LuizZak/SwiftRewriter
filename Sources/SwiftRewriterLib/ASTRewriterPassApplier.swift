@@ -51,7 +51,8 @@ public final class ASTRewriterPassApplier {
             ASTRewriterPassContext(typeSystem: self.typeSystem,
                                    typeResolver: item.context.typeResolver,
                                    notifyChangedTree: notifyChangedTree,
-                                   source: item.intention)
+                                   source: item.intention,
+                                   functionBodyIntention: item.body)
         
         let pass = passType.init(context: expContext)
         _=pass.apply(on: item.body.body, context: expContext)

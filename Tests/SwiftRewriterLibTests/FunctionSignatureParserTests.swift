@@ -151,6 +151,18 @@ class FunctionSignatureParserTests: XCTestCase {
         )
     }
     
+    func testMutatingFunction() {
+        assert(string: "mutating function()",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [],
+                returnType: .void,
+                isStatic: false,
+                isMutating: true
+            )
+        )
+    }
+    
     func testExtraneousInputError() {
         do {
             _=try FunctionSignatureParser.parseParameters(from: "())")

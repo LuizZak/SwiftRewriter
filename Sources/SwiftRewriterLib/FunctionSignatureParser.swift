@@ -16,9 +16,9 @@ public final class FunctionSignatureParser {
     ///
     /// ```
     /// function-signature
-    ///     : identifier parameter-signature return-type?
-    ///     : identifier parameter-signature 'throws' return-type?
-    ///     : identifier parameter-signature 'rethrows' return-type?
+    ///     : 'mutating'? identifier parameter-signature return-type?
+    ///     : 'mutating'? identifier parameter-signature 'throws' return-type?
+    ///     : 'mutating'? identifier parameter-signature 'rethrows' return-type?
     ///     ;
     ///
     /// return-type
@@ -33,6 +33,12 @@ public final class FunctionSignatureParser {
     /// - Throws: Lexing errors, if string is malformed.
     public static func parseSignature(from string: String) throws -> FunctionSignature {
         let tokenizer = Tokenizer(input: string)
+        
+        // 'mutating'?
+        var isMutating = false
+        if tokenizer.consumeToken(ifTypeIs: .mutating) != nil {
+            isMutating = true
+        }
         
         let identifier = try tokenizer.advance(overTokenType: .identifier)
         let parameters = try parseParameterList(tokenizer: tokenizer)
@@ -63,7 +69,8 @@ public final class FunctionSignatureParser {
                 name: String(identifier.value),
                 parameters: parameters,
                 returnType: returnType,
-                isStatic: false
+                isStatic: false,
+                isMutating: isMutating
             )
     }
     
@@ -227,6 +234,7 @@ public final class FunctionSignatureParser {
         case at = "@"
         case underscore = "_"
         case `inout`
+        case mutating
         case identifier
         case `throws`
         case `rethrows`
@@ -252,6 +260,8 @@ public final class FunctionSignatureParser {
                 return 5
             case .throws:
                 return 6
+            case .mutating:
+                return 8
             case .rethrows:
                 return 8
             case .identifier:
@@ -305,6 +315,9 @@ public final class FunctionSignatureParser {
                 }
                 if ident == "rethrows" {
                     return .rethrows
+                }
+                if ident == "mutating" {
+                    return .mutating
                 }
                 
                 return .identifier

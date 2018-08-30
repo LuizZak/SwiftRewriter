@@ -1098,7 +1098,8 @@ extension DefaultTypeSystem {
                                                         name: "selector",
                                                         type: .selector)],
                         returnType: .bool,
-                        isStatic: false)
+                        isStatic: false,
+                        isMutating: false)
                 )
                 .method(withSignature:
                     FunctionSignature(
@@ -1107,7 +1108,8 @@ extension DefaultTypeSystem {
                                                         name: "object",
                                                         type: .anyObject)],
                         returnType: .bool,
-                        isStatic: false)
+                        isStatic: false,
+                        isMutating: false)
                 )
                 .build()
         
@@ -1132,7 +1134,8 @@ extension DefaultTypeSystem {
                             ParameterSignature(label: "forKey", name: "aKey", type: .anyObject)
                         ],
                         returnType: .void,
-                        isStatic: false
+                        isStatic: false,
+                        isMutating: false
                     ),
                         semantics: Semantics.collectionMutator
                 )
@@ -1149,7 +1152,8 @@ extension DefaultTypeSystem {
                         name: "add",
                         parameters: [
                             ParameterSignature(label: nil, name: "object", type: .anyObject)
-                        ]
+                        ],
+                        isMutating: false
                     ),
                         semantics: Semantics.collectionMutator
                 )
@@ -1303,10 +1307,8 @@ func _applyOverloadResolution(signatures: [FunctionSignature],
                 let parameterType =
                     signature.element.parameters[argIndex].type
                 
-                // TODO: Support sub-type matching as well here
-                if !typeSystem.typesMatch(argumentType,
-                                          parameterType,
-                                          ignoreNullability: true) {
+                if !typeSystem.isType(argumentType.deepUnwrapped,
+                                      assignableTo: parameterType.deepUnwrapped) {
                     
                     candidates.remove(at: i)
                     doWork = true

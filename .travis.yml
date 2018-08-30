@@ -1,0 +1,4 @@
+osx_image: xcode10
+language: objective-c
+script:
+  - swift test --parallel

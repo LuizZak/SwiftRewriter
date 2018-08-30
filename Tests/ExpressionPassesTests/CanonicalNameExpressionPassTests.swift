@@ -7,7 +7,7 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = CanonicalNameExpressionPass(context: makeContext())
+        sutType = CanonicalNameExpressionPass.self
         
         let typeProvider = CollectionKnownTypeProvider()
         typeProvider.addCanonicalMapping(nonCanonical: "NonCanon",

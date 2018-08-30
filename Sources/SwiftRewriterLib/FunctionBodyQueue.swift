@@ -211,3 +211,27 @@ public enum FunctionBodyCarryingIntention {
     case global(GlobalFunctionGenerationIntention)
     case property(PropertyGenerationIntention, isSetter: Bool)
 }
+
+/// An empty funtion body queue implementation which always return an empty
+/// context object.
+public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
+    public typealias Context = Void
+    
+    public func makeContext(forFunction function: GlobalFunctionGenerationIntention) {
+        
+    }
+    public func makeContext(forMethod method: MethodGenerationIntention) {
+        
+    }
+    public func makeContext(forInit ctor: InitGenerationIntention) {
+        
+    }
+    public func makeContext(forPropertyGetter property: PropertyGenerationIntention,
+                            getter: FunctionBodyIntention) {
+        
+    }
+    public func makeContext(forPropertySetter property: PropertyGenerationIntention,
+                            setter: PropertyGenerationIntention.Setter) {
+        
+    }
+}

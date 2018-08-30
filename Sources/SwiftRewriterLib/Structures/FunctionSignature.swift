@@ -2,6 +2,7 @@ import SwiftAST
 
 /// Signature for a function intention
 public struct FunctionSignature: Equatable, Codable {
+    public var isMutating: Bool
     public var isStatic: Bool
     public var name: String
     public var returnType: SwiftType
@@ -32,18 +33,21 @@ public struct FunctionSignature: Equatable, Codable {
         return FunctionSignature(name: name,
                                  parameters: parameters,
                                  returnType: returnType.deepUnwrapped,
-                                 isStatic: isStatic)
+                                 isStatic: isStatic,
+                                 isMutating: isMutating)
     }
     
     public init(name: String,
                 parameters: [ParameterSignature] = [],
                 returnType: SwiftType = .void,
-                isStatic: Bool = false) {
+                isStatic: Bool = false,
+                isMutating: Bool = false) {
         
         self.isStatic = isStatic
         self.name = name
         self.returnType = returnType
         self.parameters = parameters
+        self.isMutating = isMutating
     }
     
     /// Returns `true` iff `self` and `other` match using Swift signature matching

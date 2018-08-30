@@ -10,6 +10,7 @@ public enum UIColorCompoundType {
     
     static func createType() -> CompoundedMappingType {
         var type = KnownTypeBuilder(typeName: "UIColor", supertype: "NSObject")
+        let annotations = AnnotationsSink()
         let transformations = TransformationsSink(typeName: type.typeName)
         
         type.useSwiftSignatureMatching = true
@@ -26,26 +27,59 @@ public enum UIColorCompoundType {
         
         // Static constants
         type = type
-            .property(named: "black", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "darkGray", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "lightGray", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "white", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "gray", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "red", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "green", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "blue", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "cyan", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "yellow", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "magenta", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "orange", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "purple", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "brown", type: "UIColor", isStatic: true, accessor: .getter)
-            .property(named: "clear", type: "UIColor", isStatic: true, accessor: .getter)
+            .staticColorProperty(named: "black", transformations: transformations)
+            .staticColorProperty(named: "darkGray", transformations: transformations)
+            .staticColorProperty(named: "lightGray", transformations: transformations)
+            .staticColorProperty(named: "white", transformations: transformations)
+            .staticColorProperty(named: "gray", transformations: transformations)
+            .staticColorProperty(named: "red", transformations: transformations)
+            .staticColorProperty(named: "green", transformations: transformations)
+            .staticColorProperty(named: "blue", transformations: transformations)
+            .staticColorProperty(named: "cyan", transformations: transformations)
+            .staticColorProperty(named: "yellow", transformations: transformations)
+            .staticColorProperty(named: "magenta", transformations: transformations)
+            .staticColorProperty(named: "orange", transformations: transformations)
+            .staticColorProperty(named: "purple", transformations: transformations)
+            .staticColorProperty(named: "brown", transformations: transformations)
+            .staticColorProperty(named: "clear", transformations: transformations)
+        
+        // Extension colors
+        type = type
+            .staticColorProperty(named: "lightText", transformations: transformations)
+            .staticColorProperty(named: "darkText", transformations: transformations)
+            .staticColorProperty(named: "groupTableViewBackground", transformations: transformations)
+            .staticColorProperty(named: "viewFlipsideBackground", transformations: transformations)
+            .staticColorProperty(named: "scrollViewTexturedBackground", transformations: transformations)
+            .staticColorProperty(named: "underPageBackground", transformations: transformations)
+        
+        type = type
+            .method(withSignature:
+                FunctionSignature(
+                    signatureString: "withAlphaComponent(_ alpha: CGFloat) -> UIColor"
+                )
+                .makeSignatureMapping(
+                    fromSignature: "colorWithAlphaComponent(_ alpha: CGFloat) -> UIColor",
+                    in: transformations,
+                    annotations: annotations
+                ),
+                    annotations: annotations.annotations
+            )
         
         return
             CompoundedMappingType(knownType: type.build(),
                                   transformations: transformations.transformations)
     }
+}
+
+private extension KnownTypeBuilder {
+    
+    func staticColorProperty(named name: String, transformations: TransformationsSink) -> KnownTypeBuilder {
+        return
+            property(named: name, type: "UIColor", isStatic: true, accessor: .getter)
+            ._createPropertyRename(from: "\(name)Color", in: transformations)
+            ._createPropertyFromMethods(getterName: "\(name)Color", setterName: nil, in: transformations)
+    }
+    
 }
 
 extension KnownTypeBuilder {
@@ -110,7 +144,7 @@ extension KnownTypeBuilder {
         
         transformations.addPropertyRenaming(old: old, new: property.name)
         
-        let annotation = "Convert from '\(old)'"
+        let annotation = "Convert from \(property.isStatic ? "static " : "")var \(old)"
         
         return self.annotationgLatestProperty(annotation: annotation)
     }
@@ -127,12 +161,24 @@ extension KnownTypeBuilder {
         transformations
             .addPropertyFromMethods(property: property.name,
                                     getter: getterName,
-                                    setter: setterName)
+                                    setter: setterName,
+                                    propertyType: property.storage.type,
+                                    isStatic: property.isStatic)
         
-        var annotation = "Convert from func \(getterName)()"
+        var annotation = "Convert from "
+        
+        if property.isStatic {
+            annotation += "static "
+        }
+        
+        annotation += "func \(getterName)()"
         
         if let setterName = setterName {
-            annotation += " / func \(setterName)(\(property.storage.type))"
+            annotation += " / "
+            if property.isStatic {
+                annotation += "static "
+            }
+            annotation += "func \(setterName)(\(property.storage.type))"
         }
         
         return self.annotationgLatestProperty(annotation: annotation)

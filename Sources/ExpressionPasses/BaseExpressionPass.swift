@@ -30,15 +30,37 @@ public class BaseExpressionPass: ASTRewriterPass {
     }
     
     func applyTransformers(_ exp: PostfixExpression) -> Expression? {
-        for transformer in staticConstructorTransformers {
-            if let result = transformer.attemptApply(on: exp) {
-                return result
+        func innerApplyTransformers(_ exp: PostfixExpression) -> Expression? {
+            for transformer in staticConstructorTransformers {
+                if let result = transformer.attemptApply(on: exp) {
+                    return result
+                }
             }
+            for transformer in transformers {
+                if let res = transformer.attemptApply(on: exp) {
+                    return res
+                }
+            }
+            
+            return nil
         }
-        for transformer in transformers {
-            if let res = transformer.attemptApply(on: exp) {
-                return res
-            }
+        
+        // Try to transform as-is
+        if let result = innerApplyTransformers(exp) {
+            return result
+        }
+        // If transformation fails, check if inner expression is a postfix itself,
+        // and try to solve that before trying one more time
+        if let postfix = exp.exp.asPostfix, let result = applyTransformers(postfix) {
+            let newPostfix = exp.copy()
+            newPostfix.exp = result.copy()
+            
+            // If we succeeded in re-writing the inner expression, but not the
+            // expression as a whole, just lift the inner expression rewriting
+            // so outer scopes have a chance to interpret e.g. member access of
+            // function calls as method invocations and attempt to properly
+            // transform these expressions.
+            return innerApplyTransformers(newPostfix) ?? newPostfix
         }
         
         return nil
@@ -105,13 +127,19 @@ public class BaseExpressionPass: ASTRewriterPass {
                         )
                     
                 // Getter or getter/setter pair conversion to property name
-                case let .propertyFromMethods(property, getterName, setterName):
+                case let .propertyFromMethods(property, getterName, setterName,
+                                              resultType, isStatic):
+                    let matcher =
+                        isStatic ? staticTypeExpressionMatcher
+                            : instanceExpressionMatcher
+                    
                     return
                         MethodsToPropertyTransformer(
-                            baseExpressionMatcher: instanceExpressionMatcher,
+                            baseExpressionMatcher: matcher,
                             getterName: getterName,
                             setterName: setterName,
-                            propertyName: property
+                            propertyName: property,
+                            resultType: resultType
                         )
                     
                 case let .initializer(_, new):

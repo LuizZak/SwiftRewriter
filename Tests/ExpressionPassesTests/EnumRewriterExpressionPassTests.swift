@@ -8,7 +8,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sut = EnumRewriterExpressionPass(context: makeContext())
+        sutType = EnumRewriterExpressionPass.self
     }
     
     func testReplaceEnum() {
@@ -35,6 +35,7 @@ class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
                 .build()
         typeSystem.addType(en)
         
+        let sut = makeSut()
         let res = sut.apply(on: Expression.identifier("Enum_Case1").makeErrorTyped(), context: makeContext())
         
         XCTAssertEqual(

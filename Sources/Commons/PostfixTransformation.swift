@@ -6,7 +6,11 @@ import SwiftAST
 public enum PostfixTransformation {
     case method(MethodInvocationTransformerMatcher)
     case property(old: String, new: String)
-    case propertyFromMethods(property: String, getterName: String, setterName: String?)
+    case propertyFromMethods(property: String,
+                             getterName: String,
+                             setterName: String?,
+                             resultType: SwiftType,
+                             isStatic: Bool)
     case initializer(old: [ParameterSignature], new: [ParameterSignature])
     case valueTransformer(ValueTransformer<PostfixExpression, Expression>)
 }
