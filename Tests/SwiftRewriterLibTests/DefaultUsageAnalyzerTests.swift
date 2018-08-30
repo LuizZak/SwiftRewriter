@@ -263,6 +263,13 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     .dot("b")
                     .assignment(op: .assign, rhs: .constant(0))
             ),
+            // a[0] = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .sub(.constant(0))
+                    .assignment(op: .assign, rhs: .constant(0))
+            ),
             // a.b?.c = 0
             .expression(
                 Expression
@@ -304,11 +311,12 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
-        XCTAssertEqual(usages.count, 4)
+        XCTAssertEqual(usages.count, 5)
         XCTAssertEqual(usages[0].isReadOnlyUsage, false)
         XCTAssertEqual(usages[1].isReadOnlyUsage, false)
         XCTAssertEqual(usages[2].isReadOnlyUsage, false)
-        XCTAssertEqual(usages[3].isReadOnlyUsage, true)
+        XCTAssertEqual(usages[3].isReadOnlyUsage, false)
+        XCTAssertEqual(usages[4].isReadOnlyUsage, true)
     }
     
     func testFindUsagesOfLocalVariableDetectingWritingUsagesOfPointerType() {

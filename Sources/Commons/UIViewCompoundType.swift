@@ -1108,11 +1108,18 @@ class TransformationsSink {
         mappings.append(matcher)
     }
     
-    func addPropertyFromMethods(property: String, getter: String, setter: String?) {
+    func addPropertyFromMethods(property: String,
+                                getter: String,
+                                setter: String?,
+                                propertyType: SwiftType,
+                                isStatic: Bool) {
+        
         postfixTransformations.append(
             .propertyFromMethods(property: property,
                                  getterName: getter,
-                                 setterName: setter)
+                                 setterName: setter,
+                                 resultType: propertyType,
+                                 isStatic: isStatic)
         )
     }
     

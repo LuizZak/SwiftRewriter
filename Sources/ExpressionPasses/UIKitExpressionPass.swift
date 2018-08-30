@@ -109,6 +109,8 @@ public class UIKitExpressionPass: BaseExpressionPass {
     
     /// Converts UIColor.orangeColor() -> UIColor.orange, etc.
     func convertUIColorStaticColorMethodCall(_ exp: PostfixExpression) -> Expression? {
+        return nil
+        /*
         guard let args = exp.functionCall?.arguments, args.isEmpty else {
             return nil
         }
@@ -124,6 +126,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
         exp.op = .member(String(colorName.dropLast("Color".count)))
         
         return exp
+        */
     }
     
     /// Converts [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>]

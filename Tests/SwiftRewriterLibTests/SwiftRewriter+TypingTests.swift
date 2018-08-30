@@ -1243,4 +1243,28 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    /// Verifies that deeply-nested transformations are properly executed and
+    /// resulting expressions match expected type.
+    func testRewriteDeepNestedTransformations() {
+        // Here, [[UIColor lightGrayColor] colorWithAlphaComponent:0.2] features
+        // two deep transformations:
+        // [UIColor lightGrayColor] -> UIColor.lightGray
+        // [<exp> colorWithAlphaComponent:] -> <exp>.withAlphaComponent()
+        // These should be properly executed and the result be of the expected
+        // UIColor type.
+        assertObjcParse(
+            objc: """
+            void test() {
+                [[UIColor lightGrayColor] colorWithAlphaComponent:0.2];
+            }
+            """,
+            swift: """
+            func test() {
+                // type: UIColor
+                UIColor.lightGray.withAlphaComponent(0.2)
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

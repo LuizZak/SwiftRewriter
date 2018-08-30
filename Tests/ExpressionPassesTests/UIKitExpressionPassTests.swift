@@ -28,14 +28,32 @@ class UIKitExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testUIColor() {
-        assertTransformParsed(
-            expression: "[UIColor orangeColor]",
-            into: Expression.identifier("UIColor").dot("orange")
+        assertTransform(
+            expression: Expression
+                .identifier("UIColor")
+                .typed(.metatype(for: "UIColor"))
+                .dot("orangeColor")
+                .call()
+                .typed("UIColor"),
+            into: Expression
+                .identifier("UIColor")
+                .typed(.metatype(for: "UIColor"))
+                .dot("orange")
+                .typed("UIColor")
         ); assertNotifiedChange()
         
-        assertTransformParsed(
-            expression: "[UIColor redColor]",
-            into: Expression.identifier("UIColor").dot("red")
+        assertTransform(
+            expression: Expression
+                .identifier("UIColor")
+                .typed(.metatype(for: "UIColor"))
+                .dot("redColor")
+                .call()
+                .typed("UIColor"),
+            into: Expression
+                .identifier("UIColor")
+                .typed(.metatype(for: "UIColor"))
+                .dot("red")
+                .typed("UIColor")
         ); assertNotifiedChange()
         
         // Test unrecognized cases are left alone

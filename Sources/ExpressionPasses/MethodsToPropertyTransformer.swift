@@ -8,16 +8,19 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
     let getterName: String
     let setterName: String?
     let propertyName: String
+    let resultType: SwiftType
     
     init(baseExpressionMatcher: ValueMatcher<Expression>,
          getterName: String,
          setterName: String?,
-         propertyName: String) {
+         propertyName: String,
+         resultType: SwiftType) {
         
         self.baseExpressionMatcher = baseExpressionMatcher
         self.getterName = getterName
         self.setterName = setterName
         self.propertyName = propertyName
+        self.resultType = resultType
     }
     
     func canApply(to postfix: PostfixExpression) -> Bool {
@@ -71,7 +74,7 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
         }
         
         if functionCall.arguments.isEmpty {
-            return memberNameAccess.exp.copy().dot(propertyName)
+            return memberNameAccess.exp.copy().dot(propertyName).typed(resultType)
         } else if functionCall.arguments.count == 1 && setterName != nil {
             return
                 memberNameAccess
