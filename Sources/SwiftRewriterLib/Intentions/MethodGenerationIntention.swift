@@ -48,7 +48,8 @@ public class MethodGenerationIntention: MemberGenerationIntention, OverridableMe
             FunctionSignature(name: name,
                               parameters: parameters,
                               returnType: returnType,
-                              isStatic: isStatic)
+                              isStatic: isStatic,
+                              isMutating: false)
         
         self.init(signature: signature,
                   accessLevel: accessLevel,

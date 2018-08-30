@@ -10,7 +10,9 @@ public class ConstantDetectionExpressionPass: ASTRewriterPass {
             return super.visitVariableDeclarations(stmt)
         }
         
-        let usage = LocalUsageAnalyzer(functionBody: functionBody)
+        let usage = LocalUsageAnalyzer(functionBody: functionBody,
+                                       typeSystem: context.typeSystem)
+        
         for (i, decl) in stmt.decl.enumerated() where !decl.isConstant {
             let usages = usage.findUsagesOf(localNamed: decl.identifier)
             

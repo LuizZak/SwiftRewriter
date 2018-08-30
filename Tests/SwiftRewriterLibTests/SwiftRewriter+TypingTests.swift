@@ -506,7 +506,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 
                 @objc
                 func f1() {
-                    var _callback = self.callback
+                    let _callback = self.callback
                     // type: Void?
                     _callback?()
                 }
@@ -538,7 +538,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 
                 @objc
                 func f1() {
-                    var _callback = self.callback
+                    let _callback = self.callback
                     // type: Void?
                     _callback?()
                 }
@@ -764,9 +764,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func method() {
-                    var local1 = self.optional()
-                    var local2 = self.nonOptional()
-                    var local3 = self.unspecifiedOptional()
+                    let local1 = self.optional()
+                    let local2 = self.nonOptional()
+                    let local3 = self.unspecifiedOptional()
                     // type: String?
                     local1
                     // type: String
@@ -863,7 +863,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 func method() {
                     // type: Callback
                     self.callback = { () -> Void in
-                        var local: Int
+                        let local: Int
                         // type: Int
                         local
                     }
@@ -915,7 +915,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 
                 @objc
                 func method() {
-                    var local: Int
+                    let local: Int
                     // type: Callback
                     self.callback = { () -> Void in
                         // type: Int
@@ -960,7 +960,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             class A: NSObject {
                 @objc
                 func f1() {
-                    var a = self.other()
+                    let a = self.other()
                     // type: A?
                     a
                 }
@@ -990,7 +990,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             class A: NSObject {
                 @objc
                 func f1() {
-                    var a = self.other()
+                    let a = self.other()
                     // type: A
                     a
                 }
@@ -1201,8 +1201,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             swift: """
             func test() {
-                var array = NSMutableArray()
-                var object = array
+                let array = NSMutableArray()
+                let object = array
                 // type: Void
                 array.add(object)
             }
@@ -1236,7 +1236,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             swift: """
             func test() {
-                var f: CGFloat = 0
+                let f: CGFloat = 0
                 // type: CGFloat
                 floor(f)
             }

@@ -16,6 +16,12 @@ public protocol LocalsUsageAnalyzer: UsageAnalyzer {
 }
 
 public class BaseUsageAnalyzer: UsageAnalyzer {
+    var typeSystem: TypeSystem
+    
+    init(typeSystem: TypeSystem) {
+        self.typeSystem = typeSystem
+    }
+    
     public func findUsagesOf(method: KnownMethod) -> [DefinitionUsage] {
         let bodies = functionBodies()
         
@@ -91,8 +97,32 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         if let postfix = expression.parentExpression?.asPostfix {
             let root = postfix.topPostfixExpression
             
+            // If at any point we find a function call, the original value cannot
+            // be mutated due to any change on the return's value, so we just
+            // assume it's never written.
             let chain = PostfixChainInverter.invert(expression: root)
-            if chain.contains(where: { $0.postfix is FunctionCallPostfix }) {
+            if let call = chain.first(where: { $0.postfix is FunctionCallPostfix }),
+                let member = call.postfixExpression?.exp.asPostfix?.member {
+                
+                // Skip checking mutating methods on reference types, since those
+                // don't mutate variables.
+                if let type = chain.first?.expression?.resolvedType,
+                    !typeSystem.isScalarType(type) {
+                    
+                    return true
+                }
+                
+                if let method = member.memberDefinition as? KnownMethod {
+                    return !method.signature.isMutating
+                }
+                
+                return true
+            }
+            
+            // Writing to a reference type at any point invalidates mutations
+            // to the original value.
+            let types = chain.compactMap({ $0.resolvedType })
+            if types.contains(where: { !typeSystem.isScalarType($0) }) {
                 return true
             }
             
@@ -112,8 +142,10 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
 public class DefaultUsageAnalyzer: BaseUsageAnalyzer {
     public var intentions: IntentionCollection
     
-    public init(intentions: IntentionCollection) {
+    public init(intentions: IntentionCollection, typeSystem: TypeSystem) {
         self.intentions = intentions
+        
+        super.init(typeSystem: typeSystem)
     }
     
     override func functionBodies() -> [FunctionBodyIntention] {
@@ -128,8 +160,10 @@ public class DefaultUsageAnalyzer: BaseUsageAnalyzer {
 public class LocalUsageAnalyzer: BaseUsageAnalyzer {
     public var functionBody: FunctionBodyIntention
     
-    public init(functionBody: FunctionBodyIntention) {
+    public init(functionBody: FunctionBodyIntention, typeSystem: TypeSystem) {
         self.functionBody = functionBody
+        
+        super.init(typeSystem: typeSystem)
     }
     
     public func findUsagesOf(localNamed local: String) -> [DefinitionUsage] {

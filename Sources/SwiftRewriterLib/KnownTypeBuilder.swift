@@ -172,6 +172,7 @@ public struct KnownTypeBuilder {
                        shortParams: [ParameterTuple] = [],
                        returning returnType: SwiftType = .void,
                        isStatic: Bool = false,
+                       isMutating: Bool = false,
                        optional: Bool = false,
                        semantics: Set<Semantic> = [],
                        annotations: [String] = []) -> KnownTypeBuilder {
@@ -184,7 +185,8 @@ public struct KnownTypeBuilder {
         let signature = FunctionSignature(name: name,
                                           parameters: parameters,
                                           returnType: returnType,
-                                          isStatic: isStatic)
+                                          isStatic: isStatic,
+                                          isMutating: isMutating)
         
         return method(withSignature: signature,
                       optional: optional,
@@ -236,6 +238,7 @@ public struct KnownTypeBuilder {
     public func method(named name: String,
                        parsingSignature signature: String,
                        isStatic: Bool = false,
+                       isMutating: Bool = false,
                        returning returnType: SwiftType = .void,
                        optional: Bool = false,
                        semantics: Set<Semantic> = [],
@@ -247,7 +250,8 @@ public struct KnownTypeBuilder {
             FunctionSignature(name: name,
                               parameters: params,
                               returnType: returnType,
-                              isStatic: isStatic)
+                              isStatic: isStatic,
+                              isMutating: isMutating)
         
         return method(withSignature: signature,
                       optional: optional,

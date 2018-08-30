@@ -30,7 +30,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions)
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -72,7 +72,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions)
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -107,7 +107,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions)
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
         let property = intentions.fileIntentions()[0].typeIntentions[1].properties[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -139,7 +139,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions)
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
         let property = intentions.fileIntentions()[0].enumIntentions[0].cases[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -178,7 +178,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions)
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
         let property = intentions.fileIntentions()[0].classIntentions[0].properties[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -203,7 +203,8 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: DefaultTypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
@@ -234,7 +235,8 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: DefaultTypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
@@ -297,7 +299,8 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: DefaultTypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
@@ -308,7 +311,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         XCTAssertEqual(usages[3].isReadOnlyUsage, true)
     }
     
-    func testFindUsagesOfLocalVariableDetectingWritingUsagesOfPointerReferenceType() {
+    func testFindUsagesOfLocalVariableDetectingWritingUsagesOfPointerType() {
         let body: CompoundStatement = [
             // var a: Int
             .variableDeclaration(
@@ -338,12 +341,193 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body))
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: DefaultTypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
         XCTAssertEqual(usages[1].isReadOnlyUsage, false)
+    }
+    
+    func testFindUsagesOfLocalVariableDetetingWritingUsagesOfReferenceFields() {
+        // Mutating fields of reference types embedded within value types should
+        // not produce write usage references
+        let typeSystem = DefaultTypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .property(named: "b", type: "B")
+                .property(named: "d", type: .int)
+                .build()
+        )
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "B", kind: .class)
+                .property(named: "c", type: .int)
+                .build()
+        )
+        
+        let body: CompoundStatement = [
+            // var a: A
+            .variableDeclaration(
+                identifier: "a",
+                type: "A",
+                initialization: nil
+            ),
+            // a.b.c = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .dot("c")
+                    .assignment(op: .assign, rhs: .constant(0))
+            ),
+            // a.d = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("d")
+                    .assignment(op: .assign, rhs: .constant(0))
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: typeSystem)
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 2)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+        XCTAssertEqual(usages[1].isReadOnlyUsage, false)
+    }
+    
+    func testFindUsagesOfLocalVariableDoesNotReportWritingUsagesWhenMutatingFieldsOfReferenceType() {
+        // Mutating any field of a reference type local variable should not be
+        // considered a variable writing usage.
+        let typeSystem = DefaultTypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .class)
+                .property(named: "b", type: .int)
+                .build()
+        )
+        
+        let body: CompoundStatement = [
+            // var a: A
+            .variableDeclaration(
+                identifier: "a",
+                type: "A",
+                initialization: nil
+            ),
+            // a.b = 0
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .assignment(op: .assign, rhs: .constant(0))
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: typeSystem)
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 1)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+    }
+    
+    func testFindUsagesOfLocalVariableDetectingMutatingCallsToValueType() {
+        // Make sure we can properly detect calls of mutating functions on value-types
+        let typeSystem = DefaultTypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .method(named: "b", isMutating: true)
+                .method(named: "c", isMutating: false)
+                .build()
+        )
+        
+        let body: CompoundStatement = [
+            // var a: A
+            .variableDeclaration(
+                identifier: "a",
+                type: "A",
+                initialization: nil
+            ),
+            // a.b()
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .call()
+            ),
+            // a.c()
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("c")
+                    .call()
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: typeSystem)
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 2)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, false)
+        XCTAssertEqual(usages[1].isReadOnlyUsage, true)
+    }
+    
+    func testFindUsagesOfLocalVariableDetectingMutatingCallsToReferenceTypes() {
+        // Calling mutating members on reference types should not be considered
+        // writing usages of locals.
+        let typeSystem = DefaultTypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .class)
+                .method(named: "b", isMutating: true)
+                .method(named: "c", isMutating: false)
+                .build()
+        )
+        
+        let body: CompoundStatement = [
+            // var a: A
+            .variableDeclaration(
+                identifier: "a",
+                type: "A",
+                initialization: nil
+            ),
+            // a.b()
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .call()
+            ),
+            // a.c()
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("c")
+                    .call()
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
+                                     typeSystem: typeSystem)
+        
+        let usages = sut.findUsagesOf(localNamed: "a")
+        
+        XCTAssertEqual(usages.count, 2)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+        XCTAssertEqual(usages[1].isReadOnlyUsage, true)
     }
 }

@@ -955,7 +955,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func method() {
-                    var aValue: NSObject!
+                    let aValue: NSObject!
                     (aValue as? String)?[123]
                 }
             }
@@ -979,7 +979,7 @@ class SwiftRewriterTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func method() {
-                    var aValue: NSObject!
+                    let aValue: NSObject!
                     (aValue as? String)?.someMethod()
                     (aValue as? String)?.property
                     (aValue as? String)?[123]
@@ -1364,13 +1364,13 @@ class SwiftRewriterTests: XCTestCase {
             class A: NSObject {
                 @objc
                 func recreatePath() {
-                    var top: CGFloat = startsAtTop ? 0 : circle.center.y
-                    var bottom = max(self.bounds.size.height, top)
+                    let top: CGFloat = startsAtTop ? 0 : circle.center.y
+                    let bottom = max(self.bounds.size.height, top)
                     if top == bottom {
                         shapeLayer.path = nil
                         return
                     }
-                    var path = CGMutablePath()
+                    let path = CGMutablePath()
                     path.move(to: CGPoint(x: 0, y: top))
                     path.addLine(to: CGPoint(x: 0, y: bottom))
                     shapeLayer.strokeColor = self.dateLabel.textColor.CGColor
@@ -1758,7 +1758,7 @@ class SwiftRewriterTests: XCTestCase {
                 }
                 @objc
                 func method() {
-                    var b: B?
+                    let b: B?
                     self.takesA(b?.a() ?? A())
                 }
             }
@@ -1797,7 +1797,7 @@ class SwiftRewriterTests: XCTestCase {
                 
                 @objc
                 func method() {
-                    var a: A!
+                    let a: A!
                     self.b?.c = 0
                     a.b?.c = 0
                     self.takesExpression(a.b?.c ?? 0)
@@ -1954,7 +1954,7 @@ class SwiftRewriterTests: XCTestCase {
                 
                 @objc
                 func method() {
-                    var local = Int((self.b?.value ?? 0.0) / (self.b?.value ?? 0.0))
+                    let local = Int((self.b?.value ?? 0.0) / (self.b?.value ?? 0.0))
                 }
             }
             """)
@@ -2020,7 +2020,7 @@ class SwiftRewriterTests: XCTestCase {
                 
                 @objc
                 func method() {
-                    var changedY = fabs(self.b - self.b) > FLT_EPSILON
+                    let changedY = fabs(self.b - self.b) > FLT_EPSILON
                 }
             }
             """)
@@ -2303,7 +2303,7 @@ class SwiftRewriterTests: XCTestCase {
                 
                 @objc
                 func method() {
-                    var local = GLenum(prop)
+                    let local = GLenum(prop)
                 }
             }
             """)
@@ -2335,7 +2335,7 @@ class SwiftRewriterTests: XCTestCase {
                 
                 @objc
                 func method() {
-                    var local = GLenum(prop)
+                    let local = GLenum(prop)
                 }
             }
             """)
@@ -2356,7 +2356,7 @@ class SwiftRewriterTests: XCTestCase {
             class A: NSObject {
                 @objc
                 func method() {
-                    var dict = [:]
+                    let dict = [:]
                     NSLog(dict["abc"]?["def"].value)
                 }
             }
@@ -2536,8 +2536,8 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             func test() {
-                var array = NSMutableArray()
-                var object: NSObject?
+                let array = NSMutableArray()
+                let object: NSObject?
                 if let object = object {
                     array.add(object)
                 }
@@ -2557,7 +2557,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             func test() {
                 Date() == Date()
-                var date: Date?
+                let date: Date?
                 date == Date()
             }
             """

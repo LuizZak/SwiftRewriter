@@ -21,7 +21,8 @@ public class SwiftMethodSignatureGen {
             FunctionSignature(name: "__",
                               parameters: [],
                               returnType: SwiftType.anyObject.asImplicitUnwrapped,
-                              isStatic: objcMethod.isClassMethod)
+                              isStatic: objcMethod.isClassMethod,
+                              isMutating: false)
         
         if let sel = objcMethod.methodSelector?.selector {
             switch sel {
@@ -59,7 +60,8 @@ public class SwiftMethodSignatureGen {
             FunctionSignature(name: function.identifier?.name ?? "__",
                               parameters: [],
                               returnType: .void,
-                              isStatic: false)
+                              isStatic: false,
+                              isMutating: false)
         
         var context = TypeMappingContext.empty
         context.instanceTypeAlias = instanceTypeAlias

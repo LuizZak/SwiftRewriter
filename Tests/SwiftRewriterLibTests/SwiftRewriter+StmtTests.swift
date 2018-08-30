@@ -162,7 +162,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
         assertSingleStatement(
             objc: "CGFloat x = [self offsetForDate:cell.startDate];",
-            swift: "var x: CGFloat = self.offsetForDate(cell.startDate)"
+            swift: "let x: CGFloat = self.offsetForDate(cell.startDate)"
         )
     }
     
@@ -170,7 +170,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     func testParseBlockVarDeclaration() {
         assertSingleStatement(
             objc: "__block id value;",
-            swift: "var value: AnyObject!"
+            swift: "let value: AnyObject!"
         )
     }
     
@@ -178,7 +178,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
     func testParseUnusedVarDeclaration() {
         assertSingleStatement(
             objc: "__unused id value;",
-            swift: "var value: AnyObject!"
+            swift: "let value: AnyObject!"
         )
     }
     
@@ -189,72 +189,72 @@ class SwiftRewriter_StmtTests: XCTestCase {
     func testKeepVarTypePatternsOnNumericTypes() {
         assertSingleStatement(
             objc: "NSInteger x = 10;",
-            swift: "var x: Int = 10"
+            swift: "let x: Int = 10"
         )
         assertSingleStatement(
             objc: "NSUInteger x = 10;",
-            swift: "var x: UInt = 10"
+            swift: "let x: UInt = 10"
         )
         assertSingleStatement(
             objc: "CGFloat x = 10;",
-            swift: "var x: CGFloat = 10"
+            swift: "let x: CGFloat = 10"
         )
         assertSingleStatement(
             objc: "double x = 10;",
-            swift: "var x: CDouble = 10"
+            swift: "let x: CDouble = 10"
         )
         // Should avoid omitting types for nil values, as well
         assertSingleStatement(
             objc: "NSString *x = nil;",
-            swift: "var x: String! = nil"
+            swift: "let x: String! = nil"
         )
         
         // Keep inferring on for literal-based expressions as well
         assertSingleStatement(
             objc: "NSInteger x = 10 + 5;",
-            swift: "var x: Int = 10 + 5"
+            swift: "let x: Int = 10 + 5"
         )
         assertSingleStatement(
             objc: "NSUInteger x = 10 + 5;",
-            swift: "var x: UInt = 10 + 5"
+            swift: "let x: UInt = 10 + 5"
         )
         assertSingleStatement(
             objc: "CGFloat x = 10 + 5.0;",
-            swift: "var x: CGFloat = 10 + 5.0"
+            swift: "let x: CGFloat = 10 + 5.0"
         )
         assertSingleStatement(
             objc: "double x = 10 + 5.0;",
-            swift: "var x: CDouble = 10 + 5.0"
+            swift: "let x: CDouble = 10 + 5.0"
         )
         
         // Don't remove type signature from error-typed initializer expressions
         assertSingleStatement(
             objc: "NSInteger x = nonExistant;",
-            swift: "var x: Int = nonExistant"
+            swift: "let x: Int = nonExistant"
         )
         
         // Type expressions from non-literal sources are not needed as they can
         // be inferred
         assertSingleStatement(
             objc: "CGFloat x = self.frame.size.width;",
-            swift: "var x = self.frame.size.width"
+            swift: "let x = self.frame.size.width"
         )
 
         // Initializers from expressions with non-literal operands should also
         // omit type
         assertSingleStatement(
             objc: "CGFloat x = self.frame.size.width - 1;",
-            swift: "var x = self.frame.size.width - 1"
+            swift: "let x = self.frame.size.width - 1"
         )
 
         // No need to keep inferrence for Boolean or String types
         assertSingleStatement(
             objc: "BOOL x = YES;",
-            swift: "var x = true"
+            swift: "let x = true"
         )
         assertSingleStatement(
             objc: "NSString *x = @\"A string\";",
-            swift: "var x = \"A string\""
+            swift: "let x = \"A string\""
         )
     }
     
@@ -448,10 +448,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    var local: Int = 5
+                    let local: Int = 5
                     let constLocal: Int = 5
-                    var local2: Int
-                    var localS1: Int = 5, localS2: Int
+                    let local2: Int
+                    let localS1: Int = 5, localS2: Int
                 }
             }
             """)
@@ -881,7 +881,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    var count: Int = 5
+                    let count: Int = 5
                     for i in 0..<count {
                     }
                 }
@@ -906,7 +906,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    var array = []
+                    let array = []
                     for i in 0..<array.count {
                     }
                 }
@@ -962,7 +962,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass: NSObject {
                 @objc
                 func myMethod() {
-                    var count: Int = 5
+                    let count: Int = 5
                     i = 0
                     while i < count {
                         defer {
