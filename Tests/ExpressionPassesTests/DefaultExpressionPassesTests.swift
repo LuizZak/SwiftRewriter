@@ -20,7 +20,7 @@ class DefaultExpressionPassesTests: XCTestCase {
         XCTAssert(passes.next() == ASTCorrectorExpressionPass.self)
         XCTAssert(passes.next() == NumberCommonsExpressionPass.self)
         XCTAssert(passes.next() == EnumRewriterExpressionPass.self)
-        XCTAssert(passes.next() == ConstantDetectionExpressionPass.self)
+        XCTAssert(passes.next() == LocalConstantPromotionExpressionPass.self)
         XCTAssert(passes.next() == ASTSimplifier.self)
     }
 }

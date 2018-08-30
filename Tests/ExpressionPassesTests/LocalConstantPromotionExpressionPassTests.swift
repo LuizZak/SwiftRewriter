@@ -3,11 +3,11 @@ import ExpressionPasses
 import SwiftRewriterLib
 import SwiftAST
 
-class ConstantDetectionExpressionPassTests: ExpressionPassTestCase {
+class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {
         super.setUp()
         
-        sutType = ConstantDetectionExpressionPass.self
+        sutType = LocalConstantPromotionExpressionPass.self
         intentionContext = .global(
             GlobalFunctionGenerationIntention(
                 signature: FunctionSignature(name: "test")

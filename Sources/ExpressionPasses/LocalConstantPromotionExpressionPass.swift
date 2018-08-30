@@ -3,7 +3,7 @@ import SwiftRewriterLib
 
 /// Allows detecting local variables that are never mutated and can be marked as
 /// constant `let` declarations.
-public class ConstantDetectionExpressionPass: ASTRewriterPass {
+public class LocalConstantPromotionExpressionPass: ASTRewriterPass {
     
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         guard let functionBody = context.functionBodyIntention else {
