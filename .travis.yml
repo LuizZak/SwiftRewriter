@@ -1,4 +1,7 @@
 osx_image: xcode10
 language: objective-c
+cache:
+  directories:
+    - ./.build/
 script:
   - swift test -Xswiftc -O
