@@ -47,8 +47,8 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     /// Configures mappers in `self.mapper` so they are automatically pushed and
     /// popped whenever the rules are entered and exited during visit.
     ///
-    /// Used as a convenience over manually pushing and popping contexts every time
-    /// a node of significance is entered.
+    /// Used as a convenience over manually pushing and popping contexts every
+    /// time a node of significance is entered.
     private func configureMappers() {
         mapper.addRuleMap(rule: ObjectiveCParser.TranslationUnitContext.self, node: rootNode)
         mapper.addRuleMap(rule: ObjectiveCParser.ClassInterfaceContext.self, nodeType: ObjcClassInterface.self)
@@ -70,9 +70,12 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         mapper.addRuleMap(rule: ObjectiveCParser.EnumDeclarationContext.self, nodeType: ObjcEnumDeclaration.self)
         mapper.addRuleMap(rule: ObjectiveCParser.FunctionDeclarationContext.self, nodeType: FunctionDefinition.self)
         mapper.addRuleMap(rule: ObjectiveCParser.FunctionDefinitionContext.self, nodeType: FunctionDefinition.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.PropertyImplementationContext.self, nodeType: PropertyImplementation.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.PropertySynthesizeListContext.self, nodeType: PropertySynthesizeList.self)
-        mapper.addRuleMap(rule: ObjectiveCParser.PropertySynthesizeItemContext.self, nodeType: PropertySynthesizeItem.self)
+        mapper.addRuleMap(
+            rule: ObjectiveCParser.PropertyImplementationContext.self, nodeType: PropertyImplementation.self)
+        mapper.addRuleMap(
+            rule: ObjectiveCParser.PropertySynthesizeListContext.self, nodeType: PropertySynthesizeList.self)
+        mapper.addRuleMap(
+            rule: ObjectiveCParser.PropertySynthesizeItemContext.self, nodeType: PropertySynthesizeItem.self)
     }
     
     override func enterEveryRule(_ ctx: ParserRuleContext) {
@@ -493,8 +496,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             }
             
             guard let type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers,
-                                                      declarator: typeDeclarator) else
-            {
+                                                      declarator: typeDeclarator) else {
                 continue
             }
             

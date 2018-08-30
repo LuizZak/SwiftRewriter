@@ -122,7 +122,9 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
         return isCompiledText().description
     }
     
-    public override func visitPreprocessorWarning(_ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> String? {
+    public override func visitPreprocessorWarning(
+        _ ctx: ObjectiveCPreprocessorParser.PreprocessorWarningContext) -> String? {
+        
         return isCompiledText().description
     }
     
@@ -150,7 +152,9 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
         }
     }
     
-    public override func visitPreprocessorConditionalSymbol(_ context: Parser.PreprocessorConditionalSymbolContext) -> String? {
+    public override func visitPreprocessorConditionalSymbol(
+        _ context: Parser.PreprocessorConditionalSymbolContext) -> String? {
+        
         guard let text = context.CONDITIONAL_SYMBOL()?.getText() else {
             return false.description
         }
@@ -174,7 +178,9 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
         return value == "true" ? "false" : "true"
     }
     
-    public override func visitPreprocessorBinary(_ context: Parser.PreprocessorBinaryContext) -> String? {
+    public override func visitPreprocessorBinary(
+        _ context: Parser.PreprocessorBinaryContext) -> String? {
+        
         let expr1Result = context.preprocessor_expression(0)?.accept(self)
         let expr2Result = context.preprocessor_expression(1)?.accept(self)
         

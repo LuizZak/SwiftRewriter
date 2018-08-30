@@ -298,7 +298,8 @@ public extension ValueMatcher where T: Expression {
 public extension ValueMatcher where T == Expression {
     
     public static func unary<O, E>(op: O, _ exp: E) -> ValueMatcher<Expression>
-        where O: ValueMatcherConvertible, E: ValueMatcherConvertible, O.Target == SwiftOperator, E.Target == Expression {
+        where O: ValueMatcherConvertible, E: ValueMatcherConvertible,
+        O.Target == SwiftOperator, E.Target == Expression {
         
         return
             ValueMatcher<UnaryExpression>()
@@ -308,7 +309,8 @@ public extension ValueMatcher where T == Expression {
     }
     
     public static func binary<O, E>(lhs: E, op: O, rhs: E) -> ValueMatcher<Expression>
-        where O: ValueMatcherConvertible, E: ValueMatcherConvertible, O.Target == SwiftOperator, E.Target == Expression {
+        where O: ValueMatcherConvertible, E: ValueMatcherConvertible,
+        O.Target == SwiftOperator, E.Target == Expression {
         
         return
             ValueMatcher<BinaryExpression>()
@@ -335,7 +337,7 @@ public extension Expression {
 public struct ExpressionMatchable {
     public var exp: Expression
     
-    public static func ==(lhs: ExpressionMatchable, rhs: ValueMatcher<Expression>) -> Bool {
+    public static func == (lhs: ExpressionMatchable, rhs: ValueMatcher<Expression>) -> Bool {
         return lhs.exp.matches(rhs)
     }
 }

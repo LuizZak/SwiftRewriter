@@ -226,7 +226,9 @@ public extension ValueMatcher {
     /// return a newly constructed value matcher that will work on the non-nil
     /// value of the key-path.
     /// - Returns: A new matcher with the specified matcher.
-    public static func keyPath<U>(_ kp: KeyPath<T, U?>, _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
+    public static func keyPath<U>(_ kp: KeyPath<T, U?>,
+                                  _ closure: (ValueMatcher<U>) -> ValueMatcher<U>) -> ValueMatcher {
+        
         return ValueMatcher().keyPath(kp, closure)
     }
 }

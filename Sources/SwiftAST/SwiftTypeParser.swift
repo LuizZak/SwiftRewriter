@@ -636,7 +636,10 @@ public class SwiftTypeParser {
             case .expectedMetatype(let offset):
                 return "Expected .Type or .Protocol metatype at column \(offset + 1)"
             case let .notProtocolComposable(type, offset):
-                return "Found protocol composition, but type \(type) is not composable on composition '&' at column \(offset + 1)"
+                return """
+                    Found protocol composition, but type \(type) is not composable \
+                    on composition '&' at column \(offset + 1)
+                    """
             case let .unexpectedToken(token, offset):
                 return "Unexpected token '\(token)' at column \(offset + 1)"
             }

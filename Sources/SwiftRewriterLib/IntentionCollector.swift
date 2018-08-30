@@ -696,7 +696,10 @@ public class IntentionCollector {
             
             // Analyze if this is an opaque pointer struct reference
             if effectiveDeclarators.isEmpty && nodeIdentifiers.isEmpty {
-                if let declarator = declarators.first, declarator.pointerNode != nil, let identifier = declarator.identifier {
+                if let declarator = declarators.first,
+                    declarator.pointerNode != nil,
+                    let identifier = declarator.identifier {
+                    
                     shouldRecord = false
                     
                     let inNonnull = delegate.isNodeInNonnullContext(declarator)

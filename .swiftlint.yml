@@ -7,6 +7,8 @@ disabled_rules:
   - type_name
   - todo
   - nesting
+  - cyclomatic_complexity
+  - function_body_length
 opt_in_rules:
   - empty_count
 excluded:

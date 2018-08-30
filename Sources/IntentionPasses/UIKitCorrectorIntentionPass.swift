@@ -40,53 +40,128 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
         addCompoundedTypeMapping(UIViewCompoundType.create())
         addCompoundedTypeMapping(UIGestureRecognizerCompoundType.create())
         
+        // UITableViewDelegate
         addConversions(
             .conformance(protocolName: "UITableViewDelegate"),
             keywordPairs: [
-                (["tableView", nil, "willDisplayCell", "forRowAtIndexPath"], ["tableView", nil, "willDisplay", "forRowAt"]),
-                (["tableView", nil, "didEndDisplayingCell", "forRowAtIndexPath"], ["tableView", nil, "didEndDisplaying", "forRowAt"]),
-                (["tableView", nil, "heightForRowAtIndexPath"], ["tableView", nil, "heightForRowAt"]),
-                (["tableView", nil, "estimatedHeightForRowAtIndexPath"], ["tableView", nil, "estimatedHeightForRowAt"]),
-                (["tableView", nil, "accessoryButtonTappedForRowWithIndexPath"], ["tableView", nil, "accessoryButtonTappedForRowWith"]),
-                (["tableView", nil, "shouldHighlightRowAtIndexPath"], ["tableView", nil, "shouldHighlightRowAt"]),
-                (["tableView", nil, "didHighlightRowAtIndexPath"], ["tableView", nil, "didHighlightRowAt"]),
-                (["tableView", nil, "didUnhighlightRowAtIndexPath"], ["tableView", nil, "didUnhighlightRowAt"]),
-                (["tableView", nil, "willSelectRowAtIndexPath"], ["tableView", nil, "willSelectRowAt"]),
-                (["tableView", nil, "willDeselectRowAtIndexPath"], ["tableView", nil, "willDeselectRowAt"]),
-                (["tableView", nil, "didSelectRowAtIndexPath"], ["tableView", nil, "didSelectRowAt"]),
-                (["tableView", nil, "didDeselectRowAtIndexPath"], ["tableView", nil, "didDeselectRowAt"]),
-                (["tableView", nil, "editingStyleForRowAtIndexPath"], ["tableView", nil, "editingStyleForRowAt"]),
-                (["tableView", nil, "titleForDeleteConfirmationButtonForRowAtIndexPath"], ["tableView", nil, "titleForDeleteConfirmationButtonForRowAt"]),
-                (["tableView", nil, "editActionsForRowAtIndexPath"], ["tableView", nil, "editActionsForRowAt"]),
-                (["tableView", nil, "leadingSwipeActionsConfigurationForRowAtIndexPath"], ["tableView", nil, "leadingSwipeActionsConfigurationForRowAt"]),
-                (["tableView", nil, "trailingSwipeActionsConfigurationForRowAtIndexPath"], ["tableView", nil, "trailingSwipeActionsConfigurationForRowAt"]),
-                (["tableView", nil, "shouldIndentWhileEditingRowAtIndexPath"], ["tableView", nil, "shouldIndentWhileEditingRowAt"]),
-                (["tableView", nil, "willBeginEditingRowAtIndexPath"], ["tableView", nil, "willBeginEditingRowAt"]),
-                (["tableView", nil, "didEndEditingRowAtIndexPath"], ["tableView", nil, "didEndEditingRowAt"]),
-                (["tableView", nil, "targetIndexPathForMoveFromRowAtIndexPath", "toProposedIndexPath"], ["tableView", nil, "targetIndexPathForMoveFromRowAt", "toProposedIndexPath"]),
-                (["tableView", nil, "indentationLevelForRowAtIndexPath"], ["tableView", nil, "indentationLevelForRowAt"]),
-                (["tableView", nil, "shouldShowMenuForRowAtIndexPath"], ["tableView", nil, "shouldShowMenuForRowAt"]),
-                (["tableView", nil, "canPerformAction", "forRowAtIndexPath", "withSender"], ["tableView", nil, "canPerformAction", "forRowAt", "withSender"]),
-                (["tableView", nil, "performAction", "forRowAtIndexPath", "withSender"], ["tableView", nil, "performAction", "forRowAt", "withSender"]),
-                (["tableView", nil, "canFocusRowAtIndexPath"], ["tableView", nil, "canFocusRowAt"]),
-                (["tableView", nil, "shouldUpdateFocusInContext"], ["tableView", nil, "shouldUpdateFocusIn"]),
-                (["tableView", nil, "didUpdateFocusInContext", "withAnimationCoordinator"], ["tableView", nil, "didUpdateFocusIn", "with"]),
-                (["indexPathForPreferredFocusedViewInTableView", nil], ["indexPathForPreferredFocusedView", "in"]),
-                (["tableView", nil, "shouldSpringLoadRowAtIndexPath", "withContext"], ["tableView", nil, "shouldSpringLoadRowAt", "with"]),
+                (["tableView", nil, "willDisplayCell", "forRowAtIndexPath"],
+                 ["tableView", nil, "willDisplay", "forRowAt"]),
+                
+                (["tableView", nil, "didEndDisplayingCell", "forRowAtIndexPath"],
+                 ["tableView", nil, "didEndDisplaying", "forRowAt"]),
+                
+                (["tableView", nil, "heightForRowAtIndexPath"],
+                 ["tableView", nil, "heightForRowAt"]),
+                
+                (["tableView", nil, "estimatedHeightForRowAtIndexPath"],
+                 ["tableView", nil, "estimatedHeightForRowAt"]),
+                
+                (["tableView", nil, "accessoryButtonTappedForRowWithIndexPath"],
+                 ["tableView", nil, "accessoryButtonTappedForRowWith"]),
+                
+                (["tableView", nil, "shouldHighlightRowAtIndexPath"],
+                 ["tableView", nil, "shouldHighlightRowAt"]),
+                
+                (["tableView", nil, "didHighlightRowAtIndexPath"],
+                 ["tableView", nil, "didHighlightRowAt"]),
+                
+                (["tableView", nil, "didUnhighlightRowAtIndexPath"],
+                 ["tableView", nil, "didUnhighlightRowAt"]),
+                
+                (["tableView", nil, "willSelectRowAtIndexPath"],
+                 ["tableView", nil, "willSelectRowAt"]),
+                
+                (["tableView", nil, "willDeselectRowAtIndexPath"],
+                 ["tableView", nil, "willDeselectRowAt"]),
+                
+                (["tableView", nil, "didSelectRowAtIndexPath"],
+                 ["tableView", nil, "didSelectRowAt"]),
+                
+                (["tableView", nil, "didDeselectRowAtIndexPath"],
+                 ["tableView", nil, "didDeselectRowAt"]),
+                
+                (["tableView", nil, "editingStyleForRowAtIndexPath"],
+                 ["tableView", nil, "editingStyleForRowAt"]),
+                
+                (["tableView", nil, "titleForDeleteConfirmationButtonForRowAtIndexPath"],
+                 ["tableView", nil, "titleForDeleteConfirmationButtonForRowAt"]),
+                
+                (["tableView", nil, "editActionsForRowAtIndexPath"],
+                 ["tableView", nil, "editActionsForRowAt"]),
+                
+                (["tableView", nil, "leadingSwipeActionsConfigurationForRowAtIndexPath"],
+                 ["tableView", nil, "leadingSwipeActionsConfigurationForRowAt"]),
+                
+                (["tableView", nil, "trailingSwipeActionsConfigurationForRowAtIndexPath"],
+                 ["tableView", nil, "trailingSwipeActionsConfigurationForRowAt"]),
+                
+                (["tableView", nil, "shouldIndentWhileEditingRowAtIndexPath"],
+                 ["tableView", nil, "shouldIndentWhileEditingRowAt"]),
+                
+                (["tableView", nil, "willBeginEditingRowAtIndexPath"],
+                 ["tableView", nil, "willBeginEditingRowAt"]),
+                
+                (["tableView", nil, "didEndEditingRowAtIndexPath"],
+                 ["tableView", nil, "didEndEditingRowAt"]),
+                
+                (["tableView", nil, "targetIndexPathForMoveFromRowAtIndexPath", "toProposedIndexPath"],
+                 ["tableView", nil, "targetIndexPathForMoveFromRowAt", "toProposedIndexPath"]),
+                
+                (["tableView", nil, "indentationLevelForRowAtIndexPath"],
+                 ["tableView", nil, "indentationLevelForRowAt"]),
+                
+                (["tableView", nil, "shouldShowMenuForRowAtIndexPath"],
+                 ["tableView", nil, "shouldShowMenuForRowAt"]),
+                
+                (["tableView", nil, "canPerformAction", "forRowAtIndexPath", "withSender"],
+                 ["tableView", nil, "canPerformAction", "forRowAt", "withSender"]),
+                
+                (["tableView", nil, "performAction", "forRowAtIndexPath", "withSender"],
+                 ["tableView", nil, "performAction", "forRowAt", "withSender"]),
+                
+                (["tableView", nil, "canFocusRowAtIndexPath"],
+                 ["tableView", nil, "canFocusRowAt"]),
+                
+                (["tableView", nil, "shouldUpdateFocusInContext"],
+                 ["tableView", nil, "shouldUpdateFocusIn"]),
+                
+                (["tableView", nil, "didUpdateFocusInContext", "withAnimationCoordinator"],
+                 ["tableView", nil, "didUpdateFocusIn", "with"]),
+                
+                (["indexPathForPreferredFocusedViewInTableView", nil],
+                 ["indexPathForPreferredFocusedView", "in"]),
+                
+                (["tableView", nil, "shouldSpringLoadRowAtIndexPath", "withContext"],
+                 ["tableView", nil, "shouldSpringLoadRowAt", "with"])
             ])
         
         // UITableViewDataSource
         addConversions(
             .conformance(protocolName: "UITableViewDataSource"),
             keywordPairs: [
-                (["tableView", nil, "cellForRowAtIndexPath"], ["tableView", nil, "cellForRowAt"]),
-                (["numberOfSectionsInTableView", nil], ["numberOfSections", "in"]),
-                (["tableView", nil, "canEditRowAtIndexPath"], ["tableView", nil, "canEditRowAt"]),
-                (["tableView", nil, "canMoveRowAtIndexPath"], ["tableView", nil, "canMoveRowAt"]),
-                (["sectionIndexTitlesForTableView", nil], ["sectionIndexTitles", "for"]),
-                (["tableView", nil, "sectionForSectionIndexTitle", "atIndex"], ["tableView", nil, "sectionForSectionIndexTitle", "at"]),
-                (["tableView", nil, "commitEditingStyle", "forRowAtIndexPath"], ["tableView", nil, "commit", "forRowAt"]),
-                (["tableView", nil, "moveRowAtIndexPath", "toIndexPath"], ["tableView", nil, "moveRowAt", "to"])
+                (["tableView", nil, "cellForRowAtIndexPath"],
+                 ["tableView", nil, "cellForRowAt"]),
+                
+                (["numberOfSectionsInTableView", nil],
+                 ["numberOfSections", "in"]),
+                
+                (["tableView", nil, "canEditRowAtIndexPath"],
+                 ["tableView", nil, "canEditRowAt"]),
+                
+                (["tableView", nil, "canMoveRowAtIndexPath"],
+                 ["tableView", nil, "canMoveRowAt"]),
+                
+                (["sectionIndexTitlesForTableView", nil],
+                 ["sectionIndexTitles", "for"]),
+                
+                (["tableView", nil, "sectionForSectionIndexTitle", "atIndex"],
+                 ["tableView", nil, "sectionForSectionIndexTitle", "at"]),
+                
+                (["tableView", nil, "commitEditingStyle", "forRowAtIndexPath"],
+                 ["tableView", nil, "commit", "forRowAt"]),
+                
+                (["tableView", nil, "moveRowAtIndexPath", "toIndexPath"],
+                 ["tableView", nil, "moveRowAt", "to"])
             ])
     }
     

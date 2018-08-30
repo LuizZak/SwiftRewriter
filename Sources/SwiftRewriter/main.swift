@@ -12,14 +12,19 @@ enum Target: String, ArgumentKind {
         if let value = Target(rawValue: argument) {
             self = value
         } else {
-            throw ArgumentParserError.invalidValue(argument: argument, error: ArgumentConversionError.custom("Expected either 'stdout' or 'filedisk'"))
+            throw ArgumentParserError.invalidValue(
+                argument: argument,
+                error: ArgumentConversionError.custom("Expected either 'stdout' or 'filedisk'")
+            )
         }
     }
     
     static var completion: ShellCompletion {
         return ShellCompletion.values([
             ("terminal", "Prints output of conversion to the terminal's standard output."),
-            ("filedisk", "Saves output of conersion to the filedisk as .swift files on the same folder as the input files.")
+            ("filedisk", """
+                Saves output of conersion to the filedisk as .swift files on the same folder as the input files.
+                """)
         ])
     }
 }

@@ -10,16 +10,17 @@ import SwiftAST
 /// based on statement AST analysis and flags them appropriately.
 public class InitAnalysisIntentionPass: IntentionPass {
     
+    // Matches 'self.init'/'super.init' expressions, with or without parameters.
     let invertedMatchSelfOrSuperInit =
         ValueMatcher<PostfixExpression>()
             .inverted { inverted in
                 inverted
                     .hasCount(3)
                     .atIndex(0, rule: .equals(.root(.identifier("super"))) || equals(.root(.identifier("self"))))
-                    .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name, .closure { $0?.hasPrefix("init") == true }))
+                    .atIndex(1, matcher: .keyPath(\.postfix?.asMember?.name,
+                                                  .closure { $0?.hasPrefix("init") == true }))
                     .atIndex(2, matcher: .isFunctionCall)
             }.anyExpression()
-    
     
     var context: IntentionPassContext?
     

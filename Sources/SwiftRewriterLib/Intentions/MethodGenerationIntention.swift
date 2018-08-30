@@ -3,7 +3,7 @@ import SwiftAST
 import GrammarModels
 
 /// An intention to generate a static/instance function for a type.
-public class MethodGenerationIntention: MemberGenerationIntention, OverridableMemberGenerationIntention, FunctionIntention {
+public class MethodGenerationIntention: MemberGenerationIntention, FunctionIntention {
     public var typedSource: MethodDefinition? {
         return source as? MethodDefinition
     }
@@ -63,6 +63,10 @@ public class MethodGenerationIntention: MemberGenerationIntention, OverridableMe
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)
     }
+}
+
+extension MethodGenerationIntention: OverridableMemberGenerationIntention {
+    
 }
 
 extension MethodGenerationIntention: KnownMethod {

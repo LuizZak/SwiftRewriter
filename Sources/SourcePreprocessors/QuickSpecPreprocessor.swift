@@ -13,7 +13,7 @@ public class QuickSpecPreprocessor: SourcePreprocessor {
     /// identifierLexer:
     ///     [a-zA-Z_] [a-zA-Z0-9_]*
     /// ```
-    private let identifierLexer: GrammarRule = (.letter | "_") .. (.letter | .digit | "_")*
+    private let identifierLexer: GrammarRule = (.letter | "_") + (.letter | .digit | "_")*
     
     public init() {
         

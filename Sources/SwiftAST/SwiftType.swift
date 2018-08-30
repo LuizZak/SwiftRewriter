@@ -409,7 +409,7 @@ extension SwiftType: Codable {
 }
 
 // MARK: - Building structures
-public typealias ZeroOrMore<T> = Array<T>
+public typealias ZeroOrMore<T> = [T]
 
 /// An enum representing a list of one or more chained items
 public enum OneOrMore<T> {
@@ -443,7 +443,9 @@ public enum OneOrMore<T> {
     /// The collection must have at least one element.
     ///
     /// - precondition: Collection is not empty
-    public static func fromCollection<C>(_ collection: C) -> OneOrMore where C: BidirectionalCollection, C.Element == T {
+    public static func fromCollection<C>(_ collection: C) -> OneOrMore
+        where C: BidirectionalCollection, C.Element == T {
+        
         precondition(!collection.isEmpty)
         
         var current = OneOrMore.tail(collection.last!)
@@ -483,10 +485,13 @@ public enum TwoOrMore<T> {
     /// The collection must have at least two elements.
     ///
     /// - precondition: `collection.count >= 2`
-    public static func fromCollection<C>(_ collection: C) -> TwoOrMore where C: BidirectionalCollection, C.Element == T, C.Index == Int {
+    public static func fromCollection<C>(_ collection: C) -> TwoOrMore
+        where C: BidirectionalCollection, C.Element == T, C.Index == Int {
+        
         precondition(collection.count >= 2)
         
-        var current = TwoOrMore.tail(collection[collection.count - 2], collection[collection.count - 1])
+        var current = TwoOrMore.tail(collection[collection.count - 2],
+                                     collection[collection.count - 1])
         
         for item in collection.dropLast(2).reversed() {
             current = .list(item, current)

@@ -742,13 +742,9 @@ private class ASTAnalyzer {
             return false
         }
         
-        for exp in sequence {
-            if exp.asAssignment?.lhs.asIdentifier?.identifier == localName {
-                return true
-            }
+        return sequence.contains { exp in
+            exp.asAssignment?.lhs.asIdentifier?.identifier == localName
         }
-        
-        return false
     }
 }
 

@@ -151,7 +151,9 @@ public class PropertyMergeIntentionPass: IntentionPass {
             return
         }
         
-        if let field = context.typeSystem.field(named: backingField, static: false, in: type) as? InstanceVariableGenerationIntention {
+        let field = context.typeSystem.field(named: backingField, static: false, in: type)
+        
+        if let field = field as? InstanceVariableGenerationIntention {
             property.setterAccessLevel = field.accessLevel
         } else {
             // Private by default, for get-only properties
@@ -169,7 +171,9 @@ public class PropertyMergeIntentionPass: IntentionPass {
             return
         }
         
-        func collectMethodBodies(fromClass classIntention: BaseClassIntention) -> [(FunctionBodyIntention, source: String)] {
+        func collectMethodBodies(fromClass classIntention: BaseClassIntention)
+            -> [(FunctionBodyIntention, source: String)] {
+                
             var bodies: [(FunctionBodyIntention, source: String)] = []
             
             for method in collectMethods(fromClass: classIntention) {

@@ -370,7 +370,8 @@ public class TypeBuilder<T: TypeGenerationIntention> {
                                type: SwiftType,
                                mode: PropertyGenerationIntention.Mode = .asField,
                                attributes: [PropertyAttribute] = [],
-                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = { _ in })
+            -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         

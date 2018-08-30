@@ -214,7 +214,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 switch expectedType {
                 case .optional, .implicitUnwrappedOptional:
                     exp.resolvedType = exp.expectedType
-                    break
                     
                 default:
                     if !typeSystem.isScalarType(expectedType) {
@@ -384,8 +383,6 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             default:
                 break
             }
-            
-            break
             
         default:
             break

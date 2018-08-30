@@ -3,7 +3,7 @@ import SwiftAST
 
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
-public class PropertyGenerationIntention: MemberGenerationIntention, OverridableMemberGenerationIntention, ValueStorageIntention {
+public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
     public var propertySource: PropertyDefinition? {
         return source as? PropertyDefinition
     }
@@ -128,6 +128,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, Overridable
             self.body = body
         }
     }
+}
+
+extension PropertyGenerationIntention: OverridableMemberGenerationIntention {
+    
 }
 
 extension PropertyGenerationIntention: KnownProperty {
