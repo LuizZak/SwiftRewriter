@@ -1,5 +1,7 @@
 # SwiftRewriter
 
+[![CI Status](https://api.travis-ci.org/LuizZak/SwiftRewriter.svg?branch=swift4.2)](https://travis-ci.org/LuizZak/SwiftRewriter?branch=swift4.2)
+
 A program that aims to aid in automatization of conversion of Objective-C code into equivalent Swift code.
 
 #### Requirements
