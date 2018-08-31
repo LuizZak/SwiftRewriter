@@ -55,4 +55,33 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
                 .dot("otherProperty")
         ); assertNotifiedChange()
     }
+    
+    func testDontTransformClosureCalls() {
+        // Make sure we ignore invocations to closure properties
+        
+        let type = KnownTypeBuilder(typeName: "A")
+            .property(named: "aClosure", type: .block(returnType: .void, parameters: []))
+            .property(named: "anOptionalClosure",
+                      type: .optional(.block(returnType: .void, parameters: [])))
+            .build()
+        typeSystem.addType(type)
+        
+        assertTransform(
+            expression: Expression
+                .identifier("a").typed("A")
+                .dot("aClosure").call(),
+            into: Expression
+                .identifier("a").typed("A")
+                .dot("aClosure").call()
+        ); assertDidNotNotifyChange()
+        
+        assertTransform(
+            expression: Expression
+                .identifier("a").typed("A")
+                .dot("anOptionalClosure").optional().call(),
+            into: Expression
+                .identifier("a").typed("A")
+                .dot("anOptionalClosure").optional().call()
+        ); assertDidNotNotifyChange()
+    }
 }

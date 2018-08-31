@@ -46,7 +46,12 @@ public class PropertyAsMethodAccessCorrectingExpressionPass: BaseExpressionPass 
             return nil
         }
         
-        if memberDefinition is KnownProperty {
+        if let member = memberDefinition as? KnownProperty {
+            // Ignore invocations to closure member types
+            if member.memberType.deepUnwrapped.isBlock {
+                return nil
+            }
+            
             return baseMemberExp.copy().typed(memberDefinition.memberType)
         }
         
