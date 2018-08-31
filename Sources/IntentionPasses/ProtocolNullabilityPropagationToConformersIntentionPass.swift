@@ -23,7 +23,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         
         // Collect protocols
         let protocols = intentionCollection.protocolIntentions()
-        let classes = intentionCollection.classIntentions()
+        let classes = intentionCollection.typeIntentions().filter { $0 is BaseClassIntention }
         
         if protocols.isEmpty || classes.isEmpty {
             return
@@ -39,10 +39,12 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
                 protocols.filter { prot in
                     context.typeSystem
                         .conformance(toProtocolName: prot.typeName, in: type) != nil
-                }
+                    }
             
             for prot in knownProtocols {
-                typeMerger.mergeMethodSignatures(from: prot, into: cls)
+                typeMerger.mergeMethodSignatures(from: prot,
+                                                 into: cls,
+                                                 createIfUnexistent: false)
             }
         }
         

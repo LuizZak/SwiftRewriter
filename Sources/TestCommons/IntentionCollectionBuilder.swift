@@ -335,28 +335,6 @@ public class TypeBuilder<T: TypeGenerationIntention> {
         self.targetType = targetType
     }
     
-    /// Marks the target type for this type builder as coming from an interface
-    /// declaration, if it supports such annotations.
-    @discardableResult
-    public func setAsInterfaceSource() -> TypeBuilder {
-        if let cls = targetType as? BaseClassIntention {
-            cls.source = ObjcClassInterface()
-        }
-        
-        return self
-    }
-    
-    /// Marks the target type for this type builder as coming from a category
-    /// extension interface declaration, if it supports such annotations.
-    @discardableResult
-    public func setAsCategoryInterfaceSource() -> TypeBuilder {
-        if let cls = targetType as? BaseClassIntention {
-            cls.source = ObjcClassCategoryInterface()
-        }
-        
-        return self
-    }
-    
     @discardableResult
     public func createProperty(named name: String,
                                type: SwiftType,
@@ -458,6 +436,19 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     }
 }
 
+public extension TypeBuilder where T: ClassExtensionGenerationIntention {
+    
+    /// Marks the target type for this type builder as an implementation for a
+    /// category extension interface declaration, if it supports such annotations.
+    @discardableResult
+    public func setAsCategoryImplementation(categoryName: String) -> TypeBuilder {
+        targetType.source = ObjcClassCategoryInterface()
+        
+        return self
+    }
+    
+}
+
 public extension TypeBuilder where T: InstanceVariableContainerIntention {
     @discardableResult
     public func createInstanceVariable(named name: String, type: SwiftType) -> TypeBuilder {
@@ -471,6 +462,26 @@ public extension TypeBuilder where T: InstanceVariableContainerIntention {
 }
 
 public extension TypeBuilder where T: BaseClassIntention {
+    
+    /// Marks the target type for this type builder as coming from an interface
+    /// declaration.
+    @discardableResult
+    public func setAsInterfaceSource() -> TypeBuilder {
+        targetType.source = ObjcClassInterface()
+        
+        return self
+    }
+    
+    /// Marks the target type for this type builder as coming from a category
+    /// extension interface declaration.
+    @discardableResult
+    public func setAsCategoryInterfaceSource() -> TypeBuilder {
+        targetType.source = ObjcClassCategoryInterface()
+        
+        return self
+    }
+    
+    
     @discardableResult
     public func createConformance(protocolName: String) -> TypeBuilder {
         let prot = ProtocolInheritanceIntention(protocolName: protocolName)

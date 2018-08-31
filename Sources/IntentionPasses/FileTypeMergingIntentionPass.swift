@@ -8,6 +8,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+        
         let typeMerger = TypeMerger(typeSystem: context.typeSystem)
         
         // Collect .h/.m pairs

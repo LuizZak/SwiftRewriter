@@ -18,8 +18,7 @@ class SwiftRewriter_ThreadingTests: XCTestCase {
             builder = produceNextClassFiles(classCount: 10, in: builder)
         }
         
-        builder.compile()
-        builder.assertExpectedSwiftFiles()
+        builder.transpile().assertExpectedSwiftFiles()
     }
 }
 

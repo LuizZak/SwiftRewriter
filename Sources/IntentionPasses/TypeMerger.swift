@@ -252,11 +252,13 @@ class TypeMerger {
     /// `mergeMethods(_ method1:KnownMethod, into method2: MethodGenerationIntention)`
     func mergeMethodSignatures(from first: KnownType,
                                into second: TypeGenerationIntention,
+                               createIfUnexistent: Bool = true,
                                skipCreatingOptionalMethods: Bool = true) {
+        
         for knownMethod in first.knownMethods {
             if let existing = second.method(matchingSelector: knownMethod.signature.asSelector) {
                 mergeMethods(knownMethod, into: existing)
-            } else {
+            } else if createIfUnexistent {
                 if skipCreatingOptionalMethods && knownMethod.optional {
                     continue
                 }

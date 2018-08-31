@@ -66,4 +66,55 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
         
         XCTAssertEqual(method.parameters[0].type, .string)
     }
+    
+    func testProperlyOrganizePropagationToTypeExtensions() {
+        // Make sure when we're propagating nullability, that we target the proper
+        // members of conformers.
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.m") { file in
+                    file.createClass(withName: "A") {
+                        $0.setAsInterfaceSource()
+                    }
+                }
+                .createFile(named: "A.m") { file in
+                    file.createClass(withName: "A")
+                }
+                .createFile(named: "P.h") { file in
+                    file.createProtocol(withName: "P") { prot in
+                        prot.createMethod(named: "a", returnType: .string)
+                            .createMethod(named: "b", returnType: .optional(.string))
+                    }
+                }
+                .createFile(named: "A+P.h") { file in
+                    file.createExtension(forClassNamed: "A", categoryName: "P") { ext in
+                        ext.createConformance(protocolName: "P")
+                            .setAsCategoryInterfaceSource()
+                            .createMethod(named: "a", returnType: .string)
+                    }
+                }.createFile(named: "A+P.m") { file in
+                    file.createExtension(forClassNamed: "A", categoryName: "P") { ext in
+                        ext.setAsCategoryImplementation(categoryName: "P")
+                            .createMethod(named: "a", returnType: .implicitUnwrappedOptional(.string)) {
+                                $0.setBody([.return(.constant(""))])
+                            }
+                            .createMethod(named: "b", returnType: .implicitUnwrappedOptional(.string)) {
+                                $0.setBody([.return(.constant(.nil))])
+                            }
+                    }
+                }.build()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let classDef = intentions.fileIntentions()[0].classIntentions[0]
+        let extDef = intentions.fileIntentions()[4].extensionIntentions[0]
+        XCTAssertEqual(classDef.typeName, "A")
+        XCTAssertFalse(classDef.isExtension)
+        XCTAssertEqual(extDef.typeName, "A")
+        XCTAssert(extDef.isExtension)
+        XCTAssert(classDef.methods.isEmpty)
+        XCTAssertEqual(extDef.methods.count, 2)
+        XCTAssertEqual(extDef.methods[0].returnType, .string)
+        XCTAssertEqual(extDef.methods[1].returnType, .optional(.string))
+    }
 }

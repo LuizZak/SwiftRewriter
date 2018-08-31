@@ -495,6 +495,74 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testProtocolConformanceHandling() {
+        let assert = assertThat()
+            .file(name: "Protocol.h", """
+            @protocol Protocol <NSObject>
+            - (nullable NSString*)protocolRequirement;
+            - (nonnull NSString*)otherProtocolRequirement;
+            @end
+            """)
+            .file(name: "Class.h", """
+            @interface Class: NSObject
+            @end
+            """)
+            .file(name: "Class.m", """
+            @implementation Class
+            @end
+            """)
+            .file(name: "Class+Protocol.h", """
+            @interface Class (Protocol) <Protocol>
+            - (nullable NSString*)protocolRequirement;
+            @end
+            """)
+            .file(name: "Class+Protocol.m", """
+            @implementation Class (Protocol)
+            - (NSString*)protocolRequirement {
+                return nil;
+            }
+            - (NSString*)otherProtocolRequirement {
+                return @"";
+            }
+            @end
+            """)
+                
+        assert
+            .expectSwiftFile(name: "Class.swift", """
+            @objc
+            class Class: NSObject {
+            }
+            // End of file Class.swift
+            """)
+            .expectSwiftFile(name: "Class+Protocol.swift", """
+            // MARK: - Protocol
+            @objc
+            extension Class: Protocol {
+                @objc
+                func protocolRequirement() -> String? {
+                    return nil
+                }
+                @objc
+                func otherProtocolRequirement() -> String {
+                    return ""
+                }
+            }
+            // End of file Class+Protocol.swift
+            """)
+            .expectSwiftFile(name: "Protocol.swift", """
+            @objc
+            protocol Protocol: NSObjectProtocol {
+                @objc
+                func protocolRequirement() -> String?
+                @objc
+                func otherProtocolRequirement() -> String
+            }
+            // End of file Protocol.swift
+            """)
+            .transpile()
+            .assertExpectedSwiftFiles()
+    }
 }
 
 extension SwiftRewriter_MultiFilesTests {

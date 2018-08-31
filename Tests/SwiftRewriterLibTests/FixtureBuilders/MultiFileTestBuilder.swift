@@ -15,6 +15,8 @@ class MultiFileTestBuilder {
     var expectedFiles: [File] = []
     var errors: String = ""
     
+    private var _invokedCompile = false
+    
     init(test: XCTestCase) {
         self.test = test
     }
@@ -33,10 +35,12 @@ class MultiFileTestBuilder {
     // building the same rewriter structure every time.
     
     /// Executes a compilation step
-    func compile(expectsErrors: Bool = false,
-                 options: ASTWriterOptions = .default,
-                 file: String = #file,
-                 line: Int = #line) {
+    func transpile(expectsErrors: Bool = false,
+                   options: ASTWriterOptions = .default,
+                   file: String = #file,
+                   line: Int = #line) -> CompiledMultiFileTestResults {
+        
+        _invokedCompile = true
         
         let inputs = files.map(TestInputSource.init)
         
@@ -60,16 +64,13 @@ class MultiFileTestBuilder {
                 withDescription: "Unexpected error(s) converting code: \(error)",
                 inFile: file, atLine: line, expected: true)
         }
-    }
-    
-    /// Asserts expected Swift files recorded with `expectSwiftFile(name:contents:)`
-    /// where produced correctly.
-    ///
-    /// Does not assert if unexpected files where produced during compilation.
-    func assertExpectedSwiftFiles(file: String = #file,
-                                  line: Int = #line) {
         
-        assertMatcheshWithExpectedFiles(results, file: file, line: line)
+        return CompiledMultiFileTestResults(
+            test: test,
+            results: results,
+            files: files,
+            expectedFiles: expectedFiles,
+            errors: errors)
     }
     
     /// Assertion execution point
@@ -99,8 +100,10 @@ class MultiFileTestBuilder {
             if buffer != expectedSwift {
                 test.recordFailure(withDescription: """
                     Failed: Expected to translate Objective-C inputs as:
+                    
                     \(expectedSwift)
                     but translated as:
+                    
                     \(buffer)
                     
                     Diff:
@@ -132,9 +135,60 @@ class MultiFileTestBuilder {
         }
     }
     
+    private func makeSut(with input: InputSourcesProvider,
+                         output: WriterOutput,
+                         options: ASTWriterOptions) -> SwiftRewriter {
+        
+        let sut = SwiftRewriter(input: input, output: output)
+        sut.writerOptions = options
+        sut.astRewriterPassSources = DefaultExpressionPasses()
+        sut.intentionPassesSource = DefaultIntentionPasses()
+        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        
+        return sut
+    }
+}
+
+class CompiledMultiFileTestResults {
+    typealias File = (path: String, souce: String)
+    
+    var test: XCTestCase
+    var results: [TestFileOutput]
+    var files: [File]
+    var expectedFiles: [File]
+    var errors: String
+    
+    init(test: XCTestCase,
+         results: [TestFileOutput],
+         files: [File],
+         expectedFiles: [File],
+         errors: String) {
+        
+        self.test = test
+        self.results = results
+        self.files = files
+        self.expectedFiles = expectedFiles
+        self.errors = errors
+        
+    }
+    
+    /// Asserts expected Swift files recorded with `expectSwiftFile(name:contents:)`
+    /// where produced correctly.
+    ///
+    /// Does not assert if unexpected files where produced during compilation.
+    func assertExpectedSwiftFiles(file: String = #file,
+                                  line: Int = #line) {
+        
+        assertMatcheshWithExpectedFiles(results, file: file, line: line)
+    }
+    
     private func assertMatcheshWithExpectedFiles(_ files: [TestFileOutput],
                                                  file: String,
                                                  line: Int) {
+        
+        let expectedNotMatched = expectedFiles.filter { expected in
+            !files.contains { $0.path == expected.path }
+        }
         
         let matches = files.sorted { $0.path < $1.path }.compactMap { file -> ResultMatch? in
             guard let expected = expectedFiles.first(where: { expected in file.path == expected.path }) else {
@@ -151,31 +205,40 @@ class MultiFileTestBuilder {
             test.recordFailure(withDescription: """
                 Failed: Expected to produce Swift file \(match.expectedPath) inputs as:
                 
+                --
                 \(expectedSwift)
+                --
                 
                 but translated as:
                 
+                --
                 \(actualSwift)
+                --
                 
                 Diff:
                 
                 \(expectedSwift.makeDifferenceMarkString(against: actualSwift))
                 """, inFile: file, atLine: line, expected: true)
+            
             break
+        }
+        
+        for nonMatched in expectedNotMatched {
+    
+            test.recordFailure(withDescription: """
+                Failed: Expected to produce Swift file \(nonMatched.path), \
+                but no such file was created.
+                """, inFile: file, atLine: line, expected: true)
         }
     }
     
-    private func makeSut(with input: InputSourcesProvider,
-                         output: WriterOutput,
-                         options: ASTWriterOptions) -> SwiftRewriter {
-        
-        let sut = SwiftRewriter(input: input, output: output)
-        sut.writerOptions = options
-        sut.astRewriterPassSources = DefaultExpressionPasses()
-        sut.intentionPassesSource = DefaultIntentionPasses()
-        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        
-        return sut
+    func assertErrorStreamIs(_ expected: String, file: String = #file, line: Int = #line) {
+        if errors != expected {
+            test.recordFailure(withDescription: """
+                Mismatched errors stream. Expected \(expected) but found \(errors)
+                """,
+                inFile: file, atLine: line, expected: true)
+        }
     }
     
     private struct ResultMatch {
