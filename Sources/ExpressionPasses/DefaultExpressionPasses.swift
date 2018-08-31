@@ -6,6 +6,7 @@ public class DefaultExpressionPasses: ASTRewriterPassSource {
         AllocInitExpressionPass.self,
         InitRewriterExpressionPass.self,
         ASTSimplifier.self,
+        PropertyAsMethodAccessCorrectingExpressionPass.self,
         CoreGraphicsExpressionPass.self,
         FoundationExpressionPass.self,
         UIKitExpressionPass.self,

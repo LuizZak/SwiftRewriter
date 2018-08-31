@@ -22,9 +22,9 @@ public class NumberCommonsExpressionPass: ASTRewriterPass {
     // Converts `<number> as? Float` -> `Float(<number>)`,
     // `<number> as? CInt` -> `CInt(<number>)`, etc.
     public override func visitCast(_ exp: CastExpression) -> Expression {
-        if context.typeSystem.isNumeric(exp.type) {
+        if typeSystem.isNumeric(exp.type) {
             let name =
-                DefaultTypeMapper(typeSystem: context.typeSystem)
+                DefaultTypeMapper(typeSystem: typeSystem)
                     .typeNameString(for: exp.type)
             
             let newExp =

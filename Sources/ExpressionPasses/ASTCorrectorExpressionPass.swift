@@ -84,7 +84,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         }
         
         // Scalars are dealt directly in another portion of the AST corrector.
-        guard !context.typeSystem.isScalarType(resolvedType.deepUnwrapped) else {
+        guard !typeSystem.isScalarType(resolvedType.deepUnwrapped) else {
             return super.visitExpressions(stmt)
         }
         
@@ -122,7 +122,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             return exp
         }
         
-        if context.typeSystem.isNumeric(expectedType) {
+        if typeSystem.isNumeric(expectedType) {
             if let corrected = correctToNumeric(exp) {
                 notifyChange()
                 
@@ -200,12 +200,12 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             // to expect non-optional of numeric values, in case they are numeric
             // themselves.
             if let lhsType = exp.lhs.resolvedType?.unwrapped,
-                context.typeSystem.isNumeric(lhsType) {
+                typeSystem.isNumeric(lhsType) {
                 
                 exp.lhs.expectedType = lhsType
             }
             if let rhsType = exp.rhs.resolvedType?.unwrapped,
-                context.typeSystem.isNumeric(rhsType) {
+                typeSystem.isNumeric(rhsType) {
                 
                 exp.rhs.expectedType = rhsType
             }
@@ -225,11 +225,11 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             let member = memberPostfix.exp
             
             guard memberType.isOptional && !memberType.isImplicitlyUnwrapped
-                && context.typeSystem.isScalarType(memberType.deepUnwrapped) else {
+                && typeSystem.isScalarType(memberType.deepUnwrapped) else {
                 return super.visitPostfix(exp)
             }
             
-            guard let initValue = context.typeSystem.defaultValue(for: memberType.deepUnwrapped) else {
+            guard let initValue = typeSystem.defaultValue(for: memberType.deepUnwrapped) else {
                 return super.visitPostfix(exp)
             }
             
@@ -272,7 +272,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         guard exp.resolvedType?.isImplicitlyUnwrapped == false else {
             return nil
         }
-        guard let defValue = context.typeSystem.defaultValue(for: expectedType) else {
+        guard let defValue = typeSystem.defaultValue(for: expectedType) else {
             return nil
         }
         guard defValue.resolvedType?.isOptional == false else {
@@ -302,8 +302,8 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             return nil
         }
         
-        if type.isOptional && context.typeSystem.isNumeric(type.deepUnwrapped) {
-            guard let defaultExp = context.typeSystem.defaultValue(for: type.deepUnwrapped) else {
+        if type.isOptional && typeSystem.isNumeric(type.deepUnwrapped) {
+            guard let defaultExp = typeSystem.defaultValue(for: type.deepUnwrapped) else {
                 return nil
             }
             
@@ -341,7 +341,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             let newExp = exp.copy()
             
             // <Numeric>
-            if context.typeSystem.isNumeric(type.deepUnwrapped) {
+            if typeSystem.isNumeric(type.deepUnwrapped) {
                 newExp.expectedType = nil
                 
                 let outer =

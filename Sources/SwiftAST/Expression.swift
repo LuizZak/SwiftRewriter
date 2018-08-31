@@ -522,6 +522,13 @@ public class PostfixExpression: Expression {
         return self
     }
     
+    /// Returns `true` if this postfix expression is the top-most in a chain of
+    /// sequential postfix expressions. Also returns `true` if this expression
+    /// is by itself and not contained in a postfix chain.
+    public var isTopPostfixExpression: Bool {
+        return !(parent is PostfixExpression)
+    }
+    
     public init(exp: Expression, op: Postfix) {
         self.exp = exp
         self.op = op

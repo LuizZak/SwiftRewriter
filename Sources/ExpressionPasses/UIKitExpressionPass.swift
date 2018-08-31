@@ -95,7 +95,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
             return nil
         }
         
-        if !context.typeSystem.isType(typeName, subtypeOf: "UIView") {
+        if !typeSystem.isType(typeName, subtypeOf: "UIView") {
             return nil
         }
         

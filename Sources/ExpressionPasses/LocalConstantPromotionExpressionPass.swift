@@ -11,7 +11,7 @@ public class LocalConstantPromotionExpressionPass: ASTRewriterPass {
         }
         
         let usage = LocalUsageAnalyzer(functionBody: functionBody,
-                                       typeSystem: context.typeSystem)
+                                       typeSystem: typeSystem)
         
         for (i, decl) in stmt.decl.enumerated() where !decl.isConstant {
             let usages = usage.findUsagesOf(localNamed: decl.identifier)
