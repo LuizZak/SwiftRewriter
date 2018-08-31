@@ -5,6 +5,8 @@ import SwiftRewriterLib
 /// detecting non-null return signature by looking into all return statements
 /// on all exit paths and the values they return.
 public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
+    private let tag = "\(DetectNonnullReturnsIntentionPass.self)"
+    
     var didWork = false
     
     public override init() {
@@ -52,6 +54,9 @@ public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
         
         // After all checks are successful, replace method's return type
         method.signature.returnType = method.returnType.deepUnwrapped
+        method.history.recordChange(tag: tag, description: """
+            Marking return as nonnull due to all exit paths returning non-nil values
+            """)
         
         didWork = true
     }

@@ -335,7 +335,7 @@ class TypeMerger {
                 .recordChange(
                     tag: historyTag,
                     description: """
-                    Inserted body from function \
+                    Inserted body from method \
                     \(TypeFormatter.asString(signature: source.signature, includeName: false))
                     """)
         }
@@ -357,19 +357,24 @@ class TypeMerger {
                               description: """
                     Updated nullability signature from \(TypeFormatter.asString(signature: originalSignature)) \
                     to: \(TypeFormatter.asString(signature: target.signature))
-                    """)
+                    """, relatedIntentions: [source])
         }
         
         if let body = source.functionBody, target.functionBody == nil {
             target.functionBody =
                 FunctionBodyIntention(body: body.body)
             
-            target.functionBody?.history.recordCreation(description: "Merged from existing type body")
+            target.functionBody?.history.recordCreation(
+                description: "Merged from existing type body",
+                relatedIntentions: [source]
+            )
             
             let funcSign = TypeFormatter.asString(signature: source.signature, includeName: false)
             
             target.history
-                .recordChange(tag: historyTag, description: "Inserted body from function \(funcSign)")
+                .recordChange(tag: historyTag,
+                              description: "Inserted body from function \(funcSign)",
+                              relatedIntentions: [source])
         }
     }
 

@@ -752,12 +752,9 @@ public class IntentionCollector {
 }
 
 extension IntentionCollector {
+    
     private func recordSourceHistory(intention: FromSourceIntention, node: ASTNode) {
-        guard let file = node.originalSource?.filePath, let rule = node.sourceRuleContext?.start else {
-            return
-        }
-        
-        intention.history
-            .recordCreation(description: "\(file) line \(rule.getLine()) column \(rule.getCharPositionInLine())")
+        intention.history.recordSourceHistory(node: node)
     }
+    
 }

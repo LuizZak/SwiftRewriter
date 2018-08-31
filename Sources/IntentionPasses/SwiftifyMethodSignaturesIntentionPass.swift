@@ -111,6 +111,14 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
         
         method.signature.parameters[0].label = splitOnWith[1].lowercasedFirstLetter
         method.signature.name = "init"
+        method.history
+            .recordChange(tag: historyTag,
+                          description: """
+                Swiftified signature from \(TypeFormatter.asString(signature: signature, includeName: true)) \
+                to \(TypeFormatter.asString(signature: method.signature, includeName: true))
+                """, relatedIntentions: [])
+        
+        operationsNumber += 1
         
         context.notifyChange()
         

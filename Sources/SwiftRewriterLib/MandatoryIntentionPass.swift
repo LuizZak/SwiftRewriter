@@ -5,6 +5,8 @@ import SwiftAST
 /// Mandatory intention pass that applies some necessary code changes to compile,
 /// like override detection and struct initialization step
 class MandatoryIntentionPass: IntentionPass {
+    private let tag: String = "\(MandatoryIntentionPass.self)"
+    
     var context: IntentionPassContext!
     
     /// Signals whether this mandatory intention pass is being applied before or
@@ -149,28 +151,37 @@ class MandatoryIntentionPass: IntentionPass {
             
             if let initMethod = initMethod as? OverridableMemberGenerationIntention {
                 initMethod.isOverride = true
+                initMethod.history.recordChange(tag: tag, description: """
+                    Marking as override due to super initializer declaration of \
+                    same selector
+                    """)
             }
         }
         
         // Check supertypes for overrides
         if let supertype = context.typeSystem.supertype(of: type) {
             for method in type.methods {
-                // TODO: Pass `invocationTypeHints`
+                let parameterTypes = method.parameters.map { $0.type }
+                
                 let superMethod
                     = context.typeSystem.method(withObjcSelector: method.selector,
-                                                invocationTypeHints: nil,
+                                                invocationTypeHints: parameterTypes,
                                                 static: method.isStatic,
                                                 includeOptional: false,
                                                 in: supertype)
                 
                 if superMethod != nil {
                     method.isOverride = true
+                    method.history.recordChange(tag: tag, description: """
+                        Marking as override due to super method declaration of \
+                        same selector
+                        """)
                 }
             }
         }
         
         // Other overrides
-        for method in type.methods {
+        for method in type.methods where !method.isOverride {
             guard let body = method.body else {
                 continue
             }
@@ -200,6 +211,11 @@ class MandatoryIntentionPass: IntentionPass {
                 
                 if methodCall.selectorWith(methodName: member.name) == selector {
                     method.isOverride = true
+                    method.history.recordChange(tag: tag, description: """
+                        Marking as override due to super method invocation detected \
+                        within body
+                        """)
+                    
                     break
                 }
             }
@@ -240,7 +256,10 @@ class MandatoryIntentionPass: IntentionPass {
                     InstanceVariableGenerationIntention(name: synth.ivarName,
                                                         storage: storage,
                                                         accessLevel: .private)
-                
+                intent.history.recordCreation(description: """
+                    Synthesized backing field for \(prop.name) due to @synthesize
+                    """,
+                    relatedIntentions: [synth])
                 type.addInstanceVariable(intent)
             }
             
@@ -263,6 +282,10 @@ class MandatoryIntentionPass: IntentionPass {
                     .property(get: getterBody,
                               set: .init(valueIdentifier: "newValue",
                                          body: setterBody))
+                
+                prop.history.recordChange(tag: tag, description: """
+                    Synthesized getter and setter for property due to @synthesize
+                    """)
             }
         }
     }
@@ -276,6 +299,10 @@ class MandatoryIntentionPass: IntentionPass {
         property.storage.type = field.storage.type
         
         type.removeInstanceVariable(named: field.name)
+        
+        property.history.recordMerge(with: [field], tag: tag, description: """
+            Collapsed with backing field property of same name.
+            """)
     }
     
     enum IntentionPassPhase {

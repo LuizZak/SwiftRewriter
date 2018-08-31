@@ -9,6 +9,7 @@ import SwiftAST
 /// An intention pass that searches for failable and convenience initializers
 /// based on statement AST analysis and flags them appropriately.
 public class InitAnalysisIntentionPass: IntentionPass {
+    private let tag = "\(InitAnalysisIntentionPass.self)"
     
     // Matches 'self.init'/'super.init' expressions, with or without parameters.
     let invertedMatchSelfOrSuperInit =
@@ -54,12 +55,21 @@ public class InitAnalysisIntentionPass: IntentionPass {
         for node in nodes.compactMap({ $0 as? ReturnStatement }) {
             if analyzeIsReturnStatementFailable(node) {
                 initializer.isFailable = true
+                initializer.history.recordChange(tag: tag, description: """
+                    Marked as failable since an explicit nil return was detected \
+                    within initializer body
+                    """)
+                
                 break
             }
         }
         for node in nodes.compactMap({ $0 as? AssignmentExpression }) {
             if let target = superOrSelfInitExpressionTargetFrom(exp: node) {
                 initializer.isConvenience = target == "self"
+                initializer.history.recordChange(tag: tag, description: """
+                    Marked as convenience since a delegated `self.init` was detected \
+                    within initializer body
+                    """)
             }
         }
     }

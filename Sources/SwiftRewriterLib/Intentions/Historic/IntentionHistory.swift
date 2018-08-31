@@ -1,3 +1,5 @@
+import GrammarModels
+
 /// Tracks changes made to an intention as it is read by AST readers and modified
 /// by intention passes so it can be sourced
 public protocol IntentionHistory {
@@ -18,6 +20,11 @@ public protocol IntentionHistory {
     /// contained within.
     @discardableResult
     func recordCreation(description: String) -> IntentionHistoryEntryEcho
+    
+    /// A shortcut method to record the creation of the intention this history is
+    /// contained within.
+    @discardableResult
+    func recordCreation(description: String, relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho
     
     /// A shortcut method to record a change to this intention history
     @discardableResult
@@ -53,28 +60,67 @@ public extension IntentionHistory {
     
     @discardableResult
     public func recordCreation(description: String) -> IntentionHistoryEntryEcho {
-        return record(IntentionHistoryEntry(tag: "Creation", description: description, relatedIntentions: []))
+        return record(IntentionHistoryEntry(tag: "Creation",
+                                            description: description,
+                                            relatedIntentions: []))
     }
     
     @discardableResult
-    public func recordChange(tag: String, description: String) -> IntentionHistoryEntryEcho {
+    public func recordCreation(description: String,
+                               relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
+        
+        return record(IntentionHistoryEntry(tag: "Creation",
+                                            description: description,
+                                            relatedIntentions: relatedIntentions))
+    }
+    
+    @discardableResult
+    public func recordChange(tag: String,
+                             description: String) -> IntentionHistoryEntryEcho {
+        
         return recordChange(tag: tag, description: description, relatedIntentions: [])
     }
     
     @discardableResult
-    public func recordChange(tag: String, description: String,
+    public func recordChange(tag: String,
+                             description: String,
                              relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
-        return record(IntentionHistoryEntry(tag: tag, description: description, relatedIntentions: relatedIntentions))
+        
+        return record(IntentionHistoryEntry(tag: tag,
+                                            description: description,
+                                            relatedIntentions: relatedIntentions))
     }
     
     @discardableResult
-    public func recordMerge(with intentions: [Intention], tag: String,
+    public func recordMerge(with intentions: [Intention],
+                            tag: String,
                             description: String) -> IntentionHistoryEntryEcho {
-        return record(IntentionHistoryEntry(tag: tag, description: description, relatedIntentions: intentions))
+        
+        return record(IntentionHistoryEntry(tag: tag,
+                                            description: description,
+                                            relatedIntentions: intentions))
     }
     
     @discardableResult
-    public func recordSplit(from intention: Intention, tag: String, description: String) -> IntentionHistoryEntryEcho {
-        return record(IntentionHistoryEntry(tag: tag, description: description, relatedIntentions: [intention]))
+    public func recordSplit(from intention: Intention,
+                            tag: String,
+                            description: String) -> IntentionHistoryEntryEcho {
+        
+        return record(IntentionHistoryEntry(tag: tag,
+                                            description: description,
+                                            relatedIntentions: [intention]))
     }
+}
+
+public extension IntentionHistory {
+    
+    @discardableResult
+    public func recordSourceHistory(node: ASTNode) -> IntentionHistoryEntryEcho {
+        guard let file = node.originalSource?.filePath, let rule = node.sourceRuleContext?.start else {
+            return recordCreation(description: "from non-file node \(type(of: node))")
+        }
+        
+        return recordCreation(description: "\(file) line \(rule.getLine()) column \(rule.getCharPositionInLine())")
+    }
+    
 }

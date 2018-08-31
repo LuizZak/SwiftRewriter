@@ -155,6 +155,9 @@ public class PropertyMergeIntentionPass: IntentionPass {
         
         if let field = field as? InstanceVariableGenerationIntention {
             property.setterAccessLevel = field.accessLevel
+            property.history.recordChange(tag: historyTag, description: """
+                Marking setter as same access level as backing field
+                """, relatedIntentions: [field])
         } else {
             // Private by default, for get-only properties
             property.setterAccessLevel = property.isReadOnly ? .private : nil
