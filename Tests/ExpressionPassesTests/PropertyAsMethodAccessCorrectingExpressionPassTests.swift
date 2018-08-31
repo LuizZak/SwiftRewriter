@@ -84,4 +84,37 @@ class PropertyAsMethodAccessCorrectingExpressionPassTests: ExpressionPassTestCas
                 .dot("anOptionalClosure").optional().call()
         ); assertDidNotNotifyChange()
     }
+    
+    func testDontTransformClosureCallsLookingThroughTypeAliases() {
+        // Make sure we traverse type aliases to detect block properties
+        
+        let type = KnownTypeBuilder(typeName: "A")
+            .property(named: "aClosure", type: "BlockAlias")
+            .property(named: "anOptionalClosure", type: .optional("BlockAlias"))
+            .property(named: "aSecondOptionalClosure", type: "OptionalBlockAlias")
+            .build()
+        typeSystem.addType(type)
+        typeSystem.addTypealias(aliasName: "BlockAlias",
+                                originalType: .block(returnType: .void, parameters: []))
+        typeSystem.addTypealias(aliasName: "OptionalBlockAlias",
+                                originalType: .optional(.block(returnType: .void, parameters: [])))
+        
+        assertTransform(
+            expression: Expression
+                .identifier("a").typed("A")
+                .dot("aClosure").call(),
+            into: Expression
+                .identifier("a").typed("A")
+                .dot("aClosure").call()
+        ); assertDidNotNotifyChange()
+        
+        assertTransform(
+            expression: Expression
+                .identifier("a").typed("A")
+                .dot("anOptionalClosure").optional().call(),
+            into: Expression
+                .identifier("a").typed("A")
+                .dot("anOptionalClosure").optional().call()
+        ); assertDidNotNotifyChange()
+    }
 }
