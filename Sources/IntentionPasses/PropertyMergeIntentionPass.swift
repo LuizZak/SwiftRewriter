@@ -24,7 +24,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         self.intentions = intentionCollection
         self.context = context
         
-        let typeSystem = context.typeSystem as? IntentionCollectionTypeSystem
+        let typeSystem = context.typeSystem as? DefaultTypeSystem
         typeSystem?.makeCache()
         
         var matches: [PropertySet] = []

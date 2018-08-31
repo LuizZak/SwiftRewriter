@@ -30,9 +30,12 @@ public final class SwiftWriter {
         self.typeSystem = typeSystem
     }
     
-    public func execute() throws {
-        let intentionTypeSystem = typeSystem as? IntentionCollectionTypeSystem
-        intentionTypeSystem?.makeCache()
+    public func execute() {
+        let cacheableTypeSystem = typeSystem as? DefaultTypeSystem
+        cacheableTypeSystem?.makeCache()
+        defer {
+            cacheableTypeSystem?.tearDownCache()
+        }
         
         var unique = Set<String>()
         let fileIntents = intentions.fileIntentions()
@@ -80,8 +83,6 @@ public final class SwiftWriter {
         }
         
         queue.waitUntilAllOperationsAreFinished()
-        
-        intentionTypeSystem?.tearDownCache()
         
         for error in errors {
             self.diagnostics.error("Error while saving file \(error.0): \(error.1)",

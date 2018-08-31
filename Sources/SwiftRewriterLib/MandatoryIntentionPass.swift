@@ -47,9 +47,9 @@ class MandatoryIntentionPass: IntentionPass {
     }
     
     private func applyOverrideDetection(_ intentions: IntentionCollection) {
-        (context.typeSystem as? IntentionCollectionTypeSystem)?.makeCache()
+        (context.typeSystem as? DefaultTypeSystem)?.makeCache()
         defer {
-            (context.typeSystem as? IntentionCollectionTypeSystem)?.tearDownCache()
+            (context.typeSystem as? DefaultTypeSystem)?.tearDownCache()
         }
         
         let visitor = AnonymousIntentionVisitor()

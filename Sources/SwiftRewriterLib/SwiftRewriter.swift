@@ -104,7 +104,7 @@ public final class SwiftRewriter {
             parseStatements()
             evaluateTypes()
             performIntentionPasses()
-            try outputDefinitions()
+            outputDefinitions()
         }
     }
     
@@ -417,7 +417,7 @@ public final class SwiftRewriter {
         typeSystem.tearDownCache()
     }
     
-    private func outputDefinitions() throws {
+    private func outputDefinitions() {
         if settings.verbose {
             print("Saving files...")
         }
@@ -429,7 +429,7 @@ public final class SwiftRewriter {
                                  typeMapper: typeMapper,
                                  typeSystem: typeSystem)
         
-        try writer.execute()
+        writer.execute()
     }
     
     private func applyPreprocessors(source: CodeSource) -> String {
