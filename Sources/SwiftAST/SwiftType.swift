@@ -4,7 +4,7 @@ indirect public enum SwiftType: Equatable {
     case nominal(NominalSwiftType)
     case protocolComposition(ProtocolCompositionSwiftType)
     case tuple(TupleSwiftType)
-    case block(returnType: SwiftType, parameters: [SwiftType])
+    case block(returnType: SwiftType, parameters: [SwiftType], attributes: Set<BlockTypeAttribute>)
     case metatype(for: SwiftType)
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)
@@ -40,6 +40,31 @@ public enum ProtocolCompositionComponent: Equatable {
 public enum TupleSwiftType: Equatable {
     case types(TwoOrMore<SwiftType>)
     case empty
+}
+
+/// An attribute for block types.
+public enum BlockTypeAttribute: Hashable, CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .autoclosure:
+            return "@autoclosure"
+            
+        case .escaping:
+            return "@escaping"
+            
+        case .convention(let c):
+            return "@convention(\(c.rawValue))"
+        }
+    }
+    
+    case autoclosure
+    case escaping
+    case convention(Convention)
+    
+    public enum Convention: String, Hashable {
+        case block
+        case c
+    }
 }
 
 public typealias ProtocolCompositionSwiftType = TwoOrMore<ProtocolCompositionComponent>
@@ -280,6 +305,10 @@ public extension SwiftType {
         return .nominal(.generic(name, parameters: parameters))
     }
     
+    public static func swiftBlock(returnType: SwiftType, parameters: [SwiftType]) -> SwiftType {
+        return .block(returnType: returnType, parameters: parameters, attributes: [])
+    }
+    
     /// Returns a type that is the same as the input, but with any .optional or
     /// .implicitUnwrappedOptional types unwrapped to non optional, inclusing
     /// block parameters.
@@ -303,7 +332,7 @@ public extension SwiftType {
         }
         
         switch result {
-        case let .block(returnType, parameters):
+        case let .block(returnType, parameters, attributes):
             let returnType =
                 asNonnullDeep(returnType,
                               removeUnspecifiedsOnly: removeUnspecifiedsOnly)
@@ -312,7 +341,10 @@ public extension SwiftType {
                 asNonnullDeep($0, removeUnspecifiedsOnly: removeUnspecifiedsOnly)
             }
             
-            result = .block(returnType: returnType, parameters: parameters)
+            result = .block(returnType: returnType,
+                            parameters: parameters,
+                            attributes: attributes)
+            
         default:
             break
         }
@@ -374,8 +406,19 @@ extension SwiftType: CustomStringConvertible {
         case .nominal(let type):
             return type.description
             
-        case let .block(returnType, parameters):
-            return "(" + parameters.map { $0.description }.joined(separator: ", ") + ") -> " + returnType.description
+        case let .block(returnType, parameters, attributes):
+            let sortedAttributes =
+                attributes.sorted { $0.description < $1.description }
+            
+            let attributeString = 
+                sortedAttributes.map { $0.description }.joined(separator: " ")
+            
+            return
+                (attributeString.isEmpty ? "" : attributeString + " ")
+                + "("
+                + parameters.map { $0.description }.joined(separator: ", ")
+                + ") -> "
+                + returnType.description
             
         case .optional(let type):
             return type.descriptionWithParens + "?"

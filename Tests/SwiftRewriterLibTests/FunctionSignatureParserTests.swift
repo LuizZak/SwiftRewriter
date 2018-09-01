@@ -47,14 +47,14 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: @escaping () -> Void)",
             parseInto: [
-                ParameterSignature(label: nil, name: "arg0", type: .block(returnType: .void, parameters: []))
+                ParameterSignature(label: nil, name: "arg0", type: .swiftBlock(returnType: .void, parameters: []))
             ]
         )
         
         assert(
             string: "(_ arg0: @autoclosure @escaping () -> Void)",
             parseInto: [
-                ParameterSignature(label: nil, name: "arg0", type: .block(returnType: .void, parameters: []))
+                ParameterSignature(label: nil, name: "arg0", type: .swiftBlock(returnType: .void, parameters: []))
             ]
         )
     }
@@ -63,7 +63,7 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: @escaping inout () -> Void)",
             parseInto: [
-                ParameterSignature(label: nil, name: "arg0", type: .block(returnType: .void, parameters: []))
+                ParameterSignature(label: nil, name: "arg0", type: .swiftBlock(returnType: .void, parameters: []))
             ]
         )
     }

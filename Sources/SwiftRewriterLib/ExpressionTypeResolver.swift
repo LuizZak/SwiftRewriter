@@ -545,7 +545,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         var blockReturnType = exp.returnType
         
         // Adjust signatures of block parameters based on expected type
-        if case let .block(ret, params)? = (exp.expectedType?.deepUnwrapped).map(expandAliases),
+        if case let .block(ret, params, _)? = (exp.expectedType?.deepUnwrapped).map(expandAliases),
             params.count == exp.parameters.count {
             
             for (i, expectedType) in zip(0..<exp.parameters.count, params) {
@@ -564,7 +564,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         } else {
             exp.resolvedType =
                 .block(returnType: exp.returnType,
-                       parameters: exp.parameters.map { $0.type })
+                       parameters: exp.parameters.map { $0.type },
+                       attributes: [])
         }
         
         // Apply definitions for function parameters
@@ -823,7 +824,10 @@ private class MemberInvocationResolver {
                 let argTypes = args.compactMap { $0.expression.resolvedType }
                 
                 if args.count == argTypes.count {
-                    postfix.exp.expectedType = .block(returnType: expectedType, parameters: argTypes)
+                    postfix.exp.expectedType =
+                        .block(returnType: expectedType,
+                               parameters: argTypes,
+                               attributes: [])
                 }
             }
         }
@@ -843,7 +847,10 @@ private class MemberInvocationResolver {
             
             postfix.resolvedType = metatype
             functionCall.returnType = metatype
-            functionCall.callableSignature = .block(returnType: metatype, parameters: ctor.parameters.map { $0.type })
+            functionCall.callableSignature =
+                .block(returnType: metatype,
+                       parameters: ctor.parameters.map { $0.type },
+                       attributes: [])
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -857,7 +864,10 @@ private class MemberInvocationResolver {
             
             postfix.resolvedType = metatype
             functionCall.returnType = metatype
-            functionCall.callableSignature = .block(returnType: metatype, parameters: ctor.parameters.map { $0.type })
+            functionCall.callableSignature =
+                .block(returnType: metatype,
+                       parameters: ctor.parameters.map { $0.type },
+                       attributes: [])
             
             matchParameterTypes(parameters: ctor.parameters, callArguments: functionCall.arguments)
             
@@ -907,7 +917,7 @@ private class MemberInvocationResolver {
                     ?? postfix.exp.resolvedType
             
             if let type = bestMatch,
-                case let .block(ret, args) = type.deepUnwrapped {
+                case let .block(ret, args, _) = type.deepUnwrapped {
                 
                 let type = type
                 

@@ -160,7 +160,8 @@ class SuggestConversionInterface {
                     excludePattern: options.excludePattern)
                 // Filter down to .h/.m files
                 .filter { (path: URL) -> Bool in
-                    ((path.path as NSString).pathExtension == "m" || (path.path as NSString).pathExtension == "h")
+                    ((path.path as NSString).pathExtension == "m"
+                        || (path.path as NSString).pathExtension == "h")
                 }
                 // Check a matching .swift file doesn't already exist for the paths
                 // (if `overwrite` is not on)

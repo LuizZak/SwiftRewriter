@@ -769,9 +769,10 @@ public class DefaultTypeSystem: TypeSystem {
         
         func expand(in type: SwiftType) -> SwiftType {
             switch type {
-            case let .block(returnType, parameters):
+            case let .block(returnType, parameters, attributes):
                 return .block(returnType: expand(in: returnType),
-                              parameters: parameters.map(expand))
+                              parameters: parameters.map(expand),
+                              attributes: attributes)
                 
             case .nominal(.typeName(let name)):
                 if let type = source.unalias(name) {

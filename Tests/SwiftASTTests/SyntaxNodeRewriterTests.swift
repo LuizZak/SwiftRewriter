@@ -41,7 +41,7 @@ class SyntaxNodeRewriterTests: XCTestCase {
                 .optional()
                 .call([.identifier("b")],
                       type: .int,
-                      callableSignature: .block(returnType: .int, parameters: [.typeName("b")]))
+                      callableSignature: .swiftBlock(returnType: .int, parameters: [.typeName("b")]))
         }
         let sut = SyntaxNodeRewriter()
         
@@ -49,7 +49,8 @@ class SyntaxNodeRewriterTests: XCTestCase {
         
         XCTAssert(result.asPostfix?.op.hasOptionalAccess == true)
         XCTAssertEqual(result.asPostfix?.functionCall?.returnType, .int)
-        XCTAssertEqual(result.asPostfix?.functionCall?.callableSignature, .block(returnType: .int, parameters: [.typeName("b")]))
+        XCTAssertEqual(result.asPostfix?.functionCall?.callableSignature,
+                       .swiftBlock(returnType: .int, parameters: [.typeName("b")]))
     }
     
     /// Tests Postfix.returnType metadata information is kept when traversing a

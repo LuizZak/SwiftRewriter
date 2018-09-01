@@ -9,12 +9,18 @@ class SingleFileTestBuilder {
     var test: XCTestCase
     var objc: String
     var options: ASTWriterOptions
+    var settings: SwiftRewriter.Settings
     var diagnosticsStream: String = ""
     
-    init(test: XCTestCase, objc: String, options: ASTWriterOptions) {
+    init(test: XCTestCase,
+         objc: String,
+         options: ASTWriterOptions,
+         settings: SwiftRewriter.Settings) {
+        
         self.test = test
         self.objc = objc
         self.options = options
+        self.settings = settings
     }
     
     func assertObjcParse(swift expectedSwift: String,
@@ -27,6 +33,7 @@ class SingleFileTestBuilder {
         
         let sut = SwiftRewriter(input: input, output: output)
         sut.writerOptions = options
+        sut.settings = settings
         sut.astRewriterPassSources = DefaultExpressionPasses()
         sut.intentionPassesSource = DefaultIntentionPasses()
         sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
@@ -128,10 +135,16 @@ extension XCTestCase {
     @discardableResult
     func assertObjcParse(objc: String, swift expectedSwift: String,
                          options: ASTWriterOptions = .default,
-                         expectsErrors: Bool = false, file: String = #file,
+                         rewriterSettings: SwiftRewriter.Settings = .default,
+                         expectsErrors: Bool = false,
+                         file: String = #file,
                          line: Int = #line) -> SingleFileTestBuilder  {
         
-        let test = SingleFileTestBuilder(test: self, objc: objc, options: options)
+        let test = SingleFileTestBuilder(test: self,
+                                         objc: objc,
+                                         options: options,
+                                         settings: rewriterSettings)
+        
         test.assertObjcParse(swift: expectedSwift,
                              expectsErrors: expectsErrors,
                              file: file, line: line)

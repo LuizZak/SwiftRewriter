@@ -501,6 +501,12 @@ public final class SwiftRewriter {
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser,
                               nonnullTokenRanges: parser.nonnullMacroRegionsTokenRange)
         
+        if settings.stageDiagnostics.contains(.parsedAST) {
+            // TODO: Would be interesting if we could simply print ASTNodes
+            // directly, or not rely on ObjcParser to do that for us, at least.
+            parser.printParsedNodes()
+        }
+        
         let ctx = IntentionBuildingContext()
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
@@ -567,7 +573,8 @@ public final class SwiftRewriter {
         public static var `default` = Settings(numThreads: 8,
                                                verbose: false,
                                                diagnoseFiles: [],
-                                               forceUseLLPrediction: false)
+                                               forceUseLLPrediction: false,
+                                               stageDiagnostics: [])
         
         /// The number of concurrent threads to use when applying intention/syntax
         /// node passes and other multi-threadable operations.
@@ -592,15 +599,25 @@ public final class SwiftRewriter {
         /// be more effective.
         public var forceUseLLPrediction: Bool
         
-        public init(numThreads: Int,
-                    verbose: Bool,
-                    diagnoseFiles: [String],
-                    forceUseLLPrediction: Bool) {
+        /// Enables printing outputs of stages for diagnostic purposes.
+        public var stageDiagnostics: [StageDiagnosticFlag]
+        
+        public init(numThreads: Int = 8,
+                    verbose: Bool = false,
+                    diagnoseFiles: [String] = [],
+                    forceUseLLPrediction: Bool = false,
+                    stageDiagnostics: [StageDiagnosticFlag] = []) {
             
             self.numThreads = numThreads
             self.verbose = verbose
             self.diagnoseFiles = []
             self.forceUseLLPrediction = forceUseLLPrediction
+            self.stageDiagnostics = stageDiagnostics
+        }
+        
+        public enum StageDiagnosticFlag {
+            /// Prints result of Objective-C grammar parsing stage
+            case parsedAST
         }
     }
 }

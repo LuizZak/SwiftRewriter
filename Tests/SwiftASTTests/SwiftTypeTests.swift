@@ -62,25 +62,27 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testDescriptionBlockType() {
-        XCTAssertEqual(SwiftType.block(returnType: .void, parameters: []).description,
+        XCTAssertEqual(SwiftType.swiftBlock(returnType: .void, parameters: []).description,
                        "() -> Void")
     }
     
     func testDescriptionBlockTypeWithReturnType() {
-        XCTAssertEqual(SwiftType.block(returnType: .typeName("A"), parameters: []).description,
+        XCTAssertEqual(SwiftType.swiftBlock(returnType: .typeName("A"), parameters: []).description,
                        "() -> A")
     }
     
     func testDescriptionBlockTypeWithParameters() {
-        XCTAssertEqual(SwiftType.block(returnType: .void, parameters: [.typeName("A")]).description,
+        XCTAssertEqual(SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")]).description,
                        "(A) -> Void")
-        XCTAssertEqual(SwiftType.block(returnType: .void, parameters: [.typeName("A"), .typeName("B")]).description,
+        XCTAssertEqual(SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A"), .typeName("B")]).description,
                        "(A, B) -> Void")
     }
     
     func testDescriptionBlockFull() {
-        XCTAssertEqual(SwiftType.block(returnType: .typeName("A"), parameters: [.typeName("B"), .typeName("C")]).description,
-                       "(B, C) -> A")
+        XCTAssertEqual(SwiftType.block(returnType: .typeName("A"),
+                                       parameters: [.typeName("B"), .typeName("C")],
+                                       attributes: [.escaping, .autoclosure, .convention(.c)]).description,
+                       "@autoclosure @convention(c) @escaping (B, C) -> A")
     }
     
     func testDescriptionOptionalWithTypeName() {
@@ -99,7 +101,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testDescriptionOptionalWithBlockTupleType() {
-        XCTAssertEqual(SwiftType.optional(.block(returnType: .void, parameters: [.typeName("A"), .typeName("B")])).description,
+        XCTAssertEqual(SwiftType.optional(.swiftBlock(returnType: .void, parameters: [.typeName("A"), .typeName("B")])).description,
                        "((A, B) -> Void)?")
     }
     
@@ -167,7 +169,7 @@ class SwiftTypeTests: XCTestCase {
     }
     
     func testEncode() throws {
-        let type = SwiftType.block(returnType: .void, parameters: [.array(.string)])
+        let type = SwiftType.swiftBlock(returnType: .void, parameters: [.array(.string)])
         
         let encoded = try JSONEncoder().encode(type)
         let decoded = try JSONDecoder().decode(SwiftType.self, from: encoded)
@@ -217,8 +219,8 @@ class SwiftTypeTests: XCTestCase {
         }
         
         let test =
-            Test(type: .block(returnType: .implicitUnwrappedOptional(.protocolComposition([.typeName("A"), .typeName("B")])),
-                              parameters: [.generic("C", parameters: [.optional(.nested([.typeName("D"), .generic("E", parameters: [.typeName("D")])]))])]))
+            Test(type: .swiftBlock(returnType: .implicitUnwrappedOptional(.protocolComposition([.typeName("A"), .typeName("B")])),
+                                   parameters: [.generic("C", parameters: [.optional(.nested([.typeName("D"), .generic("E", parameters: [.typeName("D")])]))])]))
         
         let encoded = try JSONEncoder().encode(test)
         let decoded = try JSONDecoder().decode(Test.self, from: encoded)

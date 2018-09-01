@@ -68,7 +68,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         }
         
         // Apply potential if-let patterns to simple 1-parameter function calls
-        guard case .block(_, let params)? = functionCall.callableSignature else {
+        guard case .block(_, let params, _)? = functionCall.callableSignature else {
             return super.visitExpressions(stmt)
         }
         

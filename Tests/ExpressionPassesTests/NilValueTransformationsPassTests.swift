@@ -14,7 +14,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         let exp = Expression.identifier("a").call()
         
         exp.subExpressions[0].resolvedType =
-            .optional(.block(returnType: .void, parameters: []))
+            .optional(.swiftBlock(returnType: .void, parameters: []))
         
         assertTransform(
             // { a() }
@@ -28,7 +28,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         // a()
         let exp = Expression.identifier("a").call()
         exp.subExpressions[0].resolvedType =
-            .implicitUnwrappedOptional(.block(returnType: .void, parameters: []))
+            .implicitUnwrappedOptional(.swiftBlock(returnType: .void, parameters: []))
         
         assertTransform(
             // { a() }
@@ -44,10 +44,10 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         let exp = Expression.identifier("a").dot("b").call()
         
         exp.asPostfix?.exp.asPostfix?.resolvedType
-            = .optional(.block(returnType: .void, parameters: []))
+            = .optional(.swiftBlock(returnType: .void, parameters: []))
         
         exp.asPostfix?.exp.asPostfix?.op.returnType
-            = .optional(.block(returnType: .void, parameters: []))
+            = .optional(.swiftBlock(returnType: .void, parameters: []))
         
         assertTransform(
             // { a.b() }
@@ -113,7 +113,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             .identifier("a").call()
         
         exp.subExpressions[0].resolvedType =
-            .block(returnType: .void, parameters: [])
+            .swiftBlock(returnType: .void, parameters: [])
         
         assertTransform(
             // { a() }
@@ -129,7 +129,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
             .identifier("a").call([.unlabeled(.postfix(.identifier("b"), .functionCall()))])
         
         exp.subExpressions[1].subExpressions[0].resolvedType =
-            .optional(.block(returnType: .void, parameters: []))
+            .optional(.swiftBlock(returnType: .void, parameters: []))
         
         assertTransform(
             // { a(b()) }
@@ -151,8 +151,8 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
         inner.exp.asPostfix?.op.returnType = .typeName("C")
         
         let exp = Expression.identifier("a").call([inner])
-        exp.op.returnType = .block(returnType: .void, parameters: [])
-        exp.subExpressions[0].resolvedType = .block(returnType: .void, parameters: [])
+        exp.op.returnType = .swiftBlock(returnType: .void, parameters: [])
+        exp.subExpressions[0].resolvedType = .swiftBlock(returnType: .void, parameters: [])
         
         assertTransform(
             // { a(b.c()) }
@@ -169,7 +169,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
     
     func testLookIntoBlockExpressionsForPotentialChanges() {
         let nilBlock = Expression.identifier("block2").call()
-        nilBlock.asPostfix?.exp.resolvedType = .optional(.block(returnType: .void, parameters: []))
+        nilBlock.asPostfix?.exp.resolvedType = .optional(.swiftBlock(returnType: .void, parameters: []))
         
         let exp = Expression
             .identifier("takesBlock")
@@ -238,7 +238,7 @@ class NilValueTransformationsPassTests: ExpressionPassTestCase {
                 exp = Expression.identifier("callback").call(params)
             }
             
-            exp.asPostfix?.exp.resolvedType = .optional(.block(returnType: .void, parameters: []))
+            exp.asPostfix?.exp.resolvedType = .optional(.swiftBlock(returnType: .void, parameters: []))
             
             return exp
         }

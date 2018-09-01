@@ -598,6 +598,21 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteCFunctionPointerTypeDef() {
+        assertObjcParse(
+            objc: """
+            typedef int (*cmpfn234)(void *, void *);
+            typedef int (*cmpfn234_2)(void (*)(), void *);
+            typedef int (*cmpfn234_3)(void (^)(), void *);
+            """,
+            swift: """
+            typealias cmpfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> Int32
+            typealias cmpfn234_2 = @convention(c) ((@convention(c) () -> Void)?, UnsafeMutableRawPointer?) -> Int32
+            typealias cmpfn234_2 = @convention(c) ((() -> Void)?, UnsafeMutableRawPointer?) -> Int32
+            """,
+            rewriterSettings: SwiftRewriter.Settings(stageDiagnostics: [.parsedAST]))
+    }
+    
     func testNSAssumeNonnullContextCollectionWorksWithCompilerDirectivesInFile() {
         assertObjcParse(
             objc: """
@@ -2676,5 +2691,34 @@ class SwiftRewriterTests: XCTestCase {
             }
             """
         )
+    }
+    
+    func testRewriteFreeStruct() {
+        assertObjcParse(
+            objc: """
+            typedef int (^cmpfn234)(void *, void *);
+            
+            struct tree234_Tag {
+                node234 *root;
+                cmpfn234 cmp;
+            };
+            """,
+            swift: """
+            typealias cmpfn234 = (UnsafeMutableRawPointer, UnsafeMutableRawPointer) -> CInt
+            
+            struct tree234_Tag {
+                var root: UnsafeMutablePointer<node234>!
+                var cmp: cmpfn234!
+                
+                init() {
+                    root = nil
+                    cmp = nil
+                }
+                init(root: UnsafeMutablePointer<node234>!, cmp: cmpfn234!) {
+                    self.root = root
+                    self.cmp = cmp
+                }
+            }
+            """)
     }
 }

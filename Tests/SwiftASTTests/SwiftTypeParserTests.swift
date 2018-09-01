@@ -3,6 +3,8 @@ import SwiftAST
 import SwiftRewriterLib
 import TestCommons
 
+// TODO: Support parsing @convention, @escaping and @autoclosure block type attributes
+
 class SwiftTypeParserTests: XCTestCase {
     func testParseIdentifierType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Type"),
@@ -38,7 +40,7 @@ class SwiftTypeParserTests: XCTestCase {
     func testParseTupleInTupleType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "((Type1, Type2), (Type3, Type4))"),
                            SwiftType.tuple(.types([.tuple(.types([.typeName("Type1"), .typeName("Type2")])),
-                                            .tuple(.types([.typeName("Type3"), .typeName("Type4")]))])))
+                                                   .tuple(.types([.typeName("Type3"), .typeName("Type4")]))])))
     }
     
     func testParseTupleTypeWithLabels() throws {
@@ -49,79 +51,79 @@ class SwiftTypeParserTests: XCTestCase {
     
     func testParseBlockType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(Type1) -> Type2"),
-                           SwiftType.block(returnType: .typeName("Type2"),
-                                           parameters: [.typeName("Type1")]))
+                           SwiftType.swiftBlock(returnType: .typeName("Type2"),
+                                                parameters: [.typeName("Type1")]))
     }
     
     func testParseBlockWithParameterLabels() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(_ param: Type1, param2: Type2) -> Type2"),
-                           SwiftType.block(returnType: .typeName("Type2"),
-                                           parameters: [.typeName("Type1"),
-                                                        .typeName("Type2")]))
+                           SwiftType.swiftBlock(returnType: .typeName("Type2"),
+                                                parameters: [.typeName("Type1"),
+                                                             .typeName("Type2")]))
     }
     
     func testParseBlockArgumentWithInOut() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(inout Type1) -> Type2"),
-                           SwiftType.block(returnType: .typeName("Type2"),
-                                           parameters: [.typeName("Type1")]))
+                           SwiftType.swiftBlock(returnType: .typeName("Type2"),
+                                                parameters: [.typeName("Type1")]))
     }
     
     func testParseBlockArgumentWithInOutAndParameterName() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(name: inout Type1) -> Type2"),
-                           SwiftType.block(returnType: .typeName("Type2"),
-                                           parameters: [.typeName("Type1")]))
+                           SwiftType.swiftBlock(returnType: .typeName("Type2"),
+                                                parameters: [.typeName("Type1")]))
     }
     
     func testParseBlockArgumentWithInOutAndParameterNameAndLabel() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(label name: inout Type1) -> Type2"),
-                           SwiftType.block(returnType: .typeName("Type2"),
-                                           parameters: [.typeName("Type1")]))
+                           SwiftType.swiftBlock(returnType: .typeName("Type2"),
+                                                parameters: [.typeName("Type1")]))
     }
     
     func testParseOptionalBlock() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ())?"),
-                           SwiftType.optional(.block(returnType: .void, parameters: [])))
+                           SwiftType.optional(.swiftBlock(returnType: .void, parameters: [])))
     }
     
     func testParseBlockTypeWithParameterAnnotation() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(@escaping () -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationAfterParameterName() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(name: @escaping (Int) -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationAfterParameterLabel() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(_ label: @escaping (Int) -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationAfterInout() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(inout @escaping (Int) -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
     }
     
     func testParseBlockTypeWithParameterAnnotationWithParenthesis() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(@escaping(abc) (Int) -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
     }
     
     func testParseBlockTypeWithMultipleParameterAnnotations() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(@autoclosure @escaping (Int) -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
     }
     
     /// Variadic parameters are converted into array-types.
     func testParseBlockTypeWithVariadicParameterEllipsis() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(Int...) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.array(.int)]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.array(.int)]))
     }
     
     func testParseBlockTypeTakingBlockType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "(() -> ()) -> ()"),
-                           SwiftType.block(returnType: .void, parameters: [.block(returnType: .void, parameters: [])]))
+                           SwiftType.swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [])]))
     }
     
     func testParseArray() throws {
@@ -464,7 +466,7 @@ class SwiftTypePermutator {
         let params = randomTypes(min: 0)
         let ret = randomSubtype() ?? .void
         
-        return SwiftType.block(returnType: ret, parameters: params)
+        return SwiftType.swiftBlock(returnType: ret, parameters: params)
     }
     
     private func generic() -> NominalSwiftType {

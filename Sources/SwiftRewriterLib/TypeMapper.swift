@@ -235,16 +235,24 @@ public class DefaultTypeMapper: TypeMapper {
                                      isBlockContext: Bool) -> String {
         
         switch swiftType {
-        case let .block(returnType, parameters):
+        case let .block(returnType, parameters, attributes):
+            let sortedAttributes =
+                attributes.sorted { $0.description < $1.description }
+            
+            let attributeString =
+                sortedAttributes.map { $0.description }.joined(separator: " ")
+            
             let paramsString =
                 parameters.map {
                     innerTypeNameString(for: $0, isBlockContext: true)
                 }.joined(separator: ", ")
             
-            return "("
-                + paramsString
-                + ") -> "
-                + innerTypeNameString(for: returnType, isBlockContext: true)
+            return 
+                (attributeString.isEmpty ? "" : attributeString + " ")
+                    + "("
+                    + paramsString
+                    + ") -> "
+                    + innerTypeNameString(for: returnType, isBlockContext: true)
             
         case .nominal(let nominal):
             return typeNameString(for: nominal)
@@ -362,7 +370,16 @@ public class DefaultTypeMapper: TypeMapper {
             return swiftType(forObjcType: type, withQualifiers: qualifiers, context: context)
             
         case let .blockType(_, returnType, parameters):
-            return swiftBlockType(forReturnType: returnType, parameters: parameters, context: context)
+            return swiftBlockType(forReturnType: returnType,
+                                  parameters: parameters,
+                                  attributes: [],
+                                  context: context)
+            
+        case let .functionPointer(_, returnType, parameters):
+            return swiftBlockType(forReturnType: returnType,
+                                  parameters: parameters,
+                                  attributes: [.convention(.c)],
+                                  context: context)
             
         case let .fixedArray(inner, length):
             if length <= 0 {
@@ -555,6 +572,7 @@ public class DefaultTypeMapper: TypeMapper {
     
     private func swiftBlockType(forReturnType returnType: ObjcType,
                                 parameters: [ObjcType],
+                                attributes: Set<BlockTypeAttribute>,
                                 context: TypeMappingContext) -> SwiftType {
         
         let ctx = context
@@ -572,7 +590,8 @@ public class DefaultTypeMapper: TypeMapper {
         
         let type: SwiftType =
             .block(returnType: swiftType(forObjcType: returnType, context: ctx),
-                   parameters: swiftParameters)
+                   parameters: swiftParameters,
+                   attributes: attributes)
         
         return swiftType(type: type, withNullability: context.nullability())
     }

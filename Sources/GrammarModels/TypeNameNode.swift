@@ -7,4 +7,8 @@ public class TypeNameNode: ASTNode {
         
         super.init(location: location)
     }
+    
+    override public func shortDescription() -> String {
+        return type.description
+    }
 }
