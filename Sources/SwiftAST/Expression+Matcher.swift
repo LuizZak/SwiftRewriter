@@ -232,19 +232,24 @@ public extension ValueMatcher where T: Expression {
         }
     }
     
+    // TODO: Revert implementation from both methods bellow to use `exp.asMatchable()`
+    // and comparisons with dynamic matchers.
+    // Currently, they crash the compiler on Xcode 10 beta 5.
+    
     public static func nilCheck(against value: Expression) -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in
+            let valueCopy = value.copy()
             
             // <exp> != nil
-            if exp.asMatchable() == .binary(lhs: value, op: SwiftOperator.unequals, rhs: .constant(.nil)) {
+            if exp == .binary(lhs: valueCopy, op: .unequals, rhs: .constant(.nil)) {
                 return true
             }
             // nil != <exp>
-            if exp.asMatchable() == .binary(lhs: .constant(.nil), op: SwiftOperator.unequals, rhs: value) {
+            if exp == .binary(lhs: .constant(.nil), op: .unequals, rhs: valueCopy) {
                 return true
             }
             // <exp>
-            if exp == value {
+            if exp == valueCopy {
                 return true
             }
             
@@ -254,17 +259,18 @@ public extension ValueMatcher where T: Expression {
     
     public static func nilCompare(against value: Expression) -> ValueMatcher<Expression> {
         return ValueMatcher<Expression>().match { exp in
+            let valueCopy = value.copy()
             
             // <exp> == nil
-            if exp.asMatchable() == .binary(lhs: value, op: SwiftOperator.equals, rhs: .constant(.nil)) {
+            if exp == .binary(lhs: valueCopy, op: .equals, rhs: .constant(.nil)) {
                 return true
             }
             // nil == <exp>
-            if exp.asMatchable() == .binary(lhs: .constant(.nil), op: SwiftOperator.equals, rhs: value) {
+            if exp == .binary(lhs: .constant(.nil), op: .equals, rhs: valueCopy) {
                 return true
             }
             // !<exp>
-            if exp.asMatchable() == .unary(op: SwiftOperator.negate, value) {
+            if exp == .unary(op: .negate, valueCopy) {
                 return true
             }
             

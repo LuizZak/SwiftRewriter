@@ -227,8 +227,6 @@ class MandatoryIntentionPass: IntentionPass {
             return
         }
         
-        // TODO: Apply history tracking to these changes
-        
         for synth in type.synthesizations {
             guard let prop = type.properties.first(where: { $0.name == synth.propertyName }) else {
                 continue

@@ -507,7 +507,8 @@ internal class StatementWriter: StatementVisitor {
                 // TODO: Abstract these omit-break/fallthrough-inserting behaviors
                 // to an external ASTRewriterPass
                 for (i, stmt) in cs.statements.enumerated() {
-                    // No need to emit the last break statement
+                    // No need to emit the last break statement (if it's not the
+                    // only statement)
                     if i > 0 && i == cs.statements.count - 1 && stmt == .break {
                         break
                     }
@@ -532,7 +533,8 @@ internal class StatementWriter: StatementVisitor {
                 // TODO: Abstract this omit-break behavior to an external
                 // ASTRewriterPass
                 for (i, stmt) in def.enumerated() {
-                    // No need to emit the last break statement
+                    // No need to emit the last break statement (if it's not the
+                    // only statement)
                     if i > 0 && i == def.count - 1 && stmt == .break {
                         break
                     }

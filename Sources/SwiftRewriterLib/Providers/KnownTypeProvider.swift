@@ -116,8 +116,6 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
 
 /// Provides known type access via a simple backing array
 public class CollectionKnownTypeProvider: KnownTypeProvider {
-    // TODO: Cache by names in a dictionary, similar to
-    // `IntentionCollectionTypeSystem`
     private var knownTypes: [KnownType]
     private var knownTypesByName: [String: [KnownType]] = [:]
     private var canonicalMappings: [String: String] = [:]
