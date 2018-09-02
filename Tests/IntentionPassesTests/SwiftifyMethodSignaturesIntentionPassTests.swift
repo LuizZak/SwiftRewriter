@@ -146,7 +146,7 @@ class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {
             .method(withObjcSignature: "- (Squeak*)getSqueakWithID:(NSInteger)id;")
             .converts(to: FunctionSignature(name: "getSqueakWithID",
                                             parameters: [ParameterSignature(label: nil, name: "id", type: .int)],
-                                            returnType: .implicitUnwrappedOptional(.typeName("Squeak")),
+                                            returnType: .nullabilityUnspecified(.typeName("Squeak")),
                                             isStatic: false)
         )
     }

@@ -59,7 +59,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                 initIntention.functionBody = method.functionBody
                 initIntention.isFailable =
                     method.returnType.isOptional
-                        && !method.returnType.isImplicitlyUnwrapped
+                        && !method.returnType.isNullabilityUnspecified
                 
                 initIntention.history
                     .recordCreation(description: """

@@ -717,7 +717,7 @@ internal class StatementWriter: StatementVisitor {
             switch type {
             case .int, .float:
                 return true
-            case .optional, .implicitUnwrappedOptional:
+            case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
                 return true
             default:
                 break

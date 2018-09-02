@@ -398,7 +398,9 @@ class TypeMerger {
         return result
     }
 
-    func mergeTypeSignatures(_ type1: SwiftType, _ type2: inout SwiftType) {
+    func mergeTypeSignatures(_ type1: SwiftType,
+                             _ type2: inout SwiftType) {
+        
         let type1Unaliased = typeSystem.resolveAlias(in: type1)
         var type2Unaliased = typeSystem.resolveAlias(in: type2)
         
@@ -418,11 +420,17 @@ class TypeMerger {
             break
         }
         
-        if !type1.isImplicitlyUnwrapped && type2.isImplicitlyUnwrapped {
-            if SwiftType.asNonnullDeep(type1Unaliased.deepUnwrapped, removeImplicitsOnly: true)
-                == SwiftType.asNonnullDeep(type2Unaliased, removeImplicitsOnly: true) {
-                
-                type2 = type2.withSameOptionalityAs(type1)
+        if !type1.isNullabilityUnspecified && type2.isNullabilityUnspecified {
+            let type1NonnullDeep =
+                SwiftType.asNonnullDeep(type1Unaliased.deepUnwrapped,
+                                        removeUnspecifiedsOnly: true)
+            
+            var type2NonnullDeep =
+                SwiftType.asNonnullDeep(type2Unaliased.deepUnwrapped,
+                                        removeUnspecifiedsOnly: true)
+            
+            if type1NonnullDeep == type2NonnullDeep {
+                type2 = type2NonnullDeep.withSameOptionalityAs(type1)
             }
         }
         

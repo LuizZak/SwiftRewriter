@@ -27,7 +27,7 @@ public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
         guard !method.isOverride else {
             return
         }
-        guard method.returnType.isImplicitlyUnwrapped else {
+        guard method.returnType.isNullabilityUnspecified else {
             return
         }
         guard let body = method.functionBody else {

@@ -239,7 +239,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
-    func testDontCorrectNonnullStructWithImplicitlyUnwrappedStructValue() {
+    func testDontCorrectNonnullStructWithNullabilityUnspecifiedStructValue() {
         let str =
             KnownTypeBuilder(typeName: "A", kind: .struct)
                 .constructor()
@@ -247,7 +247,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         typeSystem.addType(str)
         let expMaker = { Expression.identifier("a") }
         let exp = expMaker()
-        exp.resolvedType = .implicitUnwrappedOptional(.typeName("A"))
+        exp.resolvedType = .nullabilityUnspecified(.typeName("A"))
         exp.expectedType = .typeName("A")
         
         assertTransform(
@@ -422,7 +422,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         typeSystem.addType(str)
         let expMaker = { Expression.identifier("a").dot("b") }
         let exp = expMaker()
-        exp.exp.resolvedType = .implicitUnwrappedOptional(.typeName("A"))
+        exp.exp.resolvedType = .nullabilityUnspecified(.typeName("A"))
         exp.op.returnType = .typeName("B")
         exp.resolvedType = .implicitUnwrappedOptional(.typeName("B"))
         exp.expectedType = .typeName("B")
@@ -431,9 +431,9 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             // a.b.c()
             expression: exp
                 .dot("c", type: .block(returnType: .int, parameters: []))
-                .typed(.implicitUnwrappedOptional(.block(returnType: .int, parameters: [])))
+                .typed(.nullabilityUnspecified(.block(returnType: .int, parameters: [])))
                 .call([], callableSignature: .block(returnType: .int, parameters: []))
-                .typed(.implicitUnwrappedOptional(.int)),
+                .typed(.nullabilityUnspecified(.int)),
             // a.b.c()
             into: expMaker().dot("c").call()
         ); assertDidNotNotifyChange()
@@ -850,8 +850,8 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         typeSystem.addType(type)
         let rhsMaker: () -> Expression = {
             let e = Expression.identifier("self")
-                .dot("value", type: .implicitUnwrappedOptional("Value"))
-            e.resolvedType = .implicitUnwrappedOptional("Value")
+                .dot("value", type: .nullabilityUnspecified("Value"))
+            e.resolvedType = .nullabilityUnspecified("Value")
             e.expectedType = "Value"
             return e
         }

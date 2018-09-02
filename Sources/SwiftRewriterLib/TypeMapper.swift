@@ -62,9 +62,17 @@ public struct TypeMappingContext {
     /// as the resulting type instead.
     public var instanceTypeAlias: SwiftType?
     
-    public init(modifiers: PropertyAttributesList?, specifiers: [String] = [],
-                qualifiers: [String] = [], alwaysNonnull: Bool = false,
+    /// When no specified nullability is detected, provides the default nullability
+    /// to use.
+    /// Defaults to `.unspecified`.
+    public var unspecifiedNullability: TypeNullability = .unspecified
+    
+    public init(modifiers: PropertyAttributesList?,
+                specifiers: [String] = [],
+                qualifiers: [String] = [],
+                alwaysNonnull: Bool = false,
                 inNonnull: Bool = false) {
+        
         self.modifiers = modifiers
         self.specifiers = specifiers
         self.qualifiers = qualifiers
@@ -77,8 +85,10 @@ public struct TypeMappingContext {
         self.inNonnullContext = inNonnull
     }
     
-    public init(nullabilitySpecs: [NullabilitySpecifier], alwaysNonnull: Bool = false,
+    public init(nullabilitySpecs: [NullabilitySpecifier],
+                alwaysNonnull: Bool = false,
                 inNonnull: Bool = false) {
+        
         self.nullabilitySpecifiers = nullabilitySpecs
         self.alwaysNonnull = alwaysNonnull
         self.inNonnullContext = inNonnull
@@ -100,6 +110,12 @@ public struct TypeMappingContext {
         return copy
     }
     
+    public func withExplicitNullability(_ nullability: TypeNullability?) -> TypeMappingContext {
+        var copy = self
+        copy.explicitNullability = nullability
+        return copy
+    }
+    
     public func withSpecifiers(_ specifiers: [String]) -> TypeMappingContext {
         var copy = self
         copy.specifiers = specifiers
@@ -109,6 +125,12 @@ public struct TypeMappingContext {
     public func withQualifiers(_ qualifiers: [String]) -> TypeMappingContext {
         var copy = self
         copy.qualifiers = qualifiers
+        return copy
+    }
+    
+    public func withUnspecifiedNullability(_ nullability: TypeNullability) -> TypeMappingContext {
+        var copy = self
+        copy.unspecifiedNullability = nullability
         return copy
     }
     
@@ -194,7 +216,7 @@ public struct TypeMappingContext {
             return .nonnull
         }
         
-        return .unspecified
+        return unspecifiedNullability
     }
 }
 
@@ -206,12 +228,23 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     public func typeNameString(for swiftType: SwiftType) -> String {
+        return innerTypeNameString(for: swiftType, isBlockContext: false)
+    }
+    
+    private func innerTypeNameString(for swiftType: SwiftType,
+                                     isBlockContext: Bool) -> String {
+        
         switch swiftType {
         case let .block(returnType, parameters):
-            return
-                "(" + parameters.map(typeNameString(for:)).joined(separator: ", ")
-                    + ") -> "
-                    + typeNameString(for: returnType)
+            let paramsString =
+                parameters.map {
+                    innerTypeNameString(for: $0, isBlockContext: true)
+                }.joined(separator: ", ")
+            
+            return "("
+                + paramsString
+                + ") -> "
+                + innerTypeNameString(for: returnType, isBlockContext: true)
             
         case .nominal(let nominal):
             return typeNameString(for: nominal)
@@ -231,6 +264,14 @@ public class DefaultTypeMapper: TypeMapper {
             }
             
             return typeName + "!"
+            
+        case .nullabilityUnspecified(let type):
+            var typeName = typeNameString(for: type)
+            if type.requiresTrailingParens {
+                typeName = "(" + typeName + ")"
+            }
+            
+            return typeName + (isBlockContext ? "?" : "!")
             
         case let .protocolComposition(types):
             return Array(types).map(typeNameString(for:)).joined(separator: " & ")
@@ -456,17 +497,6 @@ public class DefaultTypeMapper: TypeMapper {
         return swiftType(type: final, withNullability: context.nullability())
     }
     
-    private func swiftType(type: SwiftType, withNullability nullability: TypeNullability) -> SwiftType {
-        switch nullability {
-        case .nonnull:
-            return type
-        case .nullable:
-            return .optional(type)
-        case .nullResettable, .unspecified:
-            return .implicitUnwrappedOptional(type)
-        }
-    }
-    
     private func swiftType(forObjcType type: ObjcType,
                            withSpecifiers specifiers: [String],
                            context: TypeMappingContext) -> SwiftType {
@@ -527,11 +557,22 @@ public class DefaultTypeMapper: TypeMapper {
                                 parameters: [ObjcType],
                                 context: TypeMappingContext) -> SwiftType {
         
-        var ctx = context.asAlwaysNonNull(isOn: false)
-        ctx.explicitNullability = nil
+        let ctx = context
+            .asAlwaysNonNull(isOn: false)
+            .withExplicitNullability(nil)
+        
+        let swiftParameters: [SwiftType]
+        
+        // 'void' parameter is the same as no parameter list
+        if parameters == [.void] {
+            swiftParameters = []
+        } else {
+            swiftParameters = parameters.map { swiftType(forObjcType: $0, context: ctx) }
+        }
+        
         let type: SwiftType =
             .block(returnType: swiftType(forObjcType: returnType, context: ctx),
-                   parameters: parameters.map { swiftType(forObjcType: $0, context: ctx) })
+                   parameters: swiftParameters)
         
         return swiftType(type: type, withNullability: context.nullability())
     }
@@ -546,6 +587,19 @@ public class DefaultTypeMapper: TypeMapper {
         }
         
         return .tuple(.types(.fromCollection(types)))
+    }
+    
+    private func swiftType(type: SwiftType, withNullability nullability: TypeNullability) -> SwiftType {
+        switch nullability {
+        case .nonnull:
+            return type
+        case .nullable:
+            return .optional(type)
+        case .nullResettable:
+            return .implicitUnwrappedOptional(type)
+        case .unspecified:
+            return .nullabilityUnspecified(type)
+        }
     }
     
     private func isPointerOnly(types: [ObjcType]) -> Bool {

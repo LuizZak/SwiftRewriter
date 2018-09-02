@@ -294,7 +294,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 }
                 .createFile(named: "A.m") { file in
                     file.createGlobalFunction(withName: "a",
-                                              returnType: .implicitUnwrappedOptional(.typeName("A")),
+                                              returnType: .nullabilityUnspecified(.typeName("A")),
                                               body: [
                                                 .expression(
                                                     Expression
@@ -552,8 +552,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let headerBlock: SwiftType
             = .block(returnType: .void, parameters: [.typeName("A")])
         
-        let implBlock: SwiftType
-            = .implicitUnwrappedOptional(.block(returnType: .void, parameters: [.implicitUnwrappedOptional(.typeName("A"))]))
+        let unspecifiedBlock: SwiftType
+            = .nullabilityUnspecified(.block(returnType: .void, parameters: [.nullabilityUnspecified(.typeName("A"))]))
         
         let intentions =
             IntentionCollectionBuilder()
@@ -569,7 +569,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     file.createClass(withName: "A") { type in
                         type.createMethod(
                             named: "a",
-                            parameters: [ParameterSignature(label: nil, name: "a", type: implBlock)]
+                            parameters: [ParameterSignature(label: nil, name: "a", type: unspecifiedBlock)]
                         )
                     }
                 }.build()
@@ -603,7 +603,20 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { type in
-                        type.createMethod("a(_ a: ((A!) -> Void)!)")
+                        type.createMethod(
+                            FunctionSignature(
+                                name: "a",
+                                parameters: [
+                                    ParameterSignature(
+                                        label: nil,
+                                        name: "a",
+                                        type: .nullabilityUnspecified(
+                                            .block(returnType: .void,
+                                                   parameters: [.nullabilityUnspecified("A")])
+                                        )
+                                    )
+                                ]
+                            ))
                     }
                 }.build()
         let sut = FileTypeMergingIntentionPass()

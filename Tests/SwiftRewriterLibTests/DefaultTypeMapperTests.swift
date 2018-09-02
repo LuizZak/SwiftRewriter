@@ -297,7 +297,7 @@ class DefaultTypeMapperTests: XCTestCase {
                           parameters: [.pointer(.struct("NSString")),
                                        .pointer(.struct("NSString"))]),
                withExplicitNullability: nil,
-               toConvertTo: "((String!, String!) -> Int)!")
+               toConvertTo: "((String?, String?) -> Int)!")
         
         expect(.blockType(name: "block",
                           returnType: .struct("NSInteger"),
@@ -311,14 +311,14 @@ class DefaultTypeMapperTests: XCTestCase {
                           parameters: [.qualified(.pointer(.struct("NSString")), qualifiers: ["_Nullable"]),
                                        .pointer(.struct("NSString"))]),
                withExplicitNullability: nil,
-               toConvertTo: "((String?, String!) -> Int)!")
+               toConvertTo: "((String?, String?) -> Int)!")
         
         expect(.blockType(name: "block",
                           returnType: .struct("NSInteger"),
                           parameters: [.specified(specifiers: ["nonnull"], .pointer(.struct("NSString"))),
                                        .pointer(.struct("NSString"))]),
                withExplicitNullability: nil,
-               toConvertTo: "((String, String!) -> Int)!")
+               toConvertTo: "((String, String?) -> Int)!")
         
         expect(.blockType(name: "block",
                           returnType: .struct("NSInteger"),
@@ -332,7 +332,7 @@ class DefaultTypeMapperTests: XCTestCase {
                           parameters: [.pointer(.struct("NSString")),
                                        .pointer(.struct("NSString"))]),
                withExplicitNullability: .nonnull,
-               toConvertTo: "(String!, String!) -> Int")
+               toConvertTo: "(String?, String?) -> Int")
     }
     
     func testNullableBlock() {

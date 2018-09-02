@@ -20,7 +20,7 @@ public class SwiftMethodSignatureGen {
         var sign =
             FunctionSignature(name: "__",
                               parameters: [],
-                              returnType: SwiftType.anyObject.asImplicitUnwrapped,
+                              returnType: SwiftType.anyObject.asNullabilityUnspecified,
                               isStatic: objcMethod.isClassMethod,
                               isMutating: false)
         

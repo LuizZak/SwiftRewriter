@@ -9,7 +9,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A.m") { type in
-                    type.createMethod(named: "a", returnType: .implicitUnwrappedOptional(.typeName("A"))) { method in
+                    type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
                         method.setBody([
                             Statement.return(Expression.identifier("self").typed(.typeName("A")))
                         ])
@@ -45,7 +45,7 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A.m") { type in
-                    type.createMethod(named: "a", returnType: .implicitUnwrappedOptional(.typeName("A"))) { method in
+                    type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
                         method.setBody([
                             Statement.return(Expression.identifier("self").typed(.errorType))
                         ])
@@ -56,14 +56,14 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
         let file = intentions.fileIntentions()[0]
-        XCTAssertEqual(file.classIntentions[0].methods[0].returnType, .implicitUnwrappedOptional(.typeName("A")))
+        XCTAssertEqual(file.classIntentions[0].methods[0].returnType, .nullabilityUnspecified(.typeName("A")))
     }
     
     func testDontApplyOnOverrides() {
         let intentions =
             IntentionCollectionBuilder()
                 .createFileWithClass(named: "A.m") { type in
-                    type.createMethod(named: "a", returnType: .implicitUnwrappedOptional(.typeName("A"))) { method in
+                    type.createMethod(named: "a", returnType: .nullabilityUnspecified(.typeName("A"))) { method in
                         method.setIsOverride(true)
                         method.setBody([
                             Statement.return(Expression.identifier("self").typed(.typeName("A")))
@@ -75,6 +75,6 @@ class DetectNonnullReturnsIntentionPassTests: XCTestCase {
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
         let file = intentions.fileIntentions()[0]
-        XCTAssertEqual(file.classIntentions[0].methods[0].returnType, .implicitUnwrappedOptional(.typeName("A")))
+        XCTAssertEqual(file.classIntentions[0].methods[0].returnType, .nullabilityUnspecified(.typeName("A")))
     }
 }

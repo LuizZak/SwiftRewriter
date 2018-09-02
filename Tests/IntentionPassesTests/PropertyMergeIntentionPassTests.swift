@@ -847,7 +847,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             IntentionCollectionBuilder()
                 .createFile(named: "A+Ext.m") { file in
                     file.createExtension(forClassNamed: "A") { type in
-                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .implicitUnwrappedOptional(.string))])  { method in
+                        type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .nullabilityUnspecified(.string))])  { method in
                             method.setBody([.expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))])
                         }
                     }

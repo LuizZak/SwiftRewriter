@@ -581,7 +581,17 @@ class SwiftRewriterTests: XCTestCase {
     func testRewriteBlockTypeDef() {
         assertObjcParse(
             objc: """
-            typedef void(^_Nonnull errorBlock)();
+            typedef void(^errorBlock)();
+            """,
+            swift: """
+            typealias errorBlock = () -> Void
+            """)
+    }
+    
+    func testRewriteBlockTypeDefWithVoidParameterList() {
+        assertObjcParse(
+            objc: """
+            typedef void(^errorBlock)(void);
             """,
             swift: """
             typealias errorBlock = () -> Void
@@ -604,6 +614,24 @@ class SwiftRewriterTests: XCTestCase {
             // #import "A.h"
             // #import "B.h"
             typealias errorBlock = (String) -> Void
+            """)
+    }
+    
+    func testBlockTypeDefinitionsDefaultToOptionalReferenceTypes() {
+        assertObjcParse(
+            objc: """
+            typedef void(^takesPointer)(int*);
+            typedef void(^takesObject)(NSObject*);
+            typedef int*(^returnsPointer)(void);
+            typedef NSObject*(^returnsObject)(void);
+            typedef void(^takesBlock)(void(^takesObject)(NSObject*));
+            """,
+            swift: """
+            typealias takesPointer = (UnsafeMutablePointer<CInt>?) -> Void
+            typealias takesObject = (NSObject?) -> Void
+            typealias returnsPointer = () -> UnsafeMutablePointer<CInt>?
+            typealias returnsObject = () -> NSObject?
+            typealias takesBlock = (((NSObject?) -> Void)?) -> Void
             """)
     }
     
@@ -654,7 +682,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var callback: (NSObject!) -> Void
+                private var callback: (NSObject?) -> Void
                 private var anotherCallback: ((String) -> Void)!
                 private var yetAnotherCallback: ((String) -> NSObject?)?
             }
@@ -673,7 +701,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             class MyClass: NSObject {
-                private var callback: (((() -> AnyObject!)?) -> Void)!
+                private var callback: (((() -> AnyObject?)?) -> Void)!
             }
             """)
     }
@@ -1305,7 +1333,7 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class A: NSObject {
                 @objc
-                func loadDataWithCallback(_ callback: ((NSArray!, Error!) -> Void)!) {
+                func loadDataWithCallback(_ callback: ((NSArray?, Error?) -> Void)!) {
                     self.doThing().then { (results: NSArray!) -> Void in
                         callback?(results, nil)
                     }.catch { (error: Error!) -> Void in

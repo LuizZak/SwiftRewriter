@@ -28,7 +28,7 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
                                 .createMethod(
                                     named: "takesValue",
                                     returnType: .void,
-                                    parameters: [ParameterSignature(name: "value", type: .implicitUnwrappedOptional(.string))])
+                                    parameters: [ParameterSignature(name: "value", type: .nullabilityUnspecified(.string))])
                         }
                 }.build()
         let type = intentions.fileIntentions()[0].classIntentions[0]
@@ -53,7 +53,7 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
                             type.createMethod(
                                     named: "takesValue",
                                     returnType: .void,
-                                    parameters: [ParameterSignature(name: "value", type: .implicitUnwrappedOptional(.string))])
+                                    parameters: [ParameterSignature(name: "value", type: .nullabilityUnspecified(.string))])
                         }
                         .createExtension(forClassNamed: "B", categoryName: nil) { ext in
                             ext.createConformance(protocolName: "A")
@@ -95,10 +95,10 @@ class ProtocolNullabilityPropagationToConformersIntentionPassTests: XCTestCase {
                 }.createFile(named: "A+P.m") { file in
                     file.createExtension(forClassNamed: "A", categoryName: "P") { ext in
                         ext.setAsCategoryImplementation(categoryName: "P")
-                            .createMethod(named: "a", returnType: .implicitUnwrappedOptional(.string)) {
+                            .createMethod(named: "a", returnType: .nullabilityUnspecified(.string)) {
                                 $0.setBody([.return(.constant(""))])
                             }
-                            .createMethod(named: "b", returnType: .implicitUnwrappedOptional(.string)) {
+                            .createMethod(named: "b", returnType: .nullabilityUnspecified(.string)) {
                                 $0.setBody([.return(.constant(.nil))])
                             }
                     }

@@ -915,7 +915,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testPropagateBlockParameterNullabilityFromExpectedType() {
         let exp =
             Expression.block(
-                parameters: [BlockParameter(name: "a", type: .implicitUnwrappedOptional(.typeName("A")))],
+                parameters: [BlockParameter(name: "a", type: .nullabilityUnspecified(.typeName("A")))],
                 return: .void,
                 body: [])
         exp.expectedType = .block(returnType: .void, parameters: [.typeName("A")])
@@ -934,7 +934,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let exp =
             Expression.block(
                 parameters: [
-                    BlockParameter(name: "a", type: .implicitUnwrappedOptional(.typeName("A")))
+                    BlockParameter(name: "a", type: .nullabilityUnspecified(.typeName("A")))
                 ],
                 return: .void,
                 body: []
@@ -955,7 +955,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let exp =
             Expression.block(
                 parameters: [
-                    BlockParameter(name: "a", type: .implicitUnwrappedOptional(.typeName("A")))
+                    BlockParameter(name: "a", type: .nullabilityUnspecified(.typeName("A")))
                 ],
                 return: .void,
                 body: []
@@ -1076,7 +1076,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             //      return 0
             //  }
             with: Expression.block(parameters: [],
-                                   return: .implicitUnwrappedOptional(.typeName("NSObject")),
+                                   return: .nullabilityUnspecified(.typeName("NSObject")),
                                    body: [.return(.constant(0))])
                 .typed(expected: SwiftType.block(returnType: .typeName("NSObject"), parameters: [])),
             sut: ExpressionTypeResolver())

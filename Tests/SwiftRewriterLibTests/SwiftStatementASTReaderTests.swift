@@ -254,7 +254,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
         assert(objcStmt: "void(^callback)();",
                parseBlock: { try $0.declaration() },
                readsAs: .variableDeclaration(identifier: "callback",
-                                             type: .implicitUnwrappedOptional(.block(returnType: .void, parameters: [])),
+                                             type: .nullabilityUnspecified(.block(returnType: .void, parameters: [])),
                                              initialization: nil))
         
         assert(objcStmt: "void(^_Nonnull callback)();",

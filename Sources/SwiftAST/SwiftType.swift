@@ -8,6 +8,7 @@ indirect public enum SwiftType: Equatable {
     case metatype(for: SwiftType)
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)
+    case nullabilityUnspecified(SwiftType)
 }
 
 extension SwiftType: ExpressibleByStringLiteral {
@@ -78,11 +79,11 @@ public extension SwiftType {
         }
     }
     
-    /// Returns `true` if this type is either an optional or implicitly unwrapped
-    /// optional.
+    /// Returns `true` if this type is either an optional, an implicitly unwrapped
+    /// optional, or a 'nullability-unspecified' optional.
     public var isOptional: Bool {
         switch self {
-        case .optional, .implicitUnwrappedOptional:
+        case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
             return true
         default:
             return false
@@ -101,6 +102,24 @@ public extension SwiftType {
     public var isImplicitlyUnwrapped: Bool {
         switch self {
         case .implicitUnwrappedOptional:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public var canBeImplicitlyUnwrapped: Bool {
+        switch self {
+        case .implicitUnwrappedOptional, .nullabilityUnspecified:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public var isNullabilityUnspecified: Bool {
+        switch self {
+        case .nullabilityUnspecified:
             return true
         default:
             return false
@@ -145,8 +164,11 @@ public extension SwiftType {
     /// The return is unwrapped only once.
     public var unwrapped: SwiftType {
         switch self {
-        case .optional(let type), .implicitUnwrappedOptional(let type):
+        case .optional(let type),
+             .implicitUnwrappedOptional(let type),
+             .nullabilityUnspecified(let type):
             return type
+            
         default:
             return self
         }
@@ -158,8 +180,11 @@ public extension SwiftType {
     /// type is reached.
     public var deepUnwrapped: SwiftType {
         switch self {
-        case .optional(let type), .implicitUnwrappedOptional(let type):
+        case .optional(let type),
+             .implicitUnwrappedOptional(let type),
+             .nullabilityUnspecified(let type):
             return type.deepUnwrapped
+            
         default:
             return self
         }
@@ -173,6 +198,11 @@ public extension SwiftType {
     /// Returns `self` wrapped over an `.implicitUnwrappedOptional` case.
     public var asImplicitUnwrapped: SwiftType {
         return .implicitUnwrappedOptional(self)
+    }
+    
+    /// Returns `self` wrapped over an `.nullabilityUnspecified` case.
+    public var asNullabilityUnspecified: SwiftType {
+        return .nullabilityUnspecified(self)
     }
     
     /// Returns this type, wrapped in the same optionality depth as another given
@@ -197,6 +227,8 @@ public extension SwiftType {
             return .optional(inner.wrappingOther(type))
         case .implicitUnwrappedOptional(let inner):
             return .implicitUnwrappedOptional(inner.wrappingOther(type))
+        case .nullabilityUnspecified(let inner):
+            return .nullabilityUnspecified(inner.wrappingOther(type))
         default:
             return type
         }
@@ -258,12 +290,12 @@ public extension SwiftType {
     /// keeping optionals in place.
     /// - Returns: The deeply unwrapped version of the input type.
     public static func asNonnullDeep(_ type: SwiftType,
-                                     removeImplicitsOnly: Bool = false) -> SwiftType {
+                                     removeUnspecifiedsOnly: Bool = false) -> SwiftType {
         
         var result: SwiftType = type
         
-        if removeImplicitsOnly {
-            if case .implicitUnwrappedOptional(let inner) = type {
+        if removeUnspecifiedsOnly {
+            if case .nullabilityUnspecified(let inner) = type {
                 result = inner
             }
         } else {
@@ -274,10 +306,10 @@ public extension SwiftType {
         case let .block(returnType, parameters):
             let returnType =
                 asNonnullDeep(returnType,
-                              removeImplicitsOnly: removeImplicitsOnly)
+                              removeUnspecifiedsOnly: removeUnspecifiedsOnly)
             
             let parameters = parameters.map {
-                asNonnullDeep($0, removeImplicitsOnly: removeImplicitsOnly)
+                asNonnullDeep($0, removeUnspecifiedsOnly: removeUnspecifiedsOnly)
             }
             
             result = .block(returnType: returnType, parameters: parameters)
@@ -349,6 +381,9 @@ extension SwiftType: CustomStringConvertible {
             return type.descriptionWithParens + "?"
             
         case .implicitUnwrappedOptional(let type):
+            return type.descriptionWithParens + "!"
+            
+        case .nullabilityUnspecified(let type):
             return type.descriptionWithParens + "!"
             
         case let .protocolComposition(types):

@@ -111,7 +111,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 type = type.withSameOptionalityAs(initValueType)
                 
                 // Promote implicitly unwrapped optionals to full optionals
-                if initValueType.isImplicitlyUnwrapped {
+                if initValueType.canBeImplicitlyUnwrapped {
                     type = .optional(type.unwrapped)
                 }
             }
@@ -212,7 +212,9 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             if let expectedType = exp.expectedType {
                 switch expectedType {
-                case .optional, .implicitUnwrappedOptional:
+                case .optional,
+                     .implicitUnwrappedOptional,
+                     .nullabilityUnspecified:
                     exp.resolvedType = exp.expectedType
                     
                 default:
@@ -548,13 +550,13 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             for (i, expectedType) in zip(0..<exp.parameters.count, params) {
                 let param = exp.parameters[i]
-                guard param.type.isImplicitlyUnwrapped else { continue }
+                guard param.type.isNullabilityUnspecified else { continue }
                 guard param.type.deepUnwrapped == expectedType.deepUnwrapped else { continue }
                 
                 exp.parameters[i].type = expectedType
             }
             
-            if blockReturnType.isImplicitlyUnwrapped &&
+            if blockReturnType.isNullabilityUnspecified &&
                 blockReturnType.deepUnwrapped == ret.deepUnwrapped {
                 
                 blockReturnType = ret
@@ -681,8 +683,17 @@ private class MemberInvocationResolver {
     func resolve(postfix exp: PostfixExpression, op: Postfix) -> Expression {
         defer {
             // Elevate an implicitly-unwrapped optional access to an optional access
-            if exp.op.hasOptionalAccess, case .implicitUnwrappedOptional(let inner)? = exp.resolvedType {
-                exp.resolvedType = .optional(inner)
+            if exp.op.hasOptionalAccess {
+                
+                switch exp.resolvedType {
+                case .implicitUnwrappedOptional(let inner)?,
+                     .nullabilityUnspecified(let inner)?:
+                    
+                    exp.resolvedType = .optional(inner)
+                    
+                default:
+                    break
+                }
             }
         }
         

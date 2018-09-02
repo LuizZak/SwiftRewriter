@@ -64,7 +64,7 @@ public class NilValueTransformationsPass: ASTRewriterPass {
                 continue
             }
             
-            if type.isOptional && !type.isImplicitlyUnwrapped && !postfix.hasOptionalAccess {
+            if type.isOptional && !type.canBeImplicitlyUnwrapped && !postfix.hasOptionalAccess {
                 postfix.hasOptionalAccess = true
                 notifyChange()
             } else if !type.isOptional && postfix.hasOptionalAccess {

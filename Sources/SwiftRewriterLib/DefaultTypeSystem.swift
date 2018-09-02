@@ -791,6 +791,9 @@ public class DefaultTypeSystem: TypeSystem {
             case .implicitUnwrappedOptional(let type):
                 return .implicitUnwrappedOptional(expand(in: type))
                 
+            case .nullabilityUnspecified(let type):
+                return .nullabilityUnspecified(expand(in: type))
+                
             case .nested(let nested):
                 return .nested(.fromCollection(nested.map(expand(inNominal:))))
                 

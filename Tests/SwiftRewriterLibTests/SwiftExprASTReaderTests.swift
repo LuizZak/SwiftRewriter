@@ -179,13 +179,13 @@ class SwiftExprASTReaderTests: XCTestCase {
                 ]))
         assert(objcExpr: "^NSString*{ return thing(); }",
                readsAs: .block(parameters: [],
-                               return: SwiftType.string.asImplicitUnwrapped,
+                               return: SwiftType.string.asNullabilityUnspecified,
                                body: [
                                 .return(Expression.identifier("thing").call())
                                 ]))
         assert(objcExpr: "^NSString*(NSInteger inty){ return thing(); }",
                readsAs: .block(parameters: [BlockParameter(name: "inty", type: .int)],
-                               return: SwiftType.string.asImplicitUnwrapped,
+                               return: SwiftType.string.asNullabilityUnspecified,
                                body: [
                                 .return(Expression.identifier("thing").call())
                                 ]))

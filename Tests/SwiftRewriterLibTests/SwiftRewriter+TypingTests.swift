@@ -746,6 +746,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @interface MyClass
             - (nullable NSString*)optional;
             - (nonnull NSString*)nonOptional;
+            - (null_unspecified NSString*)unspecifiedOptional;
             - (NSString*)unspecifiedOptional;
             @end
             @implementation MyClass

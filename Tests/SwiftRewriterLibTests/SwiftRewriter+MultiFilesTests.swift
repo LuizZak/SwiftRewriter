@@ -206,6 +206,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             .file(name: "file.h",
             """
             @interface MyClass
+            - (void)doOtherThing;
             - (void)doThing;
             @end
             """)
@@ -215,6 +216,8 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             - (instancetype)initWithThing:(id)thing {
             }
             - (void)doThing {
+            }
+            - (void)doOtherThing {
             }
             @end
             """)
@@ -226,6 +229,9 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
                 @objc
                 func doThing() {
+                }
+                @objc
+                func doOtherThing() {
                 }
             }
             // End of file file.swift

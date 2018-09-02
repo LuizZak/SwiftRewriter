@@ -79,7 +79,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         // Swift takes care of unwrapping that automatically)
         guard let resolvedType = argument.resolvedType, !params[0].isOptional
             && resolvedType.isOptional == true
-            && argument.resolvedType?.isImplicitlyUnwrapped == false else {
+            && argument.resolvedType?.canBeImplicitlyUnwrapped == false else {
             return super.visitExpressions(stmt)
         }
         
@@ -224,7 +224,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
             
             let member = memberPostfix.exp
             
-            guard memberType.isOptional && !memberType.isImplicitlyUnwrapped
+            guard memberType.isOptional && !memberType.canBeImplicitlyUnwrapped
                 && typeSystem.isScalarType(memberType.deepUnwrapped) else {
                 return super.visitPostfix(exp)
             }
@@ -269,7 +269,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         guard expectedType == exp.resolvedType?.deepUnwrapped else {
             return nil
         }
-        guard exp.resolvedType?.isImplicitlyUnwrapped == false else {
+        guard exp.resolvedType?.canBeImplicitlyUnwrapped == false else {
             return nil
         }
         guard let defValue = typeSystem.defaultValue(for: expectedType) else {
