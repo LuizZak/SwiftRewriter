@@ -170,12 +170,13 @@ public class TypeParsing {
         
         // Block type
         if let directDeclarator = declarator.directDeclarator(),
-            let blockIdentifier = directDeclarator.identifier(),
             let blockParameters = directDeclarator.blockParameters() {
             
             let blockParameterTypes = parseObjcTypes(fromBlockParameters: blockParameters)
             
-            type = .blockType(name: blockIdentifier.getText(),
+            let blockIdentifier = directDeclarator.identifier()
+            
+            type = .blockType(name: blockIdentifier?.getText(),
                               returnType: type,
                               parameters: blockParameterTypes)
             
@@ -330,6 +331,53 @@ public class TypeParsing {
         }
         
         return type
+    }
+    
+    public func parseObjcType(fromFunctionPointer ctx: Parser.FunctionPointerContext) -> ObjcType? {
+        guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
+            return nil
+        }
+        guard let returnType = parseObjcType(inDeclarationSpecifiers: declarationSpecifiers) else {
+            return nil
+        }
+        guard let identifier = ctx.identifier() else {
+            return nil
+        }
+        guard let parameterList = ctx.functionPointerParameterList()?.functionPointerParameterDeclarationList() else {
+            return nil
+        }
+        
+        let parameterDeclarations = parameterList.functionPointerParameterDeclaration()
+        
+        var parameters: [ObjcType] = []
+        
+        for parameter in parameterDeclarations {
+            if let declarationSpecifier = parameter.declarationSpecifiers() {
+                let type: ObjcType?
+                
+                if let declarator = parameter.declarator() {
+                    type = parseObjcType(inDeclarationSpecifiers: declarationSpecifier,
+                                         declarator: declarator)
+                } else {
+                    type = parseObjcType(inDeclarationSpecifiers: declarationSpecifier)
+                }
+                
+                if let type = type {
+                    parameters.append(type)
+                }
+            } else if let pointer = parameter.functionPointer() {
+                if let type = parseObjcType(fromFunctionPointer: pointer) {
+                    parameters.append(type)
+                }
+            }
+        }
+        
+        let functionPointerType: ObjcType =
+            .functionPointer(name: identifier.getText(),
+                             returnType: returnType,
+                             parameters: parameters)
+        
+        return functionPointerType
     }
 }
 

@@ -918,50 +918,16 @@ private class FunctionPointerVisitor: ObjectiveCParserBaseVisitor<TypedefNode> {
     }
     
     override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> TypedefNode? {
-        guard let declarationSpecifiers = ctx.declarationSpecifiers() else {
+        guard let name = VarDeclarationIdentifierNameExtractor.extract(from: ctx) else {
             return nil
         }
-        guard let returnType = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifiers) else {
-            return nil
-        }
-        guard let identifier = ctx.identifier() else {
-            return nil
-        }
-        guard let parameterList = ctx.functionPointerParameterList()?.functionPointerParameterDeclarationList() else {
+        guard let type = typeParser.parseObjcType(fromFunctionPointer: ctx) else {
             return nil
         }
         
-        let parameterDeclarations = parameterList.functionPointerParameterDeclaration()
-        
-        var parameters: [ObjcType] = []
-        
-        for parameter in parameterDeclarations {
-            guard let declarationSpecifier = parameter.declarationSpecifiers() else {
-                continue
-            }
-            
-            let type: ObjcType?
-            
-            if let declarator = parameter.declarator() {
-                type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifier,
-                                                declarator: declarator)
-            } else {
-                type = typeParser.parseObjcType(inDeclarationSpecifiers: declarationSpecifier)
-            }
-            
-            if let type = type {
-                parameters.append(type)
-            }
-        }
-        
-        let functionPointerType: ObjcType =
-            .functionPointer(name: identifier.getText(),
-                             returnType: returnType,
-                             parameters: parameters)
-        
-        let identifierNode = Identifier(name: identifier.getText())
-        identifierNode.sourceRuleContext = identifier
-        let typeNameNode = TypeNameNode(type: functionPointerType)
+        let identifierNode = Identifier(name: name)
+        identifierNode.sourceRuleContext = ctx.identifier()
+        let typeNameNode = TypeNameNode(type: type)
         typeNameNode.sourceRuleContext = ctx
         
         typedefNode.addChild(identifierNode)

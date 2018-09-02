@@ -249,6 +249,7 @@ public final class SwiftRewriter {
                         typeali.fromType =
                             typeMapper.swiftType(forObjcType: typeali.originalObjcType,
                                                  context: ctx.withExplicitNullability(.nonnull))
+                        _=typeali.fromType
                     default:
                         break
                     }

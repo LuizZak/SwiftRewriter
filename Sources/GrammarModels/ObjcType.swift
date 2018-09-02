@@ -33,11 +33,11 @@ public enum ObjcType: Equatable, CustomStringConvertible {
     
     /// An objective-C block type.
     /// Block types may specify names, or not (in case of block literals).
-    indirect case blockType(name: String, returnType: ObjcType, parameters: [ObjcType])
+    indirect case blockType(name: String?, returnType: ObjcType, parameters: [ObjcType])
     
     /// A C function pointer.
     /// Function pointer types may specify names, or not (in case of pointer literals).
-    indirect case functionPointer(name: String, returnType: ObjcType, parameters: [ObjcType])
+    indirect case functionPointer(name: String?, returnType: ObjcType, parameters: [ObjcType])
     
     /// A fixed array type
     indirect case fixedArray(ObjcType, length: Int)
@@ -82,10 +82,10 @@ public enum ObjcType: Equatable, CustomStringConvertible {
             return "\(specifiers.joined(separator: " ")) \(type.description)"
             
         case let .blockType(name, returnType, parameters):
-            return "\(returnType)(^\(name))(\(parameters.map { $0.description }.joined(separator: ", ")))"
+            return "\(returnType)(^\(name ?? ""))(\(parameters.map { $0.description }.joined(separator: ", ")))"
             
         case let .functionPointer(name, returnType, parameters):
-            return "\(returnType)(*\(name))(\(parameters.map { $0.description }.joined(separator: ", ")))"
+            return "\(returnType)(*\(name ?? ""))(\(parameters.map { $0.description }.joined(separator: ", ")))"
             
         case let .fixedArray(type, length):
             return "\(type)[\(length)]"
