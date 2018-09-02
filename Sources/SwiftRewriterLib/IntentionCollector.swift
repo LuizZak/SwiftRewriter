@@ -189,19 +189,40 @@ public class IntentionCollector {
         guard let type = node.type else {
             return
         }
-        guard let name = node.typeDeclarators[0].identifier?.name else {
+        if !node.typeDeclarators.isEmpty {
+            guard let name = node.typeDeclarators[0].identifier?.name else {
+                return
+            }
+            
+            let intent =
+                TypealiasIntention(originalObjcType: type.type, fromType: .void,
+                                   named: name)
+            recordSourceHistory(intention: intent, node: node)
+            intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+            
+            ctx.addTypealias(intent)
+            
+            delegate?.reportForLazyResolving(intention: intent)
+            
             return
         }
         
-        let intent =
-            TypealiasIntention(originalObjcType: type.type, fromType: .void,
-                               named: name)
-        recordSourceHistory(intention: intent, node: node)
-        intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
-        
-        ctx.addTypealias(intent)
-        
-        delegate?.reportForLazyResolving(intention: intent)
+        // Attempt to interpret as a function pointer typealias
+        if let identifier = node.identifier, let typeNode = node.type {
+            
+            let intent =
+                TypealiasIntention(originalObjcType: typeNode.type,
+                                   fromType: .void,
+                                   named: identifier.name)
+            
+            recordSourceHistory(intention: intent, node: node)
+            intent.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+            
+            ctx.addTypealias(intent)
+            
+            delegate?.reportForLazyResolving(intention: intent)
+            
+        }
     }
     
     // MARK: - Global Variable

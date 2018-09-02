@@ -378,8 +378,8 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         let res = assertTransform(
             // a?.b.c()
             expression: exp
-                .dot("c", type: .block(returnType: .int, parameters: [])).typed(.optional(.block(returnType: .int, parameters: [])))
-                .call([], callableSignature: .block(returnType: .int, parameters: [])).typed(.optional(.int)),
+                .dot("c", type: .swiftBlock(returnType: .int, parameters: [])).typed(.optional(.swiftBlock(returnType: .int, parameters: [])))
+                .call([], callableSignature: .swiftBlock(returnType: .int, parameters: [])).typed(.optional(.int)),
             // (a?.b ?? B()).c()
             into:
             Expression
@@ -388,7 +388,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
         
         XCTAssertEqual(res.resolvedType, .int)
-        XCTAssertEqual(res.asPostfix?.exp.resolvedType, .block(returnType: .int, parameters: []))
+        XCTAssertEqual(res.asPostfix?.exp.resolvedType, .swiftBlock(returnType: .int, parameters: []))
     }
     
     /// No need to correct accesses when the access is a plain member access over
@@ -430,9 +430,9 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             // a.b.c()
             expression: exp
-                .dot("c", type: .block(returnType: .int, parameters: []))
-                .typed(.nullabilityUnspecified(.block(returnType: .int, parameters: [])))
-                .call([], callableSignature: .block(returnType: .int, parameters: []))
+                .dot("c", type: .swiftBlock(returnType: .int, parameters: []))
+                .typed(.nullabilityUnspecified(.swiftBlock(returnType: .int, parameters: [])))
+                .call([], callableSignature: .swiftBlock(returnType: .int, parameters: []))
                 .typed(.nullabilityUnspecified(.int)),
             // a.b.c()
             into: expMaker().dot("c").call()
@@ -709,7 +709,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// when a nullable value is passed to a non-null parameter of a function
     /// call expression.
     func testCorrectSimpleNullableValueInNonnullParameterToIfLet() {
-        let funcType = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
         
         let exp =
             Expression
@@ -731,7 +731,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     
     /// Same as above, but as a member access.
     func testCorrectMemberAccessNullableValueInNonnullParameterToIfLet() {
-        let funcType = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
         
         let exp =
             Expression
@@ -754,7 +754,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// Use the member name of a nullable-method invocation as the name of the
     /// pattern local variable.
     func testCorrectMethodInvocationNullableValueInNonnullParameterToIfLet() {
-        let funcType = SwiftType.block(returnType: .void, parameters: [.typeName("A")])
+        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.typeName("A")])
         
         let exp =
             Expression
@@ -777,8 +777,8 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// Correct method invocation returns as well by assigning the return value
     /// to a `value` local variable using an if-let.
     func testCorrectMethodReturnNullableValueInNonnullParameterToIfLet() {
-        let funcTypeA = SwiftType.block(returnType: .void, parameters: ["A"])
-        let funcTypeB = SwiftType.block(returnType: .optional("A"), parameters: [])
+        let funcTypeA = SwiftType.swiftBlock(returnType: .void, parameters: ["A"])
+        let funcTypeB = SwiftType.swiftBlock(returnType: .optional("A"), parameters: [])
         
         let exp =
             Expression
@@ -801,7 +801,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     /// Tests non-null arguments with nullable scalar types are not corrected to
     /// an if-let, since this is dealt at another point in the AST corrector.
     func testDontCorrectSimpleNullableValueInNonnullParameterToIfLetIfArgumentIsNullableScalarType() {
-        let funcType = SwiftType.block(returnType: .void, parameters: [.int])
+        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.int])
         
         let exp =
             Expression
@@ -822,7 +822,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     
     /// Make sure we don't correct passing a nullable value to a nullable parameter
     func testDontCorrectNullableValuesPassedToNullableParameters() {
-        let funcType = SwiftType.block(returnType: .void, parameters: [.optional(.typeName("A"))])
+        let funcType = SwiftType.swiftBlock(returnType: .void, parameters: [.optional(.typeName("A"))])
         let expMaker = {
             Expression
                 .identifier("a").typed(funcType)

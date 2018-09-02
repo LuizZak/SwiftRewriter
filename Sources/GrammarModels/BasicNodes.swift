@@ -20,6 +20,10 @@ public class Identifier: ASTNode {
         
         super.init(location: location)
     }
+    
+    override public func shortDescription() -> String {
+        return name
+    }
 }
 
 /// A node that represents a special keyword-type token
@@ -30,5 +34,9 @@ public class KeywordNode: ASTNode {
         self.keyword = keyword
         
         super.init(location: location)
+    }
+    
+    override public func shortDescription() -> String {
+        return keyword.rawValue
     }
 }

@@ -550,10 +550,10 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
     
     func testMergeBlockParameterNullability() {
         let headerBlock: SwiftType
-            = .block(returnType: .void, parameters: [.typeName("A")])
+            = .swiftBlock(returnType: .void, parameters: [.typeName("A")])
         
         let unspecifiedBlock: SwiftType
-            = .nullabilityUnspecified(.block(returnType: .void, parameters: [.nullabilityUnspecified(.typeName("A"))]))
+            = .nullabilityUnspecified(.swiftBlock(returnType: .void, parameters: [.nullabilityUnspecified(.typeName("A"))]))
         
         let intentions =
             IntentionCollectionBuilder()
@@ -579,7 +579,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         
         let cls = intentions.fileIntentions()[0].typeIntentions[0]
         XCTAssertEqual(cls.methods[0].parameters[0].type,
-                       .block(returnType: .void, parameters: [.typeName("A")]))
+                       .swiftBlock(returnType: .void, parameters: [.typeName("A")]))
     }
     
     func testKeepsAliasInMergedBlockSignatures() {
@@ -589,7 +589,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     file.beginNonnulContext()
                         .createTypealias(
                             withName: "ABlock",
-                            swiftType: .block(returnType: .void, parameters: ["A"]),
+                            swiftType: .swiftBlock(returnType: .void, parameters: ["A"]),
                             type: .blockType(name: "ABlock",
                                              returnType: .void,
                                              parameters: [.pointer(.struct("A"))])
@@ -611,8 +611,8 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                                         label: nil,
                                         name: "a",
                                         type: .nullabilityUnspecified(
-                                            .block(returnType: .void,
-                                                   parameters: [.nullabilityUnspecified("A")])
+                                            .swiftBlock(returnType: .void,
+                                                        parameters: [.nullabilityUnspecified("A")])
                                         )
                                     )
                                 ]

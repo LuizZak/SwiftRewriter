@@ -26,6 +26,9 @@ class ObjcParserTests: XCTestCase {
                 int b;
             } A;
 
+            typedef void(^f)();
+            typedef int (*f2) (void *);
+
             void aFunc(int a, int b, ...);
 
             void anotherFunc(int a, int b, ...) {
@@ -445,13 +448,23 @@ class ObjcParserTests: XCTestCase {
             """)
     }
     
-    func testIfWithExpressionList() {
+    func testParseIfWithExpressionList() {
         _=parserTest("""
             void main() {
                 if (a[10] -= 20, true) {
                     
                 }
             }
+            """)
+    }
+    
+    func testParseFunctionPointerTypes() {
+        _=parserTest("""
+            typedef int (*cmpfn234)(void *, void *);
+            typedef int (*cmpfn234_2)(void (*)(), void *);
+            typedef int (*cmpfn234_2)(void (*)(void), void *);
+            typedef int (*cmpfn234_2)(void (*v)(void), void *);
+            typedef int (*cmpfn234_3)(void (^)(), void *);
             """)
     }
 }

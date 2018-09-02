@@ -112,7 +112,7 @@ public enum UIViewCompoundType {
                     parameters: [
                         ParameterSignature(label: "withRelativeStartTime", name: "frameStartTime", type: .double),
                         ParameterSignature(label: "relativeDuration", name: "frameDuration", type: .double),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: []))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: []))
                     ],
                     isStatic: true
                 )
@@ -122,16 +122,16 @@ public enum UIViewCompoundType {
                     name: "animate",
                     parameters: [
                         ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
                 ).makeSignatureMapping(
                     fromMethodNamed: "animateWithDuration",
                     parameters: [
                         ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     in: transformations,
                     annotations: annotations
@@ -143,14 +143,14 @@ public enum UIViewCompoundType {
                     name: "animate",
                     parameters: [
                         ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: []))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: []))
                     ],
                     isStatic: true
                 ).makeSignatureMapping(
                     fromMethodNamed: "animateWithDuration",
                     parameters: [
                         ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: []))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: []))
                     ],
                     in: transformations,
                     annotations: annotations
@@ -164,8 +164,8 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "delay", type: "TimeInterval"),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
                 ).makeSignatureMapping(
@@ -174,8 +174,8 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "delay", type: "TimeInterval"),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     in: transformations,
                     annotations: annotations
@@ -191,8 +191,8 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: "usingSpringWithDamping", name: "dampingRatio", type: .cgFloat),
                         ParameterSignature(label: "initialSpringVelocity", name: "velocity", type: .cgFloat),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
                 )
@@ -204,8 +204,8 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: "withDuration", name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "delay", type: "TimeInterval"),
                         ParameterSignature(name: "options", type: "UIViewKeyframeAnimationOptions"),
-                        ParameterSignature(name: "animations", type: .block(returnType: .void, parameters: [])),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "animations", type: .swiftBlock(returnType: .void, parameters: [])),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
                 )
@@ -228,8 +228,8 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: nil, name: "animation", type: "UISystemAnimation"),
                         ParameterSignature(label: "on", name: "views", type: .array("UIView")),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
-                        ParameterSignature(label: "animations", name: "parallelAnimations", type: .optional(.block(returnType: .void, parameters: []))),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(label: "animations", name: "parallelAnimations", type: .optional(.swiftBlock(returnType: .void, parameters: []))),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
                 )
@@ -238,7 +238,7 @@ public enum UIViewCompoundType {
                 FunctionSignature(
                     name: "performWithoutAnimation",
                     parameters: [
-                        ParameterSignature(label: nil, name: "actionsWithoutAnimation", type: .block(returnType: .void, parameters: []))
+                        ParameterSignature(label: nil, name: "actionsWithoutAnimation", type: .swiftBlock(returnType: .void, parameters: []))
                     ],
                     isStatic: true
                 )
@@ -365,7 +365,7 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: "to", name: "toView", type: "UIView"),
                         ParameterSignature(name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
                 )
@@ -377,8 +377,8 @@ public enum UIViewCompoundType {
                         ParameterSignature(label: "with", name: "view", type: "UIView"),
                         ParameterSignature(name: "duration", type: "TimeInterval"),
                         ParameterSignature(name: "options", type: "UIViewAnimationOptions"),
-                        ParameterSignature(name: "animations", type: .optional(.block(returnType: .void, parameters: []))),
-                        ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                        ParameterSignature(name: "animations", type: .optional(.swiftBlock(returnType: .void, parameters: []))),
+                        ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                     ],
                     isStatic: true
                 )

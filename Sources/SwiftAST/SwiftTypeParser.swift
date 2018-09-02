@@ -506,7 +506,7 @@ public class SwiftTypeParser {
         if lexer.consumeToken(ifTypeIs: .functionArrow) != nil {
             returnType = try parseType(lexer)
             
-            return .block(returnType: returnType, parameters: parameters)
+            return .block(returnType: returnType, parameters: parameters, attributes: [])
         } else if expectsBlock {
             throw expectedBlockType(lexer: lexer)
         }

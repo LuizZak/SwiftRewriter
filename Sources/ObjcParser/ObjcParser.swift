@@ -123,6 +123,35 @@ public class ObjcParser {
         rootNode = GlobalContextNode()
     }
     
+    public func printParsedNodes() {
+        var ident = 0
+        func _printIndented(_ str: String) {
+            print(String(repeating: " ", count: ident) + str)
+        }
+        
+        func _print(_ node: ASTNode) {
+            var nodeTitle = "\(type(of: node))"
+            let description = node.shortDescription()
+            if !description.isEmpty {
+                nodeTitle += " (\(description))"
+            }
+            
+            _printIndented(nodeTitle)
+            
+            ident += 2
+            for child in node.children {
+                _print(child)
+            }
+            ident -= 2
+        }
+        
+        // --
+        
+        print("Begin print ASTNodes --")
+        _print(rootNode)
+        print("-- End print ASTNodes")
+    }
+    
     func startRange() -> RangeMarker {
         return lexer.startRange()
     }

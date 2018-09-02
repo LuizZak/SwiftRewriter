@@ -17,6 +17,9 @@ public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<
     public static func extract(from ctx: ObjectiveCParser.IdentifierContext) -> String? {
         return ctx.accept(VarDeclarationIdentifierNameExtractor())
     }
+    public static func extract(from ctx: ObjectiveCParser.FunctionPointerContext) -> String? {
+        return ctx.accept(VarDeclarationIdentifierNameExtractor())
+    }
     
     public static func extractAll(from ctx: ObjectiveCParser.FieldDeclarationContext) -> [String] {
         guard let fieldDeclarators = ctx.fieldDeclaratorList()?.fieldDeclarator() else {
@@ -43,5 +46,8 @@ public class VarDeclarationIdentifierNameExtractor: ObjectiveCParserBaseVisitor<
     }
     public override func visitIdentifier(_ ctx: ObjectiveCParser.IdentifierContext) -> String? {
         return ctx.getText()
+    }
+    public override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> String? {
+        return ctx.identifier()?.accept(self)
     }
 }

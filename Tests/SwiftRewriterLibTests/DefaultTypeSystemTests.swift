@@ -64,30 +64,30 @@ class DefaultTypeSystemTests: XCTestCase {
     func testTypesMatchExpandingAliasesInBlockType() {
         sut.addTypealias(aliasName: "A", originalType: "B")
         
-        XCTAssert(sut.typesMatch(.block(returnType: "A", parameters: []),
-                                 .block(returnType: "B", parameters: []),
+        XCTAssert(sut.typesMatch(.swiftBlock(returnType: "A", parameters: []),
+                                 .swiftBlock(returnType: "B", parameters: []),
                                  ignoreNullability: false))
     }
     
     func testExpandBlockTypeAliases() {
         sut.addTypealias(
             aliasName: "A",
-            originalType: .block(returnType: .void, parameters: []))
+            originalType: .swiftBlock(returnType: .void, parameters: []))
         
         XCTAssert(sut.typesMatch(.typeName("A"),
-                                 .block(returnType: .void, parameters: []),
+                                 .swiftBlock(returnType: .void, parameters: []),
                                  ignoreNullability: false))
     }
     
     func testExpandBlockTypeAliasesDeep() {
         sut.addTypealias(aliasName: "A",
-                         originalType: .block(returnType: "B", parameters: []))
+                         originalType: .swiftBlock(returnType: "B", parameters: []))
         
         sut.addTypealias(aliasName: "B",
                          originalType: .typeName("C"))
         
         XCTAssert(sut.typesMatch(.typeName("A"),
-                                 .block(returnType: .typeName("C"), parameters: []),
+                                 .swiftBlock(returnType: .typeName("C"), parameters: []),
                                  ignoreNullability: false))
     }
     
@@ -450,24 +450,24 @@ class DefaultTypeSystemTests: XCTestCase {
     }
     
     func testAddTypeAlias() {
-        sut.addTypealias(aliasName: "A", originalType: .block(returnType: .void, parameters: []))
+        sut.addTypealias(aliasName: "A", originalType: .swiftBlock(returnType: .void, parameters: []))
         
-        XCTAssertEqual(sut.resolveAlias(in: "A"), .block(returnType: .void, parameters: []))
+        XCTAssertEqual(sut.resolveAlias(in: "A"), .swiftBlock(returnType: .void, parameters: []))
     }
     
     func testResolveAliasRecursive() {
         sut.addTypealias(aliasName: "B", originalType: .int)
-        sut.addTypealias(aliasName: "A", originalType: .block(returnType: .void, parameters: [.typeName("B")]))
+        sut.addTypealias(aliasName: "A", originalType: .swiftBlock(returnType: .void, parameters: [.typeName("B")]))
         
-        XCTAssertEqual(sut.resolveAlias(in: "A"), .block(returnType: .void, parameters: [.int]))
+        XCTAssertEqual(sut.resolveAlias(in: "A"), .swiftBlock(returnType: .void, parameters: [.int]))
     }
     
     func testResolveAliasSwiftType() {
         sut.addTypealias(aliasName: "B", originalType: .int)
-        sut.addTypealias(aliasName: "A", originalType: .block(returnType: .void, parameters: [.typeName("B")]))
+        sut.addTypealias(aliasName: "A", originalType: .swiftBlock(returnType: .void, parameters: [.typeName("B")]))
         
-        XCTAssertEqual(sut.resolveAlias(in: .block(returnType: .void, parameters: [.typeName("A")])),
-                       .block(returnType: .void, parameters: [.block(returnType: .void, parameters: [.int])]))
+        XCTAssertEqual(sut.resolveAlias(in: .swiftBlock(returnType: .void, parameters: [.typeName("A")])),
+                       .swiftBlock(returnType: .void, parameters: [.swiftBlock(returnType: .void, parameters: [.int])]))
     }
     
     func testIsTypeConformingToProtocol() {

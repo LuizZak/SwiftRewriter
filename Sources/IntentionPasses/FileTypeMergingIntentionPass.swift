@@ -3,6 +3,9 @@ import SwiftRewriterLib
 import SwiftAST
 
 public class FileTypeMergingIntentionPass: IntentionPass {
+    private let headerExtensions: [String] = [".h"]
+    private let implementationExtensions: [String] = [".m", ".c"]
+    
     public init() {
         
     }
@@ -11,17 +14,21 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         
         let typeMerger = TypeMerger(typeSystem: context.typeSystem)
         
-        // Collect .h/.m pairs
+        // Collect header/implementation pairs
         let intentions = intentionCollection.fileIntentions()
         
         var headers: [FileGenerationIntention] = []
         var implementations: [FileGenerationIntention] = []
         
         headers = intentions.filter { intent in
-            intent.sourcePath.hasSuffix(".h")
+            headerExtensions.contains {
+                intent.sourcePath.hasSuffix($0)
+            }
         }
         implementations = intentions.filter { intent in
-            intent.sourcePath.hasSuffix(".m")
+            implementationExtensions.contains {
+                intent.sourcePath.hasSuffix($0)
+            }
         }
         
         // Merge all types from the header files into the associated implementation
@@ -42,8 +49,8 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             }
         }
         
-        // Move all enum/protocol/global variables from .h to .m files, when
-        // available
+        // Move all enum/protocol/global variables from header to implementation
+        // files, when available
         for header in headers {
             let path = (header.sourcePath as NSString).deletingPathExtension
             guard let impl = implementations.first(where: {
@@ -121,7 +128,9 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         
         // Remove all empty header files
         intentionCollection.removeIntentions { intent -> Bool in
-            return intent.sourcePath.hasSuffix(".h") && intent.isEmpty
+            return headerExtensions.contains {
+                intent.sourcePath.hasSuffix($0)
+            } && intent.isEmpty
         }
         
         // Always notify a change- it's easier to just consider things as changed

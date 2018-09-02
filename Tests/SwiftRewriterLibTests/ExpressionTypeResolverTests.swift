@@ -661,7 +661,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         let exp = Expression.identifier("closure").call()
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "closure", type: .block(returnType: .void, parameters: []))
+            .definingLocal(name: "closure", type: .swiftBlock(returnType: .void, parameters: []))
             .resolve()
             .thenAssertExpression(resolvedAs: .void)
     }
@@ -669,10 +669,10 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testCallOptionalClosureType() {
         // closure()
         let exp = Expression.identifier("closure").call()
-        exp.exp.resolvedType = .optional(.block(returnType: .void, parameters: []))
+        exp.exp.resolvedType = .optional(.swiftBlock(returnType: .void, parameters: []))
         
         startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "closure", type: .block(returnType: .void, parameters: []))
+            .definingLocal(name: "closure", type: .swiftBlock(returnType: .void, parameters: []))
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.void))
     }
@@ -731,7 +731,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             ])
         
         _=startScopedTest(with: exp, sut: ExpressionTypeResolver())
-            .definingLocal(name: "callback", type: .optional(.block(returnType: .void, parameters: [])))
+            .definingLocal(name: "callback", type: .optional(.swiftBlock(returnType: .void, parameters: [])))
             .resolve()
         
         XCTAssertEqual(callbacks[0].resolvedType, .optional(.void))
@@ -837,7 +837,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         _=startScopedTest(with:
             Expression.identifier("a").call([.constant(false)]),
                           sut: ExpressionTypeResolver())
-            .definingLocal(name: "a", type: SwiftType.block(returnType: .void, parameters: [.int]))
+            .definingLocal(name: "a", type: SwiftType.swiftBlock(returnType: .void, parameters: [.int]))
             .resolve()
             .thenAssertExpression(at: \Expression.asPostfix?.functionCall?.arguments[0].expression, expectsType: .int)
     }
@@ -918,7 +918,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                 parameters: [BlockParameter(name: "a", type: .nullabilityUnspecified(.typeName("A")))],
                 return: .void,
                 body: [])
-        exp.expectedType = .block(returnType: .void, parameters: [.typeName("A")])
+        exp.expectedType = .swiftBlock(returnType: .void, parameters: [.typeName("A")])
         let sut = ExpressionTypeResolver()
         
         _=sut.resolveType(exp)
@@ -939,7 +939,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                 return: .void,
                 body: []
             )
-        exp.expectedType = .optional(.block(returnType: .void, parameters: [.typeName("A")]))
+        exp.expectedType = .optional(.swiftBlock(returnType: .void, parameters: [.typeName("A")]))
         let sut = ExpressionTypeResolver()
         
         _=sut.resolveType(exp)
@@ -960,7 +960,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                 return: .void,
                 body: []
         )
-        exp.expectedType = .implicitUnwrappedOptional(.block(returnType: .void, parameters: [.typeName("A")]))
+        exp.expectedType = .implicitUnwrappedOptional(.swiftBlock(returnType: .void, parameters: [.typeName("A")]))
         let sut = ExpressionTypeResolver()
         
         _=sut.resolveType(exp)
@@ -976,7 +976,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                 parameters: [BlockParameter(name: "a", type: .optional(.typeName("A")))],
                 return: .void,
                 body: [])
-        exp.expectedType = .block(returnType: .void, parameters: [.typeName("A")])
+        exp.expectedType = .swiftBlock(returnType: .void, parameters: [.typeName("A")])
         let sut = ExpressionTypeResolver()
         
         _=sut.resolveType(exp)
@@ -994,7 +994,7 @@ class ExpressionTypeResolverTests: XCTestCase {
                 return: .void,
                 body: [])
         exp.expectedType =
-            .block(returnType: .void,
+            .swiftBlock(returnType: .void,
                    parameters: [.typeName("A"),
                                 .typeName("B"),
                                 ])
@@ -1078,7 +1078,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             with: Expression.block(parameters: [],
                                    return: .nullabilityUnspecified(.typeName("NSObject")),
                                    body: [.return(.constant(0))])
-                .typed(expected: SwiftType.block(returnType: .typeName("NSObject"), parameters: [])),
+                .typed(expected: SwiftType.swiftBlock(returnType: .typeName("NSObject"), parameters: [])),
             sut: ExpressionTypeResolver())
             .resolve()
             .thenAssertExpression(at: \Expression.asBlock?.body.statements[0].asReturn?.exp,
@@ -1137,7 +1137,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(
             with: Expression
                 .identifier("a")
-                .typed(SwiftType.block(returnType: .void, parameters: ["GLenum"]))
+                .typed(SwiftType.swiftBlock(returnType: .void, parameters: ["GLenum"]))
                 .call([Expression.constant(1).typed("GLint")]),
             sut: ExpressionTypeResolver())
             .definingTypeAlias("GLenum", type: "UInt32")
@@ -1168,7 +1168,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(
                 at: \Expression.asPostfix?.functionCall?.subExpressions[0].asPostfix?.exp,
-                expectsType: .block(returnType: .int, parameters: [])
+                expectsType: .swiftBlock(returnType: .int, parameters: [])
             )
         
         // Test that argument types are back-propagated as well
@@ -1179,7 +1179,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(
                 at: \Expression.asPostfix?.functionCall?.subExpressions[0].asPostfix?.exp,
-                expectsType: .block(returnType: .int, parameters: [.int])
+                expectsType: .swiftBlock(returnType: .int, parameters: [.int])
             )
     }
     
@@ -1190,11 +1190,11 @@ class ExpressionTypeResolverTests: XCTestCase {
             sut: ExpressionTypeResolver())
             .thenAssertExpression(
                 at: \Statement.asIf?.exp.asPostfix?.exp,
-                expectsType: .block(returnType: .bool, parameters: [.int])
+                expectsType: .swiftBlock(returnType: .bool, parameters: [.int])
             )
             .thenAssertExpression(
                 at: \Statement.asIf?.exp.asPostfix?.exp,
-                resolvedAs: .block(returnType: .bool, parameters: [.int])
+                resolvedAs: .swiftBlock(returnType: .bool, parameters: [.int])
             )
     }
     

@@ -93,7 +93,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         let walker = ParseTreeWalker()
         try? walker.walk(globalVariableListener, ctx)
         
-        for global in globalVariableListener.variables {
+        for global in globalVariableListener.declarations {
             context.addChildNode(global)
         }
     }
@@ -450,6 +450,18 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         guard let typedefNode = context.currentContextNode(as: TypedefNode.self) else {
             return
         }
+        
+        if let functionPointer = ctx.functionPointer() {
+            // TODO: FunctionPointerVisitor may be better off being a listener
+            // instead of a visitor due to this awkward use case?
+            let visitor =
+                FunctionPointerVisitor(typedefNode: typedefNode,
+                                       typeParser: typeParser)
+            _=functionPointer.accept(visitor)
+            
+            return
+        }
+        
         guard let typeDeclaratorList = ctx.typeDeclaratorList() else {
             return
         }
@@ -674,7 +686,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
 }
 
 private class GlobalVariableListener: ObjectiveCParserBaseListener {
-    var variables: [VariableDeclaration] = []
+    var declarations: [ASTNode] = []
     var typeParser: TypeParsing
     
     init(typeParser: TypeParsing) {
@@ -691,7 +703,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
             guard let varDeclaration = declaration.varDeclaration() else { continue }
             
             if let vars = varDeclaration.accept(visitor) {
-                variables.append(contentsOf: vars)
+                declarations.append(contentsOf: vars)
             }
         }
     }
@@ -706,21 +718,32 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
         let visitor = GlobalVariableVisitor(typeParser: typeParser)
         
         if let vars = ctx.accept(visitor) {
-            variables.append(contentsOf: vars)
+            declarations.append(contentsOf: vars)
         }
     }
     
-    private class GlobalVariableVisitor: ObjectiveCParserBaseVisitor<[VariableDeclaration]> {
+    private class GlobalVariableVisitor: ObjectiveCParserBaseVisitor<[ASTNode]> {
         var typeParser: TypeParsing
         
         init(typeParser: TypeParsing) {
             self.typeParser = typeParser
         }
         
-        override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> [VariableDeclaration]? {
-            var variables: [VariableDeclaration] = []
+        override func visitVarDeclaration(_ ctx: ObjectiveCParser.VarDeclarationContext) -> [ASTNode]? {
+            var declarations: [ASTNode] = []
             
-            guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else { return nil }
+            // Free struct/union declarators
+            if let typeSpecifiers = ctx.declarationSpecifiers()?.typeSpecifier() {
+                for specifier in typeSpecifiers {
+                    if let vars = specifier.accept(self) {
+                        declarations.append(contentsOf: vars)
+                    }
+                }
+            }
+            
+            guard let initDeclarators = ctx.initDeclaratorList()?.initDeclarator() else {
+                return declarations
+            }
             
             let allTypes = VarDeclarationTypeExtractor.extractAll(from: ctx)
             
@@ -749,10 +772,22 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                     varDecl.addChild(initialExpression)
                 }
                 
-                variables.append(varDecl)
+                declarations.append(varDecl)
             }
             
-            return variables
+            return declarations
+        }
+        
+        override func visitTypeSpecifier(_ ctx: ObjectiveCParser.TypeSpecifierContext) -> [ASTNode]? {
+            if ctx.structOrUnionSpecifier() != nil {
+                let structListener = StructListener(typeParser: typeParser)
+                let walker = ParseTreeWalker()
+                try? walker.walk(structListener, ctx)
+                
+                return structListener.structs
+            }
+            
+            return nil
         }
     }
 }
@@ -868,6 +903,37 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         node.sourceRuleContext = ctx
         
         property.attributesList?.addChild(node)
+    }
+}
+
+private class FunctionPointerVisitor: ObjectiveCParserBaseVisitor<TypedefNode> {
+    
+    var typedefNode: TypedefNode
+    var typeParser: TypeParsing
+    
+    init(typedefNode: TypedefNode, typeParser: TypeParsing) {
+        
+        self.typedefNode = typedefNode
+        self.typeParser = typeParser
+    }
+    
+    override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> TypedefNode? {
+        guard let name = VarDeclarationIdentifierNameExtractor.extract(from: ctx) else {
+            return nil
+        }
+        guard let type = typeParser.parseObjcType(fromFunctionPointer: ctx) else {
+            return nil
+        }
+        
+        let identifierNode = Identifier(name: name)
+        identifierNode.sourceRuleContext = ctx.identifier()
+        let typeNameNode = TypeNameNode(type: type)
+        typeNameNode.sourceRuleContext = ctx
+        
+        typedefNode.addChild(identifierNode)
+        typedefNode.addChild(typeNameNode)
+        
+        return nil
     }
 }
 

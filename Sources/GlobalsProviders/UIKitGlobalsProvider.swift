@@ -536,8 +536,8 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .method(withSignature:
                     FunctionSignature(
                         name: "performBatchUpdates", parameters: [
-                            ParameterSignature(label: nil, name: "updates", type: .optional(.block(returnType: .void, parameters: []))),
-                            ParameterSignature(name: "completion", type: .optional(.block(returnType: .void, parameters: [.bool])))
+                            ParameterSignature(label: nil, name: "updates", type: .optional(.swiftBlock(returnType: .void, parameters: []))),
+                            ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
                         ]
                     )
                 )

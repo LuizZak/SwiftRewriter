@@ -20,9 +20,11 @@ public struct FunctionSignature: Equatable, Codable {
             )
     }
     
+    // TODO: Support suplying type attributes for function signatures
     /// Returns a `SwiftType.block`-equivalent type for this function signature
     public var swiftClosureType: SwiftType {
-        return .block(returnType: returnType, parameters: parameters.map { $0.type })
+        return .swiftBlock(returnType: returnType,
+                           parameters: parameters.map { $0.type })
     }
     
     public var droppingNullability: FunctionSignature {

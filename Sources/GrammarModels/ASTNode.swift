@@ -139,6 +139,12 @@ open class ASTNode {
             self.location.range = range
         }
     }
+    
+    /// Overriden by subclasses to provide custom short descriptions to be used
+    /// when printing AST nodes for diagnostics
+    public func shortDescription() -> String {
+        return ""
+    }
 }
 
 /// Describes a node with a parameterless `init()`

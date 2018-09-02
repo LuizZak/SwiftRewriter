@@ -387,4 +387,43 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         
         return output
     }
+    
+    public override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> TypeName? {
+        var output = ""
+        
+        if let specifiers = ctx.declarationSpecifiers()?.accept(self) {
+            output += specifiers
+        }
+        
+        output += "(*"
+        
+        if let identifier = ctx.identifier()?.getText() {
+            output += identifier
+        }
+        
+        output += ")("
+        
+        let parameterList =
+            ctx.functionPointerParameterList()?
+                .functionPointerParameterDeclarationList()?
+                .functionPointerParameterDeclaration()
+        
+        if let parameterList = parameterList {
+            for (i, param) in parameterList.enumerated() {
+                if i > 0 {
+                    output += ", "
+                }
+                
+                if let declSpec = param.declarationSpecifiers()?.accept(self) {
+                    output += declSpec
+                } else if let functionPointer = param.functionPointer()?.accept(self) {
+                    output += functionPointer
+                }
+            }
+        }
+        
+        output += ")"
+        
+        return output
+    }
 }

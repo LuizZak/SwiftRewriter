@@ -24,8 +24,8 @@ class DefaultTypeMapperTests: XCTestCase {
         expectSwift(.optional(.dictionary(key: .int, value: .string)), toConvertTo: "[Int: String]?")
         expectSwift(.protocolComposition([.typeName("Type1"), .typeName("Type2")]), toConvertTo: "Type1 & Type2")
         expectSwift(.optional(.protocolComposition([.typeName("Type1"), .typeName("Type2")])), toConvertTo: "(Type1 & Type2)?")
-        expectSwift(.block(returnType: .int, parameters: [.int]), toConvertTo: "(Int) -> Int")
-        expectSwift(.optional(.block(returnType: .int, parameters: [.int])), toConvertTo: "((Int) -> Int)?")
+        expectSwift(.swiftBlock(returnType: .int, parameters: [.int]), toConvertTo: "(Int) -> Int")
+        expectSwift(.optional(.swiftBlock(returnType: .int, parameters: [.int])), toConvertTo: "((Int) -> Int)?")
         expectSwift(.metatype(for: .int), toConvertTo: "Int.self")
         expectSwift(.tuple(.empty), toConvertTo: "Void")
         expectSwift(.tuple(.types([.int, .int])), toConvertTo: "(Int, Int)")
@@ -345,7 +345,7 @@ class DefaultTypeMapperTests: XCTestCase {
     
     func testNullableBlockViaTypealias() {
         typeSystem.addTypealias(aliasName: "callback",
-                                originalType: .block(returnType: .void, parameters: []))
+                                originalType: .swiftBlock(returnType: .void, parameters: []))
         
         expect(.qualified(.struct("callback"),
                           qualifiers: ["_Nullable"]),
