@@ -433,7 +433,7 @@ class TypeMerger {
                 SwiftType.asNonnullDeep(type1Unaliased.deepUnwrapped,
                                         removeUnspecifiedsOnly: true)
             
-            var type2NonnullDeep =
+            let type2NonnullDeep =
                 SwiftType.asNonnullDeep(type2Unaliased.deepUnwrapped,
                                         removeUnspecifiedsOnly: true)
             
