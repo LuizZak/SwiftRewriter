@@ -47,14 +47,78 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: @escaping () -> Void)",
             parseInto: [
-                ParameterSignature(label: nil, name: "arg0", type: .swiftBlock(returnType: .void, parameters: []))
+                ParameterSignature(
+                    label: nil,
+                    name: "arg0",
+                    type: .block(returnType: .void,
+                                 parameters: [],
+                                 attributes: [.escaping])
+                )
+            ]
+        )
+        
+        assert(
+            string: "(_ arg0: @autoclosure () -> Void)",
+            parseInto: [
+                ParameterSignature(
+                    label: nil,
+                    name: "arg0",
+                    type: .block(returnType: .void,
+                                 parameters: [],
+                                 attributes: [.autoclosure])
+                )
             ]
         )
         
         assert(
             string: "(_ arg0: @autoclosure @escaping () -> Void)",
             parseInto: [
-                ParameterSignature(label: nil, name: "arg0", type: .swiftBlock(returnType: .void, parameters: []))
+                ParameterSignature(
+                    label: nil,
+                    name: "arg0",
+                    type: .block(returnType: .void,
+                                 parameters: [],
+                                 attributes: [.autoclosure, .escaping])
+                )
+            ]
+        )
+    }
+    
+    func testParseParameterAttributesBlockCallingConvention() {
+        assert(
+            string: "(_ arg0: @convention(c) () -> Void)",
+            parseInto: [
+                ParameterSignature(
+                    label: nil,
+                    name: "arg0",
+                    type: .block(returnType: .void,
+                                 parameters: [],
+                                 attributes: [.convention(.c)])
+                )
+            ]
+        )
+        
+        assert(
+            string: "(_ arg0: @convention(block) () -> Void)",
+            parseInto: [
+                ParameterSignature(
+                    label: nil,
+                    name: "arg0",
+                    type: .block(returnType: .void,
+                                 parameters: [],
+                                 attributes: [.convention(.block)])
+                )
+            ]
+        )
+        
+        assert(
+            string: "(_ arg0: @convention(swift) () -> Void)",
+            parseInto: [
+                ParameterSignature(
+                    label: nil,
+                    name: "arg0",
+                    type: .swiftBlock(returnType: .void, parameters: [])
+                )
             ]
         )
     }
@@ -63,7 +127,13 @@ class FunctionSignatureParserTests: XCTestCase {
         assert(
             string: "(_ arg0: @escaping inout () -> Void)",
             parseInto: [
-                ParameterSignature(label: nil, name: "arg0", type: .swiftBlock(returnType: .void, parameters: []))
+                ParameterSignature(
+                    label: nil,
+                    name: "arg0",
+                    type: .block(returnType: .void,
+                                 parameters: [],
+                                 attributes: [.escaping])
+                )
             ]
         )
     }

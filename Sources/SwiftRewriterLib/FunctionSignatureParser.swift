@@ -184,17 +184,50 @@ public final class FunctionSignatureParser {
         return parameters
     }
     
-    private static func skipTypeAnnotations(tokenizer: Tokenizer) throws {
+    private static func parseTypeAnnotations(tokenizer: Tokenizer) throws -> [BlockTypeAttribute] {
+        var attributes: [BlockTypeAttribute] = []
+        
         while tokenizer.consumeToken(ifTypeIs: .at) != nil {
-            try tokenizer.advance(overTokenType: .identifier)
+            let token = try tokenizer.advance(overTokenType: .identifier)
+            
+            switch token.value {
+            case "autoclosure":
+                attributes.append(.autoclosure)
+            case "escaping":
+                attributes.append(.escaping)
+            case "convention":
+                // Parse convention type
+                try tokenizer.advance(overTokenType: .openParens)
+                let ident = try tokenizer.advance(overTokenType: .identifier)
+                try tokenizer.advance(overTokenType: .closeParens)
+                
+                switch ident.value {
+                case "c":
+                    attributes.append(.convention(.c))
+                case "block":
+                    attributes.append(.convention(.block))
+                case "swift":
+                    break // "swift" calling convention is the default and is the
+                          // same as not having any calling convention attributes
+                default:
+                    break
+                }
+                
+            default:
+                break
+            }
         }
         
         // Inout marks the end of an attributes list
         tokenizer.consumeToken(ifTypeIs: .inout)
+        
+        return attributes
     }
     
     private static func parseParameter(tokenizer: Tokenizer) throws -> ParameterSignature {
         let label: String?
+        let name: String
+        var attributes: [BlockTypeAttribute] = []
         if tokenizer.tokenType(is: .underscore) {
             try tokenizer.advance(overTokenType: .underscore)
             label = nil
@@ -202,24 +235,33 @@ public final class FunctionSignatureParser {
             label = String(try tokenizer.advance(overTokenType: .identifier).value)
         }
         
+        var type: SwiftType
+        
         if tokenizer.consumeToken(ifTypeIs: .colon) != nil {
             guard let label = label else {
                 throw tokenizer.lexer.syntaxError("Expected argument name after '_'")
             }
             
-            try skipTypeAnnotations(tokenizer: tokenizer)
+            name = label
+        } else {
+            name = String(try tokenizer.advance(overTokenType: .identifier).value)
             
-            let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
-            
-            return ParameterSignature(name: label, type: type)
+            try tokenizer.advance(overTokenType: .colon)
         }
         
-        let name = try tokenizer.advance(overTokenType: .identifier).value
+        attributes.append(contentsOf: try parseTypeAnnotations(tokenizer: tokenizer))
+        type = try SwiftTypeParser.parse(from: tokenizer.lexer)
         
-        try tokenizer.advance(overTokenType: .colon)
-        
-        try skipTypeAnnotations(tokenizer: tokenizer)
-        let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        // Append attributes
+        switch type {
+        case let .block(returnType, parameters, attr):
+            type = .block(returnType: returnType,
+                          parameters: parameters,
+                          attributes: attr.union(attributes))
+            
+        default:
+            break
+        }
         
         return ParameterSignature(label: label, name: String(name), type: type)
     }
