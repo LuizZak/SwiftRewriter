@@ -6,6 +6,15 @@ public class StructGenerationIntention: TypeGenerationIntention, InstanceVariabl
         return .struct
     }
     
+    public override var isEmptyType: Bool {
+        // Unlike with classes, constructors do not count when defining whether
+        // the type definition is empty or not.
+        return protocols.isEmpty
+            && properties.isEmpty
+            && methods.isEmpty
+            && instanceVariables.isEmpty
+    }
+    
     private(set) public var instanceVariables: [InstanceVariableGenerationIntention] = []
     
     public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {

@@ -43,9 +43,7 @@ public class ASTSimplifier: ASTRewriterPass {
             ValueMatcher<IfStatement>()
                 .match(if: !hasElse())
                 .keyPath(\.nullCheckMember?.asIdentifier,
-                         .differentThan(nil)
-                            ->> &nullCheckM
-                )
+                            .differentThan(nil) ->> &nullCheckM)
                 .keyPath(\.body.statements, hasCount(1))
                 .keyPath(\.body.statements[0].asExpressions,
                          ValueMatcher()

@@ -626,4 +626,31 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         let cls = intentions.fileIntentions()[1].typeIntentions[0]
         XCTAssertEqual(cls.methods[0].parameters[0].type, "ABlock")
     }
+    
+    func testMergeStructTypeDefinitions() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.h") { file in
+                    file.createStruct(withName: "A")
+                }
+                .createFile(named: "A.m") { file in
+                    file.createStruct(withName: "A") { str in
+                        str.createInstanceVariable(named: "a", type: .int)
+                            .createConstructor()
+                            .createConstructor(
+                                withParameters: [
+                                    ParameterSignature(name: "a", type: .int)
+                                ])
+                    }
+                }.build()
+        let sut = FileTypeMergingIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let file = intentions.fileIntentions()[0]
+        XCTAssertEqual(intentions.fileIntentions().count, 1)
+        XCTAssert(file.sourcePath.hasSuffix(".m"))
+        XCTAssertEqual(file.structIntentions.count, 1)
+        XCTAssertEqual(file.structIntentions[0].instanceVariables.count, 1)
+    }
 }

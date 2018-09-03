@@ -569,6 +569,33 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             .transpile()
             .assertExpectedSwiftFiles()
     }
+    
+    func testMergeStructsFromHeaderAndImplementation() {
+        assertThat()
+            .file(name: "A.h", """
+            typedef struct Aimpl A;
+            """)
+            .file(name: "A.m", """
+            struct Aimpl {
+                int a;
+            };
+            """)
+            .translatesToSwift("""
+            typealias A = Aimpl
+            
+            struct Aimpl {
+                var a: CInt
+                
+                init() {
+                    a = 0
+                }
+                init(a: CInt) {
+                    self.a = a
+                }
+            }
+            // End of file A.swift
+            """)
+    }
 }
 
 extension SwiftRewriter_MultiFilesTests {

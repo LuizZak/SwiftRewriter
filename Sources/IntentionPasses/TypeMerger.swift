@@ -23,11 +23,16 @@ class TypeMerger {
         let sourceExtensions = source.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         let targetExtensions = target.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
         
+        let sourceStructs = source.structIntentions
+        let targetStructs = target.structIntentions
+        
         let allClasses = sourceClasses + targetClasses
         let allExtensions = sourceExtensions + targetExtensions
+        let allStructs = sourceStructs + targetStructs
         
         let allClassesByName = Dictionary(grouping: allClasses, by: { $0.typeName })
         let allExtensionsByName = Dictionary(grouping: allExtensions, by: { $0.typeName })
+        let allStructsByName = Dictionary(grouping: allStructs, by: { $0.typeName })
         
         for (_, classes) in allClassesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
@@ -68,6 +73,20 @@ class TypeMerger {
             
             mergeTypeSignatures(gvar.type, &targetVar.storage.type)
         }
+        
+        // Merge struct definitions
+        for (_, structs) in allStructsByName {
+            guard let target = structs.first(where: { !$0.isEmptyType }) else {
+                continue
+            }
+            
+            let remaining = structs.filter { $0 !== target }
+            
+            mergeAllTypeDefinitions(in: remaining, on: target)
+            
+            // Remove merged structs
+            source.removeTypes(where: { type in remaining.contains { $0 === type } })
+        }
     }
 
     /// Merges in duplicated types from @interface and @implementation's that match
@@ -75,9 +94,11 @@ class TypeMerger {
     func mergeDuplicatedTypesInFile(_ file: FileGenerationIntention) {
         let classes = file.typeIntentions.compactMap { $0 as? ClassGenerationIntention }
         let extensions = file.typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
+        let structs = file.structIntentions
         
         let classesByName = Dictionary(grouping: classes, by: { $0.typeName })
         let extensionsByName = Dictionary(grouping: extensions, by: { $0.typeName })
+        let structsByName = Dictionary(grouping: structs, by: { $0.typeName })
         
         for (_, classes) in classesByName {
             guard let target = classes.first(where: { !$0.isInterfaceSource }) else {
@@ -108,6 +129,19 @@ class TypeMerger {
                 // Remove all interface types after merge
                 file.removeTypes { type in remaining.contains { $0 === type } }
             }
+        }
+        
+        for (_, structs) in structsByName {
+            guard let target = structs.first(where: { !$0.isEmptyType }) else {
+                continue
+            }
+            
+            let remaining = structs.filter { $0 !== target }
+            
+            mergeAllTypeDefinitions(in: remaining, on: target)
+            
+            // Remove merged structs
+            file.removeTypes(where: { type in remaining.contains { $0 === type } })
         }
     }
 

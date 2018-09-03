@@ -59,31 +59,31 @@ public class FileTypeMergingIntentionPass: IntentionPass {
                 continue
             }
             
-            header.enumIntentions.forEach { en in
-                header.removeTypes(where: { $0 === en })
-                impl.addType(en)
+            header.enumIntentions.forEach { enumIntent in
+                header.removeTypes(where: { $0 === enumIntent })
+                impl.addType(enumIntent)
             }
             
-            header.protocolIntentions.forEach { prot in
-                header.removeTypes(where: { $0 === prot })
-                impl.addType(prot)
+            header.protocolIntentions.forEach { protocolIntent in
+                header.removeTypes(where: { $0 === protocolIntent })
+                impl.addType(protocolIntent)
             }
             
-            header.typealiasIntentions.forEach { alias in
-                header.removeTypealiases(where: { $0 === alias })
-                impl.addTypealias(alias)
+            header.typealiasIntentions.forEach { aliasIntent in
+                header.removeTypealiases(where: { $0 === aliasIntent })
+                impl.addTypealias(aliasIntent)
             }
             
-            header.structIntentions.forEach { alias in
-                header.removeTypes(where: { $0 === alias })
-                impl.addType(alias)
+            header.structIntentions.forEach { structIntent in
+                header.removeTypes(where: { $0 === structIntent })
+                impl.addType(structIntent)
             }
             
-            header.globalVariableIntentions.forEach { gvar in
-                header.removeGlobalVariables(where: { $0 === gvar })
+            header.globalVariableIntentions.forEach { globalVarIntent in
+                header.removeGlobalVariables(where: { $0 === globalVarIntent })
                 
-                if !impl.globalVariableIntentions.contains(where: { $0.name == gvar.name }) {
-                    impl.addGlobalVariable(gvar)
+                if !impl.globalVariableIntentions.contains(where: { $0.name == globalVarIntent.name }) {
+                    impl.addGlobalVariable(globalVarIntent)
                 }
             }
         }
