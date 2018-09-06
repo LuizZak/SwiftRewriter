@@ -120,7 +120,7 @@ public class ObjcParser {
         lexer = ObjcLexer(source: source)
         context = NodeCreationContext()
         diagnostics = Diagnostics()
-        rootNode = GlobalContextNode()
+        rootNode = GlobalContextNode(isInNonnullContext: false)
     }
     
     public func printParsedNodes() {
@@ -186,10 +186,15 @@ public class ObjcParser {
         preprocessorDirectives = []
         
         let input = try parsePreprocessor()
-        try parseMainChannel(input: input)
         try parseNSAssumeNonnullChannel(input: input)
         
-        // Go around the tree setting the source for the nodes
+        let nonnullContextQuerier =
+            NonnullContextQuerier(nonnullMacroRegionsTokenRange: nonnullMacroRegionsTokenRange)
+        
+        try parseMainChannel(input: input, nonnullContextQuerier: nonnullContextQuerier)
+        
+        // Go around the tree setting the source for the nodes and detecting
+        // nodes within assume non-null ranges
         let visitor = AnyASTVisitor(visit: { $0.originalSource = self.source })
         let traverser = ASTTraverser(node: rootNode, visitor: visitor)
         traverser.traverse()
@@ -257,7 +262,9 @@ public class ObjcParser {
         return processed.visitObjectiveCDocument(root) ?? ""
     }
     
-    private func parseMainChannel(input: String) throws {
+    private func parseMainChannel(input: String,
+                                  nonnullContextQuerier: NonnullContextQuerier) throws {
+        
         // Make a pass with ANTLR before traversing the parse tree and collecting
         // known constructs
         let src = source.fetchSource()
@@ -273,7 +280,8 @@ public class ObjcParser {
             ObjcParserListener(sourceString: src,
                                source: source,
                                state: state,
-                               antlrSettings: antlrSettings)
+                               antlrSettings: antlrSettings,
+                               nonnullContextQuerier: nonnullContextQuerier)
         
         let walker = ParseTreeWalker()
         try walker.walk(listener, root)

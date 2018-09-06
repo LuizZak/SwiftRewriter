@@ -43,7 +43,7 @@ public struct StringCodeSource: CodeSource {
             return 0
         }
         
-        return source.distance(from: index, to: offsets.lowerBound) + 1
+        return source.distance(from: offsets.lowerBound, to: index) + 1
     }
     
     private mutating func _computeLineOffsets() {

@@ -5,8 +5,8 @@ public class ObjcClassImplementation: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

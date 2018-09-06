@@ -9,11 +9,17 @@ public final class SourceLocation {
     ///
     /// It always has a `SourceRange.invalid` range and a source pointing to an
     /// `InvalidSource` instance.
-    public static let invalid = SourceLocation(source: InvalidSource.invalid,
-                                               range: .invalid)
+    public static var invalid: SourceLocation {
+        return SourceLocation(source: InvalidSource.invalid,
+                              range: .invalid)
+    }
     
-    /// The original source this location references.
-    public var source: Source
+    /// The original source this location reference.
+    public var source: Source {
+        didSet {
+            computeLineAndColumn()
+        }
+    }
     
     /// Line at which this location starts within the source.
     /// Valid source location lines start at 1.
@@ -42,6 +48,7 @@ public final class SourceLocation {
         }
         set {
             _range = .range(newValue)
+            computeLineAndColumn()
         }
     }
     

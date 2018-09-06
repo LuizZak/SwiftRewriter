@@ -6,8 +6,8 @@ public class ObjcClassInterface: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -44,8 +44,8 @@ public class IVarsList: ASTNode, InitializableNode {
         return childrenMatching()
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -57,8 +57,8 @@ public class IVarDeclaration: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -67,8 +67,8 @@ public class ProtocolReferenceList: ASTNode, InitializableNode {
         return childrenMatching()
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

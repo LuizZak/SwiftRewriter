@@ -23,20 +23,20 @@ class IntentionCollectorTests: XCTestCase {
     
     func testCollectFunctionDefinition() {
         // Arrange
-        let root = GlobalContextNode()
+        let root = GlobalContextNode(isInNonnullContext: false)
         
-        let function = FunctionDefinition()
+        let function = FunctionDefinition(isInNonnullContext: false)
         root.addChild(function)
         
-        function.addChild(Identifier(name: "global"))
-        function.addChild(TypeNameNode(type: .void))
+        function.addChild(Identifier(name: "global", isInNonnullContext: false))
+        function.addChild(TypeNameNode(type: .void, isInNonnullContext: false))
         
-        let parameters = ParameterList()
+        let parameters = ParameterList(isInNonnullContext: false)
         function.addChild(parameters)
         
-        let param1 = FunctionParameter()
-        param1.addChild(Identifier(name: "a"))
-        param1.addChild(TypeNameNode(type: .struct("NSInteger")))
+        let param1 = FunctionParameter(isInNonnullContext: false)
+        param1.addChild(Identifier(name: "a", isInNonnullContext: false))
+        param1.addChild(TypeNameNode(type: .struct("NSInteger"), isInNonnullContext: false))
         parameters.addChild(param1)
         
         // Act
