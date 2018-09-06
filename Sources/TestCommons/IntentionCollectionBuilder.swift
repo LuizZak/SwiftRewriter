@@ -279,7 +279,7 @@ public class MemberBuilder<T: MemberGenerationIntention> {
 
 public extension MemberBuilder where T: OverridableMemberGenerationIntention {
     @discardableResult
-    public func setIsOverride(_ isOverride: Bool) -> MemberBuilder  {
+    public func setIsOverride(_ isOverride: Bool) -> MemberBuilder {
         targetMember.isOverride = isOverride
         return self
     }
@@ -480,7 +480,6 @@ public extension TypeBuilder where T: BaseClassIntention {
         
         return self
     }
-    
     
     @discardableResult
     public func createConformance(protocolName: String) -> TypeBuilder {
