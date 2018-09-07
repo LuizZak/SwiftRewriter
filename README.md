@@ -84,12 +84,10 @@ MyClass.m:
 SwiftRewriter will output the given Swift code:
 
 ```swift
-@objc
 class MyClass: NSObject {
-    @objc var name: String
-    @objc var surname: String
+    var name: String
+    var surname: String
     
-    @objc
     func printMyName() {
         NSLog("%@ %@", self.name, self.surname)
     }
