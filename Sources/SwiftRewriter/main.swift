@@ -33,9 +33,11 @@ let parser =
     ArgumentParser(
         usage: """
         [--colorize] [--print-expression-types] [--print-tracing-history] \
-        [--verbose] [--num-threads <n>] [--target stdout | filedisk]
+        [--emit-objc-compatibility] [--verbose] [--num-threads <n>] [--force-ll] \
+        [--target stdout | filedisk] \
         [files <files...> \
-        | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]
+        | path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] \
+        [--skip-confirm] [--overwrite]]
         """,
         overview: """
         Converts a set of files, or, if not provided, starts an interactive \
@@ -90,13 +92,16 @@ let forceUseLLPredictionArg
         original source code.
         """)
 
-// --omit-objc-compatibility
-let omitObjcCompatibilityArg
+// --emit-objc-compatibility
+let emitObjcCompatibilityArg
     = parser.add(
-        option: "--omit-objc-compatibility", kind: Bool.self,
+        option: "--emit-objc-compatibility", kind: Bool.self,
         usage: """
-        Don't emit '@objc' attributes on definitions, and don't emit NSObject subclass \
-        and NSObjectProtocol conformance by default.
+        Emits '@objc' attributes on definitions, and emits NSObject subclass \
+        and NSObjectProtocol conformance on protocols.
+        
+        This forces Swift to create Objective-C-compatible subclassing structures
+        which may increase compatibility with previous Obj-C code.
         """)
 
 // --diagnose-file
@@ -128,7 +133,7 @@ let targetArg
 
 let filesParser
     = parser.add(subparser: "files",
-                 overview: "Converts one or more series of files to Swift and print them to the terminal.")
+                 overview: "Converts one or more series of .h/.m files to Swift.")
 let filesArg
     = filesParser.add(positional: "files", kind: [String].self, usage: "Objective-C file(s) to convert.")
 
@@ -185,7 +190,7 @@ do {
     Settings.astWriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
     Settings.astWriter.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false
     Settings.astWriter.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
-    Settings.astWriter.omitObjcCompatibility = result.get(omitObjcCompatibilityArg) ?? false
+    Settings.astWriter.emitObjcCompatibility = result.get(emitObjcCompatibilityArg) ?? false
     Settings.rewriter.forceUseLLPrediction = result.get(forceUseLLPredictionArg) ?? false
     
     let target = result.get(targetArg) ?? .filedisk

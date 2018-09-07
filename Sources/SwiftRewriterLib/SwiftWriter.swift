@@ -231,7 +231,7 @@ class InternalSwiftWriter {
         
         // [@objc] enum <Name>: <RawValue> {
         target.outputIdentation()
-        if !options.omitObjcCompatibility {
+        if options.emitObjcCompatibility {
             target.outputInlineWithSpace("@objc", style: .keyword)
         }
         target.outputInlineWithSpace("enum", style: .keyword)
@@ -353,7 +353,7 @@ class InternalSwiftWriter {
         } else {
             target.output(line: "// MARK: -", style: .comment)
         }
-        if !options.omitObjcCompatibility {
+        if options.emitObjcCompatibility {
             target.output(line: "@objc", style: .keyword)
         }
         target.outputIdentation()
@@ -366,7 +366,7 @@ class InternalSwiftWriter {
     func outputClass(_ cls: ClassGenerationIntention, target: RewriterOutputTarget) {
         outputHistory(cls.history, target: target)
         
-        if !options.omitObjcCompatibility {
+        if options.emitObjcCompatibility {
             target.output(line: "@objc", style: .keyword)
         }
         target.outputIdentation()
@@ -382,12 +382,13 @@ class InternalSwiftWriter {
         if let cls = type as? ClassGenerationIntention {
             if let sup = cls.superclassName {
                 inheritances.append(sup)
-            } else if !options.omitObjcCompatibility {
+            } else if options.emitObjcCompatibility {
                 // Always inherit from NSObject, at least, in Objective-C
                 // compatibility mode.
                 inheritances.append("NSObject")
             }
         }
+        
         inheritances.append(contentsOf: type.protocols.map { p in p.protocolName })
         
         if !inheritances.isEmpty {
@@ -449,17 +450,23 @@ class InternalSwiftWriter {
         var inheritances: [String] = []
         inheritances.append(contentsOf: prot.protocols.map { p in p.protocolName })
         
-        var emitObjcAttribute = true
+        var emitObjcAttribute = false
         
-        if !options.omitObjcCompatibility {
+        if prot.methods.contains(where: { $0.optional })
+            || prot.properties.contains(where: { $0.optional }) {
+            
+            emitObjcAttribute = true
+        }
+        
+        if emitObjcAttribute || options.emitObjcCompatibility {
             // Always inherit form NSObjectProtocol in Objective-C compatibility mode
             if !inheritances.contains("NSObjectProtocol") {
                 inheritances.insert("NSObjectProtocol", at: 0)
             }
             
             emitObjcAttribute = true
-        } else if !inheritances.contains("NSObjectProtocol") {
-            emitObjcAttribute = false
+        } else {
+            inheritances.removeAll(where: { $0 == "NSObjectProtocol" })
         }
         
         if emitObjcAttribute {
@@ -555,7 +562,7 @@ class InternalSwiftWriter {
         
         target.outputIdentation()
         
-        if !options.omitObjcCompatibility {
+        if options.emitObjcCompatibility {
             target.outputInlineWithSpace("@objc", style: .keyword)
         }
         
@@ -681,7 +688,7 @@ class InternalSwiftWriter {
         
         outputHistory(for: initMethod, target: target)
         
-        if !options.omitObjcCompatibility && (selfType.kind == .class || selfType.kind == .protocol) {
+        if options.emitObjcCompatibility && (selfType.kind == .class || selfType.kind == .protocol) {
             target.output(line: "@objc", style: .keyword)
         }
         target.outputIdentation()
@@ -730,7 +737,7 @@ class InternalSwiftWriter {
         
         outputHistory(for: method, target: target)
         
-        if !options.omitObjcCompatibility {
+        if options.emitObjcCompatibility {
             target.output(line: "@objc", style: .keyword)
         }
         target.outputIdentation()
@@ -761,7 +768,7 @@ class InternalSwiftWriter {
         
         outputHistory(for: method, target: target)
         
-        if !options.omitObjcCompatibility {
+        if options.emitObjcCompatibility {
             target.output(line: "@objc", style: .keyword)
         }
         
@@ -776,11 +783,9 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("static", style: .keyword)
         }
         
-        if !options.omitObjcCompatibility {
-            // Protocol 'optional' keyword
-            if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
-                target.outputInlineWithSpace("optional", style: .keyword)
-            }
+        // Protocol 'optional' keyword
+        if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
+            target.outputInlineWithSpace("optional", style: .keyword)
         }
         
         if method.isOverride {
