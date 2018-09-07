@@ -350,13 +350,13 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             
             parameters =
                 zip(args, types).map { (param, type) -> BlockParameter in
-                    guard let name = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
+                    guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: param) else {
                         return BlockParameter(name: "<unknown>", type: .void)
                     }
                     
                     let swiftType = typeMapper.swiftType(forObjcType: type)
                     
-                    return BlockParameter(name: name, type: swiftType)
+                    return BlockParameter(name: identifier.getText(), type: swiftType)
                 }
         } else {
             parameters = []

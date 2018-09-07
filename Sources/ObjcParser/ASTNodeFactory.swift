@@ -65,6 +65,52 @@ class ASTNodeFactory {
         return node
     }
     
+    func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> NullabilitySpecifier {
+        let spec = NullabilitySpecifier(name: rule.getText(),
+                                        isInNonnullContext: isInNonnullContext(rule))
+        spec.location = sourceLocation(for: rule)
+        
+        return spec
+    }
+    
+    func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> MethodBody {
+        let methodBody = MethodBody(isInNonnullContext: isInNonnullContext(rule))
+        methodBody.location = sourceLocation(for: rule)
+        methodBody.statements = rule.compoundStatement()
+        
+        return methodBody
+    }
+    
+    func makeMethodBody(from rule: Parser.CompoundStatementContext) -> MethodBody {
+        
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+        
+        let body = MethodBody(isInNonnullContext: nonnull)
+        body.statements = rule
+        body.location = sourceLocation(for: rule)
+        
+        return body
+    }
+    
+    func makeEnumCase(from rule: Parser.EnumeratorContext, identifier: Parser.IdentifierContext) -> ObjcEnumCase {
+        let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
+        
+        let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
+        enumCase.location = sourceLocation(for: rule)
+        
+        let identifierNode = makeIdentifier(from: identifier)
+        enumCase.addChild(identifierNode)
+        
+        if let expression = rule.expression() {
+            let expressionNode = ExpressionNode(isInNonnullContext: nonnull)
+            expressionNode.expression = expression
+            expressionNode.location = sourceLocation(for: expression)
+            enumCase.addChild(expressionNode)
+        }
+        
+        return enumCase
+    }
+    
     private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
         guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
             return .invalid

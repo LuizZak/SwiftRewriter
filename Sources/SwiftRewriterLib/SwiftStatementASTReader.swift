@@ -41,7 +41,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         return
             .expression(
                 .postfix(.identifier(ident.getText()),
-                         .functionCall(arguments: [.unlabeled(.identifier(param))]
+                         .functionCall(arguments: [.unlabeled(.identifier(param.getText()))]
                     ))
             )
     }
@@ -305,7 +305,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             return .unknown(UnknownASTContext(context: ctx.getText()))
         }
         
-        return .for(.identifier(identifier), expression, body: body)
+        return .for(.identifier(identifier.getText()), expression, body: body)
     }
     
     // MARK: - Helper methods
