@@ -80,6 +80,13 @@ public struct KnownTypeBuilder {
         self.useSwiftSignatureMatching = useSwiftSignatureMatching
     }
     
+    /// Changes the type name defined in this known type builder.
+    public func named(_ name: String) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.typeName = name
+        return new
+    }
+    
     /// Sets the value of `useSwiftSignatureMatching` to be used for the remaining
     /// type builder invocations.
     public func settingUseSwiftSignatureMatching(_ value: Bool) -> KnownTypeBuilder {
@@ -478,6 +485,20 @@ public struct KnownTypeBuilder {
     }
 }
 
+// MARK: - Removal
+extension KnownTypeBuilder {
+    
+    /// Removes direct protocol conformances to protocols that match the given
+    /// name.
+    public func removingConformance(to protocolName: String) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.protocols.removeAll(where: { $0.protocolName == protocolName })
+        return new
+    }
+    
+}
+
+// MARK: - Querying
 extension KnownTypeBuilder {
     /// Returns a reference to the latest constructor added to this `KnownTypeBuilder`
     /// via a `.constructor(...)` call
@@ -495,6 +516,11 @@ extension KnownTypeBuilder {
     /// via a `.property(...)` call
     public var lastProperty: KnownProperty? {
         return type.properties.last
+    }
+    
+    /// Returns the currently recorded protocol conformances for the final type
+    public var protocolConformances: [String] {
+        return type.protocols.map { $0.protocolName }
     }
 }
 
