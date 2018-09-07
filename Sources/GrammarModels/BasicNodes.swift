@@ -1,7 +1,7 @@
 /// A node that represents the global namespace
 public final class GlobalContextNode: ASTNode, InitializableNode {
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -15,10 +15,13 @@ public class Identifier: ASTNode {
     /// String identifier
     public var name: String
     
-    public init(name: String, location: SourceLocation = .invalid) {
+    public init(name: String,
+                isInNonnullContext: Bool,
+                location: SourceLocation = .invalid) {
+        
         self.name = name
         
-        super.init(location: location)
+        super.init(isInNonnullContext: isInNonnullContext, location: location)
     }
     
     override public func shortDescription() -> String {
@@ -30,10 +33,13 @@ public class Identifier: ASTNode {
 public class KeywordNode: ASTNode {
     public var keyword: Keyword
     
-    public init(keyword: Keyword, location: SourceLocation = .invalid) {
+    public init(keyword: Keyword,
+                location: SourceLocation = .invalid,
+                isInNonnullContext: Bool) {
+        
         self.keyword = keyword
         
-        super.init(location: location)
+        super.init(isInNonnullContext: isInNonnullContext, location: location)
     }
     
     override public func shortDescription() -> String {

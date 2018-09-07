@@ -645,26 +645,7 @@ fileprivate extension SwiftRewriter {
         }
         
         func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
-            let ranges = nonnullTokenRanges
-            
-            // Requires original ANTLR's rule context
-            guard let ruleContext = node.sourceRuleContext else {
-                return false
-            }
-            // Fetch the token indices of the node's start and end
-            guard let startToken = ruleContext.getStart(), let stopToken = ruleContext.getStop() else {
-                return false
-            }
-            
-            // Check if it the token start/end indices are completely contained
-            // within NS_ASSUME_NONNULL_BEGIN/END intervals
-            for n in ranges {
-                if n.start <= startToken.getTokenIndex() && n.end >= stopToken.getTokenIndex() {
-                    return true
-                }
-            }
-            
-            return false
+            return node.isInNonnullContext
         }
         
         func reportForLazyResolving(intention: Intention) {

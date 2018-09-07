@@ -13,13 +13,6 @@ open class ASTNode {
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
     
-    // TODO: Start stripping away references to ANTLR from ASTNodes so we can
-    // start considering serialization options for this type.
-    
-    /// If this node was parsed from an Antlr rule, this value is set to the original
-    /// parser rule that originated this node.
-    public var sourceRuleContext: ParserRuleContext?
-    
     /// Parent node for this node
     public weak var parent: ASTNode?
     
@@ -28,14 +21,22 @@ open class ASTNode {
     public var existsInSource: Bool
     
     /// Trivia leading up to this node
-    public var leadingTrivia: Trivia?
+    //public var leadingTrivia: Trivia?
     
     /// Trivia leading after this node
-    public var trailingTrivia: Trivia?
+    //public var trailingTrivia: Trivia?
+    
+    /// Indicates whether this node was completely contained within the range of
+    /// a NS_ASSUME_NONNULL_BEGIN/NS_ASSUME_NONNULL_END region.
+    public var isInNonnullContext: Bool = false
     
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
-    public init(location: SourceLocation = .invalid, existsInSource: Bool = true) {
+    public init(isInNonnullContext: Bool,
+                location: SourceLocation = .invalid,
+                existsInSource: Bool = true) {
+        
+        self.isInNonnullContext = isInNonnullContext
         self.location = location
         self.existsInSource = existsInSource
     }
@@ -136,6 +137,7 @@ open class ASTNode {
         case .invalid:
             break
         default:
+            self.location.source = children[0].location.source
             self.location.range = range
         }
     }
@@ -147,9 +149,10 @@ open class ASTNode {
     }
 }
 
-/// Describes a node with a parameterless `init()`
+/// Describes a node with a default parametered `init` which is a known
+/// base node requirement initializer.
 public protocol InitializableNode {
-    init()
+    init(isInNonnullContext: Bool)
 }
 
 /// A bare node used to specify invalid contexts

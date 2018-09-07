@@ -7,8 +7,8 @@ public class ObjcClassCategoryInterface: ASTNode, InitializableNode {
         return child(ofType: Identifier.self, atIndex: 1)
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -40,8 +40,8 @@ public class ObjcClassCategoryImplementation: ASTNode, InitializableNode {
         return child(ofType: Identifier.self, atIndex: 1)
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

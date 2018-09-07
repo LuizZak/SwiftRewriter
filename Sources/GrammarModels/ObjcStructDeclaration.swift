@@ -8,13 +8,13 @@ public final class ObjcStructDeclaration: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        super.init(location: .invalid, existsInSource: true)
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 public final class ObjcStructField: IVarDeclaration {
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }

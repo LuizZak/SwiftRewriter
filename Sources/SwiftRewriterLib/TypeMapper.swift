@@ -491,15 +491,19 @@ public class DefaultTypeMapper: TypeMapper {
         if case .struct(let inner) = type {
             if let ptr = DefaultTypeMapper._pointerMappings[inner] {
                 final = ptr
+                
             } else if let scalar = DefaultTypeMapper._scalarMappings[inner] {
                 // Pointers of scalar types are converted to 'UnsafeMutablePointer<TypeName>'
                 final = .generic("UnsafeMutablePointer", parameters: [scalar])
-            } else if typeSystem.isClassInstanceType(inner) || context.alwaysClass {
+                
+            } else if context.alwaysClass || typeSystem.isClassInstanceType(inner) {
                 // Assume it's a class type here
                 final = .typeName(inner)
+                
             } else {
                 // Pointers of value types are converted to 'UnsafeMutablePointer<TypeName>'
-                let pointeeType = swiftType(forObjcType: .struct(inner), context: .alwaysNonnull)
+                let pointeeType = swiftType(forObjcType: .struct(inner),
+                                            context: .alwaysNonnull)
                 
                 final = .generic("UnsafeMutablePointer", parameters: [pointeeType])
             }

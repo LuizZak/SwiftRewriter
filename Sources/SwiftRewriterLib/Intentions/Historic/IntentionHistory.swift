@@ -116,11 +116,11 @@ public extension IntentionHistory {
     
     @discardableResult
     public func recordSourceHistory(node: ASTNode) -> IntentionHistoryEntryEcho {
-        guard let file = node.originalSource?.filePath, let rule = node.sourceRuleContext?.start else {
+        guard let file = node.originalSource?.filePath else {
             return recordCreation(description: "from non-file node \(type(of: node))")
         }
         
-        return recordCreation(description: "\(file) line \(rule.getLine()) column \(rule.getCharPositionInLine())")
+        return recordCreation(description: "\(file) line \(node.location.line) column \(node.location.column)")
     }
     
 }

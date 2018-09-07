@@ -22,8 +22,8 @@ public class MethodDefinition: ASTNode, InitializableNode {
     // For use in protocol methods only
     public var isOptionalMethod: Bool = false
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
     
     public override func addChild(_ node: ASTNode) {
@@ -43,8 +43,8 @@ public class MethodSelector: ASTNode, InitializableNode {
         }
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
     
     public enum SelectorKind {
@@ -87,8 +87,8 @@ public final class KeywordDeclarator: ASTNode, InitializableNode {
         return childrenMatching().last
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -100,8 +100,8 @@ public final class MethodType: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

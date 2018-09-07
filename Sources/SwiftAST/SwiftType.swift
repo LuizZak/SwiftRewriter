@@ -497,9 +497,7 @@ public enum OneOrMore<T> {
     /// Returns the item contained on this `OneOrMore` list node.
     public var item: T {
         switch self {
-        case .list(let item, _):
-            return item
-        case .tail(let item):
+        case .list(let item, _), .tail(let item):
             return item
         }
     }
@@ -675,9 +673,8 @@ extension OneOrMore: Collection {
         
         if position == 0 {
             switch self {
-            case .list(let item, _):
-                return item
-            case .tail(let item):
+            case .list(let item, _),
+                 .tail(let item):
                 return item
             }
         }
@@ -724,10 +721,9 @@ extension TwoOrMore: Collection {
         
         if position == 0 {
             switch self {
-            case .list(let item, _):
+            case .list(let item, _),
+                 .tail(let item, _):
                 return item
-            case .tail(let left, _):
-                return left
             }
         } else if position == 1 {
             switch self {

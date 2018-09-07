@@ -16,8 +16,8 @@ public class TypedefNode: ASTNode, InitializableNode {
         return childrenMatching()
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -27,8 +27,8 @@ public class BlockParametersNode: ASTNode, InitializableNode {
         return childrenMatching()
     }
     
-    public required init() {
-        super.init()
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

@@ -3,6 +3,8 @@ import GrammarModels
 
 /// An intention to generate a class, struct or enumeration in swift.
 public class TypeGenerationIntention: FromSourceIntention {
+    public var origin: String
+    
     public var typeName: String
     
     public var supertype: KnownTypeReference? {
@@ -37,8 +39,22 @@ public class TypeGenerationIntention: FromSourceIntention {
     
     public var semantics: Set<Semantic> = []
     
-    public init(typeName: String, accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(typeName: String,
+                accessLevel: AccessLevel = .internal,
+                source: ASTNode? = nil) {
+        
         self.typeName = typeName
+        
+        self.origin = {
+            guard let sourceNode = source else {
+                return "Code-generated type"
+            }
+            guard let filename = sourceNode.originalSource?.filePath else {
+                return "Code-generated type"
+            }
+            
+            return "File '\(filename)' line \(sourceNode.location.line) column \(sourceNode.location.column)"
+        }()
         
         super.init(accessLevel: accessLevel, source: source)
     }
@@ -176,19 +192,6 @@ public class TypeGenerationIntention: FromSourceIntention {
 }
 
 extension TypeGenerationIntention: KnownType {
-    public var origin: String {
-        guard let sourceNode = source else {
-            return "Code-generated type"
-        }
-        guard let start = sourceNode.sourceRuleContext?.getStart() else {
-            return "Code-generated type"
-        }
-        guard let filename = sourceNode.originalSource?.filePath else {
-            return "Code-generated type"
-        }
-        
-        return "File '\(filename)' line \(start.getLine()) column \(start.getCharPositionInLine())"
-    }
     public var knownMethods: [KnownMethod] {
         return methods
     }

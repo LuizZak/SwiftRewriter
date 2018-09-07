@@ -16,8 +16,8 @@ public class FunctionDefinition: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -31,8 +31,8 @@ public class ParameterList: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -46,15 +46,15 @@ public class FunctionParameter: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 
 /// A variadic parameter which is specified as a (', ...') after at least one
 /// function parameter.
 public class VariadicParameter: ASTNode, InitializableNode {
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }

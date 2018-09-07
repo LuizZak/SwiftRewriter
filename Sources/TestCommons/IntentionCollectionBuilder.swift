@@ -439,10 +439,10 @@ public class TypeBuilder<T: TypeGenerationIntention> {
 public extension TypeBuilder where T: ClassExtensionGenerationIntention {
     
     /// Marks the target type for this type builder as an implementation for a
-    /// category extension interface declaration, if it supports such annotations.
+    /// category extension interface declaration.
     @discardableResult
     public func setAsCategoryImplementation(categoryName: String) -> TypeBuilder {
-        targetType.source = ObjcClassCategoryInterface()
+        targetType.source = ObjcClassCategoryInterface(isInNonnullContext: false)
         
         return self
     }
@@ -467,7 +467,7 @@ public extension TypeBuilder where T: BaseClassIntention {
     /// declaration.
     @discardableResult
     public func setAsInterfaceSource() -> TypeBuilder {
-        targetType.source = ObjcClassInterface()
+        targetType.source = ObjcClassInterface(isInNonnullContext: false)
         
         return self
     }
@@ -476,7 +476,7 @@ public extension TypeBuilder where T: BaseClassIntention {
     /// extension interface declaration.
     @discardableResult
     public func setAsCategoryInterfaceSource() -> TypeBuilder {
-        targetType.source = ObjcClassCategoryInterface()
+        targetType.source = ObjcClassCategoryInterface(isInNonnullContext: false)
         
         return self
     }

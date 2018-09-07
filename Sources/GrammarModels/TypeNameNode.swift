@@ -2,10 +2,10 @@ public class TypeNameNode: ASTNode {
     /// Full type name
     public var type: ObjcType
     
-    public init(type: ObjcType, location: SourceLocation = .invalid) {
+    public init(type: ObjcType, isInNonnullContext: Bool, location: SourceLocation = .invalid) {
         self.type = type
         
-        super.init(location: location)
+        super.init(isInNonnullContext: isInNonnullContext, location: location)
     }
     
     override public func shortDescription() -> String {

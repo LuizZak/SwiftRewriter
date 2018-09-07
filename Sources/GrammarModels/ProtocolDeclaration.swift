@@ -4,8 +4,8 @@ public class ProtocolDeclaration: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public required init() {
-        
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

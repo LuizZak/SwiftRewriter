@@ -14,8 +14,8 @@ public class ObjcEnumDeclaration: ASTNode, InitializableNode {
         return childrenMatching()
     }
     
-    public required init() {
-        super.init(location: .invalid, existsInSource: true)
+    public required init(isInNonnullContext: Bool) {
+        super.init(isInNonnullContext: isInNonnullContext)
     }
 }
 

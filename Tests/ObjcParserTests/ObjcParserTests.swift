@@ -72,7 +72,7 @@ class ObjcParserTests: XCTestCase {
                 return
             }
             
-            XCTAssertNotNil(node.sourceRuleContext, "\(node)")
+            //XCTAssertNotNil(node.sourceRuleContext, "\(node)")
         })
         
         let traverser = ASTTraverser(node: node, visitor: visitor)

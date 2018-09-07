@@ -256,7 +256,7 @@ public class TypeParsing {
             
             let identifier = VarDeclarationIdentifierNameExtractor.extract(from: typeVariableDecl)
             
-            var type: ObjcType = .blockType(name: identifier ?? "",
+            var type: ObjcType = .blockType(name: identifier?.getText() ?? "",
                                             returnType: returnType,
                                             parameters: parameters)
             
