@@ -13,9 +13,6 @@ open class ASTNode {
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
     
-    // TODO: Start stripping away references to ANTLR from ASTNodes so we can
-    // start considering serialization options for this type.
-    
     /// Parent node for this node
     public weak var parent: ASTNode?
     
