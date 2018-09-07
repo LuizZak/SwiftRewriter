@@ -90,13 +90,16 @@ let forceUseLLPredictionArg
         original source code.
         """)
 
-// --omit-objc-compatibility
-let omitObjcCompatibilityArg
+// --emit-objc-compatibility
+let emitObjcCompatibilityArg
     = parser.add(
-        option: "--omit-objc-compatibility", kind: Bool.self,
+        option: "--emit-objc-compatibility", kind: Bool.self,
         usage: """
-        Don't emit '@objc' attributes on definitions, and don't emit NSObject subclass \
-        and NSObjectProtocol conformance by default.
+        Emits '@objc' attributes on definitions, and emits NSObject subclass \
+        and NSObjectProtocol conformance on protocols.
+        
+        This forces Swift to create Objective-C-compatible subclassing structures
+        which may increase compatibility with previous Obj-C code.
         """)
 
 // --diagnose-file
@@ -185,7 +188,7 @@ do {
     Settings.astWriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
     Settings.astWriter.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false
     Settings.astWriter.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
-    Settings.astWriter.omitObjcCompatibility = result.get(omitObjcCompatibilityArg) ?? false
+    Settings.astWriter.emitObjcCompatibility = result.get(emitObjcCompatibilityArg) ?? false
     Settings.rewriter.forceUseLLPrediction = result.get(forceUseLLPredictionArg) ?? false
     
     let target = result.get(targetArg) ?? .filedisk

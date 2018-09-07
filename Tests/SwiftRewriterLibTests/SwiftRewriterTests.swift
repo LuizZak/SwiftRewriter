@@ -851,7 +851,7 @@ class SwiftRewriterTests: XCTestCase {
                 func myMethod()
             }
             """,
-            options: ASTWriterOptions(omitObjcCompatibility: true))
+            options: ASTWriterOptions(emitObjcCompatibility: true))
     }
     
     func testRewriteProtocolConformance() {
@@ -1606,20 +1606,23 @@ class SwiftRewriterTests: XCTestCase {
                 case Enum_A
             }
             
-            protocol A {
+            @objc
+            protocol A: NSObjectProtocol {
                 var b: Bool { get set }
                 
                 func method()
             }
             
+            @objc
             class B: A {
-                var b: Bool = false
+                @objc var b: Bool = false
                 
+                @objc
                 func method() {
                 }
             }
             """,
-            options: ASTWriterOptions(omitObjcCompatibility: true))
+            options: ASTWriterOptions(emitObjcCompatibility: true))
     }
     
     /// Tests calls that override a super call by detection of a `super` call on

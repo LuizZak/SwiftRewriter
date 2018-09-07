@@ -19,21 +19,24 @@ public struct ASTWriterOptions {
     /// as a comment for inspection.
     public var printIntentionHistory: Bool
     
-    /// If `true`, `@objc` attributes and `: NSObject` are omitted from declarations
+    /// If `true`, `@objc` attributes and `: NSObject` are emitted for declarations
     /// during output.
-    public var omitObjcCompatibility: Bool
+    ///
+    /// This may increase compatibility with previous Objective-C code when compiled
+    /// and executed.
+    public var emitObjcCompatibility: Bool
     
     /// Number of concurrent threads to use when saving files.
     public var numThreads: Int
     
     public init(outputExpressionTypes: Bool = false,
                 printIntentionHistory: Bool = false,
-                omitObjcCompatibility: Bool = false,
+                emitObjcCompatibility: Bool = false,
                 numThreads: Int = OperationQueue.defaultMaxConcurrentOperationCount) {
         
         self.outputExpressionTypes = outputExpressionTypes
         self.printIntentionHistory = printIntentionHistory
-        self.omitObjcCompatibility = omitObjcCompatibility
+        self.emitObjcCompatibility = emitObjcCompatibility
         self.numThreads = numThreads
     }
 }
