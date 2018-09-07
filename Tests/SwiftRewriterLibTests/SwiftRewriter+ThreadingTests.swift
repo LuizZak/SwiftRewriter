@@ -62,15 +62,13 @@ private extension SwiftRewriter_ThreadingTests {
             """
             
             expectedSwift += """
-            @objc
             class \(className): UIView {
-                @objc weak var next: \(className)?
-                @objc var a: Bool = false
-                @objc var b: Bool = false
-                @objc var c: CGFloat = 0.0
+                weak var next: \(className)?
+                var a: Bool = false
+                var b: Bool = false
+                var c: CGFloat = 0.0
                 \
             
-                @objc
                 func myMethod() {
                     var i: CInt = 0
                     while i < CInt(self.myOtherMethod()) {
@@ -82,7 +80,6 @@ private extension SwiftRewriter_ThreadingTests {
                     }
                     self.window?.bounds
                 }
-                @objc
                 func myOtherMethod() -> CGFloat {
                     return (10 + (next?.c ?? 0.0)) / 2
                 }

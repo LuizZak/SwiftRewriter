@@ -40,7 +40,6 @@ class SwiftWriterTests: XCTestCase {
         sut.outputInitMethod(initMethod, selfType: type, target: output.outputTarget())
         
         let expected = """
-            @objc
             init?() {
             }
             """
@@ -57,7 +56,6 @@ class SwiftWriterTests: XCTestCase {
         sut.outputInitMethod(initMethod, selfType: type, target: output.outputTarget())
         
         let expected = """
-            @objc
             convenience init() {
             }
             """

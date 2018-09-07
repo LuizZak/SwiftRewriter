@@ -21,9 +21,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
-                @objc
                 func method() {
                     // type: MyClass
                     self
@@ -68,29 +66,26 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
-                @objc static var a: Bool {
+                static var a: Bool {
                     // type: MyClass.Type
                     self
                     // type: NSObject.Type
                     super
                 }
-                @objc var b: Bool {
+                var b: Bool {
                     // type: MyClass
                     self
                     // type: NSObject
                     super
                 }
                 
-                @objc
                 static func classMethod() {
                     // type: MyClass.Type
                     self
                     // type: NSObject.Type
                     super
                 }
-                @objc
                 func instanceMethod() {
                     // type: MyClass
                     self
@@ -122,9 +117,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
-                @objc var value: Bool {
+                var value: Bool {
                     get {
                         // type: MyClass
                         self
@@ -158,9 +152,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
-                @objc
                 static func method() {
                     // type: MyClass
                     self.init()
@@ -186,11 +178,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
-                @objc var aValue: Int = 0
+                var aValue: Int = 0
                 
-                @objc
                 func method() {
                     // type: Int
                     self.aValue
@@ -218,14 +208,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
-                @objc
                 func method1() {
                     // type: Int
                     self.method2()
                 }
-                @objc
                 func method2() -> Int {
                     return 0
                 }
@@ -252,14 +239,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
-                @objc
                 static func method1() {
                     // type: Int
                     self.method2()
                 }
-                @objc
                 static func method2() -> Int {
                     return 0
                 }
@@ -291,17 +275,13 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc
                 func method() {
                     // type: B
                     B(value: 0)
                 }
             }
-            @objc
             class B: NSObject {
-                @objc
                 init(value: Int) {
                     // type: Int
                     value
@@ -321,9 +301,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func method(_ value: Int) {
                     // type: Int
                     value
@@ -349,9 +327,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc var value: Bool {
+                var value: Bool {
                     get {
                         return false
                     }
@@ -382,9 +359,8 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc var value: Bool {
+                var value: Bool {
                     get {
                         return false
                     }
@@ -416,12 +392,10 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var field: Int = 0
-                @objc var value: Bool = false
+                var value: Bool = false
                 
-                @objc
                 func f1() {
                     // type: Bool
                     self.value
@@ -443,9 +417,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func f1(_ value: A!) {
                     // type: A!
                     value
@@ -470,11 +442,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc var prop: Int = 0
+                var prop: Int = 0
                 
-                @objc
                 func f1(_ value: A!) {
                     // type: Int
                     value.prop
@@ -500,11 +470,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var callback: (() -> Void)?
                 
-                @objc
                 func f1() {
                     let _callback = self.callback
                     // type: Void?
@@ -532,11 +500,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var callback: (() -> Void)?
                 
-                @objc
                 func f1() {
                     let _callback = self.callback
                     // type: Void?
@@ -561,11 +527,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc var b: NSObject?
+                var b: NSObject?
                 
-                @objc
                 func method() {
                     // type: Bool?
                     b?.responds(to: Selector("abc:"))
@@ -593,17 +557,13 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class B: NSObject {
-                @objc
                 func method() -> B {
                 }
             }
-            @objc
             class A: NSObject {
-                @objc var b: B?
+                var b: B?
                 
-                @objc
                 func method() {
                     // type: B?
                     self.b?.method().method()
@@ -631,17 +591,13 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class B: NSObject {
-                @objc
                 func method() -> B? {
                 }
             }
-            @objc
             class A: NSObject {
-                @objc var b: B?
+                var b: B?
                 
-                @objc
                 func method() {
                     // type: B?
                     self.b?.method()?.method()
@@ -671,15 +627,12 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            protocol B: NSObjectProtocol {
+            protocol B {
             }
 
-            @objc
             class A: NSObject {
-                @objc weak var b: B?
+                weak var b: B?
                 
-                @objc
                 func method() {
                     // type: Bool?
                     self.b?.responds(to: Selector("abc:"))
@@ -713,20 +666,16 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            protocol A: NSObjectProtocol {
-                @objc var a: Bool { get set }
+            protocol A {
+                var a: Bool { get set }
             }
-            @objc
-            protocol B: NSObjectProtocol {
-                @objc var b: Int { get set }
+            protocol B {
+                var b: Int { get set }
             }
 
-            @objc
             class C: NSObject {
-                @objc var composed: (A & B)!
+                var composed: (A & B)!
                 
-                @objc
                 func method() {
                     // type: (A & B)!
                     self.composed
@@ -761,9 +710,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func method() {
                     let local1 = self.optional()
                     let local2 = self.nonOptional()
@@ -775,13 +722,10 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // type: String?
                     local3
                 }
-                @objc
                 func optional() -> String? {
                 }
-                @objc
                 func nonOptional() -> String {
                 }
-                @objc
                 func unspecifiedOptional() -> String! {
                 }
             }
@@ -813,11 +757,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             typealias Callback = (Int) -> Void
 
-            @objc
-            class MyClass: NSObject {
-                @objc var callback: Callback
+            class MyClass {
+                var callback: Callback
                 
-                @objc
                 func method() {
                     // type: Callback
                     self.callback = { (arg: Int) -> Void in
@@ -856,11 +798,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             typealias Callback = () -> Void
 
-            @objc
-            class MyClass: NSObject {
-                @objc var callback: Callback
+            class MyClass {
+                var callback: Callback
                 
-                @objc
                 func method() {
                     // type: Callback
                     self.callback = { () -> Void in
@@ -910,11 +850,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             func takesBlock(_ block: (() -> Void)!) -> String! {
             }
 
-            @objc
-            class MyClass: NSObject {
-                @objc var callback: Callback
+            class MyClass {
+                var callback: Callback
                 
-                @objc
                 func method() {
                     let local: Int
                     // type: Callback
@@ -935,7 +873,6 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // type: Int
                     local
                 }
-                @objc
                 func takesBlock(_ block: (() -> Void)!) {
                 }
             }
@@ -957,15 +894,12 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func f1() {
                     let a = self.other()
                     // type: A?
                     a
                 }
-                @objc
                 func other() -> A! {
                 }
             }
@@ -987,15 +921,12 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func f1() {
                     let a = self.other()
                     // type: A
                     a
                 }
-                @objc
                 func other() -> A {
                 }
             }
@@ -1022,9 +953,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             func globalFunc() {
             }
             
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func f1() {
                     // type: Int
                     global
@@ -1049,14 +978,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: UIView {
             }
 
             // MARK: - B
-            @objc
             extension A {
-                @objc
                 func f1() {
                     // type: CGRect?
                     self.window?.bounds
@@ -1082,7 +1008,6 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 A()
             }
             
-            @objc
             class A: UIView {
             }
             """,
@@ -1105,9 +1030,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: UIView {
-                @objc
                 func method() {
                     // type: UIWindow?
                     self.window
@@ -1115,7 +1038,6 @@ class SwiftRewriter_TypingTests: XCTestCase {
             }
 
             // MARK: - Category
-            @objc
             extension UIView {
             }
             """,
@@ -1134,9 +1056,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     for i in 0..<10 {
                         // type: Int
@@ -1167,11 +1087,9 @@ class SwiftRewriter_TypingTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: UIView {
-                @objc var a: UIView?
+                var a: UIView?
                 
-                @objc
                 func method() {
                     // type: CGRect
                     self.convert(CGRect.zero, to: nil)
