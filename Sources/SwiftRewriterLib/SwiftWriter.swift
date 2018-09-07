@@ -388,6 +388,7 @@ class InternalSwiftWriter {
                 inheritances.append("NSObject")
             }
         }
+        
         inheritances.append(contentsOf: type.protocols.map { p in p.protocolName })
         
         if !inheritances.isEmpty {
@@ -449,17 +450,23 @@ class InternalSwiftWriter {
         var inheritances: [String] = []
         inheritances.append(contentsOf: prot.protocols.map { p in p.protocolName })
         
-        var emitObjcAttribute = true
+        var emitObjcAttribute = false
         
-        if options.emitObjcCompatibility {
+        if prot.methods.contains(where: { $0.optional })
+            || prot.properties.contains(where: { $0.optional }) {
+            
+            emitObjcAttribute = true
+        }
+        
+        if emitObjcAttribute || options.emitObjcCompatibility {
             // Always inherit form NSObjectProtocol in Objective-C compatibility mode
             if !inheritances.contains("NSObjectProtocol") {
                 inheritances.insert("NSObjectProtocol", at: 0)
             }
             
             emitObjcAttribute = true
-        } else if !inheritances.contains("NSObjectProtocol") {
-            emitObjcAttribute = false
+        } else {
+            inheritances.removeAll(where: { $0 == "NSObjectProtocol" })
         }
         
         if emitObjcAttribute {
@@ -776,11 +783,9 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("static", style: .keyword)
         }
         
-        if options.emitObjcCompatibility {
-            // Protocol 'optional' keyword
-            if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
-                target.outputInlineWithSpace("optional", style: .keyword)
-            }
+        // Protocol 'optional' keyword
+        if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
+            target.outputInlineWithSpace("optional", style: .keyword)
         }
         
         if method.isOverride {

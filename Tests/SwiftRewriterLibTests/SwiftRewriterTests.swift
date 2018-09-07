@@ -20,7 +20,6 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: NSObject {
             }
             """)
@@ -33,8 +32,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
             }
             """)
     }
@@ -46,7 +44,6 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: UIView {
             }
             """)
@@ -62,7 +59,6 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: MyBaseClass {
             }
             """)
@@ -75,7 +71,6 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class MyClass: UIView, UITableViewDelegate {
             }
             """)
@@ -90,7 +85,7 @@ class SwiftRewriterTests: XCTestCase {
             };
             """,
             swift: """
-            @objc enum MyEnum: Int {
+            enum MyEnum: Int {
                 case MyEnumCase1 = 0
                 case MyEnumCase2
             }
@@ -105,9 +100,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc weak var myClass: MyClass?
+            class MyClass {
+                weak var myClass: MyClass?
             }
             """)
     }
@@ -120,9 +114,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc static var myClass: MyClass!
+            class MyClass {
+                static var myClass: MyClass!
             }
             """)
     }
@@ -145,19 +138,18 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc var someField: Bool = false
-                @objc var someOtherField: Int = 0
-                @objc var aRatherStringlyField: String
-                @objc var specifiedNull: String?
-                @objc var nonNullWithQualifier: String
-                @objc var nonSpecifiedNull: String!
-                @objc var idType: AnyObject!
-                @objc weak var delegate: (MyDelegate & MyDataSource)?
-                @objc var tableWithDataSource: UITableView & UITableViewDataSource
-                @objc weak var weakViewWithDelegate: (UIView & UIDelegate)?
-                @objc unowned(unsafe) var assignProp: MyClass
+            class MyClass {
+                var someField: Bool = false
+                var someOtherField: Int = 0
+                var aRatherStringlyField: String
+                var specifiedNull: String?
+                var nonNullWithQualifier: String
+                var nonSpecifiedNull: String!
+                var idType: AnyObject!
+                weak var delegate: (MyDelegate & MyDataSource)?
+                var tableWithDataSource: UITableView & UITableViewDataSource
+                weak var weakViewWithDelegate: (UIView & UIDelegate)?
+                unowned(unsafe) var assignProp: MyClass
             }
             """)
     }
@@ -178,17 +170,15 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class SomeType: NSObject {
             }
-            @objc
-            class MyClass: NSObject {
-                @objc var nontypedArray: NSArray
-                @objc var nontypedArrayNull: NSArray?
-                @objc var stringArray: [String]!
-                @objc var clsArray: [SomeType]
-                @objc var clsArrayNull: [SomeType]?
-                @objc var delegateable: SomeType & SomeDelegate
+            class MyClass {
+                var nontypedArray: NSArray
+                var nontypedArrayNull: NSArray?
+                var stringArray: [String]!
+                var clsArray: [SomeType]
+                var clsArrayNull: [SomeType]?
+                var delegateable: SomeType & SomeDelegate
             }
             """)
     }
@@ -204,8 +194,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var _myString: String!
                 private weak var _delegate: AnyObject?
             }
@@ -220,9 +209,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                 }
             }
@@ -237,9 +224,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 static func myMethod() {
                 }
             }
@@ -259,24 +244,17 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                 }
-                @objc
                 func myOtherMethod(_ abc: Int, aString str: String) -> Int {
                 }
-                @objc
                 func myAnonParamMethod(_ abc: Int, _ str: String) -> Int {
                 }
-                @objc
                 func someNullArray() -> NSArray? {
                 }
-                @objc
                 func __(_ a: AnyObject!) {
                 }
-                @objc
                 func __(_ a: AnyObject!) -> AnyObject! {
                 }
             }
@@ -293,15 +271,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 override init() {
                 }
-                @objc
                 init(thing: AnyObject!) {
                 }
-                @objc
                 init(number: NSNumber) {
                 }
             }
@@ -318,9 +292,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 deinit {
                     thing()
                 }
@@ -341,8 +313,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var _myString: String!
                 weak var _delegate: AnyObject?
                 public var _myInt: Int = 0
@@ -362,8 +333,7 @@ class SwiftRewriterTests: XCTestCase {
             NS_ASSUME_NONNULL_END
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var _myString: String
             }
             """)
@@ -387,13 +357,10 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 init(thing: AnyObject!) {
                     self.thing()
                 }
-                @objc
                 func myMethod() {
                     self.thing()
                 }
@@ -428,24 +395,19 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var anIVar: Int = 0
                 
-                @objc
                 init(thing: AnyObject!) {
                     self.thing()
                 }
-                @objc
                 func myMethod() {
                     self.thing()
                 }
             }
             
             // MARK: -
-            @objc
             extension MyClass: MyDelegate {
-                @objc
                 func methodFromCategory() {
                 }
             }
@@ -470,13 +432,10 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 init(thing: AnyObject) {
                     self.thing()
                 }
-                @objc
                 func myMethod() {
                     self.thing()
                 }
@@ -495,15 +454,11 @@ class SwiftRewriterTests: XCTestCase {
             - (NSString*)myMethod:(NSObject*)object;
             @end
             """, swift: """
-            @objc
-            protocol MyProtocol: NSObjectProtocol {
-                @objc
+            protocol MyProtocol {
                 func myMethod(_ object: NSObject?) -> String
             }
             
-            @objc
             class MyClass: NSObject, MyProtocol {
-                @objc
                 func myMethod(_ object: NSObject?) -> String {
                 }
             }
@@ -524,9 +479,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod(_ aParamy: Bool) {
                     thing()
                 }
@@ -543,9 +496,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func doSomething(with color: CGColor) {
                 }
             }
@@ -679,12 +630,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class AClass: NSObject {
-                @objc
+            class AClass {
                 func aBlocky(_ blocky: (() -> Void)!) {
                 }
-                @objc
                 func aBlockyWithString(_ blocky: (String) -> Void) {
                 }
             }
@@ -703,8 +651,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var callback: (NSObject?) -> Void
                 private var anotherCallback: ((String) -> Void)!
                 private var yetAnotherCallback: ((String) -> NSObject?)?
@@ -722,8 +669,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var callback: (((() -> AnyObject?)?) -> Void)!
             }
             """)
@@ -742,15 +688,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass1: NSObject {
-                @objc
+            class MyClass1 {
                 func aMethod(_ param: String) -> AnyObject {
                 }
             }
-            @objc
-            class MyClass2: NSObject {
-                @objc
+            class MyClass2 {
                 func aMethod(_ param: String!) -> AnyObject! {
                 }
             }
@@ -771,9 +713,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func aMethod(_ param: String) -> AnyObject {
                 }
             }
@@ -792,8 +732,7 @@ class SwiftRewriterTests: XCTestCase {
             let kMethodKey: String = "method"
             var kCodeOperatorKey: String = "codigo_operador"
             
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
             }
             """)
     }
@@ -810,9 +749,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     if self.responds(to: Selector("abc:")) {
                         thing()
@@ -830,9 +767,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            protocol MyProtocol: NSObjectProtocol {
-                @objc
+            protocol MyProtocol {
                 func myMethod()
             }
             """)
@@ -848,6 +783,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
+                @objc
                 func myMethod()
             }
             """,
@@ -870,15 +806,11 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
-                @objc
                 optional func myMethod()
-                @objc
                 optional func myMethod2()
             }
 
-            @objc
             class A: NSObject, MyProtocol {
-                @objc
                 func myMethod2() {
                 }
             }
@@ -899,13 +831,9 @@ class SwiftRewriterTests: XCTestCase {
             """, swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
-                @objc
                 func f1()
-                @objc
                 optional func f2()
-                @objc
                 optional func f3()
-                @objc
                 func f4()
             }
             """)
@@ -919,10 +847,9 @@ class SwiftRewriterTests: XCTestCase {
             @property (readonly) BOOL value2;
             @end
             """, swift: """
-            @objc
-            protocol MyProtocol: NSObjectProtocol {
-                @objc var value1: Bool { get set }
-                @objc var value2: Bool { get }
+            protocol MyProtocol {
+                var value1: Bool { get set }
+                var value2: Bool { get }
             }
             """)
     }
@@ -944,14 +871,12 @@ class SwiftRewriterTests: XCTestCase {
             weak var aWeakGlobal: NSObject?
             var anIntGlobal: Int
             
-            @objc
             class AClass: NSObject {
             }
-            @objc
-            class MyClass: NSObject {
-                @objc unowned(unsafe) var aClass: AClass!
-                @objc var anInt: Int = 0
-                @objc var aProperInt: Int = 0
+            class MyClass {
+                unowned(unsafe) var aClass: AClass!
+                var anInt: Int = 0
+                var aProperInt: Int = 0
             }
             """)
     }
@@ -1002,9 +927,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func method() {
                     let aValue: NSObject!
                     (aValue as? String)?[123]
@@ -1026,9 +949,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func method() {
                     let aValue: NSObject!
                     (aValue as? String)?.someMethod()
@@ -1051,10 +972,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class B: NSObject {
             }
-            @objc
             class A: NSObject {
                 private var _u: RACSubject<[B]>!
             }
@@ -1298,8 +1217,7 @@ class SwiftRewriterTests: XCTestCase {
             func global() -> A! {
             }
             
-            @objc
-            class A: NSObject {
+            class A {
             }
             """)
     }
@@ -1322,9 +1240,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             @end
             """, swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 override func finishRequested(_ completion: (() -> Void)!) {
                     super.finishRequested { () -> Void in
                         _updateLink.invalidate()
@@ -1353,9 +1269,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             @end
             """, swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func loadDataWithCallback(_ callback: ((NSArray?, Error?) -> Void)!) {
                     self.doThing().then { (results: NSArray!) -> Void in
                         callback?(results, nil)
@@ -1411,9 +1325,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func recreatePath() {
                     let top: CGFloat = startsAtTop ? 0 : circle.center.y
                     let bottom = max(self.bounds.size.height, top)
@@ -1452,13 +1364,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc enum MyEnum: Int {
+            enum MyEnum: Int {
                 case MyEnumCase
             }
 
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func method() {
                     MyEnum.MyEnumCase
                 }
@@ -1476,11 +1386,9 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             // MARK: - Extension
-            @objc
             extension String {
             }
             // MARK: - Extension
-            @objc
             extension Date {
             }
             """)
@@ -1520,12 +1428,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc enum E: Int {
+            enum E: Int {
                 case E_1
             }
 
-            @objc
-            class A: NSObject {
+            class A {
                 private var _a: Bool = false
                 private var _b: Int = 0
                 private var _c: UInt = 0
@@ -1536,15 +1443,15 @@ class SwiftRewriterTests: XCTestCase {
                 private var _g: E
                 private var _h: String
                 private let _i: String! = nil
-                @objc var a: Bool = false
-                @objc var b: Int = 0
-                @objc var c: UInt = 0
-                @objc var d: CFloat = 0.0
-                @objc var e: CDouble = 0.0
-                @objc var e: CGFloat = 0.0
-                @objc var f: String!
-                @objc var g: E
-                @objc var h: String
+                var a: Bool = false
+                var b: Int = 0
+                var c: UInt = 0
+                var d: CFloat = 0.0
+                var e: CDouble = 0.0
+                var e: CGFloat = 0.0
+                var f: String!
+                var g: E
+                var h: String
             }
             """)
     }
@@ -1564,14 +1471,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func method() {
                     A()
                     A()
                 }
-                @objc
                 static func method2() {
                     self.init()
                     self.init()
@@ -1580,7 +1484,7 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testOmitObjcAttribute() {
+    func testEmitObjcAttribute() {
         assertObjcParse(
             objc: """
             typedef NS_ENUM(NSInteger, Enum) {
@@ -1602,14 +1506,15 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            enum Enum: Int {
+            @objc enum Enum: Int {
                 case Enum_A
             }
             
             @objc
             protocol A: NSObjectProtocol {
-                var b: Bool { get set }
+                @objc var b: Bool { get set }
                 
+                @objc
                 func method()
             }
             
@@ -1649,25 +1554,19 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 override init(thing: A!) {
                     super.init(thing: thing)
                 }
-                @objc
                 init(otherThing thing: A!) {
                     super.init(thing: thing)
                 }
-                @objc
                 override func a() {
                     super.a()
                 }
-                @objc
                 override func b(_ a: Int) {
                     super.b(a)
                 }
-                @objc
                 func c(_ a: Int) {
                     super.c()
                 }
@@ -1687,15 +1586,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func method() {
                 }
             }
-            @objc
             class B: A {
-                @objc
                 override func method() {
                 }
             }
@@ -1715,15 +1610,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            protocol A: NSObjectProtocol {
-                @objc
+            protocol A {
                 func method()
             }
             
-            @objc
             class B: NSObject, A {
-                @objc
                 func method() {
                 }
             }
@@ -1749,22 +1640,18 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc var a: A?
-                @objc var b: Int = 0
+            class A {
+                var a: A?
+                var b: Int = 0
                 
-                @objc
                 func method() {
                     self.takesInt(a?.b ?? 0)
                     self.takesInt(a?.returnsInt() ?? 0)
                     self.takesInt((a?.b ?? 0) + 0)
                     self.takesInt((a?.returnsInt() ?? 0) + 0)
                 }
-                @objc
                 func takesInt(_ a: Int) {
                 }
-                @objc
                 func returnsInt() -> Int {
                 }
             }
@@ -1802,15 +1689,11 @@ class SwiftRewriterTests: XCTestCase {
                 }
             }
 
-            @objc
-            class B: NSObject {
-                @objc
+            class B {
                 func a() -> A {
                 }
-                @objc
                 func takesA(_ a: A) {
                 }
-                @objc
                 func method() {
                     let b: B?
                     self.takesA(b?.a() ?? A())
@@ -1841,22 +1724,18 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class B: NSObject {
-                @objc var c: Int = 0
+            class B {
+                var c: Int = 0
             }
-            @objc
-            class A: NSObject {
-                @objc weak var b: B?
+            class A {
+                weak var b: B?
                 
-                @objc
                 func method() {
                     let a: A!
                     self.b?.c = 0
                     a.b?.c = 0
                     self.takesExpression(a.b?.c ?? 0)
                 }
-                @objc
                 func takesExpression(_ a: Int) {
                 }
             }
@@ -1881,20 +1760,16 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class B: NSObject {
+            class B {
             }
-            @objc
-            class A: NSObject {
-                @objc var b: B?
+            class A {
+                var b: B?
                 
-                @objc
                 func method() {
                     if let b = self.b {
                         self.takesB(b)
                     }
                 }
-                @objc
                 func takesB(_ b: B) {
                 }
             }
@@ -1909,9 +1784,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 static func makeA() -> A! {
                 }
             }
@@ -1937,14 +1810,11 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             typealias block = (String) -> Void
 
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func method() {
                     self.takesBlock { (a: String) -> Void in
                     }
                 }
-                @objc
                 func takesBlock(_ a: block) {
                 }
             }
@@ -1966,12 +1836,10 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc var bounds: CGRect = CGRect()
-                @objc weak var parent: A?
+            class A {
+                var bounds: CGRect = CGRect()
+                weak var parent: A?
                 
-                @objc
                 func method() {
                     self.bounds.insetBy(dx: 1, dy: 2)
                     self.bounds = (self.parent?.bounds ?? CGRect()).insetBy(dx: 1, dy: 2)
@@ -1998,15 +1866,12 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class B: NSObject {
-                @objc var value: CGFloat = 0.0
+            class B {
+                var value: CGFloat = 0.0
             }
-            @objc
-            class A: NSObject {
-                @objc var b: B?
+            class A {
+                var b: B?
                 
-                @objc
                 func method() {
                     let local = Int((self.b?.value ?? 0.0) / (self.b?.value ?? 0.0))
                 }
@@ -2035,19 +1900,15 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class B: NSObject {
-                @objc var value: CGFloat = 0.0
+            class B {
+                var value: CGFloat = 0.0
             }
-            @objc
-            class A: NSObject {
-                @objc var b: B?
+            class A {
+                var b: B?
                 
-                @objc
                 func method(_ b: B) {
                     self.takesF(b.value)
                 }
-                @objc
                 func takesF(_ value: CGFloat) {
                 }
             }
@@ -2068,11 +1929,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc var b: CGFloat = 0.0
+                var b: CGFloat = 0.0
                 
-                @objc
                 func method() {
                     let changedY = fabs(self.b - self.b) > FLT_EPSILON
                 }
@@ -2094,14 +1953,12 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var _a: Int = 0
-                @objc var a: Int {
+                var a: Int {
                     return self._a
                 }
                 
-                @objc
                 func method() {
                     self._a = 0
                 }
@@ -2121,10 +1978,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var b: Int = 0
-                @objc var a: Int {
+                var a: Int {
                     get {
                         return b
                     }
@@ -2148,10 +2004,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var b: Int = 0
-                @objc var a: Int {
+                var a: Int {
                     return b
                 }
             }
@@ -2170,9 +2025,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc var a: Int = 0
+                var a: Int = 0
             }
             """)
     }
@@ -2192,10 +2046,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var b: Int = 0
-                @objc var a: Int {
+                var a: Int {
                     get {
                         return b
                     }
@@ -2219,9 +2072,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc var a: Int = 0
+                var a: Int = 0
             }
             """)
     }
@@ -2251,12 +2103,11 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc private(set) var a: NSMutableString!
-                @objc var b: NSMutableString!
-                @objc var c: NSMutableString!
-                @objc var d: NSMutableString!
+                private(set) var a: NSMutableString!
+                var b: NSMutableString!
+                var c: NSMutableString!
+                var d: NSMutableString!
             }
             """)
     }
@@ -2279,10 +2130,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
                 private var b: Int = 0
-                @objc var a: Int {
+                var a: Int {
                     get {
                         return b
                     }
@@ -2293,7 +2143,6 @@ class SwiftRewriterTests: XCTestCase {
             }
 
             // MARK: - category
-            @objc
             extension A {
             }
             """)
@@ -2321,11 +2170,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: NSObject {
-                @objc private(set) var a: Int = 0
+                private(set) var a: Int = 0
                 
-                @objc
                 func method() {
                     self.a = 0
                 }
@@ -2351,11 +2198,9 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             typealias GLenum = UInt32
             
-            @objc
-            class A: NSObject {
-                @objc var prop: CGFloat = 0.0
+            class A {
+                var prop: CGFloat = 0.0
                 
-                @objc
                 func method() {
                     let local = GLenum(prop)
                 }
@@ -2383,11 +2228,9 @@ class SwiftRewriterTests: XCTestCase {
             typealias GLenum = UInt32
             typealias Alias = GLenum
 
-            @objc
-            class A: NSObject {
-                @objc var prop: CGFloat = 0.0
+            class A {
+                var prop: CGFloat = 0.0
                 
-                @objc
                 func method() {
                     let local = GLenum(prop)
                 }
@@ -2406,9 +2249,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func method() {
                     let dict = [:]
                     NSLog(dict["abc"]?["def"].value)
@@ -2429,9 +2270,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: UITableViewCell {
-                @objc
                 func method() {
                     self.isHidden
                 }
@@ -2456,11 +2295,9 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc var a: Int = 0
+            class A {
+                var a: Int = 0
                 
-                @objc
                 override init() {
                     self.a = 0
                     super.init()
@@ -2482,9 +2319,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 init?(thing: Int) {
                     return self
                 }
@@ -2505,9 +2340,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 init?(thing: Int) {
                     return nil
                 }
@@ -2538,17 +2371,13 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class A: NSObject {
+            class A {
             }
-            @objc
             class B: A {
-                @objc
                 override init(a: A) {
                     self = super.init(a: a)
                     return self
                 }
-                @objc
                 convenience init(b: B) {
                     self.init(a: a)
                 }
@@ -2569,9 +2398,7 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: UIView {
-                @objc
                 override func convert(_ point: CGPoint, to view: UIView?) -> CGPoint {
                     return self.convert(CGPoint(x: 0, y: 0), to: nil)
                 }
@@ -2635,9 +2462,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             typealias callback = () -> Void
             
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func doWork(_ call: callback?) {
                     call?()
                 }
@@ -2681,21 +2506,16 @@ class SwiftRewriterTests: XCTestCase {
             typealias predicate = (String?) -> Bool
             typealias other_predicate = (String?) -> Bool
             
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func doWork(_ call: callback?) {
                     call?()
                 }
-                @objc
                 func doMoreWork(_ predicate: predicate?) {
                     predicate?()
                 }
-                @objc
                 func doOtherWork(_ predicate: ((String) -> Bool)!) {
                     predicate?()
                 }
-                @objc
                 static func rawQuery(_ query: String, handler: (AnyObject?, Error?) -> Void) {
                     handler(nil, nil)
                 }

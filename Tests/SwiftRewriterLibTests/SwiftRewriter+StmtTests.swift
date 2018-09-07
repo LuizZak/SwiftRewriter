@@ -330,9 +330,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 }
             }
 
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     MemoryLayout<VertexObject>.size
                 }
@@ -353,9 +351,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     self.doThing(a) { () -> Void in
                     }
@@ -376,9 +372,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     { () -> Void in
                     }
@@ -394,9 +388,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let myBlock: (() -> Void)! = {
                     }
@@ -414,9 +406,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let myBlock: (() -> Void)! = {
                         self.doThing()
@@ -444,9 +434,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             var myInt: Int
             var myInt2: Int = 5
             
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let local: Int = 5
                     let constLocal: Int = 5
@@ -489,9 +477,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     if true {
                         stmt(abc)
@@ -518,9 +504,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     if true {
                         stmt1()
@@ -548,9 +532,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     if true {
                         stmt1()
@@ -579,9 +561,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     if true {
                         stmt1()
@@ -608,9 +588,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     if true {
                         if true {
@@ -634,9 +612,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     if ({
                         a -= 10
@@ -665,9 +641,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     switch value {
                     case 0:
@@ -698,9 +672,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     switch value {
                     case 0:
@@ -734,9 +706,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     switch value {
                     case 0:
@@ -771,9 +741,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     switch value {
                     case 0:
@@ -802,9 +770,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     while true {
                         stmt()
@@ -828,9 +794,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     for i in 0..<10 {
                     }
@@ -852,9 +816,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let count: Int = 5
                     for i in 0..<count {
@@ -877,9 +839,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let count: Int = 5
                     for i in 0..<count {
@@ -902,9 +862,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let array = []
                     for i in 0..<array.count {
@@ -928,9 +886,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     var count: Int = 5
                     var i: Int = 0
@@ -958,9 +914,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let count: Int = 5
                     i = 0
@@ -987,9 +941,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     repeat {
                         stmt()
@@ -1012,9 +964,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     let _lockTarget = self
                     objc_sync_enter(_lockTarget)
@@ -1039,9 +989,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     autoreleasepool { () -> Void in
                         stuff()
@@ -1062,9 +1010,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     for obj in anArray {
                     }
@@ -1106,9 +1052,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     // label:
                     if true {
@@ -1136,9 +1080,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                     // label:
                     if true {
@@ -1160,9 +1102,7 @@ private extension SwiftRewriter_StmtTests {
             @end
             """
         let swift = """
-            @objc
             class MyClass: UIView {
-                @objc
                 func myMethod() {
                     \(swift)
                 }

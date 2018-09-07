@@ -17,9 +17,7 @@ class SwiftRewriter_GlobalsProvidersTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
             class A: UIView {
-                @objc
                 func method() {
                     // type: CGRect
                     self.frame

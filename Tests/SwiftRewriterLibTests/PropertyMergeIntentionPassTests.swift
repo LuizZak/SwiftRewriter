@@ -19,9 +19,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc var value: Bool {
+            class MyClass {
+                var value: Bool {
                     get {
                         return false
                     }
@@ -47,9 +46,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc var value: Bool {
+            class MyClass {
+                var value: Bool {
                     return false
                 }
             }
@@ -76,10 +74,9 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var _value: Bool = false
-                @objc var value: Bool {
+                var value: Bool {
                     get {
                         return self._value
                     }
@@ -104,9 +101,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc var value: Bool {
+            class MyClass {
+                var value: Bool {
                     return false
                 }
             }
@@ -134,9 +130,8 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
-                @objc var value: MyClass {
+            class MyClass {
+                var value: MyClass {
                     get {
                         return MyClass()
                     }
@@ -166,10 +161,9 @@ class PropertyMergeIntentionPassTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
                 private var _ganttStartDate: Date = Date()
-                @objc var ganttStartDate: Date {
+                var ganttStartDate: Date {
                     get {
                         return _ganttStartDate
                     }

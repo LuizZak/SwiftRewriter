@@ -15,9 +15,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                 }
             }
@@ -42,9 +40,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func myMethod() {
                 }
             }
@@ -72,11 +68,9 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
-            @objc
-            class MyClass: NSObject {
-                @objc var property: String
+            class MyClass {
+                var property: String
                 
-                @objc
                 func myMethod(_ parameter: String) -> AnyObject {
                 }
             }
@@ -116,19 +110,14 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             .translatesToSwift(
             """
             // MARK: - Extension
-            @objc
             extension MyClass {
-                @objc
                 func fromExtension() {
                 }
-                @objc
                 func fromExtensionInterfaceOnly() {
                 }
             }
             // End of file MyClass+Ext.swift
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 func originalMethod() {
                 }
             }
@@ -143,7 +132,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
         assertThat()
             .file(name: "Class.h",
             """
-            @interface MyClass : NSObject
+            @interface MyClass
             @end
             """)
             .file(name: "Class.m",
@@ -175,24 +164,19 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift("""
             // MARK: - Ext1
-            @objc
             extension MyClass {
-                @objc
                 func f1() {
                     stmt1()
                 }
             }
             // MARK: - Ext2
-            @objc
             extension MyClass {
-                @objc
                 func f2() {
                     stmt2()
                 }
             }
             // End of file Class+Ext.swift
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
             }
             // End of file Class.swift
             """)
@@ -222,15 +206,11 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .translatesToSwift("""
-            @objc
-            class MyClass: NSObject {
-                @objc
+            class MyClass {
                 init(thing: AnyObject!) {
                 }
-                @objc
                 func doThing() {
                 }
-                @objc
                 func doOtherThing() {
                 }
             }
@@ -247,7 +227,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             };
             
             B *globalB;
-            @interface A: NSObject
+            @interface A
             {
                 B* ivarB;
             }
@@ -258,31 +238,27 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .file(name: "B.h",
             """
-            @interface B: NSObject
+            @interface B
             @end
             """)
             .translatesToSwift("""
-            @objc enum AnEnum: String {
+            enum AnEnum: String {
                 case AnEnumCase1
             }
             
             var globalB: B!
             
-            @objc
-            class A: NSObject {
+            class A {
                 private var ivarB: B!
-                @objc var b: B
+                var b: B
                 
-                @objc
                 init(b: B!) {
                 }
-                @objc
                 func takesB(_ b: B!) -> B! {
                 }
             }
             // End of file A.swift
-            @objc
-            class B: NSObject {
+            class B {
             }
             // End of file B.swift
             """)
@@ -322,17 +298,13 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // Preprocessor directives found in file:
             // #pragma mark - Delegate
             // #pragma mark - Calculation methods
-            @objc
-            protocol Delegate: NSObjectProtocol {
-                @objc
+            protocol Delegate {
                 func delegateMethod(_ cls: Class)
             }
 
-            @objc
             class Class: UIView {
-                @objc weak var delegate: Delegate?
+                weak var delegate: Delegate?
                 
-                @objc
                 func method() {
                     // type: Delegate?
                     self.delegate
@@ -345,8 +317,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
             }
             // End of file A.swift
-            """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            """, options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
     func testPreserversAssumesNonnullContextAfterMovingDeclarationsFromHeaderToImplementation() {
@@ -363,8 +334,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             .translatesToSwift("""
             typealias errorBlock = (String) -> Void
 
-            @objc
-            class A: NSObject {
+            class A {
             }
             // End of file A.swift
             """)
@@ -386,9 +356,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .translatesToSwift("""
-            @objc
-            class A: NSObject {
-                @objc
+            class A {
                 func method(_ param: (String) -> Void) {
                 }
             }
@@ -415,7 +383,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
     func testMergeAndKeepNullabilityDefinitions() {
         assertThat()
             .file(name: "A.h", """
-            @interface A : NSObject
+            @interface A
             @property CGFloat width;
             @end
             """)
@@ -424,7 +392,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .file(name: "B.h", """
-            @interface B : NSObject
+            @interface B
             @property (nullable) A* a;
             - (void)takesCGFloat:(CGFloat)f;
             @end
@@ -439,20 +407,16 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .translatesToSwift("""
-            @objc
-            class A: NSObject {
-                @objc var width: CGFloat = 0.0
+            class A {
+                var width: CGFloat = 0.0
             }
             // End of file A.swift
-            @objc
-            class B: NSObject {
-                @objc var a: A?
+            class B {
+                var a: A?
                 
-                @objc
                 func method() {
                     self.takesCGFloat(a?.width ?? 0.0)
                 }
-                @objc
                 func takesCGFloat(_ f: CGFloat) {
                 }
             }
@@ -481,11 +445,9 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """)
             .translatesToSwift(
             """
-            @objc
             class A: UIView {
-                @objc var b: B?
+                var b: B?
                 
-                @objc
                 func test() {
                     // type: CGRect?
                     self.window?.bounds
@@ -494,7 +456,6 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 }
             }
             // End of file A.swift
-            @objc
             class B: UIView {
             }
             // End of file B.swift
@@ -511,7 +472,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
             """)
             .file(name: "Class.h", """
-            @interface Class: NSObject
+            @interface Class
             @end
             """)
             .file(name: "Class.m", """
@@ -536,20 +497,16 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
                 
         assert
             .expectSwiftFile(name: "Class.swift", """
-            @objc
-            class Class: NSObject {
+            class Class {
             }
             // End of file Class.swift
             """)
             .expectSwiftFile(name: "Class+Protocol.swift", """
             // MARK: - Protocol
-            @objc
             extension Class: Protocol {
-                @objc
                 func protocolRequirement() -> String? {
                     return nil
                 }
-                @objc
                 func otherProtocolRequirement() -> String {
                     return ""
                 }
@@ -557,11 +514,8 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // End of file Class+Protocol.swift
             """)
             .expectSwiftFile(name: "Protocol.swift", """
-            @objc
-            protocol Protocol: NSObjectProtocol {
-                @objc
+            protocol Protocol {
                 func protocolRequirement() -> String?
-                @objc
                 func otherProtocolRequirement() -> String
             }
             // End of file Protocol.swift

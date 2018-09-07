@@ -19,8 +19,7 @@ class SwiftRewriter_SourcePreprocessor: XCTestCase {
         try rewriter.rewrite()
         
         XCTAssertEqual(output.buffer, """
-            @objc
-            class MyClass: NSObject {
+            class MyClass {
             }
             """)
     }
