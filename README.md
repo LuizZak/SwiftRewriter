@@ -23,17 +23,21 @@ swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/MyC
 Usage:
 
 ```
-SwiftRewriter [--colorize] [--print-expression-types] [--print-tracing-history] [--verbose] [--num-threads <n>] [--target stdout | filedisk]
-[files <files...> | path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]]
+SwiftRewriter [--colorize] [--print-expression-types] [--print-tracing-history] [--emit-objc-compatibility] [--verbose] [--num-threads <n>]
+[--force-ll] [--target stdout | filedisk] [files <files...> | path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]]
 
 OPTIONS:
   --colorize              Pass this parameter as true to enable terminal colorization during output.
   --diagnose-file         Provides a target file path to diagnose during rewriting.
 After each intention pass and after expression passes, the file is written
 to the standard output for diagnosing rewriting issues.
+  --emit-objc-compatibility
+                          Emits '@objc' attributes on definitions, and emits NSObject subclass and NSObjectProtocol conformance on protocols.
+
+This forces Swift to create Objective-C-compatible subclassing structures
+which may increase compatibility with previous Obj-C code.
+  --force-ll              Forces ANTLR parsing to use LL prediction context, instead of making an attempt at SLL first. May be more performant in some circumstances depending on complexity of original source code.
   --num-threads           Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.
-  --omit-objc-compatibility
-                          Don't emit '@objc' attributes on definitions, and don't emit NSObject subclass and NSObjectProtocol conformance by default.
   --print-expression-types
                           Prints the type of each top-level resolved expression statement found in function bodies.
   --print-tracing-history
@@ -50,7 +54,7 @@ Defaults to 'filedisk' if not provided.
   --help                  Display available options
 
 SUBCOMMANDS:
-  files                   Converts one or more input .h/.m files to Swift.
+  files                   Converts one or more series of .h/.m files to Swift.
   path                    Examines a path and collects all .h/.m files to convert, before presenting a prompt to confirm conversion of files.
 ```
 

@@ -33,9 +33,11 @@ let parser =
     ArgumentParser(
         usage: """
         [--colorize] [--print-expression-types] [--print-tracing-history] \
-        [--verbose] [--num-threads <n>] [--target stdout | filedisk]
+        [--emit-objc-compatibility] [--verbose] [--num-threads <n>] [--force-ll] \
+        [--target stdout | filedisk] \
         [files <files...> \
-        | path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]]
+        | path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] \
+        [--skip-confirm] [--overwrite]]
         """,
         overview: """
         Converts a set of files, or, if not provided, starts an interactive \
@@ -131,7 +133,7 @@ let targetArg
 
 let filesParser
     = parser.add(subparser: "files",
-                 overview: "Converts one or more series of files to Swift and print them to the terminal.")
+                 overview: "Converts one or more series of .h/.m files to Swift.")
 let filesArg
     = filesParser.add(positional: "files", kind: [String].self, usage: "Objective-C file(s) to convert.")
 
