@@ -252,9 +252,7 @@ public final class SwiftClassInterfaceParser {
     ///
     /// access-level-modifier
     ///     : 'public'
-    ///     | 'public(set)'
     ///     | 'open'
-    ///     | 'open(set)'
     ///     ;
     /// ```
     private static func parseDeclarationModifier(from tokenizer: Tokenizer) throws -> DeclarationModifier {
