@@ -10,11 +10,11 @@ public final class SwiftClassInterfaceParser {
     ///
     /// String must contain a single, complete class or extension definition.
     /// Definition must be interface-only (i.e. no method implementations or bodies).
-    public static func parseDefinition(from string: String) throws -> IncompleteKnownType {
+    public static func parseDeclaration(from string: String) throws -> IncompleteKnownType {
         
         var builder = KnownTypeBuilder(typeName: "")
         
-        try parseDefinition(from: string, into: &builder)
+        try parseDeclaration(from: string, into: &builder)
         
         return IncompleteKnownType(typeBuilder: builder)
     }
@@ -24,30 +24,74 @@ public final class SwiftClassInterfaceParser {
     ///
     /// String must contain a single, complete class or extension definition.
     /// Definition must be interface-only (i.e. no method implementations or bodies).
-    public static func parseDefinition(from string: String,
-                                       into typeBuilder: inout KnownTypeBuilder) throws {
+    ///
+    /// ```
+    /// type-declaration
+    ///     : type-declaration-header type-body
+    ///     ;
+    ///
+    /// type-body
+    ///     : '{' type-members? '}'
+    ///     ;
+    /// ```
+    public static func parseDeclaration(from string: String,
+                                        into typeBuilder: inout KnownTypeBuilder) throws {
         
-        let tokenizer = Tokenizer(input: string)
+        return try parseDeclaration(from: Lexer(input: string), into: &typeBuilder)
+    }
+    
+    /// Parses a class type interface signature from a given lexer into a given
+    /// know type builder object.
+    ///
+    /// String must contain a single, complete class or extension definition.
+    /// Definition must be interface-only (i.e. no method implementations or bodies).
+    ///
+    /// ```
+    /// type-declaration
+    ///     : type-declaration-header type-body
+    ///     ;
+    ///
+    /// type-body
+    ///     : '{' type-members? '}'
+    ///     ;
+    /// ```
+    public static func parseDeclaration(from lexer: Lexer,
+                                        into typeBuilder: inout KnownTypeBuilder) throws {
+        
+        let tokenizer = Tokenizer(lexer: lexer)
         
         var builder = typeBuilder
         
-        builder = builder.named("")
+        try parseTypeDeclarationHeader(from: tokenizer, &builder)
         
         typeBuilder = builder
     }
     
     /// ```
-    /// class-header
-    ///     : 'class' type-name (':' type-name (',' type-name)*)?
-    //          '{' class-body-definition '}'
+    /// type-declaration-header
+    ///     : 'class' type-name type-inheritance-clause?
+    ///     : 'extension' type-name type-inheritance-clause?
     ///     ;
+    ///
+    /// type-inheritance-clause
+    ///     : ':' type-name (',' type-name)*
     ///
     /// type-name
     ///     : identifier
     ///     ;
     /// ```
-    private static func parseClassHeader(from tokenizer: Tokenizer,
-                                         _ typeBuilder: inout KnownTypeBuilder) throws {
+    private static func parseTypeDeclarationHeader(from tokenizer: Tokenizer,
+                                                   _ typeBuilder: inout KnownTypeBuilder) throws {
+        
+        let isExtension: Bool
+        
+        if tokenizer.tokenType(is: .extension) {
+            try tokenizer.advance(overTokenType: .extension)
+            isExtension = true
+        } else {
+            try tokenizer.advance(overTokenType: .class)
+            isExtension = false
+        }
         
         try tokenizer.advance(overTokenType: .class)
         let name = try typeName(from: tokenizer)
@@ -71,9 +115,217 @@ public final class SwiftClassInterfaceParser {
             }
         }
         
+        try parseTypeBody(from: tokenizer, &typeBuilder)
+        
         typeBuilder = typeBuilder
             .named(name)
+            .settingIsExtension(isExtension)
             .protocolConformances(protocolNames: supertypes)
+    }
+    
+    /// ```
+    /// type-body
+    ///     : '{' type-members? '}'
+    ///     ;
+    ///
+    /// type-members
+    ///     : type-member+
+    ///     ;
+    /// ```
+    private static func parseTypeBody(from tokenizer: Tokenizer,
+                                      _ typeBuilder: inout KnownTypeBuilder) throws {
+        
+        try tokenizer.advance(overTokenType: .openBrace)
+        
+        if !tokenizer.tokenType(is: .closeBrace) {
+            try parseTypeMembers(from: tokenizer, &typeBuilder)
+        }
+        
+        try tokenizer.advance(overTokenType: .closeBrace)
+    }
+    
+    /// ```
+    /// type-members
+    ///     : type-member+
+    ///     ;
+    ///
+    /// type-member
+    ///     : var-declaration
+    ///     | function-declaration
+    ///     | initializer-declaration
+    ///     ;
+    /// ```
+    private static func parseTypeMembers(from tokenizer: Tokenizer,
+                                         _ typeBuilder: inout KnownTypeBuilder) throws {
+        
+        _ = tokenizer.lexer.performGreedyRounds { (lexer, round) -> Bool in
+            try parseTypeMember(from: tokenizer, &typeBuilder)
+            
+            return true
+        }
+    }
+    
+    /// ```
+    /// type-member
+    ///     : declaration-modifiers? var-declaration
+    ///     | declaration-modifiers? function-declaration
+    ///     | declaration-modifiers? initializer-declaration
+    ///     ;
+    ///
+    /// function-declaration
+    ///     : 'func' function-signature
+    ///     ;
+    ///
+    /// initializer-declaration
+    ///     : 'init' function-signature
+    ///     ;
+    /// ```
+    private static func parseTypeMember(from tokenizer: Tokenizer,
+                                        _ typeBuilder: inout KnownTypeBuilder) throws {
+        
+        let modifiers: [DeclarationModifier] =
+            (try? parseDeclarationModifiers(from: tokenizer)) ?? []
+        
+        switch tokenizer.tokenType() {
+        case .var:
+            let varDecl = try parseVarDeclaration(from: tokenizer)
+            
+            typeBuilder =
+                typeBuilder.property(named: varDecl.identifier, type: varDecl.type)
+            
+        default:
+            throw tokenizer.lexer.syntaxError(
+                "Expected variable, function or initializer declaration"
+            )
+        }
+        
+    }
+    
+    /// ```
+    /// var-declaration
+    ///     : 'var' identifier ':' swift-type
+    ///     ;
+    /// ```
+    private static func parseVarDeclaration(from tokenizer: Tokenizer) throws -> VarDeclaration {
+        try tokenizer.advance(overTokenType: .var)
+        
+        let ident = try identifier(from: tokenizer)
+        let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        
+        return VarDeclaration(identifier: ident, type: type)
+    }
+    
+    /// ```
+    /// declaration-modifiers
+    ///     : declaration-modifier+
+    ///     ;
+    /// ```
+    private static func parseDeclarationModifiers(from tokenizer: Tokenizer) throws -> [DeclarationModifier] {
+        var modifiers: [DeclarationModifier] = []
+        
+        try tokenizer.lexer.expect(atLeast: 1) { (lexer) -> Bool in
+            modifiers.append(try parseDeclarationModifier(from: tokenizer))
+            
+            return true
+        }
+        
+        return modifiers
+    }
+    
+    /// ```
+    /// declaration-modifier
+    ///     : access-level-modifier
+    ///     | 'class'
+    ///     | 'convenience'
+    ///     | 'dynamic'
+    ///     | 'final'
+    ///     | 'lazy'
+    ///     | 'optional'
+    ///     | 'override'
+    ///     | 'required'
+    ///     | 'static'
+    ///     | 'unowned'
+    ///     | 'unowned(safe)'
+    ///     | 'unowned(unsafe)'
+    ///     | 'weak'
+    ///     ;
+    ///
+    /// access-level-modifier
+    ///     : 'public'
+    ///     | 'public(set)'
+    ///     | 'open'
+    ///     | 'open(set)'
+    ///     ;
+    /// ```
+    private static func parseDeclarationModifier(from tokenizer: Tokenizer) throws -> DeclarationModifier {
+        
+        let ignored: Set<Token> = [
+            .convenience,
+            .dynamic,
+            .final,
+            .optional,
+            .required
+        ]
+        
+        let tokenType = tokenizer.tokenType()
+        
+        if ignored.contains(tokenType) {
+            tokenizer.skipToken()
+            
+            return DeclarationModifier.ignored
+        }
+        
+        switch tokenType {
+        case .static, .class:
+            tokenizer.skipToken()
+            
+            return DeclarationModifier.static
+            
+        case .override:
+            tokenizer.skipToken()
+            
+            return DeclarationModifier.override
+            
+        case .weak:
+            tokenizer.skipToken()
+            
+            return DeclarationModifier.ownership(.weak)
+            
+        case .unowned, .unowned_safe:
+            tokenizer.skipToken()
+            
+            return DeclarationModifier.ownership(.unownedSafe)
+            
+        case .unowned_unsafe:
+            tokenizer.skipToken()
+            
+            return DeclarationModifier.ownership(.unownedUnsafe)
+        default:
+            break
+        }
+        
+        return DeclarationModifier.accessLevel(try parseAccessLevel(from: tokenizer))
+    }
+    
+    /// ```
+    /// access-level-modifier
+    ///     : 'public'
+    ///     | 'public(set)'
+    ///     | 'open'
+    ///     | 'open(set)'
+    ///     ;
+    /// ```
+    private static func parseAccessLevel(from tokenizer: Tokenizer) throws -> AccessLevel {
+        if tokenizer.tokenType(is: .open) {
+            tokenizer.skipToken()
+            return .open
+        }
+        if tokenizer.tokenType(is: .public) {
+            tokenizer.skipToken()
+            return .public
+        }
+        
+        throw tokenizer.lexer.syntaxError("Expected access level modifier")
     }
     
     private static func typeName(from tokenizer: Tokenizer) throws -> String {
@@ -82,8 +334,31 @@ public final class SwiftClassInterfaceParser {
             
             return String(token.value)
         } catch {
+            throw tokenizer.lexer.syntaxError("Expected type name")
+        }
+    }
+    
+    private static func identifier(from tokenizer: Tokenizer) throws -> String {
+        do {
+            let token = try tokenizer.advance(overTokenType: .identifier)
+            
+            return String(token.value)
+        } catch {
             throw tokenizer.lexer.syntaxError("Expected identifier")
         }
+    }
+    
+    private struct VarDeclaration {
+        var identifier: String
+        var type: SwiftType
+    }
+    
+    private enum DeclarationModifier: Hashable {
+        case accessLevel(AccessLevel)
+        case `static`
+        case ownership(Ownership)
+        case `override`
+        case ignored
     }
 }
 
@@ -123,6 +398,8 @@ extension SwiftClassInterfaceParser {
         
         case openParens = "("
         case closeParens = ")"
+        case openBrace = "{"
+        case closeBrace = "}"
         case colon = ":"
         case comma = ","
         case at = "@"
@@ -132,16 +409,25 @@ extension SwiftClassInterfaceParser {
         case `var`
         case `let`
         case `func`
+        case `weak`
+        case `open`
         case `inout`
+        case `final`
         case `class`
         case `throws`
         case `static`
         case `public`
-        case `private`
+        case `dynamic`
+        case `unowned`
+        case unowned_safe
+        case unowned_unsafe
+        case optional
         case `mutating`
         case `rethrows`
-        case `internal`
+        case `required`
+        case `override`
         case `extension`
+        case `convenience`
         case `fileprivate`
         case eof
         
@@ -156,26 +442,31 @@ extension SwiftClassInterfaceParser {
         
         func length(in lexer: Lexer) -> Int {
             switch self {
-            case .openParens, .closeParens, .colon, .comma, .underscore, .at:
+            case .openParens, .closeParens, .openBrace, .closeBrace, .colon,
+                 .comma, .underscore, .at:
                 return 1
             case .functionArrow:
                 return 2
             case .var, .let:
                 return 3
-            case .func:
+            case .func, .weak, .open:
                 return 4
-            case .inout, .class:
+            case .inout, .class, .final:
                 return 5
             case .throws, .public, .static:
                 return 6
-            case .private:
+            case .dynamic, .unowned:
                 return 7
-            case .mutating, .rethrows, .internal:
+            case .mutating, .rethrows, .required, .override, .optional:
                 return 8
             case .extension:
                 return 9
-            case .fileprivate:
+            case .fileprivate, .convenience:
                 return 11
+            case .unowned_safe:
+                return 12
+            case .unowned_unsafe:
+                return 14
             case .identifier:
                 return Token.identifierLexer.maximumLength(in: lexer) ?? 0
             case .eof:
@@ -228,26 +519,48 @@ extension SwiftClassInterfaceParser {
                     return .class
                 case "func":
                     return .func
+                case "weak":
+                    return .weak
+                case "open":
+                    return .open
                 case "inout":
                     return .inout
+                case "final":
+                    return .final
                 case "throws":
                     return .throws
                 case "public":
                     return .public
                 case "static":
                     return .static
-                case "private":
-                    return .private
+                case "dynamic":
+                    return .dynamic
+                case "unowned":
+                    
+                    if lexer.checkNext(matches: "(safe)") {
+                        return .unowned_safe
+                    }
+                    if lexer.checkNext(matches: "(unsafe)") {
+                        return .unowned_unsafe
+                    }
+                    
+                    return .unowned
                 case "mutating":
                     return .mutating
                 case "rethrows":
                     return .rethrows
-                case "internal":
-                    return .internal
+                case "required":
+                    return .required
+                case "override":
+                    return .override
+                case "optional":
+                    return .optional
                 case "extension":
                     return .extension
                 case "fileprivate":
                     return .fileprivate
+                case "convenience":
+                    return .convenience
                     
                 default:
                     return .identifier
