@@ -121,12 +121,6 @@ public final class SyntaxNodeIterator: IteratorProtocol {
     }
 }
 
-/// Enum produced as the result of a `SyntaxNodeIterator`'s iteration process
-public enum ExpressionOrStatement {
-    case expression(Expression)
-    case statement(Statement)
-}
-
 public final class SyntaxNodeSequence: Sequence {
     private var node: SyntaxNode
     private var inspectBlocks: Bool
