@@ -30,14 +30,15 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         for functionBody in bodies {
             let body = functionBody.body
             
-            let iterator = SyntaxNodeSequence(node: body, inspectBlocks: true)
-            
-            for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
+            let visitor = AnonymousSyntaxNodeVisitor { node in
+                guard let exp = node as? PostfixExpression else {
+                    return
+                }
                 guard let expMethod = exp.member?.memberDefinition as? KnownMethod else {
-                    continue
+                    return
                 }
                 guard expMethod.signature == method.signature else {
-                    continue
+                    return
                 }
                 
                 if expMethod.ownerType?.asTypeName == method.ownerType?.asTypeName {
@@ -48,6 +49,8 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                     usages.append(usage)
                 }
             }
+            
+            visitor.visitStatement(body)
         }
         
         return usages
@@ -61,18 +64,19 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
         for functionBody in bodies {
             let body = functionBody.body
             
-            let iterator = SyntaxNodeSequence(node: body, inspectBlocks: true)
-            
-            for exp in iterator.lazy.compactMap({ $0 as? PostfixExpression }) {
+            let visitor = AnonymousSyntaxNodeVisitor { node in
+                guard let exp = node as? PostfixExpression else {
+                    return
+                }
                 guard let expProperty = exp.member?.memberDefinition as? KnownProperty else {
-                    continue
+                    return
                 }
                 guard expProperty.name == property.name else {
-                    continue
+                    return
                 }
                 
                 if expProperty.ownerType?.asTypeName == property.ownerType?.asTypeName {
-                    let readOnly = isReadOnlyContext(exp)
+                    let readOnly = self.isReadOnlyContext(exp)
                     
                     let usage = DefinitionUsage(intention: functionBody,
                                                 expression: exp,
@@ -81,6 +85,8 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                     usages.append(usage)
                 }
             }
+            
+            visitor.visitStatement(body)
         }
         
         return usages

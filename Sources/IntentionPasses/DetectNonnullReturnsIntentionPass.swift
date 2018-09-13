@@ -35,9 +35,15 @@ public class DetectNonnullReturnsIntentionPass: ClassVisitingIntentionPass {
         }
         
         // Collect all return statements
-        let returns =
-            SyntaxNodeSequence(node: body.body, inspectBlocks: false)
-                .compactMap { $0 as? ReturnStatement }
+        var returns: [ReturnStatement] = []
+        
+        let visitor = AnonymousSyntaxNodeVisitor { node in
+            if let ret = node as? ReturnStatement {
+                returns.append(ret)
+            }
+        }
+        
+        visitor.visitStatement(body.body)
         
         // TODO: Be aware of polymorphism/inheritance here.
         
