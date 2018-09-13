@@ -45,8 +45,8 @@ public class FromSourceIntention: NonNullScopedIntention {
     /// intention, `false` otherwise.
     public func isVisible(for intention: FromSourceIntention) -> Bool {
         switch accessLevel {
-        // Internal/public are visible everywhere
-        case .public, .internal:
+        // Internal/public/open are visible everywhere
+        case .internal, .public, .open:
             return true
             
         case .fileprivate:

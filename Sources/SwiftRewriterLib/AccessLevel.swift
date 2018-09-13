@@ -4,6 +4,7 @@ public enum AccessLevel: String {
     case `fileprivate`
     case `internal`
     case `public`
+    case `open`
     
     /// Returns `true` if this access level value is of higher visibility than
     /// the one provided.
@@ -27,6 +28,12 @@ public enum AccessLevel: String {
         case (.public, .private),
              (.public, .fileprivate),
              (.public, .internal):
+            return true
+            
+        case (.open, .private),
+             (.open, .fileprivate),
+             (.open, .internal),
+             (.open, .public):
             return true
             
         default:
