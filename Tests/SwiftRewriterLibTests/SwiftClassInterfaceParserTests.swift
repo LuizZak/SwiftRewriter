@@ -41,6 +41,18 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.supertype?.asTypeName, "UIView")
     }
     
+    func testParseProtocolConformances() throws {
+        
+        let type = try parseType("""
+            class MyClass: A, B {
+            }
+            """)
+        
+        XCTAssertEqual(type.knownProtocolConformances.count, 2)
+        XCTAssertEqual(type.knownProtocolConformances[0].protocolName, "A")
+        XCTAssertEqual(type.knownProtocolConformances[1].protocolName, "B")
+    }
+    
     func testParseProperty() throws {
         
         let type = try parseType("""
