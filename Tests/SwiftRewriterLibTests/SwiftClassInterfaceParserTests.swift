@@ -111,6 +111,38 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownConstructors[0].parameters.count, 0)
     }
     
+    func testParseExtensionDeclaration() throws {
+        let type = try parseType("""
+            extension MyClass {
+                func a()
+                func b(_ a: Int)
+                func c(a: String, b: Int?) -> MyClass
+            }
+            """)
+        
+        XCTAssertEqual(type.knownMethods.count, 3)
+        XCTAssertEqual(type.knownMethods[0].signature.name, "a")
+        XCTAssertEqual(type.knownMethods[0].signature.parameters.count, 0)
+        XCTAssertEqual(type.knownMethods[0].signature.returnType, .void)
+        
+        XCTAssertEqual(type.knownMethods[1].signature.name, "b")
+        XCTAssertEqual(type.knownMethods[1].signature.parameters.count, 1)
+        XCTAssertNil(type.knownMethods[1].signature.parameters[0].label)
+        XCTAssertEqual(type.knownMethods[1].signature.parameters[0].name, "a")
+        XCTAssertEqual(type.knownMethods[1].signature.parameters[0].type, .int)
+        XCTAssertEqual(type.knownMethods[1].signature.returnType, .void)
+        
+        XCTAssertEqual(type.knownMethods[2].signature.name, "c")
+        XCTAssertEqual(type.knownMethods[2].signature.parameters.count, 2)
+        XCTAssertEqual(type.knownMethods[2].signature.parameters[0].label, "a")
+        XCTAssertEqual(type.knownMethods[2].signature.parameters[0].name, "a")
+        XCTAssertEqual(type.knownMethods[2].signature.parameters[0].type, .string)
+        XCTAssertEqual(type.knownMethods[2].signature.parameters[1].label, "b")
+        XCTAssertEqual(type.knownMethods[2].signature.parameters[1].name, "b")
+        XCTAssertEqual(type.knownMethods[2].signature.parameters[1].type, .optional(.int))
+        XCTAssertEqual(type.knownMethods[2].signature.returnType, "MyClass")
+    }
+    
     func testBackToBackTypeParse() throws {
         
         let type = try parseType("""

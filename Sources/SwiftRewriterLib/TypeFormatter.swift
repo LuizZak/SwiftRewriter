@@ -8,7 +8,11 @@ public enum TypeFormatter {
         
         let o = StringRewriterOutput(settings: .defaults)
         
-        o.outputInline("\(type.kind.rawValue) \(type.typeName)")
+        if type.isExtension {
+            o.outputInline("extension \(type.typeName)")
+        } else {
+            o.outputInline("\(type.kind.rawValue) \(type.typeName)")
+        }
         
         var inheritances: [String] = []
         

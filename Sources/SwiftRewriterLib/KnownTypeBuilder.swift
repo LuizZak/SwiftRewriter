@@ -550,6 +550,7 @@ private class DummyType: KnownType {
         knownProtocolConformances = type.knownProtocolConformances
         supertype = type.supertype
         semantics = type.semantics
+        isExtension = type.isExtension
     }
     
     init(typeName: String, supertype: KnownTypeReferenceConvertible? = nil) {

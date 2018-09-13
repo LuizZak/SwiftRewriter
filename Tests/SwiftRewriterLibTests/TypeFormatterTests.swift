@@ -173,6 +173,22 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
     }
     
+    func testAsStringKnownTypeExtension() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .class)
+            .settingIsExtension(true)
+            .property(named: "a", type: .int)
+            .build()
+        
+        let result = TypeFormatter.asString(knownType: type)
+        let expected = """
+            extension A {
+                var a: Int
+            }
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
+    
     func testAsStringKnownTypeEnum() {
         let type = KnownTypeBuilder(typeName: "A", kind: .enum)
             .enumRawValue(type: .int)
