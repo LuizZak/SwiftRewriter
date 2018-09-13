@@ -10,6 +10,7 @@ public class MemberGenerationIntention: FromSourceIntention {
     public var isStatic: Bool { return false }
     
     public var semantics: Set<Semantic> = []
+    public var knownAttributes: [KnownAttribute] = []
     public var annotations: [String] = []
     
     public var memberType: SwiftType {

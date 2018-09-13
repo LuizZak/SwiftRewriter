@@ -961,6 +961,7 @@ public class DefaultTypeSystem: TypeSystem {
             let knownMethods: [KnownMethod] = []
             let knownProperties: [KnownProperty] = []
             let knownFields: [KnownProperty] = []
+            let knownAttributes: [KnownAttribute] = []
             let knownProtocolConformances: [KnownProtocolConformance]
             let semantics: Set<Semantic> = []
             
@@ -1053,6 +1054,7 @@ public class DefaultTypeSystem: TypeSystem {
             let knownProperties: [KnownProperty] = []
             let knownFields: [KnownProperty] = []
             let knownProtocolConformances: [KnownProtocolConformance]
+            let knownAttributes: [KnownAttribute] = []
             let semantics: Set<Semantic> = []
             
             init(classType: ClassType) {

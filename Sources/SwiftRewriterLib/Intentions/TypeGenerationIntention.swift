@@ -204,4 +204,7 @@ extension TypeGenerationIntention: KnownType {
     public var knownProtocolConformances: [KnownProtocolConformance] {
         return protocols
     }
+    public var knownAttributes: [KnownAttribute] {
+        return []
+    }
 }

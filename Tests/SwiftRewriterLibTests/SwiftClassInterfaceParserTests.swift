@@ -155,6 +155,30 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownMethods[2].signature.returnType, "MyClass")
     }
     
+    func testParseAttributes() throws {
+        let type = try parseType("""
+            @attribute1
+            extension MyClass {
+                @attribute2
+                var a: Int
+                @attribute3
+                init()
+                @attribute4(someTag:)
+                func f()
+            }
+            """)
+        
+        XCTAssertEqual(type.knownAttributes.count, 1)
+        XCTAssertEqual(type.knownAttributes[0].name, "attribute1")
+        XCTAssertEqual(type.knownProperties[0].knownAttributes.count, 1)
+        XCTAssertEqual(type.knownProperties[0].knownAttributes[0].name, "attribute2")
+        XCTAssertEqual(type.knownConstructors[0].knownAttributes.count, 1)
+        XCTAssertEqual(type.knownConstructors[0].knownAttributes[0].name, "attribute3")
+        XCTAssertEqual(type.knownMethods[0].knownAttributes.count, 1)
+        XCTAssertEqual(type.knownMethods[0].knownAttributes[0].name, "attribute4")
+        XCTAssertEqual(type.knownMethods[0].knownAttributes[0].parameters, "someTag:")
+    }
+    
     func testBackToBackTypeParse() throws {
         
         let type = try parseType("""

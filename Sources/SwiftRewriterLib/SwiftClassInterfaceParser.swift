@@ -60,6 +60,10 @@ public final class SwiftClassInterfaceParser {
     }
     
     /// ```
+    /// type-declaration
+    ///     : attributes? type-declaration-header type-body
+    ///     ;
+    ///
     /// type-declaration-header
     ///     : 'class' type-name type-inheritance-clause?
     ///     : 'extension' type-name type-inheritance-clause?
@@ -75,7 +79,15 @@ public final class SwiftClassInterfaceParser {
     private static func parseTypeDeclarationHeader(from tokenizer: Tokenizer,
                                                    _ typeBuilder: inout KnownTypeBuilder) throws {
         
+        let attributes: [Attribute]
         let isExtension: Bool
+        
+        // Verify attributes
+        if tokenizer.tokenType(is: .at) {
+            attributes = try parseAttributes(from: tokenizer)
+        } else {
+            attributes = []
+        }
         
         if tokenizer.tokenType(is: .extension) {
             try tokenizer.advance(overTokenType: .extension)
@@ -112,6 +124,7 @@ public final class SwiftClassInterfaceParser {
             .named(name)
             .settingIsExtension(isExtension)
             .protocolConformances(protocolNames: supertypes)
+            .settingAttributes(attributes.map { $0.asKnownAttribute })
     }
     
     /// ```
@@ -152,18 +165,26 @@ public final class SwiftClassInterfaceParser {
         while !tokenizer.tokenType(is: .closeBrace) {
             try parseTypeMember(from: tokenizer, &typeBuilder)
         }
-        
     }
     
     /// ```
     /// type-member
-    ///     : declaration-modifiers? var-declaration
-    ///     | declaration-modifiers? function-declaration
-    ///     | declaration-modifiers? initializer-declaration
+    ///     : attributes? declaration-modifiers? type-member-declaration
+    ///     ;
+    ///
+    /// type-member-declaration
+    ///     : var-declaration
+    ///     | function-declaration
+    ///     | initializer-declaration
     ///     ;
     /// ```
     private static func parseTypeMember(from tokenizer: Tokenizer,
                                         _ typeBuilder: inout KnownTypeBuilder) throws {
+        
+        let attributes: [Attribute] =
+            (try? parseAttributes(from: tokenizer)) ?? []
+        
+        let knownAttributes = attributes.map { $0.asKnownAttribute }
         
         let modifiers: [DeclarationModifier] =
             (try? parseDeclarationModifiers(from: tokenizer)) ?? []
@@ -189,26 +210,28 @@ public final class SwiftClassInterfaceParser {
                     type: varDecl.type,
                     ownership: ownership,
                     isStatic: modifiers.contains(.static),
-                    accessor: varDecl.isConstant ? .getter : .getterAndSetter)
+                    accessor: varDecl.isConstant ? .getter : .getterAndSetter,
+                    attributes: knownAttributes)
             
         case .func:
             let funcDecl = try parseFunctionDeclaration(from: tokenizer)
             
             typeBuilder =
-                typeBuilder.method(withSignature: funcDecl.signature)
+                typeBuilder.method(withSignature: funcDecl.signature,
+                                   attributes: knownAttributes)
             
         case ._init:
             let initDecl = try parseInitializerDeclaration(from: tokenizer)
             
             typeBuilder =
-                typeBuilder.constructor(withParameters: initDecl.parameters)
+                typeBuilder.constructor(withParameters: initDecl.parameters,
+                                        attributes: knownAttributes)
             
         default:
             throw tokenizer.lexer.syntaxError(
                 "Expected variable, function or initializer declaration"
             )
         }
-        
     }
     
     /// ```
@@ -287,6 +310,21 @@ public final class SwiftClassInterfaceParser {
     }
     
     /// ```
+    /// attributes
+    ///     : attribute+
+    ///     ;
+    /// ```
+    private static func parseAttributes(from tokenizer: Tokenizer) throws -> [Attribute] {
+        var attributes: [Attribute] = []
+        
+        while tokenizer.tokenType(is: .at) {
+            attributes.append(try parseAttribute(from: tokenizer))
+        }
+        
+        return attributes
+    }
+    
+    /// ```
     /// declaration-modifiers
     ///     : declaration-modifier+
     ///     ;
@@ -301,6 +339,90 @@ public final class SwiftClassInterfaceParser {
         }
         
         return modifiers
+    }
+    
+    /// ```
+    /// attribute
+    ///     : '@' identifier attribute-argument-clause?
+    ///     ;
+    ///
+    /// attribute-argument-clause
+    ///     : '(' balanced-tokens? ')'
+    ///     ;
+    ///
+    /// balanced-tokens
+    ///     : balanced-token+
+    ///     ;
+    ///
+    /// balanced-token
+    ///     : '(' balanced-tokens ')'
+    ///     | '[' balanced-tokens ']'
+    ///     | '{' balanced-tokens '}'
+    ///     | identifier
+    ///     | keyword
+    ///     | literal
+    ///     | operator
+    ///     | { Any punctuation except '(', ')', '[', ']', '{', or '}' }
+    ///     ;
+    /// ```
+    private static func parseAttribute(from tokenizer: Tokenizer) throws -> Attribute {
+        
+        func skipBalancedTokens() throws {
+            switch tokenizer.tokenType() {
+            case .openParens:
+                tokenizer.skipToken()
+                
+                while !tokenizer.isEof && !tokenizer.tokenType(is: .closeParens) {
+                    try skipBalancedTokens()
+                }
+                
+                try tokenizer.advance(overTokenType: .closeParens)
+                
+            case .openBrace:
+                tokenizer.skipToken()
+                
+                while !tokenizer.isEof && !tokenizer.tokenType(is: .closeBrace) {
+                    try skipBalancedTokens()
+                }
+                
+                try tokenizer.advance(overTokenType: .closeBrace)
+                
+            case .openSquare:
+                tokenizer.skipToken()
+                
+                while !tokenizer.isEof && !tokenizer.tokenType(is: .closeSquare) {
+                    try skipBalancedTokens()
+                }
+                
+                try tokenizer.advance(overTokenType: .closeBrace)
+                
+            default:
+                tokenizer.skipToken()
+            }
+        }
+        
+        try tokenizer.advance(overTokenType: .at)
+        
+        let name = String(try tokenizer.advance(overTokenType: .identifier).value)
+        let content: String?
+        
+        // attribute-argument-clause
+        //     : '(' balanced-tokens? ')'
+        //     ;
+        if tokenizer.tokenType(is: .openParens) {
+            let range = tokenizer.lexer.startRange()
+            
+            try skipBalancedTokens()
+            
+            let newStart = tokenizer.lexer.inputString.index(after: range.range().lowerBound)
+            let newEnd = tokenizer.lexer.inputString.index(before: range.range().upperBound)
+            
+            content = String(tokenizer.lexer.inputString[newStart..<newEnd])
+        } else {
+            content = nil
+        }
+        
+        return Attribute.generic(name: name, content: content)
     }
     
     /// ```
@@ -396,6 +518,13 @@ public final class SwiftClassInterfaceParser {
         throw tokenizer.lexer.syntaxError("Expected access level modifier")
     }
     
+    /// ```
+    /// swift-rewriter-attribute
+    /// ```
+    private static func parseSwiftRewriterAttribute(from tokenizer: Tokenizer) throws {
+        
+    }
+    
     private static func typeName(from tokenizer: Tokenizer) throws -> String {
         do {
             let token = try tokenizer.advance(overTokenType: .identifier)
@@ -428,6 +557,28 @@ public final class SwiftClassInterfaceParser {
     
     private struct InitializerDeclaration {
         var parameters: [ParameterSignature]
+    }
+    
+    private enum Attribute {
+        case generic(name: String, content: String?)
+        case swiftRewriter(SwiftRewriterAttribute)
+        
+        var asKnownAttribute: KnownAttribute {
+            switch self {
+            case .generic(let name, let content):
+                return KnownAttribute(name: name, parameters: content)
+                
+            case .swiftRewriter(let attribute):
+                return KnownAttribute(name: SwiftRewriterAttribute.name,
+                                      parameters: attribute.content)
+            }
+        }
+    }
+    
+    private struct SwiftRewriterAttribute {
+        static let name = "_swift_rewriter"
+        
+        var content: String
     }
     
     private enum DeclarationModifier: Hashable {
@@ -466,6 +617,12 @@ public class IncompleteKnownType {
         
         return knownTypeBuilder.build()
     }
+    
+    /// Provides access to customized attributes found while parsing a type
+    /// interface.
+    public class AttributesCollection {
+        
+    }
 }
 
 extension SwiftClassInterfaceParser {
@@ -477,6 +634,8 @@ extension SwiftClassInterfaceParser {
         case closeParens = ")"
         case openBrace = "{"
         case closeBrace = "}"
+        case openSquare = "["
+        case closeSquare = "]"
         case colon = ":"
         case comma = ","
         case at = "@"
@@ -522,8 +681,8 @@ extension SwiftClassInterfaceParser {
         
         func length(in lexer: Lexer) -> Int {
             switch self {
-            case .openParens, .closeParens, .openBrace, .closeBrace, .colon,
-                 .comma, .underscore, .at:
+            case .openParens, .closeParens, .openBrace, .closeBrace, .openSquare,
+                 .closeSquare, .colon, .comma, .underscore, .at:
                 return 1
             case .functionArrow:
                 return 2

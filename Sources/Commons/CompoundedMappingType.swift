@@ -62,4 +62,7 @@ extension CompoundedMappingType: KnownType {
     public var knownProtocolConformances: [KnownProtocolConformance] {
         return knownType.knownProtocolConformances
     }
+    public var knownAttributes: [KnownAttribute] {
+        return knownType.knownAttributes
+    }
 }

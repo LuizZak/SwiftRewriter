@@ -2,7 +2,7 @@ import Foundation
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
-public protocol KnownType: KnownTypeReferenceConvertible, SemanticalObject {
+public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObject, SemanticalObject {
     /// A string that specifies the origin of this known type.
     /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
@@ -97,7 +97,7 @@ public extension KnownType {
 }
 
 /// Describes a known type constructor
-public protocol KnownConstructor: SemanticalObject {
+public protocol KnownConstructor: SemanticalObject, AttributeTaggeableObject {
     /// Gets the parameters for this constructor
     var parameters: [ParameterSignature] { get }
     
@@ -113,7 +113,7 @@ public protocol KnownConstructor: SemanticalObject {
 }
 
 /// Describes a known member of a type
-public protocol KnownMember: SemanticalObject {
+public protocol KnownMember: SemanticalObject, AttributeTaggeableObject {
     /// The owner type for this known member
     var ownerType: KnownTypeReference? { get }
     
@@ -250,5 +250,22 @@ public enum TraitType: Equatable, Codable {
     private enum CodingKeys: Int, CodingKey {
         case flag
         case field
+    }
+}
+
+/// An object that supports attribute markings
+public protocol AttributeTaggeableObject {
+    /// Gets an array of all known attributes for this object
+    var knownAttributes: [KnownAttribute] { get }
+}
+
+/// Describes an attribute for a `KnownType` or one of its members.
+public struct KnownAttribute: Codable {
+    public var name: String
+    public var parameters: String?
+    
+    public init(name: String, parameters: String?) {
+        self.name = name
+        self.parameters = parameters
     }
 }
