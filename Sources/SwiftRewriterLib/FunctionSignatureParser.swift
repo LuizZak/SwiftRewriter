@@ -32,7 +32,46 @@ public final class FunctionSignatureParser {
     /// - Returns: A function signature, with name, parameters and a return type.
     /// - Throws: Lexing errors, if string is malformed.
     public static func parseSignature(from string: String) throws -> FunctionSignature {
-        let tokenizer = Tokenizer(input: string)
+        let lexer = Lexer(input: string)
+        
+        let signature = try parseSignature(from: lexer)
+        
+        // Verify extraneous input
+        if !lexer.isEof() {
+            let rem = lexer.withTemporaryIndex { lexer.consumeRemaining() }
+            
+            throw lexer.syntaxError("Extraneous input '\(rem)'")
+        }
+        
+        return signature
+    }
+    
+    /// Parses a function signature from a given input lexer.
+    ///
+    /// Parsing begins at the function name and the input should not start with
+    /// a `func` keyword.
+    ///
+    /// formal grammar of a function signature:
+    ///
+    /// ```
+    /// function-signature
+    ///     : 'mutating'? identifier parameter-signature return-type?
+    ///     : 'mutating'? identifier parameter-signature 'throws' return-type?
+    ///     : 'mutating'? identifier parameter-signature 'rethrows' return-type?
+    ///     ;
+    ///
+    /// return-type
+    ///     : '->' swift-type
+    /// ```
+    ///
+    /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
+    ///
+    /// - Parameter string: The input string to parse, containing the function
+    /// signature, starting at the function identifier name.
+    /// - Returns: A function signature, with name, parameters and a return type.
+    /// - Throws: Lexing errors, if string is malformed.
+    public static func parseSignature(from lexer: Lexer) throws -> FunctionSignature {
+        let tokenizer = Tokenizer(lexer: lexer)
         
         // 'mutating'?
         var isMutating = false
@@ -56,14 +95,6 @@ public final class FunctionSignatureParser {
             returnType = try SwiftTypeParser.parse(from: tokenizer.lexer)
         }
         
-        // Verify extraneous input
-        if !tokenizer.lexer.isEof() {
-            let index = tokenizer.lexer.inputIndex
-            let rem = tokenizer.lexer.consumeRemaining()
-            
-            throw LexerError.syntaxError(index, "Extraneous input '\(rem)'")
-        }
-        
         return
             FunctionSignature(
                 name: String(identifier.value),
@@ -72,6 +103,26 @@ public final class FunctionSignatureParser {
                 isStatic: false,
                 isMutating: isMutating
             )
+    }
+    
+    /// Parses an array of parameter signatures from a given input string.
+    ///
+    /// - Parameter string: The input string to parse, containing the parameter
+    /// list enclosed within parenthesis.
+    /// - Returns: An array of parameter signatures from the input string.
+    /// - Throws: Lexing errors, if string is malformed.
+    public static func parseParameters(from string: String) throws -> [ParameterSignature] {
+        let lexer = Lexer(input: string)
+        let params = try parseParameters(from: lexer)
+        
+        // Verify extraneous input
+        if !lexer.isEof() {
+            let rem = lexer.withTemporaryIndex { lexer.consumeRemaining() }
+            
+            throw lexer.syntaxError("Extraneous input '\(rem)'")
+        }
+        
+        return params
     }
     
     /// Parses an array of parameter signatures from a given input string.
@@ -130,17 +181,9 @@ public final class FunctionSignatureParser {
     /// list enclosed within parenthesis.
     /// - Returns: An array of parameter signatures from the input string.
     /// - Throws: Lexing errors, if string is malformed.
-    public static func parseParameters(from string: String) throws -> [ParameterSignature] {
-        let tokenizer = Tokenizer(input: string)
+    public static func parseParameters(from lexer: Lexer) throws -> [ParameterSignature] {
+        let tokenizer = Tokenizer(lexer: lexer)
         let params = try parseParameterList(tokenizer: tokenizer)
-        
-        // Verify extraneous input
-        if !tokenizer.lexer.isEof() {
-            let index = tokenizer.lexer.inputIndex
-            let rem = tokenizer.lexer.consumeRemaining()
-            
-            throw LexerError.syntaxError(index, "Extraneous input '\(rem)'")
-        }
         
         return params
     }

@@ -10,6 +10,10 @@ public final class SwiftClassInterfaceParser {
     ///
     /// String must contain a single, complete class or extension definition.
     /// Definition must be interface-only (i.e. no method implementations or bodies).
+    ///
+    /// Support for parsing Swift types is borrowed from `SwiftTypeParser`,
+    /// and support for parsing Swift function signatures is borrowed from
+    /// `FunctionSignatureParser`.
     public static func parseDeclaration(from string: String) throws -> IncompleteKnownType {
         
         var builder = KnownTypeBuilder(typeName: "")
@@ -25,15 +29,9 @@ public final class SwiftClassInterfaceParser {
     /// String must contain a single, complete class or extension definition.
     /// Definition must be interface-only (i.e. no method implementations or bodies).
     ///
-    /// ```
-    /// type-declaration
-    ///     : type-declaration-header type-body
-    ///     ;
-    ///
-    /// type-body
-    ///     : '{' type-members? '}'
-    ///     ;
-    /// ```
+    /// Support for parsing Swift types is borrowed from `SwiftTypeParser`,
+    /// and support for parsing Swift function signatures is borrowed from
+    /// `FunctionSignatureParser`.
     public static func parseDeclaration(from string: String,
                                         into typeBuilder: inout KnownTypeBuilder) throws {
         
@@ -46,15 +44,9 @@ public final class SwiftClassInterfaceParser {
     /// String must contain a single, complete class or extension definition.
     /// Definition must be interface-only (i.e. no method implementations or bodies).
     ///
-    /// ```
-    /// type-declaration
-    ///     : type-declaration-header type-body
-    ///     ;
-    ///
-    /// type-body
-    ///     : '{' type-members? '}'
-    ///     ;
-    /// ```
+    /// Support for parsing Swift types is borrowed from `SwiftTypeParser`,
+    /// and support for parsing Swift function signatures is borrowed from
+    /// `FunctionSignatureParser`.
     public static func parseDeclaration(from lexer: Lexer,
                                         into typeBuilder: inout KnownTypeBuilder) throws {
         
@@ -93,7 +85,6 @@ public final class SwiftClassInterfaceParser {
             isExtension = false
         }
         
-        try tokenizer.advance(overTokenType: .class)
         let name = try typeName(from: tokenizer)
         var supertypes: [String] = []
         
@@ -158,11 +149,10 @@ public final class SwiftClassInterfaceParser {
     private static func parseTypeMembers(from tokenizer: Tokenizer,
                                          _ typeBuilder: inout KnownTypeBuilder) throws {
         
-        _ = tokenizer.lexer.performGreedyRounds { (lexer, round) -> Bool in
+        while !tokenizer.tokenType(is: .closeBrace) {
             try parseTypeMember(from: tokenizer, &typeBuilder)
-            
-            return true
         }
+        
     }
     
     /// ```
@@ -170,14 +160,6 @@ public final class SwiftClassInterfaceParser {
     ///     : declaration-modifiers? var-declaration
     ///     | declaration-modifiers? function-declaration
     ///     | declaration-modifiers? initializer-declaration
-    ///     ;
-    ///
-    /// function-declaration
-    ///     : 'func' function-signature
-    ///     ;
-    ///
-    /// initializer-declaration
-    ///     : 'init' function-signature
     ///     ;
     /// ```
     private static func parseTypeMember(from tokenizer: Tokenizer,
@@ -190,8 +172,36 @@ public final class SwiftClassInterfaceParser {
         case .var:
             let varDecl = try parseVarDeclaration(from: tokenizer)
             
+            var ownership: Ownership = .strong
+            for modifier in modifiers {
+                switch modifier {
+                case .ownership(let own):
+                    ownership = own
+                    break
+                default:
+                    break
+                }
+            }
+            
             typeBuilder =
-                typeBuilder.property(named: varDecl.identifier, type: varDecl.type)
+                typeBuilder.property(
+                    named: varDecl.identifier,
+                    type: varDecl.type,
+                    ownership: ownership,
+                    isStatic: modifiers.contains(.static),
+                    accessor: varDecl.isConstant ? .getter : .getterAndSetter)
+            
+        case .func:
+            let funcDecl = try parseFunctionDeclaration(from: tokenizer)
+            
+            typeBuilder =
+                typeBuilder.method(withSignature: funcDecl.signature)
+            
+        case ._init:
+            let initDecl = try parseInitializerDeclaration(from: tokenizer)
+            
+            typeBuilder =
+                typeBuilder.constructor(withParameters: initDecl.parameters)
             
         default:
             throw tokenizer.lexer.syntaxError(
@@ -203,16 +213,77 @@ public final class SwiftClassInterfaceParser {
     
     /// ```
     /// var-declaration
-    ///     : 'var' identifier ':' swift-type
+    ///     : 'var' identifier ':' swift-type getter-setter-keywords?
+    ///     ;
+    ///
+    /// getter-setter-keywords
+    ///     : '{' 'get' '}'
+    ///     | '{' 'get' 'set' '}'
+    ///     | '{' 'set' 'get' '}'
     ///     ;
     /// ```
     private static func parseVarDeclaration(from tokenizer: Tokenizer) throws -> VarDeclaration {
         try tokenizer.advance(overTokenType: .var)
         
         let ident = try identifier(from: tokenizer)
+        try tokenizer.advance(overTokenType: .colon)
         let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        var isConstant = true
         
-        return VarDeclaration(identifier: ident, type: type)
+        // getter-setter-keywords
+        if tokenizer.tokenType(is: .openBrace) {
+            try tokenizer.advance(overTokenType: .openBrace)
+            
+            // 'set' implies 'get'
+            if tokenizer.tokenType(is: .set) {
+                tokenizer.skipToken()
+                try tokenizer.advance(overTokenType: .get)
+                
+                isConstant = false
+            } else {
+                try tokenizer.advance(overTokenType: .get)
+                
+                if tokenizer.tokenType(is: .set) {
+                    tokenizer.skipToken()
+                    
+                    isConstant = false
+                }
+            }
+            
+            try tokenizer.advance(overTokenType: .closeBrace)
+        } else {
+            isConstant = false
+        }
+        
+        return VarDeclaration(identifier: ident, type: type, isConstant: isConstant)
+    }
+    
+    /// ```
+    /// function-declaration
+    ///     : 'func' function-signature
+    ///     ;
+    /// ```
+    private static func parseFunctionDeclaration(from tokenizer: Tokenizer) throws -> FunctionDeclaration {
+        try tokenizer.advance(overTokenType: .func)
+        
+        let signature =
+            try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
+        
+        return FunctionDeclaration(signature: signature)
+    }
+    
+    /// ```
+    /// initializer-declaration
+    ///     : 'init' function-parameters
+    ///     ;
+    /// ```
+    private static func parseInitializerDeclaration(from tokenizer: Tokenizer) throws -> InitializerDeclaration {
+        try tokenizer.advance(overTokenType: ._init)
+        
+        let parameters =
+            try FunctionSignatureParser.parseParameters(from: tokenizer.lexer)
+        
+        return InitializerDeclaration(parameters: parameters)
     }
     
     /// ```
@@ -256,7 +327,6 @@ public final class SwiftClassInterfaceParser {
     ///     ;
     /// ```
     private static func parseDeclarationModifier(from tokenizer: Tokenizer) throws -> DeclarationModifier {
-        
         let ignored: Set<Token> = [
             .convenience,
             .dynamic,
@@ -349,6 +419,15 @@ public final class SwiftClassInterfaceParser {
     private struct VarDeclaration {
         var identifier: String
         var type: SwiftType
+        var isConstant: Bool
+    }
+    
+    private struct FunctionDeclaration {
+        var signature: FunctionSignature
+    }
+    
+    private struct InitializerDeclaration {
+        var parameters: [ParameterSignature]
     }
     
     private enum DeclarationModifier: Hashable {
@@ -368,7 +447,7 @@ public class IncompleteKnownType {
         self.knownTypeBuilder = typeBuilder
     }
     
-    func complete(typeSystem: TypeSystem) -> KnownType {
+    public func complete(typeSystem: TypeSystem) -> KnownType {
         
         // We add all supertypes we find as protocol conformances since we can't
         // verify during parsing that a type is either a protocol or a class, here
@@ -406,9 +485,12 @@ extension SwiftClassInterfaceParser {
         case functionArrow
         case `var`
         case `let`
+        case `get`
+        case `set`
         case `func`
         case `weak`
         case `open`
+        case `_init`
         case `inout`
         case `final`
         case `class`
@@ -445,9 +527,9 @@ extension SwiftClassInterfaceParser {
                 return 1
             case .functionArrow:
                 return 2
-            case .var, .let:
+            case .var, .let, .get, .set:
                 return 3
-            case .func, .weak, .open:
+            case .func, .weak, .open, ._init:
                 return 4
             case .inout, .class, .final:
                 return 5
@@ -513,14 +595,20 @@ extension SwiftClassInterfaceParser {
                     return .let
                 case "var":
                     return .var
-                case "class":
-                    return .class
+                case "get":
+                    return .get
+                case "set":
+                    return .set
                 case "func":
                     return .func
                 case "weak":
                     return .weak
                 case "open":
                     return .open
+                case "init":
+                    return ._init
+                case "class":
+                    return .class
                 case "inout":
                     return .inout
                 case "final":
