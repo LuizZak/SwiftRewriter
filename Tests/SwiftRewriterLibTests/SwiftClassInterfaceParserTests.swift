@@ -179,6 +179,38 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownMethods[0].knownAttributes[0].parameters, "someTag:")
     }
     
+    func testParseAttributesRoundtrip() throws {
+        _=try parseType("""
+            @attribute(a)
+            @attribute(b[1])
+            @_specialize(Int, T == Array<Float>)
+            extension MyClass {
+            }
+            """)
+    }
+    
+    func testParseSwiftAttribute() throws {
+        let type = try parseType("""
+            @_swiftrewriter(renameFrom: NSMyClass)
+            class MyClass {
+                @_swiftrewriter(mapFrom: b())
+                func a()
+                @inlinable
+                @_swiftrewriter(mapFrom: c(x: Int))
+                func b(y: Int)
+            }
+            """)
+        
+        XCTAssertEqual(type.knownAttributes[0].name, "_swiftrewriter")
+        XCTAssertEqual(type.knownAttributes[0].parameters, "renameFrom: NSMyClass")
+        XCTAssertEqual(type.knownMethods[0].knownAttributes[0].name, "_swiftrewriter")
+        XCTAssertEqual(type.knownMethods[0].knownAttributes[0].parameters, "mapFrom: b()")
+        XCTAssertEqual(type.knownMethods[1].knownAttributes[0].name, "inlinable")
+        XCTAssertNil(type.knownMethods[1].knownAttributes[0].parameters)
+        XCTAssertEqual(type.knownMethods[1].knownAttributes[1].name, "_swiftrewriter")
+        XCTAssertEqual(type.knownMethods[1].knownAttributes[1].parameters, "mapFrom: c(x: Int)")
+    }
+    
     func testBackToBackTypeParse() throws {
         
         let type = try parseType("""

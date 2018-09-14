@@ -344,6 +344,7 @@ public final class SwiftClassInterfaceParser {
     /// ```
     /// attribute
     ///     : '@' identifier attribute-argument-clause?
+    ///     | swift-rewriter-attribute
     ///     ;
     ///
     /// attribute-argument-clause
@@ -394,12 +395,18 @@ public final class SwiftClassInterfaceParser {
                     try skipBalancedTokens()
                 }
                 
-                try tokenizer.advance(overTokenType: .closeBrace)
+                try tokenizer.advance(overTokenType: .closeSquare)
                 
             default:
                 tokenizer.skipToken()
             }
         }
+        
+        let backtracker = tokenizer.backtracker()
+        if let swiftAttribute = try? parseSwiftRewriterAttribute(from: tokenizer) {
+            return Attribute.swiftRewriter(swiftAttribute)
+        }
+        backtracker.backtrack()
         
         try tokenizer.advance(overTokenType: .at)
         
@@ -423,6 +430,59 @@ public final class SwiftClassInterfaceParser {
         }
         
         return Attribute.generic(name: name, content: content)
+    }
+    
+    /// ```
+    /// swift-rewriter-attribute
+    ///     : '@' '_swiftrewriter' '(' swift-rewriter-attribute-clause ')'
+    ///     ;
+    ///
+    /// swift-rewriter-attribute-clause
+    ///     : 'mapFrom' ':' function-signature
+    ///     | 'renameFrom' ':' identifier
+    ///     ;
+    /// ```
+    private static func parseSwiftRewriterAttribute(from tokenizer: Tokenizer) throws -> SwiftRewriterAttribute {
+        
+        try tokenizer.advance(overTokenType: .at)
+        let ident = try tokenizer.advance(overTokenType: .identifier)
+        
+        if ident.value != "_swiftrewriter" {
+            throw tokenizer.lexer.syntaxError(
+                "Expected '_swiftrewriter' to initiate SwiftRewriter attribute"
+            )
+        }
+        
+        let content: SwiftRewriterAttribute.Content
+        
+        try tokenizer.advance(overTokenType: .openParens)
+        
+        if tokenizer.token().value == "mapFrom" {
+            tokenizer.skipToken()
+            try tokenizer.advance(overTokenType: .colon)
+            
+            let signature =
+                try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
+            
+            content = .mapFrom(signature)
+            
+        } else if tokenizer.token().value == "renameFrom" {
+            tokenizer.skipToken()
+            try tokenizer.advance(overTokenType: .colon)
+            
+            let ident = try tokenizer.advance(overTokenType: .identifier)
+            
+            content = .renameFrom(String(ident.value))
+            
+        } else {
+            throw tokenizer.lexer.syntaxError(
+                "Expected 'mapFrom' or 'renameFrom' in SwiftRewriter attribute"
+            )
+        }
+        
+        try tokenizer.advance(overTokenType: .closeParens)
+        
+        return SwiftRewriterAttribute(content: content)
     }
     
     /// ```
@@ -518,13 +578,6 @@ public final class SwiftClassInterfaceParser {
         throw tokenizer.lexer.syntaxError("Expected access level modifier")
     }
     
-    /// ```
-    /// swift-rewriter-attribute
-    /// ```
-    private static func parseSwiftRewriterAttribute(from tokenizer: Tokenizer) throws {
-        
-    }
-    
     private static func typeName(from tokenizer: Tokenizer) throws -> String {
         do {
             let token = try tokenizer.advance(overTokenType: .identifier)
@@ -570,15 +623,34 @@ public final class SwiftClassInterfaceParser {
                 
             case .swiftRewriter(let attribute):
                 return KnownAttribute(name: SwiftRewriterAttribute.name,
-                                      parameters: attribute.content)
+                                      parameters: attribute.content.asString)
             }
         }
     }
     
     private struct SwiftRewriterAttribute {
-        static let name = "_swift_rewriter"
+        static let name = "_swiftrewriter"
         
-        var content: String
+        var content: Content
+        
+        enum Content {
+            case mapFrom(FunctionSignature)
+            case renameFrom(String)
+            
+            var asString: String {
+                switch self {
+                case .mapFrom(let signature):
+                    return
+                        "mapFrom: " +
+                            TypeFormatter.asString(signature: signature,
+                                                   includeName: true,
+                                                   includeFuncKeyword: false)
+                    
+                case .renameFrom(let name):
+                    return "renameFrom: \(name)"
+                }
+            }
+        }
     }
     
     private enum DeclarationModifier: Hashable {
@@ -629,6 +701,7 @@ extension SwiftClassInterfaceParser {
     
     private enum Token: String, TokenProtocol {
         private static let identifierLexer = (.letter | "_") + (.letter | "_" | .digit)*
+        private static let integerLexer = .digit+
         
         case openParens = "("
         case closeParens = ")"
@@ -636,12 +709,17 @@ extension SwiftClassInterfaceParser {
         case closeBrace = "}"
         case openSquare = "["
         case closeSquare = "]"
+        case openAngle = "<"
+        case closeAngle = ">"
         case colon = ":"
         case comma = ","
         case at = "@"
         case underscore = "_"
+        case equals = "="
         case identifier
         case functionArrow
+        case integerLiteral
+        case stringLiteral
         case `var`
         case `let`
         case `get`
@@ -682,7 +760,8 @@ extension SwiftClassInterfaceParser {
         func length(in lexer: Lexer) -> Int {
             switch self {
             case .openParens, .closeParens, .openBrace, .closeBrace, .openSquare,
-                 .closeSquare, .colon, .comma, .underscore, .at:
+                 .closeSquare, .openAngle, .closeAngle, .colon, .comma,
+                 .underscore, .at, .equals:
                 return 1
             case .functionArrow:
                 return 2
@@ -708,6 +787,17 @@ extension SwiftClassInterfaceParser {
                 return 14
             case .identifier:
                 return Token.identifierLexer.maximumLength(in: lexer) ?? 0
+            case .integerLiteral:
+                return Token.integerLexer.maximumLength(in: lexer) ?? 0
+            case .stringLiteral:
+                
+                let l = lexer.startRange()
+                try? lexer.advance()
+                lexer.advance(while: { $0 != "\"" })
+                try? lexer.advance()
+                
+                return lexer.inputString.distance(from: l.range().lowerBound,
+                                                  to: l.range().upperBound)
             case .eof:
                 return 0
             }
@@ -737,9 +827,16 @@ extension SwiftClassInterfaceParser {
             if lexer.checkNext(matches: "->") {
                 return .functionArrow
             }
+            if lexer.checkNext(matches: "\"") {
+                return .stringLiteral
+            }
             
             guard let next = try? lexer.peek() else {
                 return nil
+            }
+            
+            if Lexer.isDigit(next) {
+                return .integerLiteral
             }
             
             if Lexer.isLetter(next) {
