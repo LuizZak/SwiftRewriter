@@ -130,12 +130,26 @@ class TypeFormatterTests: XCTestCase {
     
     func testAsStringKnownType() {
         let type = KnownTypeBuilder(typeName: "A", kind: .struct)
+            .settingAttributes([KnownAttribute(name: "attr", parameters: nil)])
             .constructor()
-            .constructor(shortParameters: [("a", .int), ("b", .int)], annotations: ["Annotation"])
-            .field(named: "readOnlyField", type: .string, isConstant: true, annotations: ["Annotation"])
-            .field(named: "field", type: .string)
-            .property(named: "prop", type: .optional(.nsArray), annotations: ["Annotation"])
-            .property(named: "readOnlyProp", type: "A", accessor: .getter, annotations: ["Annotation"])
+            .constructor(shortParameters: [("a", .int), ("b", .int)],
+                         annotations: ["Annotation"])
+            .field(named: "readOnlyField",
+                   type: .string,
+                   isConstant: true,
+                   annotations: ["Annotation"])
+            .field(named: "field",
+                   type: .string,
+                   attributes: [KnownAttribute(name: "attr", parameters: nil)])
+            .property(named: "prop",
+                      type: .optional(.nsArray),
+                      attributes: [KnownAttribute(name: "attr", parameters: nil)],
+                      annotations: ["Annotation"])
+            .property(named: "readOnlyProp",
+                      type: "A",
+                      accessor: .getter,
+                      attributes: [KnownAttribute(name: "attr", parameters: nil)],
+                      annotations: ["Annotation"])
             .protocolConformance(protocolName: "Protocol")
             .method(withSignature: FunctionSignature(
                 name: "methodA",
@@ -143,22 +157,25 @@ class TypeFormatterTests: XCTestCase {
                     ParameterSignature(label: nil, name: "c", type: .int)
                 ],
                 returnType: .string),
+                    attributes: [KnownAttribute(name: "_attribute", parameters: nil),
+                                 KnownAttribute(name: "_attribute2", parameters: "param")],
                     annotations: ["Annotation"]
             )
             .build()
         
         let result = TypeFormatter.asString(knownType: type)
         let expected = """
+            @attr
             struct A: Protocol {
                 // Annotation
                 let readOnlyField: String
-                var field: String
+                @attr var field: String
                 
                 // Annotation
-                var prop: NSArray?
+                @attr var prop: NSArray?
                 
                 // Annotation
-                var readOnlyProp: A { get }
+                @attr var readOnlyProp: A { get }
                 
                 init()
                 
@@ -166,6 +183,8 @@ class TypeFormatterTests: XCTestCase {
                 init(a: Int, b: Int)
                 
                 // Annotation
+                @_attribute
+                @_attribute2(param)
                 func methodA(_ c: Int) -> String
             }
             """

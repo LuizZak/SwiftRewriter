@@ -7,6 +7,52 @@ import Utils
 public final class FunctionSignatureParser {
     private typealias Tokenizer = TokenizerLexer<FullToken<Token>>
     
+    /// Parses a function identifier from a given lexer.
+    ///
+    /// formal grammar of a function identifier:
+    ///
+    /// ```
+    /// function-identifier
+    ///     : identifier '(' parameter-identifiers? ')'
+    ///     ;
+    ///
+    /// parameter-identifiers
+    ///     : parameter-identifier+
+    ///     ;
+    ///
+    /// parameter-identifier
+    ///     : identifier ':'
+    ///     | '_' ':'
+    ///     ;
+    /// ```
+    public static func parseIdentifier(from lexer: Lexer) throws -> FunctionIdentifier {
+        
+        let tokenizer = Tokenizer(lexer: lexer)
+        
+        let identifier = String(try tokenizer.advance(overTokenType: .identifier).value)
+        var params: [String?] = []
+        
+        try tokenizer.advance(overTokenType: .openParens)
+        
+        while !tokenizer.isEof && !tokenizer.tokenType(is: .closeParens) {
+            let param: String?
+            if tokenizer.tokenType(is: .underscore) {
+                tokenizer.skipToken()
+                param = nil
+            } else {
+                param = String(try tokenizer.advance(overTokenType: .identifier).value)
+            }
+            
+            try tokenizer.advance(overTokenType: .colon)
+            
+            params.append(param)
+        }
+        
+        try tokenizer.advance(overTokenType: .closeParens)
+        
+        return FunctionIdentifier(name: identifier, parameterNames: params)
+    }
+    
     /// Parses a function signature from a given input string.
     ///
     /// Parsing begins at the function name and the input should not start with

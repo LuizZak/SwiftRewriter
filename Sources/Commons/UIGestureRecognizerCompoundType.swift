@@ -31,7 +31,7 @@ public enum UIGestureRecognizerCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
             .method(withSignature:
                 FunctionSignature(signatureString:
@@ -41,7 +41,7 @@ public enum UIGestureRecognizerCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
         
         return

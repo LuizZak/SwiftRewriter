@@ -438,8 +438,22 @@ public final class SwiftClassInterfaceParser {
     ///     ;
     ///
     /// swift-rewriter-attribute-clause
-    ///     : 'mapFrom' ':' function-signature
+    ///     : 'mapFrom' ':' function-identifier
+    ///     | 'mapFrom' ':' function-signature
     ///     | 'renameFrom' ':' identifier
+    ///     ;
+    ///
+    /// function-identifier
+    ///     : identifier '(' parameter-identifiers? ')'
+    ///     ;
+    ///
+    /// parameter-identifiers
+    ///     : parameter-identifier+
+    ///     ;
+    ///
+    /// parameter-identifier
+    ///     : identifier ':'
+    ///     | '_' ':'
     ///     ;
     /// ```
     private static func parseSwiftRewriterAttribute(from tokenizer: Tokenizer) throws -> SwiftRewriterAttribute {
@@ -461,10 +475,18 @@ public final class SwiftClassInterfaceParser {
             tokenizer.skipToken()
             try tokenizer.advance(overTokenType: .colon)
             
-            let signature =
-                try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
-            
-            content = .mapFrom(signature)
+            // Try an identifier first
+            do {
+                let identifier =
+                    try FunctionSignatureParser.parseIdentifier(from: tokenizer.lexer)
+                
+                content = .mapFromIdentifier(identifier)
+            } catch {
+                let signature =
+                    try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
+                
+                content = .mapFrom(signature)
+            }
             
         } else if tokenizer.token().value == "renameFrom" {
             tokenizer.skipToken()
@@ -628,16 +650,17 @@ public final class SwiftClassInterfaceParser {
         }
     }
     
-    private struct SwiftRewriterAttribute {
-        static let name = "_swiftrewriter"
+    public struct SwiftRewriterAttribute {
+        public static let name = "_swiftrewriter"
         
-        var content: Content
+        public var content: Content
         
-        enum Content {
+        public enum Content {
             case mapFrom(FunctionSignature)
+            case mapFromIdentifier(FunctionIdentifier)
             case renameFrom(String)
             
-            var asString: String {
+            public var asString: String {
                 switch self {
                 case .mapFrom(let signature):
                     return
@@ -645,6 +668,10 @@ public final class SwiftClassInterfaceParser {
                             TypeFormatter.asString(signature: signature,
                                                    includeName: true,
                                                    includeFuncKeyword: false)
+                    
+                case .mapFromIdentifier(let identifier):
+                    return
+                        "mapFrom: " + identifier.description
                     
                 case .renameFrom(let name):
                     return "renameFrom: \(name)"

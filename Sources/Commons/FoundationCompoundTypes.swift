@@ -44,7 +44,7 @@ public enum CalendarCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
             .method(withSignature:
                 FunctionSignature(
@@ -76,7 +76,7 @@ public enum CalendarCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
         
         return
@@ -130,7 +130,7 @@ public enum NSArrayCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             ).method(withSignature:
                 FunctionSignature(
                     name: "contains",
@@ -146,7 +146,7 @@ public enum NSArrayCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
         
         return
@@ -184,7 +184,7 @@ public enum NSMutableArrayCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             ).method(withSignature:
                 FunctionSignature(
                     name: "addObjects",
@@ -199,7 +199,7 @@ public enum NSMutableArrayCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             ).method(withSignature:
                 FunctionSignature(
                     name: "remove",
@@ -214,7 +214,7 @@ public enum NSMutableArrayCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
         
         return
@@ -259,7 +259,7 @@ public enum NSDateFormatterCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             ).method(withSignature:
                 FunctionSignature(
                     name: "date",
@@ -275,7 +275,7 @@ public enum NSDateFormatterCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
         
         return
@@ -331,7 +331,7 @@ public enum NSDateCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
             .method(withSignature:
                 FunctionSignature(
@@ -341,7 +341,7 @@ public enum NSDateCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
             .method(withSignature:
                 FunctionSignature(
@@ -351,7 +351,7 @@ public enum NSDateCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
             .method(withSignature:
                 FunctionSignature(
@@ -361,7 +361,7 @@ public enum NSDateCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
         
         return

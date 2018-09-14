@@ -197,6 +197,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
                 func a()
                 @inlinable
                 @_swiftrewriter(mapFrom: c(x: Int))
+                @_swiftrewriter(mapFrom: d(x:))
                 func b(y: Int)
             }
             """)

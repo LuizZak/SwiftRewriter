@@ -8,6 +8,33 @@ public enum TypeFormatter {
         
         let o = StringRewriterOutput(settings: .defaults)
         
+        var _onFirstAnnotation = true
+        
+        let outputAttributes: ([KnownAttribute], Bool) -> Void = { attr, sameLine in
+            guard !attr.isEmpty else {
+                return
+            }
+            
+            if !_onFirstAnnotation {
+                o.output(line: "")
+            }
+            
+            _onFirstAnnotation = false
+            
+            if sameLine {
+                o.outputIdentation()
+                
+                let line = attr.map(stringify).joined(separator: " ")
+                o.outputInlineWithSpace(line, style: .keyword)
+            } else {
+                for attr in attr {
+                    o.output(line: stringify(attr), style: .attribute)
+                }
+            }
+        }
+        
+        outputAttributes(type.knownAttributes, false)
+        
         if type.isExtension {
             o.outputInline("extension \(type.typeName)")
         } else {
@@ -35,8 +62,6 @@ public enum TypeFormatter {
         
         // Type body
         o.idented {
-            var _onFirstAnnotation = true
-            
             let outputAnnotations: ([String]) -> Void = { annotations in
                 guard !annotations.isEmpty else {
                     return
@@ -49,30 +74,48 @@ public enum TypeFormatter {
                 _onFirstAnnotation = false
                 
                 for annotation in annotations {
-                    o.output(line: "// \(annotation)")
+                    o.output(line: "// \(annotation)", style: .comment)
                 }
             }
             
             let outputField: (KnownProperty) -> Void = { field in
                 outputAnnotations(field.annotations)
+                outputAttributes(field.knownAttributes, true)
                 
-                o.output(line: asString(field: field,
-                                        ofType: type,
-                                        withTypeName: false,
-                                        includeVarKeyword: true))
+                let line = asString(field: field,
+                                    ofType: type,
+                                    withTypeName: false,
+                                    includeVarKeyword: true)
+                
+                if field.knownAttributes.isEmpty {
+                    o.outputIdentation()
+                }
+                
+                o.outputInline(line)
+                o.outputLineFeed()
             }
             let outputProperty: (KnownProperty) -> Void = { property in
                 outputAnnotations(property.annotations)
+                outputAttributes(property.knownAttributes, true)
+                
+                let line: String
                 
                 if property.isEnumCase {
-                    o.output(line: "case \(property.name)")
+                    line = "case \(property.name)"
                 } else {
-                    o.output(line: asString(property: property,
-                                            ofType: type,
-                                            withTypeName: false,
-                                            includeVarKeyword: true,
-                                            includeAccessors: property.accessor != .getterAndSetter))
+                    line = asString(property: property,
+                                    ofType: type,
+                                    withTypeName: false,
+                                    includeVarKeyword: true,
+                                    includeAccessors: property.accessor != .getterAndSetter)
                 }
+                
+                if property.knownAttributes.isEmpty {
+                    o.outputIdentation()
+                }
+                
+                o.outputInline(line)
+                o.outputLineFeed()
             }
             
             let staticFields = type.knownFields.filter { $0.isStatic }
@@ -94,11 +137,13 @@ public enum TypeFormatter {
             
             for ctor in type.knownConstructors {
                 outputAnnotations(ctor.annotations)
+                outputAttributes(ctor.knownAttributes, false)
                 
                 o.output(line: "init" + asString(parameters: ctor.parameters))
             }
             for method in type.knownMethods {
                 outputAnnotations(method.annotations)
+                outputAttributes(method.knownAttributes, false)
                 
                 o.output(line:
                     asString(signature: method.signature, includeName: true,
@@ -309,6 +354,14 @@ public enum TypeFormatter {
         case .semantics(let semantics):
             return stringify(semantics)
         }
+    }
+    
+    private static func stringify(_ attribute: KnownAttribute) -> String {
+        if let parameters = attribute.parameters {
+            return "@\(attribute.name)(\(parameters))"
+        }
+        
+        return "@\(attribute.name)"
     }
     
     private static func stringify(_ semantics: [Semantic]) -> String {

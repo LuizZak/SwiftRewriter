@@ -62,7 +62,7 @@ public enum UIColorCompoundType {
                     in: transformations,
                     annotations: annotations
                 ),
-                    annotations: annotations.annotations
+                    attributes: annotations.attributes
             )
         
         return
