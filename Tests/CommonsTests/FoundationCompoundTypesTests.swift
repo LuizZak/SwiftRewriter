@@ -93,10 +93,10 @@ class FoundationCompoundTypesTests: XCTestCase {
                 @_swiftrewriter(mapFrom: timeIntervalSinceDate(_ date: Date) -> TimeInterval)
                 func timeIntervalSince(_ date: Date) -> TimeInterval
                 
-                // Convert to binary operator '=='
+                @_swiftrewriter(mapToBinary: ==)
                 func isEqual(_ other: AnyObject) -> Bool
                 
-                // Convert to binary operator '=='
+                @_swiftrewriter(mapToBinary: ==)
                 func isEqualToDate(_ other: Date) -> Bool
             }
             """)

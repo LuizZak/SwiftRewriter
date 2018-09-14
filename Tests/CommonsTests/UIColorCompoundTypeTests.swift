@@ -101,7 +101,7 @@ class UIColorCompoundTypeTests: XCTestCase {
                 var ciColor: CGColor { get }
                 
                 
-                // Convert from colorWithAlphaComponent(_ alpha: CGFloat) -> UIColor
+                @_swiftrewriter(mapFrom: colorWithAlphaComponent(_ alpha: CGFloat) -> UIColor)
                 func withAlphaComponent(_ alpha: CGFloat) -> UIColor
             }
             """)

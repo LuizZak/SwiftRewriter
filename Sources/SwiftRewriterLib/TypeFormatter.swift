@@ -10,30 +10,41 @@ public enum TypeFormatter {
         
         var _onFirstAnnotation = true
         
-        let outputAttributes: ([KnownAttribute], Bool) -> Void = { attr, sameLine in
-            guard !attr.isEmpty else {
+        let outputAttributesAndAnnotations: ([KnownAttribute], [String], Bool) -> Void
+        outputAttributesAndAnnotations = { attr, annotations, sameLine in
+            guard !attr.isEmpty || !annotations.isEmpty else {
                 return
             }
             
-            if !_onFirstAnnotation {
-                o.output(line: "")
+            if !annotations.isEmpty || (!attr.isEmpty && !sameLine) {
+                if !_onFirstAnnotation {
+                    o.output(line: "")
+                }
+                
+                _onFirstAnnotation = false
             }
             
-            _onFirstAnnotation = false
+            for annotation in annotations {
+                o.output(line: "// \(annotation)", style: .comment)
+            }
             
-            if sameLine {
-                o.outputIdentation()
-                
-                let line = attr.map(stringify).joined(separator: " ")
-                o.outputInlineWithSpace(line, style: .keyword)
-            } else {
-                for attr in attr {
-                    o.output(line: stringify(attr), style: .attribute)
+            if !attr.isEmpty {
+                if sameLine {
+                    o.outputIdentation()
+                    
+                    let line = attr.map(stringify).joined(separator: " ")
+                    o.outputInlineWithSpace(line, style: .keyword)
+                } else {
+                    
+                    for attr in attr {
+                        o.output(line: stringify(attr), style: .attribute)
+                    }
                 }
             }
         }
         
-        outputAttributes(type.knownAttributes, false)
+        outputAttributesAndAnnotations(type.knownAttributes, [], false)
+        _onFirstAnnotation = true
         
         if type.isExtension {
             o.outputInline("extension \(type.typeName)")
@@ -62,25 +73,10 @@ public enum TypeFormatter {
         
         // Type body
         o.idented {
-            let outputAnnotations: ([String]) -> Void = { annotations in
-                guard !annotations.isEmpty else {
-                    return
-                }
-                
-                if !_onFirstAnnotation {
-                    o.output(line: "")
-                }
-                
-                _onFirstAnnotation = false
-                
-                for annotation in annotations {
-                    o.output(line: "// \(annotation)", style: .comment)
-                }
-            }
-            
             let outputField: (KnownProperty) -> Void = { field in
-                outputAnnotations(field.annotations)
-                outputAttributes(field.knownAttributes, true)
+                outputAttributesAndAnnotations(field.knownAttributes,
+                                               field.annotations,
+                                               true)
                 
                 let line = asString(field: field,
                                     ofType: type,
@@ -95,8 +91,9 @@ public enum TypeFormatter {
                 o.outputLineFeed()
             }
             let outputProperty: (KnownProperty) -> Void = { property in
-                outputAnnotations(property.annotations)
-                outputAttributes(property.knownAttributes, true)
+                outputAttributesAndAnnotations(property.knownAttributes,
+                                               property.annotations,
+                                               true)
                 
                 let line: String
                 
@@ -136,14 +133,16 @@ public enum TypeFormatter {
             }
             
             for ctor in type.knownConstructors {
-                outputAnnotations(ctor.annotations)
-                outputAttributes(ctor.knownAttributes, false)
+                outputAttributesAndAnnotations(ctor.knownAttributes,
+                                               ctor.annotations,
+                                               false)
                 
                 o.output(line: "init" + asString(parameters: ctor.parameters))
             }
             for method in type.knownMethods {
-                outputAnnotations(method.annotations)
-                outputAttributes(method.knownAttributes, false)
+                outputAttributesAndAnnotations(method.knownAttributes,
+                                               method.annotations,
+                                               false)
                 
                 o.output(line:
                     asString(signature: method.signature, includeName: true,

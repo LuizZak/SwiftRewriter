@@ -1092,10 +1092,14 @@ extension FunctionSignature {
         
         transformsSink.addValueTransformer(transformer)
         
-        let annotation =
-            "Convert to binary operator '\(op)'"
+        let attributeParam =
+            SwiftClassInterfaceParser.SwiftRewriterAttribute.Content.mapToBinaryOperator(op)
         
-        annotations.addAnnotation(annotation, newTag: AnyEquatable(self))
+        let attribute =
+            KnownAttribute(name: SwiftClassInterfaceParser.SwiftRewriterAttribute.name,
+                           parameters: attributeParam.asString)
+        
+        annotations.addAttribute(attribute, newTag: AnyEquatable(self))
         
         return self
     }
@@ -1252,20 +1256,22 @@ class AnnotationsSink {
     var attributes: [KnownAttribute] = []
     private var annotations: [String] = []
     
-    func addAttribute(_ attribute: KnownAttribute, newTag: AnyEquatable) {
+    private func _verifyTag(_ newTag: AnyEquatable) {
         if tag != newTag {
             tag = newTag
             attributes.removeAll()
+            annotations.removeAll()
         }
+    }
+    
+    func addAttribute(_ attribute: KnownAttribute, newTag: AnyEquatable) {
+        _verifyTag(newTag)
         
         attributes.append(attribute)
     }
     
     func addAnnotation(_ annotation: String, newTag: AnyEquatable) {
-        if tag != newTag {
-            tag = newTag
-            annotations.removeAll()
-        }
+        _verifyTag(newTag)
         
         annotations.append(annotation)
     }
