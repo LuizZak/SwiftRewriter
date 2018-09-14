@@ -1205,6 +1205,8 @@ extension SwiftClassInterfaceParser {
                 return .closeSquare
             case ":":
                 return .colon
+            case ",":
+                return .comma
             case "@":
                 return .at
             case "_":
