@@ -234,6 +234,32 @@ class FunctionSignatureParserTests: XCTestCase {
         )
     }
     
+    func testParseDefaultValueDefault() {
+        assert(string: "function(a: Int = default)",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [
+                    ParameterSignature(name: "a", type: .int)
+                ],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+    }
+    
+    func testParseDefaultValueSquareBrackets() {
+        assert(string: "function(a: Options = [])",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [
+                    ParameterSignature(name: "a", type: "Options")
+                ],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+    }
+    
     func testParseFullSignature() {
         assert(string: "dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?",
                parseInto: FunctionSignature(
@@ -292,6 +318,18 @@ class FunctionSignatureParserTests: XCTestCase {
         } catch let lexError as LexerError {
             XCTAssertEqual(lexError.description(withOffsetsIn: "(=)"),
                            "Error at line 1 column 2: Expected token ')' but found 'eof'")
+        } catch {
+            XCTFail("Wrong error type \(type(of: error))")
+        }
+    }
+    
+    func testInvalidDefaultArgument() {
+        do {
+            _=try FunctionSignatureParser.parseParameters(from: "(a: Int = a)")
+            XCTFail("Expected to throw error")
+        } catch let lexError as LexerError {
+            XCTAssertEqual(lexError.description(withOffsetsIn: "(a: Int = a)"),
+                           "Error at line 1 column 10: Default values for arguments must either be 'default' or '[]', found 'a'")
         } catch {
             XCTFail("Wrong error type \(type(of: error))")
         }

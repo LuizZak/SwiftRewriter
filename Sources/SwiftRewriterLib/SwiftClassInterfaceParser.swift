@@ -184,6 +184,7 @@ public final class SwiftClassInterfaceParser {
     ///
     /// type-member-declaration
     ///     : var-declaration
+    ///     | let-declaration
     ///     | function-declaration
     ///     | initializer-declaration
     ///     ;
@@ -200,6 +201,17 @@ public final class SwiftClassInterfaceParser {
             (try? parseDeclarationModifiers(from: tokenizer)) ?? []
         
         switch tokenizer.tokenType() {
+        case .let:
+            let letDecl = try parseLetDeclaration(from: tokenizer)
+            
+            typeBuilder =
+                typeBuilder.field(
+                    named: letDecl.identifier,
+                    type: letDecl.type,
+                    isConstant: true,
+                    isStatic: modifiers.contains(.static),
+                    attributes: knownAttributes)
+            
         case .var:
             let varDecl = try parseVarDeclaration(from: tokenizer)
             
@@ -289,7 +301,27 @@ public final class SwiftClassInterfaceParser {
             isConstant = false
         }
         
-        return VarDeclaration(identifier: ident, type: type, isConstant: isConstant)
+        return VarDeclaration(identifier: ident,
+                              type: type,
+                              isProperty: true,
+                              isConstant: isConstant)
+    }
+    
+    /// ```
+    /// let-declaration
+    ///     : 'let' identifier ':' swift-type
+    /// ```
+    private static func parseLetDeclaration(from tokenizer: Tokenizer) throws -> VarDeclaration {
+        try tokenizer.advance(overTokenType: .let)
+        
+        let ident = try identifier(from: tokenizer)
+        try tokenizer.advance(overTokenType: .colon)
+        let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        
+        return VarDeclaration(identifier: ident,
+                              type: type,
+                              isProperty: false,
+                              isConstant: true)
     }
     
     /// ```
@@ -713,6 +745,7 @@ public final class SwiftClassInterfaceParser {
     private struct VarDeclaration {
         var identifier: String
         var type: SwiftType
+        var isProperty: Bool
         var isConstant: Bool
     }
     

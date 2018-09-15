@@ -92,6 +92,20 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownProtocolConformances[1].protocolName, "B")
     }
     
+    func testParseConstantField() throws {
+        let type = try parseType("""
+            class MyClass {
+                let v1: Int
+            }
+            """)
+        
+        XCTAssertEqual(type.knownFields.count, 1)
+        XCTAssertEqual(type.knownFields[0].name, "v1")
+        XCTAssertEqual(type.knownFields[0].storage.type, .int)
+        XCTAssert(type.knownFields[0].storage.isConstant)
+        XCTAssertEqual(type.knownFields[0].storage.ownership, .strong)
+    }
+    
     func testParseProperty() throws {
         let type = try parseType("""
             class MyClass {
@@ -152,13 +166,16 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         let type = try parseType("""
             class MyClass {
                 static var a: Int
-                static func b()
+                static let b: Int
+                static func c()
             }
             """)
         
         XCTAssertEqual(type.knownProperties.count, 1)
+        XCTAssertEqual(type.knownFields.count, 1)
         XCTAssertEqual(type.knownMethods.count, 1)
         XCTAssert(type.knownProperties[0].isStatic)
+        XCTAssert(type.knownFields[0].isStatic)
         XCTAssert(type.knownMethods[0].isStatic)
     }
     
