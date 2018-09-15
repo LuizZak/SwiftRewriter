@@ -8,12 +8,15 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testCalendarDefinition() {
         let type = FoundationCompoundTypes.nsCalendar.create()
         
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 2)
+        
         assertSignature(type: type, matches: """
             class Calendar: NSObject {
-                // Convert from component(_ component: Calendar.Component, fromDate date: Date) -> Int
+                @_swiftrewriter(mapFrom: component(_:fromDate:))
                 func component(_ component: Calendar.Component, from date: Date) -> Int
                 
-                // Convert from dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?
+                @_swiftrewriter(mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?)
                 func date(byAdding component: Calendar.Component, value: Int, to date: Date) -> Date?
             }
             """)
@@ -22,21 +25,96 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSArrayDefinition() {
         let type = FoundationCompoundTypes.nsArray.create()
         
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 10)
+        
         assertSignature(type: type, matches: """
             class NSArray: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
                 var count: Int { get }
-                // Convert from func firstObject()
+                
+                @_swiftrewriter(mapFrom: firstObject())
                 var firstObject: Any? { get }
                 
-                // Convert from func lastObject()
+                @_swiftrewriter(mapFrom: lastObject())
                 var lastObject: Any? { get }
+                var description: String { get }
+                var sortedArrayHint: Data { get }
                 
                 
-                // Convert from objectAtIndex(_ index: Int) -> Any
+                @_swiftrewriter(mapFrom: objectAtIndex(_:))
                 func object(at index: Int) -> Any
                 
-                // Convert from containsObject(_ anObject: Any) -> Bool
+                @_swiftrewriter(mapFrom: containsObject(_:))
                 func contains(_ anObject: Any) -> Bool
+                
+                @_swiftrewriter(mapFrom: addingObject(_:))
+                func adding(_ anObject: Any) -> [Any]
+                
+                @_swiftrewriter(mapFrom: addingObjectsFromArray(_:))
+                func addingObjects(from otherArray: [Any]) -> [Any]
+                func componentsJoined(by separator: String) -> String
+                func description(withLocale locale: Any?) -> String
+                func description(withLocale locale: Any?, indent level: Int) -> String
+                func firstObjectCommon(with otherArray: [Any]) -> Any?
+                
+                @_swiftrewriter(mapFrom: indexOfObject(_:))
+                func index(of anObject: Any) -> Int
+                
+                @_swiftrewriter(mapFrom: indexOf(_:inRange:))
+                func index(of anObject: Any, in range: NSRange) -> Int
+                
+                @_swiftrewriter(mapFrom: indexOfObjectIdenticalTo(_:))
+                func indexOfObjectIdentical(to anObject: Any) -> Int
+                
+                @_swiftrewriter(mapFrom: indexOfObjectIdenticalTo(_:inRange:))
+                func indexOfObjectIdentical(to anObject: Any, in range: NSRange) -> Int
+                func isEqual(to otherArray: [Any]) -> Bool
+                func objectEnumerator() -> NSEnumerator
+                func reverseObjectEnumerator() -> NSEnumerator
+                func sortedArray(_ comparator: @convention(c) (Any, Any, UnsafeMutableRawPointer?) -> Int, context: UnsafeMutableRawPointer?) -> [Any]
+                func sortedArray(_ comparator: @convention(c) (Any, Any, UnsafeMutableRawPointer?) -> Int, context: UnsafeMutableRawPointer?, hint: Data?) -> [Any]
+                func sortedArray(using comparator: Selector) -> [Any]
+                func subarray(with range: NSRange) -> [Any]
+                
+                @available(OSX 10.13, *)
+                func write(to url: URL)
+                func objects(at indexes: IndexSet) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func enumerateObjects(_ block: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func enumerateObjects(options opts: NSEnumerationOptions, using block: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func enumerateObjects(at s: IndexSet, options opts: NSEnumerationOptions, using block: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func indexOfObject(passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Int
+                
+                @available(OSX 10.6, *)
+                func indexOfObject(options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Int
+                
+                @available(OSX 10.6, *)
+                func indexOfObject(at s: IndexSet, options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Int
+                
+                @available(OSX 10.6, *)
+                func indexesOfObjects(passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> IndexSet
+                
+                @available(OSX 10.6, *)
+                func indexesOfObjects(options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> IndexSet
+                
+                @available(OSX 10.6, *)
+                func indexesOfObjects(at s: IndexSet, options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> IndexSet
+                
+                @available(OSX 10.6, *)
+                func sortedArray(comparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func sortedArray(options opts: NSSortOptions, usingComparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func index(of obj: Any, inSortedRange r: NSRange, options opts: NSBinarySearchingOptions, usingComparator cmp: (Any, Any) -> ComparisonResult) -> Int
             }
             """)
     }
@@ -44,16 +122,48 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSMutableArrayDefinition() {
         let type = FoundationCompoundTypes.nsMutableArray.create()
         
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 7)
+        
         assertSignature(type: type, matches: """
             class NSMutableArray: NSArray {
-                // Convert from addObject(_ anObject: Any)
+                @_swiftrewriter(mapFrom: addObject(_:))
                 func add(_ anObject: Any)
                 
-                // Convert from addObjectsFromArray(_ otherArray: [Any])
+                @_swiftrewriter(mapFrom: addObjectsFromArray(_:))
                 func addObjects(from otherArray: [Any])
                 
-                // Convert from removeObject(_ anObject: Any)
+                @_swiftrewriter(mapFrom: removeObject(_:))
                 func remove(_ anObject: Any)
+                func exchangeObject(at idx1: Int, withObjectAt idx2: Int)
+                func removeAllObjects()
+                
+                @_swiftrewriter(mapFrom: removeObject(_:inRange:))
+                func remove(_ anObject: Any, in range: NSRange)
+                
+                @_swiftrewriter(mapFrom: removeObjectIdenticalTo(_:inRange:))
+                func removeObject(identicalTo anObject: Any, in range: NSRange)
+                
+                @_swiftrewriter(mapFrom: removeObjectIdenticalTo(_:))
+                func removeObject(identicalTo anObject: Any)
+                func removeObjects(in otherArray: [Any])
+                
+                @_swiftrewriter(mapFrom: removeObjectsInRange(_:))
+                func removeObjects(in range: NSRange)
+                func replaceObjects(in range: NSRange, withObjectsFrom otherArray: [Any], range otherRange: NSRange)
+                func replaceObjects(in range: NSRange, withObjectsFrom otherArray: [Any])
+                func setArray(_ otherArray: [Any])
+                func sort(_ compare: @convention(c) (Any, Any, UnsafeMutableRawPointer?) -> Int, context: UnsafeMutableRawPointer?)
+                func sort(using comparator: Selector)
+                func insert(_ objects: [Any], at indexes: IndexSet)
+                func removeObjects(at indexes: IndexSet)
+                func replaceObjects(at indexes: IndexSet, with objects: [Any])
+                
+                @available(OSX 10.6, *)
+                func sort(comparator cmptr: (Any, Any) -> ComparisonResult)
+                
+                @available(OSX 10.6, *)
+                func sort(options opts: NSSortOptions, usingComparator cmptr: (Any, Any) -> ComparisonResult)
             }
             """)
     }
@@ -61,16 +171,20 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSDateFormatterDefinition() {
         let type = FoundationCompoundTypes.nsDateFormatter.create()
         
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 3)
+        
         assertSignature(type: type, matches: """
             class DateFormatter: Formatter {
-                // Convert from func dateFormat() / func setDateFormat(String!)
+                @_swiftrewriter(mapFrom: dateFormat())
+                @_swiftrewriter(mapFrom: setDateFormat(_:))
                 var dateFormat: String!
                 
                 
-                // Convert from stringFromDate(_ date: Date) -> String
+                @_swiftrewriter(mapFrom: stringFromDate(_:))
                 func string(from date: Date) -> String
                 
-                // Convert from dateFromString(_ date: Date) -> Date?
+                @_swiftrewriter(mapFrom: dateFromString(_:))
                 func date(from string: Date) -> Date?
             }
             """)
@@ -79,24 +193,36 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSDateDefinition() {
         let type = FoundationCompoundTypes.nsDate.create()
         
+        XCTAssertEqual(type.nonCanonicalNames, ["NSDate"])
+        XCTAssertEqual(type.transformations.count, 5)
+        
         assertSignature(type: type, matches: """
+            @_swiftrewriter(renameFrom: NSDate)
             struct Date: Hashable, Equatable {
-                var timeIntervalSince1970: TimeInterval
+                static let distantFuture: Date
+                static let distantPast: Date
+                static var timeIntervalSinceReferenceDate: TimeInterval { get }
+                var timeIntervalSinceNow: TimeInterval { get }
+                var timeIntervalSince1970: TimeInterval { get }
                 
-                // Convert from 'static date() -> Date'
+                
+                @_swiftrewriter(mapFrom: date() -> Date)
                 init()
                 static func date() -> Date
                 
-                // Convert from dateByAddingTimeInterval(_ timeInterval: TimeInterval) -> Date
+                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
+                func timeIntervalSince(_ anotherDate: Date) -> TimeInterval
+                
+                @_swiftrewriter(mapFrom: dateByAddingTimeInterval(_:))
                 func addingTimeInterval(_ timeInterval: TimeInterval) -> Date
+                func earlierDate(_ anotherDate: Date) -> Date
+                func laterDate(_ anotherDate: Date) -> Date
+                func compare(_ other: Date) -> ComparisonResult
                 
-                // Convert from timeIntervalSinceDate(_ date: Date) -> TimeInterval
-                func timeIntervalSince(_ date: Date) -> TimeInterval
-                
-                // Convert to binary operator '=='
+                @_swiftrewriter(mapToBinary: ==)
                 func isEqual(_ other: AnyObject) -> Bool
                 
-                // Convert to binary operator '=='
+                @_swiftrewriter(mapToBinary: ==)
                 func isEqualToDate(_ other: Date) -> Bool
             }
             """)
@@ -105,9 +231,13 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSLocaleDefinition() {
         let type = FoundationCompoundTypes.nsLocale.create()
         
+        XCTAssertEqual(type.nonCanonicalNames, ["NSLocale"])
+        XCTAssertEqual(type.transformations.count, 1)
+        
         assertSignature(type: type, matches: """
+            @_swiftrewriter(renameFrom: NSLocale)
             struct Locale: Hashable, Equatable {
-                // Convert from 'init(localeIdentifier: String)'
+                @_swiftrewriter(mapFrom: init(localeIdentifier:))
                 init(identifier: String)
             }
             """)

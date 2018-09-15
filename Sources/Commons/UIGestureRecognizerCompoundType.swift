@@ -9,43 +9,31 @@ public enum UIGestureRecognizerCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "UIGestureRecognizer", supertype: "NSObject")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "location",
-                    parameters: [
-                        ParameterSignature(label: "in", name: "view", type: .optional("UIView"))
-                    ],
-                    returnType: "CGPoint"
-                ).makeSignatureMapping(
-                    fromMethodNamed: "locationInView",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "view", type: .optional("UIView"))
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing UIGestureRecognizer class interface: \(error)"
             )
-            .method(withSignature:
-                FunctionSignature(signatureString:
-                    "require(toFail otherGestureRecognizer: UIGestureRecognizer)"
-                ).makeSignatureMapping(fromSignature:
-                    "requireGestureRecognizerToFail(_ otherGestureRecognizer: UIGestureRecognizer)",
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class UIGestureRecognizer: NSObject {
+                @_swiftrewriter(mapFrom: locationInView(_:))
+                func location(in view: UIView?) -> CGPoint
+                
+                @_swiftrewriter(mapFrom: requireGestureRecognizerToFail(_:))
+                func require(toFail otherGestureRecognizer: UIGestureRecognizer)
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }

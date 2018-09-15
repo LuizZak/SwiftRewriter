@@ -11,6 +11,6 @@ public enum PostfixTransformation {
                              setterName: String?,
                              resultType: SwiftType,
                              isStatic: Bool)
-    case initializer(old: [ParameterSignature], new: [ParameterSignature])
+    case initializer(old: [String?], new: [String?])
     case valueTransformer(ValueTransformer<PostfixExpression, Expression>)
 }

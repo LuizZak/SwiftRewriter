@@ -22,7 +22,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public var ignoreResolvedExpressions: Bool = false
     
     public override init() {
-        self.typeSystem = DefaultTypeSystem()
+        self.typeSystem = DefaultTypeSystem.defaultTypeSystem
         self.intrinsicVariables = EmptyCodeScope()
         contextFunctionReturnTypeStack = []
         super.init()

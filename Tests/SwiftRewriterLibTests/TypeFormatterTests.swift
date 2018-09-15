@@ -121,6 +121,7 @@ class TypeFormatterTests: XCTestCase {
         
         XCTAssertEqual("static abc(a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: true))
         XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: false))
+        XCTAssertEqual("(a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: false, includeStatic: false))
         
         // Test default values for `includeName`
         XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1))
@@ -130,12 +131,26 @@ class TypeFormatterTests: XCTestCase {
     
     func testAsStringKnownType() {
         let type = KnownTypeBuilder(typeName: "A", kind: .struct)
+            .settingAttributes([KnownAttribute(name: "attr", parameters: nil)])
             .constructor()
-            .constructor(shortParameters: [("a", .int), ("b", .int)], annotations: ["Annotation"])
-            .field(named: "readOnlyField", type: .string, isConstant: true, annotations: ["Annotation"])
-            .field(named: "field", type: .string)
-            .property(named: "prop", type: .optional(.nsArray), annotations: ["Annotation"])
-            .property(named: "readOnlyProp", type: "A", accessor: .getter, annotations: ["Annotation"])
+            .constructor(shortParameters: [("a", .int), ("b", .int)],
+                         annotations: ["Annotation"])
+            .field(named: "readOnlyField",
+                   type: .string,
+                   isConstant: true,
+                   annotations: ["Annotation"])
+            .field(named: "field",
+                   type: .string,
+                   attributes: [KnownAttribute(name: "attr", parameters: nil)])
+            .property(named: "prop",
+                      type: .optional(.nsArray),
+                      attributes: [KnownAttribute(name: "attr", parameters: nil)],
+                      annotations: ["Annotation"])
+            .property(named: "readOnlyProp",
+                      type: "A",
+                      accessor: .getter,
+                      attributes: [KnownAttribute(name: "attr", parameters: nil)],
+                      annotations: ["Annotation"])
             .protocolConformance(protocolName: "Protocol")
             .method(withSignature: FunctionSignature(
                 name: "methodA",
@@ -143,22 +158,25 @@ class TypeFormatterTests: XCTestCase {
                     ParameterSignature(label: nil, name: "c", type: .int)
                 ],
                 returnType: .string),
+                    attributes: [KnownAttribute(name: "_attribute", parameters: nil),
+                                 KnownAttribute(name: "_attribute2", parameters: "param")],
                     annotations: ["Annotation"]
             )
             .build()
         
         let result = TypeFormatter.asString(knownType: type)
         let expected = """
+            @attr
             struct A: Protocol {
                 // Annotation
                 let readOnlyField: String
-                var field: String
+                @attr var field: String
                 
                 // Annotation
-                var prop: NSArray?
+                @attr var prop: NSArray?
                 
                 // Annotation
-                var readOnlyProp: A { get }
+                @attr var readOnlyProp: A { get }
                 
                 init()
                 
@@ -166,7 +184,40 @@ class TypeFormatterTests: XCTestCase {
                 init(a: Int, b: Int)
                 
                 // Annotation
+                @_attribute
+                @_attribute2(param)
                 func methodA(_ c: Int) -> String
+            }
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
+    
+    func testLongAttributeProperty() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .property(named: "prop1", type: "A",
+                      attributes: [KnownAttribute(name: "attr", parameters: nil)])
+            .property(named: "prop2", type: "A",
+                      attributes: [KnownAttribute(name: "attributeWithVeryLongName",
+                                                  parameters: nil)])
+            .property(named: "prop3", type: "A",
+                      attributes: [KnownAttribute(name: "attr1", parameters: nil),
+                                   KnownAttribute(name: "attr2", parameters: nil),
+                                   KnownAttribute(name: "attr3", parameters: nil)])
+            .build()
+        
+        let result = TypeFormatter.asString(knownType: type)
+        let expected = """
+            class A {
+                @attr var prop1: A
+                
+                @attributeWithVeryLongName
+                var prop2: A
+                
+                @attr1
+                @attr2
+                @attr3
+                var prop3: A
             }
             """
         

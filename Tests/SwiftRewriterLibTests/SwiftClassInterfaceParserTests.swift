@@ -14,12 +14,12 @@ class SwiftClassInterfaceParserTests: XCTestCase {
     }
     
     func testParseEmptyClass() throws {
-        
         let type = try parseType("""
             class Empty {
             }
             """)
         
+        XCTAssertEqual(type.kind, .class)
         XCTAssertEqual(type.typeName, "Empty")
         XCTAssertEqual(type.knownProperties.count, 0)
         XCTAssertEqual(type.knownMethods.count, 0)
@@ -29,8 +29,48 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertFalse(type.isExtension)
     }
     
-    func testParseSupertypes() throws {
+    func testParseEmptyExtension() throws {
+        let type = try parseType("""
+            extension Empty {
+            }
+            """)
         
+        XCTAssertEqual(type.kind, .class)
+        XCTAssertEqual(type.typeName, "Empty")
+        XCTAssertEqual(type.knownProperties.count, 0)
+        XCTAssertEqual(type.knownMethods.count, 0)
+        XCTAssertEqual(type.knownConstructors.count, 0)
+        XCTAssertEqual(type.knownFields.count, 0)
+        XCTAssertEqual(type.knownProtocolConformances.count, 0)
+        XCTAssert(type.isExtension)
+    }
+    
+    func testParseEmptyStruct() throws {
+        let type = try parseType("""
+            struct Empty {
+            }
+            """)
+        
+        XCTAssertEqual(type.kind, .struct)
+        XCTAssertEqual(type.typeName, "Empty")
+        XCTAssertEqual(type.knownProperties.count, 0)
+        XCTAssertEqual(type.knownMethods.count, 0)
+        XCTAssertEqual(type.knownConstructors.count, 0)
+        XCTAssertEqual(type.knownFields.count, 0)
+        XCTAssertEqual(type.knownProtocolConformances.count, 0)
+        XCTAssertFalse(type.isExtension)
+    }
+    
+    func testParseWithSwiftSignatureMatching() throws {
+        _=try parseType("""
+            class Empty {
+                func a()
+                func a() -> Int
+            }
+            """)
+    }
+    
+    func testParseSupertypes() throws {
         let type = try parseType("""
             class MyClass: UIView, B {
             }
@@ -42,7 +82,6 @@ class SwiftClassInterfaceParserTests: XCTestCase {
     }
     
     func testParseProtocolConformances() throws {
-        
         let type = try parseType("""
             class MyClass: A, B {
             }
@@ -53,8 +92,21 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownProtocolConformances[1].protocolName, "B")
     }
     
-    func testParseProperty() throws {
+    func testParseConstantField() throws {
+        let type = try parseType("""
+            class MyClass {
+                let v1: Int
+            }
+            """)
         
+        XCTAssertEqual(type.knownFields.count, 1)
+        XCTAssertEqual(type.knownFields[0].name, "v1")
+        XCTAssertEqual(type.knownFields[0].storage.type, .int)
+        XCTAssert(type.knownFields[0].storage.isConstant)
+        XCTAssertEqual(type.knownFields[0].storage.ownership, .strong)
+    }
+    
+    func testParseProperty() throws {
         let type = try parseType("""
             class MyClass {
                 var v1: Int
@@ -79,7 +131,6 @@ class SwiftClassInterfaceParserTests: XCTestCase {
     }
     
     func testParseFunction() throws {
-        
         let type = try parseType("""
             class MyClass {
                 func a()
@@ -111,8 +162,24 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownMethods[2].signature.returnType, "MyClass")
     }
     
-    func testParseInitializer() throws {
+    func testParseStaticMembers() throws {
+        let type = try parseType("""
+            class MyClass {
+                static var a: Int
+                static let b: Int
+                static func c()
+            }
+            """)
         
+        XCTAssertEqual(type.knownProperties.count, 1)
+        XCTAssertEqual(type.knownFields.count, 1)
+        XCTAssertEqual(type.knownMethods.count, 1)
+        XCTAssert(type.knownProperties[0].isStatic)
+        XCTAssert(type.knownFields[0].isStatic)
+        XCTAssert(type.knownMethods[0].isStatic)
+    }
+    
+    func testParseInitializer() throws {
         let type = try parseType("""
             class MyClass {
                 init()
@@ -183,13 +250,13 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         _=try parseType("""
             @attribute(a)
             @attribute(b[1])
-            @_specialize(Int, T == Array<Float>)
+            @_specialize(Int, T? == Array<Float>.Type)
             extension MyClass {
             }
             """)
     }
     
-    func testParseSwiftAttribute() throws {
+    func testParseSwiftAttributeInType() throws {
         let type = try parseType("""
             @_swiftrewriter(renameFrom: NSMyClass)
             class MyClass {
@@ -197,6 +264,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
                 func a()
                 @inlinable
                 @_swiftrewriter(mapFrom: c(x: Int))
+                @_swiftrewriter(mapFrom: d(x:))
                 func b(y: Int)
             }
             """)
@@ -211,8 +279,23 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownMethods[1].knownAttributes[1].parameters, "mapFrom: c(x: Int)")
     }
     
-    func testBackToBackTypeParse() throws {
+    func testParseSwiftAttribute() throws {
+        let attribute = try parseAttribute("""
+            @_swiftrewriter(mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?)
+            """)
         
+        XCTAssertEqual(attribute.content.asString, """
+            mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?
+            """)
+    }
+    
+    func testParseSwiftAttributeRoundtrip() throws {
+        _=try parseAttribute("""
+            @_swiftrewriter(mapFrom: date() -> Date)
+            """)
+    }
+    
+    func testBackToBackTypeParse() throws {
         let type = try parseType("""
             class MyClass: UIView, UITableViewDelegate {
                 var count: Int { get }
@@ -264,7 +347,6 @@ class SwiftClassInterfaceParserTests: XCTestCase {
 extension SwiftClassInterfaceParserTests {
     
     func parseType(_ string: String, file: String = #file, line: Int = #line) throws -> KnownType {
-        
         do {
             let type =
                 try SwiftClassInterfaceParser
@@ -272,7 +354,6 @@ extension SwiftClassInterfaceParserTests {
             
             return type.complete(typeSystem: typeSystem)
         } catch {
-            
             let description: String
             if let error = error as? LexerError {
                 description = error.description(withOffsetsIn: string)
@@ -287,7 +368,33 @@ extension SwiftClassInterfaceParserTests {
             
             throw error
         }
-        
     }
     
+    func parseAttribute(_ string: String,
+                        file: String = #file,
+                        line: Int = #line) throws -> SwiftClassInterfaceParser.SwiftRewriterAttribute {
+        
+        do {
+            let type =
+                try SwiftClassInterfaceParser
+                    .parseSwiftRewriterAttribute(from: Lexer(input: string))
+            
+            return type
+        } catch {
+            
+            let description: String
+            if let error = error as? LexerError {
+                description = error.description(withOffsetsIn: string)
+            } else {
+                description = "\(error)"
+            }
+            
+            recordFailure(withDescription: "Error while parsing attribute: \(description)",
+                          inFile: file,
+                          atLine: line,
+                          expected: true)
+            
+            throw error
+        }
+    }
 }

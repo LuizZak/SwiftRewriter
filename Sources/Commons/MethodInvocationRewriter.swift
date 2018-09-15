@@ -4,9 +4,9 @@ import SwiftAST
 /// Method-to-method call transformation should allow:
 ///
 /// 1. Renaming method member name
-///     <exp>.method()
+///     \<exp>.method()
 ///         to
-///     <exp>.otherMethod()
+///     \<exp>.otherMethod()
 ///
 /// 2. Add or remove arguments in arbitrary position
 ///     2.1 Add a new argument to an arbitrary position
@@ -32,7 +32,6 @@ import SwiftAST
 /// Phases are all optional; applying no phases is a no-op and returns the original
 /// expression.
 ///
-
 public class MethodInvocationRewriter {
     public let renaming: String?
     public let argumentRewriting: [(ArgumentRewritingStrategy, SwiftType?)]?
@@ -140,6 +139,20 @@ public class MethodInvocationRewriterBuilder {
         
     }
     
+    public init(mappingTo signature: FunctionSignature) {
+        renaming(to: signature.name)
+        returnType(signature.returnType)
+        
+        for param in signature.parameters {
+            var strat = ArgumentRewritingStrategy.asIs
+            if let label = param.label {
+                strat = .labeled(label, strat)
+            }
+            
+            addingArgument(strategy: strat, type: param.type)
+        }
+    }
+    
     @discardableResult
     public func renaming(to newName: String?) -> MethodInvocationRewriterBuilder {
         _renaming = newName
@@ -183,7 +196,6 @@ public class MethodInvocationRewriterBuilder {
                                         argumentRewriting: _argumentRewriting,
                                         returnType: _returnType)
     }
-    
 }
 
 public class MethodInvocationTransformerMatcher {
@@ -198,6 +210,5 @@ public class MethodInvocationTransformerMatcher {
         self.identifier = identifier
         self.isStatic = isStatic
         self.transformer = transformer
-        
     }
 }

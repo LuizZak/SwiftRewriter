@@ -65,6 +65,7 @@ public protocol RewriterOutputTarget: class {
 public enum TextStyle {
     case plain
     case keyword
+    case attribute
     case typeName
     case stringLiteral
     case numberLiteral

@@ -1,5 +1,6 @@
 import SwiftAST
 import SwiftRewriterLib
+import MiniLexer
 
 public enum FoundationCompoundTypes {
     public static let nsCalendar = CalendarCompoundType.self
@@ -18,70 +19,21 @@ public enum CalendarCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "Calendar", supertype: "NSObject")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        return makeType(from: typeString())
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class Calendar: NSObject {
+                @_swiftrewriter(mapFrom: component(_:fromDate:))
+                func component(_ component: Calendar.Component, from date: Date) -> Int
+                
+                @_swiftrewriter(mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?)
+                func date(byAdding component: Calendar.Component, value: Int, to date: Date) -> Date?
+            }
+            """
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "component",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "component",
-                                           type: .nested(["Calendar", "Component"])),
-                        ParameterSignature(label: "from", name: "date", type: "Date")
-                    ],
-                    returnType: .int
-                ).makeSignatureMapping(
-                    fromMethodNamed: "component",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "component",
-                                           type: .nested(["Calendar", "Component"])),
-                        ParameterSignature(label: "fromDate", name: "date", type: "Date")
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-            .method(withSignature:
-                FunctionSignature(
-                    name: "date",
-                    parameters: [
-                        ParameterSignature(label: "byAdding", name: "component",
-                                           type: .nested(["Calendar", "Component"])),
-                        ParameterSignature(name: "value", type: "Int"),
-                        ParameterSignature(label: "to", name: "date", type: "Date")
-                    ],
-                    returnType: .optional("Date")
-                ).makeSignatureMapping(
-                    from:
-                    FunctionSignature(
-                        name: "dateByAddingUnit",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "component",
-                                               type: .nested(["Calendar", "Component"])),
-                            ParameterSignature(name: "value", type: "Int"),
-                            ParameterSignature(label: "toDate", name: "date", type: "Date"),
-                            ParameterSignature(name: "options", type: "NSCalendarOptions")
-                        ], returnType: .optional("Date")
-                    ),
-                    arguments: [
-                        .asIs,
-                        .labeled("value", .asIs),
-                        .labeled("to", .asIs)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-        
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -93,65 +45,101 @@ public enum NSArrayCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "NSArray", supertype: "NSObject")
-        let transformations = TransformationsSink(typeName: type.typeName)
+       return makeType(from: typeString())
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSArray: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
+                var count: Int { get }
+                
+                @_swiftrewriter(mapFrom: firstObject())
+                var firstObject: Any? { get }
+                
+                @_swiftrewriter(mapFrom: lastObject())
+                var lastObject: Any? { get }
+                var description: String { get }
+                var sortedArrayHint: Data { get }
+                
+                
+                @_swiftrewriter(mapFrom: objectAtIndex(_:))
+                func object(at index: Int) -> Any
+                
+                @_swiftrewriter(mapFrom: containsObject(_:))
+                func contains(_ anObject: Any) -> Bool
+                
+                @_swiftrewriter(mapFrom: addingObject(_:))
+                func adding(_ anObject: Any) -> [Any]
+                
+                @_swiftrewriter(mapFrom: addingObjectsFromArray(_:))
+                func addingObjects(from otherArray: [Any]) -> [Any]
+                func componentsJoined(by separator: String) -> String
+                func description(withLocale locale: Any?) -> String
+                func description(withLocale locale: Any?, indent level: Int) -> String
+                func firstObjectCommon(with otherArray: [Any]) -> Any?
+                
+                @_swiftrewriter(mapFrom: indexOfObject(_:))
+                func index(of anObject: Any) -> Int
+                
+                @_swiftrewriter(mapFrom: indexOf(_:inRange:))
+                func index(of anObject: Any, in range: NSRange) -> Int
+                
+                @_swiftrewriter(mapFrom: indexOfObjectIdenticalTo(_:))
+                func indexOfObjectIdentical(to anObject: Any) -> Int
+                
+                @_swiftrewriter(mapFrom: indexOfObjectIdenticalTo(_:inRange:))
+                func indexOfObjectIdentical(to anObject: Any, in range: NSRange) -> Int
+                func isEqual(to otherArray: [Any]) -> Bool
+                func objectEnumerator() -> NSEnumerator
+                func reverseObjectEnumerator() -> NSEnumerator
+                func sortedArray(_ comparator: @convention(c) (Any, Any, UnsafeMutableRawPointer?) -> Int, context: UnsafeMutableRawPointer?) -> [Any]
+                func sortedArray(_ comparator: @convention(c) (Any, Any, UnsafeMutableRawPointer?) -> Int, context: UnsafeMutableRawPointer?, hint: Data?) -> [Any]
+                func sortedArray(using comparator: Selector) -> [Any]
+                func subarray(with range: NSRange) -> [Any]
+                
+                @available(OSX 10.13, *)
+                func write(to url: URL)
+                func objects(at indexes: IndexSet) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func enumerateObjects(_ block: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func enumerateObjects(options opts: NSEnumerationOptions, using block: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func enumerateObjects(at s: IndexSet, options opts: NSEnumerationOptions, using block: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Void)
+                
+                @available(OSX 10.6, *)
+                func indexOfObject(passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Int
+                
+                @available(OSX 10.6, *)
+                func indexOfObject(options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Int
+                
+                @available(OSX 10.6, *)
+                func indexOfObject(at s: IndexSet, options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> Int
+                
+                @available(OSX 10.6, *)
+                func indexesOfObjects(passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> IndexSet
+                
+                @available(OSX 10.6, *)
+                func indexesOfObjects(options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> IndexSet
+                
+                @available(OSX 10.6, *)
+                func indexesOfObjects(at s: IndexSet, options opts: NSEnumerationOptions, passingTest predicate: (Any, Int, UnsafeMutablePointer<ObjCBool>) -> Bool) -> IndexSet
+                
+                @available(OSX 10.6, *)
+                func sortedArray(comparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func sortedArray(options opts: NSSortOptions, usingComparator cmptr: (Any, Any) -> ComparisonResult) -> [Any]
+                
+                @available(OSX 10.6, *)
+                func index(of obj: Any, inSortedRange r: NSRange, options opts: NSBinarySearchingOptions, usingComparator cmp: (Any, Any) -> ComparisonResult) -> Int
+            }
+            """
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .protocolConformances(protocolNames: [
-                "NSCopying",
-                "NSMutableCopying",
-                "NSSecureCoding",
-                "NSFastEnumeration"
-            ])
-        
-        type = type
-            .property(named: "count", type: .int, accessor: .getter)
-            .property(named: "firstObject", type: .optional(.any), accessor: .getter)
-            ._createPropertyFromMethods(getterName: "firstObject", setterName: nil, in: transformations)
-            .property(named: "lastObject", type: .optional(.any), accessor: .getter)
-            ._createPropertyFromMethods(getterName: "lastObject", setterName: nil, in: transformations)
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "object",
-                    parameters: [
-                        ParameterSignature(label: "at", name: "index", type: .int)
-                    ],
-                    returnType: .any
-                ).makeSignatureMapping(
-                    fromMethodNamed: "objectAtIndex",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "index", type: .int)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "contains",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    returnType: .bool
-                ).makeSignatureMapping(
-                    fromMethodNamed: "containsObject",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-        
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -163,63 +151,87 @@ public enum NSMutableArrayCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "NSMutableArray", supertype: "NSArray")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "add",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ]
-                ).makeSignatureMapping(
-                    fromMethodNamed: "addObject",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "addObjects",
-                    parameters: [
-                        ParameterSignature(label: "from", name: "otherArray", type: .array(.any))
-                    ]
-                ).makeSignatureMapping(
-                    fromMethodNamed: "addObjectsFromArray",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "otherArray", type: .array(.any))
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "remove",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ]
-                ).makeSignatureMapping(
-                    fromMethodNamed: "removeObject",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            // FIXME: Currently we have to manually transform NSArray from a protocol
+            // to a class inheritance; this is due to the way we detect supertypes
+            // when completing IncompleteKnownTypes.
+            // We need to improve the typing of CompoundTypes to allow callers
+            // collect incomplete types which are then completed externally, with
+            // all type informations.
+            incomplete.modifying { type in
+                type.removingConformance(to: "NSArray")
+                    .settingSupertype(KnownTypeReference.typeName("NSArray"))
+            }
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing NSMutableArray class interface: \(error)"
             )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSMutableArray: NSArray {
+                @_swiftrewriter(mapFrom: addObject(_:))
+                func add(_ anObject: Any)
+                
+                @_swiftrewriter(mapFrom: addObjectsFromArray(_:))
+                func addObjects(from otherArray: [Any])
+                
+                @_swiftrewriter(mapFrom: removeObject(_:))
+                func remove(_ anObject: Any)
+
+                open func exchangeObject(at idx1: Int, withObjectAt idx2: Int)
+
+                open func removeAllObjects()
+
+                @_swiftrewriter(mapFrom: removeObject(_:inRange:))
+                open func remove(_ anObject: Any, in range: NSRange)
+                
+                @_swiftrewriter(mapFrom: removeObjectIdenticalTo(_:inRange:))
+                open func removeObject(identicalTo anObject: Any, in range: NSRange)
+                
+                @_swiftrewriter(mapFrom: removeObjectIdenticalTo(_:))
+                open func removeObject(identicalTo anObject: Any)
+
+                
+                open func removeObjects(in otherArray: [Any])
+                
+                @_swiftrewriter(mapFrom: removeObjectsInRange(_:))
+                open func removeObjects(in range: NSRange)
+
+                open func replaceObjects(in range: NSRange, withObjectsFrom otherArray: [Any], range otherRange: NSRange)
+
+                open func replaceObjects(in range: NSRange, withObjectsFrom otherArray: [Any])
+
+                open func setArray(_ otherArray: [Any])
+
+                open func sort(_ compare: @convention(c) (Any, Any, UnsafeMutableRawPointer?) -> Int, context: UnsafeMutableRawPointer?)
+
+                open func sort(using comparator: Selector)
+
+                
+                open func insert(_ objects: [Any], at indexes: IndexSet)
+
+                open func removeObjects(at indexes: IndexSet)
+
+                open func replaceObjects(at indexes: IndexSet, with objects: [Any])
+                
+                @available(OSX 10.6, *)
+                open func sort(comparator cmptr: (Any, Any) -> ComparisonResult)
+
+                @available(OSX 10.6, *)
+                open func sort(options opts: NSSortOptions = [], usingComparator cmptr: (Any, Any) -> ComparisonResult)
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -231,56 +243,26 @@ public enum NSDateFormatterCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "DateFormatter", supertype: "Formatter")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        return makeType(from: typeString())
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class DateFormatter: Formatter {
+                @_swiftrewriter(mapFrom: dateFormat())
+                @_swiftrewriter(mapFrom: setDateFormat(_:))
+                var dateFormat: String!
+                
+                
+                @_swiftrewriter(mapFrom: stringFromDate(_:))
+                func string(from date: Date) -> String
+                
+                @_swiftrewriter(mapFrom: dateFromString(_:))
+                func date(from string: Date) -> Date?
+            }
+            """
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .property(named: "dateFormat", type: .implicitUnwrappedOptional(.string))
-            ._createPropertyFromMethods(getterName: "dateFormat",
-                                        setterName: "setDateFormat",
-                                        in: transformations)
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "string",
-                    parameters: [
-                        ParameterSignature(label: "from", name: "date", type: "Date")
-                    ],
-                    returnType: .string
-                ).makeSignatureMapping(
-                    fromMethodNamed: "stringFromDate",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "date", type: "Date")
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "date",
-                    parameters: [
-                        ParameterSignature(label: "from", name: "string", type: "Date")
-                    ],
-                    returnType: .optional("Date")
-                ).makeSignatureMapping(
-                    fromMethodNamed: "dateFromString",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "date", type: "Date")
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-        
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -292,82 +274,49 @@ public enum NSDateCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let aliases = ["NSDate"]
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "Date", kind: .struct)
-        let transformations = TransformationsSink(typeName: type.typeName)
+        return makeType(from: typeString())
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            @_swiftrewriter(renameFrom: NSDate)
+            struct Date: Hashable, Equatable {
+                static let distantFuture: Date
+                static let distantPast: Date
+                
+                static var timeIntervalSinceReferenceDate: TimeInterval { get }
+                var timeIntervalSinceNow: TimeInterval { get }
+                var timeIntervalSince1970: TimeInterval { get }
+
+
+                @_swiftrewriter(mapFrom: date() -> Date)
+                init()
+                static func date() -> Date
+                
+                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
+                func timeIntervalSince(_ anotherDate: Date) -> TimeInterval
+                
+                @_swiftrewriter(mapFrom: dateByAddingTimeInterval(_:))
+                func addingTimeInterval(_ timeInterval: TimeInterval) -> Date
+                
+                func earlierDate(_ anotherDate: Date) -> Date
+                
+                func laterDate(_ anotherDate: Date) -> Date
+                
+                func compare(_ other: Date) -> ComparisonResult
+
+                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
+                func timeIntervalSince(_ date: Date) -> TimeInterval
+
+                @_swiftrewriter(mapToBinary: ==)
+                func isEqual(_ other: AnyObject) -> Bool
+
+                @_swiftrewriter(mapToBinary: ==)
+                func isEqualToDate(_ other: Date) -> Bool
+            }
+            """
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .protocolConformances(protocolNames: ["Hashable", "Equatable"])
-        
-        type = type
-            .property(named: "timeIntervalSince1970", type: "TimeInterval")
-        
-        type = type
-            .constructor()
-            ._createConstructorMapping(
-                fromStaticMethod:
-                    FunctionSignature(isStatic: true,
-                                      signatureString: "date() -> Date"),
-                in: transformations
-            )
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    isStatic: true,
-                    signatureString: "date() -> Date"
-                )
-            )
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "addingTimeInterval(_ timeInterval: TimeInterval) -> Date"
-                ).makeSignatureMapping(
-                    fromMethodNamed: "dateByAddingTimeInterval",
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "timeIntervalSince(_ date: Date) -> TimeInterval"
-                ).makeSignatureMapping(
-                    fromMethodNamed: "timeIntervalSinceDate",
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "isEqual(_ other: AnyObject) -> Bool"
-                ).toBinaryOperation(
-                    op: .equals,
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "isEqualToDate(_ other: Date) -> Bool"
-                ).toBinaryOperation(
-                    op: .equals,
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
-            )
-        
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations,
-                                  aliases: aliases)
+        return type
     }
 }
 
@@ -379,25 +328,18 @@ public enum NSLocaleCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let aliases = ["NSLocale"]
-        var type = KnownTypeBuilder(typeName: "Locale", kind: .struct)
-        let transformations = TransformationsSink(typeName: type.typeName)
+        return makeType(from: typeString())
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            @_swiftrewriter(renameFrom: NSLocale)
+            struct Locale: Hashable, Equatable {
+                @_swiftrewriter(mapFrom: init(localeIdentifier:))
+                init(identifier: String)
+            }
+            """
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .protocolConformances(protocolNames: ["Hashable", "Equatable"])
-        
-        type = type
-            .constructor(shortParameters: [("identifier", .string)])
-            ._createConstructorMapping(fromParameters:
-                Array(parsingParameters: "(localeIdentifier: String)"),
-                in: transformations
-            )
-        
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations,
-                                  aliases: aliases)
+        return type
     }
 }

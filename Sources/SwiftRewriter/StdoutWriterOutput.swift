@@ -129,7 +129,7 @@ public final class TerminalStringRewriterOutput: RewriterOutputTarget {
             return .white
         case .comment:
             return .green
-        case .keyword:
+        case .keyword, .attribute:
             return .magenta
         case .numberLiteral:
             return .blue

@@ -9,178 +9,119 @@ public enum UIColorCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        var type = KnownTypeBuilder(typeName: "UIColor", supertype: "NSObject")
-        let annotations = AnnotationsSink()
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .protocolConformances(protocolNames: ["NSSecureCoding", "NSCopying"])
-        
-        // Properties
-        type = type
-            .property(named: "cgColor", type: "CGColor", accessor: .getter)
-            ._createPropertyRename(from: "CGColor", in: transformations)
-            .property(named: "ciColor", type: "CGColor", accessor: .getter)
-            ._createPropertyRename(from: "CIColor", in: transformations)
-        
-        // Static constants
-        type = type
-            .staticColorProperty(named: "black", transformations: transformations)
-            .staticColorProperty(named: "darkGray", transformations: transformations)
-            .staticColorProperty(named: "lightGray", transformations: transformations)
-            .staticColorProperty(named: "white", transformations: transformations)
-            .staticColorProperty(named: "gray", transformations: transformations)
-            .staticColorProperty(named: "red", transformations: transformations)
-            .staticColorProperty(named: "green", transformations: transformations)
-            .staticColorProperty(named: "blue", transformations: transformations)
-            .staticColorProperty(named: "cyan", transformations: transformations)
-            .staticColorProperty(named: "yellow", transformations: transformations)
-            .staticColorProperty(named: "magenta", transformations: transformations)
-            .staticColorProperty(named: "orange", transformations: transformations)
-            .staticColorProperty(named: "purple", transformations: transformations)
-            .staticColorProperty(named: "brown", transformations: transformations)
-            .staticColorProperty(named: "clear", transformations: transformations)
-        
-        // Extension colors
-        type = type
-            .staticColorProperty(named: "lightText", transformations: transformations)
-            .staticColorProperty(named: "darkText", transformations: transformations)
-            .staticColorProperty(named: "groupTableViewBackground", transformations: transformations)
-            .staticColorProperty(named: "viewFlipsideBackground", transformations: transformations)
-            .staticColorProperty(named: "scrollViewTexturedBackground", transformations: transformations)
-            .staticColorProperty(named: "underPageBackground", transformations: transformations)
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "withAlphaComponent(_ alpha: CGFloat) -> UIColor"
-                )
-                .makeSignatureMapping(
-                    fromSignature: "colorWithAlphaComponent(_ alpha: CGFloat) -> UIColor",
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    annotations: annotations.annotations
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing UIColor class interface: \(error)"
             )
-        
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
-    }
-}
-
-private extension KnownTypeBuilder {
-    
-    func staticColorProperty(named name: String, transformations: TransformationsSink) -> KnownTypeBuilder {
-        return
-            property(named: name, type: "UIColor", isStatic: true, accessor: .getter)
-            ._createPropertyRename(from: "\(name)Color", in: transformations)
-            ._createPropertyFromMethods(getterName: "\(name)Color", setterName: nil, in: transformations)
-    }
-    
-}
-
-extension KnownTypeBuilder {
-    func _createConstructorMapping(fromStaticMethod signature: FunctionSignature,
-                                   in transformations: TransformationsSink) -> KnownTypeBuilder {
-        
-        guard let constructor = lastConstructor else {
-            assertionFailure("Must be called after a call to `.constructor`")
-            return self
         }
-        
-        let transformer = ValueTransformer<PostfixExpression, Expression> { $0 }
-            .validate { exp in
-                exp.asPostfix?
-                    .functionCall?
-                    .identifierWith(methodName: signature.name)
-                        == signature.asIdentifier
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class UIColor: NSObject, NSSecureCoding, NSCopying {
+                @_swiftrewriter(renameFrom: blackColor)
+                @_swiftrewriter(mapFrom: blackColor())
+                static var black: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: darkGrayColor)
+                @_swiftrewriter(mapFrom: darkGrayColor())
+                static var darkGray: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: lightGrayColor)
+                @_swiftrewriter(mapFrom: lightGrayColor())
+                static var lightGray: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: whiteColor)
+                @_swiftrewriter(mapFrom: whiteColor())
+                static var white: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: grayColor)
+                @_swiftrewriter(mapFrom: grayColor())
+                static var gray: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: redColor)
+                @_swiftrewriter(mapFrom: redColor())
+                static var red: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: greenColor)
+                @_swiftrewriter(mapFrom: greenColor())
+                static var green: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: blueColor)
+                @_swiftrewriter(mapFrom: blueColor())
+                static var blue: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: cyanColor)
+                @_swiftrewriter(mapFrom: cyanColor())
+                static var cyan: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: yellowColor)
+                @_swiftrewriter(mapFrom: yellowColor())
+                static var yellow: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: magentaColor)
+                @_swiftrewriter(mapFrom: magentaColor())
+                static var magenta: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: orangeColor)
+                @_swiftrewriter(mapFrom: orangeColor())
+                static var orange: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: purpleColor)
+                @_swiftrewriter(mapFrom: purpleColor())
+                static var purple: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: brownColor)
+                @_swiftrewriter(mapFrom: brownColor())
+                static var brown: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: clearColor)
+                @_swiftrewriter(mapFrom: clearColor())
+                static var clear: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: lightTextColor)
+                @_swiftrewriter(mapFrom: lightTextColor())
+                static var lightText: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: darkTextColor)
+                @_swiftrewriter(mapFrom: darkTextColor())
+                static var darkText: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: groupTableViewBackgroundColor)
+                @_swiftrewriter(mapFrom: groupTableViewBackgroundColor())
+                static var groupTableViewBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: viewFlipsideBackgroundColor)
+                @_swiftrewriter(mapFrom: viewFlipsideBackgroundColor())
+                static var viewFlipsideBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: scrollViewTexturedBackgroundColor)
+                @_swiftrewriter(mapFrom: scrollViewTexturedBackgroundColor())
+                static var scrollViewTexturedBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: underPageBackgroundColor)
+                @_swiftrewriter(mapFrom: underPageBackgroundColor())
+                static var underPageBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: CGColor)
+                var cgColor: CGColor { get }
+                
+                @_swiftrewriter(renameFrom: CIColor)
+                var ciColor: CGColor { get }
+                
+                
+                @_swiftrewriter(mapFrom: colorWithAlphaComponent(_:))
+                func withAlphaComponent(_ alpha: CGFloat) -> UIColor
             }
-            .decompose()
-            .transformIndex(index: 0, transformer: ValueTransformer()
-                .removingMemberAccess()
-                .validate(matcher: ValueMatcher()
-                    .isTyped(.metatype(for: .typeName(typeName)),
-                             ignoringNullability: true)
-                )
-            )
-            .asFunctionCall(labels: constructor.parameters.argumentLabels())
-            .typed(.typeName(typeName))
-        
-        transformations.addValueTransformer(transformer)
-        
-        let annotation = """
-            Convert from '\(
-                TypeFormatter.asString(signature: signature, includeName: true)
-            )'
             """
         
-        return self.annotationgLatestConstructor(annotation: annotation)
-    }
-    
-    func _createConstructorMapping(fromParameters parameters: [ParameterSignature],
-                                   in transformations: TransformationsSink) -> KnownTypeBuilder {
-        
-        guard let constructor = lastConstructor else {
-            assertionFailure("Must be called after a call to `.constructor`")
-            return self
-        }
-        
-        transformations.addInitTransform(from: parameters,
-                                         to: constructor.parameters)
-        
-        let annotation = "Convert from 'init\(TypeFormatter.asString(parameters: parameters))'"
-        
-        return self.annotationgLatestConstructor(annotation: annotation)
-    }
-    
-    func _createPropertyRename(from old: String, in transformations: TransformationsSink) -> KnownTypeBuilder {
-        guard let property = lastProperty else {
-            assertionFailure("Must be called after a call to `.property`")
-            return self
-        }
-        
-        transformations.addPropertyRenaming(old: old, new: property.name)
-        
-        let annotation = "Convert from \(property.isStatic ? "static " : "")var \(old)"
-        
-        return self.annotationgLatestProperty(annotation: annotation)
-    }
-    
-    func _createPropertyFromMethods(getterName: String,
-                                    setterName: String?,
-                                    in transformations: TransformationsSink) -> KnownTypeBuilder {
-        
-        guard let property = lastProperty else {
-            assertionFailure("Must be called after a call to `.property`")
-            return self
-        }
-        
-        transformations
-            .addPropertyFromMethods(property: property.name,
-                                    getter: getterName,
-                                    setter: setterName,
-                                    propertyType: property.storage.type,
-                                    isStatic: property.isStatic)
-        
-        var annotation = "Convert from "
-        
-        if property.isStatic {
-            annotation += "static "
-        }
-        
-        annotation += "func \(getterName)()"
-        
-        if let setterName = setterName {
-            annotation += " / "
-            if property.isStatic {
-                annotation += "static "
-            }
-            annotation += "func \(setterName)(\(property.storage.type))"
-        }
-        
-        return self.annotationgLatestProperty(annotation: annotation)
+        return type
     }
 }

@@ -8,100 +8,103 @@ class UIColorCompoundTypeTests: XCTestCase {
     func testUIColorDefinition() {
         let type = UIColorCompoundType.create()
         
+        XCTAssert(type.nonCanonicalNames.isEmpty)
+        XCTAssertEqual(type.transformations.count, 45)
+        
         assertSignature(type: type, matches: """
             class UIColor: NSObject, NSSecureCoding, NSCopying {
-                // Convert from static var blackColor
-                // Convert from static func blackColor()
+                @_swiftrewriter(renameFrom: blackColor)
+                @_swiftrewriter(mapFrom: blackColor())
                 static var black: UIColor { get }
                 
-                // Convert from static var darkGrayColor
-                // Convert from static func darkGrayColor()
+                @_swiftrewriter(renameFrom: darkGrayColor)
+                @_swiftrewriter(mapFrom: darkGrayColor())
                 static var darkGray: UIColor { get }
                 
-                // Convert from static var lightGrayColor
-                // Convert from static func lightGrayColor()
+                @_swiftrewriter(renameFrom: lightGrayColor)
+                @_swiftrewriter(mapFrom: lightGrayColor())
                 static var lightGray: UIColor { get }
                 
-                // Convert from static var whiteColor
-                // Convert from static func whiteColor()
+                @_swiftrewriter(renameFrom: whiteColor)
+                @_swiftrewriter(mapFrom: whiteColor())
                 static var white: UIColor { get }
                 
-                // Convert from static var grayColor
-                // Convert from static func grayColor()
+                @_swiftrewriter(renameFrom: grayColor)
+                @_swiftrewriter(mapFrom: grayColor())
                 static var gray: UIColor { get }
                 
-                // Convert from static var redColor
-                // Convert from static func redColor()
+                @_swiftrewriter(renameFrom: redColor)
+                @_swiftrewriter(mapFrom: redColor())
                 static var red: UIColor { get }
                 
-                // Convert from static var greenColor
-                // Convert from static func greenColor()
+                @_swiftrewriter(renameFrom: greenColor)
+                @_swiftrewriter(mapFrom: greenColor())
                 static var green: UIColor { get }
                 
-                // Convert from static var blueColor
-                // Convert from static func blueColor()
+                @_swiftrewriter(renameFrom: blueColor)
+                @_swiftrewriter(mapFrom: blueColor())
                 static var blue: UIColor { get }
                 
-                // Convert from static var cyanColor
-                // Convert from static func cyanColor()
+                @_swiftrewriter(renameFrom: cyanColor)
+                @_swiftrewriter(mapFrom: cyanColor())
                 static var cyan: UIColor { get }
                 
-                // Convert from static var yellowColor
-                // Convert from static func yellowColor()
+                @_swiftrewriter(renameFrom: yellowColor)
+                @_swiftrewriter(mapFrom: yellowColor())
                 static var yellow: UIColor { get }
                 
-                // Convert from static var magentaColor
-                // Convert from static func magentaColor()
+                @_swiftrewriter(renameFrom: magentaColor)
+                @_swiftrewriter(mapFrom: magentaColor())
                 static var magenta: UIColor { get }
                 
-                // Convert from static var orangeColor
-                // Convert from static func orangeColor()
+                @_swiftrewriter(renameFrom: orangeColor)
+                @_swiftrewriter(mapFrom: orangeColor())
                 static var orange: UIColor { get }
                 
-                // Convert from static var purpleColor
-                // Convert from static func purpleColor()
+                @_swiftrewriter(renameFrom: purpleColor)
+                @_swiftrewriter(mapFrom: purpleColor())
                 static var purple: UIColor { get }
                 
-                // Convert from static var brownColor
-                // Convert from static func brownColor()
+                @_swiftrewriter(renameFrom: brownColor)
+                @_swiftrewriter(mapFrom: brownColor())
                 static var brown: UIColor { get }
                 
-                // Convert from static var clearColor
-                // Convert from static func clearColor()
+                @_swiftrewriter(renameFrom: clearColor)
+                @_swiftrewriter(mapFrom: clearColor())
                 static var clear: UIColor { get }
                 
-                // Convert from static var lightTextColor
-                // Convert from static func lightTextColor()
+                @_swiftrewriter(renameFrom: lightTextColor)
+                @_swiftrewriter(mapFrom: lightTextColor())
                 static var lightText: UIColor { get }
                 
-                // Convert from static var darkTextColor
-                // Convert from static func darkTextColor()
+                @_swiftrewriter(renameFrom: darkTextColor)
+                @_swiftrewriter(mapFrom: darkTextColor())
                 static var darkText: UIColor { get }
                 
-                // Convert from static var groupTableViewBackgroundColor
-                // Convert from static func groupTableViewBackgroundColor()
+                @_swiftrewriter(renameFrom: groupTableViewBackgroundColor)
+                @_swiftrewriter(mapFrom: groupTableViewBackgroundColor())
                 static var groupTableViewBackground: UIColor { get }
                 
-                // Convert from static var viewFlipsideBackgroundColor
-                // Convert from static func viewFlipsideBackgroundColor()
+                @_swiftrewriter(renameFrom: viewFlipsideBackgroundColor)
+                @_swiftrewriter(mapFrom: viewFlipsideBackgroundColor())
                 static var viewFlipsideBackground: UIColor { get }
                 
-                // Convert from static var scrollViewTexturedBackgroundColor
-                // Convert from static func scrollViewTexturedBackgroundColor()
+                @_swiftrewriter(renameFrom: scrollViewTexturedBackgroundColor)
+                @_swiftrewriter(mapFrom: scrollViewTexturedBackgroundColor())
                 static var scrollViewTexturedBackground: UIColor { get }
                 
-                // Convert from static var underPageBackgroundColor
-                // Convert from static func underPageBackgroundColor()
+                @_swiftrewriter(renameFrom: underPageBackgroundColor)
+                @_swiftrewriter(mapFrom: underPageBackgroundColor())
                 static var underPageBackground: UIColor { get }
                 
-                // Convert from var CGColor
+                @_swiftrewriter(renameFrom: CGColor)
                 var cgColor: CGColor { get }
                 
-                // Convert from var CIColor
+                @_swiftrewriter(renameFrom: CIColor)
                 var ciColor: CGColor { get }
                 
                 
-                // Convert from colorWithAlphaComponent(_ alpha: CGFloat) -> UIColor
+                @_swiftrewriter(mapFrom: colorWithAlphaComponent(_:))
                 func withAlphaComponent(_ alpha: CGFloat) -> UIColor
             }
             """)

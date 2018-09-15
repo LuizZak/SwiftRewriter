@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import SwiftAST
 import MiniLexer
 
 class FunctionSignatureParserTests: XCTestCase {
@@ -233,6 +234,49 @@ class FunctionSignatureParserTests: XCTestCase {
         )
     }
     
+    func testParseDefaultValueDefault() {
+        assert(string: "function(a: Int = default)",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [
+                    ParameterSignature(name: "a", type: .int)
+                ],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+    }
+    
+    func testParseDefaultValueSquareBrackets() {
+        assert(string: "function(a: Options = [])",
+               parseInto: FunctionSignature(
+                name: "function",
+                parameters: [
+                    ParameterSignature(name: "a", type: "Options")
+                ],
+                returnType: .void,
+                isStatic: false
+            )
+        )
+    }
+    
+    func testParseFullSignature() {
+        assert(string: "dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?",
+               parseInto: FunctionSignature(
+                name: "dateByAddingUnit",
+                parameters: [
+                    ParameterSignature(label: nil, name: "component", type: .nested(["Calendar", "Component"])),
+                    ParameterSignature(name: "value", type: "Int"),
+                    ParameterSignature(label: "toDate", name: "date", type: "Date"),
+                    ParameterSignature(name: "options", type: "NSCalendarOptions")
+                ],
+                returnType: .optional("Date"),
+                isStatic: false,
+                isMutating: false
+            )
+        )
+    }
+    
     func testExtraneousInputError() {
         do {
             _=try FunctionSignatureParser.parseParameters(from: "())")
@@ -273,7 +317,19 @@ class FunctionSignatureParserTests: XCTestCase {
             XCTFail("Expected to throw error")
         } catch let lexError as LexerError {
             XCTAssertEqual(lexError.description(withOffsetsIn: "(=)"),
-                           "Error at line 1 column 2: Expected token ')' but found 'eof'")
+                           "Error at line 1 column 2: Expected token ')' but found '='")
+        } catch {
+            XCTFail("Wrong error type \(type(of: error))")
+        }
+    }
+    
+    func testInvalidDefaultArgument() {
+        do {
+            _=try FunctionSignatureParser.parseParameters(from: "(a: Int = a)")
+            XCTFail("Expected to throw error")
+        } catch let lexError as LexerError {
+            XCTAssertEqual(lexError.description(withOffsetsIn: "(a: Int = a)"),
+                           "Error at line 1 column 10: Default values for arguments must either be 'default' or '[]', found 'a'")
         } catch {
             XCTFail("Wrong error type \(type(of: error))")
         }

@@ -8,6 +8,48 @@ public enum TypeFormatter {
         
         let o = StringRewriterOutput(settings: .defaults)
         
+        var _onFirstDeclaration = true
+        
+        let outputAttributesAndAnnotations: ([KnownAttribute], [String], Bool) -> Bool
+        outputAttributesAndAnnotations = { attr, annotations, sameLine in
+            guard !attr.isEmpty || !annotations.isEmpty else {
+                return false
+            }
+            
+            let attrInLineLimit = 20
+            let attrInLine = attr.map(stringify).joined(separator: " ")
+            
+            if !annotations.isEmpty || (!attr.isEmpty && (!sameLine || attrInLine.count >= attrInLineLimit)) {
+                if !_onFirstDeclaration {
+                    o.output(line: "")
+                }
+            }
+            
+            for annotation in annotations {
+                o.output(line: "// \(annotation)", style: .comment)
+            }
+            
+            printAttributes: if !attr.isEmpty {
+                if sameLine {
+                    if attrInLine.count < attrInLineLimit {
+                        o.outputIdentation()
+                        o.outputInlineWithSpace(attrInLine, style: .keyword)
+                        
+                        return true
+                    }
+                }
+                
+                for attr in attr {
+                    o.output(line: stringify(attr), style: .attribute)
+                }
+            }
+            
+            return false
+        }
+        
+        _=outputAttributesAndAnnotations(type.knownAttributes, [], false)
+        _onFirstDeclaration = true
+        
         if type.isExtension {
             o.outputInline("extension \(type.typeName)")
         } else {
@@ -35,44 +77,50 @@ public enum TypeFormatter {
         
         // Type body
         o.idented {
-            var _onFirstAnnotation = true
-            
-            let outputAnnotations: ([String]) -> Void = { annotations in
-                guard !annotations.isEmpty else {
-                    return
-                }
-                
-                if !_onFirstAnnotation {
-                    o.output(line: "")
-                }
-                
-                _onFirstAnnotation = false
-                
-                for annotation in annotations {
-                    o.output(line: "// \(annotation)")
-                }
-            }
-            
             let outputField: (KnownProperty) -> Void = { field in
-                outputAnnotations(field.annotations)
+                let didPrintSameLine = outputAttributesAndAnnotations(field.knownAttributes,
+                                                                      field.annotations,
+                                                                      true)
                 
-                o.output(line: asString(field: field,
-                                        ofType: type,
-                                        withTypeName: false,
-                                        includeVarKeyword: true))
+                let line = asString(field: field,
+                                    ofType: type,
+                                    withTypeName: false,
+                                    includeVarKeyword: true)
+                
+                if !didPrintSameLine {
+                    o.outputIdentation()
+                }
+                
+                o.outputInline(line)
+                o.outputLineFeed()
+                
+                _onFirstDeclaration = false
             }
             let outputProperty: (KnownProperty) -> Void = { property in
-                outputAnnotations(property.annotations)
+                let didPrintSameLine = outputAttributesAndAnnotations(property.knownAttributes,
+                                                                      property.annotations,
+                                                                      true)
+                
+                let line: String
                 
                 if property.isEnumCase {
-                    o.output(line: "case \(property.name)")
+                    line = "case \(property.name)"
                 } else {
-                    o.output(line: asString(property: property,
-                                            ofType: type,
-                                            withTypeName: false,
-                                            includeVarKeyword: true,
-                                            includeAccessors: property.accessor != .getterAndSetter))
+                    line = asString(property: property,
+                                    ofType: type,
+                                    withTypeName: false,
+                                    includeVarKeyword: true,
+                                    includeAccessors: property.accessor != .getterAndSetter)
                 }
+                
+                if !didPrintSameLine {
+                    o.outputIdentation()
+                }
+                
+                o.outputInline(line)
+                o.outputLineFeed()
+                
+                _onFirstDeclaration = false
             }
             
             let staticFields = type.knownFields.filter { $0.isStatic }
@@ -93,17 +141,25 @@ public enum TypeFormatter {
             }
             
             for ctor in type.knownConstructors {
-                outputAnnotations(ctor.annotations)
+                _=outputAttributesAndAnnotations(ctor.knownAttributes,
+                                                 ctor.annotations,
+                                                 false)
                 
                 o.output(line: "init" + asString(parameters: ctor.parameters))
+                
+                _onFirstDeclaration = false
             }
             for method in type.knownMethods {
-                outputAnnotations(method.annotations)
+                _=outputAttributesAndAnnotations(method.knownAttributes,
+                                                 method.annotations,
+                                                 false)
                 
                 o.output(line:
                     asString(signature: method.signature, includeName: true,
                              includeFuncKeyword: true)
                 )
+                
+                _onFirstDeclaration = false
             }
         }
         
@@ -233,11 +289,12 @@ public enum TypeFormatter {
     /// The signature's name can be optionally include during conversion.
     public static func asString(signature: FunctionSignature,
                                 includeName: Bool = false,
-                                includeFuncKeyword: Bool = false) -> String {
+                                includeFuncKeyword: Bool = false,
+                                includeStatic: Bool = true) -> String {
         
         var result = ""
         
-        if signature.isStatic {
+        if signature.isStatic && includeStatic {
             result += "static "
         }
         
@@ -309,6 +366,14 @@ public enum TypeFormatter {
         case .semantics(let semantics):
             return stringify(semantics)
         }
+    }
+    
+    private static func stringify(_ attribute: KnownAttribute) -> String {
+        if let parameters = attribute.parameters {
+            return "@\(attribute.name)(\(parameters))"
+        }
+        
+        return "@\(attribute.name)"
     }
     
     private static func stringify(_ semantics: [Semantic]) -> String {

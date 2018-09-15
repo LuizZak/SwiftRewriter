@@ -7,6 +7,52 @@ import Utils
 public final class FunctionSignatureParser {
     private typealias Tokenizer = TokenizerLexer<FullToken<Token>>
     
+    /// Parses a function identifier from a given lexer.
+    ///
+    /// formal grammar of a function identifier:
+    ///
+    /// ```
+    /// function-identifier
+    ///     : identifier '(' parameter-identifiers? ')'
+    ///     ;
+    ///
+    /// parameter-identifiers
+    ///     : parameter-identifier+
+    ///     ;
+    ///
+    /// parameter-identifier
+    ///     : identifier ':'
+    ///     | '_' ':'
+    ///     ;
+    /// ```
+    public static func parseIdentifier(from lexer: Lexer) throws -> FunctionIdentifier {
+        
+        let tokenizer = Tokenizer(lexer: lexer)
+        
+        let identifier = String(try tokenizer.advance(overTokenType: .identifier).value)
+        var params: [String?] = []
+        
+        try tokenizer.advance(overTokenType: .openParens)
+        
+        while !tokenizer.isEof && !tokenizer.tokenType(is: .closeParens) {
+            let param: String?
+            if tokenizer.tokenType(is: .underscore) {
+                tokenizer.skipToken()
+                param = nil
+            } else {
+                param = String(try tokenizer.advance(overTokenType: .identifier).value)
+            }
+            
+            try tokenizer.advance(overTokenType: .colon)
+            
+            params.append(param)
+        }
+        
+        try tokenizer.advance(overTokenType: .closeParens)
+        
+        return FunctionIdentifier(name: identifier, parameterNames: params)
+    }
+    
     /// Parses a function signature from a given input string.
     ///
     /// Parsing begins at the function name and the input should not start with
@@ -17,8 +63,8 @@ public final class FunctionSignatureParser {
     /// ```
     /// function-signature
     ///     : 'mutating'? identifier parameter-signature return-type?
-    ///     : 'mutating'? identifier parameter-signature 'throws' return-type?
-    ///     : 'mutating'? identifier parameter-signature 'rethrows' return-type?
+    ///     | 'mutating'? identifier parameter-signature 'throws' return-type?
+    ///     | 'mutating'? identifier parameter-signature 'rethrows' return-type?
     ///     ;
     ///
     /// return-type
@@ -56,8 +102,8 @@ public final class FunctionSignatureParser {
     /// ```
     /// function-signature
     ///     : 'mutating'? identifier parameter-signature return-type?
-    ///     : 'mutating'? identifier parameter-signature 'throws' return-type?
-    ///     : 'mutating'? identifier parameter-signature 'rethrows' return-type?
+    ///     | 'mutating'? identifier parameter-signature 'throws' return-type?
+    ///     | 'mutating'? identifier parameter-signature 'rethrows' return-type?
     ///     ;
     ///
     /// return-type
@@ -154,7 +200,7 @@ public final class FunctionSignatureParser {
     ///     ;
     ///
     /// parameter
-    ///     : parameter-name ':' parameter-attribute-list? swift-type ('=' 'default')?
+    ///     : parameter-name ':' parameter-attribute-list? swift-type parameter-default-value?
     ///     ;
     ///
     /// parameter-name
@@ -163,11 +209,16 @@ public final class FunctionSignatureParser {
     ///
     /// parameter-attribute-list
     ///     : parameter-attribute parameter-attribute-list?
-    ///     : 'inout'
+    ///     | 'inout'
     ///     ;
     ///
     /// parameter-attribute
     ///     : '@' identifier
+    ///     ;
+    ///
+    /// parameter-default-value
+    ///     : '=' 'default'
+    ///     | '=' '[]'
     ///     ;
     ///
     /// identifier
@@ -213,9 +264,11 @@ public final class FunctionSignatureParser {
                 break
             }
             
-            throw LexerError.unexpectedCharacter(tokenizer.lexer.inputIndex,
-                                                 char: try tokenizer.lexer.peek(),
-                                                 message: "Expected ')'")
+            throw tokenizer.lexer
+                .unexpectedCharacterError(
+                    char: try tokenizer.lexer.peek(),
+                    "Expected token ')' but found '\(tokenizer.tokenType().tokenString)'"
+                )
         }
         
         if afterComma {
@@ -306,7 +359,46 @@ public final class FunctionSignatureParser {
             break
         }
         
+        if tokenizer.tokenType(is: .equals) {
+            try parseDefaultValue(tokenizer: tokenizer)
+        }
+        
         return ParameterSignature(label: label, name: String(name), type: type)
+    }
+    
+    // TODO: Map default values into `ParameterSignature` to allow the type system
+    // to recognize call sites that omit these optional parameters.
+    private static func parseDefaultValue(tokenizer: Tokenizer) throws {
+        try tokenizer.advance(overTokenType: .equals)
+        
+        let backtracker = tokenizer.backtracker()
+        
+        let index = tokenizer.lexer.inputIndex
+        
+        do {
+            if tokenizer.tokenType(is: .identifier) {
+                try tokenizer.advance(matching: { $0.value == "default" })
+            } else {
+                try tokenizer.advance(overTokenType: .openSquare)
+                try tokenizer.advance(overTokenType: .closeSquare)
+            }
+        } catch {
+            backtracker.backtrack()
+            
+            // Skip until comma or closeParens and make a string of that interval
+            // to form a meaningful error message
+            tokenizer.lexer.skipWhitespace()
+            let range = tokenizer.lexer.startRange()
+            
+            while !tokenizer.isEof && !tokenizer.tokenType(is: .comma) && !tokenizer.tokenType(is: .closeParens) {
+                tokenizer.skipToken()
+            }
+            
+            throw tokenizer.lexer.syntaxError(
+                offset: index,
+                "Default values for arguments must either be 'default' or '[]', found '\(range.string())'"
+            )
+        }
     }
     
     private enum Token: String, TokenProtocol {
@@ -314,10 +406,13 @@ public final class FunctionSignatureParser {
         
         case openParens = "("
         case closeParens = ")"
+        case openSquare = "["
+        case closeSquare = "]"
         case colon = ":"
         case comma = ","
         case at = "@"
         case underscore = "_"
+        case equals = "="
         case `inout`
         case mutating
         case identifier
@@ -337,7 +432,8 @@ public final class FunctionSignatureParser {
         
         func length(in lexer: Lexer) -> Int {
             switch self {
-            case .openParens, .closeParens, .colon, .comma, .underscore, .at:
+            case .openParens, .closeParens, .openSquare, .closeSquare, .colon,
+                 .comma, .at, .underscore, .equals:
                 return 1
             case .functionArrow:
                 return 2

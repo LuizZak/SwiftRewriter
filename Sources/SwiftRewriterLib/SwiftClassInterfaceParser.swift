@@ -15,8 +15,8 @@ public final class SwiftClassInterfaceParser {
     /// and support for parsing Swift function signatures is borrowed from
     /// `FunctionSignatureParser`.
     public static func parseDeclaration(from string: String) throws -> IncompleteKnownType {
-        
         var builder = KnownTypeBuilder(typeName: "")
+        builder.useSwiftSignatureMatching = true
         
         try parseDeclaration(from: string, into: &builder)
         
@@ -66,6 +66,7 @@ public final class SwiftClassInterfaceParser {
     ///
     /// type-declaration-header
     ///     : 'class' type-name type-inheritance-clause?
+    ///     : 'struct' type-name type-inheritance-clause?
     ///     : 'extension' type-name type-inheritance-clause?
     ///     ;
     ///
@@ -92,9 +93,18 @@ public final class SwiftClassInterfaceParser {
         if tokenizer.tokenType(is: .extension) {
             try tokenizer.advance(overTokenType: .extension)
             isExtension = true
-        } else {
+        } else if tokenizer.tokenType(is: .class) {
             try tokenizer.advance(overTokenType: .class)
             isExtension = false
+            
+            typeBuilder =
+                typeBuilder.settingKind(.class)
+        } else {
+            try tokenizer.advance(overTokenType: .struct)
+            isExtension = false
+            
+            typeBuilder =
+                typeBuilder.settingKind(.struct)
         }
         
         let name = try typeName(from: tokenizer)
@@ -174,6 +184,7 @@ public final class SwiftClassInterfaceParser {
     ///
     /// type-member-declaration
     ///     : var-declaration
+    ///     | let-declaration
     ///     | function-declaration
     ///     | initializer-declaration
     ///     ;
@@ -190,6 +201,17 @@ public final class SwiftClassInterfaceParser {
             (try? parseDeclarationModifiers(from: tokenizer)) ?? []
         
         switch tokenizer.tokenType() {
+        case .let:
+            let letDecl = try parseLetDeclaration(from: tokenizer)
+            
+            typeBuilder =
+                typeBuilder.field(
+                    named: letDecl.identifier,
+                    type: letDecl.type,
+                    isConstant: true,
+                    isStatic: modifiers.contains(.static),
+                    attributes: knownAttributes)
+            
         case .var:
             let varDecl = try parseVarDeclaration(from: tokenizer)
             
@@ -198,7 +220,7 @@ public final class SwiftClassInterfaceParser {
                 switch modifier {
                 case .ownership(let own):
                     ownership = own
-                    break
+                    
                 default:
                     break
                 }
@@ -214,7 +236,8 @@ public final class SwiftClassInterfaceParser {
                     attributes: knownAttributes)
             
         case .func:
-            let funcDecl = try parseFunctionDeclaration(from: tokenizer)
+            var funcDecl = try parseFunctionDeclaration(from: tokenizer)
+            funcDecl.signature.isStatic = modifiers.contains(.static)
             
             typeBuilder =
                 typeBuilder.method(withSignature: funcDecl.signature,
@@ -278,7 +301,27 @@ public final class SwiftClassInterfaceParser {
             isConstant = false
         }
         
-        return VarDeclaration(identifier: ident, type: type, isConstant: isConstant)
+        return VarDeclaration(identifier: ident,
+                              type: type,
+                              isProperty: true,
+                              isConstant: isConstant)
+    }
+    
+    /// ```
+    /// let-declaration
+    ///     : 'let' identifier ':' swift-type
+    /// ```
+    private static func parseLetDeclaration(from tokenizer: Tokenizer) throws -> VarDeclaration {
+        try tokenizer.advance(overTokenType: .let)
+        
+        let ident = try identifier(from: tokenizer)
+        try tokenizer.advance(overTokenType: .colon)
+        let type = try SwiftTypeParser.parse(from: tokenizer.lexer)
+        
+        return VarDeclaration(identifier: ident,
+                              type: type,
+                              isProperty: false,
+                              isConstant: true)
     }
     
     /// ```
@@ -432,16 +475,45 @@ public final class SwiftClassInterfaceParser {
         return Attribute.generic(name: name, content: content)
     }
     
+    /// Parses a Swift attribute in the form of a SwiftRewriterAttribute from a
+    /// given input lexer.
+    ///
+    /// Formal grammar:
+    ///
     /// ```
     /// swift-rewriter-attribute
     ///     : '@' '_swiftrewriter' '(' swift-rewriter-attribute-clause ')'
     ///     ;
     ///
     /// swift-rewriter-attribute-clause
-    ///     : 'mapFrom' ':' function-signature
+    ///     : 'mapFrom' ':' function-identifier
+    ///     | 'mapFrom' ':' function-signature
+    ///     | 'mapToBinary' ':' swift-operator
     ///     | 'renameFrom' ':' identifier
     ///     ;
+    ///
+    /// function-identifier
+    ///     : identifier '(' parameter-identifiers? ')'
+    ///     ;
+    ///
+    /// parameter-identifiers
+    ///     : parameter-identifier+
+    ///     ;
+    ///
+    /// parameter-identifier
+    ///     : identifier ':'
+    ///     | '_' ':'
+    ///     ;
     /// ```
+    ///
+    /// Support for parsing Swift function signatures and identifiers is borrowed
+    /// from `FunctionSignatureParser`.
+    public static func parseSwiftRewriterAttribute(from lexer: Lexer) throws -> SwiftRewriterAttribute {
+        let tokenizer = Tokenizer(lexer: lexer)
+        
+        return try parseSwiftRewriterAttribute(from: tokenizer)
+    }
+    
     private static func parseSwiftRewriterAttribute(from tokenizer: Tokenizer) throws -> SwiftRewriterAttribute {
         
         try tokenizer.advance(overTokenType: .at)
@@ -461,10 +533,31 @@ public final class SwiftClassInterfaceParser {
             tokenizer.skipToken()
             try tokenizer.advance(overTokenType: .colon)
             
-            let signature =
-                try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
+            // Try an identifier first
+            let backtracker = tokenizer.backtracker()
+            do {
+                let identifier =
+                    try FunctionSignatureParser.parseIdentifier(from: tokenizer.lexer)
+                
+                try tokenizer.advance(overTokenType: .closeParens)
+                
+                return SwiftRewriterAttribute(content: .mapFromIdentifier(identifier))
+            } catch {
+                backtracker.backtrack()
+                
+                let signature =
+                    try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
+                
+                content = .mapFrom(signature)
+            }
             
-            content = .mapFrom(signature)
+        } else if tokenizer.token().value == "mapToBinary" {
+            tokenizer.skipToken()
+            try tokenizer.advance(overTokenType: .colon)
+            
+            let op = try parseSwiftOperator(from: tokenizer)
+            
+            content = .mapToBinaryOperator(op)
             
         } else if tokenizer.token().value == "renameFrom" {
             tokenizer.skipToken()
@@ -476,13 +569,64 @@ public final class SwiftClassInterfaceParser {
             
         } else {
             throw tokenizer.lexer.syntaxError(
-                "Expected 'mapFrom' or 'renameFrom' in SwiftRewriter attribute"
+                "Expected 'mapFrom', 'mapToBinary', or 'renameFrom' in SwiftRewriter attribute"
             )
         }
         
         try tokenizer.advance(overTokenType: .closeParens)
         
         return SwiftRewriterAttribute(content: content)
+    }
+    
+    /// ```
+    /// swift-operator
+    ///     :
+    ///     | "+"
+    ///     | "-"
+    ///     | "*"
+    ///     | "/"
+    ///     | "%"
+    ///     | "+="
+    ///     | "-="
+    ///     | "*="
+    ///     | "/="
+    ///     | "!"
+    ///     | "&&"
+    ///     | "||"
+    ///     | "&"
+    ///     | "|"
+    ///     | "^"
+    ///     | "~"
+    ///     | "<<"
+    ///     | ">>"
+    ///     | "&="
+    ///     | "|="
+    ///     | "^="
+    ///     | '~='
+    ///     | '<<='
+    ///     | '>>='
+    ///     | '<'
+    ///     | '<='
+    ///     | '>'
+    ///     | '>='
+    ///     | '='
+    ///     | '=='
+    ///     | '!='
+    ///     | '??'
+    ///     | '..<'
+    ///     | '...'
+    ///     ;
+    /// ```
+    private static func parseSwiftOperator(from tokenizer: Tokenizer) throws -> SwiftOperator {
+        
+        let op = try tokenizer.advance(matching: { $0.tokenType.isOperator })
+        
+        switch op.tokenType {
+        case .operator(let o):
+            return o
+        default:
+            throw tokenizer.lexer.syntaxError("Expected Swift operator")
+        }
     }
     
     /// ```
@@ -601,6 +745,7 @@ public final class SwiftClassInterfaceParser {
     private struct VarDeclaration {
         var identifier: String
         var type: SwiftType
+        var isProperty: Bool
         var isConstant: Bool
     }
     
@@ -628,23 +773,33 @@ public final class SwiftClassInterfaceParser {
         }
     }
     
-    private struct SwiftRewriterAttribute {
-        static let name = "_swiftrewriter"
+    public struct SwiftRewriterAttribute {
+        public static let name = "_swiftrewriter"
         
-        var content: Content
+        public var content: Content
         
-        enum Content {
+        public enum Content {
             case mapFrom(FunctionSignature)
+            case mapFromIdentifier(FunctionIdentifier)
+            case mapToBinaryOperator(SwiftOperator)
             case renameFrom(String)
             
-            var asString: String {
+            public var asString: String {
                 switch self {
                 case .mapFrom(let signature):
                     return
                         "mapFrom: " +
                             TypeFormatter.asString(signature: signature,
                                                    includeName: true,
-                                                   includeFuncKeyword: false)
+                                                   includeFuncKeyword: false,
+                                                   includeStatic: false)
+                    
+                case .mapFromIdentifier(let identifier):
+                    return
+                        "mapFrom: " + identifier.description
+                    
+                case .mapToBinaryOperator(let op):
+                    return "mapToBinary: \(op)"
                     
                 case .renameFrom(let name):
                     return "renameFrom: \(name)"
@@ -668,6 +823,10 @@ public class IncompleteKnownType {
     
     fileprivate init(typeBuilder: KnownTypeBuilder) {
         self.knownTypeBuilder = typeBuilder
+    }
+    
+    public func modifying(with closure: (KnownTypeBuilder) -> KnownTypeBuilder) {
+        knownTypeBuilder = closure(knownTypeBuilder)
     }
     
     public func complete(typeSystem: TypeSystem) -> KnownType {
@@ -699,27 +858,27 @@ public class IncompleteKnownType {
 
 extension SwiftClassInterfaceParser {
     
-    private enum Token: String, TokenProtocol {
+    fileprivate enum Token: TokenProtocol, Hashable {
         private static let identifierLexer = (.letter | "_") + (.letter | "_" | .digit)*
         private static let integerLexer = .digit+
         
-        case openParens = "("
-        case closeParens = ")"
-        case openBrace = "{"
-        case closeBrace = "}"
-        case openSquare = "["
-        case closeSquare = "]"
-        case openAngle = "<"
-        case closeAngle = ">"
-        case colon = ":"
-        case comma = ","
-        case at = "@"
-        case underscore = "_"
-        case equals = "="
+        case openParens
+        case closeParens
+        case openBrace
+        case closeBrace
+        case openSquare
+        case closeSquare
+        case colon
+        case comma
+        case at
+        case qmark
+        case period
+        case underscore
         case identifier
         case functionArrow
         case integerLiteral
         case stringLiteral
+        case `operator`(SwiftOperator)
         case `var`
         case `let`
         case `get`
@@ -731,6 +890,7 @@ extension SwiftClassInterfaceParser {
         case `inout`
         case `final`
         case `class`
+        case `struct`
         case `throws`
         case `static`
         case `public`
@@ -760,8 +920,7 @@ extension SwiftClassInterfaceParser {
         func length(in lexer: Lexer) -> Int {
             switch self {
             case .openParens, .closeParens, .openBrace, .closeBrace, .openSquare,
-                 .closeSquare, .openAngle, .closeAngle, .colon, .comma,
-                 .underscore, .at, .equals:
+                 .closeSquare, .colon, .comma, .underscore, .at, .period, .qmark:
                 return 1
             case .functionArrow:
                 return 2
@@ -771,7 +930,7 @@ extension SwiftClassInterfaceParser {
                 return 4
             case .inout, .class, .final:
                 return 5
-            case .throws, .public, .static:
+            case .throws, .public, .static, .struct:
                 return 6
             case .dynamic, .unowned:
                 return 7
@@ -798,13 +957,106 @@ extension SwiftClassInterfaceParser {
                 
                 return lexer.inputString.distance(from: l.range().lowerBound,
                                                   to: l.range().upperBound)
+            case .operator(let op):
+                return op.rawValue.count
             case .eof:
                 return 0
             }
         }
         
         var tokenString: String {
-            return rawValue
+            switch self {
+            case .openParens:
+                return "("
+            case .closeParens:
+                return ")"
+            case .openBrace:
+                return "{"
+            case .closeBrace:
+                return "}"
+            case .openSquare:
+                return "["
+            case .closeSquare:
+                return "]"
+            case .colon:
+                return ":"
+            case .comma:
+                return ","
+            case .at:
+                return "@"
+            case .period:
+                return "."
+            case .underscore:
+                return "_"
+            case .qmark:
+                return "?"
+            case .identifier:
+                return "identifier"
+            case .functionArrow:
+                return "->"
+            case .integerLiteral:
+                return "integer-literal"
+            case .stringLiteral:
+                return "string-literal"
+            case .operator(let op):
+                return op.rawValue
+            case .var:
+                return "var"
+            case .let:
+                return "let"
+            case .get:
+                return "get"
+            case .set:
+                return "set"
+            case .func:
+                return "func"
+            case .weak:
+                return "weak"
+            case .open:
+                return "open"
+            case ._init:
+                return "init"
+            case .inout:
+                return "inout"
+            case .final:
+                return "final"
+            case .class:
+                return "class"
+            case .struct:
+                return "struct"
+            case .throws:
+                return "throws"
+            case .static:
+                return "static"
+            case .public:
+                return "public"
+            case .dynamic:
+                return "dynamic"
+            case .unowned:
+                return "unowned"
+            case .unowned_safe:
+                return "unowned_safe"
+            case .unowned_unsafe:
+                return "unowned_unsafe"
+            case .optional:
+                return "optional"
+            case .mutating:
+                return "mutating"
+            case .rethrows:
+                return "rethrows"
+            case .required:
+                return "required"
+            case .override:
+                return "override"
+            case .extension:
+                return "extension"
+            case .convenience:
+                return "convenience"
+            case .fileprivate:
+                return "fileprivate"
+            case .eof:
+                return ""
+            }
         }
         
         static func tokenType(at lexer: Lexer) -> SwiftClassInterfaceParser.Token? {
@@ -831,6 +1083,110 @@ extension SwiftClassInterfaceParser {
                 return .stringLiteral
             }
             
+            // Operators
+            if lexer.checkNext(matches: "+=") {
+                return .operator(.addAssign)
+            }
+            if lexer.checkNext(matches: "+") {
+                return .operator(.add)
+            }
+            if lexer.checkNext(matches: "-=") {
+                return .operator(.subtractAssign)
+            }
+            if lexer.checkNext(matches: "-") {
+                return .operator(.subtract)
+            }
+            if lexer.checkNext(matches: "*=") {
+                return .operator(.multiplyAssign)
+            }
+            if lexer.checkNext(matches: "*") {
+                return .operator(.multiply)
+            }
+            if lexer.checkNext(matches: "/=") {
+                return .operator(.divideAssign)
+            }
+            if lexer.checkNext(matches: "/") {
+                return .operator(.divide)
+            }
+            if lexer.checkNext(matches: "==") {
+                return .operator(.equals)
+            }
+            if lexer.checkNext(matches: "=") {
+                return .operator(.assign)
+            }
+            if lexer.checkNext(matches: "!=") {
+                return .operator(.unequals)
+            }
+            if lexer.checkNext(matches: "!") {
+                return .operator(.negate)
+            }
+            if lexer.checkNext(matches: ">=") {
+                return .operator(.greaterThanOrEqual)
+            }
+            if lexer.checkNext(matches: ">>=") {
+                return .operator(.bitwiseShiftRightAssign)
+            }
+            if lexer.checkNext(matches: ">>") {
+                return .operator(.bitwiseShiftRight)
+            }
+            if lexer.checkNext(matches: ">") {
+                return .operator(.greaterThan)
+            }
+            if lexer.checkNext(matches: "<<=") {
+                return .operator(.bitwiseShiftLeftAssign)
+            }
+            if lexer.checkNext(matches: "<<") {
+                return .operator(.lessThanOrEqual)
+            }
+            if lexer.checkNext(matches: "<<") {
+                return .operator(.bitwiseShiftLeft)
+            }
+            if lexer.checkNext(matches: "<") {
+                return .operator(.greaterThan)
+            }
+            if lexer.checkNext(matches: "%") {
+                return .operator(.mod)
+            }
+            if lexer.checkNext(matches: "??") {
+                return .operator(.nullCoalesce)
+            }
+            if lexer.checkNext(matches: "...") {
+                return .operator(.closedRange)
+            }
+            if lexer.checkNext(matches: "..<") {
+                return .operator(.openRange)
+            }
+            if lexer.checkNext(matches: "&&") {
+                return .operator(.and)
+            }
+            if lexer.checkNext(matches: "||") {
+                return .operator(.or)
+            }
+            if lexer.checkNext(matches: "&=") {
+                return .operator(.bitwiseAndAssign)
+            }
+            if lexer.checkNext(matches: "&") {
+                return .operator(.bitwiseAnd)
+            }
+            if lexer.checkNext(matches: "|=") {
+                return .operator(.bitwiseOrAssign)
+            }
+            if lexer.checkNext(matches: "|") {
+                return .operator(.bitwiseOr)
+            }
+            if lexer.checkNext(matches: "^=") {
+                return .operator(.bitwiseXorAssign)
+            }
+            if lexer.checkNext(matches: "^") {
+                return .operator(.bitwiseXor)
+            }
+            if lexer.checkNext(matches: "~=") {
+                return .operator(.bitwiseNotAssign)
+            }
+            if lexer.checkNext(matches: "~") {
+                return .operator(.bitwiseNot)
+            }
+            
             guard let next = try? lexer.peek() else {
                 return nil
             }
@@ -839,6 +1195,7 @@ extension SwiftClassInterfaceParser {
                 return .integerLiteral
             }
             
+            // Identifiers and keywords
             if Lexer.isLetter(next) {
                 guard let ident = try? lexer.withTemporaryIndex(changes: {
                     try identifierLexer.consume(from: lexer)
@@ -869,6 +1226,8 @@ extension SwiftClassInterfaceParser {
                     return .inout
                 case "final":
                     return .final
+                case "struct":
+                    return .struct
                 case "throws":
                     return .throws
                 case "public":
@@ -909,14 +1268,49 @@ extension SwiftClassInterfaceParser {
                 }
             }
             
-            if let token = Token(rawValue: String(next)) {
-                return token
+            // Special characters
+            switch next {
+            case "(":
+                return .openParens
+            case ")":
+                return .closeParens
+            case "{":
+                return .openBrace
+            case "}":
+                return .closeBrace
+            case "[":
+                return .openSquare
+            case "]":
+                return .closeSquare
+            case ":":
+                return .colon
+            case ",":
+                return .comma
+            case "@":
+                return .at
+            case ".":
+                return .period
+            case "_":
+                return .underscore
+            case "?":
+                return .qmark
+            default:
+                return nil
             }
-            
-            return nil
         }
         
         static var eofToken: Token = .eof
     }
+}
+
+extension SwiftClassInterfaceParser.Token {
     
+    var isOperator: Bool {
+        switch self {
+        case .operator:
+            return true
+        default:
+            return false
+        }
+    }
 }

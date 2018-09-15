@@ -123,3 +123,16 @@ public extension Sequence where Element == ParameterSignature {
         return map { $0.label }
     }
 }
+
+public extension FunctionSignature {
+    public init(isStatic: Bool = false, signatureString: String) throws {
+        self = try FunctionSignatureParser.parseSignature(from: signatureString)
+        self.isStatic = isStatic
+    }
+}
+
+public extension Array where Element == ParameterSignature {
+    public init(parsingParameters parametersString: String) throws {
+        self = try FunctionSignatureParser.parseParameters(from: parametersString)
+    }
+}

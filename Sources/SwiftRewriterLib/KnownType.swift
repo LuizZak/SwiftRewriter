@@ -264,6 +264,15 @@ public struct KnownAttribute: Codable {
     public var name: String
     public var parameters: String?
     
+    /// Returns the formatted attribute string as `@<name>(<parameters>)`
+    public var attributeString: String {
+        if let parameters = parameters {
+            return "@\(name)(\(parameters))"
+        }
+        
+        return "@\(name)()"
+    }
+    
     public init(name: String, parameters: String?) {
         self.name = name
         self.parameters = parameters
