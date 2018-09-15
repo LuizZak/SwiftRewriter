@@ -792,6 +792,10 @@ public class IncompleteKnownType {
         self.knownTypeBuilder = typeBuilder
     }
     
+    public func modifying(with closure: (KnownTypeBuilder) -> KnownTypeBuilder) {
+        knownTypeBuilder = closure(knownTypeBuilder)
+    }
+    
     public func complete(typeSystem: TypeSystem) -> KnownType {
         
         // We add all supertypes we find as protocol conformances since we can't

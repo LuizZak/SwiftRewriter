@@ -18,7 +18,9 @@ extension IncompleteKnownType {
             nonCanonicalNames = try aliases(in: type)
             
             transformations.append(contentsOf:
-                try type.knownConstructors.flatMap(initTransformations)
+                try type.knownConstructors.flatMap {
+                    try initTransformations($0, type: type)
+                }
             )
             transformations.append(contentsOf:
                 try type.knownProperties.flatMap(propertyTransformations)
@@ -67,8 +69,30 @@ private func aliases(in type: KnownType) throws -> [String] {
     return aliases
 }
 
-private func initTransformations(_ ctor: KnownConstructor) throws -> [PostfixTransformation] {
+private func initTransformations(_ ctor: KnownConstructor, type: KnownType) throws -> [PostfixTransformation] {
     var transforms: [PostfixTransformation] = []
+    
+    func _map(_ identifier: FunctionIdentifier) {
+        let transformer = ValueTransformer<PostfixExpression, Expression> { $0 }
+            .validate { exp in
+                exp.asPostfix?
+                    .functionCall?
+                    .identifierWith(methodName: identifier.name)
+                        == identifier
+            }
+            .decompose()
+            .transformIndex(index: 0, transformer: ValueTransformer()
+                .removingMemberAccess()
+                .validate(matcher: ValueMatcher()
+                    .isTyped(.metatype(for: .typeName(type.typeName)),
+                             ignoringNullability: true)
+                )
+            )
+            .asFunctionCall(labels: ctor.parameters.argumentLabels())
+            .typed(.typeName(type.typeName))
+        
+        transforms.append(.valueTransformer(transformer.anyExpression()))
+    }
     
     for attribute in ctor.knownAttributes {
         guard attribute.name == SwiftRewriterAttribute.name else {
@@ -79,14 +103,22 @@ private func initTransformations(_ ctor: KnownConstructor) throws -> [PostfixTra
         
         switch attr.content {
         case .mapFrom(let signature):
-            transforms.append(
-                .initializer(old: signature.parameters.argumentLabels(),
-                             new: ctor.parameters.argumentLabels()))
+            if signature.name == "init" {
+                transforms.append(
+                    .initializer(old: signature.parameters.argumentLabels(),
+                                 new: ctor.parameters.argumentLabels()))
+            } else {
+                _map(signature.asIdentifier)
+            }
             
         case .mapFromIdentifier(let identifier):
-            transforms.append(
-                .initializer(old: identifier.parameterNames,
-                             new: ctor.parameters.argumentLabels()))
+            if identifier.name == "init" {
+                transforms.append(
+                    .initializer(old: identifier.parameterNames,
+                                 new: ctor.parameters.argumentLabels()))
+            } else {
+                _map(identifier)
+            }
             
         case .renameFrom, .mapToBinaryOperator:
             // TODO: Throw diagnostic error for unsupported mappings
