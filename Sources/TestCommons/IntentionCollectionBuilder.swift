@@ -147,9 +147,7 @@ public class FileIntentionBuilder {
     
     @discardableResult
     public func createTypealias(withName name: String, type: ObjcType) -> FileIntentionBuilder {
-        let swiftType =
-            DefaultTypeMapper(typeSystem: DefaultTypeSystem())
-                .swiftType(forObjcType: type, context: .empty)
+        let swiftType = DefaultTypeMapper().swiftType(forObjcType: type, context: .empty)
         
         return self.createTypealias(withName: name, swiftType: swiftType, type: type)
     }

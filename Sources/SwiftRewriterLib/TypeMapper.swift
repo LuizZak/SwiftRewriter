@@ -223,7 +223,7 @@ public struct TypeMappingContext {
 public class DefaultTypeMapper: TypeMapper {
     let typeSystem: TypeSystem
     
-    public init(typeSystem: TypeSystem = DefaultTypeSystem()) {
+    public init(typeSystem: TypeSystem = DefaultTypeSystem.defaultTypeSystem) {
         self.typeSystem = typeSystem
     }
     
