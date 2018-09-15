@@ -42,17 +42,18 @@ class UIViewCompoundTypeTests: XCTestCase {
                 var insetsLayoutMarginsFromSafeArea: Bool
                 var intrinsicContentSize: CGSize { get }
                 var isExclusiveTouch: Bool
-                // Convert from var focused
+                
+                @_swiftrewriter(renameFrom: focused)
                 var isFocused: Bool { get }
                 
-                // Convert from var hidden
+                @_swiftrewriter(renameFrom: hidden)
                 var isHidden: Bool
                 var isMultipleTouchEnabled: Bool
                 
-                // Convert from var opaque
+                @_swiftrewriter(renameFrom: opaque)
                 var isOpaque: Bool
                 
-                // Convert from var userInteractionEnabled
+                @_swiftrewriter(renameFrom: userInteractionEnabled)
                 var isUserInteractionEnabled: Bool
                 var lastBaselineAnchor: NSLayoutYAxisAnchor { get }
                 var layer: CALayer { get }

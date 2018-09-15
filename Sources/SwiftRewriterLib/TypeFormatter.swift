@@ -8,43 +8,47 @@ public enum TypeFormatter {
         
         let o = StringRewriterOutput(settings: .defaults)
         
-        var _onFirstAnnotation = true
+        var _onFirstDeclaration = true
         
-        let outputAttributesAndAnnotations: ([KnownAttribute], [String], Bool) -> Void
+        let outputAttributesAndAnnotations: ([KnownAttribute], [String], Bool) -> Bool
         outputAttributesAndAnnotations = { attr, annotations, sameLine in
             guard !attr.isEmpty || !annotations.isEmpty else {
-                return
+                return false
             }
             
-            if !annotations.isEmpty || (!attr.isEmpty && !sameLine) {
-                if !_onFirstAnnotation {
+            let attrInLineLimit = 20
+            let attrInLine = attr.map(stringify).joined(separator: " ")
+            
+            if !annotations.isEmpty || (!attr.isEmpty && (!sameLine || attrInLine.count >= attrInLineLimit)) {
+                if !_onFirstDeclaration {
                     o.output(line: "")
                 }
-                
-                _onFirstAnnotation = false
             }
             
             for annotation in annotations {
                 o.output(line: "// \(annotation)", style: .comment)
             }
             
-            if !attr.isEmpty {
+            printAttributes: if !attr.isEmpty {
                 if sameLine {
-                    o.outputIdentation()
-                    
-                    let line = attr.map(stringify).joined(separator: " ")
-                    o.outputInlineWithSpace(line, style: .keyword)
-                } else {
-                    
-                    for attr in attr {
-                        o.output(line: stringify(attr), style: .attribute)
+                    if attrInLine.count < attrInLineLimit {
+                        o.outputIdentation()
+                        o.outputInlineWithSpace(attrInLine, style: .keyword)
+                        
+                        return true
                     }
                 }
+                
+                for attr in attr {
+                    o.output(line: stringify(attr), style: .attribute)
+                }
             }
+            
+            return false
         }
         
-        outputAttributesAndAnnotations(type.knownAttributes, [], false)
-        _onFirstAnnotation = true
+        _=outputAttributesAndAnnotations(type.knownAttributes, [], false)
+        _onFirstDeclaration = true
         
         if type.isExtension {
             o.outputInline("extension \(type.typeName)")
@@ -74,26 +78,28 @@ public enum TypeFormatter {
         // Type body
         o.idented {
             let outputField: (KnownProperty) -> Void = { field in
-                outputAttributesAndAnnotations(field.knownAttributes,
-                                               field.annotations,
-                                               true)
+                let didPrintSameLine = outputAttributesAndAnnotations(field.knownAttributes,
+                                                                      field.annotations,
+                                                                      true)
                 
                 let line = asString(field: field,
                                     ofType: type,
                                     withTypeName: false,
                                     includeVarKeyword: true)
                 
-                if field.knownAttributes.isEmpty {
+                if !didPrintSameLine {
                     o.outputIdentation()
                 }
                 
                 o.outputInline(line)
                 o.outputLineFeed()
+                
+                _onFirstDeclaration = false
             }
             let outputProperty: (KnownProperty) -> Void = { property in
-                outputAttributesAndAnnotations(property.knownAttributes,
-                                               property.annotations,
-                                               true)
+                let didPrintSameLine = outputAttributesAndAnnotations(property.knownAttributes,
+                                                                      property.annotations,
+                                                                      true)
                 
                 let line: String
                 
@@ -107,12 +113,14 @@ public enum TypeFormatter {
                                     includeAccessors: property.accessor != .getterAndSetter)
                 }
                 
-                if property.knownAttributes.isEmpty {
+                if !didPrintSameLine {
                     o.outputIdentation()
                 }
                 
                 o.outputInline(line)
                 o.outputLineFeed()
+                
+                _onFirstDeclaration = false
             }
             
             let staticFields = type.knownFields.filter { $0.isStatic }
@@ -133,21 +141,25 @@ public enum TypeFormatter {
             }
             
             for ctor in type.knownConstructors {
-                outputAttributesAndAnnotations(ctor.knownAttributes,
-                                               ctor.annotations,
-                                               false)
+                _=outputAttributesAndAnnotations(ctor.knownAttributes,
+                                                 ctor.annotations,
+                                                 false)
                 
                 o.output(line: "init" + asString(parameters: ctor.parameters))
+                
+                _onFirstDeclaration = false
             }
             for method in type.knownMethods {
-                outputAttributesAndAnnotations(method.knownAttributes,
-                                               method.annotations,
-                                               false)
+                _=outputAttributesAndAnnotations(method.knownAttributes,
+                                                 method.annotations,
+                                                 false)
                 
                 o.output(line:
                     asString(signature: method.signature, includeName: true,
                              includeFuncKeyword: true)
                 )
+                
+                _onFirstDeclaration = false
             }
         }
         

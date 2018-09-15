@@ -25,10 +25,11 @@ class FoundationCompoundTypesTests: XCTestCase {
         assertSignature(type: type, matches: """
             class NSArray: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
                 var count: Int { get }
-                // Convert from func firstObject()
+                
+                @_swiftrewriter(mapFrom: firstObject())
                 var firstObject: Any? { get }
                 
-                // Convert from func lastObject()
+                @_swiftrewriter(mapFrom: lastObject())
                 var lastObject: Any? { get }
                 
                 
@@ -63,7 +64,8 @@ class FoundationCompoundTypesTests: XCTestCase {
         
         assertSignature(type: type, matches: """
             class DateFormatter: Formatter {
-                // Convert from func dateFormat() / func setDateFormat(String!)
+                @_swiftrewriter(mapFrom: dateFormat())
+                @_swiftrewriter(mapFrom: setDateFormat(_:))
                 var dateFormat: String!
                 
                 
@@ -82,6 +84,7 @@ class FoundationCompoundTypesTests: XCTestCase {
         assertSignature(type: type, matches: """
             struct Date: Hashable, Equatable {
                 var timeIntervalSince1970: TimeInterval
+                
                 
                 // Convert from 'static date() -> Date'
                 init()

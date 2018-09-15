@@ -117,7 +117,7 @@ extension KnownTypeBuilder {
             )'
             """
         
-        return self.annotationgLatestConstructor(annotation: annotation)
+        return self.annotatingLatestConstructor(annotation: annotation)
     }
     
     func _createConstructorMapping(fromParameters parameters: [ParameterSignature],
@@ -133,7 +133,7 @@ extension KnownTypeBuilder {
         
         let annotation = "Convert from 'init\(TypeFormatter.asString(parameters: parameters))'"
         
-        return self.annotationgLatestConstructor(annotation: annotation)
+        return self.annotatingLatestConstructor(annotation: annotation)
     }
     
     func _createPropertyRename(from old: String, in transformations: TransformationsSink) -> KnownTypeBuilder {
@@ -144,9 +144,14 @@ extension KnownTypeBuilder {
         
         transformations.addPropertyRenaming(old: old, new: property.name)
         
-        let annotation = "Convert from \(property.isStatic ? "static " : "")var \(old)"
+        let attributeParams =
+            SwiftClassInterfaceParser.SwiftRewriterAttribute.Content.renameFrom(old).asString
         
-        return self.annotationgLatestProperty(annotation: annotation)
+        let attribute =
+            KnownAttribute(name: SwiftClassInterfaceParser.SwiftRewriterAttribute.name,
+                           parameters: attributeParams)
+        
+        return self.attributingLatestProperty(attribute: attribute)
     }
     
     func _createPropertyFromMethods(getterName: String,
@@ -165,22 +170,27 @@ extension KnownTypeBuilder {
                                     propertyType: property.storage.type,
                                     isStatic: property.isStatic)
         
-        var annotation = "Convert from "
+        var attributes: [KnownAttribute] = []
         
-        if property.isStatic {
-            annotation += "static "
-        }
+        let attributeParams: SwiftClassInterfaceParser.SwiftRewriterAttribute.Content
+            = .mapFromIdentifier(FunctionIdentifier(name: getterName, parameterNames: []))
         
-        annotation += "func \(getterName)()"
+        let attribute =
+            KnownAttribute(name: SwiftClassInterfaceParser.SwiftRewriterAttribute.name,
+                           parameters: attributeParams.asString)
+        attributes.append(attribute)
         
         if let setterName = setterName {
-            annotation += " / "
-            if property.isStatic {
-                annotation += "static "
-            }
-            annotation += "func \(setterName)(\(property.storage.type))"
+            let attributeParams: SwiftClassInterfaceParser.SwiftRewriterAttribute.Content
+                = .mapFromIdentifier(FunctionIdentifier(name: setterName, parameterNames: [nil]))
+            
+            let attribute =
+                KnownAttribute(name: SwiftClassInterfaceParser.SwiftRewriterAttribute.name,
+                               parameters: attributeParams.asString)
+            
+            attributes.append(attribute)
         }
         
-        return self.annotationgLatestProperty(annotation: annotation)
+        return attributes.reduce(self) { $0.attributingLatestProperty(attribute: $1) }
     }
 }

@@ -192,6 +192,37 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
     }
     
+    func testLongAttributeProperty() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .property(named: "prop1", type: "A",
+                      attributes: [KnownAttribute(name: "attr", parameters: nil)])
+            .property(named: "prop2", type: "A",
+                      attributes: [KnownAttribute(name: "attributeWithVeryLongName",
+                                                  parameters: nil)])
+            .property(named: "prop3", type: "A",
+                      attributes: [KnownAttribute(name: "attr1", parameters: nil),
+                                   KnownAttribute(name: "attr2", parameters: nil),
+                                   KnownAttribute(name: "attr3", parameters: nil)])
+            .build()
+        
+        let result = TypeFormatter.asString(knownType: type)
+        let expected = """
+            class A {
+                @attr var prop1: A
+                
+                @attributeWithVeryLongName
+                var prop2: A
+                
+                @attr1
+                @attr2
+                @attr3
+                var prop3: A
+            }
+            """
+        
+        XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
+    }
+    
     func testAsStringKnownTypeExtension() {
         let type = KnownTypeBuilder(typeName: "A", kind: .class)
             .settingIsExtension(true)
