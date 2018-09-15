@@ -1203,11 +1203,11 @@ class ExpressionTypeResolverTests: XCTestCase {
                         sut: ExpressionTypeResolver())
             .definingIntrinsic(
                 CodeDefinition(functionSignature:
-                    FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
+                    try! FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
             )
             .definingIntrinsic(
                 CodeDefinition(functionSignature:
-                    FunctionSignature(signatureString: "f(_ d: Double) -> String"))
+                    try! FunctionSignature(signatureString: "f(_ d: Double) -> String"))
             )
             .resolve()
             .thenAssertExpression(resolvedAs: .bool)
@@ -1216,11 +1216,11 @@ class ExpressionTypeResolverTests: XCTestCase {
                         sut: ExpressionTypeResolver())
             .definingIntrinsic(
                 CodeDefinition(functionSignature:
-                    FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
+                    try! FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
             )
             .definingIntrinsic(
                 CodeDefinition(functionSignature:
-                    FunctionSignature(signatureString: "f(_ d: Double) -> String"))
+                    try! FunctionSignature(signatureString: "f(_ d: Double) -> String"))
             )
             .resolve()
             .thenAssertExpression(resolvedAs: .string)
