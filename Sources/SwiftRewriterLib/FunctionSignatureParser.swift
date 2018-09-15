@@ -267,7 +267,7 @@ public final class FunctionSignatureParser {
             throw tokenizer.lexer
                 .unexpectedCharacterError(
                     char: try tokenizer.lexer.peek(),
-                    "Expected ')'"
+                    "Expected token ')' but found '\(tokenizer.tokenType().tokenString)'"
                 )
         }
         
