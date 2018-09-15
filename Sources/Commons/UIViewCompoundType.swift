@@ -903,10 +903,18 @@ public enum UIViewCompoundType {
                 var insetsLayoutMarginsFromSafeArea: Bool
                 var intrinsicContentSize: CGSize { get }
                 var isExclusiveTouch: Bool
+                
+                @_swiftrewriter(renameFrom: focused)
                 var isFocused: Bool { get }
+                
+                @_swiftrewriter(renameFrom: hidden)
                 var isHidden: Bool
                 var isMultipleTouchEnabled: Bool
+                
+                @_swiftrewriter(renameFrom: opaque)
                 var isOpaque: Bool
+                
+                @_swiftrewriter(renameFrom: userInteractionEnabled)
                 var isUserInteractionEnabled: Bool
                 var lastBaselineAnchor: NSLayoutYAxisAnchor { get }
                 var layer: CALayer { get }
@@ -947,7 +955,6 @@ public enum UIViewCompoundType {
                 
                 @_swiftrewriter(mapFrom: animateWithDuration(_:delay:options:animations:completion:))
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
-                
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, usingSpringWithDamping dampingRatio: CGFloat, initialSpringVelocity velocity: CGFloat, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animateKeyframes(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewKeyframeAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func beginAnimations(_ animationID: String?, context: UnsafeMutableRawPointer?)
@@ -978,29 +985,29 @@ public enum UIViewCompoundType {
                 func addSubview(_ view: UIView)
                 func alignmentRect(forFrame frame: CGRect) -> CGRect
                 
-                // Convert from bringSubviewToFront(_ view: UIView)
+                @_swiftrewriter(mapFrom: bringSubviewToFront(_:))
                 func bringSubview(toFront view: UIView)
                 func constraintsAffectingLayout(for axis: UILayoutConstraintAxis) -> [NSLayoutConstraint]
                 func contentCompressionResistancePriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
                 func contentHuggingPriority(for axis: UILayoutConstraintAxis) -> UILayoutPriority
                 
-                // Convert from convertPoint(_ point: CGPoint, fromView view: UIView?) -> CGPoint
+                @_swiftrewriter(mapFrom: convertPoint(_:fromView:))
                 func convert(_ point: CGPoint, from view: UIView?) -> CGPoint
                 
-                // Convert from convertPoint(_ point: CGPoint, toView view: UIView?) -> CGPoint
+                @_swiftrewriter(mapFrom: convertPoint(_:toView:))
                 func convert(_ point: CGPoint, to view: UIView?) -> CGPoint
                 
-                // Convert from convertRect(_ rect: CGRect, fromView view: UIView?) -> CGRect
+                @_swiftrewriter(mapFrom: convertRect(_:fromView:))
                 func convert(_ rect: CGRect, from view: UIView?) -> CGRect
                 
-                // Convert from convertRect(_ rect: CGRect, toView view: UIView?) -> CGRect
+                @_swiftrewriter(mapFrom: convertRect(_:toView:))
                 func convert(_ rect: CGRect, to view: UIView?) -> CGRect
                 func decodeRestorableState(with coder: NSCoder)
                 func didAddSubview(_ subview: UIView)
                 func didMoveToSuperview()
                 func didMoveToWindow()
                 
-                // Convert from drawRect(_ rect: CGRect)
+                @_swiftrewriter(mapFrom: drawRect(_:))
                 func draw(_ rect: CGRect)
                 func drawHierarchy(in rect: CGRect, afterScreenUpdates afterUpdates: Bool) -> Bool
                 func encodeRestorableState(with coder: NSCoder)
@@ -1012,7 +1019,7 @@ public enum UIViewCompoundType {
                 func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView?
                 func insertSubview(_ view: UIView, aboveSubview siblingSubview: UIView)
                 
-                // Convert from insertSubview(_ view: UIView, atIndex index: Int)
+                @_swiftrewriter(mapFrom: insertSubview(_:atIndex:))
                 func insertSubview(_ view: UIView, at index: Int)
                 func insertSubview(_ view: UIView, belowSubview siblingSubview: UIView)
                 func invalidateIntrinsicContentSize()
@@ -1191,12 +1198,19 @@ extension FunctionSignature {
                                           isStatic: signature.isStatic,
                                           transformer: builder.build())
         
-        let attributeParam =
-            SwiftClassInterfaceParser.SwiftRewriterAttribute.Content.mapFrom(signature).asString
+        let attributeParam: SwiftClassInterfaceParser.SwiftRewriterAttribute.Content
+        
+        if signature.returnType == returnType
+            && signature.parameters.map({ $0.type }) == parameters.map({ $0.type }) {
+            
+            attributeParam = .mapFromIdentifier(signature.asIdentifier)
+        } else {
+            attributeParam = .mapFrom(signature)
+        }
         
         let attribute =
             KnownAttribute(name: SwiftClassInterfaceParser.SwiftRewriterAttribute.name,
-                           parameters: attributeParam)
+                           parameters: attributeParam.asString)
         
         annotations.addAttribute(attribute, newTag: AnyEquatable(self))
         
@@ -1221,12 +1235,19 @@ extension FunctionSignature {
                                           isStatic: signature.isStatic,
                                           transformer: builder.build())
         
-        let attributeParam =
-            SwiftClassInterfaceParser.SwiftRewriterAttribute.Content.mapFrom(signature).asString
+        let attributeParam: SwiftClassInterfaceParser.SwiftRewriterAttribute.Content
+        
+        if signature.returnType == returnType
+            && signature.parameters.map({ $0.type }) == parameters.map({ $0.type }) {
+            
+            attributeParam = .mapFromIdentifier(signature.asIdentifier)
+        } else {
+            attributeParam = .mapFrom(signature)
+        }
         
         let attribute =
             KnownAttribute(name: SwiftClassInterfaceParser.SwiftRewriterAttribute.name,
-                           parameters: attributeParam)
+                           parameters: attributeParam.asString)
         
         annotations.addAttribute(attribute, newTag: AnyEquatable(self))
         

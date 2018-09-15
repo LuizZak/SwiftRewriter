@@ -10,7 +10,7 @@ class FoundationCompoundTypesTests: XCTestCase {
         
         assertSignature(type: type, matches: """
             class Calendar: NSObject {
-                @_swiftrewriter(mapFrom: component(_ component: Calendar.Component, fromDate date: Date) -> Int)
+                @_swiftrewriter(mapFrom: component(_:fromDate:))
                 func component(_ component: Calendar.Component, from date: Date) -> Int
                 
                 @_swiftrewriter(mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?)
@@ -33,10 +33,10 @@ class FoundationCompoundTypesTests: XCTestCase {
                 var lastObject: Any? { get }
                 
                 
-                @_swiftrewriter(mapFrom: objectAtIndex(_ index: Int) -> Any)
+                @_swiftrewriter(mapFrom: objectAtIndex(_:))
                 func object(at index: Int) -> Any
                 
-                @_swiftrewriter(mapFrom: containsObject(_ anObject: Any) -> Bool)
+                @_swiftrewriter(mapFrom: containsObject(_:))
                 func contains(_ anObject: Any) -> Bool
             }
             """)
@@ -47,13 +47,13 @@ class FoundationCompoundTypesTests: XCTestCase {
         
         assertSignature(type: type, matches: """
             class NSMutableArray: NSArray {
-                @_swiftrewriter(mapFrom: addObject(_ anObject: Any))
+                @_swiftrewriter(mapFrom: addObject(_:))
                 func add(_ anObject: Any)
                 
-                @_swiftrewriter(mapFrom: addObjectsFromArray(_ otherArray: [Any]))
+                @_swiftrewriter(mapFrom: addObjectsFromArray(_:))
                 func addObjects(from otherArray: [Any])
                 
-                @_swiftrewriter(mapFrom: removeObject(_ anObject: Any))
+                @_swiftrewriter(mapFrom: removeObject(_:))
                 func remove(_ anObject: Any)
             }
             """)
@@ -69,10 +69,10 @@ class FoundationCompoundTypesTests: XCTestCase {
                 var dateFormat: String!
                 
                 
-                @_swiftrewriter(mapFrom: stringFromDate(_ date: Date) -> String)
+                @_swiftrewriter(mapFrom: stringFromDate(_:))
                 func string(from date: Date) -> String
                 
-                @_swiftrewriter(mapFrom: dateFromString(_ date: Date) -> Date?)
+                @_swiftrewriter(mapFrom: dateFromString(_:))
                 func date(from string: Date) -> Date?
             }
             """)
@@ -90,10 +90,10 @@ class FoundationCompoundTypesTests: XCTestCase {
                 init()
                 static func date() -> Date
                 
-                @_swiftrewriter(mapFrom: dateByAddingTimeInterval(_ timeInterval: TimeInterval) -> Date)
+                @_swiftrewriter(mapFrom: dateByAddingTimeInterval(_:))
                 func addingTimeInterval(_ timeInterval: TimeInterval) -> Date
                 
-                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_ date: Date) -> TimeInterval)
+                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
                 func timeIntervalSince(_ date: Date) -> TimeInterval
                 
                 @_swiftrewriter(mapToBinary: ==)
