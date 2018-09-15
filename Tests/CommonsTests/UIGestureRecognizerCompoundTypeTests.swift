@@ -8,6 +8,9 @@ class UIGestureRecognizerCompoundTypeTests: XCTestCase {
     func testUIGestureRecognizerDefinition() {
         let type = UIGestureRecognizerCompoundType.create()
         
+        XCTAssert(type.nonCanonicalNames.isEmpty)
+        XCTAssertEqual(type.transformations.count, 2)
+        
         assertSignature(type: type, matches: """
             class UIGestureRecognizer: NSObject {
                 @_swiftrewriter(mapFrom: locationInView(_:))

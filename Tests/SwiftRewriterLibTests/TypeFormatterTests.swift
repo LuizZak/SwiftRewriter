@@ -121,6 +121,7 @@ class TypeFormatterTests: XCTestCase {
         
         XCTAssertEqual("static abc(a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: true))
         XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: false))
+        XCTAssertEqual("(a b: Float, c: Int)", TypeFormatter.asString(signature: sig3, includeName: false, includeStatic: false))
         
         // Test default values for `includeName`
         XCTAssertEqual("() -> Int", TypeFormatter.asString(signature: sig1))

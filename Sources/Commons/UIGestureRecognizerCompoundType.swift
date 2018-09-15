@@ -9,43 +9,119 @@ public enum UIGestureRecognizerCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "UIGestureRecognizer", supertype: "NSObject")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "location",
-                    parameters: [
-                        ParameterSignature(label: "in", name: "view", type: .optional("UIView"))
-                    ],
-                    returnType: "CGPoint"
-                ).makeSignatureMapping(
-                    fromMethodNamed: "locationInView",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "view", type: .optional("UIView"))
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing UIGestureRecognizer class interface: \(error)"
             )
-            .method(withSignature:
-                FunctionSignature(signatureString:
-                    "require(toFail otherGestureRecognizer: UIGestureRecognizer)"
-                ).makeSignatureMapping(fromSignature:
-                    "requireGestureRecognizerToFail(_ otherGestureRecognizer: UIGestureRecognizer)",
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class UIColor: NSObject, NSSecureCoding, NSCopying {
+                @_swiftrewriter(renameFrom: blackColor)
+                @_swiftrewriter(mapFrom: blackColor())
+                static var black: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: darkGrayColor)
+                @_swiftrewriter(mapFrom: darkGrayColor())
+                static var darkGray: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: lightGrayColor)
+                @_swiftrewriter(mapFrom: lightGrayColor())
+                static var lightGray: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: whiteColor)
+                @_swiftrewriter(mapFrom: whiteColor())
+                static var white: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: grayColor)
+                @_swiftrewriter(mapFrom: grayColor())
+                static var gray: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: redColor)
+                @_swiftrewriter(mapFrom: redColor())
+                static var red: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: greenColor)
+                @_swiftrewriter(mapFrom: greenColor())
+                static var green: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: blueColor)
+                @_swiftrewriter(mapFrom: blueColor())
+                static var blue: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: cyanColor)
+                @_swiftrewriter(mapFrom: cyanColor())
+                static var cyan: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: yellowColor)
+                @_swiftrewriter(mapFrom: yellowColor())
+                static var yellow: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: magentaColor)
+                @_swiftrewriter(mapFrom: magentaColor())
+                static var magenta: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: orangeColor)
+                @_swiftrewriter(mapFrom: orangeColor())
+                static var orange: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: purpleColor)
+                @_swiftrewriter(mapFrom: purpleColor())
+                static var purple: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: brownColor)
+                @_swiftrewriter(mapFrom: brownColor())
+                static var brown: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: clearColor)
+                @_swiftrewriter(mapFrom: clearColor())
+                static var clear: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: lightTextColor)
+                @_swiftrewriter(mapFrom: lightTextColor())
+                static var lightText: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: darkTextColor)
+                @_swiftrewriter(mapFrom: darkTextColor())
+                static var darkText: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: groupTableViewBackgroundColor)
+                @_swiftrewriter(mapFrom: groupTableViewBackgroundColor())
+                static var groupTableViewBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: viewFlipsideBackgroundColor)
+                @_swiftrewriter(mapFrom: viewFlipsideBackgroundColor())
+                static var viewFlipsideBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: scrollViewTexturedBackgroundColor)
+                @_swiftrewriter(mapFrom: scrollViewTexturedBackgroundColor())
+                static var scrollViewTexturedBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: underPageBackgroundColor)
+                @_swiftrewriter(mapFrom: underPageBackgroundColor())
+                static var underPageBackground: UIColor { get }
+                
+                @_swiftrewriter(renameFrom: CGColor)
+                var cgColor: CGColor { get }
+                
+                @_swiftrewriter(renameFrom: CIColor)
+                var ciColor: CGColor { get }
+                
+                
+                @_swiftrewriter(mapFrom: colorWithAlphaComponent(_:))
+                func withAlphaComponent(_ alpha: CGFloat) -> UIColor
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }

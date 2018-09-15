@@ -8,6 +8,9 @@ class UIViewCompoundTypeTests: XCTestCase {
     func testUIViewDefinition() {
         let type = UIViewCompoundType.create()
         
+        XCTAssert(type.nonCanonicalNames.isEmpty)
+        XCTAssertEqual(type.transformations.count, 14)
+        
         assertSignature(type: type, matches: """
             class UIView: UIResponder, NSCoding, UIAppearance, UIAppearanceContainer, UIDynamicItem, UITraitEnvironment, UICoordinateSpace, UIFocusItem, CALayerDelegate {
                 static var areAnimationsEnabled: Bool { get }

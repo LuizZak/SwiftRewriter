@@ -289,11 +289,12 @@ public enum TypeFormatter {
     /// The signature's name can be optionally include during conversion.
     public static func asString(signature: FunctionSignature,
                                 includeName: Bool = false,
-                                includeFuncKeyword: Bool = false) -> String {
+                                includeFuncKeyword: Bool = false,
+                                includeStatic: Bool = true) -> String {
         
         var result = ""
         
-        if signature.isStatic {
+        if signature.isStatic && includeStatic {
             result += "static "
         }
         

@@ -8,6 +8,9 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testCalendarDefinition() {
         let type = FoundationCompoundTypes.nsCalendar.create()
         
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 2)
+        
         assertSignature(type: type, matches: """
             class Calendar: NSObject {
                 @_swiftrewriter(mapFrom: component(_:fromDate:))
@@ -21,6 +24,9 @@ class FoundationCompoundTypesTests: XCTestCase {
     
     func testNSArrayDefinition() {
         let type = FoundationCompoundTypes.nsArray.create()
+        
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 4)
         
         assertSignature(type: type, matches: """
             class NSArray: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
@@ -45,6 +51,9 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSMutableArrayDefinition() {
         let type = FoundationCompoundTypes.nsMutableArray.create()
         
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 3)
+        
         assertSignature(type: type, matches: """
             class NSMutableArray: NSArray {
                 @_swiftrewriter(mapFrom: addObject(_:))
@@ -61,6 +70,9 @@ class FoundationCompoundTypesTests: XCTestCase {
     
     func testNSDateFormatterDefinition() {
         let type = FoundationCompoundTypes.nsDateFormatter.create()
+        
+        XCTAssertEqual(type.nonCanonicalNames.count, 0)
+        XCTAssertEqual(type.transformations.count, 3)
         
         assertSignature(type: type, matches: """
             class DateFormatter: Formatter {
@@ -81,12 +93,16 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSDateDefinition() {
         let type = FoundationCompoundTypes.nsDate.create()
         
+        XCTAssertEqual(type.nonCanonicalNames, ["NSDate"])
+        XCTAssertEqual(type.transformations.count, 5)
+        
         assertSignature(type: type, matches: """
+            @_swiftrewriter(renameFrom: NSDate)
             struct Date: Hashable, Equatable {
                 var timeIntervalSince1970: TimeInterval
                 
                 
-                // Convert from 'static date() -> Date'
+                @_swiftrewriter(mapFrom: date() -> Date)
                 init()
                 static func date() -> Date
                 
@@ -108,9 +124,13 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testNSLocaleDefinition() {
         let type = FoundationCompoundTypes.nsLocale.create()
         
+        XCTAssertEqual(type.nonCanonicalNames, ["NSLocale"])
+        XCTAssertEqual(type.transformations.count, 1)
+        
         assertSignature(type: type, matches: """
+            @_swiftrewriter(renameFrom: NSLocale)
             struct Locale: Hashable, Equatable {
-                // Convert from 'init(localeIdentifier: String)'
+                @_swiftrewriter(mapFrom: init(localeIdentifier:))
                 init(identifier: String)
             }
             """)

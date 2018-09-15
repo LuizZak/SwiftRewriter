@@ -8,6 +8,9 @@ class UIColorCompoundTypeTests: XCTestCase {
     func testUIColorDefinition() {
         let type = UIColorCompoundType.create()
         
+        XCTAssert(type.nonCanonicalNames.isEmpty)
+        XCTAssertEqual(type.transformations.count, 45)
+        
         assertSignature(type: type, matches: """
             class UIColor: NSObject, NSSecureCoding, NSCopying {
                 @_swiftrewriter(renameFrom: blackColor)

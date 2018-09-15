@@ -1,5 +1,6 @@
 import XCTest
 import SwiftRewriterLib
+import SwiftAST
 import MiniLexer
 
 class FunctionSignatureParserTests: XCTestCase {
@@ -229,6 +230,23 @@ class FunctionSignatureParserTests: XCTestCase {
                 returnType: .void,
                 isStatic: false,
                 isMutating: true
+            )
+        )
+    }
+    
+    func testParseFullSignature() {
+        assert(string: "dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?",
+               parseInto: FunctionSignature(
+                name: "dateByAddingUnit",
+                parameters: [
+                    ParameterSignature(label: nil, name: "component", type: .nested(["Calendar", "Component"])),
+                    ParameterSignature(name: "value", type: "Int"),
+                    ParameterSignature(label: "toDate", name: "date", type: "Date"),
+                    ParameterSignature(name: "options", type: "NSCalendarOptions")
+                ],
+                returnType: .optional("Date"),
+                isStatic: false,
+                isMutating: false
             )
         )
     }

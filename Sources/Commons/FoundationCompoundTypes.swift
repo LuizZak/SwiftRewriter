@@ -18,70 +18,32 @@ public enum CalendarCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "Calendar", supertype: "NSObject")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "component",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "component",
-                                           type: .nested(["Calendar", "Component"])),
-                        ParameterSignature(label: "from", name: "date", type: "Date")
-                    ],
-                    returnType: .int
-                ).makeSignatureMapping(
-                    fromMethodNamed: "component",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "component",
-                                           type: .nested(["Calendar", "Component"])),
-                        ParameterSignature(label: "fromDate", name: "date", type: "Date")
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing Calendar class interface: \(error)"
             )
-            .method(withSignature:
-                FunctionSignature(
-                    name: "date",
-                    parameters: [
-                        ParameterSignature(label: "byAdding", name: "component",
-                                           type: .nested(["Calendar", "Component"])),
-                        ParameterSignature(name: "value", type: "Int"),
-                        ParameterSignature(label: "to", name: "date", type: "Date")
-                    ],
-                    returnType: .optional("Date")
-                ).makeSignatureMapping(
-                    from:
-                    FunctionSignature(
-                        name: "dateByAddingUnit",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "component",
-                                               type: .nested(["Calendar", "Component"])),
-                            ParameterSignature(name: "value", type: "Int"),
-                            ParameterSignature(label: "toDate", name: "date", type: "Date"),
-                            ParameterSignature(name: "options", type: "NSCalendarOptions")
-                        ], returnType: .optional("Date")
-                    ),
-                    arguments: [
-                        .asIs,
-                        .labeled("value", .asIs),
-                        .labeled("to", .asIs)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class Calendar: NSObject {
+                @_swiftrewriter(mapFrom: component(_:fromDate:))
+                func component(_ component: Calendar.Component, from date: Date) -> Int
+                
+                @_swiftrewriter(mapFrom: dateByAddingUnit(_ component: Calendar.Component, value: Int, toDate date: Date, options: NSCalendarOptions) -> Date?)
+                func date(byAdding component: Calendar.Component, value: Int, to date: Date) -> Date?
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -93,65 +55,41 @@ public enum NSArrayCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "NSArray", supertype: "NSObject")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .protocolConformances(protocolNames: [
-                "NSCopying",
-                "NSMutableCopying",
-                "NSSecureCoding",
-                "NSFastEnumeration"
-            ])
-        
-        type = type
-            .property(named: "count", type: .int, accessor: .getter)
-            .property(named: "firstObject", type: .optional(.any), accessor: .getter)
-            ._createPropertyFromMethods(getterName: "firstObject", setterName: nil, in: transformations)
-            .property(named: "lastObject", type: .optional(.any), accessor: .getter)
-            ._createPropertyFromMethods(getterName: "lastObject", setterName: nil, in: transformations)
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "object",
-                    parameters: [
-                        ParameterSignature(label: "at", name: "index", type: .int)
-                    ],
-                    returnType: .any
-                ).makeSignatureMapping(
-                    fromMethodNamed: "objectAtIndex",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "index", type: .int)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "contains",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    returnType: .bool
-                ).makeSignatureMapping(
-                    fromMethodNamed: "containsObject",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing Calendar class interface: \(error)"
             )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSArray: NSObject, NSCopying, NSMutableCopying, NSSecureCoding, NSFastEnumeration {
+                var count: Int { get }
+                
+                @_swiftrewriter(mapFrom: firstObject())
+                var firstObject: Any? { get }
+                
+                @_swiftrewriter(mapFrom: lastObject())
+                var lastObject: Any? { get }
+                
+                
+                @_swiftrewriter(mapFrom: objectAtIndex(_:))
+                func object(at index: Int) -> Any
+                
+                @_swiftrewriter(mapFrom: containsObject(_:))
+                func contains(_ anObject: Any) -> Bool
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -163,63 +101,35 @@ public enum NSMutableArrayCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "NSMutableArray", supertype: "NSArray")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "add",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ]
-                ).makeSignatureMapping(
-                    fromMethodNamed: "addObject",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "addObjects",
-                    parameters: [
-                        ParameterSignature(label: "from", name: "otherArray", type: .array(.any))
-                    ]
-                ).makeSignatureMapping(
-                    fromMethodNamed: "addObjectsFromArray",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "otherArray", type: .array(.any))
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "remove",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ]
-                ).makeSignatureMapping(
-                    fromMethodNamed: "removeObject",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "anObject", type: .any)
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing Calendar class interface: \(error)"
             )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSMutableArray: NSArray {
+                @_swiftrewriter(mapFrom: addObject(_:))
+                func add(_ anObject: Any)
+                
+                @_swiftrewriter(mapFrom: addObjectsFromArray(_:))
+                func addObjects(from otherArray: [Any])
+                
+                @_swiftrewriter(mapFrom: removeObject(_:))
+                func remove(_ anObject: Any)
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -231,56 +141,37 @@ public enum NSDateFormatterCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "DateFormatter", supertype: "Formatter")
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .property(named: "dateFormat", type: .implicitUnwrappedOptional(.string))
-            ._createPropertyFromMethods(getterName: "dateFormat",
-                                        setterName: "setDateFormat",
-                                        in: transformations)
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    name: "string",
-                    parameters: [
-                        ParameterSignature(label: "from", name: "date", type: "Date")
-                    ],
-                    returnType: .string
-                ).makeSignatureMapping(
-                    fromMethodNamed: "stringFromDate",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "date", type: "Date")
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            ).method(withSignature:
-                FunctionSignature(
-                    name: "date",
-                    parameters: [
-                        ParameterSignature(label: "from", name: "string", type: "Date")
-                    ],
-                    returnType: .optional("Date")
-                ).makeSignatureMapping(
-                    fromMethodNamed: "dateFromString",
-                    parameters: [
-                        ParameterSignature(label: nil, name: "date", type: "Date")
-                    ],
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing DateFormatter class interface: \(error)"
             )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class DateFormatter: Formatter {
+                @_swiftrewriter(mapFrom: dateFormat())
+                @_swiftrewriter(mapFrom: setDateFormat(_:))
+                var dateFormat: String!
+                
+                
+                @_swiftrewriter(mapFrom: stringFromDate(_:))
+                func string(from date: Date) -> String
+                
+                @_swiftrewriter(mapFrom: dateFromString(_:))
+                func date(from string: Date) -> Date?
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations)
+        return type
     }
 }
 
@@ -292,82 +183,46 @@ public enum NSDateCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let aliases = ["NSDate"]
-        let annotations: AnnotationsSink = AnnotationsSink()
-        var type = KnownTypeBuilder(typeName: "Date", kind: .struct)
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .protocolConformances(protocolNames: ["Hashable", "Equatable"])
-        
-        type = type
-            .property(named: "timeIntervalSince1970", type: "TimeInterval")
-        
-        type = type
-            .constructor()
-            ._createConstructorMapping(
-                fromStaticMethod:
-                    FunctionSignature(isStatic: true,
-                                      signatureString: "date() -> Date"),
-                in: transformations
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing Date class interface: \(error)"
             )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            @_swiftrewriter(renameFrom: NSDate)
+            struct Date: Hashable, Equatable {
+                var timeIntervalSince1970: TimeInterval
+
+
+                @_swiftrewriter(mapFrom: date() -> Date)
+                init()
+                static func date() -> Date
+
+                @_swiftrewriter(mapFrom: dateByAddingTimeInterval(_:))
+                func addingTimeInterval(_ timeInterval: TimeInterval) -> Date
+
+                @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
+                func timeIntervalSince(_ date: Date) -> TimeInterval
+
+                @_swiftrewriter(mapToBinary: ==)
+                func isEqual(_ other: AnyObject) -> Bool
+
+                @_swiftrewriter(mapToBinary: ==)
+                func isEqualToDate(_ other: Date) -> Bool
+            }
+            """
         
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    isStatic: true,
-                    signatureString: "date() -> Date"
-                )
-            )
-        
-        type = type
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "addingTimeInterval(_ timeInterval: TimeInterval) -> Date"
-                ).makeSignatureMapping(
-                    fromMethodNamed: "dateByAddingTimeInterval",
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            )
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "timeIntervalSince(_ date: Date) -> TimeInterval"
-                ).makeSignatureMapping(
-                    fromMethodNamed: "timeIntervalSinceDate",
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            )
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "isEqual(_ other: AnyObject) -> Bool"
-                ).toBinaryOperation(
-                    op: .equals,
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            )
-            .method(withSignature:
-                FunctionSignature(
-                    signatureString: "isEqualToDate(_ other: Date) -> Bool"
-                ).toBinaryOperation(
-                    op: .equals,
-                    in: transformations,
-                    annotations: annotations
-                ),
-                    attributes: annotations.attributes
-            )
-        
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations,
-                                  aliases: aliases)
+        return type
     }
 }
 
@@ -379,25 +234,29 @@ public enum NSLocaleCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        let aliases = ["NSLocale"]
-        var type = KnownTypeBuilder(typeName: "Locale", kind: .struct)
-        let transformations = TransformationsSink(typeName: type.typeName)
+        let string = typeString()
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            .protocolConformances(protocolNames: ["Hashable", "Equatable"])
-        
-        type = type
-            .constructor(shortParameters: [("identifier", .string)])
-            ._createConstructorMapping(fromParameters:
-                Array(parsingParameters: "(localeIdentifier: String)"),
-                in: transformations
+        do {
+            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            let type = try incomplete.toCompoundedKnownType()
+            
+            return type
+        } catch {
+            fatalError(
+                "Found error while parsing Locale class interface: \(error)"
             )
+        }
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            @_swiftrewriter(renameFrom: NSLocale)
+            struct Locale: Hashable, Equatable {
+                @_swiftrewriter(mapFrom: init(localeIdentifier:))
+                init(identifier: String)
+            }
+            """
         
-        return
-            CompoundedMappingType(knownType: type.build(),
-                                  transformations: transformations.transformations,
-                                  aliases: aliases)
+        return type
     }
 }

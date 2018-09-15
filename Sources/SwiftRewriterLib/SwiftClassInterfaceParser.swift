@@ -15,8 +15,8 @@ public final class SwiftClassInterfaceParser {
     /// and support for parsing Swift function signatures is borrowed from
     /// `FunctionSignatureParser`.
     public static func parseDeclaration(from string: String) throws -> IncompleteKnownType {
-        
         var builder = KnownTypeBuilder(typeName: "")
+        builder.useSwiftSignatureMatching = true
         
         try parseDeclaration(from: string, into: &builder)
         
@@ -66,6 +66,7 @@ public final class SwiftClassInterfaceParser {
     ///
     /// type-declaration-header
     ///     : 'class' type-name type-inheritance-clause?
+    ///     : 'struct' type-name type-inheritance-clause?
     ///     : 'extension' type-name type-inheritance-clause?
     ///     ;
     ///
@@ -92,9 +93,18 @@ public final class SwiftClassInterfaceParser {
         if tokenizer.tokenType(is: .extension) {
             try tokenizer.advance(overTokenType: .extension)
             isExtension = true
-        } else {
+        } else if tokenizer.tokenType(is: .class) {
             try tokenizer.advance(overTokenType: .class)
             isExtension = false
+            
+            typeBuilder =
+                typeBuilder.settingKind(.class)
+        } else {
+            try tokenizer.advance(overTokenType: .struct)
+            isExtension = false
+            
+            typeBuilder =
+                typeBuilder.settingKind(.struct)
         }
         
         let name = try typeName(from: tokenizer)
@@ -198,7 +208,7 @@ public final class SwiftClassInterfaceParser {
                 switch modifier {
                 case .ownership(let own):
                     ownership = own
-                    break
+                    
                 default:
                     break
                 }
@@ -214,7 +224,8 @@ public final class SwiftClassInterfaceParser {
                     attributes: knownAttributes)
             
         case .func:
-            let funcDecl = try parseFunctionDeclaration(from: tokenizer)
+            var funcDecl = try parseFunctionDeclaration(from: tokenizer)
+            funcDecl.signature.isStatic = modifiers.contains(.static)
             
             typeBuilder =
                 typeBuilder.method(withSignature: funcDecl.signature,
@@ -432,6 +443,11 @@ public final class SwiftClassInterfaceParser {
         return Attribute.generic(name: name, content: content)
     }
     
+    /// Parses a Swift attribute in the form of a SwiftRewriterAttribute from a
+    /// given input lexer.
+    ///
+    /// Formal grammar:
+    ///
     /// ```
     /// swift-rewriter-attribute
     ///     : '@' '_swiftrewriter' '(' swift-rewriter-attribute-clause ')'
@@ -457,6 +473,15 @@ public final class SwiftClassInterfaceParser {
     ///     | '_' ':'
     ///     ;
     /// ```
+    ///
+    /// Support for parsing Swift function signatures and identifiers is borrowed
+    /// from `FunctionSignatureParser`.
+    public static func parseSwiftRewriterAttribute(from lexer: Lexer) throws -> SwiftRewriterAttribute {
+        let tokenizer = Tokenizer(lexer: lexer)
+        
+        return try parseSwiftRewriterAttribute(from: tokenizer)
+    }
+    
     private static func parseSwiftRewriterAttribute(from tokenizer: Tokenizer) throws -> SwiftRewriterAttribute {
         
         try tokenizer.advance(overTokenType: .at)
@@ -477,12 +502,17 @@ public final class SwiftClassInterfaceParser {
             try tokenizer.advance(overTokenType: .colon)
             
             // Try an identifier first
+            let backtracker = tokenizer.backtracker()
             do {
                 let identifier =
                     try FunctionSignatureParser.parseIdentifier(from: tokenizer.lexer)
                 
-                content = .mapFromIdentifier(identifier)
+                try tokenizer.advance(overTokenType: .closeParens)
+                
+                return SwiftRewriterAttribute(content: .mapFromIdentifier(identifier))
             } catch {
+                backtracker.backtrack()
+                
                 let signature =
                     try FunctionSignatureParser.parseSignature(from: tokenizer.lexer)
                 
@@ -728,7 +758,8 @@ public final class SwiftClassInterfaceParser {
                         "mapFrom: " +
                             TypeFormatter.asString(signature: signature,
                                                    includeName: true,
-                                                   includeFuncKeyword: false)
+                                                   includeFuncKeyword: false,
+                                                   includeStatic: false)
                     
                 case .mapFromIdentifier(let identifier):
                     return
@@ -803,6 +834,8 @@ extension SwiftClassInterfaceParser {
         case colon
         case comma
         case at
+        case qmark
+        case period
         case underscore
         case identifier
         case functionArrow
@@ -820,6 +853,7 @@ extension SwiftClassInterfaceParser {
         case `inout`
         case `final`
         case `class`
+        case `struct`
         case `throws`
         case `static`
         case `public`
@@ -849,7 +883,7 @@ extension SwiftClassInterfaceParser {
         func length(in lexer: Lexer) -> Int {
             switch self {
             case .openParens, .closeParens, .openBrace, .closeBrace, .openSquare,
-                 .closeSquare, .colon, .comma, .underscore, .at:
+                 .closeSquare, .colon, .comma, .underscore, .at, .period, .qmark:
                 return 1
             case .functionArrow:
                 return 2
@@ -859,7 +893,7 @@ extension SwiftClassInterfaceParser {
                 return 4
             case .inout, .class, .final:
                 return 5
-            case .throws, .public, .static:
+            case .throws, .public, .static, .struct:
                 return 6
             case .dynamic, .unowned:
                 return 7
@@ -913,8 +947,12 @@ extension SwiftClassInterfaceParser {
                 return ","
             case .at:
                 return "@"
+            case .period:
+                return "."
             case .underscore:
                 return "_"
+            case .qmark:
+                return "?"
             case .identifier:
                 return "identifier"
             case .functionArrow:
@@ -947,6 +985,8 @@ extension SwiftClassInterfaceParser {
                 return "final"
             case .class:
                 return "class"
+            case .struct:
+                return "struct"
             case .throws:
                 return "throws"
             case .static:
@@ -1149,6 +1189,8 @@ extension SwiftClassInterfaceParser {
                     return .inout
                 case "final":
                     return .final
+                case "struct":
+                    return .struct
                 case "throws":
                     return .throws
                 case "public":
@@ -1209,8 +1251,12 @@ extension SwiftClassInterfaceParser {
                 return .comma
             case "@":
                 return .at
+            case ".":
+                return .period
             case "_":
                 return .underscore
+            case "?":
+                return .qmark
             default:
                 return nil
             }
