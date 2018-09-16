@@ -159,7 +159,7 @@ public class BaseExpressionPass: ASTRewriterPass {
                             arguments: args)
                     
                 case let .valueTransformer(transformer):
-                    return transformer
+                    return ValueTransformerWrapper(valueTransformer: transformer)
                 }
             }
         )

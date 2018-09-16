@@ -2552,4 +2552,20 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testDateClassGetterCase() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                id obj = [Date date];
+                [objc isKindOfClass:[Date class]];
+            }
+            """,
+            swift: """
+            func test() {
+                let obj = Date()
+                objc.isKindOfClass(Date.self)
+            }
+            """)
+    }
 }

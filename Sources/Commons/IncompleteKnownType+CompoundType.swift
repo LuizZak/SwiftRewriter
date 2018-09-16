@@ -75,10 +75,14 @@ private func initTransformations(_ ctor: KnownConstructor, type: KnownType) thro
     func _map(_ identifier: FunctionIdentifier) {
         let transformer = ValueTransformer<PostfixExpression, Expression> { $0 }
             .validate { exp in
-                exp.asPostfix?
-                    .functionCall?
-                    .identifierWith(methodName: identifier.name)
-                        == identifier
+                guard let member = exp.asPostfix?.exp.asPostfix?.member?.name else {
+                    return false
+                }
+                
+                return
+                    exp.asPostfix?
+                        .functionCall?
+                        .identifierWith(methodName: member) == identifier
             }
             .decompose()
             .transformIndex(index: 0, transformer: ValueTransformer()

@@ -106,4 +106,26 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
                     ])
         ); assertNotifiedChange()
     }
+
+    func testStaticToConstructorTransformerLeniency() {
+        // Test case for bug where any static postfix expression is incorrectly
+        // transformed
+        
+        assertTransform(
+            expression: Expression
+                .identifier("Date")
+                .typed(.metatype(for: "Date"))
+                .dot("date").call(),
+            into: Expression.identifier("Date").call()
+        ); assertNotifiedChange()
+        
+        // This should not be transformed!
+        assertTransform(
+            expression: Expression
+                .identifier("Date")
+                .typed(.metatype(for: "Date"))
+                .dot("class").call(),
+            into: Expression.identifier("Date").dot("class").call()
+        ); assertDidNotNotifyChange()
+    }
 }

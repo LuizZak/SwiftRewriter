@@ -296,17 +296,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
 // MARK: - Transformations
 
 extension FoundationExpressionPass {
-    func makeSignatureTransformers() {
-//        addCompoundedType(FoundationCompoundTypes.nsCalendar.create())
-//        addCompoundedType(FoundationCompoundTypes.nsArray.create())
-//        addCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
-//        addCompoundedType(FoundationCompoundTypes.nsDateFormatter.create())
-//        addCompoundedType(FoundationCompoundTypes.nsDate.create())
-//        addCompoundedType(FoundationCompoundTypes.nsLocale.create())
-    }
-    
     func makeFunctionTransformers() {
-        makeSignatureTransformers()
         makeInitializerTransformers()
     }
     
