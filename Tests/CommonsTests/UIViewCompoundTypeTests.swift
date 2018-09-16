@@ -9,7 +9,7 @@ class UIViewCompoundTypeTests: XCTestCase {
         let type = UIViewCompoundType.create()
         
         XCTAssert(type.nonCanonicalNames.isEmpty)
-        XCTAssertEqual(type.transformations.count, 14)
+        XCTAssertEqual(type.transformations.count, 17)
         
         assertSignature(type: type, matches: """
             class UIView: UIResponder, NSCoding, UIAppearance, UIAppearanceContainer, UIDynamicItem, UITraitEnvironment, UICoordinateSpace, UIFocusItem, CALayerDelegate {
@@ -97,6 +97,8 @@ class UIViewCompoundTypeTests: XCTestCase {
                 
                 @_swiftrewriter(mapFrom: animateWithDuration(_:delay:options:animations:completion:))
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
+                
+                @_swiftrewriter(mapFrom: animateWithDuration(delay:usingSpringWithDamping:initialSpringVelocity:options:animations:completion:))
                 static func animate(withDuration duration: TimeInterval, delay: TimeInterval, usingSpringWithDamping dampingRatio: CGFloat, initialSpringVelocity velocity: CGFloat, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func animateKeyframes(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewKeyframeAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func beginAnimations(_ animationID: String?, context: UnsafeMutableRawPointer?)
@@ -195,7 +197,11 @@ class UIViewCompoundTypeTests: XCTestCase {
                 func updateConstraints()
                 func updateConstraintsIfNeeded()
                 func viewWithTag(_ tag: Int) -> UIView?
+                
+                @_swiftrewriter(mapFrom: willMoveToSuperview(_:))
                 func willMove(toSuperview newSuperview: UIView?)
+                
+                @_swiftrewriter(mapFrom: willMoveToWindow(_:))
                 func willMove(toWindow newWindow: UIWindow?)
                 func willRemoveSubview(_ subview: UIView)
             }

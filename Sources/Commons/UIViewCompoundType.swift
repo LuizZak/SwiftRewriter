@@ -103,17 +103,42 @@ public enum UIViewCompoundType {
                 var window: UIWindow? { get }
                 
                 init(frame: CGRect)
-                static func addKeyframe(withRelativeStartTime frameStartTime: Double, relativeDuration frameDuration: Double, animations: () -> Void)
+                
+                static func addKeyframe(withRelativeStartTime frameStartTime: Double,
+                                        relativeDuration frameDuration: Double,
+                                        animations: () -> Void)
                 
                 @_swiftrewriter(mapFrom: animateWithDuration(_:animations:completion:))
-                static func animate(withDuration duration: TimeInterval, animations: () -> Void, completion: ((Bool) -> Void)?)
+                static func animate(withDuration duration: TimeInterval,
+                                    animations: () -> Void,
+                                    completion: ((Bool) -> Void)?)
                 
                 @_swiftrewriter(mapFrom: animateWithDuration(_:animations:))
-                static func animate(withDuration duration: TimeInterval, animations: () -> Void)
+                static func animate(withDuration duration: TimeInterval,
+                                    animations: () -> Void)
                 
                 @_swiftrewriter(mapFrom: animateWithDuration(_:delay:options:animations:completion:))
-                static func animate(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
-                static func animate(withDuration duration: TimeInterval, delay: TimeInterval, usingSpringWithDamping dampingRatio: CGFloat, initialSpringVelocity velocity: CGFloat, options: UIViewAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
+                static func animate(withDuration duration: TimeInterval,
+                                    delay: TimeInterval,
+                                    options: UIViewAnimationOptions,
+                                    animations: () -> Void,
+                                    completion: ((Bool) -> Void)?)
+                
+                @_swiftrewriter(mapFrom:
+                    animateWithDuration(delay:
+                                        usingSpringWithDamping:
+                                        initialSpringVelocity:
+                                        options:
+                                        animations:
+                                        completion:))
+                static func animate(withDuration duration: TimeInterval,
+                                    delay: TimeInterval,
+                                    usingSpringWithDamping dampingRatio: CGFloat,
+                                    initialSpringVelocity velocity: CGFloat,
+                                    options: UIViewAnimationOptions,
+                                    animations: () -> Void,
+                                    completion: ((Bool) -> Void)?)
+                
                 static func animateKeyframes(withDuration duration: TimeInterval, delay: TimeInterval, options: UIViewKeyframeAnimationOptions, animations: () -> Void, completion: ((Bool) -> Void)?)
                 static func beginAnimations(_ animationID: String?, context: UnsafeMutableRawPointer?)
                 static func commitAnimations()
@@ -211,7 +236,9 @@ public enum UIViewCompoundType {
                 func updateConstraints()
                 func updateConstraintsIfNeeded()
                 func viewWithTag(_ tag: Int) -> UIView?
+                @_swiftrewriter(mapFrom: willMoveToSuperview(_:))
                 func willMove(toSuperview newSuperview: UIView?)
+                @_swiftrewriter(mapFrom: willMoveToWindow(_:))
                 func willMove(toWindow newWindow: UIWindow?)
                 func willRemoveSubview(_ subview: UIView)
             }
