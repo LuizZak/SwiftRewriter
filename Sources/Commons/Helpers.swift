@@ -2,7 +2,7 @@ import SwiftAST
 import SwiftRewriterLib
 import MiniLexer
 
-func makeType(from typeString: String) -> CompoundedMappingType {
+func makeType(from typeString: String, typeName: String) -> CompoundedMappingType {
     do {
         let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: typeString)
         let type = try incomplete.toCompoundedKnownType()
@@ -11,7 +11,7 @@ func makeType(from typeString: String) -> CompoundedMappingType {
     } catch let error as LexerError {
         fatalError(
             """
-            Found error while parsing class interface: \
+            Found error while parsing class interface '\(typeName)': \
             \(error.description(withOffsetsIn: typeString))
             """
         )

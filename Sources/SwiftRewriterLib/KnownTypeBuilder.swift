@@ -541,6 +541,11 @@ extension KnownTypeBuilder {
 
 // MARK: - Querying
 extension KnownTypeBuilder {
+    /// Gets the supertype currently registered on this known type builder.
+    public var supertype: KnownTypeReferenceConvertible? {
+        return type.supertype
+    }
+    
     /// Returns a reference to the latest constructor added to this `KnownTypeBuilder`
     /// via a `.constructor(...)` call
     public var lastConstructor: KnownConstructor? {

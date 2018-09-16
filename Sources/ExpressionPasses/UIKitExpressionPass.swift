@@ -55,11 +55,6 @@ public class UIKitExpressionPass: BaseExpressionPass {
     }
     
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
-        if let exp = convertUIColorStaticColorMethodCall(exp) {
-            notifyChange()
-            
-            return super.visitExpression(exp)
-        }
         if let exp = convertAddTargetForControlEvents(exp) {
             notifyChange()
             
@@ -105,28 +100,6 @@ public class UIKitExpressionPass: BaseExpressionPass {
         exp.op = op
         
         return exp
-    }
-    
-    /// Converts UIColor.orangeColor() -> UIColor.orange, etc.
-    func convertUIColorStaticColorMethodCall(_ exp: PostfixExpression) -> Expression? {
-        return nil
-        /*
-        guard let args = exp.functionCall?.arguments, args.isEmpty else {
-            return nil
-        }
-        guard let colorMember = exp.exp.asPostfix, colorMember.exp == .identifier("UIColor"),
-            let colorName = colorMember.member?.name else {
-            return nil
-        }
-        guard colorName.hasSuffix("Color") && !colorName.replacingOccurrences(of: "Color", with: "").isEmpty else {
-            return nil
-        }
-        
-        exp.exp = .identifier("UIColor")
-        exp.op = .member(String(colorName.dropLast("Color".count)))
-        
-        return exp
-        */
     }
     
     /// Converts [<exp> addTarget:<a1> action:<a2> forControlEvents:<a3>]
@@ -177,9 +150,9 @@ public class UIKitExpressionPass: BaseExpressionPass {
 
 extension UIKitExpressionPass {
     func makeSignatureTransformers() {
-        addCompoundedType(UIViewCompoundType.create())
-        addCompoundedType(UIGestureRecognizerCompoundType.create())
-        addCompoundedType(UIColorCompoundType.create())
+//        addCompoundedType(UIViewCompoundType.create())
+//        addCompoundedType(UIGestureRecognizerCompoundType.create())
+//        addCompoundedType(UIColorCompoundType.create())
     }
     
     func makeEnumTransformers() {

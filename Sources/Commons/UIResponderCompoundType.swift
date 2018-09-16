@@ -9,58 +9,37 @@ public enum UIResponderCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        var type = KnownTypeBuilder(typeName: "UIResponder", supertype: "NSObject")
+        return makeType(from: typeString(), typeName: "UIResponder")
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class UIResponder: NSObject, UIResponderStandardEditActions {
+                var canBecomeFirstResponder: Bool { get }
+                var canResignFirstResponder: Bool { get }
+                @_swiftrewriter(renameFrom: firstResponder)
+                var isFirstResponder: UIResponder? { get }
+                var undoManager: UndoManager? { get }
+                
+                func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool
+                func resignFirstResponder() -> Bool
+                func target(forAction action: Selector, withSender sender: Any?) -> Any?
+                func motionBegan(_ motion: UIEventSubtype, with event: UIEvent?)
+                func motionCancelled(_ motion: UIEventSubtype, with event: UIEvent?)
+                func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
+                func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?)
+                func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?)
+                func pressesChanged(_ presses: Set<UIPress>, with event: UIPressesEvent?)
+                func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?)
+                func remoteControlReceived(with event: UIEvent?)
+                func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
+                func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?)
+                func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
+                func touchesEstimatedPropertiesUpdated(_ touches: Set<UITouch>)
+                func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?)
+            }
+            """
         
-        type.useSwiftSignatureMatching = true
-        
-        type = type
-            // Protocol conformances
-            .protocolConformance(protocolName: "UIResponderStandardEditActions")
-        
-        type = type
-            // Properties
-            .property(named: "canBecomeFirstResponder", type: .bool, accessor: .getter)
-            .property(named: "canResignFirstResponder", type: .bool, accessor: .getter)
-            .property(named: "isFirstResponder", type: .optional("UIResponder"), accessor: .getter)
-            .property(named: "undoManager", type: .optional("UndoManager"), accessor: .getter)
-        
-        // Methods
-        type = type
-            .method(named: "canPerformAction",
-                    parsingSignature: "(_ action: Selector, withSender sender: Any?)",
-                    returning: .bool)
-            .method(named: "resignFirstResponder",
-                    returning: .bool)
-            .method(named: "target",
-                    parsingSignature: "(forAction action: Selector, withSender sender: Any?)",
-                    returning: .optional(.any))
-            .method(named: "motionBegan",
-                    parsingSignature: "(_ motion: UIEventSubtype, with event: UIEvent?)")
-            .method(named: "motionCancelled",
-                    parsingSignature: "(_ motion: UIEventSubtype, with event: UIEvent?)")
-            .method(named: "motionEnded",
-                    parsingSignature: "(_ motion: UIEventSubtype, with event: UIEvent?)")
-            .method(named: "pressesBegan",
-                    parsingSignature: "(_ presses: Set<UIPress>, with event: UIPressesEvent?)")
-            .method(named: "pressesCancelled",
-                    parsingSignature: "(_ presses: Set<UIPress>, with event: UIPressesEvent?)")
-            .method(named: "pressesChanged",
-                    parsingSignature: "(_ presses: Set<UIPress>, with event: UIPressesEvent?)")
-            .method(named: "pressesEnded",
-                    parsingSignature: "(_ presses: Set<UIPress>, with event: UIPressesEvent?)")
-            .method(named: "remoteControlReceived",
-                    parsingSignature: "(with event: UIEvent?)")
-            .method(named: "touchesBegan",
-                    parsingSignature: "(_ touches: Set<UITouch>, with event: UIEvent?)")
-            .method(named: "touchesCancelled",
-                    parsingSignature: "(_ touches: Set<UITouch>, with event: UIEvent?)")
-            .method(named: "touchesEnded",
-                    parsingSignature: "(_ touches: Set<UITouch>, with event: UIEvent?)")
-            .method(named: "touchesEstimatedPropertiesUpdated",
-                    parsingSignature: "(_ touches: Set<UITouch>)")
-            .method(named: "touchesMoved",
-                    parsingSignature: "(_ touches: Set<UITouch>, with event: UIEvent?)")
-        
-        return CompoundedMappingType(knownType: type.build(), transformations: [])
+        return type
     }
 }

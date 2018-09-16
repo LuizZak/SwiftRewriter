@@ -248,7 +248,8 @@ public final class SwiftClassInterfaceParser {
             
             typeBuilder =
                 typeBuilder.constructor(withParameters: initDecl.parameters,
-                                        attributes: knownAttributes)
+                                        attributes: knownAttributes,
+                                        isFailable: initDecl.isFailable)
             
         default:
             throw tokenizer.lexer.syntaxError(
@@ -340,16 +341,25 @@ public final class SwiftClassInterfaceParser {
     
     /// ```
     /// initializer-declaration
-    ///     : 'init' function-parameters
+    ///     : 'init' '?'? function-parameters
     ///     ;
     /// ```
     private static func parseInitializerDeclaration(from tokenizer: Tokenizer) throws -> InitializerDeclaration {
         try tokenizer.advance(overTokenType: ._init)
         
+        var isFailable = false
+        
+        if tokenizer.tokenType(is: .qmark) {
+            tokenizer.skipToken()
+            
+            isFailable = true
+        }
+        
         let parameters =
             try FunctionSignatureParser.parseParameters(from: tokenizer.lexer)
         
-        return InitializerDeclaration(parameters: parameters)
+        return InitializerDeclaration(parameters: parameters,
+                                      isFailable: isFailable)
     }
     
     /// ```
@@ -755,6 +765,7 @@ public final class SwiftClassInterfaceParser {
     
     private struct InitializerDeclaration {
         var parameters: [ParameterSignature]
+        var isFailable: Bool
     }
     
     private enum Attribute {
@@ -836,13 +847,15 @@ public class IncompleteKnownType {
         // we check for these protocol conformances to pick out which conformance
         // is actually a supertype name, thus allowing us to complete the type
         // properly.
-        for conformance in knownTypeBuilder.protocolConformances {
-            if typeSystem.isClassInstanceType(conformance) {
-                knownTypeBuilder = knownTypeBuilder
-                    .removingConformance(to: conformance)
-                    .settingSupertype(KnownTypeReference.typeName(conformance))
-                
-                break
+        if knownTypeBuilder.supertype == nil {
+            for conformance in knownTypeBuilder.protocolConformances {
+                if typeSystem.isClassInstanceType(conformance) {
+                    knownTypeBuilder = knownTypeBuilder
+                        .removingConformance(to: conformance)
+                        .settingSupertype(KnownTypeReference.typeName(conformance))
+                    
+                    break
+                }
             }
         }
         

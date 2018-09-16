@@ -11,6 +11,7 @@ class DefaultExpressionPassesTests: XCTestCase {
         XCTAssert(passes.next() == InitRewriterExpressionPass.self)
         XCTAssert(passes.next() == ASTSimplifier.self)
         XCTAssert(passes.next() == PropertyAsMethodAccessCorrectingExpressionPass.self)
+        XCTAssert(passes.next() == CompoundTypeApplierExpressionPass.self)
         XCTAssert(passes.next() == CoreGraphicsExpressionPass.self)
         XCTAssert(passes.next() == FoundationExpressionPass.self)
         XCTAssert(passes.next() == UIKitExpressionPass.self)

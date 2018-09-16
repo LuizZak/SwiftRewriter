@@ -2,8 +2,6 @@ import SwiftAST
 import SwiftRewriterLib
 
 // swiftlint:disable line_length
-// s wiftlint:disable type_body_length
-// s wiftlint:disable function_body_length
 public enum UIViewCompoundType {
     private static var singleton: CompoundedMappingType = createType()
     

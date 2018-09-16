@@ -32,48 +32,11 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
     }
     
     func testDefinedUIResponder() {
-        assertDefined(typeName: "UIResponder", signature: """
-            class UIResponder: NSObject, UIResponderStandardEditActions {
-                var canBecomeFirstResponder: Bool { get }
-                var canResignFirstResponder: Bool { get }
-                var isFirstResponder: UIResponder? { get }
-                var undoManager: UndoManager? { get }
-                
-                func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool
-                func resignFirstResponder() -> Bool
-                func target(forAction action: Selector, withSender sender: Any?) -> Any?
-                func motionBegan(_ motion: UIEventSubtype, with event: UIEvent?)
-                func motionCancelled(_ motion: UIEventSubtype, with event: UIEvent?)
-                func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
-                func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?)
-                func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?)
-                func pressesChanged(_ presses: Set<UIPress>, with event: UIPressesEvent?)
-                func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?)
-                func remoteControlReceived(with event: UIEvent?)
-                func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?)
-                func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?)
-                func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?)
-                func touchesEstimatedPropertiesUpdated(_ touches: Set<UITouch>)
-                func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?)
-            }
-            """)
+        assertDefined(typeName: "UIResponder")
     }
     
     func testDefinedUIViewController() {
-        assertDefined(typeName: "UIViewController", signature: """
-            class UIViewController: UIResponder, NSCoding, UIAppearanceContainer, UITraitEnvironment, UIContentContainer, UIFocusEnvironment {
-                var view: UIView
-                
-                init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?)
-                func viewDidLoad()
-                func viewWillAppear(_ animated: Bool)
-                func viewDidAppear(_ animated: Bool)
-                func viewWillDisappear(_ animated: Bool)
-                func viewDidDisappear(_ animated: Bool)
-                func viewWillLayoutSubviews()
-                func viewDidLayoutSubviews()
-            }
-            """)
+        assertDefined(typeName: "UIViewController")
     }
     
     func testDefinedUILayoutConstraintAxis() {

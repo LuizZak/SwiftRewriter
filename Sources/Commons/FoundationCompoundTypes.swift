@@ -19,7 +19,7 @@ public enum CalendarCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
+        return makeType(from: typeString(), typeName: "Calendar")
     }
     
     static func typeString() -> String {
@@ -45,7 +45,7 @@ public enum NSArrayCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-       return makeType(from: typeString())
+       return makeType(from: typeString(), typeName: "NSArray")
     }
     
     static func typeString() -> String {
@@ -243,7 +243,7 @@ public enum NSDateFormatterCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
+        return makeType(from: typeString(), typeName: "DateFormatter")
     }
     
     static func typeString() -> String {
@@ -274,7 +274,7 @@ public enum NSDateCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
+        return makeType(from: typeString(), typeName: "Date")
     }
     
     static func typeString() -> String {
@@ -328,7 +328,7 @@ public enum NSLocaleCompoundType {
     }
     
     static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
+        return makeType(from: typeString(), typeName: "Locale")
     }
     
     static func typeString() -> String {
