@@ -31,8 +31,8 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
         assertDefined(variable: "UILayoutFittingExpandedSize", type: "CGSize")
     }
     
-    func testDefinedUIResponder() {
-        assertDefined(typeName: "UIResponder")
+    func testDefinedUITableViewAutomaticDimension() {
+        assertDefined(variable: "UITableViewAutomaticDimension", type: "CGFloat")
     }
     
     func testDefinedUIViewController() {
@@ -46,10 +46,6 @@ class UIKitGlobalsProviderTests: BaseGlobalsProviderTestCase {
                 case vertical
             }
             """)
-    }
-    
-    func testDefinedUIView() {
-        assertDefined(typeName: "UIView")
     }
     
     func testDefinedUIWindow() {

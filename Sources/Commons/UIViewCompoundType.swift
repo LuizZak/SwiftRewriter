@@ -2,26 +2,11 @@ import SwiftAST
 import SwiftRewriterLib
 
 // swiftlint:disable line_length
-public enum UIViewCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+public class UIViewCompoundType {
+    private static var singleton = makeType(from: typeString(), typeName: "UIView")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        let string = typeString()
-        
-        do {
-            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
-            let type = try incomplete.toCompoundedKnownType()
-            
-            return type
-        } catch {
-            fatalError(
-                "Found error while parsing UIView class interface: \(error)"
-            )
-        }
     }
     
     static func typeString() -> String {

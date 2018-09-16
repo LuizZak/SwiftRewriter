@@ -16,7 +16,7 @@ class IntentionCollectionTypeSystemTests: XCTestCase {
                     }
                 }.build()
         let sut = IntentionCollectionTypeSystem(intentions: intentions)
-        sut.addKnownTypeProvider(UIKitGlobalsProvider().knownTypeProvider())
+        sut.addKnownTypeProvider(CompoundedMappingTypesGlobalsProvider().knownTypeProvider())
         
         guard let result = sut.knownTypeWithName("UIView") else {
             XCTFail("Expected to find UIView")

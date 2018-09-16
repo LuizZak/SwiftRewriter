@@ -38,14 +38,10 @@ public enum CalendarCompoundType {
 }
 
 public enum NSArrayCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "NSArray")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-       return makeType(from: typeString(), typeName: "NSArray")
     }
     
     static func typeString() -> String {
@@ -267,14 +263,10 @@ public enum NSDateFormatterCompoundType {
 }
 
 public enum NSDateCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "Date")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString(), typeName: "Date")
     }
     
     static func typeString() -> String {
@@ -321,14 +313,10 @@ public enum NSDateCompoundType {
 }
 
 public enum NSLocaleCompoundType {
-    private static var singleton = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "Locale")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString(), typeName: "Locale")
     }
     
     static func typeString() -> String {

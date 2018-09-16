@@ -35,16 +35,12 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     override func createTypes() {
-        createUIResponder()
         createUIViewController()
         createUILayoutConstraintAxis()
-        createUIView()
         createUIWindow()
         createUITableViewCell()
         createUIScrollView()
         createUITableView()
-        createUIColor()
-        createUILabel()
     }
     
     override func createDefinitions() {
@@ -52,28 +48,15 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                      returnType: .optional(.typeName("CGContext"))))
         
         add(CodeDefinition(variableNamed: "UIViewNoIntrinsicMetric",
-                           storage: ValueStorage.constant(ofType: .cgFloat)))
+                           storage: .constant(ofType: .cgFloat)))
         add(CodeDefinition(variableNamed: "UILayoutFittingCompressedSize",
-                           storage: ValueStorage.constant(ofType: "CGSize")))
+                           storage: .constant(ofType: "CGSize")))
         add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
-                           storage: ValueStorage.constant(ofType: "CGSize")))
+                           storage: .constant(ofType: "CGSize")))
+        add(CodeDefinition(variableNamed: "UITableViewAutomaticDimension",
+                           storage: .constant(ofType: .cgFloat)))
         
         definitions = ArrayDefinitionsSource(definitions: globals)
-    }
-    
-    func createUIResponder() {
-        let type = UIResponderCompoundType.create()
-        add(type)
-    }
-    
-    func createUIColor() {
-        let type = UIColorCompoundType.create()
-        add(type)
-    }
-    
-    func createUILabel() {
-        let type = UILabelCompoundType.create()
-        add(type)
     }
     
     func createUIViewController() {
@@ -89,16 +72,6 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .enumCase(named: "vertical", rawValue: .constant(1))
                 .build()
         }
-    }
-    
-    func createUIView() {
-        let type = UIViewCompoundType.create()
-        add(type)
-    }
-    
-    func createUIGestureRecognizer() {
-        let type = UIGestureRecognizerCompoundType.create()
-        add(type)
     }
     
     func createUITableViewCell() {

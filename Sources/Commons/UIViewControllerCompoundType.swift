@@ -2,14 +2,10 @@ import SwiftAST
 import SwiftRewriterLib
 
 public enum UIViewControllerCompoundType {
-    private static var signature: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "UIViewController")
     
     public static func create() -> CompoundedMappingType {
-        return signature
-    }
-    
-    private static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString(), typeName: "UIViewController")
+        return singleton
     }
     
     private static func typeString() -> String {

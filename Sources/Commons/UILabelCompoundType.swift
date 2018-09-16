@@ -2,14 +2,10 @@ import SwiftAST
 import SwiftRewriterLib
 
 public enum UILabelCompoundType {
-    private static var signature: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "UILabel")
     
     public static func create() -> CompoundedMappingType {
-        return signature
-    }
-    
-    private static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString(), typeName: "UILabel")
+        return singleton
     }
     
     private static func typeString() -> String {
