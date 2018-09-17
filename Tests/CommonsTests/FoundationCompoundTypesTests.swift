@@ -232,11 +232,12 @@ class FoundationCompoundTypesTests: XCTestCase {
         let type = FoundationCompoundTypes.nsLocale.create()
         
         XCTAssertEqual(type.nonCanonicalNames, ["NSLocale"])
-        XCTAssertEqual(type.transformations.count, 1)
+        XCTAssertEqual(type.transformations.count, 2)
         
         assertSignature(type: type, matches: """
             @_swiftrewriter(renameFrom: NSLocale)
             struct Locale: Hashable, Equatable {
+                @_swiftrewriter(mapFrom: localeWithLocaleIdentifier(_:))
                 @_swiftrewriter(mapFrom: init(localeIdentifier:))
                 init(identifier: String)
             }

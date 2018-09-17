@@ -249,7 +249,6 @@ public enum NSDateFormatterCompoundType {
                 @_swiftrewriter(mapFrom: setDateFormat(_:))
                 var dateFormat: String!
                 
-                
                 @_swiftrewriter(mapFrom: stringFromDate(_:))
                 func string(from date: Date) -> String
                 
@@ -279,8 +278,7 @@ public enum NSDateCompoundType {
                 static var timeIntervalSinceReferenceDate: TimeInterval { get }
                 var timeIntervalSinceNow: TimeInterval { get }
                 var timeIntervalSince1970: TimeInterval { get }
-
-
+                
                 @_swiftrewriter(mapFrom: date() -> Date)
                 init()
                 static func date() -> Date
@@ -299,10 +297,10 @@ public enum NSDateCompoundType {
 
                 @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
                 func timeIntervalSince(_ date: Date) -> TimeInterval
-
+                
                 @_swiftrewriter(mapToBinary: ==)
                 func isEqual(_ other: AnyObject) -> Bool
-
+                
                 @_swiftrewriter(mapToBinary: ==)
                 func isEqualToDate(_ other: Date) -> Bool
             }
@@ -323,6 +321,7 @@ public enum NSLocaleCompoundType {
         let type = """
             @_swiftrewriter(renameFrom: NSLocale)
             struct Locale: Hashable, Equatable {
+                @_swiftrewriter(mapFrom: localeWithLocaleIdentifier(_:))
                 @_swiftrewriter(mapFrom: init(localeIdentifier:))
                 init(identifier: String)
             }
