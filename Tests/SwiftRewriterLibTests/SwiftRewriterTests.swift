@@ -2568,33 +2568,4 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
-    
-    func testOptionalProtocolInvocationOptionalAccess() {
-        assertObjcParse(
-            objc: """
-            @protocol Protocol <NSObject>
-            @optional
-            - (BOOL)method;
-            @end
-            
-            void test() {
-                id<Protocol> prot;
-                
-                if([prot method]) {
-                }
-            }
-            """,
-            swift: """
-            func test() {
-                let prot: Protocol!
-                if prot.method?() == true {
-                }
-            }
-            
-            @objc
-            protocol Protocol: NSObjectProtocol {
-                @objc optional func method() -> Bool
-            }
-            """)
-    }
 }

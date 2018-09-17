@@ -1186,4 +1186,36 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testOptionalProtocolInvocationOptionalAccess() {
+        assertObjcParse(
+            objc: """
+            @protocol Protocol <NSObject>
+            @optional
+            - (BOOL)method;
+            @end
+            
+            void test() {
+                id<Protocol> prot;
+                [prot method];
+                if([prot method]) {
+                }
+            }
+            """,
+            swift: """
+            func test() {
+                let prot: Protocol!
+                // type: Bool?
+                prot.method?()
+                if prot.method?() == true {
+                }
+            }
+            
+            @objc
+            protocol Protocol: NSObjectProtocol {
+                @objc optional func method() -> Bool
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }
