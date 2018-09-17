@@ -1,11 +1,11 @@
 public enum CompoundedMappingTypeList {
     public static func typeList() -> [CompoundedMappingType] {
         return [
+            UIResponderCompoundType.create(),
             UIViewCompoundType.create(),
             UIColorCompoundType.create(),
             UIGestureRecognizerCompoundType.create(),
             UILabelCompoundType.create(),
-            UIGestureRecognizerCompoundType.create(),
             UIViewControllerCompoundType.create(),
             FoundationCompoundTypes.nsCalendar.create(),
             FoundationCompoundTypes.nsArray.create(),
