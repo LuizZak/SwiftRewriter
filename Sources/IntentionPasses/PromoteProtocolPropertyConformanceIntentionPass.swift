@@ -43,15 +43,26 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
                     continue
                 }
                 
-                apply(to: type, protocol: protType)
+                let interfaces = types.filter {
+                    $0 !== type && $0.typeName == $0.typeName && $0.isInterfaceSource
+                }
+                
+                apply(to: type, interfaces: interfaces, protocol: protType)
             }
         }
         
         typeSystem?.tearDownCache()
     }
     
-    private func apply(to type: BaseClassIntention, protocol prot: KnownType) {
+    private func apply(to type: BaseClassIntention,
+                       interfaces: [BaseClassIntention],
+                       protocol prot: KnownType) {
+        
         for prop in prot.knownProperties {
+            if interfaces.contains(where: { $0.hasProperty(named: prop.name) }) {
+                continue
+            }
+            
             let ident = FunctionIdentifier(name: prop.name, parameterNames: [])
             let methods = type.methods(matching: ident)
             guard methods.count == 1 else {
