@@ -1225,6 +1225,19 @@ class ExpressionTypeResolverTests: XCTestCase {
             .resolve()
             .thenAssertExpression(resolvedAs: .string)
     }
+    
+    func testInvocationOfOptionalProtocolRequirement() {
+        startScopedTest(with: Expression.identifier("prot").dot("method").call(),
+                        sut: ExpressionTypeResolver())
+            .definingLocal(name: "prot", type: "Protocol")
+            .definingType(named: "Protocol") { type in
+                type.settingKind(KnownTypeKind.protocol)
+                    .method(named: "method", returning: .bool, optional: true)
+                    .build()
+            }
+            .resolve()
+            .thenAssertExpression(resolvedAs: .optional(.bool))
+    }
 }
 
 // MARK: - Test Building Helpers

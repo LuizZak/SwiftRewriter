@@ -885,15 +885,24 @@ private class MemberInvocationResolver {
                 return postfix.makeErrorTyped()
             }
             
+            let signature = method.signature
+            
             member.memberDefinition = method
+            member.returnType = signature.swiftClosureType
             
-            postfix.exp.resolvedType = method.signature.swiftClosureType
-            postfix.resolvedType = method.signature.returnType
+            postfix.exp.resolvedType = signature.swiftClosureType
+            postfix.resolvedType = signature.returnType
             
-            functionCall.returnType = method.signature.returnType
-            functionCall.callableSignature = method.signature.swiftClosureType
+            functionCall.returnType = signature.returnType
+            functionCall.callableSignature = signature.swiftClosureType
             
-            matchParameterTypes(parameters: method.signature.parameters, callArguments: functionCall.arguments)
+            if method.optional {
+                member.returnType = member.returnType?.asOptional
+                postfix.exp.resolvedType = postfix.exp.resolvedType?.asOptional
+                postfix.resolvedType = postfix.resolvedType?.asOptional
+            }
+            
+            matchParameterTypes(parameters: signature.parameters, callArguments: functionCall.arguments)
             
             return postfix
         }
