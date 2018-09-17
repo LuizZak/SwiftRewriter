@@ -104,4 +104,33 @@ class PromoteProtocolPropertyConformanceIntentionPassTests: XCTestCase {
         XCTAssertEqual(type.methods.count, 1)
         XCTAssertEqual(type.properties.count, 0)
     }
+    
+    func testDontDuplicatePropertyImplementations_2() {
+        // Tests a variant of the case above (of not emitting duplicated properties),
+        // but this time post-file-merge
+        
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.m") { file in
+                    file.createProtocol(withName: "A") { prot in
+                        prot.createProperty(named: "a", type: .int)
+                    }
+                    file.createClass(withName: "B") { builder in
+                        builder
+                            .createConformance(protocolName: "A")
+                            .createProperty(named: "a", type: .int)
+                            .createMethod(named: "a", returnType: .int) { method in
+                                method.setBody([.return(.constant(0))])
+                            }
+                    }
+                }.build()
+        let sut = PromoteProtocolPropertyConformanceIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let type = intentions.fileIntentions()[0].classIntentions[0]
+        XCTAssertEqual(intentions.fileIntentions()[0].sourcePath, "A.m")
+        XCTAssertEqual(type.methods.count, 1)
+        XCTAssertEqual(type.properties.count, 1)
+    }
 }

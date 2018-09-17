@@ -62,6 +62,9 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
             if interfaces.contains(where: { $0.hasProperty(named: prop.name) }) {
                 continue
             }
+            if type.hasProperty(named: prop.name) {
+                continue
+            }
             
             let ident = FunctionIdentifier(name: prop.name, parameterNames: [])
             let methods = type.methods(matching: ident)

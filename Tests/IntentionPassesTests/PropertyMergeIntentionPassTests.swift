@@ -718,7 +718,11 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                     file.createExtension(forClassNamed: "A") { type in
                         type.createMethod(named: "setA", parameters: [ParameterSignature(label: nil, name: "a", type: .int)]) { method in
                                     method.setBody([
-                                        .expression(Expression.identifier("self").dot("b").assignment(op: .assign, rhs: .identifier("a")))
+                                        .expression(Expression
+                                            .identifier("self")
+                                            .dot("b")
+                                            .assignment(op: .assign, rhs: .identifier("a"))
+                                        )
                                     ])
                                 }
                             }.createClass(withName: "A") { type in
@@ -727,10 +731,12 @@ class PropertyMergeIntentionPassTests: XCTestCase {
                             }
                 }.build()
         let cls = intentions.classIntentions()[0]
+        let ext = intentions.extensionIntentions()[0]
         let sut = PropertyMergeIntentionPass()
         
         sut.apply(on: intentions, context: makeContext(intentions: intentions))
         
+        XCTAssertEqual(ext.instanceVariables.count, 0)
         XCTAssertEqual(cls.instanceVariables.count, 1)
         XCTAssertEqual(cls.instanceVariables.first?.name, "b")
         XCTAssertEqual(cls.instanceVariables.first?.type, .int)
@@ -879,6 +885,30 @@ class PropertyMergeIntentionPassTests: XCTestCase {
         default:
             XCTFail("Unexpected property mode \(cls.properties.first?.mode as Any)")
         }
+    }
+    
+    func testMergePropertyFromExtension() {
+        let intentions =
+            IntentionCollectionBuilder()
+                .createFile(named: "A.m") { file in
+                    file.createExtension(forClassNamed: "A", categoryName: "Ext") { ext in
+                        ext.setAsCategoryImplementation(categoryName: "Ext")
+                            .createProperty(named: "a", type: .int, attributes: [.readonly])
+                            .createMethod(named: "a", returnType: .int) { method in
+                                method.setBody([.return(.constant(0))])
+                            }
+                    }
+                }
+                .build()
+        let sut = PropertyMergeIntentionPass()
+        
+        sut.apply(on: intentions, context: makeContext(intentions: intentions))
+        
+        let file = intentions.intentionFor(fileNamed: "A.m")!
+        let type = file.extensionIntentions[0]
+        XCTAssertEqual(type.methods.count, 0)
+        XCTAssertEqual(type.properties.count, 1)
+        XCTAssertEqual(type.properties[0].getter?.body, [.return(.constant(0))])
     }
 }
 

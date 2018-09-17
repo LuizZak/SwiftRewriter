@@ -561,7 +561,48 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             @end
 
             @interface NSString (QuickDateExtensions) <DateConvertible>
+            
+            @end
+            """)
+            .file(name: "A.m", """
+            @implementation NSString (QuickDateExtensions)
+            
+            - (NSDate*)asDate
+            {
+                return [NSDate date];
+            }
+            
+            @end
+            """)
+            .translatesToSwift("""
+            protocol DateConvertible {
+                var asDate: Date? { get }
+            }
 
+            // MARK: - QuickDateExtensions
+            extension String: DateConvertible {
+                var asDate: Date? {
+                    return Date()
+                }
+            }
+            // End of file A.swift
+            """)
+    }
+    
+    func testMergePropertyConformanceWithMethodInImplementationSynergy() {
+        assertThat()
+            .file(name: "A.h", """
+            @protocol DateConvertible <NSObject>
+            
+            @property (nullable, readonly) NSDate *asDate;
+
+            @end
+
+            @interface NSString (QuickDateExtensions) <DateConvertible>
+            
+            // This should not be duplicated on the final emitted type!
+            @property (nullable, readonly) NSDate *asDate;
+            
             @end
             """)
             .file(name: "A.m", """
