@@ -9,17 +9,15 @@ public enum FoundationCompoundTypes {
     public static let nsDateFormatter = NSDateFormatterCompoundType.self
     public static let nsDate = NSDateCompoundType.self
     public static let nsLocale = NSLocaleCompoundType.self
+    public static let nsString = NSStringCompoundType.self
+    public static let nsMutableString = NSMutableStringCompoundType.self
 }
 
 public enum CalendarCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "Calendar")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString(), typeName: "Calendar")
     }
     
     static func typeString() -> String {
@@ -232,14 +230,10 @@ public enum NSMutableArrayCompoundType {
 }
 
 public enum NSDateFormatterCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "DateFormatter")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString(), typeName: "DateFormatter")
     }
     
     static func typeString() -> String {
@@ -324,6 +318,68 @@ public enum NSLocaleCompoundType {
                 @_swiftrewriter(mapFrom: localeWithLocaleIdentifier(_:))
                 @_swiftrewriter(mapFrom: init(localeIdentifier:))
                 init(identifier: String)
+            }
+            """
+        
+        return type
+    }
+}
+
+public enum NSStringCompoundType {
+    private static var singleton = makeType(from: typeString(), typeName: "NSString")
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSString: NSObject {
+            }
+            """
+        
+        return type
+    }
+}
+
+public enum NSMutableStringCompoundType {
+    private static var singleton = makeType(from: typeString(), typeName: "NSMutableString")
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSMutableString: NSString {
+                @_swiftrewriter(mapFrom: stringWithCapacity(_:))
+                public init(capacity: Int)
+                
+                @_swiftrewriter(mapFrom: replaceCharactersInRange(_:withString:))
+                open func replaceCharacters(in range: NSRange, with aString: String)
+                
+                @_swiftrewriter(mapFrom: insertString(_:atIndex:))
+                open func insert(_ aString: String, at loc: Int)
+                
+                @_swiftrewriter(mapFrom: deleteCharactersInRange(_:))
+                open func deleteCharacters(in range: NSRange)
+                
+                @_swiftrewriter(mapFrom: appendString(_:))
+                open func append(_ aString: String)
+                
+                open func setString(_ aString: String)
+                
+                @_swiftrewriter(mapFrom: replaceOccurrencesOfString(_:withString:options:range:))
+                open func replaceOccurrences(of target: String,
+                                             with replacement: String,
+                                             options: NSString.CompareOptions = [],
+                                             range searchRange: NSRange) -> Int
+                
+                @available(iOS 9.0, *)
+                open func applyTransform(_ transform: StringTransform,
+                                         reverse: Bool,
+                                         range: NSRange,
+                                         updatedRange resultingRange: NSRangePointer?) -> Bool
             }
             """
         

@@ -12,7 +12,9 @@ public enum CompoundedMappingTypeList {
             FoundationCompoundTypes.nsMutableArray.create(),
             FoundationCompoundTypes.nsDateFormatter.create(),
             FoundationCompoundTypes.nsDate.create(),
-            FoundationCompoundTypes.nsLocale.create()
+            FoundationCompoundTypes.nsLocale.create(),
+            FoundationCompoundTypes.nsString.create(),
+            FoundationCompoundTypes.nsMutableString.create()
         ]
     }
 }
