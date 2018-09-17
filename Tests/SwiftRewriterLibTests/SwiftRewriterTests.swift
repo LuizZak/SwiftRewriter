@@ -2593,7 +2593,7 @@ class SwiftRewriterTests: XCTestCase {
             
             @objc
             protocol Protocol: NSObjectProtocol {
-                @objc optional func method() -> Bool
+                optional func method() -> Bool
             }
             """)
     }
