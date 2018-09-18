@@ -5,6 +5,52 @@ import GrammarModels
 
 class SwiftRewriter_MultiFilesTests: XCTestCase {
     
+    func testReadmeSampleMerge() {
+        assertThat()
+            .file(name: "MyClass.h",
+            """
+            @interface MyClass : NSObject
+            @property (nonnull) NSString *name;
+            @property (nonnull) NSString *surname;
+
+            - (nonnull instancetype)initWithName:(nonnull NSString*)name surname:(nonnull NSString*)surname;
+            - (void)printMyName;
+            @end
+            """)
+            .file(name: "MyClass.m",
+            """
+            @implementation MyClass
+            - (instancetype)initWithName:(NSString*)name surname:(NSString*)surname {
+                self = [super init];
+                if(self) {
+                    self.name = name;
+                    self.surname = surname;
+                }
+                return self;
+            }
+            - (void)printMyName {
+                NSLog(@"%@ %@", self.name, self.surname);
+            }
+            @end
+            """)
+            .translatesToSwift("""
+            class MyClass: NSObject {
+                var name: String
+                var surname: String
+                
+                init(name: String, surname: String) {
+                    self.name = name
+                    self.surname = surname
+                    super.init()
+                }
+                func printMyName() {
+                    NSLog("%@ %@", self.name, self.surname)
+                }
+            }
+            // End of file MyClass.swift
+            """)
+    }
+    
     func testEmittingHeaderWhenMissingImplementation() {
         assertThat()
             .file(name: "objc.h",

@@ -96,6 +96,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         //
         // is rewritten as:
         //
+        //   self.property = property
         //   super.init()
         //
         
@@ -187,6 +188,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         //
         // is rewritten as:
         //
+        //   self.property = property;
         //   super.init()
         //
         
