@@ -149,19 +149,12 @@ public class UIKitExpressionPass: BaseExpressionPass {
 }
 
 extension UIKitExpressionPass {
-    func makeSignatureTransformers() {
-//        addCompoundedType(UIViewCompoundType.create())
-//        addCompoundedType(UIGestureRecognizerCompoundType.create())
-//        addCompoundedType(UIColorCompoundType.create())
-    }
-    
     func makeEnumTransformers() {
         makeNSTextAlignmentTransformers()
         makeUIFontEnumTransformers()
     }
     
     func makeFunctionTransformers() {
-        makeSignatureTransformers()
         makeUIFontTransformers()
         makeUIColorTransformes()
     }
