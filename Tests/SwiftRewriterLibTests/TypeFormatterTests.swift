@@ -129,6 +129,13 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3))
     }
     
+    func testAsStringParameterDefaultValue() {
+        let parameters = [
+            ParameterSignature(label: "label", name: "name", type: .int, hasDefaultValue: true)
+        ]
+        XCTAssertEqual("(label name: Int = default)", TypeFormatter.asString(parameters: parameters))
+    }
+    
     func testAsStringKnownType() {
         let type = KnownTypeBuilder(typeName: "A", kind: .struct)
             .settingAttributes([KnownAttribute(name: "attr", parameters: nil)])

@@ -239,7 +239,7 @@ class FunctionSignatureParserTests: XCTestCase {
                parseInto: FunctionSignature(
                 name: "function",
                 parameters: [
-                    ParameterSignature(name: "a", type: .int)
+                    ParameterSignature(name: "a", type: .int, hasDefaultValue: true)
                 ],
                 returnType: .void,
                 isStatic: false
@@ -252,7 +252,7 @@ class FunctionSignatureParserTests: XCTestCase {
                parseInto: FunctionSignature(
                 name: "function",
                 parameters: [
-                    ParameterSignature(name: "a", type: "Options")
+                    ParameterSignature(name: "a", type: "Options", hasDefaultValue: true)
                 ],
                 returnType: .void,
                 isStatic: false
