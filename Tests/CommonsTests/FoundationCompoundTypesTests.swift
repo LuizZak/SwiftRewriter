@@ -163,7 +163,7 @@ class FoundationCompoundTypesTests: XCTestCase {
                 func sort(comparator cmptr: (Any, Any) -> ComparisonResult)
                 
                 @available(OSX 10.6, *)
-                func sort(options opts: NSSortOptions, usingComparator cmptr: (Any, Any) -> ComparisonResult)
+                func sort(options opts: NSSortOptions = default, usingComparator cmptr: (Any, Any) -> ComparisonResult)
             }
             """)
     }
