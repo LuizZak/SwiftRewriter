@@ -107,3 +107,23 @@ class MyClass: NSObject {
     }
 }
 ```
+
+#### Project goals
+
+This is mostly a side project of mine to train my Swift and architecture chops. That being said, there are a couple of main goals that I have in mind going forward with this:
+
+SwiftRewriter should:
+
+1. Always produce valid Swift syntax as output (not necessarily _semantically_ valid, though);
+2. Try to produce code that functions as close as possible to the original Objective-C source, with no surprises;
+3. Try to do as much as possible of the tedious laborious work of converting syntax and getting it ready for the user to make the last manual changes that will inevitably be necessary;
+4. Whenever possible, make automatic, semantically correct transformations that will save the user some time from doing it manually later;
+5. Be extensible, as far as writing a new syntax/type-structure transformation pass is concerned.
+
+Some other libraries and resources that are also concerned with automating the process of converting Objective-C to Swift to some degree include that I think are worth mentioning:
+
+- [Yahoo's Objc2Swift](https://github.com/yahoojapan/objc2swift) makes language transformations, but it has shortcomings as far as making large transpilations go: Its grammar implementation lacks modern Objective-C features (such as generic types), and it makes no semantic transformations, doing AST conversions only. Main inspiration for writing this tool, I just thought augmenting it with a more modern Objective-C syntax and some semantical awareness would be nifty.
+
+- [Objc2Swift.js](http://okaxaki.github.io/objc2swift/index.html) is a more fully-fledged, nifty converter that is semantically-aware and attempts to produce working code while respecting semantics, but it does not currently support emitting Swift 3 and 4-compatible code.
+
+- [Swiftify](https://objectivec2swift.com/) is a comercial product which does many high and low-level transformations, producing code that appears to be (I haven't tested it much, tbh) nearly fully-functioning Swift code.
