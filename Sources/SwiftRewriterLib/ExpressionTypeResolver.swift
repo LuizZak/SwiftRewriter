@@ -242,7 +242,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         _=super.visitUnary(exp)
         
-        // Propagte error type
+        // Propagate error type
         if exp.exp.isErrorTyped {
             return exp.makeErrorTyped()
         }
@@ -275,7 +275,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         _=super.visitCast(exp)
         
-        // Propagte error type
+        // Propagate error type
         if exp.exp.isErrorTyped {
             return exp.makeErrorTyped()
         }
@@ -304,7 +304,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         exp.rhs.expectedType = exp.lhs.resolvedType
         exp.rhs = visitExpression(exp.rhs)
         
-        // Propagte error type
+        // Propagate error type
         if exp.lhs.isErrorTyped || exp.rhs.isErrorTyped {
             return exp.makeErrorTyped()
         }
@@ -317,13 +317,15 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         if ignoreResolvedExpressions && exp.isTypeResolved { return exp }
         
+        // Preset logical operator expectations
+        if exp.op.category == .logical {
+            exp.lhs.expectedType = .bool
+            exp.rhs.expectedType = .bool
+        }
+        
         exp.lhs = visitExpression(exp.lhs)
         
         switch exp.op.category {
-        case .logical:
-            exp.lhs.expectedType = .bool
-            exp.rhs.expectedType = .bool
-            
         case .nullCoalesce:
             exp.rhs.expectedType = exp.lhs.resolvedType?.deepUnwrapped
             
@@ -333,7 +335,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         
         exp.rhs = visitExpression(exp.rhs)
         
-        // Propagte error type
+        // Propagate error type
         if exp.lhs.isErrorTyped || exp.rhs.isErrorTyped {
             return exp.makeErrorTyped()
         }

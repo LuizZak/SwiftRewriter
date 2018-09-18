@@ -501,19 +501,6 @@ public final class SwiftClassInterfaceParser {
     ///     | 'mapToBinary' ':' swift-operator
     ///     | 'renameFrom' ':' identifier
     ///     ;
-    ///
-    /// function-identifier
-    ///     : identifier '(' parameter-identifiers? ')'
-    ///     ;
-    ///
-    /// parameter-identifiers
-    ///     : parameter-identifier+
-    ///     ;
-    ///
-    /// parameter-identifier
-    ///     : identifier ':'
-    ///     | '_' ':'
-    ///     ;
     /// ```
     ///
     /// Support for parsing Swift function signatures and identifiers is borrowed
