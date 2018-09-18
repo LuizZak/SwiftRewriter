@@ -169,6 +169,12 @@ public protocol TypeSystem {
     func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty?
 }
 
+extension TypeSystem {
+    func overloadResolver() -> OverloadResolver {
+        return OverloadResolver(typeSystem: self)
+    }
+}
+
 public enum TypeCategory {
     case integer
     case float

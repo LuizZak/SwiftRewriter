@@ -978,13 +978,13 @@ private class MemberInvocationResolver {
     func findBestMatch(_ functions: [FunctionSignature],
                        matching arguments: [FunctionArgument]) -> FunctionSignature? {
         
-        // TODO: Matching a best candidate out of an overload set should be the
-        // type system's job.
         let argTypes = arguments.map { $0.expression.resolvedType }
         
-        if let index = _applyOverloadResolution(signatures: functions,
-                                                argumentTypes: argTypes,
-                                                typeSystem: typeSystem) {
+        if let index =
+            typeSystem
+                .overloadResolver()
+                .applyOverloadResolution(signatures: functions,
+                                         argumentTypes: argTypes) {
             
             return functions[index]
         }
