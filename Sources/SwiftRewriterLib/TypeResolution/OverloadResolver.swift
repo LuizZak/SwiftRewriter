@@ -8,16 +8,17 @@ class OverloadResolver {
         self.typeSystem = typeSystem
     }
     
+    /// Returns a matching resolution by index on a given array of methods.
     ///
     /// - precondition:
     ///     for all methods `M` in `methods`,
     ///     `M.signature.parameters.count == argumentTypes.count`
     ///
-    func applyOverloadResolution(methods: [KnownMethod],
-                                 argumentTypes: [SwiftType?]) -> KnownMethod? {
+    func findBestOverload(in methods: [KnownMethod],
+                          argumentTypes: [SwiftType?]) -> KnownMethod? {
         
         let signatures = methods.map { $0.signature }
-        if let index = applyOverloadResolution(signatures: signatures,
+        if let index = findBestOverload(inSignatures: signatures,
                                                argumentTypes: argumentTypes) {
             return methods[index]
         }
@@ -31,8 +32,8 @@ class OverloadResolver {
     ///     for all methods `M` in `methods`,
     ///     `M.signature.parameters.count == argumentTypes.count`
     ///
-    func applyOverloadResolution(signatures: [FunctionSignature],
-                                 argumentTypes: [SwiftType?]) -> Int? {
+    func findBestOverload(inSignatures signatures: [FunctionSignature],
+                          argumentTypes: [SwiftType?]) -> Int? {
         
         if signatures.isEmpty {
             return nil
@@ -100,5 +101,4 @@ class OverloadResolver {
         // Return first candidate found
         return candidates.first?.offset
     }
-
 }

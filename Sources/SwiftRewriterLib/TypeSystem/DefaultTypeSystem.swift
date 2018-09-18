@@ -592,7 +592,7 @@ public class DefaultTypeSystem: TypeSystem {
                 
                 if let method =
                     overloadResolver()
-                        .applyOverloadResolution(methods: methods,
+                        .findBestOverload(in: methods,
                                                  argumentTypes: invocationTypeHints) {
                     
                     return method

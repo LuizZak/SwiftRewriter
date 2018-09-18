@@ -192,7 +192,7 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         return overloadResolver()
-            .applyOverloadResolution(methods: methods,
+            .findBestOverload(in: methods,
                                      argumentTypes: invocationTypeHints)
     }
     
