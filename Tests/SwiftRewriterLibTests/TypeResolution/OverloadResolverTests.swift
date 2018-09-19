@@ -160,6 +160,17 @@ class OverloadResolverTests: XCTestCase {
         XCTAssertEqual(index, 1)
     }
     
+    func testOverloadResolveWithDefaultArgument() throws {
+        let signatures: [FunctionSignature] = [
+            try FunctionSignature(signatureString: "foo(b: Int, c: Int)"),
+            try FunctionSignature(signatureString: "foo(a: Int = default)")
+        ]
+        
+        let index = sut.findBestOverload(inSignatures: signatures, argumentTypes: [])
+        
+        XCTAssertEqual(index, 1)
+    }
+    
     // FIXME: Making this pass would not be vital, but would also be nice for
     // completeness sake.
     func xtestMatchFavoringSameOptionalityWithPolymorphism() throws {

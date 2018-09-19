@@ -805,6 +805,23 @@ class DefaultTypeSystemTests: XCTestCase {
         )
     }
     
+    func testDetectMethodWithDefaultArgumentValue() {
+        let type =
+            KnownTypeBuilder(typeName: "Test")
+                .settingUseSwiftSignatureMatching(true)
+                .method(named: "method", parsingSignature: "(value: Int, flags: Int = default)")
+                .build()
+        sut.addType(type)
+        
+        XCTAssertNotNil(
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["method", "value"]),
+                       invocationTypeHints: [.int],
+                       static: false,
+                       includeOptional: false,
+                       in: type)
+        )
+    }
+    
     func testCanonicalTypeName() {
         let provider = CollectionKnownTypeProvider()
         provider.addCanonicalMapping(nonCanonical: "NSLocale", canonical: "Locale")

@@ -570,7 +570,7 @@ public class DefaultTypeSystem: TypeSystem {
                 .filter {
                     $0.isStatic == isStatic
                         && (includeOptional || !$0.optional)
-                        && $0.signature.asSelector == selector
+                        && $0.signature.possibleSelectorSignatures().contains(selector)
                 }
         
         if !methods.isEmpty {

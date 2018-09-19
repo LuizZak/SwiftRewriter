@@ -1,7 +1,7 @@
 import SwiftAST
 
 /// Represents an Objective-C selector signature.
-public struct SelectorSignature: Equatable, Codable {
+public struct SelectorSignature: Hashable, Codable {
     public var isStatic: Bool
     public var keywords: [String?]
     
