@@ -57,7 +57,9 @@ class OverloadResolver {
                         
                         let parameterType = signature.parameters[argIndex].type
                         
-                        if !typeSystem.typesMatch(argumentType, parameterType, ignoreNullability: false) {
+                        if !typeSystem.typesMatch(argumentType,
+                                                  parameterType,
+                                                  ignoreNullability: false) {
                             break
                         }
                         

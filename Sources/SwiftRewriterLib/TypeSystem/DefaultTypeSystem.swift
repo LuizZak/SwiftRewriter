@@ -334,16 +334,17 @@ public class DefaultTypeSystem: TypeSystem {
         // For nominal types, check for subtyping conformance
         if case .nominal(let nominalType) = unaliasedType,
             case .nominal(let nominalBaseType) = unaliasedBaseType {
-            
+
             let typeName = typeNameIn(nominalType: nominalType)
             let baseTypeName = typeNameIn(nominalType: nominalBaseType)
-            
+
             return isType(typeName, subtypeOf: baseTypeName) ||
                 isType(typeName, conformingTo: baseTypeName)
         }
         
         // TODO: Convert into this switch later; currently it crashes during
-        // runtime, most likely due to a compiler bug.
+        // runtime because Swift is failing to detect the switch as non-exhaustive.
+        // Care should be taken when switching over SwiftTypes elsewhere, too.
         #if false
         
         switch (unaliasedType, unaliasedBaseType) {
