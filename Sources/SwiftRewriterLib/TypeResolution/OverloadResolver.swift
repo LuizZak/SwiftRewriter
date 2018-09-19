@@ -39,23 +39,34 @@ class OverloadResolver {
             return nil
         }
         
-        // All argument types are nil, or no argument types are available: no best
-        // candidate can be decided.
-        if argumentTypes.isEmpty || argumentTypes.allSatisfy({ $0 == nil }) {
-            return 0
+        let signatureCandidates = produceCandidates(from: signatures)
+        
+        // All argument types are nil, or no signature matches the available type
+        // count: no best candidate can be decided.
+        if !signatureCandidates.contains(where: { $0.argumentCount == argumentTypes.count })
+            || (!argumentTypes.isEmpty && argumentTypes.allSatisfy({ $0 == nil })) {
+            return nil
         }
         
         // Start with a linear search for the first fully matching method signature
         let allArgumentsPresent = argumentTypes.allSatisfy { $0 != nil }
         if allArgumentsPresent {
             outerLoop:
-                for (i, signature) in signatures.enumerated() {
+                for candidate in signatureCandidates {
+                    if argumentTypes.isEmpty && candidate.argumentCount == 0 {
+                        return candidate.inputIndex
+                    }
+                    guard argumentTypes.count == candidate.argumentCount else {
+                        continue
+                    }
+                    
                     for (argIndex, argumentType) in argumentTypes.enumerated() {
                         guard let argumentType = argumentType else {
                             break outerLoop
                         }
                         
-                        let parameterType = signature.parameters[argIndex].type
+                        let parameterType =
+                            candidate.signature.parameters[argIndex].type
                         
                         if !typeSystem.typesMatch(argumentType,
                                                   parameterType,
@@ -65,7 +76,7 @@ class OverloadResolver {
                         
                         if argIndex == argumentTypes.count - 1 {
                             // Candidate matches fully
-                            return i
+                            return candidate.inputIndex
                         }
                     }
             }
@@ -73,7 +84,7 @@ class OverloadResolver {
         
         // Do a lookup ignoring type nullability to attempt to find best-matching
         // candidates, now
-        var candidates = Array(signatures.enumerated())
+        var candidates = signatureCandidates
         
         for (argIndex, argumentType) in argumentTypes.enumerated() {
             guard candidates.count > 1, let argumentType = argumentType else {
@@ -87,7 +98,7 @@ class OverloadResolver {
                 
                 for (i, signature) in candidates.enumerated() {
                     let parameterType =
-                        signature.element.parameters[argIndex].type
+                        signature.signature.parameters[argIndex].type
                     
                     if !typeSystem.isType(argumentType.deepUnwrapped,
                                           assignableTo: parameterType.deepUnwrapped) {
@@ -101,6 +112,31 @@ class OverloadResolver {
         }
         
         // Return first candidate found
-        return candidates.first?.offset
+        return candidates.first?.inputIndex
+    }
+    
+    private func produceCandidates(from signatures: [FunctionSignature]) -> [OverloadCandidate] {
+        var overloads: [OverloadCandidate] = []
+        
+        for (i, signature) in signatures.enumerated() {
+            for selector in signature.possibleSelectorSignatures() {
+                let candidate =
+                    OverloadCandidate(selector: selector,
+                                      signature: signature,
+                                      inputIndex: i,
+                                      argumentCount: selector.keywords.count - 1)
+                
+                overloads.append(candidate)
+            }
+        }
+        
+        return overloads
+    }
+    
+    private struct OverloadCandidate {
+        var selector: SelectorSignature
+        var signature: FunctionSignature
+        var inputIndex: Int
+        var argumentCount: Int
     }
 }

@@ -28,6 +28,17 @@ class OverloadResolverTests: XCTestCase {
         XCTAssertEqual(index, 1)
     }
     
+    func testOverloadResolverWithEmptyFunction() throws {
+        let signatures: [FunctionSignature] = [
+            try FunctionSignature(signatureString: "foo(a: Int, b: Bool)"),
+            try FunctionSignature(signatureString: "foo()")
+        ]
+        
+        let index = sut.findBestOverload(inSignatures: signatures, argumentTypes: [])
+        
+        XCTAssertEqual(index, 1)
+    }
+    
     func testResolveWithIncompleteArgumentTypes() throws {
         let argumentTypes: [SwiftType?] = [
             .int,
@@ -169,6 +180,48 @@ class OverloadResolverTests: XCTestCase {
         let index = sut.findBestOverload(inSignatures: signatures, argumentTypes: [])
         
         XCTAssertEqual(index, 1)
+    }
+    
+    func testOverloadResolveWithDefaultArgumentNonEmptyArgumentCount() throws {
+        let argumentTypes: [SwiftType?] = [
+            .int, .int, .int
+        ]
+        let signatures: [FunctionSignature] = [
+            try FunctionSignature(signatureString: "foo(b: Int, c: Int)"),
+            try FunctionSignature(signatureString: "foo(a: Int, c: Int, d: Int = default)")
+        ]
+        
+        let index = sut.findBestOverload(inSignatures: signatures, argumentTypes: argumentTypes)
+        
+        XCTAssertEqual(index, 1)
+    }
+    
+    func testResolveWithOverloadWithDefaultArgumentValueAtEnd() throws {
+        let argumentTypes: [SwiftType?] = [
+            .int, .int
+        ]
+        let signatures: [FunctionSignature] = [
+            try FunctionSignature(signatureString: "foo(b: Int)"),
+            try FunctionSignature(signatureString: "foo(a: Int, c: Int, d: Int = default)")
+        ]
+        
+        let index = sut.findBestOverload(inSignatures: signatures, argumentTypes: argumentTypes)
+        
+        XCTAssertEqual(index, 1)
+    }
+    
+    func testOverloadsWithDefaultArgumentsNoResolution() throws {
+        let argumentTypes: [SwiftType?] = [
+            .int
+        ]
+        let signatures: [FunctionSignature] = [
+            try FunctionSignature(signatureString: "foo()"),
+            try FunctionSignature(signatureString: "foo(a: Int, c: Int, d: Int = default)")
+        ]
+        
+        let index = sut.findBestOverload(inSignatures: signatures, argumentTypes: argumentTypes)
+        
+        XCTAssertNil(index)
     }
     
     // FIXME: Making this pass would not be vital, but would also be nice for
