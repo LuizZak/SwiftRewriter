@@ -19,7 +19,7 @@ class OverloadResolver {
         
         let signatures = methods.map { $0.signature }
         if let index = findBestOverload(inSignatures: signatures,
-                                               argumentTypes: argumentTypes) {
+                                        argumentTypes: argumentTypes) {
             return methods[index]
         }
         

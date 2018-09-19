@@ -983,8 +983,7 @@ private class MemberInvocationResolver {
         if let index =
             typeSystem
                 .overloadResolver()
-                .findBestOverload(inSignatures: functions,
-                                         argumentTypes: argTypes) {
+                .findBestOverload(inSignatures: functions, argumentTypes: argTypes) {
             
             return functions[index]
         }
