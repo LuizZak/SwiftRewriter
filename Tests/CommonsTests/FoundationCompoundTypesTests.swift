@@ -232,13 +232,59 @@ class FoundationCompoundTypesTests: XCTestCase {
         let type = FoundationCompoundTypes.nsLocale.create()
         
         XCTAssertEqual(type.nonCanonicalNames, ["NSLocale"])
-        XCTAssertEqual(type.transformations.count, 1)
+        XCTAssertEqual(type.transformations.count, 2)
         
         assertSignature(type: type, matches: """
             @_swiftrewriter(renameFrom: NSLocale)
             struct Locale: Hashable, Equatable {
+                @_swiftrewriter(mapFrom: localeWithLocaleIdentifier(_:))
                 @_swiftrewriter(mapFrom: init(localeIdentifier:))
                 init(identifier: String)
+            }
+            """)
+    }
+    
+    func testNSStringDefinition() {
+        let type = FoundationCompoundTypes.nsString.create()
+        
+        XCTAssertEqual(type.nonCanonicalNames, [])
+        XCTAssertEqual(type.transformations.count, 0)
+        
+        assertSignature(type: type, matches: """
+            class NSString: NSObject {
+            }
+            """)
+    }
+    
+    func testNSMutableStringDefinition() {
+        let type = FoundationCompoundTypes.nsMutableString.create()
+        
+        XCTAssertEqual(type.nonCanonicalNames, [])
+        XCTAssertEqual(type.transformations.count, 6)
+        
+        assertSignature(type: type, matches: """
+            class NSMutableString: NSString {
+                @_swiftrewriter(mapFrom: stringWithCapacity(_:))
+                init(capacity: Int)
+                
+                @_swiftrewriter(mapFrom: replaceCharactersInRange(_:withString:))
+                func replaceCharacters(in range: NSRange, with aString: String)
+                
+                @_swiftrewriter(mapFrom: insertString(_:atIndex:))
+                func insert(_ aString: String, at loc: Int)
+                
+                @_swiftrewriter(mapFrom: deleteCharactersInRange(_:))
+                func deleteCharacters(in range: NSRange)
+                
+                @_swiftrewriter(mapFrom: appendString(_:))
+                func append(_ aString: String)
+                func setString(_ aString: String)
+                
+                @_swiftrewriter(mapFrom: replaceOccurrencesOfString(_:withString:options:range:))
+                func replaceOccurrences(of target: String, with replacement: String, options: NSString.CompareOptions, range searchRange: NSRange) -> Int
+                
+                @available(iOS 9.0, *)
+                func applyTransform(_ transform: StringTransform, reverse: Bool, range: NSRange, updatedRange resultingRange: NSRangePointer?) -> Bool
             }
             """)
     }

@@ -806,8 +806,8 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
-                optional func myMethod()
-                optional func myMethod2()
+                @objc optional func myMethod()
+                @objc optional func myMethod2()
             }
 
             class A: NSObject, MyProtocol {
@@ -832,8 +832,8 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             protocol MyProtocol: NSObjectProtocol {
                 func f1()
-                optional func f2()
-                optional func f3()
+                @objc optional func f2()
+                @objc optional func f3()
                 func f4()
             }
             """)
@@ -2553,31 +2553,18 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
-    func testOptionalProtocolInvocationOptionalAccess() {
+    func testDateClassGetterCase() {
         assertObjcParse(
             objc: """
-            @protocol Protocol <NSObject>
-            @optional
-            - (BOOL)method;
-            @end
-            
             void test() {
-                id<Protocol> prot;
-                
-                if([prot method]) {
-                }
+                id obj = [Date date];
+                [objc isKindOfClass:[Date class]];
             }
             """,
             swift: """
             func test() {
-                let prot: Protocol!
-                if prot.method?() == true {
-                }
-            }
-            
-            @objc
-            protocol Protocol: NSObjectProtocol {
-                optional func method() -> Bool
+                let obj = Date()
+                objc.isKindOfClass(Date.self)
             }
             """)
     }

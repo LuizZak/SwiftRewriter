@@ -9,12 +9,14 @@ class UIResponderCompoundTypeTests: XCTestCase {
         let type = UIResponderCompoundType.create()
         
         XCTAssert(type.nonCanonicalNames.isEmpty)
-        XCTAssertEqual(type.transformations.count, 0)
+        XCTAssertEqual(type.transformations.count, 1)
         
         assertSignature(type: type, matches: """
             class UIResponder: NSObject, UIResponderStandardEditActions {
                 var canBecomeFirstResponder: Bool { get }
                 var canResignFirstResponder: Bool { get }
+                
+                @_swiftrewriter(renameFrom: firstResponder)
                 var isFirstResponder: UIResponder? { get }
                 var undoManager: UndoManager? { get }
                 

@@ -49,6 +49,21 @@ public class PropertyMergeIntentionPass: IntentionPass {
             }
         }
         
+        // Do a second run, this time collecting extensions for which there is no
+        // nominal primary declaration (i.e. categories for types imported from
+        // external dependencies)
+        for file in intentionCollection.fileIntentions() {
+            for cls in file.extensionIntentions {
+                if classesSeen.contains(cls.typeName) {
+                    continue
+                }
+                
+                classesSeen.insert(cls.typeName)
+                
+                matches.append(contentsOf: collectMatches(in: cls))
+            }
+        }
+        
         typeSystem?.tearDownCache()
         
         // Flatten properties now
@@ -57,7 +72,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             // If no action was taken, look into synthesizing a backing field
             // anyway, due to usage of backing field in any method of the type
-            if !acted {
+            if !acted && !(match.classIntention is ClassExtensionGenerationIntention) {
                 synthesizeBackingFieldIfUsing(in: match.classIntention, for: match.property)
                 adjustPropertySetterAccessLevel(in: match.classIntention, for: match.property)
             }
@@ -434,7 +449,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
                         """, relatedIntentions: [setter, propertySet.property])
                     .echoRecord(to: setter)
                     .echoRecord(to: propertySet.property)
-            } else {
+            } else if !(classIntention is ClassExtensionGenerationIntention) {
                 let field = synthesizeBackingField(for: propertySet.property, in: classIntention)
                 
                 setterOwner

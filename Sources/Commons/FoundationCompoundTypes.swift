@@ -9,17 +9,15 @@ public enum FoundationCompoundTypes {
     public static let nsDateFormatter = NSDateFormatterCompoundType.self
     public static let nsDate = NSDateCompoundType.self
     public static let nsLocale = NSLocaleCompoundType.self
+    public static let nsString = NSStringCompoundType.self
+    public static let nsMutableString = NSMutableStringCompoundType.self
 }
 
 public enum CalendarCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "Calendar")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
     }
     
     static func typeString() -> String {
@@ -38,14 +36,10 @@ public enum CalendarCompoundType {
 }
 
 public enum NSArrayCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "NSArray")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-       return makeType(from: typeString())
     }
     
     static func typeString() -> String {
@@ -236,14 +230,10 @@ public enum NSMutableArrayCompoundType {
 }
 
 public enum NSDateFormatterCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "DateFormatter")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
     }
     
     static func typeString() -> String {
@@ -252,7 +242,6 @@ public enum NSDateFormatterCompoundType {
                 @_swiftrewriter(mapFrom: dateFormat())
                 @_swiftrewriter(mapFrom: setDateFormat(_:))
                 var dateFormat: String!
-                
                 
                 @_swiftrewriter(mapFrom: stringFromDate(_:))
                 func string(from date: Date) -> String
@@ -267,14 +256,10 @@ public enum NSDateFormatterCompoundType {
 }
 
 public enum NSDateCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "Date")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
     }
     
     static func typeString() -> String {
@@ -287,8 +272,7 @@ public enum NSDateCompoundType {
                 static var timeIntervalSinceReferenceDate: TimeInterval { get }
                 var timeIntervalSinceNow: TimeInterval { get }
                 var timeIntervalSince1970: TimeInterval { get }
-
-
+                
                 @_swiftrewriter(mapFrom: date() -> Date)
                 init()
                 static func date() -> Date
@@ -307,10 +291,10 @@ public enum NSDateCompoundType {
 
                 @_swiftrewriter(mapFrom: timeIntervalSinceDate(_:))
                 func timeIntervalSince(_ date: Date) -> TimeInterval
-
+                
                 @_swiftrewriter(mapToBinary: ==)
                 func isEqual(_ other: AnyObject) -> Bool
-
+                
                 @_swiftrewriter(mapToBinary: ==)
                 func isEqualToDate(_ other: Date) -> Bool
             }
@@ -321,22 +305,81 @@ public enum NSDateCompoundType {
 }
 
 public enum NSLocaleCompoundType {
-    private static var singleton = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "Locale")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        return makeType(from: typeString())
     }
     
     static func typeString() -> String {
         let type = """
             @_swiftrewriter(renameFrom: NSLocale)
             struct Locale: Hashable, Equatable {
+                @_swiftrewriter(mapFrom: localeWithLocaleIdentifier(_:))
                 @_swiftrewriter(mapFrom: init(localeIdentifier:))
                 init(identifier: String)
+            }
+            """
+        
+        return type
+    }
+}
+
+public enum NSStringCompoundType {
+    private static var singleton = makeType(from: typeString(), typeName: "NSString")
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSString: NSObject {
+            }
+            """
+        
+        return type
+    }
+}
+
+public enum NSMutableStringCompoundType {
+    private static var singleton = makeType(from: typeString(), typeName: "NSMutableString")
+    
+    public static func create() -> CompoundedMappingType {
+        return singleton
+    }
+    
+    static func typeString() -> String {
+        let type = """
+            class NSMutableString: NSString {
+                @_swiftrewriter(mapFrom: stringWithCapacity(_:))
+                public init(capacity: Int)
+                
+                @_swiftrewriter(mapFrom: replaceCharactersInRange(_:withString:))
+                open func replaceCharacters(in range: NSRange, with aString: String)
+                
+                @_swiftrewriter(mapFrom: insertString(_:atIndex:))
+                open func insert(_ aString: String, at loc: Int)
+                
+                @_swiftrewriter(mapFrom: deleteCharactersInRange(_:))
+                open func deleteCharacters(in range: NSRange)
+                
+                @_swiftrewriter(mapFrom: appendString(_:))
+                open func append(_ aString: String)
+                
+                open func setString(_ aString: String)
+                
+                @_swiftrewriter(mapFrom: replaceOccurrencesOfString(_:withString:options:range:))
+                open func replaceOccurrences(of target: String,
+                                             with replacement: String,
+                                             options: NSString.CompareOptions = [],
+                                             range searchRange: NSRange) -> Int
+                
+                @available(iOS 9.0, *)
+                open func applyTransform(_ transform: StringTransform,
+                                         reverse: Bool,
+                                         range: NSRange,
+                                         updatedRange resultingRange: NSRangePointer?) -> Bool
             }
             """
         

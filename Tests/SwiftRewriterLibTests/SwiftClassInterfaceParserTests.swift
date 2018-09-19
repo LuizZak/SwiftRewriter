@@ -190,6 +190,17 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownConstructors[0].parameters.count, 0)
     }
     
+    func testParseFailableInitializer() throws {
+        let type = try parseType("""
+            class MyClass {
+                init?()
+            }
+            """)
+        
+        XCTAssertEqual(type.knownConstructors.count, 1)
+        XCTAssert(type.knownConstructors[0].isFailable)
+    }
+    
     func testParseExtensionDeclaration() throws {
         let type = try parseType("""
             extension MyClass {

@@ -189,6 +189,13 @@ public class TypeGenerationIntention: FromSourceIntention {
             return $0.signature.asSelector == selector
         }
     }
+    
+    /// Returns all methods that match a given function identifier.
+    public func methods(matching identifier: FunctionIdentifier) -> [MethodGenerationIntention] {
+        return methods.filter {
+            $0.signature.asIdentifier == identifier
+        }
+    }
 }
 
 extension TypeGenerationIntention: KnownType {

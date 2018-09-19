@@ -38,6 +38,7 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
     
     func createConversions() {
         addCompoundedTypeMapping(UIViewCompoundType.create())
+        addCompoundedTypeMapping(UILabelCompoundType.create())
         addCompoundedTypeMapping(UIGestureRecognizerCompoundType.create())
         
         // UITableViewDelegate

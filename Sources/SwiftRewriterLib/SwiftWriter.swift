@@ -785,6 +785,7 @@ class InternalSwiftWriter {
         
         // Protocol 'optional' keyword
         if let protocolMethod = method as? ProtocolMethodGenerationIntention, protocolMethod.isOptional {
+            target.outputInlineWithSpace("@objc", style: .keyword)
             target.outputInlineWithSpace("optional", style: .keyword)
         }
         

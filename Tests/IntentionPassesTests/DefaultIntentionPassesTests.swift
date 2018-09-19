@@ -10,9 +10,8 @@ class DefaultIntentionPassesTests: XCTestCase {
         // (could crash and abort tests halfway through)
         var intentsIterator = intents.makeIterator()
         
-        XCTAssertEqual(intents.count, 10)
-        
         XCTAssert(intentsIterator.next() is FileTypeMergingIntentionPass)
+        XCTAssert(intentsIterator.next() is PromoteProtocolPropertyConformanceIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
         XCTAssert(intentsIterator.next() is PropertyMergeIntentionPass)
         XCTAssert(intentsIterator.next() is StoredPropertyToNominalTypesIntentionPass)
@@ -22,6 +21,7 @@ class DefaultIntentionPassesTests: XCTestCase {
         XCTAssert(intentsIterator.next() is UIKitCorrectorIntentionPass)
         XCTAssert(intentsIterator.next() is ProtocolNullabilityPropagationToConformersIntentionPass)
         XCTAssert(intentsIterator.next() is DetectNonnullReturnsIntentionPass)
+        XCTAssertNil(intentsIterator.next())
     }
 }
 

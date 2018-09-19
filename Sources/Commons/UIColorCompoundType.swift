@@ -2,25 +2,10 @@ import SwiftAST
 import SwiftRewriterLib
 
 public enum UIColorCompoundType {
-    private static var singleton: CompoundedMappingType = createType()
+    private static var singleton = makeType(from: typeString(), typeName: "UIColor")
     
     public static func create() -> CompoundedMappingType {
         return singleton
-    }
-    
-    static func createType() -> CompoundedMappingType {
-        let string = typeString()
-        
-        do {
-            let incomplete = try SwiftClassInterfaceParser.parseDeclaration(from: string)
-            let type = try incomplete.toCompoundedKnownType()
-            
-            return type
-        } catch {
-            fatalError(
-                "Found error while parsing UIColor class interface: \(error)"
-            )
-        }
     }
     
     static func typeString() -> String {

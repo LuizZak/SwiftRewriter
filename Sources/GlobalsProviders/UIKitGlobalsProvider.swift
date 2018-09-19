@@ -35,15 +35,12 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     override func createTypes() {
-        createUIResponder()
         createUIViewController()
         createUILayoutConstraintAxis()
-        createUIView()
         createUIWindow()
         createUITableViewCell()
         createUIScrollView()
         createUITableView()
-        createUIColor()
     }
     
     override func createDefinitions() {
@@ -51,78 +48,20 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                      returnType: .optional(.typeName("CGContext"))))
         
         add(CodeDefinition(variableNamed: "UIViewNoIntrinsicMetric",
-                           storage: ValueStorage.constant(ofType: .cgFloat)))
+                           storage: .constant(ofType: .cgFloat)))
         add(CodeDefinition(variableNamed: "UILayoutFittingCompressedSize",
-                           storage: ValueStorage.constant(ofType: "CGSize")))
+                           storage: .constant(ofType: "CGSize")))
         add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
-                           storage: ValueStorage.constant(ofType: "CGSize")))
+                           storage: .constant(ofType: "CGSize")))
+        add(CodeDefinition(variableNamed: "UITableViewAutomaticDimension",
+                           storage: .constant(ofType: .cgFloat)))
         
         definitions = ArrayDefinitionsSource(definitions: globals)
     }
     
-    func createUIResponder() {
-        let type = UIResponderCompoundType.create()
-        add(type)
-    }
-    
-    func createUIColor() {
-        let type = UIColorCompoundType.create()
-        add(type)
-    }
-    
     func createUIViewController() {
-        makeType(named: "UIViewController", supertype: "UIResponder") { type -> KnownType in
-            type
-                // Protocol conformances
-                .protocolConformances(protocolNames: [
-                    "NSCoding", "UIAppearanceContainer", "UITraitEnvironment",
-                    "UIContentContainer", "UIFocusEnvironment"
-                ])
-                // Properties
-                .property(named: "view", type: "UIView")
-                // Initializers
-                .constructor(withParameters: [
-                    ParameterSignature(label: "nibName", name: "nibNameOrNil", type: .optional(.string)),
-                    ParameterSignature(label: "bundle", name: "nibBundleOrNil", type: .optional("Bundle"))
-                ])
-                // Methods
-                .method(named: "viewDidLoad")
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "viewWillAppear",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "viewDidAppear",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "viewWillDisappear",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "viewDidDisappear",
-                        parameters: [
-                            ParameterSignature(label: nil, name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                .method(named: "viewWillLayoutSubviews")
-                .method(named: "viewDidLayoutSubviews")
-                .build()
-        }
+        let type = UIViewControllerCompoundType.create()
+        add(type)
     }
     
     func createUILayoutConstraintAxis() {
@@ -133,16 +72,6 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                 .enumCase(named: "vertical", rawValue: .constant(1))
                 .build()
         }
-    }
-    
-    func createUIView() {
-        let type = UIViewCompoundType.create()
-        add(type)
-    }
-    
-    func createUIGestureRecognizer() {
-        let type = UIGestureRecognizerCompoundType.create()
-        add(type)
     }
     
     func createUITableViewCell() {

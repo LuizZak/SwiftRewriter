@@ -7,7 +7,7 @@ public class DefaultGlobalsProvidersSource: GlobalsProvidersSource {
         CoreGraphicsGlobalsProvider(),
         UIKitGlobalsProvider(),
         OpenGLESGlobalsProvider(),
-        FoundationGlobalsProvider()
+        CompoundedMappingTypesGlobalsProvider()
     ]
     
     public init() {
