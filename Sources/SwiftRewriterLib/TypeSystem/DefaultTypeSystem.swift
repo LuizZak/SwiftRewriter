@@ -20,8 +20,6 @@ public class DefaultTypeSystem: TypeSystem {
     var innerKnownTypes = CollectionKnownTypeProvider(knownTypes: [])
     var knownTypeProviders: CompoundKnownTypeProvider
     
-    private var typesByName: [String: KnownType] = [:]
-    
     public init() {
         typealiasProviders = CompoundTypealiasProvider(providers: [])
         knownTypeProviders = CompoundKnownTypeProvider(providers: [])
@@ -59,15 +57,12 @@ public class DefaultTypeSystem: TypeSystem {
         knownTypeProviders.providers.removeAll()
         typealiasProviders.providers.removeAll()
         
-        typesByName.removeAll()
         registerInitialTypeProviders()
         registerInitialKnownTypes()
     }
     
     public func addType(_ type: KnownType) {
         innerKnownTypes.addType(type)
-        
-        typesByName[type.typeName] = type
     }
     
     public func typesMatch(_ type1: SwiftType, _ type2: SwiftType, ignoreNullability: Bool) -> Bool {
@@ -92,10 +87,6 @@ public class DefaultTypeSystem: TypeSystem {
     public func typeExists(_ name: String) -> Bool {
         guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
             return false
-        }
-        
-        if typesByName.keys.contains(name) {
-            return true
         }
         
         if knownTypeProviders.knownType(withName: name) != nil {
@@ -594,7 +585,7 @@ public class DefaultTypeSystem: TypeSystem {
                 if let method =
                     overloadResolver()
                         .findBestOverload(in: methods,
-                                                 argumentTypes: invocationTypeHints) {
+                                          argumentTypes: invocationTypeHints) {
                     
                     return method
                 }
