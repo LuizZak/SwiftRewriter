@@ -23,26 +23,25 @@ swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/MyC
 Usage:
 
 ```
-SwiftRewriter [--colorize] [--print-expression-types] [--print-tracing-history] [--emit-objc-compatibility] [--verbose] [--num-threads <n>]
-[--force-ll] [--target stdout | filedisk] [files <files...> | path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]]
+USAGE: SwiftRewriter [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-h] [--emit-objc-compatibility|-o] [--verbose|-v] [--num-threads|-t <n>] [--force-ll|-ll] [--target|-w stdout | filedisk] [files <files...> | path <path> [--exclude-pattern|-e <pattern>] [--include-pattern|-i <pattern>] [--skip-confirm|-s] [--overwrite|-o]]
 
 OPTIONS:
-  --colorize              Pass this parameter as true to enable terminal colorization during output.
-  --diagnose-file         Provides a target file path to diagnose during rewriting.
+  --colorize, -c          Pass this parameter as true to enable terminal colorization during output.
+  --diagnose-file, -d     Provides a target file path to diagnose during rewriting.
 After each intention pass and after expression passes, the file is written
 to the standard output for diagnosing rewriting issues.
-  --emit-objc-compatibility
+  --emit-objc-compatibility, -o
                           Emits '@objc' attributes on definitions, and emits NSObject subclass and NSObjectProtocol conformance on protocols.
 
 This forces Swift to create Objective-C-compatible subclassing structures
 which may increase compatibility with previous Obj-C code.
-  --force-ll              Forces ANTLR parsing to use LL prediction context, instead of making an attempt at SLL first. May be more performant in some circumstances depending on complexity of original source code.
-  --num-threads           Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.
-  --print-expression-types
+  --force-ll, -ll         Forces ANTLR parsing to use LL prediction context, instead of making an attempt at SLL first. May be more performant in some circumstances depending on complexity of original source code.
+  --num-threads, -t       Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.
+  --print-expression-types, -e
                           Prints the type of each top-level resolved expression statement found in function bodies.
-  --print-tracing-history
+  --print-tracing-history, -h
                           Prints extra information before each declaration and member about the inner logical decisions of intention passes as they change the structure of declarations.
-  --target                Specifies the output target for the conversion.
+  --target, -w            Specifies the output target for the conversion.
 Defaults to 'filedisk' if not provided.
 
     stdout
@@ -50,7 +49,7 @@ Defaults to 'filedisk' if not provided.
     
     filedisk
         Saves output of conersion to the filedisk as .swift files on the same folder as the input files.
-  --verbose               Prints progress information to the console while performing a transpiling job.
+  --verbose, -v           Prints progress information to the console while performing a transpiling job.
   --help                  Display available options
 
 SUBCOMMANDS:

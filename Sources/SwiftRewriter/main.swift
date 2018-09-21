@@ -32,12 +32,12 @@ enum Target: String, ArgumentKind {
 let parser =
     ArgumentParser(
         usage: """
-        [--colorize] [--print-expression-types] [--print-tracing-history] \
-        [--emit-objc-compatibility] [--verbose] [--num-threads <n>] [--force-ll] \
-        [--target stdout | filedisk] \
+        [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-h] \
+        [--emit-objc-compatibility|-o] [--verbose|-v] [--num-threads|-t <n>] [--force-ll|-ll] \
+        [--target|-w stdout | filedisk] \
         [files <files...> \
-        | path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] \
-        [--skip-confirm] [--overwrite]]
+        | path <path> [--exclude-pattern|-e <pattern>] [--include-pattern|-i <pattern>] \
+        [--skip-confirm|-s] [--overwrite|-o]]
         """,
         overview: """
         Converts a set of files, or, if not provided, starts an interactive \
@@ -46,18 +46,18 @@ let parser =
 
 // --colorize
 let colorArg
-    = parser.add(option: "--colorize", kind: Bool.self,
+    = parser.add(option: "--colorize", shortName: "-c", kind: Bool.self,
                  usage: "Pass this parameter as true to enable terminal colorization during output.")
 
 // --print-expression-types
 let outputExpressionTypesArg
-    = parser.add(option: "--print-expression-types",
+    = parser.add(option: "--print-expression-types", shortName: "-e",
                  kind: Bool.self,
                  usage: "Prints the type of each top-level resolved expression statement found in function bodies.")
 
 // --print-tracing-history
 let outputIntentionHistoryArg: OptionArgument<Bool> =
-    parser.add(option: "--print-tracing-history", kind: Bool.self,
+    parser.add(option: "--print-tracing-history", shortName: "-h", kind: Bool.self,
                usage: """
         Prints extra information before each declaration and member about the \
         inner logical decisions of intention passes as they change the structure \
@@ -66,13 +66,13 @@ let outputIntentionHistoryArg: OptionArgument<Bool> =
 
 // --verbose
 let verboseArg
-    = parser.add(option: "--verbose", kind: Bool.self,
+    = parser.add(option: "--verbose", shortName: "-v", kind: Bool.self,
                  usage: "Prints progress information to the console while performing a transpiling job.")
 
 // --num-threads
 let numThreadsArg
     = parser.add(
-        option: "--num-threads",
+        option: "--num-threads", shortName: "-t",
         kind: Int.self,
         usage: """
         Specifies the number of threads to use when performing parsing, as well \
@@ -83,7 +83,7 @@ let numThreadsArg
 // --force-ll
 let forceUseLLPredictionArg
     = parser.add(
-        option: "--force-ll",
+        option: "--force-ll", shortName: "-ll",
         kind: Bool.self,
         usage: """
         Forces ANTLR parsing to use LL prediction context, instead of making an \
@@ -95,7 +95,8 @@ let forceUseLLPredictionArg
 // --emit-objc-compatibility
 let emitObjcCompatibilityArg
     = parser.add(
-        option: "--emit-objc-compatibility", kind: Bool.self,
+        option: "--emit-objc-compatibility", shortName: "-o",
+        kind: Bool.self,
         usage: """
         Emits '@objc' attributes on definitions, and emits NSObject subclass \
         and NSObjectProtocol conformance on protocols.
@@ -107,7 +108,8 @@ let emitObjcCompatibilityArg
 // --diagnose-file
 let diagnoseFileArg
     = parser.add(
-        option: "--diagnose-file", kind: String.self,
+        option: "--diagnose-file", shortName: "-d",
+        kind: String.self,
         usage: """
         Provides a target file path to diagnose during rewriting.
         After each intention pass and after expression passes, the file is written
@@ -117,7 +119,8 @@ let diagnoseFileArg
 //// --target stdout | filedisk
 let targetArg
     = parser.add(
-        option: "--target", kind: Target.self,
+        option: "--target", shortName: "-w",
+        kind: Target.self,
         usage: """
         Specifies the output target for the conversion.
         Defaults to 'filedisk' if not provided.
@@ -153,7 +156,7 @@ let pathArg
 
 let excludePatternArg
     = pathParser.add(
-        option: "--exclude-pattern", kind: String.self,
+        option: "--exclude-pattern", shortName: "-e", kind: String.self,
         usage: """
         Provides a file pattern for excluding matches from the initial Objective-C \
         files search. Pattern is applied to the full path.
@@ -161,7 +164,7 @@ let excludePatternArg
 
 let includePatternArg
     = pathParser.add(
-        option: "--include-pattern", kind: String.self,
+        option: "--include-pattern", shortName: "-i", kind: String.self,
         usage: """
         Provides a pattern for including matches from the initial Objective-C files \
         search. Pattern is applied to the full path. --exclude-pattern takes \
@@ -169,11 +172,11 @@ let includePatternArg
         """)
 
 let skipConfirmArg
-    = pathParser.add(option: "--skip-confirm", kind: Bool.self,
+    = pathParser.add(option: "--skip-confirm", shortName: "-s", kind: Bool.self,
                      usage: "Skipts asking for confirmation prior to parsing.")
 
 let overwriteArg
-    = pathParser.add(option: "--overwrite", kind: Bool.self,
+    = pathParser.add(option: "--overwrite", shortName: "-o", kind: Bool.self,
                      usage: "Overwrites any .swift file with a matching output name on the target path.")
 
 do {
