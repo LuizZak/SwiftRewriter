@@ -104,7 +104,7 @@ class TestSingleInputProvider: InputSourcesProvider, InputSource {
     }
     
     func loadSource() throws -> CodeSource {
-        return StringCodeSource(source: code)
+        return StringCodeSource(source: code, fileName: sourceName())
     }
 }
 

@@ -267,7 +267,7 @@ struct TestInputSource: InputSource {
     }
     
     func loadSource() throws -> CodeSource {
-        return StringCodeSource(source: source)
+        return StringCodeSource(source: source, fileName: name)
     }
 }
 

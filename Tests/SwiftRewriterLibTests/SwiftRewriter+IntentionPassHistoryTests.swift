@@ -24,12 +24,12 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             @end
             """,
             swift: """
-            // [Creation]  line 1 column 1
-            // [Creation]  line 12 column 1
+            // [Creation] TestSingleInputProvider.m line 1 column 1
+            // [Creation] TestSingleInputProvider.m line 12 column 1
             // [PropertyMergeIntentionPass:1] Removed method MyClass.value() -> Bool since deduced it is a getter for property MyClass.value: Bool
             // [PropertyMergeIntentionPass:1] Removed method MyClass.setValue(_ value: Bool) since deduced it is a setter for property MyClass.value: Bool
             class MyClass {
-                // [Creation]  line 13 column 1
+                // [Creation] TestSingleInputProvider.m line 13 column 1
                 // [PropertyMergeIntentionPass:1] Merged MyClass.value() -> Bool and MyClass.setValue(_ value: Bool) into property MyClass.value: Bool
                 var value: Bool {
                     get {
@@ -39,7 +39,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                     }
                 }
                 
-                // [Creation]  line 8 column 3
+                // [Creation] TestSingleInputProvider.m line 8 column 3
                 // [TypeMerge] Updated nullability signature from () -> String! to: () -> String
                 func aMethod() -> String {
                 }
@@ -109,21 +109,21 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             // #else
             // #define LOG(x) (printf x)
             // #endif
-            // [Creation]  line 22 column 28
+            // [Creation] A.c line 22 column 28
             typealias node234 = node234_Tag
-            // [Creation]  line 5 column 28
+            // [Creation] A.h line 5 column 28
             typealias tree234 = tree234_Tag
-            // [Creation]  line 6 column 9
+            // [Creation] A.h line 6 column 9
             typealias cmpfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> CInt
-            // [Creation]  line 7 column 9
+            // [Creation] A.h line 7 column 9
             typealias copyfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
 
-            // [Creation]  line 24 column 1
-            // [Creation]  line 5 column 9
+            // [Creation] A.c line 24 column 1
+            // [Creation] A.h line 5 column 9
             struct tree234_Tag {
-                // [Creation]  line 25 column 5
+                // [Creation] A.c line 25 column 5
                 var root: UnsafeMutablePointer<node234>!
-                // [Creation]  line 26 column 5
+                // [Creation] A.c line 26 column 5
                 var cmp: cmpfn234!
                 
                 // [Creation] Synthesizing parameterless constructor for struct
@@ -137,16 +137,16 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                     self.cmp = cmp
                 }
             }
-            // [Creation]  line 28 column 1
-            // [Creation]  line 22 column 9
+            // [Creation] A.c line 28 column 1
+            // [Creation] A.c line 22 column 9
             struct node234_Tag {
-                // [Creation]  line 29 column 5
+                // [Creation] A.c line 29 column 5
                 var parent: UnsafeMutablePointer<node234>!
-                // [Creation]  line 30 column 5
+                // [Creation] A.c line 30 column 5
                 var kids: UnsafeMutablePointer<node234>!
-                // [Creation]  line 31 column 5
+                // [Creation] A.c line 31 column 5
                 var counts: CInt
-                // [Creation]  line 32 column 5
+                // [Creation] A.c line 32 column 5
                 var elems: UnsafeMutableRawPointer!
                 
                 // [Creation] Synthesizing parameterless constructor for struct
