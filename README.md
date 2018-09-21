@@ -39,7 +39,7 @@ which may increase compatibility with previous Obj-C code.
   --num-threads, -t       Specifies the number of threads to use when performing parsing, as well as intention and expression passes. If not specified, thread allocation is defined by the system depending on usage conditions.
   --print-expression-types, -e
                           Prints the type of each top-level resolved expression statement found in function bodies.
-  --print-tracing-history, -h
+  --print-tracing-history, -p
                           Prints extra information before each declaration and member about the inner logical decisions of intention passes as they change the structure of declarations.
   --target, -w            Specifies the output target for the conversion.
 Defaults to 'filedisk' if not provided.

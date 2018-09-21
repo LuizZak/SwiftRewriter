@@ -32,7 +32,7 @@ enum Target: String, ArgumentKind {
 let parser =
     ArgumentParser(
         usage: """
-        [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-h] \
+        [--colorize|-c] [--print-expression-types|-t] [--print-tracing-history|-p] \
         [--emit-objc-compatibility|-o] [--verbose|-v] [--num-threads|-t <n>] [--force-ll|-ll] \
         [--target|-w stdout | filedisk] \
         [files <files...> \
