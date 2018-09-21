@@ -258,7 +258,9 @@ public class ObjcParser {
         }
         
         // Return proper code
-        let processed = ObjectiveCPreprocessor(commonTokenStream: parserState.tokens)
+        let processed = ObjectiveCPreprocessor(commonTokenStream: parserState.tokens,
+                                               inputString: src)
+        
         return processed.visitObjectiveCDocument(root) ?? ""
     }
     

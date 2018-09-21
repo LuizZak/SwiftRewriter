@@ -215,6 +215,8 @@ class InternalSwiftWriter {
     }
     
     func outputTypealias(_ typeali: TypealiasIntention, target: RewriterOutputTarget) {
+        outputHistory(for: typeali, target: target)
+        
         let typeName = typeMapper.typeNameString(for: typeali.fromType)
         
         // typealias <Type1> = <Type2>
@@ -227,6 +229,8 @@ class InternalSwiftWriter {
     }
     
     func outputEnum(_ intention: EnumGenerationIntention, target: RewriterOutputTarget) {
+        outputHistory(for: intention, target: target)
+        
         let rawTypeName = typeMapper.typeNameString(for: intention.rawValueType)
         
         // [@objc] enum <Name>: <RawValue> {
@@ -260,6 +264,8 @@ class InternalSwiftWriter {
     }
     
     func outputStruct(_ str: StructGenerationIntention, target: RewriterOutputTarget) {
+        outputHistory(for: str, target: target)
+        
         target.outputInlineWithSpace("struct", style: .keyword)
         target.outputInline(str.typeName, style: .typeName)
         
@@ -268,6 +274,8 @@ class InternalSwiftWriter {
     
     func outputVariableDeclaration(_ varDecl: GlobalVariableGenerationIntention,
                                    target: RewriterOutputTarget) {
+        outputHistory(for: varDecl, target: target)
+        
         let name = varDecl.name
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr

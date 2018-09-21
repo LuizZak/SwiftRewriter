@@ -707,6 +707,7 @@ public class IntentionCollector {
                     let alias = TypealiasIntention(originalObjcType: objcType,
                                                    fromType: .void,
                                                    named: identifier.name)
+                    recordSourceHistory(intention: alias, node: identifier)
                     alias.inNonnullContext = inNonnull
                     
                     fileIntent?.addTypealias(alias)
@@ -728,6 +729,7 @@ public class IntentionCollector {
                     let alias = TypealiasIntention(originalObjcType: .struct("OpaquePointer"),
                                                    fromType: .void,
                                                    named: identifier.name)
+                    recordSourceHistory(intention: alias, node: identifier)
                     alias.inNonnullContext = inNonnull
                     
                     fileIntent?.addTypealias(alias)

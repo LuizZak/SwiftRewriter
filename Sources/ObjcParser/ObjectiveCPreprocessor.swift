@@ -34,12 +34,16 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     private var _conditions: [Bool] = []
     private var _compilied = true
     private var _tokensStream: CommonTokenStream
+    private var inputString: String
+    private var lineRanges: [Range<String.Index>]
     
     public var conditionalSymbols: [String: String] = [:]
     
-    init(commonTokenStream: CommonTokenStream) {
+    init(commonTokenStream: CommonTokenStream, inputString: String) {
         _conditions.append(true)
         _tokensStream = commonTokenStream
+        self.inputString = inputString
+        lineRanges = inputString.lineRanges()
     }
     
     public override func visitObjectiveCDocument(_ ctx: Parser.ObjectiveCDocumentContext) -> String? {
@@ -53,7 +57,11 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     }
     
     public override func visitText(_ context: Parser.TextContext) -> String? {
-        var result = context.getText()
+        guard let text = self._sourceText(for: context) else {
+            return nil
+        }
+        
+        var result = text
         var directive = false
         if let direct = context.directive() {
             _compilied = visit(direct) == "true"
@@ -229,5 +237,16 @@ class ObjectiveCPreprocessor: ObjectiveCPreprocessorParserBaseVisitor<String> {
     
     private func isCompiledText() -> Bool {
         return !_conditions.contains(false)
+    }
+    
+    private func _sourceText(for context: ParserRuleContext) -> String? {
+        guard let start = context.getStart(), let stop = context.getStop() else {
+            return nil
+        }
+        
+        let startIndex = inputString.index(inputString.startIndex, offsetBy: start.getStartIndex())
+        let endIndex = inputString.index(inputString.startIndex, offsetBy: stop.getStopIndex())
+        
+        return String(inputString[startIndex...endIndex])
     }
 }
