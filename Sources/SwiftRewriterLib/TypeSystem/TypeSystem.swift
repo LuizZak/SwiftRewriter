@@ -10,12 +10,19 @@ public protocol TypeSystem {
     /// Returns nil, in case no default values are known
     func defaultValue(for type: SwiftType) -> Expression?
     
-    /// Returns `true` if `type` represents a numerical type (int, float, CGFloat,
-    /// etc.).
+    /// Returns `true` if `type` represents a numerical type (`Int`, `Float`,
+    /// `CGFloat`, etc.).
     func isNumeric(_ type: SwiftType) -> Bool
     
-    /// Returns `true` is an integer (signed or unsigned) type.
+    /// Returns `true` if `type` is an integer (signed or unsigned) type.
     func isInteger(_ type: SwiftType) -> Bool
+    
+    /// Returns `true` if `type` is a floating-point type.
+    func isFloat(_ type: SwiftType) -> Bool
+    
+    /// Between two scalar numeric types, returns the type that the type system
+    /// should favor when cast-converting.
+    func implicitCoercedNumericType(for type1: SwiftType, _ type2: SwiftType) -> SwiftType
     
     /// Returns `true` if a type is known to exists with a given name.
     func typeExists(_ name: String) -> Bool

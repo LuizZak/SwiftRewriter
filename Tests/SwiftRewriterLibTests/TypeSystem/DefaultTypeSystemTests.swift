@@ -156,6 +156,80 @@ class DefaultTypeSystemTests: XCTestCase {
         XCTAssert(sut.isNumeric(.typeName("CDouble")))
     }
     
+    func testIsInteger() {
+        // 64-bits
+        XCTAssert(sut.isInteger(.typeName("Int64")))
+        XCTAssert(sut.isInteger(.typeName("UInt64")))
+        XCTAssert(sut.isInteger(.typeName("CLongLong")))
+        XCTAssert(sut.isInteger(.typeName("CUnsignedLongLong")))
+        
+        // 32-bits
+        XCTAssert(sut.isInteger(.typeName("Int")))
+        XCTAssert(sut.isInteger(.typeName("UInt")))
+        XCTAssert(sut.isInteger(.typeName("Int32")))
+        XCTAssert(sut.isInteger(.typeName("UInt32")))
+        XCTAssert(sut.isInteger(.typeName("CInt")))
+        XCTAssert(sut.isInteger(.typeName("CUnsignedInt")))
+        XCTAssert(sut.isInteger(.typeName("CChar32")))
+        
+        // 16-bits
+        XCTAssert(sut.isInteger(.typeName("Int16")))
+        XCTAssert(sut.isInteger(.typeName("UInt16")))
+        XCTAssert(sut.isInteger(.typeName("CShort")))
+        XCTAssert(sut.isInteger(.typeName("CUnsignedShort")))
+        XCTAssert(sut.isInteger(.typeName("CChar16")))
+        
+        // 8-bits
+        XCTAssert(sut.isInteger(.typeName("Int8")))
+        XCTAssert(sut.isInteger(.typeName("UInt8")))
+        XCTAssert(sut.isInteger(.typeName("CChar")))
+        XCTAssert(sut.isInteger(.typeName("CUnsignedChar")))
+        
+        // Floating-point
+        XCTAssertFalse(sut.isInteger(.typeName("Float")))
+        XCTAssertFalse(sut.isInteger(.typeName("Float80")))
+        XCTAssertFalse(sut.isInteger(.typeName("Double")))
+        XCTAssertFalse(sut.isInteger(.typeName("CFloat")))
+        XCTAssertFalse(sut.isInteger(.typeName("CDouble")))
+    }
+    
+    func testIsFloat() {
+        // 64-bits
+        XCTAssertFalse(sut.isFloat(.typeName("Int64")))
+        XCTAssertFalse(sut.isFloat(.typeName("UInt64")))
+        XCTAssertFalse(sut.isFloat(.typeName("CLongLong")))
+        XCTAssertFalse(sut.isFloat(.typeName("CUnsignedLongLong")))
+        
+        // 32-bits
+        XCTAssertFalse(sut.isFloat(.typeName("Int")))
+        XCTAssertFalse(sut.isFloat(.typeName("UInt")))
+        XCTAssertFalse(sut.isFloat(.typeName("Int32")))
+        XCTAssertFalse(sut.isFloat(.typeName("UInt32")))
+        XCTAssertFalse(sut.isFloat(.typeName("CInt")))
+        XCTAssertFalse(sut.isFloat(.typeName("CUnsignedInt")))
+        XCTAssertFalse(sut.isFloat(.typeName("CChar32")))
+        
+        // 16-bits
+        XCTAssertFalse(sut.isFloat(.typeName("Int16")))
+        XCTAssertFalse(sut.isFloat(.typeName("UInt16")))
+        XCTAssertFalse(sut.isFloat(.typeName("CShort")))
+        XCTAssertFalse(sut.isFloat(.typeName("CUnsignedShort")))
+        XCTAssertFalse(sut.isFloat(.typeName("CChar16")))
+        
+        // 8-bits
+        XCTAssertFalse(sut.isFloat(.typeName("Int8")))
+        XCTAssertFalse(sut.isFloat(.typeName("UInt8")))
+        XCTAssertFalse(sut.isFloat(.typeName("CChar")))
+        XCTAssertFalse(sut.isFloat(.typeName("CUnsignedChar")))
+        
+        // Floating-point
+        XCTAssert(sut.isFloat(.typeName("Float")))
+        XCTAssert(sut.isFloat(.typeName("Float80")))
+        XCTAssert(sut.isFloat(.typeName("Double")))
+        XCTAssert(sut.isFloat(.typeName("CFloat")))
+        XCTAssert(sut.isFloat(.typeName("CDouble")))
+    }
+    
     func testIsIntegerTypealiased() {
         sut.addTypealias(aliasName: "Alias", originalType: .int)
         sut.addTypealias(aliasName: "NonIntegerAlias", originalType: .float)

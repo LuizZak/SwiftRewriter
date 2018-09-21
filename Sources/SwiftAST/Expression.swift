@@ -19,10 +19,20 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
     /// `.unary`, `.prefix`, `.parens`, and `.ternary` which only feature
     /// literal sub-expressions.
     ///
-    /// For ternary expressions, the test expression to the left of the question
-    /// mark operand does not affect the result of literal-based tests.
+    /// For ternary expressions, the test predicate doesn't have to be be a
+    /// literal as well for the result to be `true`.
     open var isLiteralExpression: Bool {
         return false
+    }
+    
+    /// In case this expression is a literal expression type, returns the
+    /// resolved literal kind it represents, recursively traversing literal
+    /// sub-expressions until a `ConstantExpression` can be found to inspect.
+    ///
+    /// Composed expression types such as binary and ternary expressions always
+    /// return `nil`.
+    open var literalExpressionKind: LiteralExpressionKind? {
+        return nil
     }
     
     /// `true` if this expression node requires parenthesis for unary, prefix, and
@@ -275,6 +285,10 @@ public class UnaryExpression: Expression {
         return exp.isLiteralExpression
     }
     
+    public override var literalExpressionKind: LiteralExpressionKind? {
+        return exp.literalExpressionKind
+    }
+    
     public override var description: String {
         // Parenthesized
         if exp.requiresParens {
@@ -416,6 +430,10 @@ public class PrefixExpression: Expression {
     
     public override var isLiteralExpression: Bool {
         return exp.isLiteralExpression
+    }
+    
+    public override var literalExpressionKind: LiteralExpressionKind? {
+        return exp.literalExpressionKind
     }
     
     public override var description: String {
@@ -587,6 +605,23 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
         }
     }
     
+    public override var literalExpressionKind: LiteralExpressionKind? {
+        switch constant {
+        case .int:
+            return .integer
+        case .float:
+            return .float
+        case .boolean:
+            return .boolean
+        case .string:
+            return .string
+        case .nil:
+            return .nil
+        default:
+            return nil
+        }
+    }
+    
     public override var description: String {
         return constant.description
     }
@@ -643,6 +678,10 @@ public class ParensExpression: Expression {
     
     public override var isLiteralExpression: Bool {
         return exp.isLiteralExpression
+    }
+    
+    public override var literalExpressionKind: LiteralExpressionKind? {
+        return exp.literalExpressionKind
     }
     
     public override var description: String {
@@ -1499,7 +1538,16 @@ public enum Constant: Equatable {
     }
 }
 
-/// Describes an operator across one or two operands
+/// Specifies one of the possible literal types
+public enum LiteralExpressionKind {
+    case integer
+    case float
+    case string
+    case boolean
+    case `nil`
+}
+
+/// Specifies an operator across one or two operands
 public enum SwiftOperator: String {
     /// If `true`, a spacing is suggested to be placed in between operands.
     /// True for most operators except range operators.

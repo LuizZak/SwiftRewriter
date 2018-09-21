@@ -281,7 +281,7 @@ class FoundationCompoundTypesTests: XCTestCase {
                 func setString(_ aString: String)
                 
                 @_swiftrewriter(mapFrom: replaceOccurrencesOfString(_:withString:options:range:))
-                func replaceOccurrences(of target: String, with replacement: String, options: NSString.CompareOptions, range searchRange: NSRange) -> Int
+                func replaceOccurrences(of target: String, with replacement: String, options: NSString.CompareOptions = default, range searchRange: NSRange) -> Int
                 
                 @available(iOS 9.0, *)
                 func applyTransform(_ transform: StringTransform, reverse: Bool, range: NSRange, updatedRange resultingRange: NSRangePointer?) -> Bool

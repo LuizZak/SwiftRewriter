@@ -81,6 +81,16 @@ private class InnerCLibGlobalsProviders: BaseGlobalsProvider {
         add(function(name: "fmodf", paramTypes: [cFloat, cFloat], returnType: cFloat))
         add(function(name: "fmod", paramTypes: [cDouble, cDouble], returnType: cDouble))
         
+        add(function(name: "max", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat))
+        add(function(name: "max", paramTypes: [.float, .float], returnType: .float))
+        add(function(name: "max", paramTypes: [cFloat, cFloat], returnType: cFloat))
+        add(function(name: "max", paramTypes: [.double, .double], returnType: .double))
+        
+        add(function(name: "min", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat))
+        add(function(name: "min", paramTypes: [.float, .float], returnType: .float))
+        add(function(name: "min", paramTypes: [cFloat, cFloat], returnType: cFloat))
+        add(function(name: "min", paramTypes: [.double, .double], returnType: .double))
+        
         definitions = ArrayDefinitionsSource(definitions: globals)
     }
 }

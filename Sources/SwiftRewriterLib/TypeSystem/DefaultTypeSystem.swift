@@ -445,6 +445,31 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
+    public func implicitCoercedNumericType(for type1: SwiftType, _ type2: SwiftType) -> SwiftType {
+        let isInt1 = isInteger(type1)
+        let isInt2 = isInteger(type2)
+        
+        let isFloat1 = isFloat(type1)
+        let isFloat2 = isFloat(type2)
+        
+        if (isInt1 && isInt2) || (isFloat1 && isFloat2) {
+            if bitwidth(intType: type1) >= bitwidth(intType: type2) {
+                return type1
+            } else {
+                return type2
+            }
+        }
+        
+        if isInt1 && isFloat2 {
+            return type2
+        }
+        if isFloat1 && isInt2 {
+            return type1
+        }
+        
+        return type1
+    }
+    
     public func isNumeric(_ type: SwiftType) -> Bool {
         if isInteger(type) {
             return true
@@ -460,6 +485,55 @@ public class DefaultTypeSystem: TypeSystem {
         default:
             return false
         }
+    }
+    
+    private func bitwidth(intType: SwiftType) -> Int {
+        func internalBitwidth(_ type: SwiftType) -> Int? {
+            // TODO: Validate these results
+            switch type {
+            case .int, .uint:
+                return 64
+            case .nominal(.typeName(let name)):
+                switch name {
+                // Swift integer types
+                case "Int", "UInt":
+                    return 64
+                case "Int64", "UInt64":
+                    return 64
+                case "Int32", "UInt32":
+                    return 32
+                case "Int16", "UInt16":
+                    return 16
+                case "Int8", "UInt8":
+                    return 8
+                // C integer types
+                case "CChar", "CSignedChar", "CUnsignedChar":
+                    return 8
+                case "CChar16", "CShort", "CUnsignedShort":
+                    return 16
+                case "CChar32", "CInt", "CUnsignedInt", "CWideChar":
+                    return 32
+                case "CUnsignedLong", "CLongLong",
+                     "CUnsignedLongLong":
+                    return 64
+                // Float values
+                case "CGFloat":
+                    return 64
+                case "Float", "CFloat":
+                    return 32
+                case "Float80":
+                    return 80
+                case "Double", "CDouble":
+                    return 64
+                default:
+                    return nil
+                }
+            default:
+                return nil
+            }
+        }
+        
+        return internalBitwidth(intType) ?? internalBitwidth(resolveAlias(in: intType)) ?? 8
     }
     
     public func isInteger(_ type: SwiftType) -> Bool {
@@ -487,6 +561,23 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         return internalIsInteger(type) || internalIsInteger(resolveAlias(in: type))
+    }
+    
+    public func isFloat(_ type: SwiftType) -> Bool {
+        let aliasedType = resolveAlias(in: type)
+        
+        switch aliasedType {
+        case .nominal(.typeName(let typeName)):
+            switch typeName {
+            case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
+                return true
+            default:
+                return false
+            }
+            
+        default:
+            return false
+        }
     }
     
     public func resolveAlias(in typeName: String) -> SwiftType {
@@ -585,7 +676,8 @@ public class DefaultTypeSystem: TypeSystem {
                 if let method =
                     overloadResolver()
                         .findBestOverload(in: methods,
-                                          argumentTypes: invocationTypeHints) {
+                                          argumentTypes: invocationTypeHints)
+                        ?? methods.first {
                     
                     return method
                 }

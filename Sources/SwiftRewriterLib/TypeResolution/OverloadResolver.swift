@@ -19,7 +19,25 @@ class OverloadResolver {
         
         let signatures = methods.map { $0.signature }
         if let index = findBestOverload(inSignatures: signatures,
-                                        argumentTypes: argumentTypes) {
+                                        arguments: argumentTypes.asOverloadResolverArguments) {
+            return methods[index]
+        }
+        
+        return nil
+    }
+    
+    /// Returns a matching resolution by index on a given array of methods.
+    ///
+    /// - precondition:
+    ///     for all methods `M` in `methods`,
+    ///     `M.signature.parameters.count == argumentTypes.count`
+    ///
+    func findBestOverload(in methods: [KnownMethod],
+                          arguments: [Argument]) -> KnownMethod? {
+        
+        let signatures = methods.map { $0.signature }
+        if let index = findBestOverload(inSignatures: signatures,
+                                        arguments: arguments) {
             return methods[index]
         }
         
@@ -35,6 +53,19 @@ class OverloadResolver {
     func findBestOverload(inSignatures signatures: [FunctionSignature],
                           argumentTypes: [SwiftType?]) -> Int? {
         
+        return findBestOverload(inSignatures: signatures,
+                                arguments: argumentTypes.asOverloadResolverArguments)
+    }
+    
+    /// Returns a matching resolution by index on a given array of signatures.
+    ///
+    /// - precondition:
+    ///     for all methods `M` in `methods`,
+    ///     `M.signature.parameters.count == arguments.count`
+    ///
+    func findBestOverload(inSignatures signatures: [FunctionSignature],
+                          arguments: [Argument]) -> Int? {
+        
         if signatures.isEmpty {
             return nil
         }
@@ -43,25 +74,25 @@ class OverloadResolver {
         
         // All argument types are nil, or no signature matches the available type
         // count: no best candidate can be decided.
-        if !signatureCandidates.contains(where: { $0.argumentCount == argumentTypes.count })
-            || (!argumentTypes.isEmpty && argumentTypes.allSatisfy({ $0 == nil })) {
+        if !signatureCandidates.contains(where: { $0.argumentCount == arguments.count })
+            || (!arguments.isEmpty && arguments.allSatisfy({ $0.isMissingType })) {
             return nil
         }
         
         // Start with a linear search for the first fully matching method signature
-        let allArgumentsPresent = argumentTypes.allSatisfy { $0 != nil }
+        let allArgumentsPresent = arguments.allSatisfy { !$0.isMissingType }
         if allArgumentsPresent {
             outerLoop:
                 for candidate in signatureCandidates {
-                    if argumentTypes.isEmpty && candidate.argumentCount == 0 {
+                    if arguments.isEmpty && candidate.argumentCount == 0 {
                         return candidate.inputIndex
                     }
-                    guard argumentTypes.count == candidate.argumentCount else {
+                    guard arguments.count == candidate.argumentCount else {
                         continue
                     }
                     
-                    for (argIndex, argumentType) in argumentTypes.enumerated() {
-                        guard let argumentType = argumentType else {
+                    for (argIndex, argumentType) in arguments.enumerated() {
+                        guard let argumentType = argumentType.type else {
                             break outerLoop
                         }
                         
@@ -74,7 +105,7 @@ class OverloadResolver {
                             break
                         }
                         
-                        if argIndex == argumentTypes.count - 1 {
+                        if argIndex == arguments.count - 1 {
                             // Candidate matches fully
                             return candidate.inputIndex
                         }
@@ -86,8 +117,8 @@ class OverloadResolver {
         // candidates, now
         var candidates = signatureCandidates
         
-        for (argIndex, argumentType) in argumentTypes.enumerated() {
-            guard candidates.count > 1, let argumentType = argumentType else {
+        for (argIndex, argument) in arguments.enumerated() {
+            guard candidates.count > 1, let argumentType = argument.type, !argument.isMissingType else {
                 continue
             }
             
@@ -100,19 +131,45 @@ class OverloadResolver {
                     let parameterType =
                         signature.signature.parameters[argIndex].type
                     
-                    if !typeSystem.isType(argumentType.deepUnwrapped,
-                                          assignableTo: parameterType.deepUnwrapped) {
-                        
-                        candidates.remove(at: i)
-                        doWork = true
-                        break
+                    let isAssignable =
+                        typeSystem.isType(argumentType.deepUnwrapped,
+                                          assignableTo: parameterType.deepUnwrapped)
+                    
+                    if isAssignable {
+                        continue
                     }
+                    
+                    // Integer/float literals must be handled specially: they can
+                    // be implicitly casted to other numeric types (float cannot
+                    // be casted to integers, however)
+                    if argument.isLiteral {
+                        switch argument.literalKind {
+                        case .integer? where typeSystem.isNumeric(parameterType.deepUnwrapped),
+                             .float? where typeSystem.isFloat(parameterType.deepUnwrapped):
+                            continue
+                            
+                        default:
+                            break
+                        }
+                    }
+                    
+                    candidates.remove(at: i)
+                    doWork = true
+                    break
                 }
             } while doWork && candidates.count > 1
         }
         
         // Return first candidate found
         return candidates.first?.inputIndex
+    }
+    
+    private func stripIntegerLiterals(from arguments: [Argument]) -> [Argument] {
+        return arguments.map {
+            $0.literalKind == .integer || $0.literalKind == .float
+                ? Argument(type: nil, isLiteral: false, literalKind: nil)
+                : $0
+        }
     }
     
     private func produceCandidates(from signatures: [FunctionSignature]) -> [OverloadCandidate] {
@@ -133,10 +190,38 @@ class OverloadResolver {
         return overloads
     }
     
+    struct Argument {
+        var isMissingType: Bool {
+            return type == nil || type == .errorType
+        }
+        
+        var type: SwiftType?
+        var isLiteral: Bool
+        var literalKind: LiteralExpressionKind?
+    }
+    
     private struct OverloadCandidate {
         var selector: SelectorSignature
         var signature: FunctionSignature
         var inputIndex: Int
         var argumentCount: Int
+    }
+}
+
+extension Sequence where Element == FunctionArgument {
+    var asOverloadResolverArguments: [OverloadResolver.Argument] {
+        return map {
+            OverloadResolver.Argument(type: $0.expression.resolvedType,
+                                      isLiteral: $0.expression.isLiteralExpression,
+                                      literalKind: $0.expression.literalExpressionKind)
+        }
+    }
+}
+
+extension Sequence where Element == SwiftType? {
+    var asOverloadResolverArguments: [OverloadResolver.Argument] {
+        return map {
+            OverloadResolver.Argument(type: $0, isLiteral: false, literalKind: nil)
+        }
     }
 }
