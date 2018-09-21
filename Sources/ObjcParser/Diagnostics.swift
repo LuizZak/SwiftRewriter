@@ -22,6 +22,12 @@ public class Diagnostics {
         
     }
     
+    public func copy() -> Diagnostics {
+        let new = Diagnostics()
+        new.diagnostics = diagnostics
+        return new
+    }
+    
     public func diagnosticsSummary(includeNotes: Bool = false) -> String {
         var diag = ""
         printDiagnostics(to: &diag, includeNotes: includeNotes)

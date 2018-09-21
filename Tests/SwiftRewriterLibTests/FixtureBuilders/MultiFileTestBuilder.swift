@@ -1,6 +1,6 @@
 import XCTest
 import ObjcParser
-import SwiftRewriterLib
+@testable import SwiftRewriterLib
 import ExpressionPasses
 import IntentionPasses
 import GlobalsProviders
@@ -9,20 +9,23 @@ import Utils
 class MultiFileTestBuilder {
     typealias File = (path: String, souce: String)
     
-    var test: XCTestCase
-    var results: [TestFileOutput] = []
-    var files: [File] = []
+    private let builder = SwiftRewriterJobBuilder()
     var expectedFiles: [ExpectedFile] = []
+    var files: [File] = []
+    let test: XCTestCase
     var errors: String = ""
-    
-    private var _invokedCompile = false
     
     init(test: XCTestCase) {
         self.test = test
+        
+        builder.astRewriterPassSources = DefaultExpressionPasses()
+        builder.intentionPassesSource = DefaultIntentionPasses()
+        builder.globalsProvidersSource = DefaultGlobalsProvidersSource()
     }
     
     func file(name: String, _ contents: String) -> MultiFileTestBuilder {
-        files.append(File(name, contents))
+        builder.inputs.add(filePath: name, source: contents)
+        files.append((name, contents))
         return self
     }
     
@@ -35,40 +38,31 @@ class MultiFileTestBuilder {
         return self
     }
     
-    /// Executes a transpilation step
     func transpile(expectsErrors: Bool = false,
                    options: ASTWriterOptions = .default,
                    file: String = #file,
                    line: Int = #line) -> CompiledMultiFileTestResults {
         
-        _invokedCompile = true
+        builder.astWriterOptions = options
         
-        let inputs = files.map(TestInputSource.init)
-        
+        let job = builder.createJob()
         let output = TestWriterOutput()
-        let input = TestMultiInputProvider(inputs: inputs)
         
-        let sut = makeSut(with: input, output: output, options: options)
+        let results = job.execute(output: output)
+        let errors = results.diagnostics.errors.map { $0.description }.joined(separator: "\n")
         
-        do {
-            try sut.rewrite()
-            
-            results = output.outputs
-            
-            if !expectsErrors && sut.diagnostics.errors.count != 0 {
-                test.recordFailure(
-                    withDescription: "Unexpected error(s) converting code: \(sut.diagnostics.errors.description)",
-                    inFile: file, atLine: line, expected: true)
-            }
-        } catch {
+        if !expectsErrors && !results.diagnostics.errors.isEmpty {
             test.recordFailure(
-                withDescription: "Unexpected error(s) converting code: \(error)",
+                withDescription: """
+                Unexpected error(s) converting code:
+                \(errors)
+                """,
                 inFile: file, atLine: line, expected: true)
         }
         
         return CompiledMultiFileTestResults(
             test: test,
-            results: results,
+            results: output.outputs,
             files: files,
             expectedFiles: expectedFiles,
             errors: errors)
@@ -82,16 +76,23 @@ class MultiFileTestBuilder {
                            file: String = #file,
                            line: Int = #line) -> MultiFileTestBuilder {
         
-        let inputs = files.map(TestInputSource.init)
+        builder.astWriterOptions = options
         
+        let job = builder.createJob()
         let output = TestWriterOutput()
-        let input = TestMultiInputProvider(inputs: inputs)
         
-        let sut = makeSut(with: input, output: output, options: options)
+        let results = job.execute(output: output)
         
-        do {
-            try sut.rewrite()
+        if !expectsErrors && !results.diagnostics.errors.isEmpty {
+            let errors = results.diagnostics.errors.map { $0.description }.joined(separator: "\n")
             
+            test.recordFailure(
+                withDescription: """
+                Unexpected error(s) converting code:
+                \(errors)
+                """,
+                inFile: file, atLine: line, expected: true)
+        } else {
             // Compute output
             let buffer = output.outputs
                 .sorted { $0.path < $1.path }
@@ -113,17 +114,9 @@ class MultiFileTestBuilder {
                     """, inFile: file, atLine: line, expected: true)
             }
             
-            if !expectsErrors && sut.diagnostics.errors.count != 0 {
-                test.recordFailure(withDescription: "Unexpected error(s) converting code: \(sut.diagnostics.errors.description)",
-                                   inFile: file, atLine: line, expected: true)
-            }
-            
             var errorsOutput = ""
-            sut.diagnostics.printDiagnostics(to: &errorsOutput)
+            results.diagnostics.printDiagnostics(to: &errorsOutput)
             errors = errorsOutput.trimmingCharacters(in: .whitespacesAndNewlines)
-        } catch {
-            test.recordFailure(withDescription: "Unexpected error(s) converting code: \(error)",
-                               inFile: file, atLine: line, expected: true)
         }
         
         return self
@@ -131,22 +124,12 @@ class MultiFileTestBuilder {
     
     func assertErrorStreamIs(_ expected: String, file: String = #file, line: Int = #line) {
         if errors != expected {
-            test.recordFailure(withDescription: "Mismatched errors stream. Expected \(expected) but found \(errors)",
-                               inFile: file, atLine: line, expected: true)
+            test.recordFailure(
+                withDescription: """
+                Mismatched errors stream. Expected \(expected) but found \(errors)
+                """,
+                inFile: file, atLine: line, expected: true)
         }
-    }
-    
-    private func makeSut(with input: InputSourcesProvider,
-                         output: WriterOutput,
-                         options: ASTWriterOptions) -> SwiftRewriter {
-        
-        let sut = SwiftRewriter(input: input, output: output)
-        sut.writerOptions = options
-        sut.astRewriterPassSources = DefaultExpressionPasses()
-        sut.intentionPassesSource = DefaultIntentionPasses()
-        sut.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        
-        return sut
     }
 }
 
@@ -304,7 +287,7 @@ class TestFileOutput: FileOutput {
 }
 
 class TestWriterOutput: WriterOutput {
-    var outputs: [FileOutput] = []
+    var outputs: [TestFileOutput] = []
     
     func createFile(path: String) -> FileOutput {
         let output = TestFileOutput(path: path)
