@@ -89,12 +89,14 @@ private class InnerCLibGlobalsProviders: BaseGlobalsProvider {
         add(function(name: "fmod", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat))
         
         add(function(name: "max", paramTypes: [.int, .int], returnType: .int))
+        add(function(name: "max", paramTypes: [cInt, cInt], returnType: cInt))
         add(function(name: "max", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat))
         add(function(name: "max", paramTypes: [.float, .float], returnType: .float))
         add(function(name: "max", paramTypes: [cFloat, cFloat], returnType: cFloat))
         add(function(name: "max", paramTypes: [.double, .double], returnType: .double))
         
         add(function(name: "min", paramTypes: [.int, .int], returnType: .int))
+        add(function(name: "min", paramTypes: [cInt, cInt], returnType: cInt))
         add(function(name: "min", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat))
         add(function(name: "min", paramTypes: [.float, .float], returnType: .float))
         add(function(name: "min", paramTypes: [cFloat, cFloat], returnType: cFloat))

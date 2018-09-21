@@ -1218,4 +1218,38 @@ class SwiftRewriter_TypingTests: XCTestCase {
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
+    
+    func testBasicOverloadResolution() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                CGFloat cgFloat = 0;
+                int cInt = 0;
+                NSInteger nsInteger = 0;
+                max(0, cgFloat);
+                max(0, cInt);
+                max(0, nsInteger);
+                max(0, 0);
+                max(0.0, 0); // FIXME: Result is currently 'CGFloat', but should be 'Double'
+            }
+            """,
+            swift: """
+            func test() {
+                let cgFloat: CGFloat = 0
+                let cInt: CInt = 0
+                let nsInteger: Int = 0
+                // type: CGFloat
+                max(0, cgFloat)
+                // type: CInt
+                max(0, cInt)
+                // type: Int
+                max(0, nsInteger)
+                // type: Int
+                max(0, 0)
+                // type: CGFloat
+                max(0.0, 0)
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
 }

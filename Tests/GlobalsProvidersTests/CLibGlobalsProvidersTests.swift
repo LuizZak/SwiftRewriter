@@ -68,12 +68,14 @@ class CLibGlobalsProvidersTests: BaseGlobalsProviderTestCase {
         assertDefined(function: "fmod", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat)
         
         assertDefined(function: "max", paramTypes: [.int, .int], returnType: .int)
+        assertDefined(function: "max", paramTypes: [cInt, cInt], returnType: cInt)
         assertDefined(function: "max", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat)
         assertDefined(function: "max", paramTypes: [.float, .float], returnType: .float)
         assertDefined(function: "max", paramTypes: [cFloat, cFloat], returnType: cFloat)
         assertDefined(function: "max", paramTypes: [.double, .double], returnType: .double)
         
         assertDefined(function: "min", paramTypes: [.int, .int], returnType: .int)
+        assertDefined(function: "min", paramTypes: [cInt, cInt], returnType: cInt)
         assertDefined(function: "min", paramTypes: [.cgFloat, .cgFloat], returnType: .cgFloat)
         assertDefined(function: "min", paramTypes: [.float, .float], returnType: .float)
         assertDefined(function: "min", paramTypes: [cFloat, cFloat], returnType: cFloat)
