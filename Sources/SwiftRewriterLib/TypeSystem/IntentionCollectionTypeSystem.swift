@@ -191,9 +191,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             $0.signature.asSelector == selector
         }
         
-        return _applyOverloadResolution(methods: methods,
-                                        argumentTypes: invocationTypeHints,
-                                        typeSystem: self)
+        return overloadResolver()
+            .findBestOverload(in: methods, argumentTypes: invocationTypeHints)
+                ?? methods.first
     }
     
     private class IntentionCollectionProvider: TypealiasProvider, KnownTypeProvider {

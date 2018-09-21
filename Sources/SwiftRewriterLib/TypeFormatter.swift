@@ -334,6 +334,10 @@ public enum TypeFormatter {
             result += param.name
             result += ": "
             result += stringify(param.type)
+            
+            if param.hasDefaultValue {
+                result += " = default"
+            }
         }
         
         return result + ")"

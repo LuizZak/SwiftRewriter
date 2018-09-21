@@ -375,6 +375,88 @@ class ExpressionTests: XCTestCase {
                        Expression.constant(1))
     }
     
+    func testLiteralExpressionKind() {
+        XCTAssertEqual(Expression.constant(1).literalExpressionKind, .integer)
+        XCTAssertEqual(Expression.constant(1.0).literalExpressionKind, .float)
+        XCTAssertEqual(Expression.constant("abc").literalExpressionKind, .string)
+        XCTAssertEqual(Expression.constant(true).literalExpressionKind, .boolean)
+        XCTAssertEqual(Expression.constant(.nil).literalExpressionKind, .nil)
+        XCTAssertEqual(Expression.constant(.rawConstant("123")).literalExpressionKind, nil)
+    }
+    
+    func testLiteralExpressionKindIsNilForAllNonLiteralExpressions() {
+        XCTAssertNil(Expression.arrayLiteral([]).literalExpressionKind)
+        XCTAssertNil(Expression.dictionaryLiteral([]).literalExpressionKind)
+        XCTAssertNil(Expression.assignment(lhs: .constant(0), op: .assign, rhs: .constant(0)).literalExpressionKind)
+        XCTAssertNil(Expression.cast(.constant(0), type: .int).literalExpressionKind)
+        XCTAssertNil(Expression.binary(lhs: .constant(0), op: .assign, rhs: .constant(0)).literalExpressionKind)
+        XCTAssertNil(Expression.block(body: []).literalExpressionKind)
+        XCTAssertNil(Expression.identifier("abc").literalExpressionKind)
+    }
+    
+    func testLiteralExpressionKindOnParensExpressionTransmitsLiteralKindOfInnerExpression() {
+        XCTAssertEqual(
+            Expression.parens(.constant(1)).literalExpressionKind,
+            .integer)
+        XCTAssertEqual(
+            Expression.parens(.constant(1.0)).literalExpressionKind,
+            .float)
+        XCTAssertEqual(
+            Expression.parens(.constant("abc")).literalExpressionKind,
+            .string)
+        XCTAssertEqual(
+            Expression.parens(.constant(true)).literalExpressionKind,
+            .boolean)
+        XCTAssertEqual(
+            Expression.parens(.constant(.nil)).literalExpressionKind,
+            .nil)
+        XCTAssertEqual(
+            Expression.parens(.constant(.rawConstant("123"))).literalExpressionKind,
+            nil)
+    }
+
+    func testLiteralExpressionKindOnUnaryExpressionTransmitsLiteralKindOfInnerExpression() {
+        XCTAssertEqual(
+            Expression.unary(op: .add, .constant(1)).literalExpressionKind,
+            .integer)
+        XCTAssertEqual(
+            Expression.unary(op: .add, .constant(1.0)).literalExpressionKind,
+            .float)
+        XCTAssertEqual(
+            Expression.unary(op: .add, .constant("abc")).literalExpressionKind,
+            .string)
+        XCTAssertEqual(
+            Expression.unary(op: .add, .constant(true)).literalExpressionKind,
+            .boolean)
+        XCTAssertEqual(
+            Expression.unary(op: .add, .constant(.nil)).literalExpressionKind,
+            .nil)
+        XCTAssertEqual(
+            Expression.unary(op: .add, .constant(.rawConstant("123"))).literalExpressionKind,
+            nil)
+    }
+    
+    func testLiteralExpressionKindOnPrefixExpressionTransmitsLiteralKindOfInnerExpression() {
+        XCTAssertEqual(
+            Expression.prefix(op: .add, .constant(1)).literalExpressionKind,
+            .integer)
+        XCTAssertEqual(
+            Expression.prefix(op: .add, .constant(1.0)).literalExpressionKind,
+            .float)
+        XCTAssertEqual(
+            Expression.prefix(op: .add, .constant("abc")).literalExpressionKind,
+            .string)
+        XCTAssertEqual(
+            Expression.prefix(op: .add, .constant(true)).literalExpressionKind,
+            .boolean)
+        XCTAssertEqual(
+            Expression.prefix(op: .add, .constant(.nil)).literalExpressionKind,
+            .nil)
+        XCTAssertEqual(
+            Expression.prefix(op: .add, .constant(.rawConstant("123"))).literalExpressionKind,
+            nil)
+    }
+    
     func anExpression(ident: String = "a") -> Expression {
         return .identifier(ident)
     }

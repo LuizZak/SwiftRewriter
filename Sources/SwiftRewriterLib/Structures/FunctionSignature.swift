@@ -12,6 +12,7 @@ public struct FunctionSignature: Equatable, Codable {
         return FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
     }
     
+    /// The cannonical selector signature for this function signature.
     public var asSelector: SelectorSignature {
         return
             SelectorSignature(
@@ -50,6 +51,74 @@ public struct FunctionSignature: Equatable, Codable {
         self.returnType = returnType
         self.parameters = parameters
         self.isMutating = isMutating
+    }
+    
+    /// Returns a set of possible selector signature variations for this function
+    /// signature when permutating over default argument type variations.
+    ///
+    /// e.g.: Given the following signature:
+    ///
+    /// ```
+    /// foo(bar: Int, baz: Int = default, _ zaz: Int = default)
+    /// ```
+    ///
+    /// permutated selector signature set returned by this method would be:
+    ///
+    /// ```
+    /// foo:bar:
+    /// foo:bar:baz:
+    /// foo:bar::
+    /// foo:bar:baz:
+    /// ```
+    ///
+    /// or the Swift equivalent signature:
+    ///
+    /// ```
+    /// foo(bar:)
+    /// foo(bar:baz:)
+    /// foo(bar:_:)
+    /// foo(bar:baz:_:)
+    /// ```
+    public func possibleSelectorSignatures() -> Set<SelectorSignature> {
+        let defaultArgIndices =
+            parameters.enumerated()
+                .filter { $0.element.hasDefaultValue }
+                .map { $0.offset }
+        
+        if defaultArgIndices.count == 0 {
+            return [asSelector]
+        }
+        
+        // Use a simple counter which increments sequentially, and use the bit
+        // representation of the counter to produce the permutations.
+        // Each bit represents the nth parameter with a default value, with 1
+        // being _with_ the parameter, and 0 being _without_ it.
+        let combinations = 1 << defaultArgIndices.count
+        
+        var set: Set<SelectorSignature> = []
+        
+        for i in 0..<combinations {
+            var keywords: [String?] = [name]
+            var nextDefaultArgIndex = 0
+            
+            for param in parameters {
+                if !param.hasDefaultValue {
+                    keywords.append(param.label)
+                    continue
+                }
+                
+                // Check if bit is set
+                if (i >> nextDefaultArgIndex) & 1 == 1 {
+                    keywords.append(param.label)
+                }
+                
+                nextDefaultArgIndex += 1
+            }
+            
+            set.insert(SelectorSignature(isStatic: isStatic, keywords: keywords))
+        }
+        
+        return set
     }
     
     /// Returns `true` iff `self` and `other` match using Swift signature matching

@@ -65,41 +65,48 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                        returnType: SwiftType,
                        file: String = #file, line: Int = #line) {
         
-        guard let definition = globals.firstDefinition(named: function) else {
-            recordFailure(withDescription: "Expected to find definition \(function)",
+        let asSignature =
+            FunctionSignature(
+                name: function,
+                parameters: paramTypes.map { ParameterSignature(label: nil, name: "v", type: $0) },
+                returnType: returnType)
+        
+        assertDefined(functionSignature: TypeFormatter.asString(signature: asSignature, includeName: true),
+                      file: file,
+                      line: line)
+        
+    }
+    
+    func assertDefined(functionSignature: String,
+                       file: String = #file, line: Int = #line) {
+        
+        let asSignature = try! FunctionSignature(signatureString: functionSignature)
+        
+        let signatures: [FunctionSignature] =
+            globals
+                .functionDefinitions(matching: asSignature.asIdentifier)
+                .compactMap {
+                    guard case let .function(signature) = $0.kind else {
+                        return nil
+                    }
+                    
+                    return signature
+                }
+        
+        guard !signatures.isEmpty else {
+            recordFailure(withDescription: "Expected to find definition for \(functionSignature)",
                 inFile: file, atLine: line, expected: true)
             return
         }
         
-        guard case let .function(signature) = definition.kind else {
-            recordFailure(
-                withDescription: "Expected to find a function defined, but found \(definition.kind) instead",
-                inFile: file, atLine: line, expected: true)
-            return
-        }
-        
-        let actualParamTypes = signature.parameters.map { $0.type }
-        
-        if actualParamTypes != paramTypes {
-            let expectedParamsString =
-                "(" + paramTypes.map { $0.description }.joined(separator: ", ") + ")"
-            
-            let actualParamsString =
-                "(" + actualParamTypes.map { $0.description }.joined(separator: ", ") + ")"
-            
+        if !signatures.contains(where: { asSignature.asIdentifier == $0.asIdentifier }) {
             recordFailure(
                 withDescription: """
-                Expected function to accept \(expectedParamsString), but it \
-                accepts \(actualParamsString) instead.
-                """,
-                inFile: file, atLine: line, expected: true)
-        }
-        
-        if signature.returnType != returnType {
-            recordFailure(
-                withDescription: """
-                Expected function to return \(returnType), but it returns \
-                \(signature.returnType) instead.
+                Failed to find function definition \(functionSignature).
+                
+                Function signatures found:
+                
+                \(signatures.map { TypeFormatter.asString(signature: $0, includeName: true) }.joined(separator: "\n -"))
                 """,
                 inFile: file, atLine: line, expected: true)
         }

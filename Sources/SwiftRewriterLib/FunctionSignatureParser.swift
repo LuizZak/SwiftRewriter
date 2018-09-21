@@ -324,6 +324,8 @@ public final class FunctionSignatureParser {
         let label: String?
         let name: String
         var attributes: [BlockTypeAttribute] = []
+        var hasDefaultValue = false
+        
         if tokenizer.tokenType(is: .underscore) {
             try tokenizer.advance(overTokenType: .underscore)
             label = nil
@@ -361,9 +363,13 @@ public final class FunctionSignatureParser {
         
         if tokenizer.tokenType(is: .equals) {
             try parseDefaultValue(tokenizer: tokenizer)
+            hasDefaultValue = true
         }
         
-        return ParameterSignature(label: label, name: String(name), type: type)
+        return ParameterSignature(label: label,
+                                  name: String(name),
+                                  type: type,
+                                  hasDefaultValue: hasDefaultValue)
     }
     
     // TODO: Map default values into `ParameterSignature` to allow the type system

@@ -20,8 +20,6 @@ public class DefaultTypeSystem: TypeSystem {
     var innerKnownTypes = CollectionKnownTypeProvider(knownTypes: [])
     var knownTypeProviders: CompoundKnownTypeProvider
     
-    private var typesByName: [String: KnownType] = [:]
-    
     public init() {
         typealiasProviders = CompoundTypealiasProvider(providers: [])
         knownTypeProviders = CompoundKnownTypeProvider(providers: [])
@@ -59,15 +57,12 @@ public class DefaultTypeSystem: TypeSystem {
         knownTypeProviders.providers.removeAll()
         typealiasProviders.providers.removeAll()
         
-        typesByName.removeAll()
         registerInitialTypeProviders()
         registerInitialKnownTypes()
     }
     
     public func addType(_ type: KnownType) {
         innerKnownTypes.addType(type)
-        
-        typesByName[type.typeName] = type
     }
     
     public func typesMatch(_ type1: SwiftType, _ type2: SwiftType, ignoreNullability: Bool) -> Bool {
@@ -92,10 +87,6 @@ public class DefaultTypeSystem: TypeSystem {
     public func typeExists(_ name: String) -> Bool {
         guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
             return false
-        }
-        
-        if typesByName.keys.contains(name) {
-            return true
         }
         
         if knownTypeProviders.knownType(withName: name) != nil {
@@ -334,16 +325,17 @@ public class DefaultTypeSystem: TypeSystem {
         // For nominal types, check for subtyping conformance
         if case .nominal(let nominalType) = unaliasedType,
             case .nominal(let nominalBaseType) = unaliasedBaseType {
-            
+
             let typeName = typeNameIn(nominalType: nominalType)
             let baseTypeName = typeNameIn(nominalType: nominalBaseType)
-            
+
             return isType(typeName, subtypeOf: baseTypeName) ||
                 isType(typeName, conformingTo: baseTypeName)
         }
         
         // TODO: Convert into this switch later; currently it crashes during
-        // runtime, most likely due to a compiler bug.
+        // runtime because Swift is failing to detect the switch as non-exhaustive.
+        // Care should be taken when switching over SwiftTypes elsewhere, too.
         #if false
         
         switch (unaliasedType, unaliasedBaseType) {
@@ -453,6 +445,31 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
+    public func implicitCoercedNumericType(for type1: SwiftType, _ type2: SwiftType) -> SwiftType {
+        let isInt1 = isInteger(type1)
+        let isInt2 = isInteger(type2)
+        
+        let isFloat1 = isFloat(type1)
+        let isFloat2 = isFloat(type2)
+        
+        if (isInt1 && isInt2) || (isFloat1 && isFloat2) {
+            if bitwidth(intType: type1) >= bitwidth(intType: type2) {
+                return type1
+            } else {
+                return type2
+            }
+        }
+        
+        if isInt1 && isFloat2 {
+            return type2
+        }
+        if isFloat1 && isInt2 {
+            return type1
+        }
+        
+        return type1
+    }
+    
     public func isNumeric(_ type: SwiftType) -> Bool {
         if isInteger(type) {
             return true
@@ -468,6 +485,55 @@ public class DefaultTypeSystem: TypeSystem {
         default:
             return false
         }
+    }
+    
+    private func bitwidth(intType: SwiftType) -> Int {
+        func internalBitwidth(_ type: SwiftType) -> Int? {
+            // TODO: Validate these results
+            switch type {
+            case .int, .uint:
+                return 64
+            case .nominal(.typeName(let name)):
+                switch name {
+                // Swift integer types
+                case "Int", "UInt":
+                    return 64
+                case "Int64", "UInt64":
+                    return 64
+                case "Int32", "UInt32":
+                    return 32
+                case "Int16", "UInt16":
+                    return 16
+                case "Int8", "UInt8":
+                    return 8
+                // C integer types
+                case "CChar", "CSignedChar", "CUnsignedChar":
+                    return 8
+                case "CChar16", "CShort", "CUnsignedShort":
+                    return 16
+                case "CChar32", "CInt", "CUnsignedInt", "CWideChar":
+                    return 32
+                case "CUnsignedLong", "CLongLong",
+                     "CUnsignedLongLong":
+                    return 64
+                // Float values
+                case "CGFloat":
+                    return 64
+                case "Float", "CFloat":
+                    return 32
+                case "Float80":
+                    return 80
+                case "Double", "CDouble":
+                    return 64
+                default:
+                    return nil
+                }
+            default:
+                return nil
+            }
+        }
+        
+        return internalBitwidth(intType) ?? internalBitwidth(resolveAlias(in: intType)) ?? 8
     }
     
     public func isInteger(_ type: SwiftType) -> Bool {
@@ -495,6 +561,23 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         return internalIsInteger(type) || internalIsInteger(resolveAlias(in: type))
+    }
+    
+    public func isFloat(_ type: SwiftType) -> Bool {
+        let aliasedType = resolveAlias(in: type)
+        
+        switch aliasedType {
+        case .nominal(.typeName(let typeName)):
+            switch typeName {
+            case "CGFloat", "Float", "Double", "CFloat", "CDouble", "Float80":
+                return true
+            default:
+                return false
+            }
+            
+        default:
+            return false
+        }
     }
     
     public func resolveAlias(in typeName: String) -> SwiftType {
@@ -578,7 +661,7 @@ public class DefaultTypeSystem: TypeSystem {
                 .filter {
                     $0.isStatic == isStatic
                         && (includeOptional || !$0.optional)
-                        && $0.signature.asSelector == selector
+                        && $0.signature.possibleSelectorSignatures().contains(selector)
                 }
         
         if !methods.isEmpty {
@@ -591,9 +674,10 @@ public class DefaultTypeSystem: TypeSystem {
                 selector.keywords.count - 1 == invocationTypeHints.count {
                 
                 if let method =
-                    _applyOverloadResolution(methods: methods,
-                                             argumentTypes: invocationTypeHints,
-                                             typeSystem: self) {
+                    overloadResolver()
+                        .findBestOverload(in: methods,
+                                          argumentTypes: invocationTypeHints)
+                        ?? methods.first {
                     
                     return method
                 }
@@ -1227,103 +1311,4 @@ func typeNameIn(swiftType: SwiftType) -> String? {
 
 func typeNameIn(nominalType: NominalSwiftType) -> String {
     return nominalType.typeNameValue
-}
-
-// TODO: Consider moving this to a separate object to better expose it to testing
-// and allow caching and other stateful niceties.
-
-///
-/// - precondition:
-///     for all methods `M` in `methods`,
-///     `M.signature.parameters.count == argumentTypes.count`
-///
-func _applyOverloadResolution(methods: [KnownMethod],
-                              argumentTypes: [SwiftType?],
-                              typeSystem: TypeSystem) -> KnownMethod? {
-    
-    let signatures = methods.map { $0.signature }
-    if let index = _applyOverloadResolution(signatures: signatures,
-                                            argumentTypes: argumentTypes,
-                                            typeSystem: typeSystem) {
-        return methods[index]
-    }
-    
-    return nil
-}
-
-/// Returns a matching resolution by index on a given array of signatures.
-///
-/// - precondition:
-///     for all methods `M` in `methods`,
-///     `M.signature.parameters.count == argumentTypes.count`
-///
-func _applyOverloadResolution(signatures: [FunctionSignature],
-                              argumentTypes: [SwiftType?],
-                              typeSystem: TypeSystem) -> Int? {
-    
-    if signatures.isEmpty {
-        return nil
-    }
-    
-    // All argument types are nil, or no argument types are available: no best
-    // candidate can be decided.
-    if argumentTypes.isEmpty || argumentTypes.allSatisfy({ $0 == nil }) {
-        return 0
-    }
-    
-    // Start with a linear search for the first fully matching method signature
-    let allArgumentsPresent = argumentTypes.allSatisfy { $0 != nil }
-    if allArgumentsPresent {
-        outerLoop:
-        for (i, signature) in signatures.enumerated() {
-            for (argIndex, argumentType) in argumentTypes.enumerated() {
-                guard let argumentType = argumentType else {
-                    break outerLoop
-                }
-                
-                let parameterType = signature.parameters[argIndex].type
-                
-                if !typeSystem.typesMatch(argumentType, parameterType, ignoreNullability: false) {
-                    break
-                }
-                
-                if argIndex == argumentTypes.count - 1 {
-                    // Candidate matches fully
-                    return i
-                }
-            }
-        }
-    }
-    
-    // Do a lookup ignoring type nullability to attempt to find best-matching
-    // candidates, now
-    var candidates = Array(signatures.enumerated())
-    
-    for (argIndex, argumentType) in argumentTypes.enumerated() {
-        guard candidates.count > 1, let argumentType = argumentType else {
-            continue
-        }
-        
-        var doWork = true
-        
-        repeat {
-            doWork = false
-            
-            for (i, signature) in candidates.enumerated() {
-                let parameterType =
-                    signature.element.parameters[argIndex].type
-                
-                if !typeSystem.isType(argumentType.deepUnwrapped,
-                                      assignableTo: parameterType.deepUnwrapped) {
-                    
-                    candidates.remove(at: i)
-                    doWork = true
-                    break
-                }
-            }
-        } while doWork && candidates.count > 1
-    }
-    
-    // Return first candidate found
-    return candidates.first?.offset
 }
