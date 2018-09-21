@@ -710,20 +710,31 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 let inNonnull = nonnullContextQuerier.isInNonnullContext(initDeclarator)
                 
                 let varDecl = VariableDeclaration(isInNonnullContext: inNonnull)
-                varDecl.addChild(Identifier(name: identifier.getText(), isInNonnullContext: inNonnull))
-                varDecl.addChild(TypeNameNode(type: type, isInNonnullContext: inNonnull))
+                
+                let identifierNode = nodeFactory.makeIdentifier(from: identifier)
+                let typeNameNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
+                typeNameNode.location = nodeFactory.sourceLocation(for: ctx)
+                
+                varDecl.addChild(identifierNode)
+                varDecl.addChild(typeNameNode)
                 
                 if let initializer = initDeclarator.initializer() {
-                    // TODO: Record source location of this nodes
                     let expression = ExpressionNode(isInNonnullContext: inNonnull)
                     expression.expression = initializer.expression()
+                    if let exp = initializer.expression() {
+                        expression.location = nodeFactory.sourceLocation(for: exp)
+                    }
                     let constantExpression = ConstantExpressionNode(isInNonnullContext: inNonnull)
                     constantExpression.addChild(expression)
+                    constantExpression.updateSourceRange()
                     let initialExpression = InitialExpression(isInNonnullContext: inNonnull)
                     initialExpression.addChild(constantExpression)
+                    initialExpression.updateSourceRange()
                     
                     varDecl.addChild(initialExpression)
                 }
+                
+                varDecl.updateSourceRange()
                 
                 declarations.append(varDecl)
             }
@@ -765,7 +776,6 @@ private class StructListener: ObjectiveCParserBaseListener {
         self.nodeFactory = nodeFactory
     }
     
-    // TODO: Record source location of nodes created here
     override func enterStructOrUnionSpecifier(_ ctx: ObjectiveCParser.StructOrUnionSpecifierContext) {
         guard ctx.STRUCT() != nil else {
             return
@@ -774,11 +784,10 @@ private class StructListener: ObjectiveCParserBaseListener {
         let inNonnull = nonnullContextQuerier.isInNonnullContext(ctx)
         
         let str = ObjcStructDeclaration(isInNonnullContext: inNonnull)
+        str.location = nodeFactory.sourceLocation(for: ctx)
         
         if let identifier = ctx.identifier() {
-            let identifier =
-                Identifier(name: identifier.getText(),
-                           isInNonnullContext: inNonnull)
+            let identifier = nodeFactory.makeIdentifier(from: identifier)
             
             str.addChild(identifier)
         }
@@ -806,8 +815,6 @@ private class StructListener: ObjectiveCParserBaseListener {
                 str.addChild(field)
             }
         }
-        
-        str.location = nodeFactory.sourceLocation(for: ctx)
         
         structs.append(str)
     }
@@ -866,7 +873,6 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         }
     }
     
-    // TODO: Record source location of nodes created here
     override func enterPropertyAttributesList(_ ctx: ObjectiveCParser.PropertyAttributesListContext) {
         let inNonnull = nonnullContextQuerier.isInNonnullContext(ctx)
         
@@ -875,7 +881,6 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         property.addChild(node)
     }
     
-    // TODO: Record source location of nodes created here
     override func enterPropertyAttribute(_ ctx: ObjectiveCParser.PropertyAttributeContext) {
         let modifier: PropertyAttributeNode.Attribute
         
@@ -918,7 +923,6 @@ private class FunctionPointerVisitor: ObjectiveCParserBaseVisitor<TypedefNode> {
         self.nodeFactory = nodeFactory
     }
     
-    // TODO: Record source location of nodes created here
     override func visitFunctionPointer(_ ctx: ObjectiveCParser.FunctionPointerContext) -> TypedefNode? {
         guard let identifier = VarDeclarationIdentifierNameExtractor.extract(from: ctx) else {
             return nil
@@ -931,9 +935,12 @@ private class FunctionPointerVisitor: ObjectiveCParserBaseVisitor<TypedefNode> {
         
         let identifierNode = nodeFactory.makeIdentifier(from: identifier)
         let typeNameNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
+        typeNameNode.location = nodeFactory.sourceLocation(for: ctx)
         
         typedefNode.addChild(identifierNode)
         typedefNode.addChild(typeNameNode)
+        
+        typedefNode.location = nodeFactory.sourceLocation(for: ctx)
         
         return nil
     }
