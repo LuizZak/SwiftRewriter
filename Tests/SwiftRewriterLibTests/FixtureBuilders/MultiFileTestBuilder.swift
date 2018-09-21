@@ -12,7 +12,7 @@ class MultiFileTestBuilder {
     var test: XCTestCase
     var results: [TestFileOutput] = []
     var files: [File] = []
-    var expectedFiles: [File] = []
+    var expectedFiles: [ExpectedFile] = []
     var errors: String = ""
     
     private var _invokedCompile = false
@@ -26,8 +26,12 @@ class MultiFileTestBuilder {
         return self
     }
     
-    func expectSwiftFile(name: String, _ contents: String) -> MultiFileTestBuilder {
-        expectedFiles.append(File(name, contents))
+    func expectSwiftFile(name: String, _ contents: String,
+                         file: String = #file, line: Int = #line) -> MultiFileTestBuilder {
+        
+        expectedFiles.append(
+            ExpectedFile(path: name, source: contents, _file: file, _line: line)
+        )
         return self
     }
     
@@ -155,13 +159,13 @@ class CompiledMultiFileTestResults {
     var test: XCTestCase
     var results: [TestFileOutput]
     var files: [File]
-    var expectedFiles: [File]
+    var expectedFiles: [ExpectedFile]
     var errors: String
     
     init(test: XCTestCase,
          results: [TestFileOutput],
          files: [File],
-         expectedFiles: [File],
+         expectedFiles: [ExpectedFile],
          errors: String) {
         
         self.test = test
@@ -195,15 +199,15 @@ class CompiledMultiFileTestResults {
                 return nil
             }
             
-            return ResultMatch(result: file, expectedPath: expected.path, expectedSource: expected.souce)
+            return ResultMatch(result: file, expectedFile: expected)
         }
         
-        for match in matches where match.result.buffer != match.expectedSource {
-            let expectedSwift = match.expectedSource
+        for match in matches where match.result.buffer != match.expectedFile.source {
+            let expectedSwift = match.expectedFile.source
             let actualSwift = match.result.buffer
             
             test.recordFailure(withDescription: """
-                Failed: Expected to produce Swift file \(match.expectedPath) inputs as:
+                Failed: Expected to produce Swift file \(match.result) inputs as:
                 
                 --
                 \(expectedSwift)
@@ -218,7 +222,7 @@ class CompiledMultiFileTestResults {
                 Diff:
                 
                 \(expectedSwift.makeDifferenceMarkString(against: actualSwift))
-                """, inFile: file, atLine: line, expected: true)
+                """, inFile: match.expectedFile._file, atLine: match.expectedFile._line, expected: true)
             
             break
         }
@@ -243,9 +247,15 @@ class CompiledMultiFileTestResults {
     
     private struct ResultMatch {
         var result: TestFileOutput
-        var expectedPath: String
-        var expectedSource: String
+        var expectedFile: ExpectedFile
     }
+}
+
+struct ExpectedFile {
+    var path: String
+    var source: String
+    var _file: String
+    var _line: Int
 }
 
 struct TestInputSource: InputSource {

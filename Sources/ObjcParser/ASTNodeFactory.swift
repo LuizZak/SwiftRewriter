@@ -19,12 +19,16 @@ class ASTNodeFactory {
     
     func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
         let nonnull = isInNonnullContext(context)
-        return Identifier(name: context.getText(), isInNonnullContext: nonnull)
+        let node = Identifier(name: context.getText(), isInNonnullContext: nonnull)
+        node.location = sourceLocation(for: context)
+        return node
     }
     
     func makeSuperclassName(from context: Parser.SuperclassNameContext) -> SuperclassName {
         let nonnull = isInNonnullContext(context)
-        return SuperclassName(name: context.getText(), isInNonnullContext: nonnull)
+        let node = SuperclassName(name: context.getText(), isInNonnullContext: nonnull)
+        node.location = sourceLocation(for: context)
+        return node
     }
     
     func makeProtocolReferenceList(from context: Parser.ProtocolListContext) -> ProtocolReferenceList {
@@ -39,7 +43,7 @@ class ASTNodeFactory {
             let protNameNode =
                 ProtocolName(name: identifier.getText(),
                              isInNonnullContext: isInNonnullContext(identifier))
-            
+            protocolListNode.location = sourceLocation(for: identifier)
             protocolListNode.addChild(protNameNode)
         }
         
@@ -48,6 +52,7 @@ class ASTNodeFactory {
     
     func makePointer(from context: ObjectiveCParser.PointerContext) -> PointerNode {
         let node = PointerNode(isInNonnullContext: isInNonnullContext(context))
+        node.location = sourceLocation(for: context)
         if let pointer = context.pointer() {
             node.addChild(makePointer(from: pointer))
         }
@@ -56,6 +61,7 @@ class ASTNodeFactory {
     
     func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
         let node = TypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
+        node.location = sourceLocation(for: context)
         if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
             node.addChild(identifierNode)
         }
@@ -111,7 +117,7 @@ class ASTNodeFactory {
         return enumCase
     }
     
-    private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
+    func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
         guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
             return .invalid
         }

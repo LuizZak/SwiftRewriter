@@ -310,6 +310,8 @@ class InternalSwiftWriter {
     }
     
     func outputFunctionDeclaration(_ funcDef: GlobalFunctionGenerationIntention, target: RewriterOutputTarget) {
+        outputHistory(for: funcDef, target: target)
+        
         let accessModifier =
             InternalSwiftWriter._accessModifierFor(accessLevel: funcDef.accessLevel)
         
@@ -446,6 +448,8 @@ class InternalSwiftWriter {
     }
     
     func outputProtocol(_ prot: ProtocolGenerationIntention, target: RewriterOutputTarget) {
+        outputHistory(for: prot, target: target)
+        
         // Figure out inheritance clauses
         var inheritances: [String] = []
         inheritances.append(contentsOf: prot.protocols.map { p in p.protocolName })

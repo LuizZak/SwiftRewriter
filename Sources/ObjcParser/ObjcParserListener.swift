@@ -797,13 +797,17 @@ private class StructListener: ObjectiveCParserBaseListener {
                 let identifierNode = nodeFactory.makeIdentifier(from: identifier)
                 
                 let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
+                typeNode.location = nodeFactory.sourceLocation(for: fieldDeclaration)
                 
                 field.addChild(identifierNode)
                 field.addChild(typeNode)
+                field.location = nodeFactory.sourceLocation(for: fieldDeclaration)
                 
                 str.addChild(field)
             }
         }
+        
+        str.location = nodeFactory.sourceLocation(for: ctx)
         
         structs.append(str)
     }

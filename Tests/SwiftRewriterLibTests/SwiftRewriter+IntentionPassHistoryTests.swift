@@ -47,4 +47,46 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             """,
             options: ASTWriterOptions(printIntentionHistory: true))
     }
+    
+    func testCFilesHistoryTracking() {
+        MultiFileTestBuilder(test: self)
+            .file(name: "A.h", """
+            typedef struct tree234_Tag tree234;
+            typedef int (*cmpfn234)(void *, void *);
+            typedef void *(*copyfn234)(void *state, void *element);
+            """)
+            .file(name: "A.c", """
+                        
+            struct tree234_Tag {
+                node234 *root;
+                cmpfn234 cmp;
+            };
+            """)
+            .expectSwiftFile(name: "A.swift", """
+            typealias tree234 = tree234_Tag
+            typealias cmpfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> CInt
+            typealias copyfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
+
+            struct tree234_Tag {
+                // [Creation]  line 3 column 5
+                var root: UnsafeMutablePointer<node234>!
+                // [Creation]  line 4 column 5
+                var cmp: cmpfn234!
+                
+                // [Creation] Synthesizing parameterless constructor for struct
+                init() {
+                    root = nil
+                    cmp = nil
+                }
+                // [Creation] Synthesizing parameterized constructor for struct
+                init(root: UnsafeMutablePointer<node234>!, cmp: cmpfn234!) {
+                    self.root = root
+                    self.cmp = cmp
+                }
+            }
+            // End of file A.swift
+            """)
+            .transpile(options: ASTWriterOptions(printIntentionHistory: true))
+            .assertExpectedSwiftFiles()
+    }
 }
