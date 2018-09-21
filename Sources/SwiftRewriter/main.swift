@@ -57,7 +57,7 @@ let outputExpressionTypesArg
 
 // --print-tracing-history
 let outputIntentionHistoryArg: OptionArgument<Bool> =
-    parser.add(option: "--print-tracing-history", shortName: "-h", kind: Bool.self,
+    parser.add(option: "--print-tracing-history", shortName: "-p", kind: Bool.self,
                usage: """
         Prints extra information before each declaration and member about the \
         inner logical decisions of intention passes as they change the structure \
