@@ -157,6 +157,12 @@ class ExpressionTypeResolverTests: XCTestCase {
                       expect: .int)
         assertResolve(.binary(lhs: .constant(1), op: .divide, rhs: .constant(1)),
                       expect: .int)
+        assertResolve(.binary(lhs: .constant(1.0), op: .divide, rhs: .constant(1.0)),
+                      expect: .double)
+        assertResolve(.binary(lhs: Expression.identifier("a").typed(.cgFloat),
+                              op: .divide,
+                              rhs: Expression.identifier("b").typed(.cgFloat)),
+                      expect: .cgFloat)
         assertResolve(.binary(lhs: .constant(1.0), op: .add, rhs: .constant(1.0)),
                       expect: .double)
         assertResolve(.binary(lhs: .constant(false), op: .add, rhs: .constant(true)),
