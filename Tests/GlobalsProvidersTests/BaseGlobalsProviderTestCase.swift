@@ -71,6 +71,10 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                 parameters: paramTypes.map { ParameterSignature(label: nil, name: "v", type: $0) },
                 returnType: returnType)
         
+        assertDefined(functionSignature: TypeFormatter.asString(signature: asSignature, includeName: true),
+                      file: file,
+                      line: line)
+        
     }
     
     func assertDefined(functionSignature: String,
@@ -102,7 +106,7 @@ class BaseGlobalsProviderTestCase: XCTestCase {
                 
                 Function signatures found:
                 
-                \(signatures.map { TypeFormatter.asString(signature: $0) }.joined(separator: "\n -"))
+                \(signatures.map { TypeFormatter.asString(signature: $0, includeName: true) }.joined(separator: "\n -"))
                 """,
                 inFile: file, atLine: line, expected: true)
         }
