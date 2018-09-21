@@ -63,28 +63,23 @@ public final class SwiftRewriter {
     /// Describes settings to pass to the AST writers when outputting code
     public var writerOptions: ASTWriterOptions = .default
     
-    public convenience init(input: InputSourcesProvider, output: WriterOutput) {
-        self.init(input: input, output: output,
-                  intentionPassesSource: ArrayIntentionPassSource(intentionPasses: []),
-                  astRewriterPassSources: ArrayASTRewriterPassSource(syntaxNodePasses: []),
-                  globalsProvidersSource: ArrayGlobalProvidersSource(globalsProviders: []),
-                  settings: .default)
-    }
-    
     public init(input: InputSourcesProvider,
                 output: WriterOutput,
-                intentionPassesSource: IntentionPassSource,
-                astRewriterPassSources: ASTRewriterPassSource,
-                globalsProvidersSource: GlobalsProvidersSource,
-                settings: Settings) {
+                intentionPassesSource: IntentionPassSource? = nil,
+                astRewriterPassSources: ASTRewriterPassSource? = nil,
+                globalsProvidersSource: GlobalsProvidersSource? = nil,
+                settings: Settings = .default) {
         
         self.diagnostics = Diagnostics()
         self.sourcesProvider = input
         self.outputTarget = output
         self.intentionCollection = IntentionCollection()
-        self.intentionPassesSource = intentionPassesSource
-        self.astRewriterPassSources = astRewriterPassSources
-        self.globalsProvidersSource = globalsProvidersSource
+        self.intentionPassesSource =
+            intentionPassesSource ?? ArrayIntentionPassSource(intentionPasses: [])
+        self.astRewriterPassSources =
+            astRewriterPassSources ?? ArrayASTRewriterPassSource(syntaxNodePasses: [])
+        self.globalsProvidersSource =
+            globalsProvidersSource ?? ArrayGlobalProvidersSource(globalsProviders: [])
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         

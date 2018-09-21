@@ -35,10 +35,7 @@ class MultiFileTestBuilder {
         return self
     }
     
-    // TODO: Merge these two methods so we can get rid of the duplication while
-    // building the same rewriter structure every time.
-    
-    /// Executes a compilation step
+    /// Executes a transpilation step
     func transpile(expectsErrors: Bool = false,
                    options: ASTWriterOptions = .default,
                    file: String = #file,
@@ -307,7 +304,7 @@ class TestFileOutput: FileOutput {
 }
 
 class TestWriterOutput: WriterOutput {
-    var outputs: [TestFileOutput] = []
+    var outputs: [FileOutput] = []
     
     func createFile(path: String) -> FileOutput {
         let output = TestFileOutput(path: path)
