@@ -136,7 +136,7 @@ let targetArg
 
 let filesParser
     = parser.add(subparser: "files",
-                 overview: "Converts one or more series of .h/.m files to Swift.")
+                 overview: "Converts one or more .h/.m file(s) to Swift.")
 let filesArg
     = filesParser.add(positional: "files", kind: [String].self, usage: "Objective-C file(s) to convert.")
 

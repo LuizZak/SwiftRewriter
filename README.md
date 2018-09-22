@@ -55,7 +55,7 @@ Defaults to 'filedisk' if not provided.
   --help                  Display available options
 
 SUBCOMMANDS:
-  files                   Converts one or more series of .h/.m files to Swift.
+  files                   Converts one or more .h/.m file(s) to Swift.
   path                    Examines a path and collects all .h/.m files to convert, before presenting a prompt to confirm conversion of files.
 ```
 
