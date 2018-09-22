@@ -8,11 +8,15 @@ class FoundationCompoundTypesTests: XCTestCase {
     func testCalendarDefinition() {
         let type = FoundationCompoundTypes.nsCalendar.create()
         
-        XCTAssertEqual(type.nonCanonicalNames.count, 0)
-        XCTAssertEqual(type.transformations.count, 2)
+        XCTAssertEqual(type.nonCanonicalNames, ["NSCalendar"])
+        XCTAssertEqual(type.transformations.count, 3)
         
         assertSignature(type: type, matches: """
+            @_swiftrewriter(renameFrom: NSCalendar)
             class Calendar: NSObject {
+                @_swiftrewriter(mapFrom: calendarWithIdentifier(_:))
+                init(identifier: Calendar.Identifier)
+                
                 @_swiftrewriter(mapFrom: component(_:fromDate:))
                 func component(_ component: Calendar.Component, from date: Date) -> Int
                 

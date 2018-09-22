@@ -552,4 +552,86 @@ class FoundationExpressionPassTests: ExpressionPassTestCase {
             into: Expression.identifier("Calendar").dot("Component").dot("timeZone")
         ); assertNotifiedChange()
     }
+    
+    func testNSCalendarIdentifierConversions() {
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierGregorian"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("gregorian")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierBuddhist"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("buddhist")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierChinese"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("chinese")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierCoptic"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("coptic")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierEthiopicAmeteMihret"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteMihret")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierEthiopicAmeteAlem"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteAlem")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierHebrew"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("hebrew")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierISO8601"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("ISO8601")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierIndian"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("indian")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierIslamic"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("islamic")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierIslamicCivil"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("islamicCivil")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierJapanese"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("japanese")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierPersian"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("persian")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierRepublicOfChina"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("republicOfChina")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierIslamicTabular"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("islamicTabular")
+         ); assertNotifiedChange()
+        
+         assertTransform(
+            expression: .identifier("NSCalendarIdentifierIslamicUmmAlQura"),
+            into: Expression.identifier("Calendar").dot("Identifier").dot("islamicUmmAlQura")
+         ); assertNotifiedChange()
+    }
 }

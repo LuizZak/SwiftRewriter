@@ -22,7 +22,11 @@ public enum CalendarCompoundType {
     
     static func typeString() -> String {
         let type = """
+            @_swiftrewriter(renameFrom: NSCalendar)
             class Calendar: NSObject {
+                @_swiftrewriter(mapFrom: calendarWithIdentifier(_:))
+                init(identifier: Calendar.Identifier)
+                
                 @_swiftrewriter(mapFrom: component(_:fromDate:))
                 func component(_ component: Calendar.Component, from date: Date) -> Int
                 

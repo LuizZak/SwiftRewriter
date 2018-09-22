@@ -349,6 +349,72 @@ extension FoundationExpressionPass {
     }
     
     func makeEnumTransformers() {
+        makeCalendarUnitTransformers()
+        makeCalendarIdentifierTransformers()
+        
+        enumMappings["NSOrderedAscending"] = {
+            Expression.identifier("ComparisonResult").dot("orderedAscending")
+        }
+        enumMappings["NSOrderedDescending"] = {
+            Expression.identifier("ComparisonResult").dot("orderedDescending")
+        }
+        enumMappings["NSOrderedSame"] = {
+            Expression.identifier("ComparisonResult").dot("orderedSame")
+        }
+    }
+    
+    func makeCalendarIdentifierTransformers() {
+        enumMappings["NSCalendarIdentifierGregorian"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("gregorian")
+        }
+        enumMappings["NSCalendarIdentifierBuddhist"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("buddhist")
+        }
+        enumMappings["NSCalendarIdentifierChinese"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("chinese")
+        }
+        enumMappings["NSCalendarIdentifierCoptic"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("coptic")
+        }
+        enumMappings["NSCalendarIdentifierEthiopicAmeteMihret"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteMihret")
+        }
+        enumMappings["NSCalendarIdentifierEthiopicAmeteAlem"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("ethiopicAmeteAlem")
+        }
+        enumMappings["NSCalendarIdentifierHebrew"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("hebrew")
+        }
+        enumMappings["NSCalendarIdentifierISO8601"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("ISO8601")
+        }
+        enumMappings["NSCalendarIdentifierIndian"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("indian")
+        }
+        enumMappings["NSCalendarIdentifierIslamic"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("islamic")
+        }
+        enumMappings["NSCalendarIdentifierIslamicCivil"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("islamicCivil")
+        }
+        enumMappings["NSCalendarIdentifierJapanese"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("japanese")
+        }
+        enumMappings["NSCalendarIdentifierPersian"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("persian")
+        }
+        enumMappings["NSCalendarIdentifierRepublicOfChina"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("republicOfChina")
+        }
+        enumMappings["NSCalendarIdentifierIslamicTabular"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("islamicTabular")
+        }
+        enumMappings["NSCalendarIdentifierIslamicUmmAlQura"] = {
+            Expression.identifier("Calendar").dot("Identifier").dot("islamicUmmAlQura")
+        }
+    }
+    
+    func makeCalendarUnitTransformers() {
         enumMappings["NSCalendarUnitEra"] = {
             Expression.identifier("Calendar").dot("Component").dot("era")
         }
@@ -399,15 +465,6 @@ extension FoundationExpressionPass {
         }
         enumMappings["NSCalendarUnitTimeZone"] = {
             Expression.identifier("Calendar").dot("Component").dot("timeZone")
-        }
-        enumMappings["NSOrderedAscending"] = {
-            Expression.identifier("ComparisonResult").dot("orderedAscending")
-        }
-        enumMappings["NSOrderedDescending"] = {
-            Expression.identifier("ComparisonResult").dot("orderedDescending")
-        }
-        enumMappings["NSOrderedSame"] = {
-            Expression.identifier("ComparisonResult").dot("orderedSame")
         }
     }
 }
