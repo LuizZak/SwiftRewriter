@@ -55,7 +55,13 @@ public final class ASTRewriterPassApplier {
                                    functionBodyIntention: item.body)
         
         let pass = passType.init(context: expContext)
-        _=pass.apply(on: item.body.body, context: expContext)
+        let result = pass.apply(on: item.body.body, context: expContext)
+        
+        if let compound = result.asCompound {
+            item.body.body = compound
+        } else {
+            item.body.body = [result]
+        }
     }
     
     private func internalApply(on intentions: IntentionCollection) {

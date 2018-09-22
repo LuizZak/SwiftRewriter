@@ -22,6 +22,12 @@ public class Diagnostics {
         
     }
     
+    public func copy() -> Diagnostics {
+        let new = Diagnostics()
+        new.diagnostics = diagnostics
+        return new
+    }
+    
     public func diagnosticsSummary(includeNotes: Bool = false) -> String {
         var diag = ""
         printDiagnostics(to: &diag, includeNotes: includeNotes)
@@ -50,7 +56,7 @@ public class Diagnostics {
     }
     
     public func error(_ message: String, location: SourceLocation) {
-        let diag = DiagnosticMessage.error(message: message, location: location)
+        let diag = DiagnosticMessage.error(ErrorDiagnostic(message: message, location: location))
         
         diagnostics.append(diag)
     }
@@ -67,6 +73,17 @@ public class Diagnostics {
         diagnostics.append(diag)
     }
     
+    public func errorDiagnostics() -> [ErrorDiagnostic] {
+        return diagnostics.compactMap {
+            switch $0 {
+            case .error(let error):
+                return error
+            default:
+                return nil
+            }
+        }
+    }
+    
     internal func removeAll() {
         diagnostics.removeAll()
     }
@@ -76,7 +93,7 @@ public class Diagnostics {
 public enum DiagnosticMessage: CustomStringConvertible {
     case note(message: String, location: SourceLocation)
     case warning(message: String, location: SourceLocation)
-    case error(message: String, location: SourceLocation)
+    case error(ErrorDiagnostic)
     
     public var description: String {
         switch self {
@@ -84,19 +101,28 @@ public enum DiagnosticMessage: CustomStringConvertible {
             return "\(message) at \(loc)"
         case let .note(message, loc):
             return "\(message) at \(loc)"
-        case let .error(message, loc):
-            return "\(message) at \(loc)"
+        case let .error(error):
+            return error.description
         }
     }
     
     public var location: SourceLocation {
         switch self {
-        case .error(_, let loc):
-            return loc
         case .warning(_, let loc):
             return loc
         case .note(_, let loc):
             return loc
+        case .error(let error):
+            return error.location
         }
+    }
+}
+
+public struct ErrorDiagnostic: CustomStringConvertible, Error {
+    var message: String
+    var location: SourceLocation
+    
+    public var description: String {
+        return "\(message) at \(location)"
     }
 }
