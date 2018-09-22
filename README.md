@@ -119,7 +119,7 @@ SwiftRewriter should:
 2. Try to produce code that functions as close as possible to the original Objective-C source, with no surprises;
 3. Try to do as much as possible of the tedious laborious work of converting syntax and getting it ready for the user to make the last manual changes that will inevitably be necessary;
 4. Whenever possible, make automatic, semantically correct transformations that will save the user some time from doing it manually later;
-5. Be extensible, as far as writing a new syntax/type-structure transformation pass is concerned.
+5. Be extensible, as far as writing a new syntax/type-structure transformation pass is concerned. (for more info on transformation passes, see aformentioned [Architecture](Architecture.md)) 
 
 Some other libraries and resources that are also concerned with automating the process of converting Objective-C to Swift to some degree include that I think are worth mentioning:
 
