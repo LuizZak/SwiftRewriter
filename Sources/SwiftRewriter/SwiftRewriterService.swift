@@ -37,21 +37,27 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
     public func rewrite(files: [URL]) throws {
         let input = FileInputProvider(files: files)
         
-        let converter =
-            SwiftRewriter(input: input, output: output,
-                          intentionPassesSource: DefaultIntentionPasses(),
-                          astRewriterPassSources: DefaultExpressionPasses(),
-                          globalsProvidersSource: DefaultGlobalsProvidersSource(),
-                          settings: Settings.rewriter)
+        let jobBuilder = SwiftRewriterJobBuilder()
         
-        converter.preprocessors.append(QuickSpecPreprocessor())
+        jobBuilder.inputs.addInputs(from: input)
+        jobBuilder.intentionPassesSource = DefaultIntentionPasses()
+        jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
+        jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        jobBuilder.settings = Settings.rewriter
+        jobBuilder.astWriterOptions = Settings.astWriter
+        jobBuilder.preprocessors = [QuickSpecPreprocessor()]
         
-        converter.writerOptions = Settings.astWriter
+        let job = jobBuilder.createJob()
         
-        try converter.rewrite()
+        let results = job.execute(output: output)
+        
+        if !results.succeeded {
+            print("One or more errors where found while transpiling the input source code.")
+            print("See bellow for more information.")
+        }
         
         // Print diagnostics
-        for diag in converter.diagnostics.diagnostics {
+        for diag in results.diagnostics.diagnostics {
             switch diag {
             case .note:
                 print("// Note: \(diag)")

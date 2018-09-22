@@ -269,6 +269,7 @@ public class IntentionCollector {
         }
         
         let intent = ClassGenerationIntention(typeName: name, source: node)
+        intent.isInterfaceSource = true
         recordSourceHistory(intention: intent, node: node)
         
         context
@@ -291,6 +292,7 @@ public class IntentionCollector {
         }
         
         let intent = ClassExtensionGenerationIntention(typeName: name, source: node)
+        intent.isInterfaceSource = true
         delegate?.reportForLazyResolving(intention: intent)
         intent.categoryName = node.categoryName?.name
         recordSourceHistory(intention: intent, node: node)

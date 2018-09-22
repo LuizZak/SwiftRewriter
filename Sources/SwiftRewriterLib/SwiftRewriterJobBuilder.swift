@@ -6,8 +6,13 @@ public class SwiftRewriterJobBuilder {
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
     public var globalsProvidersSource: GlobalsProvidersSource?
+    public var preprocessors: [SourcePreprocessor] = []
     public var settings: SwiftRewriter.Settings = .default
     public var astWriterOptions: ASTWriterOptions = .default
+    
+    public init() {
+        
+    }
     
     /// Returns a new `SwiftRewriterJob` created using the parameters configured
     /// with this builder object.
@@ -18,6 +23,7 @@ public class SwiftRewriterJobBuilder {
                                 intentionPassesSource: intentionPassesSource,
                                 astRewriterPassSources: astRewriterPassSources,
                                 globalsProvidersSource: globalsProvidersSource,
+                                preprocessors: preprocessors,
                                 settings: settings,
                                 astWriterOptions: astWriterOptions)
     }
@@ -31,8 +37,16 @@ public class SwiftRewriterJobInputFiles {
         inputs.append(input)
     }
     
+    public func add(inputs: [InputSource]) {
+        self.inputs.append(contentsOf: inputs)
+    }
+    
     public func add(filePath: String, source: String) {
         add(SwiftRewriterJobInputSource(filePath: filePath, source: source))
+    }
+    
+    public func addInputs(from inputsProvider: InputSourcesProvider) {
+        add(inputs: inputsProvider.sources())
     }
     
     func createSourcesProvider() -> InputSourcesProvider {

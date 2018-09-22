@@ -8,9 +8,12 @@ class SwiftRewriterJobTests: XCTestCase {
         let expectedSwift = """
             class BaseClass: NSObject {
             }
+            class PreprocessedClass: NSObject {
+            }
             // End of file Input.swift
             class Class {
                 func method() {
+                    hello.world()
                 }
             }
             // End of file Source.swift
@@ -20,6 +23,7 @@ class SwiftRewriterJobTests: XCTestCase {
                              intentionPassesSource: MockIntentionPassSource(),
                              astRewriterPassSources: MockExpressionPassesSource(),
                              globalsProvidersSource: MockGlobalsProvidersSource(),
+                             preprocessors: [MockSourcePreprocessor()],
                              settings: .default,
                              astWriterOptions: .default)
         let output = MockWriterOutput()
@@ -32,6 +36,7 @@ class SwiftRewriterJobTests: XCTestCase {
             buffer,
             expectedSwift,
             """
+            
             Diff:
             
             \(expectedSwift.makeDifferenceMarkString(against: buffer))
@@ -125,6 +130,7 @@ private class MockIntentionPass: IntentionPass {
     func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         let file = FileGenerationIntention(sourcePath: "Source.m", targetPath: "Source.swift")
         let cls = ClassGenerationIntention(typeName: "Class")
+        cls.isInterfaceSource = false
         let method = MethodGenerationIntention(signature: FunctionSignature(name: "method"))
         method.functionBody = FunctionBodyIntention(body: [])
         cls.addMethod(method)
@@ -146,6 +152,21 @@ private final class MockExpressionPasses: ASTRewriterPass {
             CompoundStatement(statements: [
                 Statement.expression(Expression.identifier("hello").dot("world").call())
             ])
+    }
+}
+
+private class MockSourcePreprocessor: SourcePreprocessor {
+    func preprocess(source: String, context: PreprocessingContext) -> String {
+        if context.filePath == "Input.m" {
+            return source +
+            """
+            
+            @interface PreprocessedClass : NSObject
+            @end
+            """
+        }
+        
+        return source
     }
 }
 

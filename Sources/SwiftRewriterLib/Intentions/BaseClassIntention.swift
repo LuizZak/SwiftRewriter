@@ -5,10 +5,7 @@ import SwiftAST
 public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContainerIntention {
     /// Returns `true` if this class intention originated from an `@interface`
     /// declaration.
-    public var isInterfaceSource: Bool {
-        return source is ObjcClassInterface
-            || source is ObjcClassCategoryInterface
-    }
+    public var isInterfaceSource: Bool = false
     
     public override var isEmptyType: Bool {
         return super.isEmptyType && instanceVariables.isEmpty && synthesizations.isEmpty

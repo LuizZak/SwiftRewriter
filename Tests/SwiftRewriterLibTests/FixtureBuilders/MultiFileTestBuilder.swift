@@ -1,6 +1,6 @@
 import XCTest
 import ObjcParser
-@testable import SwiftRewriterLib
+import SwiftRewriterLib
 import ExpressionPasses
 import IntentionPasses
 import GlobalsProviders

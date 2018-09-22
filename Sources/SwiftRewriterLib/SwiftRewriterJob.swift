@@ -7,6 +7,7 @@ public class SwiftRewriterJob {
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
     public var globalsProvidersSource: GlobalsProvidersSource?
+    public var preprocessors: [SourcePreprocessor]
     public var settings: SwiftRewriter.Settings = .default
     public var astWriterOptions: ASTWriterOptions = .default
     
@@ -14,12 +15,14 @@ public class SwiftRewriterJob {
                 intentionPassesSource: IntentionPassSource?,
                 astRewriterPassSources: ASTRewriterPassSource?,
                 globalsProvidersSource: GlobalsProvidersSource?,
+                preprocessors: [SourcePreprocessor],
                 settings: SwiftRewriter.Settings,
                 astWriterOptions: ASTWriterOptions) {
         
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources
         self.globalsProvidersSource = globalsProvidersSource
+        self.preprocessors = preprocessors
         self.settings = settings
         self.input = input
         self.astWriterOptions = astWriterOptions
@@ -55,7 +58,9 @@ public class SwiftRewriterJob {
                                      astRewriterPassSources: astRewriterPassSources,
                                      globalsProvidersSource: globalsProvidersSource,
                                      settings: settings)
+        
         rewriter.writerOptions = astWriterOptions
+        rewriter.preprocessors = preprocessors
         
         return rewriter
     }

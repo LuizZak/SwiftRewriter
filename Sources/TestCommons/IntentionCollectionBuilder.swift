@@ -465,7 +465,7 @@ public extension TypeBuilder where T: BaseClassIntention {
     /// declaration.
     @discardableResult
     public func setAsInterfaceSource() -> TypeBuilder {
-        targetType.source = ObjcClassInterface(isInNonnullContext: false)
+        targetType.isInterfaceSource = true
         
         return self
     }
@@ -474,7 +474,7 @@ public extension TypeBuilder where T: BaseClassIntention {
     /// extension interface declaration.
     @discardableResult
     public func setAsCategoryInterfaceSource() -> TypeBuilder {
-        targetType.source = ObjcClassCategoryInterface(isInNonnullContext: false)
+        targetType.isInterfaceSource = true
         
         return self
     }
