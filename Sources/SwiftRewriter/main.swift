@@ -173,7 +173,7 @@ let includePatternArg
 
 let skipConfirmArg
     = pathParser.add(option: "--skip-confirm", shortName: "-s", kind: Bool.self,
-                     usage: "Skipts asking for confirmation prior to parsing.")
+                     usage: "Skips asking for confirmation prior to parsing.")
 
 let overwriteArg
     = pathParser.add(option: "--overwrite", shortName: "-o", kind: Bool.self,
