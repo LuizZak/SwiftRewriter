@@ -40,7 +40,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 }
                 
                 // [Creation] TestSingleInputProvider.m line 8 column 3
-                // [TypeMerge] Updated nullability signature from () -> String! to: () -> String
+                // [TypeMerge:FileTypeMergingIntentionPass] Updated nullability signature from () -> String! to: () -> String
                 func aMethod() -> String {
                 }
             }

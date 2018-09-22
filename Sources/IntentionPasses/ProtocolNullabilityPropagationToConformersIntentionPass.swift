@@ -19,7 +19,11 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             typeSystem?.tearDownCache()
         }
         
-        let typeMerger = TypeMerger(typeSystem: context.typeSystem)
+        let typeMerger =
+            TypeMerger(
+                typeSystem: context.typeSystem,
+                invocatorTag: "\(ProtocolNullabilityPropagationToConformersIntentionPass.self)"
+            )
         
         // Collect protocols
         let protocols = intentionCollection.protocolIntentions()

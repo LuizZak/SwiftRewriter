@@ -191,7 +191,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(
             files[0].classIntentions[0].history.summary,
             """
-            [TypeMerge] Creating definition for newly found method A.fromHeader()
+            [TypeMerge:FileTypeMergingIntentionPass] Creating definition for newly found method A.fromHeader()
             """
             )
     }

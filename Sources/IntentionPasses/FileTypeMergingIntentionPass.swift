@@ -12,7 +12,11 @@ public class FileTypeMergingIntentionPass: IntentionPass {
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
         
-        let typeMerger = TypeMerger(typeSystem: context.typeSystem)
+        let typeMerger =
+            TypeMerger(
+                typeSystem: context.typeSystem,
+                invocatorTag: "\(FileTypeMergingIntentionPass.self)"
+            )
         
         // Collect header/implementation pairs
         let intentions = intentionCollection.fileIntentions()

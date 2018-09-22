@@ -1,13 +1,17 @@
 import SwiftRewriterLib
 import SwiftAST
 
-private let historyTag = "TypeMerge"
-
 class TypeMerger {
     let typeSystem: TypeSystem
+    let invocatorTag: String
     
-    init(typeSystem: TypeSystem) {
+    var historyTag: String {
+        return "TypeMerge:\(invocatorTag)"
+    }
+    
+    init(typeSystem: TypeSystem, invocatorTag: String) {
         self.typeSystem = typeSystem
+        self.invocatorTag = invocatorTag
     }
 
     func mergeTypesToMatchingImplementations(from source: FileGenerationIntention,
@@ -209,7 +213,7 @@ class TypeMerger {
                 
                 second.history
                     .recordChange(
-                        tag: "TypeMerge",
+                        tag: historyTag,
                         description: "Generating protocol conformance \(prot.protocolName) due to \(first.origin)")
                 
                 if let historic = prot as? Historic {
@@ -226,7 +230,7 @@ class TypeMerger {
                 
                 second.history
                     .recordChange(
-                        tag: "TypeMerge",
+                        tag: historyTag,
                         description: """
                         Setting superclass of \(second.typeName) to \(superclass) due to \
                         superclass definition found at \(first.origin)
@@ -243,7 +247,7 @@ class TypeMerger {
                     
                     second.history
                         .recordChange(
-                            tag: "TypeMerge",
+                            tag: historyTag,
                             description: """
                             Moved ivar \(ivar.name) from \(first.origin) to \(second.file?.sourcePath ?? "")
                             """)
@@ -301,7 +305,7 @@ class TypeMerger {
                 
                 second.history
                     .recordChange(
-                        tag: "TypeMerge",
+                        tag: historyTag,
                         description: """
                         Creating definition for newly found method \
                         \(TypeFormatter.asString(method: knownMethod, ofType: first))
