@@ -21,7 +21,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", ._branchItem("swift4.2")),
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.7.0"),
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", ._branchItem("swift4.2")),
         .package(url: "https://github.com/LuizZak/console.git", from: "0.1.0")
