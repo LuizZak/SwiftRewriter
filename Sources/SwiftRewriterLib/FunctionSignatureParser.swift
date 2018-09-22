@@ -372,8 +372,6 @@ public final class FunctionSignatureParser {
                                   hasDefaultValue: hasDefaultValue)
     }
     
-    // TODO: Map default values into `ParameterSignature` to allow the type system
-    // to recognize call sites that omit these optional parameters.
     private static func parseDefaultValue(tokenizer: Tokenizer) throws {
         try tokenizer.advance(overTokenType: .equals)
         
