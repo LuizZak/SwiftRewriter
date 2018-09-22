@@ -4,6 +4,8 @@
 
 A program that aims to aid in automatization of conversion of Objective-C code into equivalent Swift code.
 
+For information about how it's structured, see the [Architecture](Architecture.md) page.
+
 #### Requirements
 
 Xcode 10.0 & Swift 4.2

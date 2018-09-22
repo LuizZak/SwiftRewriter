@@ -73,9 +73,9 @@ This step is redone many times later during intention and AST rewriting steps to
 
 The final collection of intentions is passed to special steps that are free to change the structure of the generated intentions before actual outputting is performed.
 
-These steps are represented by an `IntentionPass` protocol, which is fed to a `SwiftRewriter` via an instance of `IntentionPassSource`. These intention passes are then fed the entire source code represented by the intermediary intention collection. Intention passes are free to delete, merge, rename, or create new source-generation intentions freely.
+These steps are represented by an `IntentionPass` protocol, which is fed to a `SwiftRewriter` via an instance of `IntentionPassSource`. These intention passes are then fed the entire source code represented by the intermediary intention collection. Intention passes are free to delete, merge, rename, or create new source-generation intentions.
 
-This is the step of the process in which outside code altering processors are allowed to change the resulting program's structure at a higher level. Actual method body rewriting should be done in a separate step (AST rewriting).
+This is the step of the process in which external code-altering processors are allowed to change the resulting program's structure at a higher level. Actual method body rewriting should be done in a separate step (see [AST rewriting](#ASTrewriting)).
 
 - Intention passes are applied serially, in the same order as the `IntentionPassSource` provides them. Type resolution is invoked between each intention pass to keep the typing information up-to-date with respect to general source code transformations.
 
@@ -96,3 +96,5 @@ Expression passes are provided via an `ASTRewriterPassSource` protocol provided 
 At the final step, the code is output to an implementer of `WriterOutput` fed to `SwiftRewriter.init`.
 
 Code is output in a per-file basis.
+
+Specifics of what files will be exported are commanded by intention passes (mainly by `FileTypeMergingIntentionPass`), such that code is produced 1:1 with original header/implementation files fed to the transpiler.
