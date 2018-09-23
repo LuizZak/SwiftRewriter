@@ -1,6 +1,6 @@
 import SwiftAST
 
-public struct ParameterSignature: Equatable, Codable {
+public struct ParameterSignature: Hashable, Codable {
     public var label: String?
     public var name: String
     public var type: SwiftType

@@ -1,11 +1,13 @@
 import SwiftAST
 
 /// Implements basic function call overload selection.
-class OverloadResolver {
+public class OverloadResolver {
     let typeSystem: TypeSystem
+    let state: OverloadResolverState
     
-    init(typeSystem: TypeSystem) {
+    init(typeSystem: TypeSystem, state: OverloadResolverState) {
         self.typeSystem = typeSystem
+        self.state = state
     }
     
     /// Returns a matching resolution by index on a given array of methods.
@@ -63,11 +65,15 @@ class OverloadResolver {
     ///     for all methods `M` in `methods`,
     ///     `M.signature.parameters.count == arguments.count`
     ///
-    func findBestOverload(inSignatures signatures: [FunctionSignature],
-                          arguments: [Argument]) -> Int? {
+    public func findBestOverload(inSignatures signatures: [FunctionSignature],
+                                 arguments: [Argument]) -> Int? {
         
         if signatures.isEmpty {
             return nil
+        }
+        
+        if let entry = state.cachedEntry(forSignatures: signatures, arguments: arguments) {
+            return entry
         }
         
         let signatureCandidates = produceCandidates(from: signatures)
@@ -76,6 +82,11 @@ class OverloadResolver {
         // count: no best candidate can be decided.
         if !signatureCandidates.contains(where: { $0.argumentCount == arguments.count })
             || (!arguments.isEmpty && arguments.allSatisfy({ $0.isMissingType })) {
+            
+            state.addCache(forSignatures: signatures,
+                           arguments: arguments,
+                           resolutionIndex: nil)
+            
             return nil
         }
         
@@ -161,7 +172,13 @@ class OverloadResolver {
         }
         
         // Return first candidate found
-        return candidates.first?.inputIndex
+        let result = candidates.first?.inputIndex
+        
+        state.addCache(forSignatures: signatures,
+                       arguments: arguments,
+                       resolutionIndex: result)
+        
+        return result
     }
     
     private func stripIntegerLiterals(from arguments: [Argument]) -> [Argument] {
@@ -190,14 +207,20 @@ class OverloadResolver {
         return overloads
     }
     
-    struct Argument {
-        var isMissingType: Bool {
+    public struct Argument: Hashable {
+        public var isMissingType: Bool {
             return type == nil || type == .errorType
         }
         
-        var type: SwiftType?
-        var isLiteral: Bool
-        var literalKind: LiteralExpressionKind?
+        public var type: SwiftType?
+        public var isLiteral: Bool
+        public var literalKind: LiteralExpressionKind?
+        
+        public init(type: SwiftType?, isLiteral: Bool, literalKind: LiteralExpressionKind?) {
+            self.type = type
+            self.isLiteral = isLiteral
+            self.literalKind = literalKind
+        }
     }
     
     private struct OverloadCandidate {
@@ -205,6 +228,58 @@ class OverloadResolver {
         var signature: FunctionSignature
         var inputIndex: Int
         var argumentCount: Int
+    }
+}
+
+class OverloadResolverState {
+    private let cache = ConcurrentValue<[CacheEntry: Int?]>()
+    
+    public func makeCache() {
+        cache.usingCache = true
+        
+        cache.modifyingState {
+            $0.value = [:]
+        }
+    }
+    
+    public func tearDownCache() {
+        cache.usingCache = false
+        
+        cache.tearDown()
+    }
+    
+    func cachedEntry(forSignatures signatures: [FunctionSignature],
+                     arguments: [OverloadResolver.Argument]) -> Int?? {
+        
+        if !cache.usingCache {
+            return nil
+        }
+        
+        return cache.readingValue { cache in
+            let entry = CacheEntry(signatures: signatures, arguments: arguments)
+            
+            return cache?[entry]
+        }
+    }
+    
+    func addCache(forSignatures signatures: [FunctionSignature],
+                  arguments: [OverloadResolver.Argument],
+                  resolutionIndex: Int?) {
+        
+        if !cache.usingCache {
+            return
+        }
+        
+        cache.modifyingValue { cache in
+            let entry = CacheEntry(signatures: signatures, arguments: arguments)
+            
+            cache?[entry] = resolutionIndex
+        }
+    }
+    
+    struct CacheEntry: Hashable {
+        var signatures: [FunctionSignature]
+        var arguments: [OverloadResolver.Argument]
     }
 }
 

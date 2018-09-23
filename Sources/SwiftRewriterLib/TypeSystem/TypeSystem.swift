@@ -174,12 +174,9 @@ public protocol TypeSystem {
     
     /// Gets an instance field with a given name on a given known type.
     func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty?
-}
-
-extension TypeSystem {
-    func overloadResolver() -> OverloadResolver {
-        return OverloadResolver(typeSystem: self)
-    }
+    
+    /// Gets the overload resolver instance for this type system
+    func overloadResolver() -> OverloadResolver
 }
 
 public enum TypeCategory {

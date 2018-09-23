@@ -1539,7 +1539,7 @@ public enum Constant: Equatable {
 }
 
 /// Specifies one of the possible literal types
-public enum LiteralExpressionKind {
+public enum LiteralExpressionKind: Hashable {
     case integer
     case float
     case string

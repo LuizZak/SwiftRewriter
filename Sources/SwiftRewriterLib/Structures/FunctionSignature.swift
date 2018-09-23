@@ -1,7 +1,7 @@
 import SwiftAST
 
 /// Signature for a function intention
-public struct FunctionSignature: Equatable, Codable {
+public struct FunctionSignature: Hashable, Codable {
     public var isMutating: Bool
     public var isStatic: Bool
     public var name: String

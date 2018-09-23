@@ -10,7 +10,7 @@ class OverloadResolverTests: XCTestCase {
         super.setUp()
         
         typeSystem = DefaultTypeSystem()
-        sut = OverloadResolver(typeSystem: typeSystem)
+        sut = OverloadResolver(typeSystem: typeSystem, state: OverloadResolverState())
     }
     
     func testOverloadResolver() throws {

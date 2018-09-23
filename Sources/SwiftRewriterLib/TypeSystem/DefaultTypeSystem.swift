@@ -11,6 +11,7 @@ public class DefaultTypeSystem: TypeSystem {
     private var compoundKnownTypesCache: CompoundKnownTypesCache?
     private var baseClassTypesByName: [String: ClassType] = [:]
     private var initializedCache = false
+    private var overloadResolverState = OverloadResolverState()
     
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
@@ -32,12 +33,19 @@ public class DefaultTypeSystem: TypeSystem {
         knownTypeProviders.makeCache()
         typealiasProviders.makeCache()
         compoundKnownTypesCache = CompoundKnownTypesCache()
+        overloadResolverState.makeCache()
     }
     
     public func tearDownCache() {
         knownTypeProviders.tearDownCache()
         typealiasProviders.tearDownCache()
         compoundKnownTypesCache = nil
+        overloadResolverState.tearDownCache()
+    }
+    
+    public func overloadResolver() -> OverloadResolver {
+        return OverloadResolver(typeSystem: self,
+                                state: overloadResolverState)
     }
     
     public func addTypealiasProvider(_ provider: TypealiasProvider) {
