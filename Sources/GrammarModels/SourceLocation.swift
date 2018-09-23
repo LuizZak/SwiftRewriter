@@ -52,6 +52,10 @@ public final class SourceLocation {
         }
     }
     
+    private var _isInvalid: Bool {
+        return source.isEqual(to: InvalidSource.invalid)
+    }
+    
     public init(source: Source, intRange: Range<Int>, line: Int, column: Int) {
         self.source = source
         _range = .intRange(intRange)
@@ -90,7 +94,14 @@ public final class SourceLocation {
 
 extension SourceLocation: Equatable {
     public static func == (lhs: SourceLocation, rhs: SourceLocation) -> Bool {
-        return lhs.range == rhs.range && lhs.source.isEqual(to: rhs.source)
+        if lhs === rhs {
+            return true
+        }
+        if lhs._isInvalid && rhs._isInvalid {
+            return true
+        }
+        
+        return lhs.source.isEqual(to: rhs.source) && lhs.range == rhs.range
     }
 }
 

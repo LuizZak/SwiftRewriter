@@ -17,6 +17,8 @@ public protocol Source {
 /// Represents an invalid source, which is neither a file nor a string source.
 /// Used to represent an invalid original source location for a node.
 public struct InvalidSource: Source {
+    private static let _stringIndex = "".startIndex
+    
     /// Gets the default invalid source instance singleton.
     public static let invalid = InvalidSource()
     
@@ -27,7 +29,7 @@ public struct InvalidSource: Source {
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
-        return "".startIndex
+        return InvalidSource._stringIndex
     }
     
     public func isEqual(to other: Source) -> Bool {

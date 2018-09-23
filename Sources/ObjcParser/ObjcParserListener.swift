@@ -41,14 +41,17 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
-        guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
-            return .invalid
-        }
+        let startIndex = rule.start?.getStartIndex() ?? 0
+        let endIndex = rule.stop?.getStopIndex() ?? 0
         
-        let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
-        let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
+        let line = rule.start?.getLine() ?? 0
+        let column = (rule.start?.getCharPositionInLine()).map { $0 + 1 } ?? 0
         
-        return SourceLocation(source: source, range: .range(sourceStartIndex..<sourceEndIndex))
+        return
+            SourceLocation(source: source,
+                           intRange: startIndex..<endIndex,
+                           line: line,
+                           column: column)
     }
     
     /// Configures mappers in `self.mapper` so they are automatically pushed and
