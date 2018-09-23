@@ -1,5 +1,5 @@
 /// Represents a Swift type structure
-indirect public enum SwiftType: Equatable {
+indirect public enum SwiftType: Hashable {
     case nested(NestedSwiftType)
     case nominal(NominalSwiftType)
     case protocolComposition(ProtocolCompositionSwiftType)
@@ -18,7 +18,7 @@ extension SwiftType: ExpressibleByStringLiteral {
 }
 
 /// A nominal Swift type, which is either a plain typename or a generic type.
-public enum NominalSwiftType: Equatable {
+public enum NominalSwiftType: Hashable {
     case typeName(String)
     case generic(String, parameters: GenericArgumentSwiftType)
 }
@@ -30,14 +30,14 @@ extension NominalSwiftType: ExpressibleByStringLiteral {
 }
 
 /// A component for a protocol composition
-public enum ProtocolCompositionComponent: Equatable {
+public enum ProtocolCompositionComponent: Hashable {
     case nominal(NominalSwiftType)
     case nested(NestedSwiftType)
 }
 
 /// A tuple swift type, which either represents an empty tuple or two or more
 /// Swift types.
-public enum TupleSwiftType: Equatable {
+public enum TupleSwiftType: Hashable {
     case types(TwoOrMore<SwiftType>)
     case empty
 }
@@ -753,29 +753,13 @@ extension TwoOrMore {
 
 // MARK: Equatable conditional conformance
 extension OneOrMore: Equatable where T: Equatable {
-    public static func == (lhs: OneOrMore, rhs: OneOrMore) -> Bool {
-        switch (lhs, rhs) {
-        case let (.tail(l), .tail(r)):
-            return l == r
-        case let (.list(left), .list(right)):
-            return left == right
-        default:
-            return false
-        }
-    }
+}
+extension OneOrMore: Hashable where T: Hashable {
 }
 
 extension TwoOrMore: Equatable where T: Equatable {
-    public static func == (lhs: TwoOrMore, rhs: TwoOrMore) -> Bool {
-        switch (lhs, rhs) {
-        case let (.tail(l), .tail(r)):
-            return l == r
-        case let (.list(left), .list(right)):
-            return left == right
-        default:
-            return false
-        }
-    }
+}
+extension TwoOrMore: Hashable where T: Hashable {
 }
 
 // MARK: Array initialization
