@@ -11,11 +11,6 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution by index on a given array of methods.
-    ///
-    /// - precondition:
-    ///     for all methods `M` in `methods`,
-    ///     `M.signature.parameters.count == argumentTypes.count`
-    ///
     func findBestOverload(in methods: [KnownMethod],
                           argumentTypes: [SwiftType?]) -> KnownMethod? {
         
@@ -29,11 +24,6 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution by index on a given array of methods.
-    ///
-    /// - precondition:
-    ///     for all methods `M` in `methods`,
-    ///     `M.signature.parameters.count == argumentTypes.count`
-    ///
     func findBestOverload(in methods: [KnownMethod],
                           arguments: [Argument]) -> KnownMethod? {
         
@@ -47,11 +37,6 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution by index on a given array of signatures.
-    ///
-    /// - precondition:
-    ///     for all methods `M` in `methods`,
-    ///     `M.signature.parameters.count == argumentTypes.count`
-    ///
     func findBestOverload(inSignatures signatures: [FunctionSignature],
                           argumentTypes: [SwiftType?]) -> Int? {
         
@@ -60,11 +45,6 @@ public class OverloadResolver {
     }
     
     /// Returns a matching resolution by index on a given array of signatures.
-    ///
-    /// - precondition:
-    ///     for all methods `M` in `methods`,
-    ///     `M.signature.parameters.count == arguments.count`
-    ///
     public func findBestOverload(inSignatures signatures: [FunctionSignature],
                                  arguments: [Argument]) -> Int? {
         
