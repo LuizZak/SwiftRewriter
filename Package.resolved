@@ -5,9 +5,9 @@
         "package": "Antlr4",
         "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
         "state": {
-          "branch": "swift4.2",
-          "revision": "c9426b50d257c9638b71cad46bf6c9b00162b8a4",
-          "version": null
+          "branch": null,
+          "revision": "217b764f6dae719274805f9b1e5238f03801795e",
+          "version": "4.0.21"
         }
       },
       {
