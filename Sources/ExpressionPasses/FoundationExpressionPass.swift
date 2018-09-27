@@ -91,9 +91,10 @@ public class FoundationExpressionPass: BaseExpressionPass {
             FunctionArgument.labeled("to", fc.arguments[0].expression)
         ])
         
-        if postfix.op.hasOptionalAccess {
+        if postfix.op.optionalAccessKind != .none {
+            let accessKind = postfix.op.optionalAccessKind
             postfix.op = .member("responds")
-            postfix.op.hasOptionalAccess = true
+            postfix.op.optionalAccessKind = accessKind
             exp.resolvedType = .optional(.bool)
         } else {
             postfix.op = .member("responds")
@@ -165,8 +166,10 @@ public class FoundationExpressionPass: BaseExpressionPass {
         newExp.exp = .postfix(postfix.exp.copy(), .member("addObjects"))
         newExp.resolvedType = .void
         
-        if postfix.op.hasOptionalAccess {
-            newExp.exp.asPostfix?.member?.hasOptionalAccess = true
+        let postfixOptional = postfix.op.optionalAccessKind
+        if postfixOptional != .none {
+            newExp.exp.asPostfix?.member?.optionalAccessKind = postfixOptional
+            
             newExp.resolvedType = .optional(.void)
         }
         

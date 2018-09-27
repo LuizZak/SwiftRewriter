@@ -54,7 +54,7 @@ public class ASTSimplifier: ASTRewriterPass {
                             ))
         
         if matcher.matches(stmt), let postfix = postfix?.copy() {
-            postfix.op.hasOptionalAccess = true
+            postfix.op.optionalAccessKind = .safeUnwrap
             
             let statement = Statement.expression(postfix)
             

@@ -105,7 +105,7 @@ public class AllocInitExpressionPass: ASTRewriterPass {
         
         let newArgs = swiftify(methodName: initName, arguments: args)
         
-        if initTarget.op.hasOptionalAccess {
+        if initTarget.op.optionalAccessKind != .none {
             return target.optional().dot("init").call(newArgs)
         }
         

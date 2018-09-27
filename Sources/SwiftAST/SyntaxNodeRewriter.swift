@@ -75,7 +75,10 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     open func visitPostfix(_ exp: PostfixExpression) -> Expression {
         exp.exp = visitExpression(exp.exp)
         
-        let wasOptional = exp.op.hasOptionalAccess
+        // TODO: Maybe there's no need to manually save optionality access here
+        // anymore because `Postfix` subtypes already implement that in their
+        // respective `replacing-` methods.
+        let originalAccess = exp.op.optionalAccessKind
         
         switch exp.op {
         case let fc as FunctionCallPostfix:
@@ -88,7 +91,7 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
             break
         }
         
-        exp.op.hasOptionalAccess = wasOptional
+        exp.op.optionalAccessKind = originalAccess
         
         return exp
     }

@@ -1234,12 +1234,18 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
     /// Custom metadata that can be associated with this postfix node
     public var metadata: [String: Any] = [:]
     
-    /// Returns `true` if this postfix operation has an optional access specified
-    /// to come before it.
-    public var hasOptionalAccess: Bool = false
+    /// The current postfix access kind for this postfix operand
+    public var optionalAccessKind: OptionalAccessKind = .none
     
     public var description: String {
-        return hasOptionalAccess ? "?" : ""
+        switch optionalAccessKind {
+        case .none:
+            return ""
+        case .safeUnwrap:
+            return "?"
+        case .forceUnwrap:
+            return "!"
+        }
     }
     
     public var subExpressions: [Expression] {
@@ -1257,8 +1263,8 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         fatalError("Must be overriden by subclasses")
     }
     
-    public func withOptionalAccess(enabled: Bool) -> Postfix {
-        hasOptionalAccess = enabled
+    public func withOptionalAccess(kind: OptionalAccessKind) -> Postfix {
+        optionalAccessKind = kind
         return self
     }
     
@@ -1268,6 +1274,17 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
     
     public static func == (lhs: Postfix, rhs: Postfix) -> Bool {
         return lhs.isEqual(to: rhs)
+    }
+    
+    /// Describes the optional access type for a postfix operator
+    ///
+    /// - none: No optional accessing - the default state for a postfix access
+    /// - safeUnwrap: A safe-unwrap access (i.e. `exp?.value`)
+    /// - forceUnwrap: A force-unwrap access (i.e. `exp!.value`)
+    public enum OptionalAccessKind {
+        case none
+        case safeUnwrap
+        case forceUnwrap
     }
 }
 
@@ -1296,7 +1313,7 @@ public final class MemberPostfix: Postfix {
     }
     
     public static func == (lhs: MemberPostfix, rhs: MemberPostfix) -> Bool {
-        return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.name == rhs.name
+        return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.name == rhs.name
     }
 }
 public extension Postfix {
@@ -1338,7 +1355,7 @@ public final class SubscriptPostfix: Postfix {
     
     public func replacingExpression(_ exp: Expression) -> SubscriptPostfix {
         let sub = Postfix.subscript(exp)
-        sub.hasOptionalAccess = hasOptionalAccess
+        sub.optionalAccessKind = optionalAccessKind
         sub.returnType = returnType
         
         return sub
@@ -1354,7 +1371,7 @@ public final class SubscriptPostfix: Postfix {
     }
     
     public static func == (lhs: SubscriptPostfix, rhs: SubscriptPostfix) -> Bool {
-        return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.expression == rhs.expression
+        return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.expression == rhs.expression
     }
 }
 public extension Postfix {
@@ -1442,7 +1459,7 @@ public final class FunctionCallPostfix: Postfix {
     }
     
     public static func == (lhs: FunctionCallPostfix, rhs: FunctionCallPostfix) -> Bool {
-        return lhs.hasOptionalAccess == rhs.hasOptionalAccess && lhs.arguments == rhs.arguments
+        return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.arguments == rhs.arguments
     }
 }
 public extension Postfix {
@@ -1808,7 +1825,7 @@ extension Postfix {
     public func copyTypeAndMetadata(from other: Postfix) -> Self {
         self.metadata = other.metadata
         self.returnType = other.returnType
-        self.hasOptionalAccess = other.hasOptionalAccess
+        self.optionalAccessKind = other.optionalAccessKind
         
         return self
     }

@@ -463,7 +463,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
                 return true
             }
             
-            if op.hasOptionalAccess {
+            if op.optionalAccessKind != .none {
                 return true
             }
             
@@ -686,7 +686,7 @@ private class MemberInvocationResolver {
     func resolve(postfix exp: PostfixExpression, op: Postfix) -> Expression {
         defer {
             // Elevate an implicitly-unwrapped optional access to an optional access
-            if exp.op.hasOptionalAccess {
+            if exp.op.optionalAccessKind != .none {
                 
                 switch exp.resolvedType {
                 case .implicitUnwrappedOptional(let inner)?,

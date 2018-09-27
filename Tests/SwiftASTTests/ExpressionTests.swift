@@ -63,6 +63,10 @@ class ExpressionTests: XCTestCase {
             Expression.identifier("abc").casted(to: .string).optional().dot("count").description,
             "(abc as? String)?.count"
         )
+        XCTAssertEqual(
+            Expression.identifier("abc").casted(to: .string).forceUnwrap().dot("count").description,
+            "(abc as? String)!.count"
+        )
     }
     
     func testDescriptionBinaryOps() {
