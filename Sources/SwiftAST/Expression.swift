@@ -122,7 +122,7 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
         return lhs.isEqual(to: rhs)
     }
     
-    func cast<T>() -> T? {
+    final func cast<T: Expression>() -> T? {
         return self as? T
     }
 }
