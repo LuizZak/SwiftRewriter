@@ -185,7 +185,12 @@ internal class ExpressionWriter: ExpressionVisitor {
     func visitPostfix(_ exp: PostfixExpression) {
         visitExpression(exp.exp, parens: exp.exp.requiresParens)
         
-        if exp.op.hasOptionalAccess {
+        switch exp.op.optionalAccessKind {
+        case .none:
+            break
+        case .forceUnwrap:
+            target.outputInline("!")
+        case .safeUnwrap:
             target.outputInline("?")
         }
         

@@ -47,7 +47,7 @@ class SyntaxNodeRewriterTests: XCTestCase {
         
         let result = sut.visitExpression(makeNode())
         
-        XCTAssert(result.asPostfix?.op.hasOptionalAccess == true)
+        XCTAssertEqual(result.asPostfix?.op.optionalAccessKind, .safeUnwrap)
         XCTAssertEqual(result.asPostfix?.functionCall?.returnType, .int)
         XCTAssertEqual(result.asPostfix?.functionCall?.callableSignature,
                        .swiftBlock(returnType: .int, parameters: [.typeName("b")]))
@@ -64,7 +64,7 @@ class SyntaxNodeRewriterTests: XCTestCase {
         let result = sut.visitExpression(makeNode())
         
         XCTAssertEqual(result.asPostfix?.subscription?.returnType, .int)
-        XCTAssert(result.asPostfix?.op.hasOptionalAccess == true)
+        XCTAssertEqual(result.asPostfix?.op.optionalAccessKind, .safeUnwrap)
     }
     
     /// Tests Postfix.returnType metadata information is kept when traversing a
@@ -78,6 +78,6 @@ class SyntaxNodeRewriterTests: XCTestCase {
         let result = sut.visitExpression(makeNode())
         
         XCTAssertEqual(result.asPostfix?.member?.returnType, .int)
-        XCTAssert(result.asPostfix?.op.hasOptionalAccess == true)
+        XCTAssertEqual(result.asPostfix?.op.optionalAccessKind, .safeUnwrap)
     }
 }

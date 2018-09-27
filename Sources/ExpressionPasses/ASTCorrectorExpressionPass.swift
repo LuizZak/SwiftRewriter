@@ -240,7 +240,7 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                             .binary(op: .nullCoalesce, rhs: initValue)
                     ).typed(memberType.deepUnwrapped)
             
-            res = Expression.postfix(res, memberPostfix.op.copy().withOptionalAccess(enabled: false))
+            res = Expression.postfix(res, memberPostfix.op.copy().withOptionalAccess(kind: .none))
             
             res.resolvedType = memberPostfix.resolvedType
             

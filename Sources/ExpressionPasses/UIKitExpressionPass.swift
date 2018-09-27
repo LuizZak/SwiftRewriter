@@ -95,7 +95,7 @@ public class UIKitExpressionPass: BaseExpressionPass {
         }
         
         let op = Postfix.member(converted)
-        op.hasOptionalAccess = exp.op.hasOptionalAccess
+        op.optionalAccessKind = exp.op.optionalAccessKind
         
         exp.op = op
         

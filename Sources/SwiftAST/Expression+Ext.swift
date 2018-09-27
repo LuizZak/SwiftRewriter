@@ -121,17 +121,18 @@ extension Expression: ExpressionPostfixBuildable {
     
     /// Begins an optional postfix creation from this expression.
     public func optional() -> OptionalAccessPostfixBuilder {
-        return OptionalAccessPostfixBuilder(exp: self)
+        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: false)
     }
 }
 
 public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     public var exp: Expression
+    public var isForceUnwrap: Bool
     
     public var expressionToBuild: Expression { return exp }
     
     public func copy() -> OptionalAccessPostfixBuilder {
-        return OptionalAccessPostfixBuilder(exp: exp.copy())
+        return OptionalAccessPostfixBuilder(exp: exp.copy(), isForceUnwrap: isForceUnwrap)
     }
     
     public func call(_ arguments: [FunctionArgument],
@@ -141,7 +142,7 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
         let op = Postfix.functionCall(arguments: arguments)
         op.returnType = type
         op.callableSignature = callableSignature
-        op.hasOptionalAccess = true
+        op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
         
         return .postfix(expressionToBuild, op)
     }
@@ -153,7 +154,7 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
         let op = Postfix.functionCall(arguments: unlabeledArguments.map(FunctionArgument.unlabeled))
         op.returnType = type
         op.callableSignature = callableSignature
-        op.hasOptionalAccess = true
+        op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
         
         return .postfix(expressionToBuild, op)
     }
@@ -161,7 +162,7 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     public func dot(_ member: String, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.member(member)
         op.returnType = type
-        op.hasOptionalAccess = true
+        op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
         
         return .postfix(expressionToBuild, op)
     }
@@ -169,7 +170,7 @@ public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
     public func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.subscript(exp)
         op.returnType = type
-        op.hasOptionalAccess = true
+        op.optionalAccessKind = isForceUnwrap ? .forceUnwrap : .safeUnwrap
         
         return .postfix(expressionToBuild, op)
     }

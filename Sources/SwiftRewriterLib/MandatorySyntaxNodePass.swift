@@ -15,7 +15,7 @@ class MandatorySyntaxNodePass: ASTRewriterPass {
     override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         // Optionalize access to casted value's members
         if exp.exp.unwrappingParens.asCast?.isOptionalCast == true {
-            exp.op.hasOptionalAccess = true
+            exp.op.optionalAccessKind = .safeUnwrap
         }
         
         // [Type new]
