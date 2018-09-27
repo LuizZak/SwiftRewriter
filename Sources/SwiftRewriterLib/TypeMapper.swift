@@ -1,5 +1,6 @@
 import SwiftAST
 import GrammarModels
+import SwiftSyntaxSupport
 
 /// Provides type-transforming support for a Swift rewriter
 public protocol TypeMapper {
@@ -228,85 +229,7 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     public func typeNameString(for swiftType: SwiftType) -> String {
-        return innerTypeNameString(for: swiftType, isBlockContext: false)
-    }
-    
-    private func innerTypeNameString(for swiftType: SwiftType,
-                                     isBlockContext: Bool) -> String {
-        
-        switch swiftType {
-        case let .block(returnType, parameters, attributes):
-            let sortedAttributes =
-                attributes.sorted { $0.description < $1.description }
-            
-            let attributeString =
-                sortedAttributes.map { $0.description }.joined(separator: " ")
-            
-            let paramsString =
-                parameters.map {
-                    innerTypeNameString(for: $0, isBlockContext: true)
-                }.joined(separator: ", ")
-            
-            return 
-                (attributeString.isEmpty ? "" : attributeString + " ")
-                    + "("
-                    + paramsString
-                    + ") -> "
-                    + innerTypeNameString(for: returnType, isBlockContext: true)
-            
-        case .nominal(let nominal):
-            return typeNameString(for: nominal)
-            
-        case .optional(let type):
-            var typeName = typeNameString(for: type)
-            if type.requiresSurroundingParens {
-                typeName = "(" + typeName + ")"
-            }
-            
-            return typeName + "?"
-            
-        case .implicitUnwrappedOptional(let type):
-            var typeName = typeNameString(for: type)
-            if type.requiresSurroundingParens {
-                typeName = "(" + typeName + ")"
-            }
-            
-            return typeName + "!"
-            
-        case .nullabilityUnspecified(let type):
-            var typeName = typeNameString(for: type)
-            if type.requiresSurroundingParens {
-                typeName = "(" + typeName + ")"
-            }
-            
-            return typeName + (isBlockContext ? "?" : "!")
-            
-        case let .protocolComposition(types):
-            return Array(types).map(typeNameString(for:)).joined(separator: " & ")
-            
-        case let .metatype(type):
-            let inner = typeNameString(for: type)
-            if type.requiresSurroundingParens {
-                return "(" + inner + ").self"
-            }
-            
-            return inner + ".self"
-        
-        case .tuple(.empty):
-            return "Void"
-            
-        case .tuple(.types(let inner)):
-            return "(" + inner.map(typeNameString).joined(separator: ", ") + ")"
-            
-        case let .nested(types):
-            return types.map { typeNameString(for: $0) }.joined(separator: ".")
-            
-        case .array(let type):
-            return "[\(typeNameString(for: type))]"
-            
-        case let .dictionary(key, value):
-            return "[\(typeNameString(for: key)): \(typeNameString(for: value))]"
-        }
+        return SwiftTypeConverter.makeTypeSyntax(swiftType).description
     }
     
     public func typeNameString(for composition: ProtocolCompositionComponent) -> String {
@@ -440,7 +363,7 @@ public class DefaultTypeMapper: TypeMapper {
             return .typeName(name)
         }
         
-        // NSArray<> -> Array<> conversion
+        // NSArray<T> -> [T] conversion
         if name == "NSArray" && parameters.count == 1 {
             let inner =
                 swiftType(forObjcType: parameters[0],
@@ -450,12 +373,8 @@ public class DefaultTypeMapper: TypeMapper {
             
             return .array(inner)
         }
-        // NSMutableArray<type> -> NSMutableArray
-        if name == "NSMutableArray" && parameters.count == 1 {
-            return .typeName(name)
-        }
         
-        // NSDictionary<,> -> Dictionary<,> conversion
+        // NSDictionary<T, U> -> [T: U] conversion
         if name == "NSDictionary" && parameters.count == 2 {
             let inner0 =
                 swiftType(forObjcType: parameters[0],
@@ -468,7 +387,7 @@ public class DefaultTypeMapper: TypeMapper {
             return .dictionary(key: inner0, value: inner1)
         }
         
-        // NSMutableDictionary<type> -> NSMutableDictionary conversion
+        // NSMutableDictionary<T, U> -> NSMutableDictionary conversion
         if name == "NSMutableDictionary" && parameters.count == 2 {
             return .typeName(name)
         }

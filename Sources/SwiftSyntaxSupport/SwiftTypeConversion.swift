@@ -230,6 +230,21 @@ public class SwiftTypeConverter {
                     genericArgumentClause: nil
                 )
             
+        // TODO: This shouldn't be here; handle it with Intention/ExpressionPasses
+        // before handing this to the syntax producer.
+        case let .generic("NSArray", parameters) where parameters.count == 1:
+            return SyntaxFactory
+                .makeSimpleTypeIdentifier(
+                    name: SyntaxFactory.makeIdentifier("NSArray"),
+                    genericArgumentClause: nil
+                )
+        case let .generic("NSMutableArray", parameters) where parameters.count == 1:
+            return SyntaxFactory
+                .makeSimpleTypeIdentifier(
+                    name: SyntaxFactory.makeIdentifier("NSMutableArray"),
+                    genericArgumentClause: nil
+            )
+            
         case let .generic(name, parameters):
             let types = parameters.map(makeTypeSyntax)
             

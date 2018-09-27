@@ -15,7 +15,8 @@ public struct DefaultIntentionPasses: IntentionPassSource {
         ImportDirectiveIntentionPass(),
         UIKitCorrectorIntentionPass(),
         ProtocolNullabilityPropagationToConformersIntentionPass(),
-        DetectNonnullReturnsIntentionPass()
+        DetectNonnullReturnsIntentionPass(),
+        PromoteNSMutableArrayIntentionPass()
     ]
     
     public init() {

@@ -2603,14 +2603,46 @@ class SwiftRewriterTests: XCTestCase {
         assertObjcParse(
             objc: """
             void test() {
-                id obj = [Date date];
-                [objc isKindOfClass:[Date class]];
+                id obj = [NSDate date];
+                [obj isKindOfClass:[NSDate class]];
             }
             """,
             swift: """
             func test() {
                 let obj = Date()
-                objc.isKindOfClass(Date.self)
+                obj.isKindOfClass(Date.self)
+            }
+            """)
+    }
+    
+    func testPromoteNSMutableArrayToArrayOfT() {
+        assertObjcParse(
+            objc: """
+            @interface A : NSObject
+            @property (nonnull) NSMutableArray<NSString*> *foo;
+            
+            - (void)bar;
+            - (void)takesArray:(nonnull NSArray<NSString*>*)array;
+            @end
+            
+            @implementation A
+            - (void)bar {
+                [self takesArray:self.foo];
+            }
+            - (void)takesArray:(nonnull NSArray<NSString*>*)array {
+                
+            }
+            @end
+            """,
+            swift: """
+            class A: NSObject {
+                var foo: [String]
+            
+                func bar() {
+                    self.takesArray(self.foo)
+                }
+                func takesArray(_ array: [String]) {
+                }
             }
             """)
     }
