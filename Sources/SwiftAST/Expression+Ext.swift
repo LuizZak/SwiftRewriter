@@ -123,6 +123,11 @@ extension Expression: ExpressionPostfixBuildable {
     public func optional() -> OptionalAccessPostfixBuilder {
         return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: false)
     }
+    
+    /// Begins a force-unwrap optional postfix creation from this expression.
+    public func forceUnwrap() -> OptionalAccessPostfixBuilder {
+        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: true)
+    }
 }
 
 public struct OptionalAccessPostfixBuilder: ExpressionPostfixBuildable {
