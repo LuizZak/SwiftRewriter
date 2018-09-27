@@ -26,17 +26,17 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the `if` statement node
     func visitIf(_ stmt: IfStatement) -> StmtResult
     
-    /// Visits a `switch` statement with this visitor
-    ///
-    /// - Parameter stmt: A switch statement to visit
-    /// - Returns: Result of visiting the `switch` statement node
-    func visitSwitch(_ stmt: SwitchStatement) -> StmtResult
-    
     /// Visits a `while` statement with this visitor
     ///
     /// - Parameter stmt: A while statement to visit
     /// - Returns: Result of visiting the `while` statement node
     func visitWhile(_ stmt: WhileStatement) -> StmtResult
+    
+    /// Visits a `switch` statement with this visitor
+    ///
+    /// - Parameter stmt: A switch statement to visit
+    /// - Returns: Result of visiting the `switch` statement node
+    func visitSwitch(_ stmt: SwitchStatement) -> StmtResult
     
     /// Visits a `do/while` statement with this visitor
     ///

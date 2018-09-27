@@ -1,0 +1,196 @@
+public class ConstantExpression: Expression, ExpressibleByStringLiteral,
+                                 ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+    public var constant: Constant
+    
+    public override var isLiteralExpression: Bool {
+        if constant.isInteger {
+            return true
+        }
+        
+        switch constant {
+        case .boolean, .nil, .float, .string:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public override var literalExpressionKind: LiteralExpressionKind? {
+        switch constant {
+        case .int:
+            return .integer
+        case .float:
+            return .float
+        case .boolean:
+            return .boolean
+        case .string:
+            return .string
+        case .nil:
+            return .nil
+        default:
+            return nil
+        }
+    }
+    
+    public override var description: String {
+        return constant.description
+    }
+    
+    public init(constant: Constant) {
+        self.constant = constant
+    }
+    
+    public override func copy() -> ConstantExpression {
+        return ConstantExpression(constant: constant).copyTypeAndMetadata(from: self)
+    }
+    
+    public required init(stringLiteral value: String) {
+        constant = .string(value)
+    }
+    public required init(integerLiteral value: Int) {
+        constant = .int(value, .decimal)
+    }
+    public required init(floatLiteral value: Float) {
+        constant = .float(value)
+    }
+    
+    public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
+        return visitor.visitConstant(self)
+    }
+    
+    public override func isEqual(to other: Expression) -> Bool {
+        switch other {
+        case let rhs as ConstantExpression:
+            return self == rhs
+        default:
+            return false
+        }
+    }
+    
+    public static func == (lhs: ConstantExpression, rhs: ConstantExpression) -> Bool {
+        return lhs.constant == rhs.constant
+    }
+}
+public extension Expression {
+    public var asConstant: ConstantExpression? {
+        return self as? ConstantExpression
+    }
+}
+
+/// Represents one of the recognized compile-time constant value types.
+public enum Constant: Equatable {
+    case float(Float)
+    case boolean(Bool)
+    case int(Int, IntegerType)
+    case string(String)
+    case rawConstant(String)
+    case `nil`
+    
+    /// Returns an integer value if this constant represents one, or nil, in case
+    /// it does not.
+    public var integerValue: Int? {
+        switch self {
+        case .int(let i, _):
+            return i
+        default:
+            return nil
+        }
+    }
+    
+    /// Returns `true` if this constant represents an integer value.
+    public var isInteger: Bool {
+        switch self {
+        case .int:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    public static func binary(_ value: Int) -> Constant {
+        return .int(value, .binary)
+    }
+    
+    public static func octal(_ value: Int) -> Constant {
+        return .int(value, .octal)
+    }
+    
+    public static func hexadecimal(_ value: Int) -> Constant {
+        return .int(value, .hexadecimal)
+    }
+    
+    public enum IntegerType {
+        case decimal
+        case binary
+        case octal
+        case hexadecimal
+    }
+}
+
+/// Specifies one of the possible literal types
+public enum LiteralExpressionKind: Hashable {
+    case integer
+    case float
+    case string
+    case boolean
+    case `nil`
+}
+
+extension Constant: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .float(let fl):
+            return fl.description
+            
+        case .boolean(let bool):
+            return bool.description
+            
+        case let .int(int, category):
+            
+            switch category {
+            case .decimal:
+                return int.description
+            case .binary:
+                return "0b" + String(int, radix: 2)
+            case .octal:
+                return "0o" + String(int, radix: 8)
+            case .hexadecimal:
+                return "0x" + String(int, radix: 16, uppercase: false)
+            }
+            
+        case .string(let str):
+            return "\"\(str)\""
+            
+        case .rawConstant(let str):
+            return str
+            
+        case .nil:
+            return "nil"
+        }
+    }
+}
+
+// MARK: - Literal initialiation
+extension Constant: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self = .int(value, .decimal)
+    }
+}
+
+extension Constant: ExpressibleByFloatLiteral {
+    public init(floatLiteral value: Float) {
+        self = .float(value)
+    }
+}
+
+extension Constant: ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: Bool) {
+        self = .boolean(value)
+    }
+}
+
+extension Constant: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .string(value)
+    }
+}
