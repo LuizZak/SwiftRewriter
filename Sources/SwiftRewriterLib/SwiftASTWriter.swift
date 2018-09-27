@@ -467,9 +467,7 @@ internal class StatementWriter: StatementVisitor {
         target.outputInlineWithSpace("if", style: .keyword)
         
         if let pattern = stmt.pattern {
-            target.outputInlineWithSpace("let", style: .keyword)
-            emitPattern(pattern)
-            target.outputInline(" = ")
+            emitLetPattern(pattern)
         }
         
         emitExpr(stmt.exp)
@@ -486,6 +484,14 @@ internal class StatementWriter: StatementVisitor {
                 visitCompound(elseBody)
             }
         }
+    }
+    
+    func visitWhile(_ stmt: WhileStatement) {
+        target.outputIdentation()
+        target.outputInlineWithSpace("while", style: .keyword)
+        emitExpr(stmt.exp)
+        
+        visitCompound(stmt.body)
     }
     
     func visitSwitch(_ stmt: SwitchStatement) {
@@ -557,14 +563,6 @@ internal class StatementWriter: StatementVisitor {
         }
         
         target.output(line: "}")
-    }
-    
-    func visitWhile(_ stmt: WhileStatement) {
-        target.outputIdentation()
-        target.outputInlineWithSpace("while", style: .keyword)
-        emitExpr(stmt.exp)
-        
-        visitCompound(stmt.body)
     }
     
     func visitDoWhile(_ stmt: DoWhileStatement) {
@@ -676,6 +674,12 @@ internal class StatementWriter: StatementVisitor {
         }
         
         target.outputLineFeed()
+    }
+    
+    private func emitLetPattern(_ pattern: Pattern) {
+        target.outputInlineWithSpace("let", style: .keyword)
+        emitPattern(pattern)
+        target.outputInline(" = ")
     }
     
     private func emitPattern(_ pattern: Pattern) {
