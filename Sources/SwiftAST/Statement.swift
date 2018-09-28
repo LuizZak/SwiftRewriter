@@ -91,6 +91,9 @@ public extension Statement {
     public static var `break`: BreakStatement {
         return BreakStatement()
     }
+    public static var `fallthrough`: FallthroughStatement {
+        return FallthroughStatement()
+    }
     public static var `continue`: ContinueStatement {
         return ContinueStatement()
     }

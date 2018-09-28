@@ -227,6 +227,14 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                     statements = stmt.statements
                 }
                 
+                // Append a default fallthrough, in case the last statement is
+                // not a jump stmt to somewhere else (`return`, `continue` or
+                // `break`)
+                let hasBreak = statements.last?.isUnconditionalJump ?? false
+                if !hasBreak {
+                    statements.append(.fallthrough)
+                }
+                
                 let labels = section.switchLabel()
                 // Default case
                 if labels.contains(where: { $0.rangeExpression() == nil }) {
@@ -248,8 +256,8 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             }
         }
         
-        // Always emit a default break statement, since switches in Swift must
-        // be exhaustive
+        // If no default is present, always emit a `default: break` statement,
+        // since switches in Swift must be exhaustive
         if def == nil {
             def = [.break]
         }

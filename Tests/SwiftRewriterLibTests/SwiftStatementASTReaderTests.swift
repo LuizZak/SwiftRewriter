@@ -225,6 +225,21 @@ class SwiftStatementASTReaderTests: XCTestCase {
         )
     }
     
+    func testAutomaticSwitchFallthrough() {
+        assert(objcStmt: "switch(value) { case 0: stmt(); case 1: break; }",
+               readsAs: .switch(.identifier("value"),
+                                cases: [
+                                    SwitchCase(patterns: [.expression(.constant(0))],
+                                               statements: [
+                                                .expression(Expression.identifier("stmt").call()),
+                                                .fallthrough
+                                                ]),
+                                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break])
+                                ],
+                                default: [.break])
+        )
+    }
+    
     func testExpressions() {
         assert(objcStmt: "abc;",
                readsAs: .expression(.identifier("abc"))

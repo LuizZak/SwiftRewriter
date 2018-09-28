@@ -327,7 +327,15 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     open func visitBreak(_ stmt: BreakStatement) -> Statement {
         return stmt
     }
-    
+
+    /// Visits a fallthrough statement
+    ///
+    /// - Parameter stmt: A FallthroughStatement to visit
+    /// - Returns: Result of visiting the fallthrough statement
+    open func visitFallthrough(_ stmt: FallthroughStatement) -> Statement {
+        return stmt
+    }
+
     /// Visits a continue statement
     ///
     /// - Parameter stmt: A ContinueStatement to visit

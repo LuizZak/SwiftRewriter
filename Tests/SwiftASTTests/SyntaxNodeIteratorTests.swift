@@ -322,7 +322,7 @@ class SyntaxNodeIteratorTests: XCTestCase {
                        L. case -> patterns
                    2.           |    L. pattern -> expression(s)
                    3.  L. case -> statement(s)
-                   4.            L. statement(s)
+                   4.  L. default ->  statement(s)
      
      1. Switch expression
      2. Switch cases' patterns
@@ -444,6 +444,10 @@ class SyntaxNodeIteratorTests: XCTestCase {
     
     func testContinue() {
         assertStatement(.continue, iteratesAs: [Statement.continue])
+    }
+    
+    func testFallthourh() {
+        assertStatement(.fallthrough, iteratesAs: [Statement.fallthrough])
     }
     
     func testVariableDeclarationsNotInspectingBlocks() {
