@@ -126,7 +126,7 @@ private func initTransformations(_ ctor: KnownConstructor, type: KnownType) thro
             
         case .renameFrom, .mapToBinaryOperator:
             // TODO: Throw diagnostic error for unsupported mappings
-             break
+            break
         }
     }
     
