@@ -20,7 +20,7 @@ A mixture of tooled and manual parsing is used on input .h/.m files to parse.
 
 The input source code is provided via an `InputSourcesProvider`-implementer provided to `SwiftRewriter.init`. This object should provide the input source code files to parse encapsulated behind objects implementing a `CodeSource` protocol. This protocol provides semantic information about the origin of a source snippet, which can be used during later steps to aid in tracing back the origin of a source code construct.
 
-The source code is then processed by `SourcePreprocessor` objects provided to `SwiftRewriter.init`. These preprocessors have access to the raw string data for the files, and can be used to apply transformations such as comment removal or preprocessor expansion before actual parsing is done for each file.
+The source code is then processed by `SourcePreprocessor` objects provided to `SwiftRewriter.init`. These pre-processors have access to the raw string data for the files, and can be used to apply transformations such as comment removal or preprocessor expansion before actual parsing is done for each file.
 
 For the tooled part, [ANTLR](http://www.antlr.org/) is used to do the heavy lifting and parse all the input source code, and a couple of more fine-grained parsing steps are performed manually with `ObjcParser` (mainly Objective-C type signature parsing).
 
@@ -42,7 +42,7 @@ Statements are parsed into a customized AST for representing Swift grammars, con
 
 The complete grammar tree is then analyzed and grouped up into sets of objects that encapsulate the intent of creating matching Swift source code for each object from the original Objective-C source code. These structures are aptly named `Intentions`. Many intention types are used to represent the final Swift source code that the tool will generate.
 
-Source code statements/expressions are not split into invididual intentions; these constructs remains encapsulated behind SwiftAST trees, which are contained within `FunctionBodyIntention` instances, one for each method body.
+Source code statements/expressions are not split into individual intentions; these constructs remains encapsulated behind SwiftAST trees, which are contained within `FunctionBodyIntention` instances, one for each method body.
 
 Intentions are nested in a tree-like structure, rooted on file generation intentions:
 
@@ -75,11 +75,11 @@ The final collection of intentions is passed to special steps that are free to c
 
 These steps are represented by an `IntentionPass` protocol, which is fed to a `SwiftRewriter` via an instance of `IntentionPassSource`. These intention passes are then fed the entire source code represented by the intermediary intention collection. Intention passes are free to delete, merge, rename, or create new source-generation intentions.
 
-This is the step of the process in which external code-altering processors are allowed to change the resulting program's structure at a higher level. Actual method body rewriting should be done in a separate step (see [AST rewriting](#ASTrewriting)).
+This is the step of the process in which external code-altering processors are allowed to change the resulting program's structure at a higher level. Actual method body rewriting should be done in a separate step (see [AST rewriting](#ASTRewriting)).
 
 - Intention passes are applied serially, in the same order as the `IntentionPassSource` provides them. Type resolution is invoked between each intention pass to keep the typing information up-to-date with respect to general source code transformations.
 
-#### 5. AST rewriting
+#### 5. AST Rewriting
 
 After intention rewriting has finished altering the program's structure, special AST rewriters used solely for method bodies are applied to all methods. This allows external objects to modify the Swift AST before the final code is generated.
 

@@ -229,8 +229,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
         
         // Don't remove type signature from error-typed initializer expressions
         assertSingleStatement(
-            objc: "NSInteger x = nonExistant;",
-            swift: "let x: Int = nonExistant"
+            objc: "NSInteger x = nonExistent;",
+            swift: "let x: Int = nonExistent"
         )
         
         // Type expressions from non-literal sources are not needed as they can
@@ -247,7 +247,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: "let x = self.frame.size.width - 1"
         )
 
-        // No need to keep inferrence for Boolean or String types
+        // No need to keep inference for Boolean or String types
         assertSingleStatement(
             objc: "BOOL x = YES;",
             swift: "let x = true"

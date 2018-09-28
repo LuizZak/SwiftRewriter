@@ -23,7 +23,7 @@ enum Target: String, ArgumentKind {
         return ShellCompletion.values([
             ("terminal", "Prints output of conversion to the terminal's standard output."),
             ("filedisk", """
-                Saves output of conersion to the filedisk as .swift files on the same folder as the input files.
+                Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
                 """)
         ])
     }
@@ -129,7 +129,7 @@ let targetArg
                 Prints the conversion results to the terminal's standard output;
             
             filedisk
-                Saves output of conersion to the filedisk as .swift files on the same folder as the input files.
+                Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
         """)
 
 //// files <files...>

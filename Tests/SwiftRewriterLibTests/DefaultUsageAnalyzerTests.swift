@@ -359,7 +359,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         XCTAssertEqual(usages[1].isReadOnlyUsage, false)
     }
     
-    func testFindUsagesOfLocalVariableDetetingWritingUsagesOfReferenceFields() {
+    func testFindUsagesOfLocalVariableDetectingWritingUsagesOfReferenceFields() {
         // Mutating fields of reference types embedded within value types should
         // not produce write usage references
         let typeSystem = DefaultTypeSystem()

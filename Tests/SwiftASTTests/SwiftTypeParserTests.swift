@@ -142,7 +142,7 @@ class SwiftTypeParserTests: XCTestCase {
                            SwiftType.generic("Type", parameters: [.typeName("A")]))
     }
     
-    func testParseGenericTypeWitihinGenericType() throws {
+    func testParseGenericTypeWithinGenericType() throws {
         try XCTAssertEqual(SwiftTypeParser.parse(from: "Type<A<B>>"),
                            SwiftType.generic("Type", parameters: [.generic("A", parameters: [.typeName("B")])]))
     }
@@ -309,7 +309,7 @@ class SwiftTypeParserTests: XCTestCase {
         XCTAssertThrowsError(try SwiftTypeParser.parse(from: "(Int).>"))
     }
     
-    // MARK: - Prodecural tests
+    // MARK: - Procedural tests
     
     /// Tests randomized type constructs that are valid
     func testRandomValidTypeParsing() throws {
@@ -322,7 +322,7 @@ class SwiftTypeParserTests: XCTestCase {
         for i in 0..<100 {
             let seed = 127 * i + i
             
-            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.9999)
+            let type = SwiftTypePermutator.permute(seed: seed, damp: 0.9999)
             let typeString = type.description
             
             do {
@@ -355,7 +355,7 @@ class SwiftTypeParserTests: XCTestCase {
             let seed = 127 * i * i
             let mt = MersenneTwister(seed: UInt32(seed % Int(UInt32.max)))
             
-            let type = SwiftTypePermutator.permutate(seed: seed, damp: 0.99)
+            let type = SwiftTypePermutator.permute(seed: seed, damp: 0.99)
             var typeString = type.description
             
             // Slice off the string
@@ -382,7 +382,7 @@ class SwiftTypeParserTests: XCTestCase {
 /// signatures like Generics and Block/Tuple types.
 class SwiftTypePermutator {
     
-    public static func permutate(seed: Int, damp: Double = 0.2) -> SwiftType {
+    public static func permute(seed: Int, damp: Double = 0.2) -> SwiftType {
         let mersenne = MersenneTwister(seed: UInt32(seed % Int(UInt32.max)))
         let context = Context(mersenne: mersenne)
         

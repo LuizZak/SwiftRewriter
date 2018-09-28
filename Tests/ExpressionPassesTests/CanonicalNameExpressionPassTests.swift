@@ -37,7 +37,7 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
     
     func testDontTransformUnknownTypeName() {
         assertTransform(
-            expression: .identifier("Unexisting"),
+            expression: .identifier("Unexistent"),
             into: .identifier("Unexisting")
         ); assertDidNotNotifyChange()
     }

@@ -113,7 +113,7 @@ class NumberCommonsExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
-    func testDontConvertLiteralExpresions() {
+    func testDontConvertLiteralExpressions() {
         assertTransform(
             // 1
             expression: Expression.constant(1).typed(.int).typed(expected: .float),

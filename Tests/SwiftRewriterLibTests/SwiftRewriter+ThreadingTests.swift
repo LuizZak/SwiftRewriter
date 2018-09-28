@@ -11,7 +11,7 @@ class SwiftRewriter_ThreadingTests: XCTestCase {
     }
     
     /// Tests multi-threading with a large number of input files
-    func testMultithreadingStability() {
+    func testMultiThreadingStability() {
         var builder = MultiFileTestBuilder(test: self)
         
         for _ in 0..<16 {

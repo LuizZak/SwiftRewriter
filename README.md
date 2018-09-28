@@ -50,7 +50,7 @@ Defaults to 'filedisk' if not provided.
         Prints the conversion results to the terminal's standard output;
     
     filedisk
-        Saves output of conersion to the filedisk as .swift files on the same folder as the input files.
+        Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
   --verbose, -v           Prints progress information to the console while performing a transpiling job.
   --help                  Display available options
 

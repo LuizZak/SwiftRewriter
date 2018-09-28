@@ -607,7 +607,7 @@ class PropertyMergeIntentionPassTests: XCTestCase {
     
     /// If a property is declared along with `@synthesize`'s and accessor methods,
     /// ensure that we don't get confused and overwrite implementations accidentally.
-    func testPropertyMergingRespectsExistingPropertySynthetization() {
+    func testPropertyMergingRespectsExistingPropertySynthesization() {
         let intentions =
             IntentionCollectionBuilder()
                 .createFile(named: "A.h") { file in

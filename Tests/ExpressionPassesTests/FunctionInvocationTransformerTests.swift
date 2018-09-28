@@ -67,7 +67,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
     /// Tests that the required argument count value also takes into consideration
     /// .firstArgIndex's that skip arguments and fetch the n'th argument, past
     /// the actual number of target arguments.
-    func testRequiredArgumentCounWithFirstArgumentIsInstanceInference() {
+    func testRequiredArgumentCountWithFirstArgumentIsInstanceInference() {
         let sut =
             FunctionInvocationTransformer(
                 objcFunctionName: "objc", toSwiftFunction: "swift",
@@ -78,7 +78,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
             FunctionInvocationTransformer(
                 objcFunctionName: "objc", toSwiftFunction: "swift",
                 firstArgumentBecomesInstance: true,
-                arguments: [.asIs, .asIs]
+                arguments: [.asIs, .fromArgIndex(2)]
             )
         
         XCTAssertEqual(sut.requiredArgumentCount, 3)

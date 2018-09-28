@@ -255,7 +255,7 @@ class ObjcParserTests: XCTestCase {
     
     func testParseVariadicParameterInFunctionDefinition() {
         let node = parserTest("""
-            void global(NSSring *format, ...);
+            void global(NSString *format, ...);
             """)
         
         let funcDecl: FunctionDefinition? = node.firstChild()

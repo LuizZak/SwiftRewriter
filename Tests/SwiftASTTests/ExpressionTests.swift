@@ -100,7 +100,7 @@ class ExpressionTests: XCTestCase {
             "10..<11")
     }
     
-    func testDescriptionCostants() {
+    func testDescriptionConstants() {
         XCTAssertEqual(Expression.constant(.int(1, .decimal)).description, "1")
         XCTAssertEqual(Expression.constant(.float(132.4)).description, "132.4")
         XCTAssertEqual(Expression.constant(.hexadecimal(0xfefe)).description, "0xfefe")

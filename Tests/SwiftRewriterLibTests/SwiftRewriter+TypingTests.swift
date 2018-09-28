@@ -428,7 +428,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
     }
     
     func testPropertyResolutionLooksThroughNullability() {
-        // FIXME: Maybe it's desireable to infer as `Int!` instead?
+        // FIXME: Maybe it's desirable to infer as `Int!` instead?
         assertObjcParse(
             objc: """
             @interface A : NSObject
@@ -774,7 +774,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             options: ASTWriterOptions(outputExpressionTypes: true))
     }
     
-    /// Testa that local variables declared within blocks are scoped within
+    /// Test that local variables declared within blocks are scoped within
     /// blocks only.
     func testBlockInvocationRetainsDefinedLocalsWithinScope() {
         assertObjcParse(

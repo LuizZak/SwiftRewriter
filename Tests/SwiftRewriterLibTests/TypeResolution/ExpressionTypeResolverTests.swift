@@ -258,13 +258,13 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testNullCoalesce() {
-        // Null-coalesce with non-null right-handside
+        // Null-coalesce with non-null right hand side
         assertResolve(.binary(lhs: Expression.constant(1).typed(.optional(.int)),
                               op: .nullCoalesce,
                               rhs: .constant(1)),
                       expect: .int)
         
-        // Null-coalesce with nullable right-handside
+        // Null-coalesce with nullable right hand side
         assertResolve(.binary(lhs: Expression.constant(1).typed(.optional(.int)),
                               op: .nullCoalesce,
                               rhs: Expression.constant(1).typed(.optional(.int))),
@@ -1190,7 +1190,7 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testBackPropagateBlockLiteralInIfStatement() {
-        // Test that backpropagation from statament expressions work as well
+        // Test that back-propagation from statement expressions work as well
         startScopedTest(
             with: Statement.if(Expression.block(parameters: [.init(name: "p", type: .int)], return: .bool, body: []).call([.constant(0)]), body: [], else: nil),
             sut: ExpressionTypeResolver())

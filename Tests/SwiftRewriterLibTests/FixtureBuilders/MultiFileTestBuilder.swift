@@ -7,7 +7,7 @@ import GlobalsProviders
 import Utils
 
 class MultiFileTestBuilder {
-    typealias File = (path: String, souce: String)
+    typealias File = (path: String, source: String)
     
     private let builder = SwiftRewriterJobBuilder()
     var expectedFiles: [ExpectedFile] = []
@@ -134,7 +134,7 @@ class MultiFileTestBuilder {
 }
 
 class CompiledMultiFileTestResults {
-    typealias File = (path: String, souce: String)
+    typealias File = (path: String, source: String)
     
     var test: XCTestCase
     var results: [TestFileOutput]
@@ -163,12 +163,12 @@ class CompiledMultiFileTestResults {
     func assertExpectedSwiftFiles(file: String = #file,
                                   line: Int = #line) {
         
-        assertMatcheshWithExpectedFiles(results, file: file, line: line)
+        assertMatchesWithExpectedFiles(results, file: file, line: line)
     }
     
-    private func assertMatcheshWithExpectedFiles(_ files: [TestFileOutput],
-                                                 file: String,
-                                                 line: Int) {
+    private func assertMatchesWithExpectedFiles(_ files: [TestFileOutput],
+                                                file: String,
+                                                line: Int) {
         
         let expectedNotMatched = expectedFiles.filter { expected in
             !files.contains { $0.path == expected.path }

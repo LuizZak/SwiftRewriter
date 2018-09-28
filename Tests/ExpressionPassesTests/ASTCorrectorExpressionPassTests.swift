@@ -56,9 +56,9 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     
     /// Tests that arithmetic comparisons (<=, <, >=, >) where lhs and rhs are
     /// optional numeric values are coerced into default values using zeroes.
-    func testNullCoalesceOnArithmeticComparisions() {
+    func testNullCoalesceOnArithmeticComparison() {
         let expMaker = { Expression.identifier("a") }
-        
+
         let exp = expMaker().binary(op: .lessThan, rhs: Expression.identifier("b"))
         exp.lhs.resolvedType = .optional(.int)
         exp.rhs.resolvedType = .int
@@ -649,7 +649,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     }
     
     /// Same as above, but testing an optional value instead.
-    func testCorrectswhileStatementWithNullableNumericExpressions() {
+    func testCorrectsWhileStatementWithNullableNumericExpressions() {
         let expMaker = { Expression.identifier("num") }
         
         let exp = expMaker()
@@ -669,7 +669,7 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     
     /// For otherwise unknown optional expressions, replace check
     /// with an 'while-not-nil'-style check
-    func testCorrectswhileStatementWithNullableValue() {
+    func testCorrectsWhileStatementWithNullableValue() {
         let expMaker = { Expression.identifier("obj") }
         
         let exp = expMaker()

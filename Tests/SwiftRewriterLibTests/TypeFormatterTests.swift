@@ -300,7 +300,7 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual(result, expected, "\n" + result.makeDifferenceMarkString(against: expected))
     }
     
-    func testAsStringParameteredInitializer() {
+    func testAsStringParameterizedInitializer() {
         let initializer =
             InitGenerationIntention(
                 parameters: [
