@@ -221,6 +221,9 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                 context.pushDefinitionContext()
                 defer { context.popDefinitionContext() }
                 
+                let labels = section.switchLabel()
+                let isDefaultCase = labels.contains { $0.rangeExpression() == nil }
+                
                 var statements = section.statement().compactMap { $0.accept(self) }
                 
                 if statements.count == 1, let stmt = statements[0].asCompound {
@@ -231,13 +234,12 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                 // not a jump stmt to somewhere else (`return`, `continue` or
                 // `break`)
                 let hasBreak = statements.last?.isUnconditionalJump ?? false
-                if !hasBreak {
+                if !hasBreak && !isDefaultCase {
                     statements.append(.fallthrough)
                 }
                 
-                let labels = section.switchLabel()
                 // Default case
-                if labels.contains(where: { $0.rangeExpression() == nil }) {
+                if isDefaultCase {
                     def = statements
                 } else {
                     let expr =

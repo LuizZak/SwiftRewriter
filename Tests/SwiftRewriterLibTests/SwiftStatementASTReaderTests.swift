@@ -2,7 +2,7 @@ import XCTest
 import Antlr4
 import ObjcParser
 import ObjcParserAntlr
-import SwiftRewriterLib
+@testable import SwiftRewriterLib
 import SwiftAST
 
 class SwiftStatementASTReaderTests: XCTestCase {
@@ -193,7 +193,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                 default: [.break])
         )
         
-        assert(objcStmt: "switch(value) { case 0: break; case 1: break }",
+        assert(objcStmt: "switch(value) { case 0: break; case 1: break; }",
                readsAs: .switch(.identifier("value"),
                                 cases: [
                                     SwitchCase(patterns: [.expression(.constant(0))], statements: [.break]),
@@ -202,7 +202,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                 default: [.break])
         )
         
-        assert(objcStmt: "switch(value) { case 0: case 1: break }",
+        assert(objcStmt: "switch(value) { case 0: case 1: break; }",
                readsAs: .switch(.identifier("value"),
                                 cases: [
                                     SwitchCase(patterns: [.expression(.constant(0)), .expression(.constant(1))], statements: [.break])
@@ -318,13 +318,41 @@ extension SwiftStatementASTReaderTests {
                 }
                 dump(expected, to: &expStr)
                 
+                var expString = ""
+                var resString = ""
+                
+                let prettyPrintExpWriter =
+                    StatementWriter(options: .default,
+                                    target: StringRewriterOutput(settings: .defaults),
+                                    typeMapper: DefaultTypeMapper(),
+                                    typeSystem: DefaultTypeSystem())
+                
+                let prettyPrintResWriter =
+                    StatementWriter(options: .default,
+                                    target: StringRewriterOutput(settings: .defaults),
+                                    typeMapper: DefaultTypeMapper(),
+                                    typeSystem: DefaultTypeSystem())
+                
+                prettyPrintExpWriter.visitStatement(expected)
+                result.map(prettyPrintResWriter.visitStatement)
+                
+                dump(expected, to: &expString)
+                dump(result, to: &resString)
+                
+                expString = (prettyPrintExpWriter.target as! StringRewriterOutput).buffer + "\n" + expString
+                resString = (prettyPrintResWriter.target as! StringRewriterOutput).buffer + "\n" + resString
+                
                 recordFailure(withDescription: """
                     Failed: Expected to read Objective-C expression
                     \(objcStmt)
                     as
-                    \(expStr)
+                    
+                    \(expString)
+                    
                     but read as
-                    \(resStr)
+                    
+                    \(resString)
+                    
                     """, inFile: file, atLine: line, expected: true)
             }
             
