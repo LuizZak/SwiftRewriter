@@ -146,7 +146,7 @@ class ExpressionPassTestCase: XCTestCase {
                                 typeSystem: DefaultTypeSystem())
             
             prettyPrintExpWriter.visitStatement(expected)
-            prettyPrintResWriter.visitStatement(statement)
+            prettyPrintResWriter.visitStatement(result)
             
             dump(expected, to: &expString)
             dump(result, to: &resString)
@@ -244,8 +244,6 @@ class ExpressionPassTestCase: XCTestCase {
         let block: () -> Void = { [weak self] in
             self?.notified = true
         }
-        
-        
         
         return ASTRewriterPassContext(typeSystem: typeSystem,
                                       notifyChangedTree: block,

@@ -518,21 +518,8 @@ internal class StatementWriter: StatementVisitor {
             target.outputLineFeed()
             
             target.idented {
-                // TODO: Abstract these omit-break/fallthrough-inserting behaviors
-                // to an external ASTRewriterPass
-                for (i, stmt) in cs.statements.enumerated() {
-                    // No need to emit the last break statement (if it's not the
-                    // only statement)
-                    if i > 0 && i == cs.statements.count - 1 && stmt == .break {
-                        break
-                    }
-                    
+                for stmt in cs.statements {
                     visitStatement(stmt)
-                }
-                
-                let hasBreak = cs.statements.last?.isUnconditionalJump ?? false
-                if !hasBreak {
-                    target.output(line: "fallthrough", style: .keyword)
                 }
             }
         }
@@ -544,15 +531,7 @@ internal class StatementWriter: StatementVisitor {
             target.outputLineFeed()
             
             target.idented {
-                // TODO: Abstract this omit-break behavior to an external
-                // ASTRewriterPass
-                for (i, stmt) in def.enumerated() {
-                    // No need to emit the last break statement (if it's not the
-                    // only statement)
-                    if i > 0 && i == def.count - 1 && stmt == .break {
-                        break
-                    }
-                    
+                for stmt in def {
                     visitStatement(stmt)
                 }
             }
@@ -613,6 +592,10 @@ internal class StatementWriter: StatementVisitor {
     
     func visitBreak(_ stmt: BreakStatement) {
         target.output(line: "break", style: .keyword)
+    }
+
+    func visitFallthrough(_ stmt: FallthroughStatement) {
+        target.output(line: "fallthrough", style: .keyword)
     }
     
     func visitExpressions(_ stmt: ExpressionsStatement) {

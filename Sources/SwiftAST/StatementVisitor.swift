@@ -73,7 +73,13 @@ public protocol StatementVisitor {
     /// - Parameter stmt: A break statement to visit
     /// - Returns: Result of visiting the break statement
     func visitBreak(_ stmt: BreakStatement) -> StmtResult
-    
+
+    /// Visits a fallthrough statement
+    ///
+    /// - Parameter stmt: A fallthrough statement to visit
+    /// - Returns: Result of visiting the fallthrough statement
+    func visitFallthrough(_ stmt: FallthroughStatement) -> StmtResult
+
     /// Visits a continue statement
     ///
     /// - Parameter stmt: A continue statement to visit

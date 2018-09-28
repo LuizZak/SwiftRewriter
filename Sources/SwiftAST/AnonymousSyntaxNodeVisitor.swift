@@ -300,7 +300,14 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
     public func visitBreak(_ stmt: BreakStatement) {
         listener(stmt)
     }
-    
+
+    /// Visits a fallthrough statement
+    ///
+    /// - Parameter stmt: A FallthroughStatement to visit
+    public func visitFallthrough(_ stmt: FallthroughStatement) {
+        listener(stmt)
+    }
+
     /// Visits a continue statement
     ///
     /// - Parameter stmt: A ContinueStatement to visit

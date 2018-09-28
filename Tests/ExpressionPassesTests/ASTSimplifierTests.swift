@@ -244,4 +244,64 @@ class ASTSimplifierTests: ExpressionPassTestCase {
             into: Expression.parens(.constant(0)).binary(op: .add, rhs: .constant(1))
         ); assertDidNotNotifyChange()
     }
+    
+    /// Tests that spurious break statements as the last statement of a switch
+    /// case are removed (since in Swift switches automatically break at the end
+    /// of a case)
+    func testSimplifyBreakAsLastSwitchCaseStatement() {
+        assertTransform(
+            statement: Statement
+                .switch(
+                    .constant(0),
+                    cases: [
+                        SwitchCase(patterns: [], statements: [
+                            Statement.expression(.identifier("stmt")),
+                            Statement.break
+                        ])
+                    ],
+                    default: [
+                        Statement.expression(.identifier("stmt")),
+                        Statement.break
+                    ]),
+            into: Statement
+                .switch(
+                    .constant(0),
+                    cases: [
+                        SwitchCase(patterns: [], statements: [
+                            Statement.expression(.identifier("stmt")),
+                        ])
+                    ],
+                    default: [
+                        Statement.expression(.identifier("stmt")),
+                    ])
+        ); assertNotifiedChange()
+    }
+    
+    /// Asserts that we don't remove break statements from empty switch cases
+    func testDontRemoveBreakFromEmptyCases() {
+        assertTransform(
+            statement: Statement
+                .switch(
+                    .constant(0),
+                    cases: [
+                        SwitchCase(patterns: [], statements: [
+                            Statement.break
+                        ])
+                    ],
+                    default: [
+                        Statement.break
+                    ]),
+            into: Statement
+                .switch(
+                    .constant(0),
+                    cases: [
+                        SwitchCase(patterns: [], statements: [
+                            Statement.break
+                        ])
+                    ],
+                    default: [
+                        Statement.break
+                    ])
+        ); assertDidNotNotifyChange()
+    }
 }

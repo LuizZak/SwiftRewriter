@@ -65,6 +65,26 @@ public class ASTSimplifier: ASTRewriterPass {
         
         return super.visitIf(stmt)
     }
+    
+    /// Simplify switch statements by removing spurious `break` statements from
+    /// cases
+    public override func visitSwitch(_ stmt: SwitchStatement) -> Statement {
+        for (i, cs) in stmt.cases.enumerated() {
+            if cs.statements.count > 1 && cs.statements.last is BreakStatement {
+                stmt.cases[i].statements.removeLast()
+                notifyChange()
+            }
+        }
+        
+        if let def = stmt.defaultCase {
+            if def.count > 1 && def.last is BreakStatement {
+                stmt.defaultCase?.removeLast()
+                notifyChange()
+            }
+        }
+
+        return super.visitSwitch(stmt)
+    }
 }
 
 extension IfStatement {
