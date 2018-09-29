@@ -22,7 +22,10 @@ public protocol TypeSystem {
     
     /// Between two scalar numeric types, returns the type that the type system
     /// should favor when cast-converting.
-    func implicitCoercedNumericType(for type1: SwiftType, _ type2: SwiftType) -> SwiftType
+    ///
+    /// In case the types are equivalent, or no casting is prefered between the
+    /// two, nil is returned, instead.
+    func implicitCoercedNumericType(for type1: SwiftType, _ type2: SwiftType) -> SwiftType?
     
     /// Returns `true` if a type is known to exists with a given name.
     func typeExists(_ name: String) -> Bool

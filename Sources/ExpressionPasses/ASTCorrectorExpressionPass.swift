@@ -93,7 +93,9 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
         // if let <name> = <arg0> {
         //   func(<name>)
         // }
-        let newOp = functionCall.replacingArguments([Expression.identifier(name).typed(resolvedType.deepUnwrapped)])
+        let newOp = functionCall.replacingArguments([
+            Expression.identifier(name).typed(resolvedType.deepUnwrapped)
+        ])
         let newPostfix = postfix.copy()
         newPostfix.op = newOp
         
@@ -194,8 +196,11 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
     
     public override func visitBinary(_ exp: BinaryExpression) -> Expression {
         switch exp.op.category {
+        
         case .comparison where exp.op != .equals && exp.op != .unequals,
-             .arithmetic, .bitwise:
+             .arithmetic,
+             .bitwise:
+            
             // Mark left hand side and right hand side of comparison expressions
             // to expect non-optional of numeric values, in case they are numeric
             // themselves.
@@ -208,6 +213,52 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                 typeSystem.isNumeric(rhsType) {
                 
                 exp.rhs.expectedType = rhsType
+            }
+            
+            if exp.op.category == .arithmetic {
+                // Correct binary operations containing operands of different
+                // numerical types
+                guard let lhsType = exp.lhs.resolvedType, let rhsType = exp.rhs.resolvedType else {
+                    break
+                }
+                
+                if !typeSystem.isNumeric(lhsType)
+                    || !typeSystem.isNumeric(rhsType)
+                    || lhsType == rhsType {
+                    break
+                }
+                
+                // Let literals be naturally coerced
+                if exp.lhs.isLiteralExpression || exp.rhs.isLiteralExpression {
+                    break
+                }
+                
+                if let expectedType = exp.expectedType {
+                    exp.lhs.expectedType = expectedType
+                    exp.rhs.expectedType = expectedType
+                }
+                
+                let targetLhsType = exp.lhs.expectedType ?? lhsType
+                let targetRhsType = exp.rhs.expectedType ?? rhsType
+                
+                let _targetType =
+                    typeSystem
+                        .implicitCoercedNumericType(for: targetLhsType,
+                                                    targetRhsType)
+                
+                guard let targetType = _targetType else {
+                    break
+                }
+                
+                if let newLhs = castNumeric(exp.lhs, to: targetType) {
+                    exp.lhs = newLhs
+                }
+                
+                if let newRhs = castNumeric(exp.rhs, to: targetType) {
+                    exp.rhs = newRhs
+                }
+                
+                notifyChange()
             }
         default:
             break
@@ -307,29 +358,53 @@ public class ASTCorrectorExpressionPass: ASTRewriterPass {
                 return nil
             }
             
-            let expCopy = exp.copy()
-            
             let newExp: Expression
             
-            if expCopy.requiresParens {
-                newExp =
-                    Expression
-                        .parens(expCopy)
-                        .binary(op: .nullCoalesce,
-                                rhs: defaultExp)
-            } else {
-                newExp = .parens(expCopy.binary(op: .nullCoalesce, rhs: defaultExp))
+            do {
+                let expCopy = exp.copy()
+                
+                if expCopy.requiresParens {
+                    newExp =
+                        Expression
+                            .parens(expCopy)
+                            .binary(op: .nullCoalesce,
+                                    rhs: defaultExp)
+                } else {
+                    newExp = .parens(expCopy.binary(op: .nullCoalesce, rhs: defaultExp))
+                }
+                
+                newExp.expectedType = expCopy.expectedType
+                newExp.resolvedType = type.deepUnwrapped
+                
+                expCopy.expectedType = nil
             }
-            
-            newExp.expectedType = expCopy.expectedType
-            newExp.resolvedType = type.deepUnwrapped
-            
-            expCopy.expectedType = nil
             
             return newExp
         }
         
         return nil
+    }
+    
+    func castNumeric(_ exp: Expression, to type: SwiftType) -> Expression? {
+        guard let typeName = type.typeName else {
+            return nil
+        }
+        guard let resolvedType = exp.resolvedType, typeSystem.isNumeric(resolvedType) else {
+            return nil
+        }
+        
+        if resolvedType == type {
+            return nil
+        }
+        
+        let cast = Expression
+            .identifier(typeName)
+            .typed(.metatype(for: type))
+            .call([exp.copy().typed(expected: nil)])
+            .typed(type)
+            .typed(expected: type)
+        
+        return cast
     }
     
     func correctToBoolean(_ exp: Expression) -> Expression? {

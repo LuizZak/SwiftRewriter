@@ -895,4 +895,104 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
             into: Expression.identifier("exp").casted(to: .string).optional().dot("count")
         ); assertDidNotNotifyChange()
     }
+    
+    func testCastDifferentNumericTypesInArithmeticOperations() {
+        // CGFloat, Int -> CGFloat, CGFloat(Int)
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed(.cgFloat),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed(.int)),
+            into: Expression
+                .binary(lhs: Expression.identifier("a"),
+                        op: .add,
+                        rhs: Expression.identifier("CGFloat").call([.identifier("b")]))
+        ); assertNotifiedChange()
+        
+        // Int, CGFloat -> CGFloat(Int), CGFloat
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed(.int),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed(.cgFloat)),
+            into: Expression
+                .binary(lhs: Expression.identifier("CGFloat").call([.identifier("a")]),
+                        op: .add,
+                        rhs: Expression.identifier("b"))
+        ); assertNotifiedChange()
+        
+        // Int64, Int32 -> Int64, Int64(Int32)
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed("Int64"),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed("Int32")),
+            into: Expression
+                .binary(lhs: Expression.identifier("a"),
+                        op: .add,
+                        rhs: Expression.identifier("Int64").call([.identifier("b")]))
+        ); assertNotifiedChange()
+        
+        // Int32, Int64 -> Int64(Int32), Int64
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed("Int32"),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed("Int64")),
+            into: Expression
+                .binary(lhs: Expression.identifier("Int64").call([.identifier("a")]),
+                        op: .add,
+                        rhs: Expression.identifier("b"))
+        ); assertNotifiedChange()
+    }
+    
+    func testNoCastForSameBitWidthNumerics() {
+        // CGFloat, Double -> CGFloat, Double
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed(.cgFloat),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed(.double)),
+            into: Expression
+                .binary(lhs: Expression.identifier("a"),
+                        op: .add,
+                        rhs: Expression.identifier("b"))
+        ); assertDidNotNotifyChange()
+        
+        // CGFloat, Double -> Double, CGFloat
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed(.double),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed(.cgFloat)),
+            into: Expression
+                .binary(lhs: Expression.identifier("a"),
+                        op: .add,
+                        rhs: Expression.identifier("b"))
+        ); assertDidNotNotifyChange()
+        
+        // Int64, UInt64 -> Int64, UInt64
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed("Int64"),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed("UInt64")),
+            into: Expression
+                .binary(lhs: Expression.identifier("a"),
+                        op: .add,
+                        rhs: Expression.identifier("b"))
+        ); assertDidNotNotifyChange()
+        
+        // UInt64, Int64 -> UInt64, Int64
+        assertTransform(
+            expression: Expression
+                .binary(lhs: Expression.identifier("a").typed("UInt64"),
+                        op: .add,
+                        rhs: Expression.identifier("b").typed("Int64")),
+            into: Expression
+                .binary(lhs: Expression.identifier("a"),
+                        op: .add,
+                        rhs: Expression.identifier("b"))
+        ); assertDidNotNotifyChange()
+    }
 }
