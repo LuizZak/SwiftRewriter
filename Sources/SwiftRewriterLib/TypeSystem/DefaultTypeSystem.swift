@@ -453,7 +453,11 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
-    public func implicitCoercedNumericType(for type1: SwiftType, _ type2: SwiftType) -> SwiftType {
+    public func implicitCoercedNumericType(for type1: SwiftType, _ type2: SwiftType) -> SwiftType? {
+        if !isNumeric(type1) || !isNumeric(type2) {
+            return nil
+        }
+        
         let isInt1 = isInteger(type1)
         let isInt2 = isInteger(type2)
         
@@ -461,10 +465,15 @@ public class DefaultTypeSystem: TypeSystem {
         let isFloat2 = isFloat(type2)
         
         if (isInt1 && isInt2) || (isFloat1 && isFloat2) {
-            if bitwidth(intType: type1) >= bitwidth(intType: type2) {
+            let bw1 = bitwidth(intType: type1)
+            let bw2 = bitwidth(intType: type2)
+            
+            if bw1 > bw2 {
                 return type1
-            } else {
+            } else if bw2 > bw1 {
                 return type2
+            } else {
+                return nil
             }
         }
         
@@ -475,7 +484,7 @@ public class DefaultTypeSystem: TypeSystem {
             return type1
         }
         
-        return type1
+        return nil
     }
     
     public func isNumeric(_ type: SwiftType) -> Bool {
@@ -521,7 +530,7 @@ public class DefaultTypeSystem: TypeSystem {
                     return 16
                 case "CChar32", "CInt", "CUnsignedInt", "CWideChar":
                     return 32
-                case "CUnsignedLong", "CLongLong",
+                case "CLong", "CUnsignedLong", "CLongLong",
                      "CUnsignedLongLong":
                     return 64
                 // Float values

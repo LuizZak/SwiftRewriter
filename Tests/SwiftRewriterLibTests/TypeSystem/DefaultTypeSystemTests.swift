@@ -916,4 +916,143 @@ class DefaultTypeSystemTests: XCTestCase {
         
         XCTAssertEqual(sut.canonicalName(forTypeName: "NonCanonAlias"), "Canon")
     }
+    
+    func testImplicitCoercedNumericTypeWithIntegers() {
+        assertCoerce(between: "Int8", "Int16", resultsIn: "Int16")
+        assertCoerce(between: "Int16", "Int32", resultsIn: "Int32")
+        assertCoerce(between: "Int32", "Int64", resultsIn: "Int64")
+        assertCoerce(between: "UInt8", "UInt16", resultsIn: "UInt16")
+        assertCoerce(between: "UInt16", "UInt32", resultsIn: "UInt32")
+        assertCoerce(between: "UInt32", "UInt64", resultsIn: "UInt64")
+        assertCoerce(between: "CLong", "Int32", resultsIn: "CLong")
+        assertCoerce(between: "CUnsignedLong", "Int32", resultsIn: "CUnsignedLong")
+        assertCoerce(between: "CLongLong", "Int32", resultsIn: "CLongLong")
+        assertCoerce(between: "CUnsignedLongLong", "Int32", resultsIn: "CUnsignedLongLong")
+        
+        // No coercion cases (same bit-width)
+        assertNoCoerce(between: "Int", "UInt")
+        assertNoCoerce(between: "CLong", "Int")
+        assertNoCoerce(between: "CUnsignedLong", "Int")
+        assertNoCoerce(between: "CLongLong", "Int")
+        assertNoCoerce(between: "Int8", "UInt8")
+        assertNoCoerce(between: "Int16", "UInt16")
+        assertNoCoerce(between: "Int32", "UInt32")
+        assertNoCoerce(between: "Int64", "UInt64")
+        assertNoCoerce(between: "CLongLong", "Int64")
+        assertNoCoerce(between: "CUnsignedLongLong", "Int64")
+    }
+    
+    func testImplicitCoercedNumericTypeWithFloats() {
+        assertCoerce(between: "Float", "CGFloat", resultsIn: "CGFloat")
+        assertCoerce(between: "Float", "Float80", resultsIn: "Float80")
+        assertCoerce(between: "Float80", "Double", resultsIn: "Float80")
+        
+        // No coercion cases (same bit-width)
+        assertNoCoerce(between: "Double", "CGFloat")
+        assertNoCoerce(between: "CFloat", "Float")
+        assertNoCoerce(between: "CDouble", "Double")
+    }
+    
+    func testImplicitCoercedNumericTypesFavorsCoercingToFloatingPointValues() {
+        assertCoerce(between: "Int8", "Float", resultsIn: "Float")
+        assertCoerce(between: "Int16", "Float", resultsIn: "Float")
+        assertCoerce(between: "Int32", "Float", resultsIn: "Float")
+        assertCoerce(between: "Int64", "Float", resultsIn: "Float")
+        assertCoerce(between: "UInt8", "Float", resultsIn: "Float")
+        assertCoerce(between: "UInt16", "Float", resultsIn: "Float")
+        assertCoerce(between: "UInt32", "Float", resultsIn: "Float")
+        assertCoerce(between: "UInt64", "Float", resultsIn: "Float")
+        
+        assertCoerce(between: "Int8", "Double", resultsIn: "Double")
+        assertCoerce(between: "Int16", "Double", resultsIn: "Double")
+        assertCoerce(between: "Int32", "Double", resultsIn: "Double")
+        assertCoerce(between: "Int64", "Double", resultsIn: "Double")
+        assertCoerce(between: "UInt8", "Double", resultsIn: "Double")
+        assertCoerce(between: "UInt16", "Double", resultsIn: "Double")
+        assertCoerce(between: "UInt32", "Double", resultsIn: "Double")
+        assertCoerce(between: "UInt64", "Double", resultsIn: "Double")
+    }
+}
+
+private extension DefaultTypeSystemTests {
+    
+    func assertAreNumeric(_ type1: SwiftType, _ type2: SwiftType, line: Int) {
+        if !sut.isNumeric(type1) {
+            recordFailure(
+                withDescription:
+                """
+                Provided type \(type1) is not recognized as a numeric type by the \
+                tested TypeSystem
+                """,
+                inFile: #file, atLine: line, expected: true)
+            return
+        }
+        if !sut.isNumeric(type2) {
+            recordFailure(
+                withDescription:
+                """
+                Provided type \(type2) is not recognized as a numeric type by the \
+                tested TypeSystem
+                """,
+                inFile: #file, atLine: line, expected: true)
+            return
+        }
+    }
+    
+    func assertCoerce(between type1: SwiftType,
+                      _ type2: SwiftType,
+                      resultsIn result: SwiftType,
+                      line: Int = #line) {
+        
+        assertAreNumeric(type1, type2, line: line)
+        
+        let r1 = sut.implicitCoercedNumericType(for: type1, type2)
+        if r1 != result {
+            recordFailure(
+                withDescription:
+                """
+                Expected coercion between \(type1) and \(type2) to result in \
+                \(result), but received \(r1?.description ?? "<nil>")
+                """,
+                inFile: #file, atLine: line, expected: true)
+        }
+        
+        let r2 = sut.implicitCoercedNumericType(for: type2, type1)
+        if r2 != result {
+            recordFailure(
+                withDescription:
+                """
+                Expected coercion between \(type2) and \(type1) to result in \
+                \(result), but received \(r2?.description ?? "<nil>")
+                """,
+                inFile: #file, atLine: line, expected: true)
+        }
+    }
+    
+    func assertNoCoerce(between type1: SwiftType,
+                        _ type2: SwiftType,
+                        line: Int = #line) {
+        
+        assertAreNumeric(type1, type2, line: line)
+        
+        if let r1 = sut.implicitCoercedNumericType(for: type1, type2) {
+            recordFailure(
+                withDescription:
+                """
+                Expected coercion between \(type1) and \(type2) to result in nil, \
+                but received \(r1)
+                """,
+                inFile: #file, atLine: line, expected: true)
+        }
+        
+        if let r2 = sut.implicitCoercedNumericType(for: type2, type1) {
+            recordFailure(
+                withDescription:
+                """
+                Expected coercion between \(type2) and \(type1) to result in nil, \
+                but received \(r2)
+                """,
+                inFile: #file, atLine: line, expected: true)
+        }
+    }
 }
