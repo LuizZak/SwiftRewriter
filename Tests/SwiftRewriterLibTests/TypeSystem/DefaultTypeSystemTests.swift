@@ -976,22 +976,12 @@ class DefaultTypeSystemTests: XCTestCase {
 
 private extension DefaultTypeSystemTests {
     
-    func assertAreNumeric(_ type1: SwiftType, _ type2: SwiftType, line: Int) {
-        if !sut.isNumeric(type1) {
+    func assertIsNumeric(_ type: SwiftType, line: Int) {
+        if !sut.isNumeric(type) {
             recordFailure(
                 withDescription:
                 """
-                Provided type \(type1) is not recognized as a numeric type by the \
-                tested TypeSystem
-                """,
-                inFile: #file, atLine: line, expected: true)
-            return
-        }
-        if !sut.isNumeric(type2) {
-            recordFailure(
-                withDescription:
-                """
-                Provided type \(type2) is not recognized as a numeric type by the \
+                Provided type \(type) is not recognized as a numeric type by the \
                 tested TypeSystem
                 """,
                 inFile: #file, atLine: line, expected: true)
@@ -1004,7 +994,8 @@ private extension DefaultTypeSystemTests {
                       resultsIn result: SwiftType,
                       line: Int = #line) {
         
-        assertAreNumeric(type1, type2, line: line)
+        assertIsNumeric(type1, line: line)
+        assertIsNumeric(type2, line: line)
         
         let r1 = sut.implicitCoercedNumericType(for: type1, type2)
         if r1 != result {
@@ -1033,7 +1024,8 @@ private extension DefaultTypeSystemTests {
                         _ type2: SwiftType,
                         line: Int = #line) {
         
-        assertAreNumeric(type1, type2, line: line)
+        assertIsNumeric(type1, line: line)
+        assertIsNumeric(type2, line: line)
         
         if let r1 = sut.implicitCoercedNumericType(for: type1, type2) {
             recordFailure(
