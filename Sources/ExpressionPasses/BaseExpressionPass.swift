@@ -126,6 +126,10 @@ public class BaseExpressionPass: ASTRewriterPass {
                             invocationMatcher: mapping
                         )
                     
+                // Free function rewriting
+                case .function(let mapping):
+                    return mapping
+                    
                 // Getter or getter/setter pair conversion to property name
                 case let .propertyFromMethods(property, getterName, setterName,
                                               resultType, isStatic):

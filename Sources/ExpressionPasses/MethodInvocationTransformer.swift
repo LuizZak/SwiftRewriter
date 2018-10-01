@@ -14,7 +14,7 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
         self.invocationMatcher = invocationMatcher
     }
     
-    func canApply(to postfix: PostfixExpression) -> Bool {
+    public func canApply(to postfix: PostfixExpression) -> Bool {
         guard let memberNameAccess = postfix.exp.asPostfix else {
             return false
         }
@@ -42,7 +42,7 @@ public final class MethodInvocationTransformer: PostfixInvocationTransformer {
         return true
     }
     
-    func attemptApply(on postfix: PostfixExpression) -> Expression? {
+    public func attemptApply(on postfix: PostfixExpression) -> Expression? {
         if !canApply(to: postfix) {
             return nil
         }

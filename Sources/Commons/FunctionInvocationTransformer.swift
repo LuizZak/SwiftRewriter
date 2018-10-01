@@ -1,5 +1,5 @@
 import SwiftAST
-import Commons
+import SwiftRewriterLib
 
 /// A function invocation transformer allows changing the shape of a postfix
 /// function call into equivalent calls with function name and parameters moved
@@ -282,5 +282,15 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
                 return name
             }
         }
+    }
+}
+
+extension Sequence where Element == FunctionArgument {
+    public func hasLabeledArguments() -> Bool {
+        return any { $0.isLabeled }
+    }
+    
+    public func argumentLabels() -> [String?] {
+        return map { $0.label }
     }
 }

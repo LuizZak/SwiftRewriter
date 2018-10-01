@@ -1,5 +1,5 @@
 import SwiftAST
-import SwiftRewriterLib
+import Commons
 
 /// An invocation transformer that allows renaming an instance or type property
 /// access
@@ -19,7 +19,7 @@ public class PropertyInvocationTransformer: PostfixInvocationTransformer {
         
     }
     
-    func canApply(to postfix: PostfixExpression) -> Bool {
+    public func canApply(to postfix: PostfixExpression) -> Bool {
         guard let member = postfix.op.asMember else {
             return false
         }
@@ -33,7 +33,7 @@ public class PropertyInvocationTransformer: PostfixInvocationTransformer {
         return true
     }
     
-    func attemptApply(on postfix: PostfixExpression) -> Expression? {
+    public func attemptApply(on postfix: PostfixExpression) -> Expression? {
         if !canApply(to: postfix) {
             return nil
         }

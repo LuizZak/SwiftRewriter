@@ -3,7 +3,7 @@ import SwiftAST
 /// Protocol for postfix invocation transformer classes which are used during AST
 /// rewriting phase to allow selectively picking and rewriting certain postfix
 /// AST constructs like free function and/or method calls.
-protocol PostfixInvocationTransformer {
+public protocol PostfixInvocationTransformer {
     
     /// Returns whether this postfix transformer can do rewriting work on a given
     /// postfix expression.

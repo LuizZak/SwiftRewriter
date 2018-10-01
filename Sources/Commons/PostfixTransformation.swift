@@ -5,6 +5,7 @@ import SwiftAST
 /// a type.
 public enum PostfixTransformation {
     case method(MethodInvocationTransformerMatcher)
+    case function(FunctionInvocationTransformer)
     case property(old: String, new: String)
     case propertyFromMethods(property: String,
                              getterName: String,

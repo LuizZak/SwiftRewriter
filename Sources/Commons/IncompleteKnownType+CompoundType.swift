@@ -134,6 +134,38 @@ private func initTransformations(_ ctor: KnownConstructor, type: KnownType) thro
 }
 
 private func methodTransformations(_ method: KnownMethod, type: KnownType) throws -> [PostfixTransformation] {
+    func makeTransformation(identifier: FunctionIdentifier) -> PostfixTransformation {
+        
+        // Free function to method conversion
+        if identifier.parameterNames.first == "self" {
+            
+            let transformer = FunctionInvocationTransformer(
+                objcFunctionName: identifier.name,
+                toSwiftFunction: method.signature.name,
+                firstArgumentBecomesInstance: true,
+                arguments: method.signature.parameters.dropFirst().map { arg in
+                    arg.label.flatMap { .labeled($0, .asIs) } ?? .asIs
+                }
+            )
+            
+            return .function(transformer)
+        }
+        
+        let builder =
+            MethodInvocationRewriterBuilder(mappingTo: method.signature)
+        
+        let transformer =
+            MethodInvocationTransformerMatcher(
+                identifier: identifier,
+                isStatic: method.isStatic,
+                transformer: builder.build())
+        
+        return .method(transformer)
+    }
+    func makeTransformation(signature: FunctionSignature) -> PostfixTransformation {
+        return makeTransformation(identifier: signature.asIdentifier)
+    }
+    
     var transforms: [PostfixTransformation] = []
     
     for attribute in method.knownAttributes {
@@ -162,28 +194,14 @@ private func methodTransformations(_ method: KnownMethod, type: KnownType) throw
             transforms.append(.method(transformer))
             
         case .mapFrom(let signature):
-            let builder =
-                MethodInvocationRewriterBuilder(mappingTo: method.signature)
+            let transformer = makeTransformation(signature: signature)
             
-            let transformer =
-                MethodInvocationTransformerMatcher(
-                    identifier: signature.asIdentifier,
-                    isStatic: signature.isStatic,
-                    transformer: builder.build())
-            
-            transforms.append(.method(transformer))
+            transforms.append(transformer)
             
         case .mapFromIdentifier(let ident):
-            let builder =
-                MethodInvocationRewriterBuilder(mappingTo: method.signature)
+            let transformer = makeTransformation(identifier: ident)
             
-            let transformer =
-                MethodInvocationTransformerMatcher(
-                    identifier: ident,
-                    isStatic: method.isStatic,
-                    transformer: builder.build())
-            
-            transforms.append(.method(transformer))
+            transforms.append(transformer)
             
         case .mapToBinaryOperator(let op):
             let signature = method.signature

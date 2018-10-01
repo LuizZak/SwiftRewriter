@@ -1,5 +1,5 @@
 import SwiftAST
-import SwiftRewriterLib
+import Commons
 
 /// Allows transforming method invocations to property accessors.
 public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
@@ -23,7 +23,7 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
         self.resultType = resultType
     }
     
-    func canApply(to postfix: PostfixExpression) -> Bool {
+    public func canApply(to postfix: PostfixExpression) -> Bool {
         guard let memberNameAccess = postfix.exp.asPostfix else {
             return false
         }
@@ -62,7 +62,7 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
         return false
     }
     
-    func attemptApply(on postfix: PostfixExpression) -> Expression? {
+    public func attemptApply(on postfix: PostfixExpression) -> Expression? {
         if !canApply(to: postfix) {
             return nil
         }
