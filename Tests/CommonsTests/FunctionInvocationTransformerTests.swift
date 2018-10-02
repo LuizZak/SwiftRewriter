@@ -1,7 +1,7 @@
 import XCTest
 import SwiftAST
 import SwiftRewriterLib
-import ExpressionPasses
+import Commons
 
 class FunctionInvocationTransformerTests: XCTestCase {
     func testRequiredArgumentCount() {
