@@ -105,7 +105,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // Setters: All methods named `func set[Name](_ name: Type)` where
             // `[Name]` is the same as the property's name with the first letter
             // uppercased
-            let potentialSetters =
+            let potentialSetters: [MethodGenerationIntention] =
                 methods.filter { $0.returnType == .void }
                     .filter { $0.isStatic == property.isStatic }
                     .filter { $0.parameters.count == 1 }

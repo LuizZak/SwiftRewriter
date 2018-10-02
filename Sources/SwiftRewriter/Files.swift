@@ -42,10 +42,10 @@ func filesAt(path directoryPath: String, includePattern: String? = nil, excludeP
             }
             // Map full path
             .map { (path: String) -> String in
-                (directoryPath as NSString).appendingPathComponent(path)
+                return (directoryPath as NSString).appendingPathComponent(path)
             }
             // Convert to URLs
             .map { (path: String) -> URL in
-                URL(fileURLWithPath: path)
+                return URL(fileURLWithPath: path)
             }
 }

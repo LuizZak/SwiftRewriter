@@ -46,10 +46,11 @@ public class ASTSimplifier: ASTRewriterPass {
                             .differentThan(nil) ->> &nullCheckM)
                 .keyPath(\.body.statements, hasCount(1))
                 .keyPath(\.body.statements[0].asExpressions,
-                         ValueMatcher()
+                         ValueMatcher<ExpressionsStatement>()
                             .keyPath(\.expressions, hasCount(1))
                             .keyPath(\.expressions[0].asPostfix,
-                                     ValueMatcher().keyPath(\.exp, lazyEquals(nullCheckM))
+                                     ValueMatcher<PostfixExpression>()
+                                        .keyPath(\.exp, lazyEquals(nullCheckM))
                                         ->> &postfix
                             ))
         

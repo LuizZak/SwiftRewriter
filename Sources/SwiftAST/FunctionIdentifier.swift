@@ -9,7 +9,8 @@ public struct FunctionIdentifier: Hashable, Equatable, CustomStringConvertible {
     public var parameterNames: [String?]
     
     public var description: String {
-        return name + "(" + parameterNames.map { ($0 ?? "_") + ":" }.joined() + ")"
+        let parameters = parameterNames.map { ($0 ?? "_") + ":" }
+        return name + "(" + parameters.joined() + ")"
     }
     
     public init(name: String, parameterNames: [String?]) {

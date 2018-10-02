@@ -88,6 +88,6 @@ private func discardMultiply(_ a: UInt32, _ b: UInt32) -> UInt32 {
     let OI = ah * bl + al * bh
     let L  = al * bl
     
-    let result = (((OI << 16) & 0xFFFFFFFF) + L) & 0xFFFFFFFF
+    let result: UInt64 = (((OI << 16) & 0xFFFFFFFF) + L) & 0xFFFFFFFF
     return UInt32(result)
 }

@@ -106,7 +106,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
                 }
                 
                 if let blockParameters = directDeclarator.blockParameters() {
-                    var blockType = TypeName()
+                    var blockType = ""
                     
                     let parameters = extractAll(from: blockParameters)
                     
@@ -247,7 +247,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
             return nil
         }
         
-        var type = TypeName()
+        var type = ""
         
         if let blockNullability = ctx.nullabilitySpecifier(0) {
             type += "\(blockNullability.getText()) "
@@ -296,7 +296,7 @@ public class VarDeclarationTypeExtractor: ObjectiveCParserBaseVisitor<String> {
         if let blockParameters = ctx.blockParameters() {
             let parameterTypes = VarDeclarationTypeExtractor.extractAll(from: blockParameters)
             
-            var type = TypeName()
+            var type = ""
             
             type += "(^"
             

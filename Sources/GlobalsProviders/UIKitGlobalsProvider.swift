@@ -44,8 +44,9 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     override func createDefinitions() {
-        add(function(name: "UIGraphicsGetCurrentContext", paramTypes: [],
-                     returnType: .optional(.typeName("CGContext"))))
+        add(function(name: "UIGraphicsGetCurrentContext",
+                     paramTypes: [],
+                     returnType: .optional("CGContext")))
         
         add(CodeDefinition(variableNamed: "UIViewNoIntrinsicMetric",
                            storage: .constant(ofType: .cgFloat)))
@@ -266,335 +267,99 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
     }
     
     func createUITableView() {
-        makeType(named: "UITableView", supertype: "UIScrollView") { type -> KnownType in
+        makeType(named: "UITableView") { type -> KnownType in
+            
             var type = type
             
             type.useSwiftSignatureMatching = true
             
-            type = type
-                // Properties
-                .property(named: "allowsMultipleSelection", type: .bool)
-                .property(named: "allowsMultipleSelectionDuringEditing", type: .bool)
-                .property(named: "allowsSelection", type: .bool)
-                .property(named: "allowsSelectionDuringEditing", type: .bool)
-                .property(named: "backgroundView", type: .optional("UIView"))
-                .property(named: "cellLayoutMarginsFollowReadableWidth", type: .bool)
-                .property(named: "dragInteractionEnabled", type: .bool)
-                .property(named: "estimatedRowHeight", type: .cgFloat)
-                .property(named: "estimatedSectionFooterHeight", type: .cgFloat)
-                .property(named: "estimatedSectionHeaderHeight", type: .cgFloat)
-                .property(named: "hasActiveDrag", type: .bool, accessor: .getter)
-                .property(named: "hasActiveDrop", type: .bool, accessor: .getter)
-                .property(named: "hasUncommittedUpdates", type: .bool, accessor: .getter)
-                .property(named: "indexPathForSelectedRow", type: .optional("IndexPath"), accessor: .getter)
-                .property(named: "indexPathsForSelectedRows", type: .optional(.array("IndexPath")), accessor: .getter)
-                .property(named: "indexPathsForVisibleRows", type: .optional(.array("IndexPath")), accessor: .getter)
-                .property(named: "insetsContentViewsToSafeArea", type: .bool)
-                .property(named: "isEditing", type: .bool)
-                .property(named: "numberOfSections", type: .int, accessor: .getter)
-                .property(named: "remembersLastFocusedIndexPath", type: .bool)
-                .property(named: "rowHeight", type: .cgFloat)
-                .property(named: "sectionFooterHeight", type: .cgFloat)
-                .property(named: "sectionHeaderHeight", type: .cgFloat)
-                .property(named: "sectionIndexBackgroundColor", type: .optional("UIColor"))
-                .property(named: "sectionIndexColor", type: .optional("UIColor"))
-                .property(named: "sectionIndexMinimumDisplayRowCount", type: .int)
-                .property(named: "sectionIndexTrackingBackgroundColor", type: .optional("UIColor"))
-                .property(named: "separatorColor", type: .optional("UIColor"))
-                .property(named: "separatorEffect", type: .optional("UIVisualEffect"))
-                .property(named: "separatorInset", type: "UIEdgeInsets")
-                .property(named: "separatorInsetReference", type: "UITableViewSeparatorInsetReference")
-                .property(named: "separatorStyle", type: "UITableViewCellSeparatorStyle")
-                .property(named: "style", type: "UITableViewStyle", accessor: .getter)
-                .property(named: "tableFooterView", type: .optional("UIView"))
-                .property(named: "tableHeaderView", type: .optional("UIView"))
-                .property(named: "visibleCells", type: .array("UITableViewCell"), accessor: .getter)
-                .property(named: "dataSource", type: .optional("UITableViewDataSource"), ownership: .weak)
-                .property(named: "delegate", type: .optional("UITableViewDelegate"), ownership: .weak)
-                .property(named: "dragDelegate", type: .optional("UITableViewDragDelegate"), ownership: .weak)
-                .property(named: "dropDelegate", type: .optional("UITableViewDropDelegate"), ownership: .weak)
-                .property(named: "prefetchDataSource", type: .optional("UITableViewDataSourcePrefetching"), ownership: .weak)
-                // Initializers
-                .constructor(shortParameters: [("frame", "CGRect"), ("style", "UITableViewStyle")])
-                
-            type = type
-                // Methods
-                .method(named: "beginUpdates")
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "cellForRow", parameters: [
-                            ParameterSignature(label: "at", name: "indexPath", type: "IndexPath")
-                        ],
-                        returnType: .optional("UITableViewCell")
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "deleteRows", parameters: [
-                            ParameterSignature(label: "at", name: "indexPaths", type: .array("IndexPath")),
-                            ParameterSignature(label: "with", name: "animation", type: "UITableViewRowAnimation")
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "deleteSections", parameters: [
-                            ParameterSignature(label: nil, name: "sections", type: "IndexSet"),
-                            ParameterSignature(label: "with", name: "animation", type: "UITableViewRowAnimation")
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "dequeueReusableCell", parameters: [
-                            ParameterSignature(label: "withIdentifier", name: "identifier", type: .string),
-                            ParameterSignature(label: "for", name: "indexPath", type: "IndexPath")
-                        ],
-                        returnType: "UITableViewCell"
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "dequeueReusableCell", parameters: [
-                            ParameterSignature(label: "withIdentifier", name: "identifier", type: .string)
-                        ],
-                        returnType: .optional("UITableViewCell")
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "dequeueReusableHeaderFooterView", parameters: [
-                            ParameterSignature(label: "withIdentifier", name: "identifier", type: .string)
-                        ],
-                        returnType: .optional("UITableViewHeaderFooterView")
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "deselectRow", parameters: [
-                            ParameterSignature(label: "at", name: "indexPath", type: "IndexPath"),
-                            ParameterSignature(name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                .method(named: "endUpdates")
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "footerView", parameters: [
-                            ParameterSignature(label: "forSection", name: "section", type: "Int")
-                        ],
-                        returnType: .optional("UITableViewHeaderFooterView")
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "headerView", parameters: [
-                            ParameterSignature(label: "forSection", name: "section", type: "Int")
-                        ],
-                        returnType: .optional("UITableViewHeaderFooterView")
-                    )
-                )
-                
-            type = type
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "indexPath", parameters: [
-                            ParameterSignature(label: "for", name: "cell", type: "UITableViewCell")
-                        ],
-                        returnType: .optional("IndexPath")
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "indexPathForRow", parameters: [
-                            ParameterSignature(label: "at", name: "point", type: "CGPoint")
-                        ],
-                        returnType: .optional("IndexPath")
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "indexPathsForRows", parameters: [
-                            ParameterSignature(label: "in", name: "rect", type: "CGRect")
-                        ],
-                        returnType: .optional(.array("IndexPath"))
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "insertRows", parameters: [
-                            ParameterSignature(label: "at", name: "indexPaths", type: .array("IndexPath")),
-                            ParameterSignature(label: "with", name: "animation", type: "UITableViewRowAnimation")
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "insertSections", parameters: [
-                            ParameterSignature(label: nil, name: "sections", type: "IndexSet"),
-                            ParameterSignature(label: "with", name: "animation", type: "UITableViewRowAnimation")
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "moveRow", parameters: [
-                            ParameterSignature(label: "at", name: "indexPath", type: "IndexPath"),
-                            ParameterSignature(label: "to", name: "newIndexPath", type: "IndexPath")
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "moveSection", parameters: [
-                            ParameterSignature(label: nil, name: "section", type: .int),
-                            ParameterSignature(label: "toSection", name: "newSection", type: .int)
-                        ]
-                    )
-                )
+            let typeString = """
+                class UITableView: UIScrollView {
+                    var allowsMultipleSelection: Bool
+                    var allowsMultipleSelectionDuringEditing: Bool
+                    var allowsSelection: Bool
+                    var allowsSelectionDuringEditing: Bool
+                    var backgroundView: UIView?
+                    var cellLayoutMarginsFollowReadableWidth: Bool
+                    var dragInteractionEnabled: Bool
+                    var estimatedRowHeight: CGFloat
+                    var estimatedSectionFooterHeight: CGFloat
+                    var estimatedSectionHeaderHeight: CGFloat
+                    var hasActiveDrag: Bool { get }
+                    var hasActiveDrop: Bool { get }
+                    var hasUncommittedUpdates: Bool { get }
+                    var indexPathForSelectedRow: IndexPath? { get }
+                    var indexPathsForSelectedRows: [IndexPath]? { get }
+                    var indexPathsForVisibleRows: [IndexPath]? { get }
+                    var insetsContentViewsToSafeArea: Bool
+                    var isEditing: Bool
+                    var numberOfSections: Int { get }
+                    var remembersLastFocusedIndexPath: Bool
+                    var rowHeight: CGFloat
+                    var sectionFooterHeight: CGFloat
+                    var sectionHeaderHeight: CGFloat
+                    var sectionIndexBackgroundColor: UIColor?
+                    var sectionIndexColor: UIColor?
+                    var sectionIndexMinimumDisplayRowCount: Int
+                    var sectionIndexTrackingBackgroundColor: UIColor?
+                    var separatorColor: UIColor?
+                    var separatorEffect: UIVisualEffect?
+                    var separatorInset: UIEdgeInsets
+                    var separatorInsetReference: UITableViewSeparatorInsetReference
+                    var separatorStyle: UITableViewCellSeparatorStyle
+                    var style: UITableViewStyle { get }
+                    var tableFooterView: UIView?
+                    var tableHeaderView: UIView?
+                    var visibleCells: [UITableViewCell] { get }
+                    weak var dataSource: UITableViewDataSource?
+                    weak var delegate: UITableViewDelegate?
+                    weak var dragDelegate: UITableViewDragDelegate?
+                    weak var dropDelegate: UITableViewDropDelegate?
+                    weak var prefetchDataSource: UITableViewDataSourcePrefetching?
+                    
+                    init(frame: CGRect, style: UITableViewStyle)
+                    func beginUpdates()
+                    func cellForRow(at indexPath: IndexPath) -> UITableViewCell?
+                    func deleteRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
+                    func deleteSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
+                    func dequeueReusableCell(withIdentifier identifier: String, for indexPath: IndexPath) -> UITableViewCell
+                    func dequeueReusableCell(withIdentifier identifier: String) -> UITableViewCell?
+                    func dequeueReusableHeaderFooterView(withIdentifier identifier: String) -> UITableViewHeaderFooterView?
+                    func deselectRow(at indexPath: IndexPath, animated: Bool)
+                    func endUpdates()
+                    func footerView(forSection section: Int) -> UITableViewHeaderFooterView?
+                    func headerView(forSection section: Int) -> UITableViewHeaderFooterView?
+                    func indexPath(for cell: UITableViewCell) -> IndexPath?
+                    func indexPathForRow(at point: CGPoint) -> IndexPath?
+                    func indexPathsForRows(in rect: CGRect) -> [IndexPath]?
+                    func insertRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
+                    func insertSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
+                    func moveRow(at indexPath: IndexPath, to newIndexPath: IndexPath)
+                    func moveSection(_ section: Int, toSection newSection: Int)
+                    func numberOfRows(inSection section: Int) -> Int
+                    func performBatchUpdates(_ updates: (() -> Void)?, completion: ((Bool) -> Void)?)
+                    func rect(forSection section: Int) -> CGRect
+                    func rectForFooter(inSection section: Int) -> CGRect
+                    func rectForHeader(inSection section: Int) -> CGRect
+                    func rectForRow(at indexPath: IndexPath) -> CGRect
+                    func register(_ aClass: AnyClass?, forHeaderFooterViewReuseIdentifier identifier: String)
+                    func register(_ cellClass: AnyClass?, forCellReuseIdentifier identifier: String)
+                    func register(_ nib: UINib?, forCellReuseIdentifier identifier: String)
+                    func register(_ nib: UINib?, forHeaderFooterViewReuseIdentifier identifier: String)
+                    func reloadData()
+                    func reloadRows(at indexPaths: [IndexPath], with animation: UITableViewRowAnimation)
+                    func reloadSectionIndexTitles()
+                    func reloadSections(_ sections: IndexSet, with animation: UITableViewRowAnimation)
+                    func scrollToNearestSelectedRow(at scrollPosition: UITableViewScrollPosition, animated: Bool)
+                    func scrollToRow(at indexPath: IndexPath, at scrollPosition: UITableViewScrollPosition, animated: Bool)
+                    func selectRow(at indexPath: IndexPath?, animated: Bool, scrollPosition: UITableViewScrollPosition)
+                    func setEditing(_ editing: Bool, animated: Bool)
+                }
+                """
             
-            type = type
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "numberOfRows", parameters: [
-                            ParameterSignature(label: "inSection", name: "section", type: .int)
-                        ],
-                        returnType: .int
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "performBatchUpdates", parameters: [
-                            ParameterSignature(label: nil, name: "updates", type: .optional(.swiftBlock(returnType: .void, parameters: []))),
-                            ParameterSignature(name: "completion", type: .optional(.swiftBlock(returnType: .void, parameters: [.bool])))
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "rect", parameters: [
-                            ParameterSignature(label: "forSection", name: "section", type: "Int")
-                        ],
-                        returnType: "CGRect"
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "rectForFooter", parameters: [
-                            ParameterSignature(label: "inSection", name: "section", type: .int)
-                        ],
-                        returnType: "CGRect"
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "rectForHeader", parameters: [
-                            ParameterSignature(label: "inSection", name: "section", type: .int)
-                        ],
-                        returnType: "CGRect"
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "rectForRow", parameters: [
-                            ParameterSignature(label: "at", name: "indexPath", type: "IndexPath")
-                        ],
-                        returnType: "CGRect"
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "register", parameters: [
-                            ParameterSignature(label: nil, name: "aClass", type: .optional("AnyClass")),
-                            ParameterSignature(label: "forHeaderFooterViewReuseIdentifier",
-                                               name: "identifier", type: .string)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "register", parameters: [
-                            ParameterSignature(label: nil, name: "cellClass", type: .optional("AnyClass")),
-                            ParameterSignature(label: "forCellReuseIdentifier",
-                                               name: "identifier", type: .string)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "register", parameters: [
-                            ParameterSignature(label: nil, name: "nib", type: .optional("UINib")),
-                            ParameterSignature(label: "forCellReuseIdentifier",
-                                               name: "identifier", type: .string)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "register", parameters: [
-                            ParameterSignature(label: nil, name: "nib", type: .optional("UINib")),
-                            ParameterSignature(label: "forHeaderFooterViewReuseIdentifier",
-                                               name: "identifier", type: .string)
-                        ]
-                    )
-                )
-                .method(named: "reloadData")
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "reloadRows", parameters: [
-                            ParameterSignature(label: "at", name: "indexPaths", type: .array("IndexPath")),
-                            ParameterSignature(label: "with",
-                                               name: "animation", type: "UITableViewRowAnimation")
-                        ]
-                    )
-                )
-                .method(named: "reloadSectionIndexTitles")
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "reloadSections", parameters: [
-                            ParameterSignature(label: nil, name: "sections", type: "IndexSet"),
-                            ParameterSignature(label: "with",
-                                               name: "animation", type: "UITableViewRowAnimation")
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "scrollToNearestSelectedRow", parameters: [
-                            ParameterSignature(label: "at", name: "scrollPosition",
-                                               type: "UITableViewScrollPosition"),
-                            ParameterSignature(name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "scrollToRow", parameters: [
-                            ParameterSignature(label: "at", name: "indexPath", type: "IndexPath"),
-                            ParameterSignature(label: "at", name: "scrollPosition",
-                                               type: "UITableViewScrollPosition"),
-                            ParameterSignature(name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "selectRow", parameters: [
-                            ParameterSignature(label: "at", name: "indexPath", type: .optional("IndexPath")),
-                            ParameterSignature(name: "animated", type: .bool),
-                            ParameterSignature(name: "scrollPosition", type: "UITableViewScrollPosition")
-                        ]
-                    )
-                )
-                .method(withSignature:
-                    FunctionSignature(
-                        name: "setEditing", parameters: [
-                            ParameterSignature(label: nil, name: "editing", type: .bool),
-                            ParameterSignature(name: "animated", type: .bool)
-                        ]
-                    )
-                )
-                
+            try! SwiftClassInterfaceParser
+                .parseDeclaration(from: typeString, into: &type)
+            
             return type.build()
         }
     }

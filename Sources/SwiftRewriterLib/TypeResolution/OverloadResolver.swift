@@ -162,10 +162,10 @@ public class OverloadResolver {
     }
     
     private func stripIntegerLiterals(from arguments: [Argument]) -> [Argument] {
-        return arguments.map {
-            $0.literalKind == .integer || $0.literalKind == .float
+        return arguments.map { (arg: Argument) -> Argument in
+            arg.literalKind == .integer || arg.literalKind == .float
                 ? Argument(type: nil, isLiteral: false, literalKind: nil)
-                : $0
+                : arg
         }
     }
     
