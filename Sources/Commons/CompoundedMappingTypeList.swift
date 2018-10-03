@@ -9,6 +9,8 @@ public enum CompoundedMappingTypeList {
             FoundationCompoundTypes.nsLocale.create(),
             FoundationCompoundTypes.nsString.create(),
             FoundationCompoundTypes.nsMutableString.create(),
+            CoreGraphicsCompoundTypes.cgSize.create(),
+            CoreGraphicsCompoundTypes.cgPoint.create(),
             CoreGraphicsCompoundTypes.cgRect.create(),
             UIResponderCompoundType.create(),
             UIViewCompoundType.create(),

@@ -1,76 +1,21 @@
+import XCTest
 import SwiftAST
 import SwiftRewriterLib
+import Commons
 
-public enum CoreGraphicsCompoundTypes {
-    public static let cgPoint = CGPointCompoundType.self
-    public static let cgSize = CGSizeCompoundType.self
-    public static let cgRect = CGRectCompoundType.self
-}
-
-public enum CGPointCompoundType {
-    private static var singleton = makeType(from: typeString(), typeName: "CGPoint")
+class CoreGraphicsCompoundTypeTests: XCTestCase {
     
-    public static func create() -> CompoundedMappingType {
-        return singleton
-    }
-    
-    private static func typeString() -> String {
-        let typeString = """
-            struct CGPoint {
-                static var zero: CGPoint { get }
-                var x: CGFloat
-                var y: CGFloat
-                
-                init()
-                
-                @_swiftrewriter(initFromFunction: CGPointMake(_:_:))
-                init(x: CGFloat, y: CGFloat)
-            }
-            """
+    func testCGRectDefinition() {
+        let type = CoreGraphicsCompoundTypes.cgRect.create()
         
-        return typeString
-    }
-}
-
-public enum CGSizeCompoundType {
-    private static var singleton = makeType(from: typeString(), typeName: "CGSize")
-    
-    public static func create() -> CompoundedMappingType {
-        return singleton
-    }
-    
-    private static func typeString() -> String {
-        let typeString = """
-            struct CGSize {
-                static var zero: CGSize { get }
-                var width: CGFloat
-                var height: CGFloat
-                
-                init()
-                
-                @_swiftrewriter(initFromFunction: CGSizeMake(_:_:))
-                init(width: CGFloat, height: CGFloat)
-            }
-            """
+        XCTAssert(type.nonCanonicalNames.isEmpty)
+        XCTAssertEqual(type.transformations.count, 20)
         
-        return typeString
-    }
-}
-
-public enum CGRectCompoundType {
-    private static var singleton = makeType(from: typeString(), typeName: "CGRect")
-    
-    public static func create() -> CompoundedMappingType {
-        return singleton
-    }
-    
-    private static func typeString() -> String {
-        let typeString = """
+        assertSignature(type: type, matches: """
             struct CGRect {
                 static let null: CGRect
                 static let infinite: CGRect
                 static var zero: CGRect { get }
-                
                 var origin: CGPoint
                 var size: CGSize
                 
@@ -137,8 +82,47 @@ public enum CGRectCompoundType {
                 @_swiftrewriter(mapFrom: CGRectEqualToRect(self:_:))
                 func equalTo(_ rect2: CGRect) -> Bool
             }
-            """
-        
-        return typeString
+            """)
     }
+    
+    func testCGSizeDefinition() {
+        let type = CoreGraphicsCompoundTypes.cgSize.create()
+        
+        XCTAssert(type.nonCanonicalNames.isEmpty)
+        XCTAssertEqual(type.transformations.count, 1)
+        
+        assertSignature(type: type, matches: """
+            struct CGSize {
+                static var zero: CGSize { get }
+                var width: CGFloat
+                var height: CGFloat
+                
+                init()
+                
+                @_swiftrewriter(initFromFunction: CGSizeMake(_:_:))
+                init(width: CGFloat, height: CGFloat)
+            }
+            """)
+    }
+    
+    func testCGPointDefinition() {
+        let type = CoreGraphicsCompoundTypes.cgPoint.create()
+        
+        XCTAssert(type.nonCanonicalNames.isEmpty)
+        XCTAssertEqual(type.transformations.count, 1)
+        
+        assertSignature(type: type, matches: """
+            struct CGPoint {
+                static var zero: CGPoint { get }
+                var x: CGFloat
+                var y: CGFloat
+                
+                init()
+                
+                @_swiftrewriter(initFromFunction: CGPointMake(_:_:))
+                init(x: CGFloat, y: CGFloat)
+            }
+            """)
+    }
+    
 }

@@ -129,6 +129,36 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
+    func testCGPointMake() {
+        assertTransformParsed(
+            expression: "CGPointMake(1, 2)",
+            into: Expression
+                .identifier("CGPoint").call([
+                    .labeled("x", .constant(1)),
+                    .labeled("y", .constant(2))
+                    ])
+        ); assertNotifiedChange()
+        
+        assertTransformParsed(
+            expression: "abc = [[UIView alloc] initWithPoint:CGPointMake(1, 2)]",
+            into:
+            Expression
+                .identifier("abc")
+                .assignment(op: .assign,
+                            rhs: Expression
+                                .identifier("UIView")
+                                .dot("alloc").call()
+                                .dot("initWithPoint").call([
+                                    Expression
+                                        .identifier("CGPoint")
+                                        .call([
+                                            .labeled("x", .constant(1)),
+                                            .labeled("y", .constant(2))
+                                            ])
+                                    ]))
+        ); assertNotifiedChange()
+    }
+    
     func testCGRectConversions() {
         assertTransformParsed(
             expression: "CGRectGetWidth(self.frame)",
@@ -350,4 +380,16 @@ class CompoundTypeApplierExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
     }
     
+    func testCGSizeMake() {
+        assertTransformParsed(
+            expression: "CGSizeMake(1, 2)",
+            into:
+            Expression
+                .identifier("CGSize")
+                .call([
+                    .labeled("width", .constant(1)),
+                    .labeled("height", .constant(2))
+                ])
+        ); assertNotifiedChange()
+    }
 }
