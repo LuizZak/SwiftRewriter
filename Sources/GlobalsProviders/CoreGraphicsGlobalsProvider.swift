@@ -109,6 +109,7 @@ private class InnerCoreGraphicsGlobalsProvider: BaseGlobalsProvider {
                     var minY: CGFloat { get }
                     var midY: CGFloat { get }
                     var maxY: CGFloat { get }
+                    @_swiftrewriter(mapFrom: CGRectGetWidth(self:))
                     var width: CGFloat { get }
                     var height: CGFloat { get }
                     var standardized: CGRect { get }

@@ -12,6 +12,9 @@ public enum PostfixTransformation {
                              setterName: String?,
                              resultType: SwiftType,
                              isStatic: Bool)
+    case propertyFromFreeFunctions(property: String,
+                                   getterName: String,
+                                   setterName: String?)
     case initializer(old: [String?], new: [String?])
     case valueTransformer(ValueTransformer<PostfixExpression, Expression>)
 }

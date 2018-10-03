@@ -72,7 +72,7 @@ private func aliases(in type: KnownType) throws -> [String] {
 private func initTransformations(_ ctor: KnownConstructor, type: KnownType) throws -> [PostfixTransformation] {
     var transforms: [PostfixTransformation] = []
     
-    func _map(_ identifier: FunctionIdentifier) {
+    func _mapStaticMethod(_ identifier: FunctionIdentifier) {
         let transformer = ValueTransformer<PostfixExpression, Expression> { $0 }
             .validate { exp in
                 guard let member = exp.asPostfix?.exp.asPostfix?.member?.name else {
@@ -98,6 +98,26 @@ private func initTransformations(_ ctor: KnownConstructor, type: KnownType) thro
         transforms.append(.valueTransformer(transformer.anyExpression()))
     }
     
+    func _mapFreeFunction(_ identifier: FunctionIdentifier) {
+        let transformer = ValueTransformer<PostfixExpression, Expression> { $0 }
+            .validate { exp in
+                guard let ident = exp.asPostfix?.exp.asIdentifier else {
+                    return false
+                }
+                
+                return
+                    exp.asPostfix?
+                        .functionCall?
+                        .identifierWith(methodName: ident.identifier) == identifier
+            }
+            .decompose()
+            .replacing(index: 0, with: Expression.identifier(type.typeName))
+            .asFunctionCall(labels: ctor.parameters.argumentLabels())
+            .typed(.typeName(type.typeName))
+        
+        transforms.append(.valueTransformer(transformer.anyExpression()))
+    }
+    
     for attribute in ctor.knownAttributes {
         guard attribute.name == SwiftRewriterAttribute.name else {
             continue
@@ -112,7 +132,7 @@ private func initTransformations(_ ctor: KnownConstructor, type: KnownType) thro
                     .initializer(old: signature.parameters.argumentLabels(),
                                  new: ctor.parameters.argumentLabels()))
             } else {
-                _map(signature.asIdentifier)
+                _mapStaticMethod(signature.asIdentifier)
             }
             
         case .mapFromIdentifier(let identifier):
@@ -121,8 +141,11 @@ private func initTransformations(_ ctor: KnownConstructor, type: KnownType) thro
                     .initializer(old: identifier.parameterNames,
                                  new: ctor.parameters.argumentLabels()))
             } else {
-                _map(identifier)
+                _mapStaticMethod(identifier)
             }
+            
+        case .initFromFunction(let identifier):
+            _mapFreeFunction(identifier)
             
         case .renameFrom, .mapToBinaryOperator:
             // TODO: Throw diagnostic error for unsupported mappings
@@ -143,7 +166,7 @@ private func methodTransformations(_ method: KnownMethod, type: KnownType) throw
                 objcFunctionName: identifier.name,
                 toSwiftFunction: method.signature.name,
                 firstArgumentBecomesInstance: true,
-                arguments: method.signature.parameters.dropFirst().map { arg in
+                arguments: method.signature.parameters.map { arg in
                     arg.label.flatMap { .labeled($0, .asIs) } ?? .asIs
                 }
             )
@@ -234,6 +257,10 @@ private func methodTransformations(_ method: KnownMethod, type: KnownType) throw
                 .asBinaryExpression(operator: op)
             
             transforms.append(.valueTransformer(transformer.anyExpression()))
+            
+        case .initFromFunction:
+            // TODO: Throw diagnostic error for unsupported mappings
+            break
         }
     }
     
@@ -243,8 +270,31 @@ private func methodTransformations(_ method: KnownMethod, type: KnownType) throw
 private func propertyTransformations(_ prop: KnownProperty) throws -> [PostfixTransformation] {
     var transforms: [PostfixTransformation] = []
     
+    var isFreeFunction = false
+    
     var getter: String?
     var setter: String?
+    
+    func analyze(_ identifier: FunctionIdentifier) {
+        let params = identifier.parameterNames
+        
+        if params.isEmpty {
+            getter = identifier.name
+            return
+        }
+        
+        if params[0] == "self" {
+            if params.count == 1 {
+                getter = identifier.name
+                isFreeFunction = true
+            } else if params.count == 2 {
+                setter = identifier.name
+                isFreeFunction = true
+            }
+        } else if params.count == 1 {
+            setter = identifier.name
+        }
+    }
     
     for attribute in prop.knownAttributes {
         guard attribute.name == SwiftRewriterAttribute.name else {
@@ -258,33 +308,36 @@ private func propertyTransformations(_ prop: KnownProperty) throws -> [PostfixTr
             transforms.append(.property(old: old, new: prop.name))
             
         case .mapFrom(let signature):
-            if signature.parameters.isEmpty {
-                getter = signature.name
-            } else if signature.parameters.count == 1 {
-                setter = signature.name
-            }
+            analyze(signature.asIdentifier)
             
         case .mapFromIdentifier(let ident):
-            if ident.parameterNames.isEmpty {
-                getter = ident.name
-            } else if ident.parameterNames.count == 1 {
-                setter = ident.name
-            }
+            analyze(ident)
             
-        case .mapToBinaryOperator:
+        case .mapToBinaryOperator, .initFromFunction:
             // TODO: Throw diagnostic error for unsupported mappings
             break
         }
     }
     
     if let getter = getter {
-        let mapper = PostfixTransformation
-            .propertyFromMethods(
+        
+        let mapper: PostfixTransformation
+        
+        if isFreeFunction {
+            mapper = .propertyFromFreeFunctions(
+                property: prop.name,
+                getterName: getter,
+                setterName: setter
+            )
+        } else {
+            mapper = .propertyFromMethods(
                 property: prop.name,
                 getterName: getter,
                 setterName: setter,
                 resultType: prop.memberType,
-                isStatic: prop.isStatic)
+                isStatic: prop.isStatic
+            )
+        }
         
         transforms.append(mapper)
     }

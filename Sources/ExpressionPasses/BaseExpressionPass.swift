@@ -74,6 +74,105 @@ public class BaseExpressionPass: ASTRewriterPass {
         return nil
     }
     
+    fileprivate func convertToPostfixInvocationTransformations(
+        _ transform: PostfixTransformation,
+        compoundedType: CompoundedMappingType,
+        instanceMatcher: ValueMatcher<Expression>,
+        staticMatcher: ValueMatcher<Expression>) -> [PostfixInvocationTransformer] {
+        
+        switch transform {
+        // Property rename from value.<old> -> value.<new>
+        case let .property(old, new):
+            return [
+                PropertyInvocationTransformer(
+                    baseExpressionMatcher: instanceMatcher,
+                    oldName: old,
+                    newName: new
+                )
+            ]
+            
+        // Method renaming/argument rearranging
+        case .method(let mapping):
+            let baseExpressionMatcher: ValueMatcher<Expression>
+            
+            if mapping.isStatic {
+                baseExpressionMatcher = staticMatcher
+            } else {
+                
+                baseExpressionMatcher = instanceMatcher
+            }
+            
+            return [
+                MethodInvocationTransformer(
+                    baseExpressionMatcher: baseExpressionMatcher,
+                    invocationMatcher: mapping
+                )
+            ]
+            
+        // Free function rewriting
+        case .function(let mapping):
+            return [mapping]
+            
+        // Getter or getter/setter pair conversion to property name
+        case let .propertyFromMethods(property, getterName, setterName,
+                                      resultType, isStatic):
+            
+            let matcher = isStatic ? staticMatcher : instanceMatcher
+            
+            return [
+                MethodsToPropertyTransformer(
+                    baseExpressionMatcher: matcher,
+                    getterName: getterName,
+                    setterName: setterName,
+                    propertyName: property,
+                    resultType: resultType
+                )
+            ]
+            
+        case let .propertyFromFreeFunctions(property, getterName, setterName):
+            
+            var transformers: [PostfixInvocationTransformer] = []
+            
+            transformers.append(FunctionInvocationTransformer(
+                objcFunctionName: getterName,
+                toSwiftPropertyGetter: property
+            ))
+            
+            if let setterName = setterName {
+                transformers.append(
+                    FunctionInvocationTransformer(
+                        objcFunctionName: setterName,
+                        toSwiftPropertySetter: property,
+                        argumentTransformer: .asIs
+                    )
+                )
+            }
+            
+            return transformers
+            
+        case let .initializer(_, new):
+            let args: [ArgumentRewritingStrategy] = new.map {
+                if let label = $0 {
+                    return .labeled(label, .asIs)
+                }
+                
+                return .asIs
+            }
+            
+            return [
+                FunctionInvocationTransformer(
+                    objcFunctionName: compoundedType.typeName,
+                    toSwiftFunction: compoundedType.typeName,
+                    firstArgumentBecomesInstance: false,
+                    arguments: args
+                )
+            ]
+            
+        case let .valueTransformer(transformer):
+            return [ValueTransformerWrapper(valueTransformer: transformer)]
+        }
+    }
+    
     func addCompoundedType(_ compoundedType: CompoundedMappingType) {
         let typeSystem = self.typeSystem // To avoid capturing 'self' bellow
         
@@ -98,73 +197,13 @@ public class BaseExpressionPass: ASTRewriterPass {
                 }
         
         transformers.append(contentsOf:
-            compoundedType.transformations.map { transform in
-                switch transform {
-                // Property rename from value.<old> -> value.<new>
-                case let .property(old, new):
-                    return
-                        PropertyInvocationTransformer(
-                            baseExpressionMatcher: instanceExpressionMatcher,
-                            oldName: old,
-                            newName: new
-                        )
-                
-                // Method renaming/argument rearranging
-                case .method(let mapping):
-                    let baseExpressionMatcher: ValueMatcher<Expression>
-                    
-                    if mapping.isStatic {
-                        baseExpressionMatcher = staticTypeExpressionMatcher
-                    } else {
-                        
-                        baseExpressionMatcher = instanceExpressionMatcher
-                    }
-                    
-                    return
-                        MethodInvocationTransformer(
-                            baseExpressionMatcher: baseExpressionMatcher,
-                            invocationMatcher: mapping
-                        )
-                    
-                // Free function rewriting
-                case .function(let mapping):
-                    return mapping
-                    
-                // Getter or getter/setter pair conversion to property name
-                case let .propertyFromMethods(property, getterName, setterName,
-                                              resultType, isStatic):
-                    let matcher =
-                        isStatic ? staticTypeExpressionMatcher
-                            : instanceExpressionMatcher
-                    
-                    return
-                        MethodsToPropertyTransformer(
-                            baseExpressionMatcher: matcher,
-                            getterName: getterName,
-                            setterName: setterName,
-                            propertyName: property,
-                            resultType: resultType
-                        )
-                    
-                case let .initializer(_, new):
-                    let args: [ArgumentRewritingStrategy] = new.map {
-                        if let label = $0 {
-                            return .labeled(label, .asIs)
-                        }
-                        
-                        return .asIs
-                    }
-                    
-                    return
-                        FunctionInvocationTransformer(
-                            objcFunctionName: compoundedType.typeName,
-                            toSwiftFunction: compoundedType.typeName,
-                            firstArgumentBecomesInstance: false,
-                            arguments: args)
-                    
-                case let .valueTransformer(transformer):
-                    return ValueTransformerWrapper(valueTransformer: transformer)
-                }
+            compoundedType.transformations.flatMap { transform in
+                return convertToPostfixInvocationTransformations(
+                    transform,
+                    compoundedType: compoundedType,
+                    instanceMatcher: instanceExpressionMatcher,
+                    staticMatcher: staticTypeExpressionMatcher
+                )
             }
         )
     }

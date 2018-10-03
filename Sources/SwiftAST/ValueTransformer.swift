@@ -80,4 +80,48 @@ public extension ValueTransformer where U: MutableCollection {
         }
     }
     
+    public func replacing(index: U.Index,
+                          with newValue: U.Element) -> ValueTransformer {
+        
+        return transforming { value in
+            guard value.endIndex > index else {
+                return nil
+            }
+            
+            var value = value
+            value[index] = newValue
+            return value
+        }
+    }
+    
+}
+
+public extension ValueTransformer where U: RangeReplaceableCollection {
+    
+    public func removing(index: U.Index) -> ValueTransformer {
+        
+        return transforming { value in
+            guard value.endIndex > index else {
+                return nil
+            }
+            
+            var value = value
+            value.remove(at: index)
+            return value
+        }
+        
+    }
+    
+}
+
+public extension ValueTransformer where U: Sequence {
+    
+    public func removingFirst() -> ValueTransformer<T, U.SubSequence> {
+        
+        return transforming { value in
+            return value.dropFirst()
+        }
+        
+    }
+    
 }
