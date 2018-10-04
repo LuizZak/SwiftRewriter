@@ -156,7 +156,7 @@ class CoreGraphicsExpressionPassTests: ExpressionPassTestCase {
                                     .call([
                                         .labeled("x", .constant(1)),
                                         .labeled("y", .constant(2))
-                                        ])),
+                                    ])),
                        .labeled("transform",
                                 Expression.identifier("t"))
                         ])

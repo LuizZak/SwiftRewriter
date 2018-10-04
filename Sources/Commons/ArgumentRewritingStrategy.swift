@@ -267,10 +267,13 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
 
 public extension ValueTransformer where U == [FunctionArgument] {
     
-    public func rewritingArguments(_ transformers: [ArgumentRewritingStrategy]) -> ValueTransformer {
+    public func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
+                                   file: String = #file,
+                                   line: Int = #line) -> ValueTransformer {
+        
         let required = transformers.requiredArgumentCount()
         
-        return transforming { args in
+        return transforming(file: file, line: line) { args in
             if args.count < required {
                 return nil
             }

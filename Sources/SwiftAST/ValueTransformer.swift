@@ -1,39 +1,59 @@
 public struct ValueTransformer<T, U> {
-    let transformer: (T) -> U?
+    private let transformer: AnyTransformer
     
-    public init(transformer: @escaping (T) -> U?) {
-        self.transformer = transformer
+    private let file: String
+    private let line: Int
+    
+    public init(file: String = #file, line: Int = #line, transformer: @escaping (T) -> U?) {
+        self.transformer = AnyTransformer(closure: transformer)
+        self.file = file
+        self.line = line
     }
     
-    public init(keyPath: KeyPath<T, U>) {
-        self.transformer = {
-            $0[keyPath: keyPath]
-        }
+    private init<Z>(file: String = #file, line: Int = #line,
+                     previous: ValueTransformer<T, Z>,
+                     transformer: @escaping (Z) -> U?) {
+        
+        self.transformer = AnyTransformer(previous: previous, closure: transformer)
+        self.file = file
+        self.line = line
     }
     
-    public init(keyPath: KeyPath<T, U?>) {
-        self.transformer = {
+    public init(keyPath: KeyPath<T, U>, file: String = #file, line: Int = #line) {
+        self.transformer = AnyTransformer(closure: {
             $0[keyPath: keyPath]
-        }
+        })
+        self.file = file
+        self.line = line
+    }
+    
+    public init(keyPath: KeyPath<T, U?>, file: String = #file, line: Int = #line) {
+        self.transformer = AnyTransformer(closure: {
+            $0[keyPath: keyPath]
+        })
+        self.file = file
+        self.line = line
     }
     
     public func transform(value: T) -> U? {
-        return transformer(value)
+        return transformer.transform(value: value)
     }
     
-    public func transforming<Z>(_ callback: @escaping (U) -> Z?) -> ValueTransformer<T, Z> {
-        return ValueTransformer<T, Z> { [transformer] value in
-            guard let value = transformer(value) else {
-                return nil
-            }
-            
+    public func transforming<Z>(file: String,
+                                line: Int,
+                                _ callback: @escaping (U) -> Z?) -> ValueTransformer<T, Z> {
+        
+        return ValueTransformer<T, Z>(file: file, line: line, previous: self) { value in
             return callback(value)
         }
     }
     
-    public func validate(_ predicate: @escaping (U) -> Bool) -> ValueTransformer<T, U> {
-        return ValueTransformer<T, U> { [transformer] value in
-            guard let value = transformer(value) else {
+    public func validate(file: String = #file,
+                         line: Int = #line,
+                         _ predicate: @escaping (U) -> Bool) -> ValueTransformer<T, U> {
+        
+        return ValueTransformer<T, U>(file: file, line: line) { value in
+            guard let value = self.transform(value: value) else {
                 return nil
             }
             
@@ -41,31 +61,63 @@ public struct ValueTransformer<T, U> {
         }
     }
     
-    public func validate(matcher: ValueMatcher<U>) -> ValueTransformer<T, U> {
-        return ValueTransformer<T, U> { [transformer] value in
-            guard let value = transformer(value) else {
+    public func validate(file: String = #file,
+                         line: Int = #line,
+                         matcher: ValueMatcher<U>) -> ValueTransformer<T, U> {
+        
+        return ValueTransformer<T, U>(file: file, line: line) { value in
+            guard let value = self.transform(value: value) else {
                 return nil
             }
             
             return matcher.matches(value) ? value : nil
         }
     }
+    
+    private struct AnyTransformer {
+        let previous: Any?
+        let closure: (T) -> U?
+        
+        init(closure: @escaping (T) -> U?) {
+            previous = nil
+            self.closure = closure
+        }
+        
+        init<Z>(previous: ValueTransformer<T, Z>,
+                closure: @escaping (Z) -> U?) {
+            
+            self.previous = previous
+            self.closure = { value in
+                guard let prev = previous.transform(value: value) else {
+                    return nil
+                }
+                
+                return closure(prev)
+            }
+        }
+        
+        func transform(value: T) -> U? {
+            return closure(value)
+        }
+    }
 }
 
 public extension ValueTransformer where T == U {
-    public init() {
-        self.init { (value: T) -> U? in
-            return value
+    public init(file: String = #file, line: Int = #line) {
+        self.init(file: file, line: line) { (value: T) -> U? in
+            value
         }
     }
 }
 
 public extension ValueTransformer where U: MutableCollection {
     
-    public func transformIndex(index: U.Index,
+    public func transformIndex(file: String = #file,
+                               line: Int = #line,
+                               index: U.Index,
                                transformer: ValueTransformer<U.Element, U.Element>) -> ValueTransformer {
         
-        return transforming { value in
+        return transforming(file: file, line: line) { value in
             guard value.endIndex > index else {
                 return nil
             }
@@ -80,10 +132,12 @@ public extension ValueTransformer where U: MutableCollection {
         }
     }
     
-    public func replacing(index: U.Index,
+    public func replacing(file: String = #file,
+                          line: Int = #line,
+                          index: U.Index,
                           with newValue: U.Element) -> ValueTransformer {
         
-        return transforming { value in
+        return transforming(file: file, line: line) { value in
             guard value.endIndex > index else {
                 return nil
             }
@@ -93,14 +147,15 @@ public extension ValueTransformer where U: MutableCollection {
             return value
         }
     }
-    
 }
 
 public extension ValueTransformer where U: RangeReplaceableCollection {
     
-    public func removing(index: U.Index) -> ValueTransformer {
+    public func removing(file: String = #file,
+                         line: Int = #line,
+                         index: U.Index) -> ValueTransformer {
         
-        return transforming { value in
+        return transforming(file: file, line: line) { value in
             guard value.endIndex > index else {
                 return nil
             }
@@ -109,19 +164,16 @@ public extension ValueTransformer where U: RangeReplaceableCollection {
             value.remove(at: index)
             return value
         }
-        
     }
-    
 }
 
 public extension ValueTransformer where U: Sequence {
     
-    public func removingFirst() -> ValueTransformer<T, U.SubSequence> {
+    public func removingFirst(file: String = #file,
+                              line: Int = #line) -> ValueTransformer<T, U.SubSequence> {
         
-        return transforming { value in
+        return transforming(file: file, line: line) { value in
             return value.dropFirst()
         }
-        
     }
-    
 }
