@@ -170,7 +170,7 @@ public struct ValueTransformer<T, U> {
                 return predicate(value)
                 
             case .failure(let message):
-                return .failure(message: "Validation failed: \(message)")
+                return .failure(message: "Validation failed: \(message())")
             }
         }
     }
@@ -215,7 +215,7 @@ public struct ValueTransformer<T, U> {
                 case .success(let value):
                     return .success(value: value)
                 case .failure(let message):
-                    printer("Transformation from \(file):\(line) failed: \(message)")
+                    printer("Transformation from \(file):\(line) failed: \(message())")
                     return .failure(message: message)
                 }
             }
@@ -252,7 +252,7 @@ public struct ValueTransformer<T, U> {
                         return .success(value: value)
                         
                     case .failure(let message):
-                        printer("Transformation from \(file):\(line) failed: \(message)")
+                        printer("Transformation from \(file):\(line) failed: \(message())")
                         return .failure(message: message)
                     }
                     
@@ -277,7 +277,7 @@ public struct ValueTransformer<T, U> {
 /// Encapsulates the result of a transformation
 public enum Result<T> {
     case success(value: T)
-    case failure(message: String)
+    case failure(message: @autoclosure () -> String)
     
     @inlinable
     var value: T? {

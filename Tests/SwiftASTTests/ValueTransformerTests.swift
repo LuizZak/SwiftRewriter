@@ -293,6 +293,26 @@ class ValueTransformerTests: XCTestCase {
             Transformation from test.swift:6 failed: Failed to pass matcher at test.swift:9
             """)
     }
+    
+    func testDebugTransformMessageIsLazilyEvaluated() {
+        var wasInvoked = false
+        var message: String {
+            get {
+                wasInvoked = true
+                return "message"
+            }
+        }
+        
+        let sut =
+            ValueTransformer<Int, String>(keyPath: \.description)
+                .transformingResult { value -> Result<String> in
+                    return .failure(message: message)
+                }
+        
+        _=sut.transform(value: 1)
+        
+        XCTAssertFalse(wasInvoked)
+    }
 }
 
 private class TestDebugPrinter {
