@@ -41,7 +41,7 @@ public extension Statement {
 }
 
 public extension ValueMatcher where T: Statement {
-    
+    @inlinable
     public func anyStatement() -> ValueMatcher<Statement> {
         return ValueMatcher<Statement>().match { (value) -> Bool in
             if let value = value as? T {
@@ -54,6 +54,7 @@ public extension ValueMatcher where T: Statement {
     
 }
 
+@inlinable
 public func hasElse() -> SyntaxMatcher<IfStatement> {
     return SyntaxMatcher().keyPath(\.elseBody, !isNil())
 }

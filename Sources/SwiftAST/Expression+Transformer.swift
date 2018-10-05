@@ -1,11 +1,15 @@
 public extension ValueTransformer where U: Expression {
     
-    public func decompose() -> ValueTransformer<T, [Expression]> {
-        return transforming { $0.subExpressions }
+    public func decompose(file: String = #file,
+                          line: Int = #line) -> ValueTransformer<T, [Expression]> {
+        
+        return transforming(file: file, line: line) { $0.subExpressions }
     }
     
-    public func removingMemberAccess() -> ValueTransformer<T, Expression> {
-        return transforming { value in
+    public func removingMemberAccess(file: String = #file,
+                                     line: Int = #line) -> ValueTransformer<T, Expression> {
+        
+        return transforming(file: file, line: line) { value in
             guard let postfix = value.asPostfix, postfix.op is MemberPostfix else {
                 return nil
             }
@@ -14,29 +18,35 @@ public extension ValueTransformer where U: Expression {
         }
     }
     
-    public func typed(_ type: SwiftType) -> ValueTransformer {
-        return transforming { exp in
+    public func typed(_ type: SwiftType, file: String = #file, line: Int = #line) -> ValueTransformer {
+        return transforming(file: file, line: line) { exp in
             exp.resolvedType = type
             return exp
         }
     }
     
-    public func typed(expectedType type: SwiftType) -> ValueTransformer {
-        return transforming { exp in
+    public func typed(expectedType type: SwiftType,
+                      file: String = #file,
+                      line: Int = #line) -> ValueTransformer {
+        
+        return transforming(file: file, line: line) { exp in
             exp.expectedType = type
             return exp
         }
     }
     
-    public func anyExpression() -> ValueTransformer<T, Expression> {
-        return transforming { $0 }
+    public func anyExpression(file: String = #file, line: Int = #line) -> ValueTransformer<T, Expression> {
+        return transforming(file: file, line: line) { $0 }
     }
 }
 
 public extension ValueTransformer where U == [Expression] {
     
-    public func asBinaryExpression(operator op: SwiftOperator) -> ValueTransformer<T, BinaryExpression> {
-        return transforming { exp -> BinaryExpression? in
+    public func asBinaryExpression(operator op: SwiftOperator,
+                                   file: String = #file,
+                                   line: Int = #line) -> ValueTransformer<T, BinaryExpression> {
+        
+        return transforming(file: file, line: line) { exp -> BinaryExpression? in
             if exp.count != 2 {
                 return nil
             }
@@ -47,8 +57,11 @@ public extension ValueTransformer where U == [Expression] {
         }
     }
     
-    public func asFunctionCall(labels: [String?]) -> ValueTransformer<T, PostfixExpression> {
-        return transforming { exp -> PostfixExpression? in
+    public func asFunctionCall(labels: [String?],
+                               file: String = #file,
+                               line: Int = #line) -> ValueTransformer<T, PostfixExpression> {
+        
+        return transforming(file: file, line: line) { exp -> PostfixExpression? in
             if exp.count != labels.count + 1 {
                 return nil
             }

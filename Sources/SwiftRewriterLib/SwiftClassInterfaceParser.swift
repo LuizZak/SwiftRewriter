@@ -498,6 +498,7 @@ public final class SwiftClassInterfaceParser {
     /// swift-rewriter-attribute-clause
     ///     : 'mapFrom' ':' function-identifier
     ///     | 'mapFrom' ':' function-signature
+    ///     | 'initFromFunction' ':' function-signature
     ///     | 'mapToBinary' ':' swift-operator
     ///     | 'renameFrom' ':' identifier
     ///     ;
@@ -563,6 +564,17 @@ public final class SwiftClassInterfaceParser {
             let ident = try tokenizer.advance(overTokenType: .identifier)
             
             content = .renameFrom(String(ident.value))
+            
+        } else if tokenizer.token().value == "initFromFunction" {
+            tokenizer.skipToken()
+            try tokenizer.advance(overTokenType: .colon)
+            
+            let identifier =
+                try FunctionSignatureParser.parseIdentifier(from: tokenizer.lexer)
+            
+            try tokenizer.advance(overTokenType: .closeParens)
+            
+            return SwiftRewriterAttribute(content: .initFromFunction(identifier))
             
         } else {
             throw tokenizer.lexer.syntaxError(
@@ -779,6 +791,7 @@ public final class SwiftClassInterfaceParser {
         public enum Content {
             case mapFrom(FunctionSignature)
             case mapFromIdentifier(FunctionIdentifier)
+            case initFromFunction(FunctionIdentifier)
             case mapToBinaryOperator(SwiftOperator)
             case renameFrom(String)
             
@@ -794,10 +807,13 @@ public final class SwiftClassInterfaceParser {
                     
                 case .mapFromIdentifier(let identifier):
                     return
-                        "mapFrom: " + identifier.description
+                        "mapFrom: \(identifier.description)"
                     
                 case .mapToBinaryOperator(let op):
                     return "mapToBinary: \(op)"
+                    
+                case .initFromFunction(let identifier):
+                    return "initFromFunction: \(identifier.description)"
                     
                 case .renameFrom(let name):
                     return "renameFrom: \(name)"

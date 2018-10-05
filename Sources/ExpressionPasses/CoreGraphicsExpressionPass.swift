@@ -35,8 +35,8 @@ public class CoreGraphicsExpressionPass: BaseExpressionPass {
     public override func visitPostfix(_ exp: PostfixExpression) -> Expression {
         switch (exp.exp, exp.op) {
         // CGRectGetWidth(<exp>) -> <exp>.width
-        case (.identifier("CGRectGetWidth"), _):
-            convertMethodToField(field: "width", ifArgCountIs: 1, exp)
+//        case (.identifier("CGRectGetWidth"), _):
+//            convertMethodToField(field: "width", ifArgCountIs: 1, exp)
             
         // CGRectGetHeight(<exp>) -> <exp>.height
         case (.identifier("CGRectGetHeight"), _):

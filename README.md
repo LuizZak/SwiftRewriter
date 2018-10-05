@@ -8,7 +8,7 @@ For information about how it's structured, see the [Architecture](Architecture.m
 
 #### Requirements
 
-Xcode 10.0 & Swift 4.2
+Xcode 10.1 beta 2 & Swift 4.2
 
 #### Usage
 

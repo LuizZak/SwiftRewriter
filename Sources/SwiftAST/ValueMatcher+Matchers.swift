@@ -1,37 +1,45 @@
+@inlinable
 public func not<T>(_ rule: ValueMatcher<T>) -> ValueMatcher<T> {
     return ValueMatcher().match(closure: { !rule.matches($0) })
 }
 
+@inlinable
 public func not<T>(_ rule: MatchRule<T>) -> MatchRule<T> {
     return .negated(rule)
 }
 
+@inlinable
 public func equals<T: Equatable>(_ value: T) -> MatchRule<T> {
     return MatchRule.equals(value)
 }
 
+@inlinable
 public func equals<T: Equatable>(_ value: T?) -> MatchRule<T> {
     return MatchRule.equalsNullable(value)
 }
 
+@inlinable
 public func lazyEquals<T: Equatable>(_ value: @autoclosure @escaping () -> T) -> MatchRule<T> {
     return MatchRule.lazyEquals(value)
 }
 
+@inlinable
 public func lazyEquals<T: Equatable>(_ value: @autoclosure @escaping () -> T?) -> MatchRule<T> {
     return MatchRule.lazyEqualsNullable(value)
 }
 
+@inlinable
 public func isNil<T>() -> MatchRule<T?> {
     return MatchRule.equals(nil)
 }
 
+@inlinable
 public func hasCount<C: Collection>(_ count: MatchRule<Int>) -> ValueMatcher<C> {
     return ValueMatcher().keyPath(\.count, count)
 }
 
 public extension ValueMatcher where T: Equatable {
-    
+    @inlinable
     public static func equals(to value: T) -> ValueMatcher<T> {
         return ValueMatcher().match(if: SwiftAST.equals(value))
     }
@@ -39,7 +47,7 @@ public extension ValueMatcher where T: Equatable {
 }
 
 public extension ValueMatcher where T: Collection {
-    
+    @inlinable
     public func hasCount(_ count: MatchRule<Int>) -> ValueMatcher<T> {
         return keyPath(\.count, count)
     }
@@ -47,7 +55,7 @@ public extension ValueMatcher where T: Collection {
 }
 
 public extension ValueMatcher where T: Collection {
-    
+    @inlinable
     public func atIndex(_ index: T.Index, matcher: ValueMatcher<T.Element>) -> ValueMatcher<T> {
         return match { value in
             guard index < value.endIndex else {
@@ -61,11 +69,12 @@ public extension ValueMatcher where T: Collection {
 }
 
 public extension ValueMatcher where T: Collection, T.Element: Equatable {
-    
+    @inlinable
     public func atIndex(_ index: T.Index, equals value: T.Element) -> ValueMatcher<T> {
         return atIndex(index, rule: .equals(value))
     }
     
+    @inlinable
     public func atIndex(_ index: T.Index, rule: MatchRule<T.Element>) -> ValueMatcher<T> {
         return match { value in
             guard index < value.endIndex else {
