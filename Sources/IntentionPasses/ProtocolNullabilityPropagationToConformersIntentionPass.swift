@@ -1,5 +1,6 @@
 import SwiftRewriterLib
 import SwiftAST
+import Foundation
 
 // TODO: This could be generalized into merging signatures from types such that
 // a child class inherits nullability from the base class, in case the child
@@ -33,24 +34,31 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             return
         }
         
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = context.numThreads
+        
         for cls in classes {
             guard let type = context.typeSystem.knownTypeWithName(cls.typeName) else {
                 continue
             }
             
-            // Find conforming protocols
-            let knownProtocols =
-                protocols.filter { prot in
-                    context.typeSystem
-                        .conformance(toProtocolName: prot.typeName, in: type) != nil
-                    }
-            
-            for prot in knownProtocols {
-                typeMerger.mergeMethodSignatures(from: prot,
-                                                 into: cls,
-                                                 createIfUnexistent: false)
+            queue.addOperation {
+                // Find conforming protocols
+                let knownProtocols =
+                    protocols.filter { prot in
+                        context.typeSystem
+                            .conformance(toProtocolName: prot.typeName, in: type) != nil
+                        }
+                
+                for prot in knownProtocols {
+                    typeMerger.mergeMethodSignatures(from: prot,
+                                                     into: cls,
+                                                     createIfUnexistent: false)
+                }
             }
         }
+        
+        queue.waitUntilAllOperationsAreFinished()
         
         context.notifyChange()
     }

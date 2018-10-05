@@ -18,6 +18,9 @@ public struct IntentionPassContext {
     /// entire intention collections.
     public let typeResolverInvoker: TypeResolverInvoker
     
+    /// Number of threads allowed to spin in parallel
+    public let numThreads: Int
+    
     /// Must be called by every `IntentionPass` if it makes any sort of change
     /// to the intentions list, or syntax tree of any member.
     ///
@@ -28,10 +31,13 @@ public struct IntentionPassContext {
     public init(typeSystem: TypeSystem,
                 typeMapper: TypeMapper,
                 typeResolverInvoker: TypeResolverInvoker,
+                numThreads: Int,
                 notifyChange: @escaping () -> Void = { }) {
+        
         self.typeSystem = typeSystem
         self.typeMapper = typeMapper
         self.typeResolverInvoker = typeResolverInvoker
+        self.numThreads = numThreads
         self.notifyChange = notifyChange
     }
 }
