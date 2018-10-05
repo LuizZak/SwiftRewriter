@@ -1,56 +1,125 @@
 public struct ValueTransformer<T, U> {
-    private let transformer: AnyTransformer
+    @usableFromInline
+    let transformer: AnyTransformer
     
-    private let file: String
-    private let line: Int
+    @usableFromInline
+    let file: String
+    @usableFromInline
+    let line: Int
     
+    @inlinable
     public init(file: String = #file, line: Int = #line, transformer: @escaping (T) -> U?) {
-        self.transformer = AnyTransformer(closure: transformer)
+        self.transformer = AnyTransformer(file: file, line: line, closure: { value in
+            if let result = transformer(value) {
+                return .success(value: result)
+            }
+            
+            return .failure(message: "Transformer returned nil")
+        })
         self.file = file
         self.line = line
     }
     
-    private init<Z>(file: String = #file, line: Int = #line,
-                    previous: ValueTransformer<T, Z>,
-                    transformer: @escaping (Z) -> U?) {
+    @inlinable
+    public init(line: Int = #line, file: String = #file, transformer: @escaping (T) -> Result<U>) {
+        self.transformer = AnyTransformer(file: file, line: line, closure: { value in
+            return transformer(value)
+        })
+        self.file = file
+        self.line = line
+    }
+    
+    @usableFromInline
+    init<Z>(file: String = #file, line: Int = #line,
+            previous: ValueTransformer<T, Z>,
+            transformer: @escaping (Z) -> U?) {
         
-        self.transformer = AnyTransformer(previous: previous, closure: transformer)
+        self.transformer = AnyTransformer(file: file, line: line, previous: previous, closure: { value in
+            if let result = transformer(value) {
+                return .success(value: result)
+            }
+            
+            return .failure(message: "Transformer returned nil")
+        })
+        
         self.file = file
         self.line = line
     }
     
+    @usableFromInline
+    init<Z>(line: Int, file: String,
+            previous: ValueTransformer<T, Z>,
+            transformer: @escaping (Z) -> Result<U>) {
+        
+        self.transformer = AnyTransformer(file: file, line: line, previous: previous, closure: { value in
+            return transformer(value)
+        })
+        
+        self.file = file
+        self.line = line
+    }
+    
+    @inlinable
     public init(keyPath: KeyPath<T, U>, file: String = #file, line: Int = #line) {
-        self.transformer = AnyTransformer(closure: {
-            $0[keyPath: keyPath]
+        self.transformer = AnyTransformer(file: file, line: line, closure: {
+            .success(value: $0[keyPath: keyPath])
         })
         self.file = file
         self.line = line
     }
     
+    @inlinable
     public init(keyPath: KeyPath<T, U?>, file: String = #file, line: Int = #line) {
-        self.transformer = AnyTransformer(closure: {
-            $0[keyPath: keyPath]
+        self.transformer = AnyTransformer(file: file, line: line, closure: {
+            if let value = $0[keyPath: keyPath] {
+                return .success(value: value)
+            }
+            
+            return .failure(message: "Keypath \(keyPath) returned nil")
         })
         self.file = file
         self.line = line
     }
     
+    @inlinable
     public func transform(value: T) -> U? {
+        return transformResult(value: value).value
+    }
+    
+    @inlinable
+    public func transformResult(value: T) -> Result<U> {
         return transformer.transform(value: value)
     }
     
+    @inlinable
     public func debugTransform(value: T) -> U? {
-        return debugTransform(value: value) { string in
-            print(string)
+        return debugTransform(value: value) { (string: @autoclosure () -> String) in
+            print(string())
         }
     }
     
-    public func debugTransform(value: T, _ printer: (String) -> Void) -> U? {
-        printer("Invoking transformer from \(file):\(line) with \(value)...")
-        
-        return transformer.debugTransform(value: value, printer)
+    @inlinable
+    public func debugTransform(value: T, _ printer: (@autoclosure () -> String) -> Void) -> U? {
+        return debugTransformResult(value: value, printer).value
     }
     
+    @inlinable
+    public func debugTransformResult(value: T, _ printer: (@autoclosure () -> String) -> Void) -> Result<U> {
+        printer("Invoking transformer from \(file):\(line) with \(value)...")
+        
+        let result = transformer.debugTransform(value: value, printer)
+        
+        switch result {
+        case .success(let value):
+            printer("Transformation succeeded with \(String(describing: value))")
+            return .success(value: value)
+            
+        case .failure(let message):
+            return .failure(message: message)
+        }
+    }
+    
+    @inlinable
     public func transforming<Z>(file: String = #file,
                                 line: Int = #line,
                                 _ callback: @escaping (U) -> Z?) -> ValueTransformer<T, Z> {
@@ -60,6 +129,17 @@ public struct ValueTransformer<T, U> {
         }
     }
     
+    @inlinable
+    public func transformingResult<Z>(file: String = #file,
+                                      line: Int = #line,
+                                      _ callback: @escaping (U) -> Result<Z>) -> ValueTransformer<T, Z> {
+        
+        return ValueTransformer<T, Z>(line: line, file: file, previous: self) { (value: U) -> Result<Z> in
+            return callback(value)
+        }
+    }
+    
+    @inlinable
     public func validate(file: String = #file,
                          line: Int = #line,
                          _ predicate: @escaping (U) -> Bool) -> ValueTransformer<T, U> {
@@ -73,82 +153,166 @@ public struct ValueTransformer<T, U> {
         }
     }
     
+    @inlinable
+    public func validateResult(file: String = #file,
+                               line: Int = #line,
+                               _ predicate: @escaping (U) -> Result<U>) -> ValueTransformer<T, U> {
+        
+        return ValueTransformer<T, U>(line: line, file: file) { (value: T) -> Result<U> in
+            let result =
+                self.transformResult(value: value)
+                    .flatMap {
+                        predicate($0)
+                    }
+            
+            switch result {
+            case .success(let value):
+                return predicate(value)
+                
+            case .failure(let message):
+                return .failure(message: "Validation failed: \(message)")
+            }
+        }
+    }
+    
+    @inlinable
     public func validate(file: String = #file,
                          line: Int = #line,
                          matcher: ValueMatcher<U>) -> ValueTransformer<T, U> {
         
-        return ValueTransformer<T, U>(file: file, line: line) { value in
-            guard let value = self.transform(value: value) else {
-                return nil
+        return ValueTransformer<T, U>(line: line, file: file, previous: self) { value in
+            if matcher.matches(value) {
+                return .success(value: value)
+            } else {
+                return .failure(message: "Failed to pass matcher at \(file):\(line)")
             }
-            
-            return matcher.matches(value) ? value : nil
         }
     }
     
-    private struct AnyTransformer {
+    @usableFromInline
+    struct AnyTransformer {
+        @usableFromInline
         let previous: Any?
-        let closure: (T) -> U?
-        let debugClosure: (T, (String) -> Void) -> U?
+        @usableFromInline
+        let closure: (T) -> Result<U>
+        @usableFromInline
+        let debugClosure: (T, (@autoclosure () -> String) -> Void) -> Result<U>
+        @usableFromInline
+        let file: String
+        @usableFromInline
+        let line: Int
         
-        init(closure: @escaping (T) -> U?) {
+        @usableFromInline
+        init(file: String, line: Int, closure: @escaping (T) -> Result<U>) {
+            self.file = file
+            self.line = line
             previous = nil
             self.closure = closure
             self.debugClosure = { value, printer in
                 let result = closure(value)
                 
-                if let result = result {
-                    printer("Transformation succeeded with \(String(describing: result))")
-                } else {
-                    printer("Transformation failed: transformer returned nil")
+                switch result {
+                case .success(let value):
+                    return .success(value: value)
+                case .failure(let message):
+                    printer("Transformation from \(file):\(line) failed: \(message)")
+                    return .failure(message: message)
                 }
-                
-                return result
             }
         }
         
-        init<Z>(previous: ValueTransformer<T, Z>,
-                closure: @escaping (Z) -> U?) {
+        @usableFromInline
+        init<Z>(file: String, line: Int,
+                previous: ValueTransformer<T, Z>,
+                closure: @escaping (Z) -> Result<U>) {
             
+            self.file = file
+            self.line = line
             self.previous = previous
             self.closure = { value in
-                guard let prev = previous.transform(value: value) else {
-                    return nil
-                }
+                let prev = previous.transformResult(value: value)
                 
-                return closure(prev)
+                switch prev {
+                case .success(let value):
+                    return closure(value)
+                    
+                case .failure(let message):
+                    return .failure(message: message)
+                }
             }
             self.debugClosure = { value, printer in
-                guard let prev = previous.debugTransform(value: value, printer) else {
-                    printer("Transformation failed: Previous transformer returned nil")
-                    return nil
+                let prev = previous.debugTransformResult(value: value, printer)
+                
+                switch prev {
+                case .success(let value):
+                    let result = closure(value)
+                    
+                    switch result {
+                    case .success(let value):
+                        return .success(value: value)
+                        
+                    case .failure(let message):
+                        printer("Transformation from \(file):\(line) failed: \(message)")
+                        return .failure(message: message)
+                    }
+                    
+                case .failure(let message):
+                    return .failure(message: message)
                 }
-                
-                printer("Nested transformer succeeded; transforming...")
-                
-                let result = closure(prev)
-                
-                if let result = result {
-                    printer("Transformation succeeded with \(String(describing: result))")
-                } else {
-                    printer("Transformation failed: transformer returned nil")
-                }
-                
-                return result
             }
         }
         
-        func transform(value: T) -> U? {
+        @usableFromInline
+        func transform(value: T) -> Result<U> {
             return closure(value)
         }
         
-        func debugTransform(value: T, _ print: (String) -> Void) -> U? {
+        @usableFromInline
+        func debugTransform(value: T, _ print: (@autoclosure () -> String) -> Void) -> Result<U> {
             return debugClosure(value, print)
         }
     }
 }
 
+/// Encapsulates the result of a transformation
+public enum Result<T> {
+    case success(value: T)
+    case failure(message: String)
+    
+    @inlinable
+    var value: T? {
+        switch self {
+        case .success(let value):
+            return value
+            
+        case .failure:
+            return nil
+        }
+    }
+    
+    @inlinable
+    public func map<U>(_ mapper: (T) -> U) -> Result<U> {
+        switch self {
+        case .success(let value):
+            return .success(value: mapper(value))
+        case .failure(let message):
+            return .failure(message: message)
+        }
+    }
+    
+    @inlinable
+    public func flatMap<U>(_ mapper: (T) -> Result<U>) -> Result<U> {
+        switch self {
+        case .success(let value):
+            return mapper(value)
+        case .failure(let message):
+            return .failure(message: message)
+        }
+    }
+}
+
 public extension ValueTransformer where T == U {
+    @inlinable
     public init(file: String = #file, line: Int = #line) {
         self.init(file: file, line: line) { (value: T) -> U? in
             value
@@ -158,26 +322,26 @@ public extension ValueTransformer where T == U {
 
 public extension ValueTransformer where U: MutableCollection {
     
+    @inlinable
     public func transformIndex(file: String = #file,
                                line: Int = #line,
                                index: U.Index,
                                transformer: ValueTransformer<U.Element, U.Element>) -> ValueTransformer {
         
-        return transforming(file: file, line: line) { value in
+        return transformingResult(file: file, line: line) { value in
             guard value.endIndex > index else {
-                return nil
+                return .failure(message: "\(index) >= \(value.endIndex)")
             }
             
-            guard let new = transformer.transform(value: value[index]) else {
-                return nil
+            return transformer.transformResult(value: value[index]).map { new in
+                var value = value
+                value[index] = new
+                return value
             }
-            
-            var value = value
-            value[index] = new
-            return value
         }
     }
     
+    @inlinable
     public func replacing(file: String = #file,
                           line: Int = #line,
                           index: U.Index,
@@ -197,6 +361,7 @@ public extension ValueTransformer where U: MutableCollection {
 
 public extension ValueTransformer where U: RangeReplaceableCollection {
     
+    @inlinable
     public func removing(file: String = #file,
                          line: Int = #line,
                          index: U.Index) -> ValueTransformer {
@@ -215,6 +380,7 @@ public extension ValueTransformer where U: RangeReplaceableCollection {
 
 public extension ValueTransformer where U: Sequence {
     
+    @inlinable
     public func removingFirst(file: String = #file,
                               line: Int = #line) -> ValueTransformer<T, U.SubSequence> {
         

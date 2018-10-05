@@ -66,15 +66,26 @@ class SwiftAttributeTransformationsExtractor {
         
         func _mapStaticMethod(_ identifier: FunctionIdentifier) {
             let transformer = ValueTransformer<PostfixExpression, Expression>(transformer: { $0 })
-                .validate { exp in
-                    guard let member = exp.asPostfix?.exp.asPostfix?.member?.name else {
-                        return false
+                .validateResult { exp in
+                    guard let postfix = exp.asPostfix else {
+                        return .failure(message: "Not a postfix expression")
+                    }
+                    guard let innerPostfix = postfix.exp.asPostfix else {
+                        return .failure(message: "\(postfix.exp) is not a postfix expression")
+                    }
+                    guard let member = innerPostfix.member?.name else {
+                        return .failure(message: "\(innerPostfix) is not a member access")
                     }
                     
-                    return
-                        exp.asPostfix?
-                            .functionCall?
-                            .identifierWith(methodName: member) == identifier
+                    let result = postfix.functionCall?.identifierWith(methodName: member)
+                    
+                    if let result = result, result != identifier {
+                        return .failure(message:
+                            "Identifier \(result) does not match expected \(identifier)"
+                        )
+                    }
+                    
+                    return .success(value: exp)
                 }
                 .decompose()
                 .transformIndex(index: 0, transformer: ValueTransformer()
