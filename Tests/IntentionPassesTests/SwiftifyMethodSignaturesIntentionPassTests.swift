@@ -208,7 +208,8 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
         let mapper = DefaultTypeMapper(typeSystem: typeSystem)
         let context = IntentionPassContext(typeSystem: DefaultTypeSystem.defaultTypeSystem,
                                            typeMapper: mapper,
-                                           typeResolverInvoker: invoker)
+                                           typeResolverInvoker: invoker,
+                                           numThreads: 8)
         
         sut.apply(on: intentions, context: context)
         

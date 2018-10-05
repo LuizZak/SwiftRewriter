@@ -359,6 +359,7 @@ public final class SwiftRewriter {
             IntentionPassContext(typeSystem: typeSystem,
                                  typeMapper: typeMapper,
                                  typeResolverInvoker: typeResolverInvoker,
+                                 numThreads: settings.numThreads,
                                  notifyChange: { requiresResolve = true })
         
         let intentionPasses =

@@ -35,5 +35,6 @@ func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
     
     return IntentionPassContext(typeSystem: system,
                                 typeMapper: typeMapper,
-                                typeResolverInvoker: invoker)
+                                typeResolverInvoker: invoker,
+                                numThreads: 8)
 }
