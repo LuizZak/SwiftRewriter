@@ -1,4 +1,5 @@
 import SwiftAST
+import Foundation
 
 // TODO: Detect indirect super-type calling (i.e. `[aVarWithSuperAssociatedWithinIt method]`)
 // on override detection code
@@ -54,14 +55,21 @@ class MandatoryIntentionPass: IntentionPass {
             (context.typeSystem as? DefaultTypeSystem)?.tearDownCache()
         }
         
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = context.numThreads
+        
         let visitor = AnonymousIntentionVisitor()
         visitor.onVisitType = { type in
             guard type.kind == .class else { return }
             
-            self.applyOverrideDetection(type)
+            queue.addOperation {
+                self.applyOverrideDetection(type)
+            }
         }
         
         visitor.visit(intentions: intentions)
+        
+        queue.waitUntilAllOperationsAreFinished()
     }
     
     private func applyStructInitializer(_ type: StructGenerationIntention) {

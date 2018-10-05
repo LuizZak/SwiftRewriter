@@ -229,31 +229,33 @@ public class PropertyMergeIntentionPass: IntentionPass {
         let bodies = collectMethodBodies(fromClass: type)
         
         for (body, source) in bodies {
-            let matches =
-                SyntaxNodeSequence(node: body.body, inspectBlocks: true)
-                    .lazy
-                    .compactMap { node in node as? Expression }
-                    .contains { exp in
-                        switch exp {
-                        case let identifier as IdentifierExpression where identifier.identifier == fieldName:
-                            // Match only if identifier matched to nothing yet
-                            return identifier.definition == nil
-                            
-                        case let postfix as PostfixExpression where postfix.member?.name == fieldName:
-                            // Direct `self` access
-                            if postfix.exp.asIdentifier?.identifier == "self" {
-                                return true
-                            }
-                            // Indirect type access
-                            if postfix.exp.resolvedType?.unwrapped == .typeName(type.typeName) {
-                                return true
-                            }
-                            
-                            return false
-                        default:
-                            return false
-                        }
+            var matches = false
+            
+            let visitor = AnonymousSyntaxNodeVisitor { node in
+                guard let exp = node as? Expression else {
+                    return
+                }
+                
+                switch exp {
+                case let identifier as IdentifierExpression where identifier.identifier == fieldName:
+                    // Match only if identifier matched to nothing yet
+                    matches = identifier.definition == nil
+                    
+                case let postfix as PostfixExpression where postfix.member?.name == fieldName:
+                    // Direct `self` access
+                    if postfix.exp.asIdentifier?.identifier == "self" {
+                        matches = true
                     }
+                    // Indirect type access
+                    if postfix.exp.resolvedType?.unwrapped == .typeName(type.typeName) {
+                        matches = true
+                    }
+                    
+                default:
+                    break
+                }
+            }
+            visitor.visitStatement(body.body)
             
             if matches {
                 let field = synthesizeBackingField(for: property, in: type)
