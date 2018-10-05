@@ -110,4 +110,58 @@ class ValueTransformerTests: XCTestCase {
         XCTAssertEqual(transformer.transform(value: 1), "1")
         XCTAssertNil(transformer.transform(value: 2))
     }
+    
+    func testDebugTransform() {
+        #sourceLocation(file: "test.swift", line: 1)
+        let transformer =
+            ValueTransformer<Int, String>(keyPath: \.description)
+        #sourceLocation()
+        
+        let printer = TestDebugPrinter()
+        
+        _=transformer.debugTransform(value: 1, printer.print)
+        
+        XCTAssertEqual(
+            printer.string(),
+            """
+            Invoking transformer from test.swift:2 with 1...
+            Transformation succeeded with 1
+            """)
+    }
+    
+    func testDebugTransformNested() {
+        #sourceLocation(file: "test.swift", line: 1)
+        let transformer =
+            ValueTransformer<Int, String>(keyPath: \.description)
+                .transforming { (value: String) -> Int in
+                    value.count
+                }
+        #sourceLocation()
+        
+        let printer = TestDebugPrinter()
+        
+        _=transformer.debugTransform(value: 1, printer.print)
+        
+        XCTAssertEqual(
+            printer.string(),
+            """
+            Invoking transformer from test.swift:3 with 1...
+            Invoking transformer from test.swift:2 with 1...
+            Transformation succeeded with 1
+            Nested transformer succeeded; transforming...
+            Transformation succeeded with 1
+            """)
+    }
+}
+
+private class TestDebugPrinter {
+    var output: [String] = []
+    
+    func print(_ input: String) {
+        output.append(input)
+    }
+    
+    func string() -> String {
+        return output.joined(separator: "\n")
+    }
 }
