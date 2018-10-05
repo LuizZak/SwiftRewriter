@@ -38,16 +38,16 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         queue.maxConcurrentOperationCount = context.numThreads
         
         for cls in classes {
-            guard let type = context.typeSystem.knownTypeWithName(cls.typeName) else {
-                continue
-            }
-            
             queue.addOperation {
+                guard let type = context.typeSystem.knownTypeWithName(cls.typeName) else {
+                    return
+                }
+            
                 // Find conforming protocols
                 let knownProtocols =
                     protocols.filter { prot in
                         context.typeSystem
-                            .conformance(toProtocolName: prot.typeName, in: type) != nil
+                            .isType(type.typeName, conformingTo: prot.typeName)
                         }
                 
                 for prot in knownProtocols {

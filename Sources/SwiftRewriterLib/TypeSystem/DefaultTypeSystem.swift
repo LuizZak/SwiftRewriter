@@ -9,6 +9,7 @@ public class DefaultTypeSystem: TypeSystem {
     public static let defaultTypeSystem: TypeSystem = DefaultTypeSystem()
     
     private var compoundKnownTypesCache: CompoundKnownTypesCache?
+    private var protocolConformanceCache: ProtocolConformanceCache?
     private var baseClassTypesByName: [String: ClassType] = [:]
     private var initializedCache = false
     private var overloadResolverState = OverloadResolverState()
@@ -33,6 +34,7 @@ public class DefaultTypeSystem: TypeSystem {
         knownTypeProviders.makeCache()
         typealiasProviders.makeCache()
         compoundKnownTypesCache = CompoundKnownTypesCache()
+        protocolConformanceCache = ProtocolConformanceCache()
         overloadResolverState.makeCache()
     }
     
@@ -40,6 +42,7 @@ public class DefaultTypeSystem: TypeSystem {
         knownTypeProviders.tearDownCache()
         typealiasProviders.tearDownCache()
         compoundKnownTypesCache = nil
+        protocolConformanceCache = nil
         overloadResolverState.tearDownCache()
     }
     
@@ -225,6 +228,12 @@ public class DefaultTypeSystem: TypeSystem {
             return true
         }
         
+        if let cache = protocolConformanceCache {
+            if cache.typeName(typeName, conformsTo: protocolName) {
+                return true
+            }
+        }
+        
         guard let unaliasedTypeName = typeNameIn(swiftType: resolveAlias(in: typeName)) else {
             return false
         }
@@ -235,8 +244,14 @@ public class DefaultTypeSystem: TypeSystem {
             return true
         }
         
-        return _unaliasedIsType(unaliasedTypeName,
-                                conformingTo: unaliasedProtocolName)
+        let conforms = _unaliasedIsType(unaliasedTypeName,
+                                        conformingTo: unaliasedProtocolName)
+        
+        if let cache = protocolConformanceCache {
+            cache.record(typeName: typeName, conformsTo: protocolName)
+        }
+        
+        return conforms
     }
     
     private func _unaliasedIsType(_ unaliasedTypeName: String,
@@ -986,6 +1001,35 @@ public class DefaultTypeSystem: TypeSystem {
             barrier.sync(flags: .barrier) {
                 types[names] = type
             }
+        }
+    }
+    
+    private final class ProtocolConformanceCache {
+        private let cache = ConcurrentValue<[String: Entry]>()
+        
+        init() {
+            cache.usingCache = true
+            cache.modifyingState { state in
+                state.value = [:]
+            }
+        }
+        
+        func record(typeName: String, conformsTo protocolName: String) {
+            cache.modifyingValue { entries -> Void in
+                var entry = entries?[typeName, default: Entry(conformances: [])]
+                entry?.conformances.insert(protocolName)
+                entries?[typeName] = entry
+            }
+        }
+        
+        func typeName(_ type: String, conformsTo protocolName: String) -> Bool {
+            return cache.readingValue { entries -> Bool in
+                return entries?[type]?.conformances.contains(protocolName) ?? false
+            }
+        }
+        
+        private struct Entry {
+            var conformances: Set<String>
         }
     }
     
