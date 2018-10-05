@@ -229,8 +229,8 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         if let cache = protocolConformanceCache {
-            if cache.typeName(typeName, conformsTo: protocolName) {
-                return true
+            if let result = cache.typeName(typeName, conformsTo: protocolName) {
+                return result
             }
         }
         
@@ -248,7 +248,7 @@ public class DefaultTypeSystem: TypeSystem {
                                         conformingTo: unaliasedProtocolName)
         
         if let cache = protocolConformanceCache {
-            cache.record(typeName: typeName, conformsTo: protocolName)
+            cache.record(typeName: typeName, conformsTo: protocolName, conforms)
         }
         
         return conforms
@@ -1014,22 +1014,22 @@ public class DefaultTypeSystem: TypeSystem {
             }
         }
         
-        func record(typeName: String, conformsTo protocolName: String) {
+        func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
             cache.modifyingValue { entries -> Void in
-                var entry = entries?[typeName, default: Entry(conformances: [])]
-                entry?.conformances.insert(protocolName)
+                var entry = entries?[typeName, default: Entry(conformances: [:])]
+                entry?.conformances[protocolName] = value
                 entries?[typeName] = entry
             }
         }
         
-        func typeName(_ type: String, conformsTo protocolName: String) -> Bool {
-            return cache.readingValue { entries -> Bool in
-                return entries?[type]?.conformances.contains(protocolName) ?? false
+        func typeName(_ type: String, conformsTo protocolName: String) -> Bool? {
+            return cache.readingValue { entries -> Bool? in
+                return entries?[type]?.conformances[protocolName]
             }
         }
         
         private struct Entry {
-            var conformances: Set<String>
+            var conformances: [String: Bool]
         }
     }
     
