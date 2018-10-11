@@ -5,11 +5,11 @@ open class ObjectiveCPreprocessorLexer: Lexer {
     public class State {
         public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
         
-        internal var _decisionToDFA: [DFA]
+        internal var _decisionToDFA: [DFA<LexerATNConfig>]
         internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
         
         public init() {
-            var decisionToDFA = [DFA]()
+            var decisionToDFA = [DFA<LexerATNConfig>]()
             let length = _ATN.getNumberOfDecisions()
             for i in 0..<length {
                 decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
@@ -21,7 +21,7 @@ open class ObjectiveCPreprocessorLexer: Lexer {
     public var _ATN: ATN {
         return state._ATN
     }
-    internal var _decisionToDFA: [DFA] {
+    internal var _decisionToDFA: [DFA<LexerATNConfig>] {
         return state._decisionToDFA
     }
     internal var _sharedContextCache: PredictionContextCache {

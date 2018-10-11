@@ -5,11 +5,11 @@ open class ObjectiveCPreprocessorParser: Parser {
     public class State {
         public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
         
-        internal var _decisionToDFA: [DFA]
+        internal var _decisionToDFA: [DFA<ATNConfig>]
         internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
         
         public init() {
-            var decisionToDFA = [DFA]()
+            var decisionToDFA = [DFA<ATNConfig>]()
             let length = _ATN.getNumberOfDecisions()
             for i in 0..<length {
                 decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
@@ -21,7 +21,7 @@ open class ObjectiveCPreprocessorParser: Parser {
     public var _ATN: ATN {
         return state._ATN
     }
-    internal var _decisionToDFA: [DFA] {
+    internal var _decisionToDFA: [DFA<ATNConfig>] {
         return state._decisionToDFA
     }
     internal var _sharedContextCache: PredictionContextCache {
