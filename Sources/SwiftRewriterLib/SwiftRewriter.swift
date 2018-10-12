@@ -708,19 +708,6 @@ private enum LazyParseItem {
     case enumCase(EnumCaseGenerationIntention)
     case functionBody(FunctionBodyIntention, method: MethodGenerationIntention?)
     case globalVar(GlobalVariableInitialValueIntention)
-    
-    /// Returns the base `FromSourceIntention`-typed value, which is the intention
-    /// associated with every case.
-    var fromSourceIntention: FromSourceIntention {
-        switch self {
-        case .enumCase(let i):
-            return i
-        case .functionBody(let i, _):
-            return i
-        case .globalVar(let i):
-            return i
-        }
-    }
 }
 
 private enum LazyTypeResolveItem {
@@ -732,42 +719,21 @@ private enum LazyTypeResolveItem {
     case enumDecl(EnumGenerationIntention)
     case extensionDecl(ClassExtensionGenerationIntention)
     case `typealias`(TypealiasIntention)
-    
-    /// Returns the base `FromSourceIntention`-typed value, which is the intention
-    /// associated with every case.
-    var fromSourceIntention: FromSourceIntention {
-        switch self {
-        case .property(let i):
-            return i
-        case .ivar(let i):
-            return i
-        case .method(let i):
-            return i
-        case .globalVar(let i):
-            return i
-        case .globalFunc(let i):
-            return i
-        case .enumDecl(let i):
-            return i
-        case .extensionDecl(let i):
-            return i
-        case .typealias(let i):
-            return i
-        }
-    }
 }
 
 internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
     switch type {
-    case .specified(let specifiers, let type):
+    case .specified(let specifiers, let type),
+         .qualified(let type, let specifiers):
+        
         // Struct types are never null.
         if case .struct = type {
             return .nonnull
         }
         
-        if specifiers.last == "__weak" {
+        if specifiers.contains("__weak") {
             return .nullable
-        } else if specifiers.last == "__unsafe_unretained" {
+        } else if specifiers.contains("__unsafe_unretained") {
             return .nonnull
         }
         
