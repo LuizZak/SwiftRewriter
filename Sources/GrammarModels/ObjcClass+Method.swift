@@ -38,9 +38,9 @@ public class MethodSelector: ASTNode, InitializableNode {
         
         if sel.count == 1 {
             return .selector(sel[0])
-        } else {
-            return .keywords(kw)
         }
+        
+        return .keywords(kw)
     }
     
     public required init(isInNonnullContext: Bool) {
@@ -50,24 +50,6 @@ public class MethodSelector: ASTNode, InitializableNode {
     public enum SelectorKind {
         case selector(Identifier)
         case keywords([KeywordDeclarator])
-        
-        public var identifier: Identifier? {
-            switch self {
-            case .selector(let id):
-                return id
-            case .keywords:
-                return nil
-            }
-        }
-        
-        public var keywordDeclarations: [KeywordDeclarator]? {
-            switch self {
-            case .selector:
-                return nil
-            case .keywords(let kw):
-                return kw
-            }
-        }
     }
 }
 

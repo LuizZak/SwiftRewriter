@@ -463,9 +463,11 @@ public class IntentionCollector {
             return
         }
         
-        let localMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem.defaultTypeSystem)
+        guard let mapper = delegate?.typeMapper(for: self) else {
+            return
+        }
         
-        let signGen = SwiftMethodSignatureGen(typeMapper: localMapper,
+        let signGen = SwiftMethodSignatureGen(typeMapper: mapper,
                                               inNonnullContext: context.inNonnullContext)
         let sign = signGen.generateDefinitionSignature(from: node)
         

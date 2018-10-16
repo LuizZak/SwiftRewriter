@@ -13,12 +13,6 @@ public class PropertyDefinition: ASTNode, InitializableNode {
         return firstChild()
     }
     
-    public override var location: SourceLocation {
-        didSet {
-            print("a")
-        }
-    }
-    
     // For use in protocol methods only
     public var isOptionalProperty: Bool = false
     
