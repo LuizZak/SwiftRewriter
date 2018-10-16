@@ -426,7 +426,7 @@ private class FilesExplorer: PagesCommandHandler {
             path = newPath
             let newList = try self.getFileListProvider()
             
-            return .modifyList { _ in
+            return .modifyList(keepPageIndex: true) { _ in
                 newList
             }
         } catch {
