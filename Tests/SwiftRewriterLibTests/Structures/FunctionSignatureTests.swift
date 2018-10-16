@@ -9,9 +9,9 @@ class FunctionSignatureTests: XCTestCase {
         let signature2 =
             try FunctionSignature(signatureString: "foo(bar: Int, baz: Int = default)")
         let signature3 =
-            try FunctionSignature(signatureString: "foo(bar: Int, baz: Int = default, zaz: Int)")
+            try FunctionSignature(signatureString: "foo(bar: Int, baz: Int = default, _ zaz: Int)")
         let signature4 =
-            try FunctionSignature(signatureString: "foo(bar: Int, baz: Int = default, zaz: Int = default)")
+            try FunctionSignature(signatureString: "foo(bar: Int, baz: Int = default, _ zaz: Int = default)")
         
         XCTAssertEqual(signature1.possibleSelectorSignatures(),
                        [SelectorSignature(isStatic: false, keywords: ["foo", "bar"])])
@@ -19,12 +19,12 @@ class FunctionSignatureTests: XCTestCase {
                        [SelectorSignature(isStatic: false, keywords: ["foo", "bar"]),
                         SelectorSignature(isStatic: false, keywords: ["foo", "bar", "baz"])])
         XCTAssertEqual(signature3.possibleSelectorSignatures(),
-                       [SelectorSignature(isStatic: false, keywords: ["foo", "bar", "zaz"]),
-                        SelectorSignature(isStatic: false, keywords: ["foo", "bar", "baz", "zaz"])])
+                       [SelectorSignature(isStatic: false, keywords: ["foo", "bar", nil]),
+                        SelectorSignature(isStatic: false, keywords: ["foo", "bar", "baz", nil])])
         XCTAssertEqual(signature4.possibleSelectorSignatures(),
                        [SelectorSignature(isStatic: false, keywords: ["foo", "bar"]),
                         SelectorSignature(isStatic: false, keywords: ["foo", "bar", "baz"]),
-                        SelectorSignature(isStatic: false, keywords: ["foo", "bar", "zaz"]),
-                        SelectorSignature(isStatic: false, keywords: ["foo", "bar", "baz", "zaz"])])
+                        SelectorSignature(isStatic: false, keywords: ["foo", "bar", nil]),
+                        SelectorSignature(isStatic: false, keywords: ["foo", "bar", "baz", nil])])
     }
 }
