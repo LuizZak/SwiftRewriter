@@ -13,7 +13,7 @@ public struct StringCodeSource: CodeSource {
         self.filePath = fileName
         
         _indices = Array(source.indices)
-        _computeLineOffsets()
+        _lineOffsets = source.lineRanges()
     }
     
     public func fetchSource() -> String {
@@ -46,9 +46,5 @@ public struct StringCodeSource: CodeSource {
         }
         
         return source.distance(from: offsets.lowerBound, to: index) + 1
-    }
-    
-    private mutating func _computeLineOffsets() {
-        _lineOffsets = source.lineRanges()
     }
 }
