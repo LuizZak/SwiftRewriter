@@ -1,24 +1,43 @@
 import SwiftAST
 
 /// Signature for a function intention
-public struct FunctionSignature: Hashable, Codable {
-    public var isMutating: Bool
-    public var isStatic: Bool
-    public var name: String
-    public var returnType: SwiftType
-    public var parameters: [ParameterSignature]
+public struct FunctionSignature: Hashable {
+    private var _asIdentifier: FunctionIdentifier = FunctionIdentifier(name: "", parameterNames: [])
+    private var _asSelector: SelectorSignature = SelectorSignature(isStatic: false, keywords: [])
+    
+    public var isMutating: Bool {
+        didSet {
+            _recreateAliases()
+        }
+    }
+    public var isStatic: Bool {
+        didSet {
+            _recreateAliases()
+        }
+    }
+    public var name: String {
+        didSet {
+            _recreateAliases()
+        }
+    }
+    public var returnType: SwiftType {
+        didSet {
+            _recreateAliases()
+        }
+    }
+    public var parameters: [ParameterSignature] {
+        didSet {
+            _recreateAliases()
+        }
+    }
     
     public var asIdentifier: FunctionIdentifier {
-        return FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
+        return _asIdentifier
     }
     
     /// The cannonical selector signature for this function signature.
     public var asSelector: SelectorSignature {
-        return
-            SelectorSignature(
-                isStatic: isStatic,
-                keywords: [name] + parameters.map { $0.label }
-            )
+        return _asSelector
     }
     
     // TODO: Support suplying type attributes for function signatures
@@ -46,11 +65,18 @@ public struct FunctionSignature: Hashable, Codable {
                 isStatic: Bool = false,
                 isMutating: Bool = false) {
         
+        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
+        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map { $0.label })
         self.isStatic = isStatic
         self.name = name
         self.returnType = returnType
         self.parameters = parameters
         self.isMutating = isMutating
+    }
+    
+    private mutating func _recreateAliases() {
+        _asIdentifier = FunctionIdentifier(name: name, parameterNames: parameters.map { $0.label })
+        _asSelector = SelectorSignature(isStatic: isStatic, keywords: [name] + parameters.map { $0.label })
     }
     
     /// Returns a set of possible selector signature variations for this function
@@ -80,6 +106,10 @@ public struct FunctionSignature: Hashable, Codable {
     /// foo(bar:baz:_:)
     /// ```
     public func possibleSelectorSignatures() -> Set<SelectorSignature> {
+        if !parameters.contains(where: { $0.hasDefaultValue }) {
+            return [asSelector]
+        }
+        
         let defaultArgIndices =
             parameters.enumerated()
                 .filter { $0.element.hasDefaultValue }
@@ -165,6 +195,29 @@ public struct FunctionSignature: Hashable, Codable {
     /// number of parameters.
     public func matchesAsCFunction(_ other: FunctionSignature) -> Bool {
         return name == other.name && parameters.count == other.parameters.count
+    }
+}
+
+extension FunctionSignature: Codable {
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try isMutating = container.decode(Bool.self, forKey: .isMutating)
+        try isStatic = container.decode(Bool.self, forKey: .isStatic)
+        try name = container.decode(String.self, forKey: .name)
+        try returnType = container.decode(SwiftType.self, forKey: .returnType)
+        try parameters = container.decode([ParameterSignature].self, forKey: .parameters)
+        
+        _recreateAliases()
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case isMutating
+        case isStatic
+        case name
+        case returnType
+        case parameters
     }
 }
 
