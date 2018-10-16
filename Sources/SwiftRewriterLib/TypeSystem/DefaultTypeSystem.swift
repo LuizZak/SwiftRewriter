@@ -96,15 +96,15 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func typeExists(_ name: String) -> Bool {
+        if _knownTypeWithNameUnaliased(name) != nil {
+            return true
+        }
+        
         guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
             return false
         }
         
-        if knownTypeProviders.knownType(withName: name) != nil {
-            return true
-        }
-        
-        return false
+        return _knownTypeWithNameUnaliased(name) != nil
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
@@ -112,6 +112,10 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func knownTypeWithName(_ name: String) -> KnownType? {
+        if let type = _knownTypeWithNameUnaliased(name) {
+            return type
+        }
+        
         guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
             return nil
         }
