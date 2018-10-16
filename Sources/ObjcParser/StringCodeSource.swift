@@ -3,6 +3,7 @@ import Utils
 
 public struct StringCodeSource: CodeSource {
     private var _lineOffsets: [Range<String.Index>] = []
+    private var _indices: [String.Index]
     
     public var filePath: String = ""
     public var source: String
@@ -11,7 +12,8 @@ public struct StringCodeSource: CodeSource {
         self.source = source
         self.filePath = fileName
         
-        _computeLineOffsets()
+        _indices = Array(source.indices)
+        _lineOffsets = source.lineRanges()
     }
     
     public func fetchSource() -> String {
@@ -19,7 +21,7 @@ public struct StringCodeSource: CodeSource {
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
-        return source.index(source.startIndex, offsetBy: offset)
+        return _indices[offset]
     }
     
     public func isEqual(to other: Source) -> Bool {
@@ -44,9 +46,5 @@ public struct StringCodeSource: CodeSource {
         }
         
         return source.distance(from: offsets.lowerBound, to: index) + 1
-    }
-    
-    private mutating func _computeLineOffsets() {
-        _lineOffsets = source.lineRanges()
     }
 }
