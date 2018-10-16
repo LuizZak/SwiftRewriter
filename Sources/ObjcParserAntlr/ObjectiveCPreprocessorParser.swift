@@ -7,6 +7,7 @@ open class ObjectiveCPreprocessorParser: Parser {
         
         internal var _decisionToDFA: [DFA<ParserATNConfig>]
         internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+        let atnConfigPool = ParserATNConfigPool()
         
         public init() {
             var decisionToDFA = [DFA<ParserATNConfig>]()
@@ -105,12 +106,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 	    return ObjectiveCPreprocessorParser.VOCABULARY
 	}
 
-    public override init(_ input: TokenStream) throws {
-        self.state = State()
-        
-        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
-        try super.init(input)
-        _interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+    public override convenience init(_ input: TokenStream) throws {
+        try self.init(input, State())
     }
     
     public init(_ input: TokenStream, _ state: State) throws {
@@ -118,7 +115,11 @@ open class ObjectiveCPreprocessorParser: Parser {
         
         RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
         try super.init(input)
-        _interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+        _interp = ParserATNSimulator(self,
+                                     _ATN,
+                                     _decisionToDFA,
+                                     _sharedContextCache,
+                                     atnConfigPool: state.atnConfigPool)
     }
     
 	open class ObjectiveCDocumentContext:ParserRuleContext {
