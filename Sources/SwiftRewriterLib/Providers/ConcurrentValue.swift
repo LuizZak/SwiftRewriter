@@ -1,6 +1,6 @@
 import Dispatch
 
-class ConcurrentValue<T> {
+final class ConcurrentValue<T> {
     struct CacheState {
         var value: T?
     }
@@ -17,26 +17,31 @@ class ConcurrentValue<T> {
     
     private var state = CacheState()
     
+    @inlinable
     func readingValue<U>(_ block: (T?) -> U) -> U {
         return readingState { block($0.value) }
     }
     
+    @inlinable
     func readingState<U>(_ block: (CacheState) -> U) -> U {
         return cacheBarrier.sync {
             block(state)
         }
     }
     
+    @inlinable
     func modifyingValue<U>(_ block: (inout T?) -> U) -> U {
         return modifyingState { block(&$0.value) }
     }
     
+    @inlinable
     func modifyingState<U>(_ block: (inout CacheState) -> U) -> U {
         return cacheBarrier.sync(flags: .barrier) {
             block(&state)
         }
     }
     
+    @inlinable
     func tearDown() {
         modifyingState { state in
             state.value = nil

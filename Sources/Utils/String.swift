@@ -92,7 +92,7 @@ public extension String {
         var lines: [Range<Index>] = []
         var currentLineStart = startIndex
         
-        for (index, char) in zip(indices, self) where char == "\n" {
+        for (index, char) in zip(indices, unicodeScalars) where char == "\n" {
             lines.append(currentLineStart..<index)
             
             if index != endIndex {

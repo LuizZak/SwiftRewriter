@@ -6,7 +6,7 @@ public class PostfixExpression: Expression {
             oldValue.parent = nil
             exp.parent = self
             
-            _subExpressions = [exp] + op.subExpressions
+            _subExpressions[0] = exp
         }
     }
     public var op: Postfix {
