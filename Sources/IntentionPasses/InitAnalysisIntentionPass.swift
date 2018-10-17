@@ -4,8 +4,6 @@ import SwiftAST
 // TODO: Also support failable init detection by inspecting `nullable` in the
 // return type of intializers in Objective-C.
 
-// TODO: Add history tracking to affected initializer intentions.
-
 /// An intention pass that searches for failable and convenience initializers
 /// based on statement AST analysis and flags them appropriately.
 public class InitAnalysisIntentionPass: IntentionPass {
@@ -79,7 +77,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
             return false
         }
         
-        // Check if we're not in one of the following patterns, which signify
+        // Check if we're not in one of the following patterns, which indicate
         // an early exit that is not neccessarily from a failable initializer
         
         // 1.:
@@ -127,7 +125,7 @@ public class InitAnalysisIntentionPass: IntentionPass {
         
         // Looks for
         //
-        // self = [super init<...>]
+        // self = [super|self init<...>]
         //
         // invocations
         var selfOrSuper: Expression?
