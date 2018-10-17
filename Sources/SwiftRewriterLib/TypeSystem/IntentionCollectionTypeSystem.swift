@@ -178,7 +178,6 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     /// Objective-C selector signature.
     ///
     /// Ignores method variable names and types of return/parameters.
-    // TODO: Apply parameter type overload resolution
     private func method(matchingSelector selector: SelectorSignature,
                         invocationTypeHints: [SwiftType?]?,
                         in methods: [KnownMethod]) -> KnownMethod? {
