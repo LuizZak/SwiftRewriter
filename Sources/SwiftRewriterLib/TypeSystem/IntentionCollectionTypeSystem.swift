@@ -140,7 +140,14 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         if result == nil {
-            result = super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
+            guard let knownType = self.findType(for: type) else {
+                return nil
+            }
+            
+            result = super.property(named: name,
+                                    static: isStatic,
+                                    includeOptional: includeOptional,
+                                    in: knownType)
         }
         
         if memberSearchCache.usingCache {
@@ -177,7 +184,11 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         if result == nil {
-            result = super.field(named: name, static: isStatic, in: type)
+            guard let knownType = self.findType(for: type) else {
+                return nil
+            }
+            
+            result = super.field(named: name, static: isStatic, in: knownType)
         }
         
         if memberSearchCache.usingCache {
@@ -227,11 +238,15 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         }
         
         if result == nil {
+            guard let knownType = self.findType(for: type) else {
+                return nil
+            }
+            
             result = super.method(withObjcSelector: selector,
                                   invocationTypeHints: invocationTypeHints,
                                   static: isStatic,
                                   includeOptional: includeOptional,
-                                  in: type)
+                                  in: knownType)
         }
         
         if memberSearchCache.usingCache {

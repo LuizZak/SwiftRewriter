@@ -123,6 +123,12 @@ public protocol TypeSystem {
     /// Gets a protocol conformance to a given protocol name on a given known type.
     func conformance(toProtocolName name: String, in type: KnownType) -> KnownProtocolConformance?
     
+    /// Gets a list of all protocol conformances of a given type.
+    ///
+    /// Looks through supertype and protocol hierarchies, if available, resulting
+    /// in all known protocol conformances of a type.
+    func allConformances(of type: KnownType) -> [KnownProtocolConformance]
+    
     /// Searches for a method with a given Objective-C equivalent selector, also
     /// specifying whether to include optional methods (from optional protocol
     /// methods that where not implemented by a concrete class).

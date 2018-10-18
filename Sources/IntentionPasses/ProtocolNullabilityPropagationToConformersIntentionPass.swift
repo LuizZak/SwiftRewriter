@@ -1,6 +1,7 @@
 import SwiftRewriterLib
 import SwiftAST
 import Foundation
+import Utils
 
 // TODO: This could be generalized into merging signatures from types such that
 // a child class inherits nullability from the base class, in case the child
@@ -27,30 +28,47 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             )
         
         // Collect protocols
-        let protocols = intentionCollection.protocolIntentions()
+        let protocols = context.typeSystem.knownTypes(ofKind: .protocol)
         let classes = intentionCollection.typeIntentions().filter { $0 is BaseClassIntention }
         
         if protocols.isEmpty || classes.isEmpty {
             return
         }
         
+        var classProtocols: [String: [KnownProtocolConformance]] = [:]
+        
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = context.numThreads
         
+        // First roundtrip: Collect all known conformances
+        for clsName in Set(classes.map { $0.typeName }) {
+            queue.addOperation {
+                guard let type = context.typeSystem.knownTypeWithName(clsName) else {
+                    return
+                }
+                
+                let conformances = context.typeSystem.allConformances(of: type)
+                
+                synchronized(self) {
+                    classProtocols[type.typeName] = conformances
+                }
+            }
+        }
+        
+        queue.waitUntilAllOperationsAreFinished()
+        
+        // Second round-trip: Merge conformers with protocols
         for cls in classes {
             queue.addOperation {
                 guard let type = context.typeSystem.knownTypeWithName(cls.typeName) else {
                     return
                 }
-            
-                // Find conforming protocols
-                let knownProtocols =
-                    protocols.filter { prot in
-                        context.typeSystem
-                            .isType(type.typeName, conformingTo: prot.typeName)
-                        }
+                guard let conformances = classProtocols[type.typeName] else {
+                    return
+                }
                 
-                for prot in knownProtocols {
+                // Find conforming protocols
+                for prot in protocols where conformances.contains(where: { $0.protocolName == prot.typeName }) {
                     typeMerger.mergeMethodSignatures(from: prot,
                                                      into: cls,
                                                      createIfUnexistent: false)

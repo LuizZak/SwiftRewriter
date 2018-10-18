@@ -21,14 +21,8 @@ public class CompoundTypealiasProvider: TypealiasProvider {
     }
     
     func makeCache() {
-        aliasesCache.modifyingState { state in
-            state.value = [:]
-            aliasesCache.usingCache = true
-        }
-        negativeLookups.modifyingState { state in
-            state.value = []
-            negativeLookups.usingCache = true
-        }
+        aliasesCache.setup(value: [:])
+        negativeLookups.setup(value: [])
     }
     
     func tearDownCache() {
