@@ -42,6 +42,14 @@ final class ConcurrentValue<T> {
     }
     
     @inlinable
+    func setup(value: T) {
+        modifyingState { state in
+            state.value = value
+            usingCache = true
+        }
+    }
+    
+    @inlinable
     func tearDown() {
         modifyingState { state in
             state.value = nil
