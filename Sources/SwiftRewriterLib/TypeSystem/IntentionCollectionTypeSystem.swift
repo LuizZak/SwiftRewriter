@@ -176,8 +176,6 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
     
     /// Finds a method on a given array of methods that matches a given
     /// Objective-C selector signature.
-    ///
-    /// Ignores method variable names and types of return/parameters.
     private func method(matchingSelector selector: SelectorSignature,
                         invocationTypeHints: [SwiftType?]?,
                         in methods: [KnownMethod]) -> KnownMethod? {
