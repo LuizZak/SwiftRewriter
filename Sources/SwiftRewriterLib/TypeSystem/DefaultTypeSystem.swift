@@ -13,7 +13,7 @@ public class DefaultTypeSystem: TypeSystem {
     private var baseClassTypesByName: [String: ClassType] = [:]
     private var initializedCache = false
     private var overloadResolverState = OverloadResolverState()
-    private var memberSearchCache = MemberSearchCache()
+    var memberSearchCache = MemberSearchCache()
     
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
@@ -1388,7 +1388,7 @@ public class DefaultTypeSystem: TypeSystem {
         }
     }
     
-    private final class MemberSearchCache {
+    internal final class MemberSearchCache {
         private let methodsCache = ConcurrentValue<[MethodSearchEntry: KnownMethod?]>()
         private let propertiesCache = ConcurrentValue<[PropertySearchEntry: KnownProperty?]>()
         private let fieldsCache = ConcurrentValue<[FieldSearchEntry: KnownProperty?]>()

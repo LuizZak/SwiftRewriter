@@ -121,13 +121,37 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                                   includeOptional: includeOptional, in: type)
         }
         
-        if let type = intentionsProvider.knownType(withName: typeName) {
-            if let prop = type.knownProperties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                return prop
+        if memberSearchCache.usingCache {
+            if let result =
+                memberSearchCache.lookupProperty(named: name,
+                                                 static: isStatic,
+                                                 includeOptional: includeOptional,
+                                                 in: typeName) {
+                return result
             }
         }
         
-        return super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
+        var result: KnownProperty?
+        
+        if let type = intentionsProvider.knownType(withName: typeName) {
+            if let prop = type.knownProperties.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                result = prop
+            }
+        }
+        
+        if result == nil {
+            result = super.property(named: name, static: isStatic, includeOptional: includeOptional, in: type)
+        }
+        
+        if memberSearchCache.usingCache {
+            memberSearchCache.storeProperty(named: name,
+                                            static: isStatic,
+                                            includeOptional: includeOptional,
+                                            in: typeName,
+                                            property: result)
+        }
+        
+        return result
     }
     
     public override func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty? {
@@ -135,13 +159,35 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
             return super.field(named: name, static: isStatic, in: type)
         }
         
-        if let type = intentionsProvider.knownType(withName: typeName) {
-            if let field = type.knownFields.first(where: { $0.name == name && $0.isStatic == isStatic }) {
-                return field
+        if memberSearchCache.usingCache {
+            if let result =
+                memberSearchCache.lookupField(named: name,
+                                              static: isStatic,
+                                              in: typeName) {
+                return result
             }
         }
         
-        return super.field(named: name, static: isStatic, in: type)
+        var result: KnownProperty?
+        
+        if let type = intentionsProvider.knownType(withName: typeName) {
+            if let field = type.knownFields.first(where: { $0.name == name && $0.isStatic == isStatic }) {
+                result = field
+            }
+        }
+        
+        if result == nil {
+            result = super.field(named: name, static: isStatic, in: type)
+        }
+        
+        if memberSearchCache.usingCache {
+            memberSearchCache.storeField(named: name,
+                                         static: isStatic,
+                                         in: typeName,
+                                         field: result)
+        }
+        
+        return result
     }
     
     public override func method(withObjcSelector selector: SelectorSignature,
@@ -158,20 +204,46 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
                                 in: type)
         }
         
+        if memberSearchCache.usingCache {
+            if let result =
+                memberSearchCache.lookupMethod(withObjcSelector: selector,
+                                               invocationTypeHints: invocationTypeHints,
+                                               static: isStatic,
+                                               includeOptional: includeOptional,
+                                               in: typeName) {
+                return result
+            }
+        }
+        
+        var result: KnownMethod?
+        
         if let type = intentionsProvider.knownType(withName: typeName) {
             if let method = method(matchingSelector: selector,
                                    invocationTypeHints: invocationTypeHints,
                                    in: type.knownMethods), method.isStatic == isStatic {
                 
-                return method
+                result = method
             }
         }
         
-        return super.method(withObjcSelector: selector,
-                            invocationTypeHints: invocationTypeHints,
-                            static: isStatic,
-                            includeOptional: includeOptional,
-                            in: type)
+        if result == nil {
+            result = super.method(withObjcSelector: selector,
+                                  invocationTypeHints: invocationTypeHints,
+                                  static: isStatic,
+                                  includeOptional: includeOptional,
+                                  in: type)
+        }
+        
+        if memberSearchCache.usingCache {
+            memberSearchCache.storeMethod(withObjcSelector: selector,
+                                          invocationTypeHints: invocationTypeHints,
+                                          static: isStatic,
+                                          includeOptional: includeOptional,
+                                          in: typeName,
+                                          method: result)
+        }
+        
+        return result
     }
     
     /// Finds a method on a given array of methods that matches a given
