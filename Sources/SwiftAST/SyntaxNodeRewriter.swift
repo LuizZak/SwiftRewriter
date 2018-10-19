@@ -221,7 +221,9 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A CompoundStatement to visit
     /// - Returns: Result of visiting the compound statement
     open func visitCompound(_ stmt: CompoundStatement) -> Statement {
-        stmt.statements = stmt.statements.map(visitStatement)
+        for (i, s) in stmt.statements.enumerated() {
+            stmt.statements[i] = visitStatement(s)
+        }
         
         return stmt
     }
@@ -349,7 +351,9 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: An ExpressionsStatement to visit
     /// - Returns: Result of visiting the expressions statement
     open func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
-        stmt.expressions = stmt.expressions.map(visitExpression)
+        for (i, e) in stmt.expressions.enumerated() {
+            stmt.expressions[i] = visitExpression(e)
+        }
         
         return stmt
     }

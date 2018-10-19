@@ -14,6 +14,9 @@ public class DefaultTypeSystem: TypeSystem {
     private var initializedCache = false
     private var overloadResolverState = OverloadResolverState()
     var memberSearchCache = MemberSearchCache()
+    var aliasCache = ConcurrentValue<[SwiftType: SwiftType]>()
+    var allConformancesCache = ConcurrentValue<[String: [KnownProtocolConformance]]>()
+    var typeExistsCache = ConcurrentValue<[String: Bool]>()
     
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
@@ -38,6 +41,9 @@ public class DefaultTypeSystem: TypeSystem {
         protocolConformanceCache = ProtocolConformanceCache()
         overloadResolverState.makeCache()
         memberSearchCache.makeCache()
+        aliasCache.setup(value: [:])
+        allConformancesCache.setup(value: [:])
+        typeExistsCache.setup(value: [:])
     }
     
     public func tearDownCache() {
@@ -47,6 +53,9 @@ public class DefaultTypeSystem: TypeSystem {
         protocolConformanceCache = nil
         overloadResolverState.tearDownCache()
         memberSearchCache.tearDownCache()
+        aliasCache.tearDown()
+        allConformancesCache.tearDown()
+        typeExistsCache.tearDown()
     }
     
     public func overloadResolver() -> OverloadResolver {
@@ -99,15 +108,27 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func typeExists(_ name: String) -> Bool {
+        if typeExistsCache.usingCache, let result = typeExistsCache.readingValue({ $0?[name] }) {
+            return result
+        }
+        
+        var result: Bool
+        
         if _knownTypeWithNameUnaliased(name) != nil {
-            return true
+            result = true
+        } else if let name = typeNameIn(swiftType: resolveAlias(in: name)) {
+            result = _knownTypeWithNameUnaliased(name) != nil
+        } else {
+            result = false
         }
         
-        guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
-            return false
+        if typeExistsCache.usingCache {
+            typeExistsCache.modifyingValue { cache in
+                cache?[name] = result
+            }
         }
         
-        return _knownTypeWithNameUnaliased(name) != nil
+        return result
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
@@ -628,8 +649,22 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func resolveAlias(in type: SwiftType) -> SwiftType {
+        if aliasCache.usingCache {
+            if let result = aliasCache.readingValue({ $0?[type] }) {
+                return result
+            }
+        }
+        
         let resolver = TypealiasExpander(aliasesSource: typealiasProviders)
-        return resolver.expand(in: type)
+        let result = resolver.expand(in: type)
+        
+        if aliasCache.usingCache {
+            aliasCache.modifyingValue {
+                $0?[type] = result
+            }
+        }
+        
+        return result
     }
     
     public func supertype(of type: KnownType) -> KnownType? {
@@ -687,6 +722,34 @@ public class DefaultTypeSystem: TypeSystem {
         }
         
         return nil
+    }
+    
+    public func allConformances(of type: KnownType) -> [KnownProtocolConformance] {
+        if allConformancesCache.usingCache {
+            if let result = allConformancesCache.readingValue({ $0?[type.typeName] }) {
+                return result
+            }
+        }
+        
+        var protocols = type.knownProtocolConformances
+        
+        for prot in type.knownProtocolConformances {
+            if let type = knownTypeWithName(prot.protocolName) {
+                protocols.append(contentsOf: allConformances(of: type))
+            }
+        }
+        
+        if let supertype = supertype(of: type) {
+            protocols.append(contentsOf: allConformances(of: supertype))
+        }
+        
+        if allConformancesCache.usingCache {
+            allConformancesCache.modifyingValue { value in
+                value?[type.typeName] = protocols
+            }
+        }
+        
+        return protocols
     }
     
     public func method(withObjcSelector selector: SelectorSignature,
@@ -1177,10 +1240,7 @@ public class DefaultTypeSystem: TypeSystem {
         private let cache = ConcurrentValue<[String: Entry]>()
         
         init() {
-            cache.usingCache = true
-            cache.modifyingState { state in
-                state.value = [:]
-            }
+            cache.setup(value: [:])
         }
         
         func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {

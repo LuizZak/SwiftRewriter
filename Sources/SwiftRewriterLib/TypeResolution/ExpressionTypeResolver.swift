@@ -2,7 +2,7 @@ import SwiftAST
 import ObjcParser
 
 public final class ExpressionTypeResolver: SyntaxNodeRewriter {
-    private var nearestScopeCache: [HashablePointer<SyntaxNode>: CodeScopeNode] = [:]
+    private var nearestScopeCache: [ObjectIdentifier: CodeScopeNode] = [:]
     
     /// In case the expression type resolver is resolving a function context,
     /// this stack is prepared with the expected return types for the current
@@ -621,12 +621,12 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
 extension ExpressionTypeResolver {
     
     func nearestScope(for node: SyntaxNode) -> CodeScopeNode? {
-        if let scope = nearestScopeCache[HashablePointer(value: node)] {
+        if let scope = nearestScopeCache[ObjectIdentifier(node)] {
             return scope
         }
         
         let scope = node.nearestScope
-        nearestScopeCache[HashablePointer(value: node)] = scope
+        nearestScopeCache[ObjectIdentifier(node)] = scope
         
         return scope
     }
@@ -1007,23 +1007,5 @@ private class MemberInvocationResolver {
                                  static: isStatic,
                                  includeOptional: true,
                                  in: type)
-    }
-}
-
-private struct HashablePointer<T: AnyObject>: Hashable {
-    var value: T
-    var identifier: ObjectIdentifier
-    
-    init(value: T) {
-        self.value = value
-        self.identifier = ObjectIdentifier(value)
-    }
-    
-    static func == (lhs: HashablePointer<T>, rhs: HashablePointer<T>) -> Bool {
-        return lhs.identifier == rhs.identifier
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        identifier.hash(into: &hasher)
     }
 }
