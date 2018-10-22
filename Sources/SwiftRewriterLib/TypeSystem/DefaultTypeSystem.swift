@@ -13,6 +13,10 @@ public class DefaultTypeSystem: TypeSystem {
     private var baseClassTypesByName: [String: ClassType] = [:]
     private var initializedCache = false
     private var overloadResolverState = OverloadResolverState()
+    var memberSearchCache = MemberSearchCache()
+    var aliasCache = ConcurrentValue<[SwiftType: SwiftType]>()
+    var allConformancesCache = ConcurrentValue<[String: [KnownProtocolConformance]]>()
+    var typeExistsCache = ConcurrentValue<[String: Bool]>()
     
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
@@ -36,6 +40,10 @@ public class DefaultTypeSystem: TypeSystem {
         compoundKnownTypesCache = CompoundKnownTypesCache()
         protocolConformanceCache = ProtocolConformanceCache()
         overloadResolverState.makeCache()
+        memberSearchCache.makeCache()
+        aliasCache.setup(value: [:])
+        allConformancesCache.setup(value: [:])
+        typeExistsCache.setup(value: [:])
     }
     
     public func tearDownCache() {
@@ -44,6 +52,10 @@ public class DefaultTypeSystem: TypeSystem {
         compoundKnownTypesCache = nil
         protocolConformanceCache = nil
         overloadResolverState.tearDownCache()
+        memberSearchCache.tearDownCache()
+        aliasCache.tearDown()
+        allConformancesCache.tearDown()
+        typeExistsCache.tearDown()
     }
     
     public func overloadResolver() -> OverloadResolver {
@@ -96,15 +108,27 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func typeExists(_ name: String) -> Bool {
+        if typeExistsCache.usingCache, let result = typeExistsCache.readingValue({ $0?[name] }) {
+            return result
+        }
+        
+        var result: Bool
+        
         if _knownTypeWithNameUnaliased(name) != nil {
-            return true
+            result = true
+        } else if let name = typeNameIn(swiftType: resolveAlias(in: name)) {
+            result = _knownTypeWithNameUnaliased(name) != nil
+        } else {
+            result = false
         }
         
-        guard let name = typeNameIn(swiftType: resolveAlias(in: name)) else {
-            return false
+        if typeExistsCache.usingCache {
+            typeExistsCache.modifyingValue { cache in
+                cache?[name] = result
+            }
         }
         
-        return _knownTypeWithNameUnaliased(name) != nil
+        return result
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
@@ -625,8 +649,22 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func resolveAlias(in type: SwiftType) -> SwiftType {
+        if aliasCache.usingCache {
+            if let result = aliasCache.readingValue({ $0?[type] }) {
+                return result
+            }
+        }
+        
         let resolver = TypealiasExpander(aliasesSource: typealiasProviders)
-        return resolver.expand(in: type)
+        let result = resolver.expand(in: type)
+        
+        if aliasCache.usingCache {
+            aliasCache.modifyingValue {
+                $0?[type] = result
+            }
+        }
+        
+        return result
     }
     
     public func supertype(of type: KnownType) -> KnownType? {
@@ -686,11 +724,75 @@ public class DefaultTypeSystem: TypeSystem {
         return nil
     }
     
+    public func allConformances(of type: KnownType) -> [KnownProtocolConformance] {
+        if allConformancesCache.usingCache {
+            if let result = allConformancesCache.readingValue({ $0?[type.typeName] }) {
+                return result
+            }
+        }
+        
+        var protocols = type.knownProtocolConformances
+        
+        for prot in type.knownProtocolConformances {
+            if let type = knownTypeWithName(prot.protocolName) {
+                protocols.append(contentsOf: allConformances(of: type))
+            }
+        }
+        
+        if let supertype = supertype(of: type) {
+            protocols.append(contentsOf: allConformances(of: supertype))
+        }
+        
+        if allConformancesCache.usingCache {
+            allConformancesCache.modifyingValue { value in
+                value?[type.typeName] = protocols
+            }
+        }
+        
+        return protocols
+    }
+    
     public func method(withObjcSelector selector: SelectorSignature,
                        invocationTypeHints: [SwiftType?]?,
                        static isStatic: Bool,
                        includeOptional: Bool,
                        in type: KnownType) -> KnownMethod? {
+        
+        if memberSearchCache.usingCache,
+            let result =
+            memberSearchCache.lookupMethod(withObjcSelector: selector,
+                                           invocationTypeHints: invocationTypeHints,
+                                           static: isStatic,
+                                           includeOptional: includeOptional,
+                                           in: type.typeName) {
+            
+            return result
+        }
+        
+        let result = _method(withObjcSelector: selector,
+                             invocationTypeHints: invocationTypeHints,
+                             static: isStatic,
+                             includeOptional: includeOptional,
+                             in: type)
+        
+        
+        if memberSearchCache.usingCache {
+            memberSearchCache.storeMethod(withObjcSelector: selector,
+                                          invocationTypeHints: invocationTypeHints,
+                                          static: isStatic,
+                                          includeOptional: includeOptional,
+                                          in: type.typeName,
+                                          method: result)
+        }
+        
+        return result
+    }
+    
+    private func _method(withObjcSelector selector: SelectorSignature,
+                         invocationTypeHints: [SwiftType?]?,
+                         static isStatic: Bool,
+                         includeOptional: Bool,
+                         in type: KnownType) -> KnownMethod? {
         
         let methods =
             type.knownMethods
@@ -726,11 +828,11 @@ public class DefaultTypeSystem: TypeSystem {
                 continue
             }
             
-            if let method = method(withObjcSelector: selector,
-                                   invocationTypeHints: invocationTypeHints,
-                                   static: isStatic,
-                                   includeOptional: includeOptional,
-                                   in: prot) {
+            if let method = _method(withObjcSelector: selector,
+                                    invocationTypeHints: invocationTypeHints,
+                                    static: isStatic,
+                                    includeOptional: includeOptional,
+                                    in: prot) {
                 
                 return method
             }
@@ -738,11 +840,11 @@ public class DefaultTypeSystem: TypeSystem {
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            method(withObjcSelector: selector,
-                   invocationTypeHints: invocationTypeHints,
-                   static: isStatic,
-                   includeOptional: includeOptional,
-                   in: $0)
+            _method(withObjcSelector: selector,
+                    invocationTypeHints: invocationTypeHints,
+                    static: isStatic,
+                    includeOptional: includeOptional,
+                    in: $0)
         }
     }
     
@@ -750,6 +852,37 @@ public class DefaultTypeSystem: TypeSystem {
                          static isStatic: Bool,
                          includeOptional: Bool,
                          in type: KnownType) -> KnownProperty? {
+        
+        if memberSearchCache.usingCache,
+            let result =
+            memberSearchCache.lookupProperty(named: name,
+                                             static: isStatic,
+                                             includeOptional: includeOptional,
+                                             in: type.typeName) {
+            
+            return result
+        }
+        
+        let result = _property(named: name,
+                               static: isStatic,
+                               includeOptional: includeOptional,
+                               in: type)
+        
+        if memberSearchCache.usingCache {
+            memberSearchCache.storeProperty(named: name,
+                                            static: isStatic,
+                                            includeOptional: includeOptional,
+                                            in: type.typeName,
+                                            property: result)
+        }
+        
+        return result
+    }
+    
+    private func _property(named name: String,
+                           static isStatic: Bool,
+                           includeOptional: Bool,
+                           in type: KnownType) -> KnownProperty? {
         
         if let property = type.knownProperties.first(where: {
             $0.name == name
@@ -761,11 +894,33 @@ public class DefaultTypeSystem: TypeSystem {
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            property(named: name, static: isStatic, includeOptional: includeOptional, in: $0)
+            _property(named: name, static: isStatic, includeOptional: includeOptional, in: $0)
         }
     }
     
     public func field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty? {
+        if memberSearchCache.usingCache,
+            let result =
+            memberSearchCache.lookupField(named: name,
+                                          static: isStatic,
+                                          in: type.typeName) {
+            
+            return result
+        }
+        
+        let result = _field(named: name, static: isStatic, in: type)
+        
+        if memberSearchCache.usingCache {
+            memberSearchCache.storeField(named: name,
+                                         static: isStatic,
+                                         in: type.typeName,
+                                         field: result)
+        }
+        
+        return result
+    }
+    
+    private func _field(named name: String, static isStatic: Bool, in type: KnownType) -> KnownProperty? {
         if let field =
             type.knownFields
                 .first(where: { $0.name == name && $0.isStatic == isStatic }) {
@@ -774,7 +929,7 @@ public class DefaultTypeSystem: TypeSystem {
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            field(named: name, static: isStatic, in: $0)
+            _field(named: name, static: isStatic, in: $0)
         }
     }
     
@@ -829,14 +984,42 @@ public class DefaultTypeSystem: TypeSystem {
                        includeOptional: Bool,
                        in type: SwiftType) -> KnownMethod? {
         
+        let typeName =
+            memberSearchCache.usingCache
+                ? typeNameIn(swiftType: type)
+                : nil
+        
+        if memberSearchCache.usingCache, let typeName = typeName {
+            if let result =
+                memberSearchCache.lookupMethod(withObjcSelector: selector,
+                                               invocationTypeHints: invocationTypeHints,
+                                               static: isStatic,
+                                               includeOptional: includeOptional,
+                                               in: typeName) {
+                
+                return result
+            }
+        }
+        
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        return method(withObjcSelector: selector,
-                      invocationTypeHints: invocationTypeHints,
-                      static: isStatic,
-                      includeOptional: includeOptional,
-                      in: knownType)
+        let result = method(withObjcSelector: selector,
+                            invocationTypeHints: invocationTypeHints,
+                            static: isStatic,
+                            includeOptional: includeOptional,
+                            in: knownType)
+        
+        if memberSearchCache.usingCache, let typeName = typeName {
+            memberSearchCache.storeMethod(withObjcSelector: selector,
+                                          invocationTypeHints: invocationTypeHints,
+                                          static: isStatic,
+                                          includeOptional: includeOptional,
+                                          in: typeName,
+                                          method: result)
+        }
+        
+        return result
     }
     
     public func property(named name: String,
@@ -844,20 +1027,65 @@ public class DefaultTypeSystem: TypeSystem {
                          includeOptional: Bool,
                          in type: SwiftType) -> KnownProperty? {
         
+        let typeName =
+            memberSearchCache.usingCache
+                ? typeNameIn(swiftType: type)
+                : nil
+        
+        if memberSearchCache.usingCache, let typeName = typeName {
+            if let result =
+                memberSearchCache.lookupProperty(named: name,
+                                                 static: isStatic,
+                                                 includeOptional: includeOptional,
+                                                 in: typeName) {
+                
+                return result
+            }
+        }
+        
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        return property(named: name,
-                        static: isStatic,
-                        includeOptional: includeOptional,
-                        in: knownType)
+        let result = property(named: name,
+                              static: isStatic,
+                              includeOptional: includeOptional,
+                              in: knownType)
+        
+        if memberSearchCache.usingCache, let typeName = typeName {
+            memberSearchCache.storeProperty(named: name,
+                                            static: isStatic,
+                                            includeOptional: includeOptional,
+                                            in: typeName,
+                                            property: result)
+        }
+        
+        return result
     }
     
     public func field(named name: String, static isStatic: Bool, in type: SwiftType) -> KnownProperty? {
+        
+        let typeName =
+            memberSearchCache.usingCache
+                ? typeNameIn(swiftType: type)
+                : nil
+        
+        if memberSearchCache.usingCache, let typeName = typeName {
+            if let result = memberSearchCache.lookupField(named: name, static: isStatic, in: typeName) {
+                return result
+            }
+        }
+        
         guard let knownType = self.findType(for: type) else {
             return nil
         }
-        return field(named: name, static: isStatic, in: knownType)
+        
+        let result = field(named: name, static: isStatic, in: knownType)
+        
+        if memberSearchCache.usingCache, let typeName = typeName {
+            memberSearchCache.storeField(named: name, static: isStatic, in: typeName, field: result)
+        }
+        
+        return result
     }
     
     private func classTypeDefinition(name: String) -> ClassType? {
@@ -1012,10 +1240,7 @@ public class DefaultTypeSystem: TypeSystem {
         private let cache = ConcurrentValue<[String: Entry]>()
         
         init() {
-            cache.usingCache = true
-            cache.modifyingState { state in
-                state.value = [:]
-            }
+            cache.setup(value: [:])
         }
         
         func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
@@ -1220,6 +1445,142 @@ public class DefaultTypeSystem: TypeSystem {
             private struct _KnownProtocolConformance: KnownProtocolConformance {
                 var protocolName: String
             }
+        }
+    }
+    
+    internal final class MemberSearchCache {
+        private let methodsCache = ConcurrentValue<[MethodSearchEntry: KnownMethod?]>()
+        private let propertiesCache = ConcurrentValue<[PropertySearchEntry: KnownProperty?]>()
+        private let fieldsCache = ConcurrentValue<[FieldSearchEntry: KnownProperty?]>()
+        
+        var usingCache: Bool = false
+        
+        func makeCache() {
+            usingCache = true
+            methodsCache.setup(value: [:])
+            propertiesCache.setup(value: [:])
+            fieldsCache.setup(value: [:])
+        }
+        
+        func tearDownCache() {
+            usingCache = false
+            methodsCache.tearDown()
+            propertiesCache.tearDown()
+            fieldsCache.tearDown()
+        }
+        
+        func storeMethod(withObjcSelector selector: SelectorSignature,
+                         invocationTypeHints: [SwiftType?]?,
+                         static isStatic: Bool,
+                         includeOptional: Bool,
+                         in typeName: String,
+                         method: KnownMethod?) {
+            
+            methodsCache.modifyingValue { cache in
+                let entry = MethodSearchEntry(selector: selector,
+                                              invocationTypeHints: invocationTypeHints,
+                                              isStatic: isStatic,
+                                              includeOptional: includeOptional,
+                                              typeName: typeName)
+                
+                cache?[entry] = method
+            }
+        }
+        
+        func storeProperty(named name: String,
+                           static isStatic: Bool,
+                           includeOptional: Bool,
+                           in typeName: String,
+                           property: KnownProperty?) {
+            
+            propertiesCache.modifyingValue { cache in
+                let entry = PropertySearchEntry(name: name,
+                                                isStatic: isStatic,
+                                                includeOptional: includeOptional,
+                                                typeName: typeName)
+                
+                cache?[entry] = property
+            }
+        }
+        
+        func storeField(named name: String,
+                        static isStatic: Bool,
+                        in typeName: String,
+                        field: KnownProperty?) {
+            
+            fieldsCache.modifyingValue { cache in
+                let entry = FieldSearchEntry(name: name,
+                                             isStatic: isStatic,
+                                             typeName: typeName)
+                
+                cache?[entry] = field
+            }
+        }
+        
+        func lookupMethod(withObjcSelector selector: SelectorSignature,
+                          invocationTypeHints: [SwiftType?]?,
+                          static isStatic: Bool,
+                          includeOptional: Bool,
+                          in typeName: String) -> KnownMethod?? {
+            
+            return methodsCache.readingValue { cache in
+                let entry = MethodSearchEntry(selector: selector,
+                                              invocationTypeHints: invocationTypeHints,
+                                              isStatic: isStatic,
+                                              includeOptional: includeOptional,
+                                              typeName: typeName)
+                
+                return cache?[entry]
+            }
+        }
+        
+        func lookupProperty(named name: String,
+                            static isStatic: Bool,
+                            includeOptional: Bool,
+                            in typeName: String) -> KnownProperty?? {
+            
+            return propertiesCache.readingValue { cache in
+                let entry = PropertySearchEntry(name: name,
+                                                isStatic: isStatic,
+                                                includeOptional: includeOptional,
+                                                typeName: typeName)
+                
+                return cache?[entry]
+            }
+        }
+        
+        func lookupField(named name: String,
+                         static isStatic: Bool,
+                         in typeName: String) -> KnownProperty?? {
+            
+            return fieldsCache.readingValue { cache in
+                let entry = FieldSearchEntry(name: name,
+                                             isStatic: isStatic,
+                                             typeName: typeName)
+                
+                return cache?[entry]
+            }
+        }
+        
+        struct MethodSearchEntry: Hashable {
+            var selector: SelectorSignature
+            var invocationTypeHints: [SwiftType?]?
+            var isStatic: Bool
+            var includeOptional: Bool
+            var typeName: String
+        }
+        
+        struct PropertySearchEntry: Hashable {
+            var name: String
+            var isStatic: Bool
+            var includeOptional: Bool
+            var typeName: String
+        }
+        
+        struct FieldSearchEntry: Hashable {
+            var name: String
+            var isStatic: Bool
+            var typeName: String
         }
     }
 }

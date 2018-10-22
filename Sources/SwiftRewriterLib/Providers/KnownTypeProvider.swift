@@ -16,7 +16,7 @@ public protocol KnownTypeProvider {
 /// Gathers one or more type providers into a single `KnownTypeProvider` interface.
 public class CompoundKnownTypeProvider: KnownTypeProvider {
     
-    private var typesCache = ConcurrentValue<[Int: KnownType]>()
+    private var typesCache = ConcurrentValue<[String: KnownType]>()
     private var canonicalTypenameCache = ConcurrentValue<[String: String]>()
     
     public var providers: [KnownTypeProvider]
@@ -26,14 +26,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func makeCache() {
-        typesCache.modifyingState { state in
-            state.value = [:]
-            typesCache.usingCache = true
-        }
-        canonicalTypenameCache.modifyingState { state in
-            state.value = [:]
-            canonicalTypenameCache.usingCache = true
-        }
+        typesCache.setup(value: [:])
+        canonicalTypenameCache.setup(value: [:])
     }
     
     func tearDownCache() {
@@ -52,7 +46,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        if typesCache.usingCache, let type = typesCache.readingValue({ $0?[name.hashValue] }) {
+        if typesCache.usingCache, let type = typesCache.readingValue({ $0?[name] }) {
             return type
         }
         
@@ -72,7 +66,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         if typesCache.usingCache {
             typesCache.modifyingValue { value in
-                value?[name.hashValue] = type
+                value?[name] = type
             }
         }
         
