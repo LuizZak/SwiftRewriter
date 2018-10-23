@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "Antlr4",
+        "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
+        "state": {
+          "branch": "master",
+          "revision": "754a3fac2175d1fd577391d04ac2a445304d3649",
+          "version": null
+        }
+      },
+      {
         "package": "Console",
         "repositoryURL": "https://github.com/LuizZak/console.git",
         "state": {

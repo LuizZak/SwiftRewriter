@@ -16,7 +16,7 @@ public protocol KnownTypeProvider {
 /// Gathers one or more type providers into a single `KnownTypeProvider` interface.
 public class CompoundKnownTypeProvider: KnownTypeProvider {
     
-    private var typesCache = ConcurrentValue<[String: KnownType]>()
+    private var typesCache = ConcurrentValue<[String: KnownType?]>()
     private var canonicalTypenameCache = ConcurrentValue<[String: String]>()
     
     public var providers: [KnownTypeProvider]
@@ -59,6 +59,11 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         }
         
         if types.isEmpty {
+            if typesCache.usingCache {
+                typesCache.modifyingValue { value in
+                    value?[name] = nil
+                }
+            }
             return nil
         }
         
