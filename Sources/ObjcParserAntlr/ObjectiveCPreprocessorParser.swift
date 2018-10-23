@@ -5,11 +5,12 @@ open class ObjectiveCPreprocessorParser: Parser {
     public class State {
         public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
         
-        internal var _decisionToDFA: [DFA]
+        internal var _decisionToDFA: [DFA<ParserATNConfig>]
         internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+        let atnConfigPool = ParserATNConfigPool()
         
         public init() {
-            var decisionToDFA = [DFA]()
+            var decisionToDFA = [DFA<ParserATNConfig>]()
             let length = _ATN.getNumberOfDecisions()
             for i in 0..<length {
                 decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
@@ -21,7 +22,7 @@ open class ObjectiveCPreprocessorParser: Parser {
     public var _ATN: ATN {
         return state._ATN
     }
-    internal var _decisionToDFA: [DFA] {
+    internal var _decisionToDFA: [DFA<ParserATNConfig>] {
         return state._decisionToDFA
     }
     internal var _sharedContextCache: PredictionContextCache {
@@ -105,12 +106,8 @@ open class ObjectiveCPreprocessorParser: Parser {
 	    return ObjectiveCPreprocessorParser.VOCABULARY
 	}
 
-    public override init(_ input: TokenStream) throws {
-        self.state = State()
-        
-        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
-        try super.init(input)
-        _interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+    public override convenience init(_ input: TokenStream) throws {
+        try self.init(input, State())
     }
     
     public init(_ input: TokenStream, _ state: State) throws {
@@ -118,7 +115,11 @@ open class ObjectiveCPreprocessorParser: Parser {
         
         RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
         try super.init(input)
-        _interp = ParserATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+        _interp = ParserATNSimulator(self,
+                                     _ATN,
+                                     _decisionToDFA,
+                                     _sharedContextCache,
+                                     atnConfigPool: state.atnConfigPool)
     }
     
 	open class ObjectiveCDocumentContext:ParserRuleContext {

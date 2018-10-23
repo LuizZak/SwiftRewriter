@@ -5,11 +5,12 @@ open class ObjectiveCPreprocessorLexer: Lexer {
     public class State {
         public let _ATN: ATN = ATNDeserializer().deserializeFromJson(_serializedATN)
         
-        internal var _decisionToDFA: [DFA]
+        internal var _decisionToDFA: [DFA<LexerATNConfig>]
         internal let _sharedContextCache: PredictionContextCache = PredictionContextCache()
+        let atnConfigPool: LexerATNConfigPool = LexerATNConfigPool()
         
         public init() {
-            var decisionToDFA = [DFA]()
+            var decisionToDFA = [DFA<LexerATNConfig>]()
             let length = _ATN.getNumberOfDecisions()
             for i in 0..<length {
                 decisionToDFA.append(DFA(_ATN.getDecisionState(i)!, i))
@@ -21,7 +22,7 @@ open class ObjectiveCPreprocessorLexer: Lexer {
     public var _ATN: ATN {
         return state._ATN
     }
-    internal var _decisionToDFA: [DFA] {
+    internal var _decisionToDFA: [DFA<LexerATNConfig>] {
         return state._decisionToDFA
     }
     internal var _sharedContextCache: PredictionContextCache {
@@ -109,12 +110,8 @@ open class ObjectiveCPreprocessorLexer: Lexer {
         return ObjectiveCPreprocessorLexer.VOCABULARY
     }
 
-    public required init(_ input: CharStream) {
-        self.state = State()
-        
-        RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
-        super.init(input)
-        _interp = LexerATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+    public required convenience init(_ input: CharStream) {
+        self.init(input, State())
     }
     
     public init(_ input: CharStream, _ state: State) {
@@ -122,7 +119,11 @@ open class ObjectiveCPreprocessorLexer: Lexer {
         
         RuntimeMetaData.checkVersion("4.7", RuntimeMetaData.VERSION)
         super.init(input)
-        _interp = LexerATNSimulator(self,_ATN,_decisionToDFA, _sharedContextCache)
+        _interp = LexerATNSimulator(self,
+                                    _ATN,
+                                    _decisionToDFA,
+                                    _sharedContextCache,
+                                    lexerAtnConfigPool: state.atnConfigPool)
     }
 
 	override
