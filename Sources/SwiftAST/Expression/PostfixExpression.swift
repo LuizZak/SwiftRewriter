@@ -78,6 +78,26 @@ public class PostfixExpression: Expression {
         _subExpressions = [exp] + op.subExpressions
     }
     
+    required public convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let exp = try container.decodeExpression(Expression.self, forKey: .exp)
+        let op: Postfix
+        
+        let opType = try container.decode(OpType.self, forKey: .opType)
+        
+        switch opType {
+        case .member:
+            op = try container.decode(MemberPostfix.self, forKey: .op)
+        case .subscript:
+            op = try container.decode(SubscriptPostfix.self, forKey: .op)
+        case .functionCall:
+            op = try container.decode(FunctionCallPostfix.self, forKey: .op)
+        }
+        
+        self.init(exp: exp, op: op)
+    }
+    
     public override func copy() -> PostfixExpression {
         return PostfixExpression(exp: exp.copy(), op: op.copy()).copyTypeAndMetadata(from: self)
     }
@@ -95,8 +115,44 @@ public class PostfixExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(exp, forKey: .exp)
+        try container.encode(op, forKey: .op)
+        
+        switch op {
+        case is MemberPostfix:
+            try container.encode(OpType.member, forKey: .opType)
+        case is SubscriptPostfix:
+            try container.encode(OpType.subscript, forKey: .opType)
+        case is FunctionCallPostfix:
+            try container.encode(OpType.functionCall, forKey: .opType)
+        default:
+            throw EncodingError.invalidValue(type(of: op),
+                                             EncodingError.Context.init(
+                                                codingPath:
+                                                encoder.codingPath + [CodingKeys.op],
+                                                debugDescription: "Unknown postfix type \(type(of: op))"))
+        }
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: PostfixExpression, rhs: PostfixExpression) -> Bool {
         return lhs.exp == rhs.exp && lhs.op == rhs.op
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case exp
+        case op
+        case opType
+    }
+    
+    enum OpType: String, Codable {
+        case member
+        case `subscript`
+        case functionCall
     }
 }
 extension Expression {
@@ -106,7 +162,7 @@ extension Expression {
 }
 
 /// A postfix operation of a PostfixExpression
-public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
+public class Postfix: ExpressionComponent, Codable, Equatable, CustomStringConvertible {
     /// Owning postfix expression for this postfix operator
     public internal(set) weak var postfixExpression: PostfixExpression?
     
@@ -138,6 +194,10 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
         
     }
     
+    public required init(from decoder: Decoder) throws {
+        
+    }
+    
     public func copy() -> Postfix {
         fatalError("Must be overriden by subclasses")
     }
@@ -149,6 +209,10 @@ public class Postfix: ExpressionComponent, Equatable, CustomStringConvertible {
     
     public func isEqual(to other: Postfix) -> Bool {
         return false
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        
     }
     
     public static func == (lhs: Postfix, rhs: Postfix) -> Bool {
@@ -176,6 +240,14 @@ public final class MemberPostfix: Postfix {
     
     public init(name: String) {
         self.name = name
+        
+        super.init()
+    }
+    
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(name: container.decode(String.self, forKey: .name))
     }
     
     public override func copy() -> MemberPostfix {
@@ -191,8 +263,20 @@ public final class MemberPostfix: Postfix {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(name, forKey: .name)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: MemberPostfix, rhs: MemberPostfix) -> Bool {
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.name == rhs.name
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case name
     }
 }
 public extension Postfix {
@@ -224,6 +308,14 @@ public final class SubscriptPostfix: Postfix {
     
     public init(expression: Expression) {
         self.expression = expression
+        
+        super.init()
+    }
+    
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(expression: container.decodeExpression(forKey: .expression))
     }
     
     public override func copy() -> SubscriptPostfix {
@@ -249,8 +341,20 @@ public final class SubscriptPostfix: Postfix {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(expression, forKey: .expression)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: SubscriptPostfix, rhs: SubscriptPostfix) -> Bool {
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.expression == rhs.expression
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case expression
     }
 }
 public extension Postfix {
@@ -293,6 +397,14 @@ public final class FunctionCallPostfix: Postfix {
     public init(arguments: [FunctionArgument]) {
         self.arguments = arguments
         self._subExpressions = arguments.map { $0.expression }
+        
+        super.init()
+    }
+    
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(arguments: container.decode([FunctionArgument].self, forKey: .arguments))
     }
     
     public override func copy() -> FunctionCallPostfix {
@@ -337,8 +449,20 @@ public final class FunctionCallPostfix: Postfix {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(arguments, forKey: .arguments)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: FunctionCallPostfix, rhs: FunctionCallPostfix) -> Bool {
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.arguments == rhs.arguments
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case arguments
     }
 }
 public extension Postfix {
@@ -358,7 +482,7 @@ public extension PostfixExpression {
 }
 
 /// A function argument kind from a function call expression
-public struct FunctionArgument: Equatable {
+public struct FunctionArgument: Codable, Equatable {
     public var label: String?
     public var expression: Expression
     
@@ -371,6 +495,13 @@ public struct FunctionArgument: Equatable {
         self.expression = expression
     }
     
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.label = try container.decodeIfPresent(String.self, forKey: .label)
+        self.expression = try container.decodeExpression(forKey: .expression)
+    }
+    
     public func copy() -> FunctionArgument {
         return FunctionArgument(label: label, expression: expression.copy())
     }
@@ -381,6 +512,18 @@ public struct FunctionArgument: Equatable {
     
     public static func labeled(_ label: String, _ exp: Expression) -> FunctionArgument {
         return FunctionArgument(label: label, expression: exp)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeIfPresent(label, forKey: .label)
+        try container.encodeExpression(expression, forKey: .expression)
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case label
+        case expression
     }
 }
 

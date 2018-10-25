@@ -96,7 +96,13 @@ let package = Package(
             dependencies: ["GrammarModels"]),
         .testTarget(
             name: "SwiftASTTests",
-            dependencies: ["SwiftAST", "TestCommons"]),
+            dependencies: ["SwiftAST",
+                           "TestCommons",
+                           // TODO: We use this SwiftRewriterLib dependency here
+                           // to print AST's in a test for debugging purposes.
+                           // Attempt to abstract a simple AST-to-string functionality
+                           // to TestCommons and use that one, instead.
+                           "SwiftRewriterLib"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",

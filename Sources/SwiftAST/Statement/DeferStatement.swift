@@ -18,6 +18,12 @@ public class DeferStatement: Statement {
         body.parent = self
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(body: container.decodeStatement(CompoundStatement.self, forKey: .body))
+    }
+    
     public override func copy() -> DeferStatement {
         return DeferStatement(body: body.copy()).copyMetadata(from: self)
     }
@@ -33,6 +39,17 @@ public class DeferStatement: Statement {
         default:
             return false
         }
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeStatement(body, forKey: .body)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    public enum CodingKeys: String, CodingKey {
+        case body
     }
 }
 public extension Statement {

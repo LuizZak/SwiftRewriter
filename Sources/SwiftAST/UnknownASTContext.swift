@@ -3,13 +3,13 @@ public struct UnknownASTContext: CustomStringConvertible, CustomReflectable {
         return context.description
     }
     
-    public var context: CustomStringConvertible
+    public var context: String
     
     public var customMirror: Mirror {
         return Mirror(reflecting: "")
     }
     
     public init(context: CustomStringConvertible) {
-        self.context = context
+        self.context = context.description
     }
 }

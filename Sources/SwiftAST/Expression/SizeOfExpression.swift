@@ -40,6 +40,12 @@ public class SizeOfExpression: Expression {
         super.init()
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(value: container.decode(Value.self, forKey: .value))
+    }
+    
     public override func copy() -> SizeOfExpression {
         return SizeOfExpression(value: value.copy()).copyTypeAndMetadata(from: self)
     }
@@ -57,14 +63,54 @@ public class SizeOfExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(value, forKey: .value)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: SizeOfExpression, rhs: SizeOfExpression) -> Bool {
         return lhs.value == rhs.value
     }
     
     /// Inner expression value for this SizeOfExpression
-    public enum Value: Equatable {
+    public enum Value: Codable, Equatable {
         case type(SwiftType)
         case expression(Expression)
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            let discriminator = try container.decode(String.self, forKey: .discriminator)
+            
+            switch discriminator {
+            case "type":
+                try self = .type(container.decode(SwiftType.self, forKey: .payload))
+            case "expression":
+                try self = .expression(container.decodeExpression(forKey: .payload))
+            default:
+                throw DecodingError.dataCorruptedError(
+                    forKey: CodingKeys.discriminator,
+                    in: container,
+                    debugDescription: "Invalid discriminator tag \(discriminator)")
+            }
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            switch self {
+            case .type(let value):
+                try container.encode("type", forKey: .discriminator)
+                try container.encode(value, forKey: .payload)
+                
+            case .expression(let value):
+                try container.encode("expression", forKey: .discriminator)
+                try container.encodeExpression(value, forKey: .payload)
+            }
+        }
         
         public func copy() -> Value {
             switch self {
@@ -74,6 +120,15 @@ public class SizeOfExpression: Expression {
                 return .expression(exp.copy())
             }
         }
+        
+        public enum CodingKeys: String, CodingKey {
+            case discriminator = "kind"
+            case payload
+        }
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case value
     }
 }
 extension Expression {

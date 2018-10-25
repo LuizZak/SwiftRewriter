@@ -35,6 +35,15 @@ public class BlockLiteralExpression: Expression {
         self.body.parent = self
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(
+            parameters: container.decode([BlockParameter].self, forKey: .parameters),
+            returnType: container.decode(SwiftType.self, forKey: .returnType),
+            body: container.decodeStatement(CompoundStatement.self, forKey: .body))
+    }
+    
     public override func copy() -> BlockLiteralExpression {
         return BlockLiteralExpression(parameters: parameters,
                                       returnType: returnType,
@@ -54,10 +63,26 @@ public class BlockLiteralExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(parameters, forKey: .parameters)
+        try container.encode(returnType, forKey: .returnType)
+        try container.encodeStatement(body, forKey: .body)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: BlockLiteralExpression, rhs: BlockLiteralExpression) -> Bool {
         return lhs.parameters == rhs.parameters &&
             lhs.returnType == rhs.returnType &&
             lhs.body == rhs.body
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case parameters
+        case returnType
+        case body
     }
 }
 public extension Expression {
@@ -66,7 +91,7 @@ public extension Expression {
     }
 }
 
-public struct BlockParameter: Equatable {
+public struct BlockParameter: Codable, Equatable {
     public var name: String
     public var type: SwiftType
     

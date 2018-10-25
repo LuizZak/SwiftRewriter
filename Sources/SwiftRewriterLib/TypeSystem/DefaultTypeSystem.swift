@@ -17,6 +17,7 @@ public class DefaultTypeSystem: TypeSystem {
     var aliasCache = ConcurrentValue<[SwiftType: SwiftType]>()
     var allConformancesCache = ConcurrentValue<[String: [KnownProtocolConformance]]>()
     var typeExistsCache = ConcurrentValue<[String: Bool]>()
+    var knownTypeForSwiftType = ConcurrentValue<[SwiftType: KnownType?]>()
     
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
@@ -44,6 +45,7 @@ public class DefaultTypeSystem: TypeSystem {
         aliasCache.setup(value: [:])
         allConformancesCache.setup(value: [:])
         typeExistsCache.setup(value: [:])
+        knownTypeForSwiftType.setup(value: [:])
     }
     
     public func tearDownCache() {
@@ -56,6 +58,7 @@ public class DefaultTypeSystem: TypeSystem {
         aliasCache.tearDown()
         allConformancesCache.tearDown()
         typeExistsCache.tearDown()
+        knownTypeForSwiftType.tearDown()
     }
     
     public func overloadResolver() -> OverloadResolver {
@@ -934,11 +937,18 @@ public class DefaultTypeSystem: TypeSystem {
     }
     
     public func findType(for swiftType: SwiftType) -> KnownType? {
+        if knownTypeForSwiftType.usingCache {
+            if let result = knownTypeForSwiftType.readingValue({ $0?[swiftType] }) {
+                return result
+            }
+        }
+        
         let swiftType = swiftType.deepUnwrapped
+        let result: KnownType?
         
         switch swiftType {
         case .nominal(.typeName(let typeName)):
-            return knownTypeWithName(typeName)
+            result = knownTypeWithName(typeName)
             
         // Meta-types recurse on themselves
         case .metatype(for: let inner):
@@ -946,18 +956,26 @@ public class DefaultTypeSystem: TypeSystem {
             
             switch type {
             case .nominal(.typeName(let name)):
-                return knownTypeWithName(name)
+                result = knownTypeWithName(name)
             default:
-                return findType(for: type)
+                result = findType(for: type)
             }
             
         case .protocolComposition(let types):
-            return composeTypeWithKnownTypes(types.map { $0.description })
+            result = composeTypeWithKnownTypes(types.map { $0.description })
             
         // Other Swift types are not supported, at the moment.
         default:
-            return nil
+            result = nil
         }
+        
+        if knownTypeForSwiftType.usingCache {
+            knownTypeForSwiftType.modifyingValue { cache in
+                cache?[swiftType] = result
+            }
+        }
+        
+        return result
     }
     
     public func constructor(withArgumentLabels labels: [String?],

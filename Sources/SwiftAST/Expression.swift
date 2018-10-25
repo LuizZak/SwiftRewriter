@@ -13,7 +13,7 @@ public protocol ExpressionComponent {
     var subExpressions: [Expression] { get }
 }
 
-open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringConvertible, CustomReflectable {
+open class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, CustomStringConvertible, CustomReflectable {
     /// `true` if this expression sub-tree contains only literal-based sub-expressions.
     /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
     /// `.unary`, `.prefix`, `.parens`, and `.ternary` which only feature
@@ -87,6 +87,14 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
         return resolvedType == .errorType
     }
     
+    override public init() {
+        super.init()
+    }
+    
+    required public init(from decoder: Decoder) throws {
+        
+    }
+    
     /// Changes this Expression's resolved type to be an error type.
     /// This overwrites any existing type that may be assigned.
     /// Returns self for potential chaining support.
@@ -112,6 +120,10 @@ open class Expression: SyntaxNode, ExpressionComponent, Equatable, CustomStringC
     
     open func isEqual(to other: Expression) -> Bool {
         return false
+    }
+    
+    open func encode(to encoder: Encoder) throws {
+        
     }
     
     public static func == (lhs: Expression, rhs: Expression) -> Bool {

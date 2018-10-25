@@ -27,6 +27,12 @@ public class ParensExpression: Expression {
         exp.parent = self
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(exp: container.decodeExpression(forKey: .exp))
+    }
+    
     public override func copy() -> ParensExpression {
         return ParensExpression(exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
@@ -44,8 +50,20 @@ public class ParensExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(exp, forKey: .exp)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: ParensExpression, rhs: ParensExpression) -> Bool {
         return lhs.exp == rhs.exp
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case exp
     }
 }
 public extension Expression {

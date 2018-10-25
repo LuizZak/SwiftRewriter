@@ -36,6 +36,15 @@ public class AssignmentExpression: Expression {
         rhs.parent = self
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(
+            lhs: container.decodeExpression(forKey: .lhs),
+            op: container.decode(SwiftOperator.self, forKey: .op),
+            rhs: container.decodeExpression(forKey: .rhs))
+    }
+    
     public override func copy() -> AssignmentExpression {
         return
             AssignmentExpression(
@@ -58,8 +67,24 @@ public class AssignmentExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(lhs, forKey: .lhs)
+        try container.encode(op, forKey: .op)
+        try container.encodeExpression(rhs, forKey: .rhs)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: AssignmentExpression, rhs: AssignmentExpression) -> Bool {
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case lhs
+        case op
+        case rhs
     }
 }
 public extension Expression {

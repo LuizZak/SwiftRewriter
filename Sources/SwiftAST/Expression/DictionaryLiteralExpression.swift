@@ -31,6 +31,12 @@ public class DictionaryLiteralExpression: Expression {
         _subExpressions = pairs.flatMap { [$0.key, $0.value] }
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(pairs: container.decode([ExpressionDictionaryPair].self, forKey: .pairs))
+    }
+    
     public override func copy() -> DictionaryLiteralExpression {
         return DictionaryLiteralExpression(pairs: pairs.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
@@ -48,8 +54,20 @@ public class DictionaryLiteralExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(pairs, forKey: .pairs)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: DictionaryLiteralExpression, rhs: DictionaryLiteralExpression) -> Bool {
         return lhs.pairs == rhs.pairs
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case pairs
     }
 }
 public extension Expression {
@@ -58,7 +76,7 @@ public extension Expression {
     }
 }
 
-public struct ExpressionDictionaryPair: Equatable {
+public struct ExpressionDictionaryPair: Codable, Equatable {
     public var key: Expression
     public var value: Expression
     
@@ -67,8 +85,27 @@ public struct ExpressionDictionaryPair: Equatable {
         self.value = value
     }
     
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.key = try container.decodeExpression(forKey: .key)
+        self.value = try container.decodeExpression(forKey: .value)
+    }
+    
     public func copy() -> ExpressionDictionaryPair {
         return ExpressionDictionaryPair(key: key.copy(), value: value.copy())
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(key, forKey: .key)
+        try container.encodeExpression(value, forKey: .value)
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case key
+        case value
     }
 }
 
