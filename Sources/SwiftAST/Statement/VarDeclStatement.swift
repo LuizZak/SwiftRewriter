@@ -95,7 +95,7 @@ public struct StatementVariableDeclaration: Codable, Equatable {
         try self.type = container.decode(SwiftType.self, forKey: .type)
         try self.ownership = container.decode(Ownership.self, forKey: .ownership)
         try self.isConstant = container.decode(Bool.self, forKey: .isConstant)
-        try self.initialization = container.decodeExpression(forKey: .initialization)
+        try self.initialization = container.decodeExpressionIfPresent(forKey: .initialization)
         
     }
     

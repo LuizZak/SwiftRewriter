@@ -10,6 +10,26 @@ class SwiftASTSerializationTests: XCTestCase {
             Statement.expression(
                 Expression.identifier("self").dot("member").assignment(op: .assign, rhs: .constant(0))
             ),
+            Statement.expression(
+                Expression.unknown(UnknownASTContext(context: "Context"))
+            ),
+            Statement.expression(
+                Expression.ternary(
+                    Expression.constant(true),
+                    true: Expression.unary(op: .add, .constant("This")),
+                    false: .constant("That")
+                )
+            ),
+            Statement.unknown(UnknownASTContext(context: "Context")),
+            Statement.do([
+                Statement.expression(
+                    Expression.dictionaryLiteral([
+                        Expression.prefix(op: .subtract, .constant(0)):
+                            Expression.sizeof(Expression.identifier("Int"))
+                        ])
+                )
+                ]),
+            Statement.semicolon,
             Statement.if(
                 Expression.constant(true),
                 body: [
@@ -39,7 +59,12 @@ class SwiftASTSerializationTests: XCTestCase {
                         Expression.constant(0).binary(op: .openRange, rhs: .constant(100)),
                         body: [
                             
-                        ])
+                        ]),
+                    Statement.continue
+                ]),
+            Statement.defer([
+                Statement.fallthrough,
+                Statement.variableDeclaration(identifier: "abc", type: .int, initialization: nil)
                 ]),
             Statement.doWhile(
                 Expression.cast(.constant(0), type: .int),
@@ -48,7 +73,8 @@ class SwiftASTSerializationTests: XCTestCase {
                         Expression.block(body: [
                             
                             ])
-                        ])
+                        ]),
+                    Statement.break
                 ]
             )
         ]
