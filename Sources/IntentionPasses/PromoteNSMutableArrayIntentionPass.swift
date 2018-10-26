@@ -43,7 +43,7 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
                 }
             }
             
-            if let baseClass = type as? BaseClassIntention {
+            if let baseClass = type as? InstanceVariableContainerIntention {
                 for field in baseClass.instanceVariables {
                     if let arrayType = arrayTypeForNSMutableArray(field.type) {
                         let entry =
@@ -87,7 +87,9 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
         }
         
         // Analysis passed! Switch type of array, now.
-        
+        // FIXME: Should switch usages of member types of `NSMutableArray`s (e.g.
+        // `add()`, `index(of:)`, etc.) to the equivalent member types of
+        // `Array<T>`
         
         let typeName = context.typeMapper.typeNameString(for: entry.arrayType)
         
