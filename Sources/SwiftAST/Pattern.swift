@@ -1,5 +1,5 @@
 /// A pattern for pattern-matching
-public enum Pattern: Equatable {
+public enum Pattern: Codable, Equatable {
     /// An identifier pattern
     case identifier(String)
     
@@ -8,6 +8,42 @@ public enum Pattern: Equatable {
     
     /// A tuple pattern
     indirect case tuple([Pattern])
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let discriminator = try container.decode(String.self, forKey: .discriminator)
+        
+        switch discriminator {
+        case "identifier":
+            try self = .identifier(container.decode(String.self, forKey: .payload))
+        case "expression":
+            try self = .expression(container.decodeExpression(forKey: .payload))
+        case "tuple":
+            try self = .tuple(container.decode([Pattern].self, forKey: .payload))
+        default:
+            throw DecodingError.dataCorruptedError(
+                forKey: CodingKeys.discriminator,
+                in: container,
+                debugDescription: "Invalid discriminator tag \(discriminator)")
+        }
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        switch self {
+        case .identifier(let ident):
+            try container.encode("identifier", forKey: .discriminator)
+            try container.encode(ident, forKey: .payload)
+        case .expression(let exp):
+            try container.encode("expression", forKey: .discriminator)
+            try container.encodeExpression(exp, forKey: .payload)
+        case .tuple(let pattern):
+            try container.encode("tuple", forKey: .discriminator)
+            try container.encode(pattern, forKey: .payload)
+        }
+    }
     
     /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by unwrapping
     /// the inner patterns.
@@ -63,6 +99,11 @@ public enum Pattern: Equatable {
         case .identifier:
             break
         }
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case discriminator
+        case payload
     }
 }
 

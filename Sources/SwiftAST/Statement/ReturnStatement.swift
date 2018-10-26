@@ -26,6 +26,12 @@ public class ReturnStatement: Statement {
         exp?.parent = self
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(exp: container.decodeExpressionIfPresent(forKey: .exp))
+    }
+    
     public override func copy() -> ReturnStatement {
         return ReturnStatement(exp: exp?.copy()).copyMetadata(from: self)
     }
@@ -41,6 +47,18 @@ public class ReturnStatement: Statement {
         default:
             return false
         }
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpressionIfPresent(exp, forKey: .exp)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case exp
     }
 }
 public extension Statement {

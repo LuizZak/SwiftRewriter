@@ -41,6 +41,16 @@ public class BinaryExpression: Expression {
         self.rhs.parent = self
     }
     
+    required public convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let lhs = try container.decodeExpression(forKey: .lhs)
+        let op = try container.decode(SwiftOperator.self, forKey: .op)
+        let rhs = try container.decodeExpression(forKey: .rhs)
+        
+        self.init(lhs: lhs, op: op, rhs: rhs)
+    }
+    
     public override func copy() -> BinaryExpression {
         return
             BinaryExpression(
@@ -65,6 +75,22 @@ public class BinaryExpression: Expression {
     
     public static func == (lhs: BinaryExpression, rhs: BinaryExpression) -> Bool {
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(lhs, forKey: .lhs)
+        try container.encode(op, forKey: .op)
+        try container.encodeExpression(rhs, forKey: .rhs)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case lhs
+        case op
+        case rhs
     }
 }
 extension Expression {

@@ -18,6 +18,12 @@ public class ExpressionsStatement: Statement {
         expressions.forEach { $0.parent = self }
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(expressions: container.decodeExpressions(forKey: .expressions))
+    }
+    
     public override func copy() -> ExpressionsStatement {
         return
             ExpressionsStatement(expressions: expressions.map { $0.copy() })
@@ -35,6 +41,18 @@ public class ExpressionsStatement: Statement {
         default:
             return false
         }
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpressions(expressions, forKey: .expressions)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case expressions
     }
 }
 public extension Statement {

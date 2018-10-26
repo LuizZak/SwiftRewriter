@@ -37,6 +37,15 @@ public class TernaryExpression: Expression {
         ifFalse.parent = self
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(
+            exp: container.decodeExpression(forKey: .exp),
+            ifTrue: container.decodeExpression(forKey: .ifTrue),
+            ifFalse: container.decodeExpression(forKey: .ifFalse))
+    }
+    
     public override func copy() -> TernaryExpression {
         return
             TernaryExpression(
@@ -59,8 +68,24 @@ public class TernaryExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(exp, forKey: .exp)
+        try container.encodeExpression(ifTrue, forKey: .ifTrue)
+        try container.encodeExpression(ifFalse, forKey: .ifFalse)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: TernaryExpression, rhs: TernaryExpression) -> Bool {
         return lhs.exp == rhs.exp && lhs.ifTrue == rhs.ifTrue && lhs.ifFalse == rhs.ifFalse
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case exp
+        case ifTrue
+        case ifFalse
     }
 }
 public extension Expression {

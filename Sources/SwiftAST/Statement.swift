@@ -1,4 +1,4 @@
-open class Statement: SyntaxNode, Equatable {
+open class Statement: SyntaxNode, Codable, Equatable {
     /// Returns `true` if this statement resolve to an unconditional jump out
     /// of the current context.
     ///
@@ -9,6 +9,16 @@ open class Statement: SyntaxNode, Equatable {
     
     /// This statement label's (parsed from C's goto labels), if any.
     public var label: String?
+    
+    override public init() {
+        super.init()
+    }
+    
+    required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.label = try container.decodeIfPresent(String.self, forKey: .label)
+    }
     
     open override func copy() -> Statement {
         fatalError("Must be overriden by subclasses")
@@ -36,8 +46,18 @@ open class Statement: SyntaxNode, Equatable {
         return lhs.isEqual(to: rhs)
     }
     
+    open func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeIfPresent(label, forKey: .label)
+    }
+    
     final func cast<T: Statement>() -> T? {
         return self as? T
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case label
     }
 }
 
@@ -52,17 +72,14 @@ public extension Statement {
                             body: CompoundStatement,
                             else elseBody: CompoundStatement?) -> IfStatement {
         
-        return IfStatement(exp: exp, body: body, elseBody: elseBody)
+        return IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: nil)
     }
     public static func ifLet(_ pattern: Pattern,
                              _ exp: Expression,
                              body: CompoundStatement,
                              else elseBody: CompoundStatement?) -> IfStatement {
         
-        let stmt = IfStatement(exp: exp, body: body, elseBody: elseBody)
-        stmt.pattern = pattern
-        
-        return stmt
+        return IfStatement(exp: exp, body: body, elseBody: elseBody, pattern: pattern)
     }
     public static func `while`(_ exp: Expression, body: CompoundStatement) -> WhileStatement {
         return WhileStatement(exp: exp, body: body)

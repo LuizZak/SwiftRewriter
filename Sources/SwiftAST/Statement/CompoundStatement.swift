@@ -37,6 +37,14 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         statements.forEach { $0.parent = self }
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let stmts = try container.decode([SwiftASTSerializer.StatementContainer].self, forKey: .statements)
+        
+        self.init(statements: stmts.map { $0.statement })
+    }
+    
     public override func copy() -> CompoundStatement {
         return CompoundStatement(statements: statements.map { $0.copy() }).copyMetadata(from: self)
     }
@@ -52,6 +60,26 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         default:
             return false
         }
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        var stmts: [SwiftASTSerializer.StatementContainer] = []
+        
+        for stmt in statements {
+            let c = try SwiftASTSerializer.StatementContainer(statement: stmt)
+            
+            stmts.append(c)
+        }
+        
+        try container.encode(stmts, forKey: .statements)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case statements
     }
 }
 

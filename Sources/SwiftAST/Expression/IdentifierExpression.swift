@@ -7,10 +7,20 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
     
     public required init(stringLiteral value: String) {
         self.identifier = value
+        
+        super.init()
     }
     
     public init(identifier: String) {
         self.identifier = identifier
+        
+        super.init()
+    }
+    
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(identifier: container.decode(String.self, forKey: .identifier))
     }
     
     public override func copy() -> IdentifierExpression {
@@ -30,8 +40,20 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(identifier, forKey: .identifier)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: IdentifierExpression, rhs: IdentifierExpression) -> Bool {
         return lhs.identifier == rhs.identifier
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case identifier
     }
 }
 public extension Expression {

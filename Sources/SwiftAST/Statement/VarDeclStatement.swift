@@ -24,6 +24,13 @@ public class VariableDeclarationsStatement: Statement {
         }
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(decl: container.decode([StatementVariableDeclaration].self,
+                                             forKey: .decl))
+    }
+    
     public override func copy() -> VariableDeclarationsStatement {
         return VariableDeclarationsStatement(decl: decl.map { $0.copy() }).copyMetadata(from: self)
     }
@@ -40,6 +47,18 @@ public class VariableDeclarationsStatement: Statement {
             return false
         }
     }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(decl, forKey: .decl)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case decl
+    }
 }
 public extension Statement {
     public var asVariableDeclaration: VariableDeclarationsStatement? {
@@ -48,7 +67,7 @@ public extension Statement {
 }
 
 /// A variable declaration statement
-public struct StatementVariableDeclaration: Equatable {
+public struct StatementVariableDeclaration: Codable, Equatable {
     public var identifier: String
     public var type: SwiftType
     public var ownership: Ownership
@@ -68,9 +87,40 @@ public struct StatementVariableDeclaration: Equatable {
         self.initialization = initialization
     }
     
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        
+        try self.identifier = container.decode(String.self, forKey: .identifier)
+        try self.type = container.decode(SwiftType.self, forKey: .type)
+        try self.ownership = container.decode(Ownership.self, forKey: .ownership)
+        try self.isConstant = container.decode(Bool.self, forKey: .isConstant)
+        try self.initialization = container.decodeExpressionIfPresent(forKey: .initialization)
+        
+    }
+    
     public func copy() -> StatementVariableDeclaration {
         var new = self
         new.initialization = self.initialization?.copy()
         return new
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(identifier, forKey: .identifier)
+        try container.encode(type, forKey: .type)
+        try container.encode(ownership, forKey: .ownership)
+        try container.encode(isConstant, forKey: .isConstant)
+        try container.encodeExpressionIfPresent(initialization, forKey: .initialization)
+        
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case identifier
+        case type
+        case ownership
+        case isConstant
+        case initialization
     }
 }

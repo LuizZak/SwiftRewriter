@@ -1,5 +1,5 @@
 /// Specifies an operator across one or two operands
-public enum SwiftOperator: String {
+public enum SwiftOperator: String, Codable {
     /// If `true`, a spacing is suggested to be placed in between operands.
     /// True for most operators except range operators.
     public var requiresSpacing: Bool {

@@ -26,21 +26,36 @@ public class IfStatement: Statement {
         return [exp, body]
     }
     
-    public init(exp: Expression, body: CompoundStatement, elseBody: CompoundStatement?) {
+    public init(exp: Expression, body: CompoundStatement, elseBody: CompoundStatement?, pattern: Pattern?) {
         self.exp = exp
         self.body = body
         self.elseBody = elseBody
+        self.pattern = pattern
         
         super.init()
         
         exp.parent = self
         body.parent = self
         elseBody?.parent = self
+        pattern?.setParent(self)
+    }
+    
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(
+            exp: container.decodeExpression(forKey: .exp),
+            body: container.decodeStatement(CompoundStatement.self, forKey: .body),
+            elseBody: container.decodeStatementIfPresent(CompoundStatement.self, forKey: .elseBody),
+            pattern: container.decodeIfPresent(Pattern.self, forKey: .pattern))
     }
     
     public override func copy() -> IfStatement {
         let copy =
-            IfStatement(exp: exp.copy(), body: body.copy(), elseBody: elseBody?.copy())
+            IfStatement(exp: exp.copy(),
+                        body: body.copy(),
+                        elseBody: elseBody?.copy(),
+                        pattern: pattern?.copy())
                 .copyMetadata(from: self)
         
         copy.pattern = pattern?.copy()
@@ -59,6 +74,24 @@ public class IfStatement: Statement {
         default:
             return false
         }
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(pattern, forKey: .pattern)
+        try container.encodeExpression(exp, forKey: .exp)
+        try container.encodeStatement(body, forKey: .body)
+        try container.encodeStatementIfPresent(elseBody, forKey: .elseBody)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case pattern
+        case exp
+        case body
+        case elseBody
     }
 }
 public extension Statement {

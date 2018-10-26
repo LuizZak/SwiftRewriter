@@ -22,6 +22,12 @@ public class ArrayLiteralExpression: Expression {
         items.forEach { $0.parent = self }
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(items: container.decodeExpressions(forKey: .items))
+    }
+    
     public override func copy() -> ArrayLiteralExpression {
         return ArrayLiteralExpression(items: items.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
@@ -39,8 +45,20 @@ public class ArrayLiteralExpression: Expression {
         }
     }
     
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpressions(items, forKey: .items)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public static func == (lhs: ArrayLiteralExpression, rhs: ArrayLiteralExpression) -> Bool {
         return lhs.items == rhs.items
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case items
     }
 }
 public extension Expression {

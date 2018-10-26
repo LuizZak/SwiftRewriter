@@ -26,6 +26,14 @@ public class WhileStatement: Statement {
         body.parent = self
     }
     
+    public required convenience init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        try self.init(
+            exp: container.decodeExpression(forKey: .exp),
+            body: container.decodeStatement(CompoundStatement.self, forKey: .body))
+    }
+    
     public override func copy() -> WhileStatement {
         return WhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
     }
@@ -41,6 +49,20 @@ public class WhileStatement: Statement {
         default:
             return false
         }
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeExpression(exp, forKey: .exp)
+        try container.encodeStatement(body, forKey: .body)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case exp
+        case body
     }
 }
 public extension Statement {
