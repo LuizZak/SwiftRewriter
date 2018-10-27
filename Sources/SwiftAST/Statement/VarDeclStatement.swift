@@ -24,11 +24,16 @@ public class VariableDeclarationsStatement: Statement {
         }
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(decl: container.decode([StatementVariableDeclaration].self,
-                                             forKey: .decl))
+        decl = try container.decode([StatementVariableDeclaration].self, forKey: .decl)
+        
+        try super.init(from: container.superDecoder())
+        
+        decl.forEach {
+            $0.initialization?.parent = self
+        }
     }
     
     public override func copy() -> VariableDeclarationsStatement {

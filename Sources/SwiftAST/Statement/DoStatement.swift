@@ -18,10 +18,14 @@ public class DoStatement: Statement {
         body.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(body: container.decodeStatement(CompoundStatement.self, forKey: .body))
+        body = try container.decodeStatement(CompoundStatement.self, forKey: .body)
+        
+        try super.init(from: container.superDecoder())
+        
+        body.parent = self
     }
     
     public override func copy() -> DoStatement {

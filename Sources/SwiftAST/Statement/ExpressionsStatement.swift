@@ -18,10 +18,14 @@ public class ExpressionsStatement: Statement {
         expressions.forEach { $0.parent = self }
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(expressions: container.decodeExpressions(forKey: .expressions))
+        expressions = try container.decodeExpressions(forKey: .expressions)
+        
+        try super.init(from: container.superDecoder())
+        
+        expressions.forEach { $0.parent = self }
     }
     
     public override func copy() -> ExpressionsStatement {

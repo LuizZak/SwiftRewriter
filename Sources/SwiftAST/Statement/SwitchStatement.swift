@@ -53,6 +53,22 @@ public class SwitchStatement: Statement {
         
         super.init()
         
+        adjustParent()
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        exp = try container.decodeExpression(Expression.self, forKey: .exp)
+        cases = try container.decode([SwitchCase].self, forKey: .cases)
+        defaultCase = try container.decodeStatementsIfPresent(forKey: .defaultCase)
+        
+        try super.init(from: container.superDecoder())
+        
+        adjustParent()
+    }
+    
+    fileprivate func adjustParent() {
         exp.parent = self
         cases.forEach {
             $0.patterns.forEach {
@@ -65,15 +81,6 @@ public class SwitchStatement: Statement {
         defaultCase?.forEach { $0.parent = self }
         
         reloadChildrenNodes()
-    }
-    
-    public required convenience init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        try self.init(
-            exp: container.decodeExpression(Expression.self, forKey: .exp),
-            cases: container.decode([SwitchCase].self, forKey: .cases),
-            defaultCase: container.decodeStatementsIfPresent(forKey: .defaultCase))
     }
     
     public override func copy() -> SwitchStatement {

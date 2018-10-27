@@ -43,13 +43,18 @@ public class ForStatement: Statement {
         body.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(
-            pattern: container.decode(Pattern.self, forKey: .pattern),
-            exp: container.decodeExpression(forKey: .exp),
-            body: container.decodeStatement(CompoundStatement.self, forKey: .body))
+        pattern = try container.decode(Pattern.self, forKey: .pattern)
+        exp = try container.decodeExpression(forKey: .exp)
+        body = try container.decodeStatement(CompoundStatement.self, forKey: .body)
+        
+        try super.init(from: container.superDecoder())
+        
+        pattern.setParent(self)
+        exp.parent = self
+        body.parent = self
     }
     
     public override func copy() -> ForStatement {

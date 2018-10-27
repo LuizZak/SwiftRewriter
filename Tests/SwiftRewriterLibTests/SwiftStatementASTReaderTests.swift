@@ -251,8 +251,8 @@ class SwiftStatementASTReaderTests: XCTestCase {
     
     func testLabeledStatement() {
         let stmt = assert(objcStmt: "label: if(true) { };",
-               readsAs: Statement.if(.constant(true), body: [], else: nil)
-        )
+               readsAs: Statement.if(.constant(true), body: [], else: nil).labeled("label")
+            )
         
         XCTAssertEqual(stmt?.label, "label")
     }

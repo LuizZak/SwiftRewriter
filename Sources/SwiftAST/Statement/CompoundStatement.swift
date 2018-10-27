@@ -37,12 +37,18 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         statements.forEach { $0.parent = self }
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    required public init(from decoder: Decoder) throws {
+        try super.init(from: decoder)
+    }
+    
+    public override func decode(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let stmts = try container.decode([SwiftASTSerializer.StatementContainer].self, forKey: .statements)
+        try super.decode(from: container.superDecoder())
         
-        self.init(statements: stmts.map { $0.statement })
+        let stmts = try container.decodeStatements(forKey: .statements)
+        
+        self.statements = stmts
     }
     
     public override func copy() -> CompoundStatement {
@@ -65,15 +71,7 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     public override func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        var stmts: [SwiftASTSerializer.StatementContainer] = []
-        
-        for stmt in statements {
-            let c = try SwiftASTSerializer.StatementContainer(statement: stmt)
-            
-            stmts.append(c)
-        }
-        
-        try container.encode(stmts, forKey: .statements)
+        try container.encodeStatements(statements, forKey: .statements)
         
         try super.encode(to: container.superEncoder())
     }

@@ -40,14 +40,20 @@ public class IfStatement: Statement {
         pattern?.setParent(self)
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(
-            exp: container.decodeExpression(forKey: .exp),
-            body: container.decodeStatement(CompoundStatement.self, forKey: .body),
-            elseBody: container.decodeStatementIfPresent(CompoundStatement.self, forKey: .elseBody),
-            pattern: container.decodeIfPresent(Pattern.self, forKey: .pattern))
+        exp = try container.decodeExpression(forKey: .exp)
+        body = try container.decodeStatement(CompoundStatement.self, forKey: .body)
+        elseBody = try container.decodeStatementIfPresent(CompoundStatement.self, forKey: .elseBody)
+        pattern = try container.decodeIfPresent(Pattern.self, forKey: .pattern)
+        
+        try super.init(from: container.superDecoder())
+        
+        exp.parent = self
+        body.parent = self
+        elseBody?.parent = self
+        pattern?.setParent(self)
     }
     
     public override func copy() -> IfStatement {

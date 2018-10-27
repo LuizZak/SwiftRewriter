@@ -14,7 +14,19 @@ open class Statement: SyntaxNode, Codable, Equatable {
         super.init()
     }
     
+    public init(label: String) {
+        self.label = label
+        
+        super.init()
+    }
+    
     required public init(from decoder: Decoder) throws {
+        super.init()
+        
+        try self.decode(from: decoder)
+    }
+    
+    public func decode(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.label = try container.decodeIfPresent(String.self, forKey: .label)
@@ -41,6 +53,9 @@ open class Statement: SyntaxNode, Codable, Equatable {
     public static func == (lhs: Statement, rhs: Statement) -> Bool {
         if lhs === rhs {
             return true
+        }
+        if lhs.label != rhs.label {
+            return false
         }
         
         return lhs.isEqual(to: rhs)
@@ -147,6 +162,13 @@ public extension Statement {
     
     func copyMetadata(from other: Statement) -> Self {
         self.label = other.label
+        
+        return self
+    }
+    
+    /// Labels this statement with a given label, and returns this instance.
+    public func labeled(_ label: String?) -> Self {
+        self.label = label
         
         return self
     }

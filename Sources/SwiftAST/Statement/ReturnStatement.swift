@@ -26,10 +26,14 @@ public class ReturnStatement: Statement {
         exp?.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(exp: container.decodeExpressionIfPresent(forKey: .exp))
+        exp = try container.decodeExpressionIfPresent(forKey: .exp)
+        
+        try super.init(from: container.superDecoder())
+        
+        exp?.parent = self
     }
     
     public override func copy() -> ReturnStatement {

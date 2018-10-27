@@ -8,8 +8,11 @@ class SwiftASTSerializationTests: XCTestCase {
     func testEncodeDecodeRoundtrip() throws {
         let stmt: CompoundStatement = [
             Statement.expression(
-                Expression.identifier("self").dot("member").assignment(op: .assign, rhs: .constant(0))
-            ),
+                Expression
+                    .identifier("self")
+                    .dot("member")
+                    .assignment(op: .assign, rhs: .constant(0))
+            ).labeled("exp"),
             Statement.expression(
                 Expression.unknown(UnknownASTContext(context: "Context"))
             ),

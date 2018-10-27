@@ -59,6 +59,7 @@ class ASTSimplifierTests: ExpressionPassTestCase {
         input.label = "label"
         
         let expected = Statement.compound([.expression(.constant(0))])
+        expected.label = "label"
         
         let res = assertTransform(
             // label: { do { 0; } }
