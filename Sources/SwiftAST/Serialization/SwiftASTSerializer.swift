@@ -295,13 +295,45 @@ public final class SwiftASTSerializer {
 
 public extension SwiftASTSerializer {
     
-    public static func encode(statement: Statement, encoder: JSONEncoder) throws -> Data {
+    public static func encode(statement: Statement,
+                              encoder: JSONEncoder,
+                              options: SerializationOptions = []) throws -> Data {
+        
         let container = try SwiftASTSerializer.StatementContainer(statement: statement)
+        
+        encoder.userInfo.merge(optionsToUserInfo([options]), uniquingKeysWith: { $1 })
+        
         return try encoder.encode(container)
     }
     
     public static func decodeStatement(decoder: JSONDecoder, data: Data) throws -> Statement {
         let container = try decoder.decode(SwiftASTSerializer.StatementContainer.self, from: data)
         return container.statement
+    }
+    
+    public static func encode(expression: Expression,
+                              encoder: JSONEncoder,
+                              options: SerializationOptions = []) throws -> Data {
+        
+        let container = try SwiftASTSerializer.ExpressionContainer(expression: expression)
+        
+        encoder.userInfo.merge(optionsToUserInfo([options]), uniquingKeysWith: { $1 })
+        
+        return try encoder.encode(container)
+    }
+    
+    public static func decodeExpression(decoder: JSONDecoder, data: Data) throws -> Expression {
+        let container = try decoder.decode(SwiftASTSerializer.ExpressionContainer.self, from: data)
+        return container.expression
+    }
+    
+    private static func optionsToUserInfo(_ options: SerializationOptions) -> [CodingUserInfoKey: Any] {
+        var dict: [CodingUserInfoKey: Any] = [:]
+        
+        if options.contains(.encodeExpressionTypes) {
+            dict[SerializationOptions._encodeExpressionTypes] = true
+        }
+        
+        return dict
     }
 }

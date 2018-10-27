@@ -128,7 +128,9 @@ open class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cust
     open func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
-        try container.encodeIfPresent(resolvedType, forKey: .resolvedType)
+        if encoder.userInfo[SerializationOptions._encodeExpressionTypes] as? Bool == true {
+            try container.encodeIfPresent(resolvedType, forKey: .resolvedType)
+        }
     }
     
     public static func == (lhs: Expression, rhs: Expression) -> Bool {

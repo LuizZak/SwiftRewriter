@@ -116,6 +116,61 @@ class SwiftASTSerializerTests: XCTestCase {
     }
     
     public func testEncodeExpressionType() throws {
+        let exp = Expression.identifier("a").typed(.int)
         
+        let encoded =
+            try SwiftASTSerializer
+                .encode(expression: exp,
+                        encoder: JSONEncoder(),
+                        options: [])
+        
+        let encodedWithType =
+            try SwiftASTSerializer
+                .encode(expression: exp,
+                        encoder: JSONEncoder(),
+                        options: .encodeExpressionTypes)
+        
+        let decoded =
+            try SwiftASTSerializer
+                .decodeExpression(decoder: JSONDecoder(),
+                                  data: encoded)
+        
+        let decodedWithType =
+            try SwiftASTSerializer
+                .decodeExpression(decoder: JSONDecoder(),
+                                  data: encodedWithType)
+        
+        XCTAssertNil(decoded.resolvedType)
+        XCTAssertEqual(decodedWithType.resolvedType, exp.resolvedType)
+    }
+    
+    public func testEncodeExpressionTypeOnEncodeStatements() throws {
+        let stmt = Statement.expression(Expression.identifier("a").typed(.int))
+        
+        let encoded =
+            try SwiftASTSerializer
+                .encode(statement: stmt,
+                        encoder: JSONEncoder(),
+                        options: [])
+        
+        let encodedWithType =
+            try SwiftASTSerializer
+                .encode(statement: stmt,
+                        encoder: JSONEncoder(),
+                        options: .encodeExpressionTypes)
+        
+        let decoded =
+            try SwiftASTSerializer
+                .decodeStatement(decoder: JSONDecoder(),
+                                  data: encoded)
+        
+        let decodedWithType =
+            try SwiftASTSerializer
+                .decodeStatement(decoder: JSONDecoder(),
+                                  data: encodedWithType)
+        
+        XCTAssertNil(decoded.asExpressions!.expressions[0].resolvedType)
+        XCTAssertEqual(decodedWithType.asExpressions!.expressions[0].resolvedType,
+                       stmt.asExpressions!.expressions[0].resolvedType)
     }
 }
