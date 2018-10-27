@@ -95,7 +95,7 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
         return lhs.constant == rhs.constant
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case constant
     }
 }
@@ -211,7 +211,7 @@ public enum Constant: Codable, Equatable {
         case hexadecimal
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case discriminator = "kind"
         case payload0
         case payload1

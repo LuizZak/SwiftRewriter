@@ -87,7 +87,7 @@ public class TernaryExpression: Expression {
         return lhs.exp == rhs.exp && lhs.ifTrue == rhs.ifTrue && lhs.ifFalse == rhs.ifFalse
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case exp
         case ifTrue
         case ifFalse

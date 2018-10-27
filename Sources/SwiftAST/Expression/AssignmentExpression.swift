@@ -85,7 +85,7 @@ public class AssignmentExpression: Expression {
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case lhs
         case op
         case rhs

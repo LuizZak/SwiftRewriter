@@ -45,7 +45,7 @@ public class UnknownExpression: Expression {
         return true
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case context
     }
 }

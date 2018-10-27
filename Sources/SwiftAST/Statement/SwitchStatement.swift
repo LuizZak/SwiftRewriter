@@ -133,7 +133,7 @@ public class SwitchStatement: Statement {
         try super.encode(to: container.superEncoder())
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case exp
         case cases
         case defaultCase
@@ -175,7 +175,7 @@ public struct SwitchCase: Codable, Equatable {
         try container.encodeStatements(statements, forKey: .statements)
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case patterns
         case statements
     }

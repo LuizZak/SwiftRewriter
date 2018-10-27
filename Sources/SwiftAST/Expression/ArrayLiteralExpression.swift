@@ -61,7 +61,7 @@ public class ArrayLiteralExpression: Expression {
         return lhs.items == rhs.items
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case items
     }
 }

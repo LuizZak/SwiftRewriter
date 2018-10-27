@@ -54,7 +54,7 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
         return lhs.identifier == rhs.identifier
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case identifier
     }
 }

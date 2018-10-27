@@ -61,7 +61,7 @@ public class VariableDeclarationsStatement: Statement {
         try super.encode(to: container.superEncoder())
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case decl
     }
 }
@@ -121,7 +121,7 @@ public struct StatementVariableDeclaration: Codable, Equatable {
         
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case identifier
         case type
         case ownership

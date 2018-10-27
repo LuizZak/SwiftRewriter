@@ -90,7 +90,7 @@ public class BinaryExpression: Expression {
         try super.encode(to: container.superEncoder())
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case lhs
         case op
         case rhs

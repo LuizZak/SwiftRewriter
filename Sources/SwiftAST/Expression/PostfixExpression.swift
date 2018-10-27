@@ -149,7 +149,7 @@ public class PostfixExpression: Expression {
         return lhs.exp == rhs.exp && lhs.op == rhs.op
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case exp
         case op
         case opType
@@ -281,7 +281,7 @@ public final class MemberPostfix: Postfix {
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.name == rhs.name
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case name
     }
 }
@@ -359,7 +359,7 @@ public final class SubscriptPostfix: Postfix {
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.expression == rhs.expression
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case expression
     }
 }
@@ -467,7 +467,7 @@ public final class FunctionCallPostfix: Postfix {
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.arguments == rhs.arguments
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case arguments
     }
 }
@@ -527,7 +527,7 @@ public struct FunctionArgument: Codable, Equatable {
         try container.encodeExpression(expression, forKey: .expression)
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case label
         case expression
     }

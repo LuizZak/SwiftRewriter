@@ -64,7 +64,7 @@ public class DoWhileStatement: Statement {
         try super.encode(to: container.superEncoder())
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case exp
         case body
     }

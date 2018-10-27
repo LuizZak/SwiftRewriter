@@ -96,7 +96,7 @@ public class ForStatement: Statement {
         try super.encode(to: container.superEncoder())
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case pattern
         case exp
         case body

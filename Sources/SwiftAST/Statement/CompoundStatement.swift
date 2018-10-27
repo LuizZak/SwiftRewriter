@@ -76,7 +76,7 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         try super.encode(to: container.superEncoder())
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case statements
     }
 }

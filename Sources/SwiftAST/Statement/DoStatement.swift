@@ -53,7 +53,7 @@ public class DoStatement: Statement {
         try super.encode(to: container.superEncoder())
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case body
     }
 }

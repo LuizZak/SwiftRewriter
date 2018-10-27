@@ -66,7 +66,7 @@ public class ParensExpression: Expression {
         return lhs.exp == rhs.exp
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case exp
     }
 }

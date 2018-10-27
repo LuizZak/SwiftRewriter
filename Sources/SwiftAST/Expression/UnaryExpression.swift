@@ -75,7 +75,7 @@ public class UnaryExpression: Expression {
         return lhs.op == rhs.op && lhs.exp == rhs.exp
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case exp
         case op
     }

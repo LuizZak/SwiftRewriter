@@ -72,7 +72,7 @@ public class CastExpression: Expression {
             lhs.isOptionalCast == rhs.isOptionalCast
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case exp
         case type
         case isOptionalCast

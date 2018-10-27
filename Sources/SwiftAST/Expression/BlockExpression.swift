@@ -82,7 +82,7 @@ public class BlockLiteralExpression: Expression {
             lhs.body == rhs.body
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case parameters
         case returnType
         case body

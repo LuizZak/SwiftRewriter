@@ -136,13 +136,13 @@ public class SizeOfExpression: Expression {
             }
         }
         
-        public enum CodingKeys: String, CodingKey {
+        private enum CodingKeys: String, CodingKey {
             case discriminator = "kind"
             case payload
         }
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case value
     }
 }

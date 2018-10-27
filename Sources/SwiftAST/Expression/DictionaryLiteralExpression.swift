@@ -71,7 +71,7 @@ public class DictionaryLiteralExpression: Expression {
         return lhs.pairs == rhs.pairs
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case pairs
     }
 }
@@ -108,7 +108,7 @@ public struct ExpressionDictionaryPair: Codable, Equatable {
         try container.encodeExpression(value, forKey: .value)
     }
     
-    public enum CodingKeys: String, CodingKey {
+    private enum CodingKeys: String, CodingKey {
         case key
         case value
     }
