@@ -153,7 +153,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             }
         }
         
-        return acceptFirst(from: ctx.postfixExpression())
+        return acceptFirst(from: ctx.postfixExpression)
     }
     
     public override func visitPostfixExpression(_ ctx: ObjectiveCParser.PostfixExpressionContext) -> Expression? {
@@ -272,7 +272,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitArgumentExpression(_ ctx: ObjectiveCParser.ArgumentExpressionContext) -> Expression? {
-        return acceptFirst(from: ctx.expression())
+        return acceptFirst(from: ctx.expression)
     }
     
     public override func visitPrimaryExpression(_ ctx: ObjectiveCParser.PrimaryExpressionContext) -> Expression? {
@@ -281,15 +281,15 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         
         return
-            acceptFirst(from: ctx.constant(),
-                        ctx.stringLiteral(),
-                        ctx.identifier(),
-                        ctx.messageExpression(),
-                        ctx.arrayExpression(),
-                        ctx.dictionaryExpression(),
-                        ctx.boxExpression(),
-                        ctx.selectorExpression(),
-                        ctx.blockExpression()
+            acceptFirst(from: ctx.constant,
+                        ctx.stringLiteral,
+                        ctx.identifier,
+                        ctx.messageExpression,
+                        ctx.arrayExpression,
+                        ctx.dictionaryExpression,
+                        ctx.boxExpression,
+                        ctx.selectorExpression,
+                        ctx.blockExpression
                 ) ?? .unknown(UnknownASTContext(context: ctx.getText()))
     }
     
@@ -325,7 +325,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     }
     
     public override func visitBoxExpression(_ ctx: ObjectiveCParser.BoxExpressionContext) -> Expression? {
-        return acceptFirst(from: ctx.expression(), ctx.constant(), ctx.identifier())
+        return acceptFirst(from: ctx.expression, ctx.constant, ctx.identifier)
     }
     
     public override func visitStringLiteral(_ ctx: ObjectiveCParser.StringLiteralContext) -> Expression? {
@@ -450,9 +450,9 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         return .identifier(ctx.getText())
     }
     
-    private func acceptFirst(from rules: ParserRuleContext?...) -> Expression? {
+    private func acceptFirst(from rules: () -> ParserRuleContext?...) -> Expression? {
         for rule in rules {
-            if let expr = rule?.accept(self) {
+            if let expr = rule()?.accept(self) {
                 return expr
             }
         }
