@@ -21,15 +21,11 @@ open class Statement: SyntaxNode, Codable, Equatable {
     }
     
     required public init(from decoder: Decoder) throws {
-        super.init()
-        
-        try self.decode(from: decoder)
-    }
-    
-    public func decode(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.label = try container.decodeIfPresent(String.self, forKey: .label)
+        
+        super.init()
     }
     
     open override func copy() -> Statement {

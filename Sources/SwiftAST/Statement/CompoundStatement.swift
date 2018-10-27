@@ -38,17 +38,13 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
     }
     
     required public init(from decoder: Decoder) throws {
-        try super.init(from: decoder)
-    }
-    
-    public override func decode(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try super.decode(from: container.superDecoder())
+        statements = try container.decodeStatements(forKey: .statements)
         
-        let stmts = try container.decodeStatements(forKey: .statements)
+        try super.init(from: container.superDecoder())
         
-        self.statements = stmts
+        statements.forEach { $0.parent = self }
     }
     
     public override func copy() -> CompoundStatement {
