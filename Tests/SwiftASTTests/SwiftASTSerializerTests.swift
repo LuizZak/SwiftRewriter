@@ -114,4 +114,8 @@ class SwiftASTSerializerTests: XCTestCase {
             """
             )
     }
+    
+    public func testEncodeExpressionType() throws {
+        
+    }
 }
