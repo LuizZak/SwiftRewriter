@@ -87,8 +87,6 @@ class SwiftASTSerializerTests: XCTestCase {
         let data = try SwiftASTSerializer.encode(statement: stmt, encoder: encoder)
         let decoder = JSONDecoder()
         
-        print(String(data: data, encoding: .utf8)!)
-        
         let decoded = try SwiftASTSerializer.decodeStatement(decoder: decoder, data: data)
         
         let writer = SwiftASTWriter(options: ASTWriterOptions.default,
