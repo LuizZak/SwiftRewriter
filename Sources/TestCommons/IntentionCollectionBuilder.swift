@@ -3,6 +3,15 @@ import SwiftRewriterLib
 import SwiftAST
 import GrammarModels
 
+/// An empty initializer used as default argument of initializer closure parameters
+/// for `IntentionCollectionBuilder` and related classes.
+///
+/// Is effectively a no-op.
+@inlinable
+public func emptyInit<T>(_: T) {
+    
+}
+
 public class IntentionCollectionBuilder {
     var intentions = IntentionCollection()
     
@@ -13,7 +22,7 @@ public class IntentionCollectionBuilder {
     @discardableResult
     public func createFileWithClass(
         named name: String,
-        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = { _ in }) -> IntentionCollectionBuilder {
+        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = emptyInit) -> IntentionCollectionBuilder {
         
         createFile(named: "\(name).swift") { builder in
             builder.createClass(withName: name, initializer: initializer)
@@ -24,7 +33,7 @@ public class IntentionCollectionBuilder {
     
     @discardableResult
     public func createFile(named name: String,
-                           initializer: (FileIntentionBuilder) -> Void = { _ in }) -> IntentionCollectionBuilder {
+                           initializer: (FileIntentionBuilder) -> Void = emptyInit) -> IntentionCollectionBuilder {
         
         let builder = FileIntentionBuilder(fileNamed: name)
         
@@ -135,7 +144,7 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createClass(
         withName name: String,
-        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<ClassGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
         
         let classIntention = ClassGenerationIntention(typeName: name)
         classIntention.inNonnullContext = inNonnullContext
@@ -172,7 +181,7 @@ public class FileIntentionBuilder {
     public func createExtension(
         forClassNamed name: String,
         categoryName: String? = nil,
-        initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<ClassExtensionGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
         
         let classIntention = ClassExtensionGenerationIntention(typeName: name)
         classIntention.categoryName = categoryName
@@ -186,7 +195,7 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createProtocol(
         withName name: String,
-        initializer: (TypeBuilder<ProtocolGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<ProtocolGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
         
         let prot = ProtocolGenerationIntention(typeName: name)
         prot.inNonnullContext = inNonnullContext
@@ -198,7 +207,7 @@ public class FileIntentionBuilder {
     
     @discardableResult
     public func createEnum(withName name: String, rawValue: SwiftType,
-                           initializer: (EnumTypeBuilder) -> Void = { _ in }) -> FileIntentionBuilder {
+                           initializer: (EnumTypeBuilder) -> Void = emptyInit) -> FileIntentionBuilder {
         
         let enumIntention = EnumGenerationIntention(typeName: name, rawValueType: rawValue)
         enumIntention.inNonnullContext = inNonnullContext
@@ -214,7 +223,7 @@ public class FileIntentionBuilder {
     @discardableResult
     public func createStruct(
         withName name: String,
-        initializer: (TypeBuilder<StructGenerationIntention>) -> Void = { _ in }) -> FileIntentionBuilder {
+        initializer: (TypeBuilder<StructGenerationIntention>) -> Void = emptyInit) -> FileIntentionBuilder {
         
         let structIntention = StructGenerationIntention(typeName: name)
         structIntention.inNonnullContext = inNonnullContext
@@ -346,7 +355,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
                                type: SwiftType,
                                mode: PropertyGenerationIntention.Mode = .asField,
                                attributes: [PropertyAttribute] = [],
-                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = { _ in })
+                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = emptyInit)
             -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
@@ -367,7 +376,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     
     @discardableResult
     public func createConstructor(withParameters parameters: [ParameterSignature] = [],
-                                  builder: (MemberBuilder<InitGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+                                  builder: (MemberBuilder<InitGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         let ctor = InitGenerationIntention(parameters: parameters)
         let mbuilder = MemberBuilder(targetMember: ctor)
@@ -381,7 +390,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     
     @discardableResult
     public func createVoidMethod(
-        named name: String, builder: (MemberBuilder<MethodGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+        named name: String, builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         let signature = FunctionSignature(name: name, parameters: [])
         
@@ -393,7 +402,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
                              returnType: SwiftType = .void,
                              parameters: [ParameterSignature] = [],
                              isStatic: Bool = false,
-                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         let signature = FunctionSignature(name: name,
                                           parameters: parameters,
@@ -406,7 +415,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     @discardableResult
     public func createMethod(_ signatureString: String,
                              isStatic: Bool = false,
-                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         var signature = try! FunctionSignatureParser.parseSignature(from: signatureString)
         signature.isStatic = isStatic
@@ -416,7 +425,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     
     @discardableResult
     public func createMethod(_ signature: FunctionSignature,
-                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = { _ in }) -> TypeBuilder {
+                             builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         let method = MethodGenerationIntention(signature: signature)
         method.functionBody = FunctionBodyIntention(body: [])
