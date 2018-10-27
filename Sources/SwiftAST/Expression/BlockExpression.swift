@@ -35,13 +35,16 @@ public class BlockLiteralExpression: Expression {
         self.body.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(
-            parameters: container.decode([BlockParameter].self, forKey: .parameters),
-            returnType: container.decode(SwiftType.self, forKey: .returnType),
-            body: container.decodeStatement(CompoundStatement.self, forKey: .body))
+        parameters = try container.decode([BlockParameter].self, forKey: .parameters)
+        returnType = try container.decode(SwiftType.self, forKey: .returnType)
+        body = try container.decodeStatement(CompoundStatement.self, forKey: .body)
+        
+        try super.init(from: container.superDecoder())
+        
+        self.body.parent = self
     }
     
     public override func copy() -> BlockLiteralExpression {

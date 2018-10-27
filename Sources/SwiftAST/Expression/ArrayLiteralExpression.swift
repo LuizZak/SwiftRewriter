@@ -22,10 +22,14 @@ public class ArrayLiteralExpression: Expression {
         items.forEach { $0.parent = self }
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(items: container.decodeExpressions(forKey: .items))
+        items = try container.decodeExpressions(forKey: .items)
+        
+        try super.init(from: container.superDecoder())
+        
+        items.forEach { $0.parent = self }
     }
     
     public override func copy() -> ArrayLiteralExpression {

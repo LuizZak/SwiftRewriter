@@ -41,14 +41,17 @@ public class BinaryExpression: Expression {
         self.rhs.parent = self
     }
     
-    required public convenience init(from decoder: Decoder) throws {
+    required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let lhs = try container.decodeExpression(forKey: .lhs)
-        let op = try container.decode(SwiftOperator.self, forKey: .op)
-        let rhs = try container.decodeExpression(forKey: .rhs)
+        lhs = try container.decodeExpression(forKey: .lhs)
+        op = try container.decode(SwiftOperator.self, forKey: .op)
+        rhs = try container.decodeExpression(forKey: .rhs)
         
-        self.init(lhs: lhs, op: op, rhs: rhs)
+        try super.init(from: container.superDecoder())
+        
+        lhs.parent = self
+        rhs.parent = self
     }
     
     public override func copy() -> BinaryExpression {

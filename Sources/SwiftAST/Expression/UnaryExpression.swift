@@ -34,12 +34,15 @@ public class UnaryExpression: Expression {
         exp.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(
-            op: container.decode(SwiftOperator.self, forKey: .op),
-            exp: container.decodeExpression(Expression.self, forKey: .exp))
+        op = try container.decode(SwiftOperator.self, forKey: .op)
+        exp = try container.decodeExpression(Expression.self, forKey: .exp)
+        
+        try super.init(from: container.superDecoder())
+        
+        exp.parent = self
     }
     
     public override func copy() -> UnaryExpression {

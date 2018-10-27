@@ -37,13 +37,28 @@ public class SizeOfExpression: Expression {
     
     public init(value: Value) {
         self.value = value
+        
         super.init()
+        
+        switch value {
+        case .expression(let exp):
+            exp.parent = self
+        case .type: break
+        }
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(value: container.decode(Value.self, forKey: .value))
+        value = try container.decode(Value.self, forKey: .value)
+        
+        try super.init(from: container.superDecoder())
+        
+        switch value {
+        case .expression(let exp):
+            exp.parent = self
+        case .type: break
+        }
     }
     
     public override func copy() -> SizeOfExpression {

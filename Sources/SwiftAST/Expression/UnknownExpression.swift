@@ -11,10 +11,14 @@ public class UnknownExpression: Expression {
         super.init()
     }
     
-    public required convenience init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(context: UnknownASTContext(context: container.decode(String.self)))
+        context =
+            try UnknownASTContext(context:
+                container.decode(String.self, forKey: .context))
+        
+        try super.init(from: container.superDecoder())
     }
     
     public override func copy() -> UnknownExpression {
@@ -30,13 +34,19 @@ public class UnknownExpression: Expression {
     }
     
     public override func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
+        var container = encoder.container(keyedBy: CodingKeys.self)
         
-        try container.encode(context.context)
+        try container.encode(context.context, forKey: .context)
+        
+        try super.encode(to: container.superEncoder())
     }
     
     public static func == (lhs: UnknownExpression, rhs: UnknownExpression) -> Bool {
         return true
+    }
+    
+    public enum CodingKeys: String, CodingKey {
+        case context
     }
 }
 public extension Expression {

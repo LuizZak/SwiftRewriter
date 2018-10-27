@@ -17,10 +17,12 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
         super.init()
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(identifier: container.decode(String.self, forKey: .identifier))
+        identifier = try container.decode(String.self, forKey: .identifier)
+        
+        try super.init(from: container.superDecoder())
     }
     
     public override func copy() -> IdentifierExpression {

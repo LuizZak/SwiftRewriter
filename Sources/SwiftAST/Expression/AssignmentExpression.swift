@@ -36,13 +36,17 @@ public class AssignmentExpression: Expression {
         rhs.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(
-            lhs: container.decodeExpression(forKey: .lhs),
-            op: container.decode(SwiftOperator.self, forKey: .op),
-            rhs: container.decodeExpression(forKey: .rhs))
+        lhs = try container.decodeExpression(forKey: .lhs)
+        op = try container.decode(SwiftOperator.self, forKey: .op)
+        rhs = try container.decodeExpression(forKey: .rhs)
+        
+        try super.init(from: container.superDecoder())
+        
+        lhs.parent = self
+        rhs.parent = self
     }
     
     public override func copy() -> AssignmentExpression {

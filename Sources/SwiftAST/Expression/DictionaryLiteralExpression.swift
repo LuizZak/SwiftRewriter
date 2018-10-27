@@ -31,10 +31,15 @@ public class DictionaryLiteralExpression: Expression {
         _subExpressions = pairs.flatMap { [$0.key, $0.value] }
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(pairs: container.decode([ExpressionDictionaryPair].self, forKey: .pairs))
+        pairs = try container.decode([ExpressionDictionaryPair].self, forKey: .pairs)
+        
+        try super.init(from: container.superDecoder())
+        
+        pairs.forEach { $0.key.parent = self; $0.value.parent = self }
+        _subExpressions = pairs.flatMap { [$0.key, $0.value] }
     }
     
     public override func copy() -> DictionaryLiteralExpression {

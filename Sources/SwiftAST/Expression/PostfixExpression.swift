@@ -78,11 +78,10 @@ public class PostfixExpression: Expression {
         _subExpressions = [exp] + op.subExpressions
     }
     
-    required public convenience init(from decoder: Decoder) throws {
+    required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let exp = try container.decodeExpression(Expression.self, forKey: .exp)
-        let op: Postfix
+        exp = try container.decodeExpression(Expression.self, forKey: .exp)
         
         let opType = try container.decode(OpType.self, forKey: .opType)
         
@@ -95,7 +94,14 @@ public class PostfixExpression: Expression {
             op = try container.decode(FunctionCallPostfix.self, forKey: .op)
         }
         
-        self.init(exp: exp, op: op)
+        try super.init(from: container.superDecoder())
+        
+        exp.parent = self
+        
+        op.subExpressions.forEach { $0.parent = self }
+        op.postfixExpression = self
+        
+        _subExpressions = [exp] + op.subExpressions
     }
     
     public override func copy() -> PostfixExpression {

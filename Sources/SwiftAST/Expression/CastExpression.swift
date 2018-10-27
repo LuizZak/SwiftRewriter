@@ -27,14 +27,16 @@ public class CastExpression: Expression {
         exp.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(
-            exp: container.decodeExpression(forKey: .exp),
-            type: container.decode(SwiftType.self, forKey: .type),
-            isOptionalCast: container.decode(Bool.self, forKey: .isOptionalCast)
-        )
+        exp = try container.decodeExpression(forKey: .exp)
+        type = try container.decode(SwiftType.self, forKey: .type)
+        isOptionalCast = try container.decode(Bool.self, forKey: .isOptionalCast)
+        
+        try super.init(from: container.superDecoder())
+        
+        exp.parent = self
     }
     
     public override func copy() -> CastExpression {

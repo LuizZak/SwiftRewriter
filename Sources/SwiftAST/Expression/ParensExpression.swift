@@ -27,10 +27,14 @@ public class ParensExpression: Expression {
         exp.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(exp: container.decodeExpression(forKey: .exp))
+        exp = try container.decodeExpression(forKey: .exp)
+        
+        try super.init(from: container.superDecoder())
+        
+        exp.parent = self
     }
     
     public override func copy() -> ParensExpression {

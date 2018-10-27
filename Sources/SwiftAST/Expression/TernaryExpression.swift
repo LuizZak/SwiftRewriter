@@ -37,13 +37,18 @@ public class TernaryExpression: Expression {
         ifFalse.parent = self
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(
-            exp: container.decodeExpression(forKey: .exp),
-            ifTrue: container.decodeExpression(forKey: .ifTrue),
-            ifFalse: container.decodeExpression(forKey: .ifFalse))
+        exp = try container.decodeExpression(forKey: .exp)
+        ifTrue = try container.decodeExpression(forKey: .ifTrue)
+        ifFalse = try container.decodeExpression(forKey: .ifFalse)
+        
+        try super.init(from: container.superDecoder())
+        
+        exp.parent = self
+        ifTrue.parent = self
+        ifFalse.parent = self
     }
     
     public override func copy() -> TernaryExpression {

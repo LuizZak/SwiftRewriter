@@ -92,7 +92,10 @@ open class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cust
     }
     
     required public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
         
+        self.resolvedType =
+            try container.decodeIfPresent(SwiftType.self, forKey: .resolvedType)
     }
     
     /// Changes this Expression's resolved type to be an error type.
@@ -123,7 +126,9 @@ open class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cust
     }
     
     open func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
         
+        try container.encodeIfPresent(resolvedType, forKey: .resolvedType)
     }
     
     public static func == (lhs: Expression, rhs: Expression) -> Bool {
@@ -136,6 +141,10 @@ open class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cust
     
     final func cast<T: Expression>() -> T? {
         return self as? T
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case resolvedType
     }
 }
 

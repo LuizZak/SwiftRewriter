@@ -58,10 +58,12 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
         super.init()
     }
     
-    public required convenience init(from decoder: Decoder) throws {
+    public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        try self.init(constant: container.decode(Constant.self, forKey: .constant))
+        constant = try container.decode(Constant.self, forKey: .constant)
+        
+        try super.init(from: container.superDecoder())
     }
     
     public override func copy() -> ConstantExpression {
