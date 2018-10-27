@@ -3,7 +3,7 @@ import XCTest
 import SwiftAST
 @testable import SwiftRewriterLib
 
-class SwiftASTSerializationTests: XCTestCase {
+class SwiftASTSerializerTests: XCTestCase {
     
     func testEncodeDecodeRoundtrip() throws {
         let stmt: CompoundStatement = [
