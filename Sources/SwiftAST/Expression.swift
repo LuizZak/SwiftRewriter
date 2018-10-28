@@ -13,7 +13,7 @@ public protocol ExpressionComponent {
     var subExpressions: [Expression] { get }
 }
 
-open class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, CustomStringConvertible, CustomReflectable {
+public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, CustomStringConvertible, CustomReflectable {
     /// `true` if this expression sub-tree contains only literal-based sub-expressions.
     /// Literal based sub-expressions include: `.constant`, as well as `.binary`,
     /// `.unary`, `.prefix`, `.parens`, and `.ternary` which only feature

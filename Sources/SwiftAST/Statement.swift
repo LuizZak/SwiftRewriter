@@ -1,4 +1,4 @@
-open class Statement: SyntaxNode, Codable, Equatable {
+public class Statement: SyntaxNode, Codable, Equatable {
     /// Returns `true` if this statement resolve to an unconditional jump out
     /// of the current context.
     ///
