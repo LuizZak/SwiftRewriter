@@ -66,7 +66,8 @@ let package = Package(
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons"]),
         .target(
             name: "ExpressionPasses",
-            dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils"]),
+            dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
+                           "TestCommons"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["SwiftRewriterLib", "Utils", "MiniLexer"]),
