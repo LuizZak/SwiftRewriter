@@ -1,5 +1,5 @@
 /// An intention to generate a Swift class type
-public class ClassGenerationIntention: BaseClassIntention {
+public final class ClassGenerationIntention: BaseClassIntention {
     public var superclassName: String?
     
     public override var isEmptyType: Bool {

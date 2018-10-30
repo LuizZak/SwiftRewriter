@@ -1,7 +1,7 @@
 import SwiftAST
 
 /// An intention to generate a struct type
-public class StructGenerationIntention: TypeGenerationIntention, InstanceVariableContainerIntention {
+public final class StructGenerationIntention: TypeGenerationIntention, InstanceVariableContainerIntention {
     public override var kind: KnownTypeKind {
         return .struct
     }

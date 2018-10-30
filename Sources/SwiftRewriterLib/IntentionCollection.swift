@@ -2,10 +2,18 @@ import Foundation
 
 /// Represents a centralization point where all source code generation intentions
 /// are placed and queried for.
-public class IntentionCollection {
+public class IntentionCollection: Codable {
     private var _intentions: [FileGenerationIntention] = []
     
     public init() {
+        
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        
+    }
+    
+    public func encode(to encoder: Encoder) throws {
         
     }
     
@@ -74,6 +82,10 @@ public class IntentionCollection {
                 item.intentionCollection = nil
             }
         }
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case files
     }
 }
 

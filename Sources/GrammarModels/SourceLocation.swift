@@ -77,6 +77,10 @@ public final class SourceLocation {
         computeLineAndColumn()
     }
     
+    public func encode(to encoder: Encoder) throws {
+        
+    }
+    
     private func computeLineAndColumn() {
         guard let loc = range.start else {
             return

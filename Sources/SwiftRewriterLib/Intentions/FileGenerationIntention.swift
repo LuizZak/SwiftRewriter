@@ -2,7 +2,7 @@ import GrammarModels
 import SwiftAST
 
 /// An intention to create a .swift file
-public class FileGenerationIntention: Intention {
+public final class FileGenerationIntention: Intention {
     /// Used to sort file generation intentions after multi-threaded parsing is
     /// finished.
     var _index: Int = 0
@@ -91,6 +91,32 @@ public class FileGenerationIntention: Intention {
         self.history.recordCreation(description: "Created from file \(sourcePath) to file \(targetPath)")
     }
     
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        _index = try container.decode(Int.self, forKey: ._index)
+        
+        sourcePath = try container.decode(String.self, forKey: .sourcePath)
+        targetPath = try container.decode(String.self, forKey: .targetPath)
+        
+        preprocessorDirectives =
+            try container.decode([String].self, forKey: .preprocessorDirectives)
+        importDirectives =
+            try container.decode([String].self, forKey: .importDirectives)
+        
+        super.init()
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(_index, forKey: ._index)
+        try container.encode(sourcePath, forKey: .sourcePath)
+        try container.encode(targetPath, forKey: .targetPath)
+        try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
+        try container.encode(importDirectives, forKey: .importDirectives)
+    }
+    
     public func addType(_ intention: TypeGenerationIntention) {
         typeIntentions.append(intention)
         intention.parent = self
@@ -168,5 +194,13 @@ public class FileGenerationIntention: Intention {
     public func addGlobalVariable(_ intention: GlobalVariableGenerationIntention) {
         globalVariableIntentions.append(intention)
         intention.parent = self
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case _index
+        case sourcePath
+        case targetPath
+        case preprocessorDirectives
+        case importDirectives
     }
 }

@@ -2,7 +2,7 @@ import GrammarModels
 import SwiftAST
 
 /// An intention to generate a Swift enumeration type
-public class EnumGenerationIntention: TypeGenerationIntention {
+public final class EnumGenerationIntention: TypeGenerationIntention {
     public var typedSource: ObjcEnumDeclaration? {
         return source as? ObjcEnumDeclaration
     }
