@@ -542,11 +542,11 @@ class InternalSwiftWriter {
         }
         if ivar.ownership != .strong {
             // Check for non-pointers
-            if let original = ivar.typedSource?.type?.type, !original.isPointer {
+            if typeSystem.isScalarType(ivar.type) {
                 diagnostics.warning("""
                     Ivar '\(ivar.name)' specified as '\(ivar.ownership.rawValue)' \
-                    but original type '\(original)' is not a pointer type.
-                    """, location: ivar.typedSource?.location ?? .invalid)
+                    but type '\(ivar.type as SwiftType)' is not a pointer type.
+                    """, location: ivar.originLocation ?? .invalid)
             } else {
                 target.outputInlineWithSpace(ivar.ownership.rawValue, style: .keyword)
             }

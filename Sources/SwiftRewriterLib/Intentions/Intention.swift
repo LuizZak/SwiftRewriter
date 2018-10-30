@@ -10,9 +10,18 @@ public protocol IntentionProtocol: class {
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
 public class Intention: IntentionProtocol, Historic {
+    /// Original source location of the node that generated this intention
+    public var originLocation: SourceLocation?
+    
     /// Reference to an AST node that originated this source-code generation
     /// intention
-    public var source: ASTNode?
+    public var source: ASTNode? {
+        didSet {
+            if let source = source {
+                originLocation = source.location
+            }
+        }
+    }
     
     /// Parent for this intention
     public internal(set) weak var parent: Intention?
@@ -26,6 +35,7 @@ public class Intention: IntentionProtocol, Historic {
     
     public init(source: ASTNode?) {
         self.source = source
+        self.originLocation = source?.location
     }
 }
 
