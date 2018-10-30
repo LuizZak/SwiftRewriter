@@ -2,13 +2,31 @@ import GrammarModels
 
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
-public protocol Intention: class, Historic {
+public protocol IntentionProtocol: class {
+    /// Gets the history tracker for this intention
+    var history: IntentionHistory { get }
+}
+
+/// An intention represents the intent of the code transpiler to generate a
+/// file/class/struct/property/etc. with Swift code.
+public class Intention: IntentionProtocol, Historic {
     /// Reference to an AST node that originated this source-code generation
     /// intention
-    var source: ASTNode? { get }
+    public var source: ASTNode?
     
     /// Parent for this intention
-    var parent: Intention? { get }
+    public internal(set) weak var parent: Intention?
+    
+    /// Gets the history tracker for this intention
+    public let history: IntentionHistory = IntentionHistoryTracker()
+    
+    public init() {
+        
+    }
+    
+    public init(source: ASTNode?) {
+        self.source = source
+    }
 }
 
 public extension Intention {

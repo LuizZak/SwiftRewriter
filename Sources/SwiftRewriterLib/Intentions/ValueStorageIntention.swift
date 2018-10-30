@@ -1,7 +1,7 @@
 import SwiftAST
 
 /// Defines a protocol for a value storage intention.
-public protocol ValueStorageIntention: Intention {
+public protocol ValueStorageIntention: IntentionProtocol {
     var name: String { get }
     var storage: ValueStorage { get }
 }

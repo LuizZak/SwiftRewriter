@@ -238,7 +238,7 @@ public class IntentionCollector {
         
         let swiftType = SwiftType.anyObject
         let ownership = evaluateOwnershipPrefix(inType: type.type)
-        let isConstant = InternalSwiftWriter._isConstant(fromType: type.type)
+        let isConstant = _isConstant(fromType: type.type)
         
         let storage =
             ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)
@@ -541,7 +541,7 @@ public class IntentionCollector {
         var isConstant = false
         if let type = node.type?.type {
             ownership = evaluateOwnershipPrefix(inType: type)
-            isConstant = InternalSwiftWriter._isConstant(fromType: type)
+            isConstant = _isConstant(fromType: type)
         }
         
         let storage = ValueStorage(type: swiftType, ownership: ownership, isConstant: isConstant)

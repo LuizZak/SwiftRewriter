@@ -2,11 +2,8 @@ import GrammarModels
 
 /// An intention that comes from the reading of a source code file, instead of
 /// being synthesized
-public class FromSourceIntention: NonNullScopedIntention {
-    public var source: ASTNode?
+public class FromSourceIntention: Intention, NonNullScopedIntention {
     public var accessLevel: AccessLevel
-    
-    weak internal(set) public var parent: Intention?
     
     /// Gets the file intention this intention is associated with, if available.
     public var file: FileGenerationIntention? {
@@ -30,11 +27,10 @@ public class FromSourceIntention: NonNullScopedIntention {
     /// macros.
     public var inNonnullContext: Bool = false
     
-    public let history: IntentionHistory = IntentionHistoryTracker()
-    
     public init(accessLevel: AccessLevel, source: ASTNode?) {
         self.accessLevel = accessLevel
-        self.source = source
+        
+        super.init(source: source)
     }
     
     /// Returns `true` if this intention's symbol is visible for a given intention.

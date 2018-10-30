@@ -1,5 +1,5 @@
 /// An intention for a type that can contain instance variables
-public protocol InstanceVariableContainerIntention: Intention {
+public protocol InstanceVariableContainerIntention: IntentionProtocol {
     var instanceVariables: [InstanceVariableGenerationIntention] { get }
     
     func addInstanceVariable(_ intention: InstanceVariableGenerationIntention)

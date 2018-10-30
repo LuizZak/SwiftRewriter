@@ -82,15 +82,11 @@ public class FileGenerationIntention: Intention {
     /// Gets the global variables to create on this file.
     public private(set) var globalVariableIntentions: [GlobalVariableGenerationIntention] = []
     
-    public let history: IntentionHistory = IntentionHistoryTracker()
-    
-    public var source: ASTNode?
-    
-    weak public var parent: Intention?
-    
     public init(sourcePath: String, targetPath: String) {
         self.sourcePath = sourcePath
         self.targetPath = targetPath
+        
+        super.init()
         
         self.history.recordCreation(description: "Created from file \(sourcePath) to file \(targetPath)")
     }

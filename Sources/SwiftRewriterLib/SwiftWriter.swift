@@ -279,7 +279,7 @@ class InternalSwiftWriter {
         let name = varDecl.name
         let type = varDecl.type
         let initVal = varDecl.initialValueExpr
-        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: varDecl.accessLevel)
+        let accessModifier = _accessModifierFor(accessLevel: varDecl.accessLevel)
         let ownership = varDecl.ownership
         let varOrLet = varDecl.isConstant ? "let" : "var"
         let typeName = typeMapper.typeNameString(for: type)
@@ -321,7 +321,7 @@ class InternalSwiftWriter {
         outputHistory(for: funcDef, target: target)
         
         let accessModifier =
-            InternalSwiftWriter._accessModifierFor(accessLevel: funcDef.accessLevel)
+            _accessModifierFor(accessLevel: funcDef.accessLevel)
         
         // '<access modifier> func' ...
         target.outputIdentation()
@@ -532,7 +532,7 @@ class InternalSwiftWriter {
         
         target.outputIdentation()
         
-        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: ivar.accessLevel)
+        let accessModifier = _accessModifierFor(accessLevel: ivar.accessLevel)
         let varOrLet = ivar.isConstant ? "let" : "var"
         
         let typeName = typeMapper.typeNameString(for: ivar.type)
@@ -578,13 +578,13 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("@objc", style: .keyword)
         }
         
-        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: prop.accessLevel)
+        let accessModifier = _accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: prop.type)
         
         // Emit setter visibility level (only if setter is less visible than property)
         if let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreVisible(than: setterLevel) {
             let setter =
-                InternalSwiftWriter._accessModifierFor(accessLevel: setterLevel,
+                _accessModifierFor(accessLevel: setterLevel,
                                                        omitInternal: false)
             
             target.outputInlineWithSpace("\(setter)(set)", style: .keyword)
@@ -705,7 +705,7 @@ class InternalSwiftWriter {
         }
         target.outputIdentation()
         
-        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: initMethod.accessLevel)
+        let accessModifier = _accessModifierFor(accessLevel: initMethod.accessLevel)
         
         if !accessModifier.isEmpty && !(initMethod.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -754,7 +754,7 @@ class InternalSwiftWriter {
         }
         target.outputIdentation()
         
-        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
+        let accessModifier = _accessModifierFor(accessLevel: method.accessLevel)
         
         if !accessModifier.isEmpty && !(method.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -786,7 +786,7 @@ class InternalSwiftWriter {
         
         target.outputIdentation()
         
-        let accessModifier = InternalSwiftWriter._accessModifierFor(accessLevel: method.accessLevel)
+        let accessModifier = _accessModifierFor(accessLevel: method.accessLevel)
         
         if !accessModifier.isEmpty && !(method.parent is ProtocolGenerationIntention) {
             target.outputInlineWithSpace(accessModifier, style: .keyword)
@@ -882,38 +882,39 @@ class InternalSwiftWriter {
             target.output(line: "// \(entry.summary)", style: .comment)
         }
     }
-    
-    internal static func _isConstant(fromType type: ObjcType) -> Bool {
-        switch type {
-        case .qualified(_, let qualifiers),
-             .specified(_, .qualified(_, let qualifiers)):
-            if qualifiers.contains("const") {
-                return true
-            }
-        case .specified(let specifiers, _):
-            if specifiers.contains("const") {
-                return true
-            }
-        default:
-            break
+}
+
+internal func _isConstant(fromType type: ObjcType) -> Bool {
+    switch type {
+    case .qualified(_, let qualifiers),
+         .specified(_, .qualified(_, let qualifiers)):
+        if qualifiers.contains("const") {
+            return true
         }
-        
-        return false
+    case .specified(let specifiers, _):
+        if specifiers.contains("const") {
+            return true
+        }
+    default:
+        break
     }
     
-    internal static func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
-        // In Swift, omitting the access level specifier infers 'internal', so we
-        // allow the user to decide whether to omit the keyword here
-        if omitInternal && accessLevel == .internal {
-            return ""
-        }
-        
-        return accessLevel.rawValue
+    return false
+}
+
+internal func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool = true) -> String {
+    // In Swift, omitting the access level specifier infers 'internal', so we
+    // allow the user to decide whether to omit the keyword here
+    if omitInternal && accessLevel == .internal {
+        return ""
     }
+    
+    return accessLevel.rawValue
 }
 
 internal func evaluateOwnershipPrefix(inType type: ObjcType,
                                       property: PropertyDefinition? = nil) -> Ownership {
+    
     var ownership: Ownership = .strong
     if !type.isPointer {
         return .strong

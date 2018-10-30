@@ -437,7 +437,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                 let swiftType = expressionReader.typeMapper.swiftType(forObjcType: type)
                 
                 let ownership = evaluateOwnershipPrefix(inType: type)
-                let isConstant = InternalSwiftWriter._isConstant(fromType: type)
+                let isConstant = _isConstant(fromType: type)
                 
                 let declaration =
                     StatementVariableDeclaration(identifier: identifier,
@@ -491,7 +491,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
                 let swiftType = expressionReader.typeMapper.swiftType(forObjcType: type)
                 
                 let ownership = evaluateOwnershipPrefix(inType: type)
-                let isConstant = InternalSwiftWriter._isConstant(fromType: type)
+                let isConstant = _isConstant(fromType: type)
                 
                 let declaration =
                     StatementVariableDeclaration(identifier: identifier,
