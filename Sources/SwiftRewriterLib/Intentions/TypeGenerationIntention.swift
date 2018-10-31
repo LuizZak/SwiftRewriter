@@ -65,9 +65,29 @@ public class TypeGenerationIntention: FromSourceIntention {
         
         origin = try container.decode(String.self, forKey: .origin)
         typeName = try container.decode(String.self, forKey: .typeName)
-        typeName = try container.decode(String.self, forKey: .typeName)
+        protocols = try container.decodeIntentions(forKey: .protocols)
+        properties = try container.decodeIntentions(forKey: .properties)
+        methods = try container.decodeIntentions(forKey: .methods)
+        constructors = try container.decodeIntentions(forKey: .constructors)
+        knownTraits = try container.decode([String: TraitType].self, forKey: .knownTraits)
+        semantics = try container.decode(Set<Semantic>.self, forKey: .semantics)
         
         try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(origin, forKey: .origin)
+        try container.encode(typeName, forKey: .typeName)
+        try container.encodeIntentions(protocols, forKey: .protocols)
+        try container.encodeIntentions(properties, forKey: .properties)
+        try container.encodeIntentions(methods, forKey: .methods)
+        try container.encodeIntentions(constructors, forKey: .constructors)
+        try container.encode(knownTraits, forKey: .knownTraits)
+        try container.encode(semantics, forKey: .semantics)
+        
+        try super.encode(to: container.superEncoder())
     }
     
     /// Generates a new protocol conformance intention from a given known protocol

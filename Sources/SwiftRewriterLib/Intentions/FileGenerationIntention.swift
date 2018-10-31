@@ -104,10 +104,12 @@ public final class FileGenerationIntention: Intention {
         importDirectives =
             try container.decode([String].self, forKey: .importDirectives)
         
-        super.init()
+        typeIntentions = try container.decodeIntentions(forKey: .typeIntentions)
+        
+        try super.init(from: container.superDecoder())
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public override func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(_index, forKey: ._index)
@@ -115,6 +117,9 @@ public final class FileGenerationIntention: Intention {
         try container.encode(targetPath, forKey: .targetPath)
         try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
         try container.encode(importDirectives, forKey: .importDirectives)
+        try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
+        
+        try super.encode(to: container.superEncoder())
     }
     
     public func addType(_ intention: TypeGenerationIntention) {
@@ -202,5 +207,6 @@ public final class FileGenerationIntention: Intention {
         case targetPath
         case preprocessorDirectives
         case importDirectives
+        case typeIntentions
     }
 }

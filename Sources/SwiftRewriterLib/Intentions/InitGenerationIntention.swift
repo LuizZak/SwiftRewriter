@@ -22,7 +22,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, FunctionI
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         parameters = try container.decode([ParameterSignature].self, forKey: .parameters)
-        functionBody = try container.decodeIfPresent(FunctionBodyIntention.self, forKey: .functionBody)
+        functionBody = try container.decodeIntentionIfPresent(forKey: .functionBody)
         isOverride = try container.decode(Bool.self, forKey: .isOverride)
         isFailable = try container.decode(Bool.self, forKey: .isFailable)
         isConvenience = try container.decode(Bool.self, forKey: .isConvenience)
@@ -34,7 +34,7 @@ public final class InitGenerationIntention: MemberGenerationIntention, FunctionI
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(parameters, forKey: .parameters)
-        try container.encodeIfPresent(functionBody, forKey: .functionBody)
+        try container.encodeIntentionIfPresent(functionBody, forKey: .functionBody)
         try container.encode(isOverride, forKey: .isOverride)
         try container.encode(isFailable, forKey: .isFailable)
         try container.encode(isConvenience, forKey: .isConvenience)

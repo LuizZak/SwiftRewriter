@@ -39,7 +39,7 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         self.signature = try container.decode(FunctionSignature.self, forKey: .signature)
-        self.functionBody = try container.decodeIfPresent(FunctionBodyIntention.self, forKey: .functionBody)
+        self.functionBody = try container.decodeIntentionIfPresent(forKey: .functionBody)
         
         try super.init(from: container.superDecoder())
     }
@@ -48,7 +48,7 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(signature, forKey: .signature)
-        try container.encodeIfPresent(functionBody, forKey: .functionBody)
+        try container.encodeIntentionIfPresent(functionBody, forKey: .functionBody)
         
         try super.encode(to: container.superEncoder())
     }

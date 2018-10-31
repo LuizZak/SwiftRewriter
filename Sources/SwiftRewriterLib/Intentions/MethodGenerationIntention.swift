@@ -69,7 +69,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
         
         isOverride = try container.decode(Bool.self, forKey: .isOverride)
         signature = try container.decode(FunctionSignature.self, forKey: .signature)
-        functionBody = try container.decodeIfPresent(FunctionBodyIntention.self, forKey: .functionBody)
+        functionBody = try container.decodeIntentionIfPresent(forKey: .functionBody)
         
         try super.init(from: container.superDecoder())
     }
@@ -79,7 +79,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
         
         try container.encode(isOverride, forKey: .isOverride)
         try container.encode(signature, forKey: .signature)
-        try container.encode(functionBody, forKey: .functionBody)
+        try container.encodeIntentionIfPresent(functionBody, forKey: .functionBody)
         
         try super.encode(to: container.superEncoder())
     }

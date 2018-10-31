@@ -2,7 +2,7 @@ import GrammarModels
 
 /// An intention that comes from the reading of a source code file, instead of
 /// being synthesized
-public class FromSourceIntention: Intention, NonNullScopedIntention, Codable {
+public class FromSourceIntention: Intention, NonNullScopedIntention {
     public var accessLevel: AccessLevel
     
     /// Gets the file intention this intention is associated with, if available.
@@ -33,7 +33,7 @@ public class FromSourceIntention: Intention, NonNullScopedIntention, Codable {
         self.accessLevel = try container.decode(AccessLevel.self, forKey: .accessLevel)
         self.inNonnullContext = try container.decode(Bool.self, forKey: .inNonnullContext)
         
-        super.init(source: nil)
+        try super.init(from: container.superDecoder())
     }
     
     public init(accessLevel: AccessLevel, source: ASTNode?) {
@@ -42,11 +42,13 @@ public class FromSourceIntention: Intention, NonNullScopedIntention, Codable {
         super.init(source: source)
     }
     
-    public func encode(to encoder: Encoder) throws {
+    public override func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(accessLevel, forKey: .accessLevel)
         try container.encode(inNonnullContext, forKey: .inNonnullContext)
+        
+        try super.encode(to: container.superEncoder())
     }
     
     /// Returns `true` if this intention's symbol is visible for a given intention.

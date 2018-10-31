@@ -156,10 +156,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
                 self = .asField
                 
             case 1:
-                self = try .computed(container.decode(FunctionBodyIntention.self, forKey: .payload0))
+                self = try .computed(container.decodeIntention(forKey: .payload0))
                 
             case 2:
-                let getter = try container.decode(FunctionBodyIntention.self, forKey: .payload0)
+                let getter = try container.decodeIntention(FunctionBodyIntention.self, forKey: .payload0)
                 let setter = try container.decode(Setter.self, forKey: .payload1)
                 
                 self = .property(get: getter, set: setter)
@@ -215,6 +215,25 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         public init(valueIdentifier: String, body: FunctionBodyIntention) {
             self.valueIdentifier = valueIdentifier
             self.body = body
+        }
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            valueIdentifier = try container.decode(String.self, forKey: .valueIdentifier)
+            body = try container.decodeIntention(forKey: .body)
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            try container.encode(valueIdentifier, forKey: .valueIdentifier)
+            try container.encodeIntention(body, forKey: .body)
+        }
+        
+        private enum CodingKeys: String, CodingKey {
+            case valueIdentifier
+            case body
         }
     }
     

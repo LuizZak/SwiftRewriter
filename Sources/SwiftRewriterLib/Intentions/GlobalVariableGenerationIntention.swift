@@ -23,7 +23,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
         
         name = try container.decode(String.self, forKey: .name)
         storage = try container.decode(ValueStorage.self, forKey: .storage)
-        initialValueExpr = try container.decodeIfPresent(GlobalVariableInitialValueIntention.self, forKey: .initialValueExpr)
+        initialValueExpr = try container.decodeIntentionIfPresent(GlobalVariableInitialValueIntention.self, forKey: .initialValueExpr)
         
         try super.init(from: container.superDecoder())
     }
@@ -33,7 +33,7 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
         
         try container.encode(name, forKey: .name)
         try container.encode(storage, forKey: .storage)
-        try container.encodeIfPresent(initialValueExpr, forKey: .initialValueExpr)
+        try container.encodeIntentionIfPresent(initialValueExpr, forKey: .initialValueExpr)
         
         try super.encode(to: container.superEncoder())
     }

@@ -32,13 +32,8 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         isInterfaceSource = try container.decode(Bool.self, forKey: .isInterfaceSource)
-        instanceVariables =
-            try container.decode([InstanceVariableGenerationIntention].self,
-                                 forKey: .instanceVariables)
-        
-        synthesizations =
-            try container.decode([PropertySynthesizationIntention].self,
-                                 forKey: .synthesizations)
+        instanceVariables = try container.decodeIntentions(forKey: .instanceVariables)
+        synthesizations = try container.decodeIntentions(forKey: .synthesizations)
         
         try super.init(from: container.superDecoder())
     }
@@ -47,8 +42,8 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(isInterfaceSource, forKey: .isInterfaceSource)
-        try container.encode(instanceVariables, forKey: .instanceVariables)
-        try container.encode(synthesizations, forKey: .synthesizations)
+        try container.encodeIntentions(instanceVariables, forKey: .instanceVariables)
+        try container.encodeIntentions(synthesizations, forKey: .synthesizations)
         
         try super.encode(to: container.superEncoder())
     }
