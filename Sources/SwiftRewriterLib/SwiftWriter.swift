@@ -86,6 +86,7 @@ public final class SwiftWriter {
         
         for error in errors {
             self.diagnostics.error("Error while saving file \(error.0): \(error.1)",
+                                   origin: error.0,
                                    location: .invalid)
         }
     }

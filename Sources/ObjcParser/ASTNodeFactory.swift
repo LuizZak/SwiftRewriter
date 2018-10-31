@@ -20,14 +20,14 @@ class ASTNodeFactory {
     func makeIdentifier(from context: Parser.IdentifierContext) -> Identifier {
         let nonnull = isInNonnullContext(context)
         let node = Identifier(name: context.getText(), isInNonnullContext: nonnull)
-        node.location = sourceLocation(for: context)
+        updateSourceLocation(for: node, with: context)
         return node
     }
     
     func makeSuperclassName(from context: Parser.SuperclassNameContext) -> SuperclassName {
         let nonnull = isInNonnullContext(context)
         let node = SuperclassName(name: context.getText(), isInNonnullContext: nonnull)
-        node.location = sourceLocation(for: context)
+        updateSourceLocation(for: node, with: context)
         return node
     }
     
@@ -43,7 +43,7 @@ class ASTNodeFactory {
             let protNameNode =
                 ProtocolName(name: identifier.getText(),
                              isInNonnullContext: isInNonnullContext(identifier))
-            protocolListNode.location = sourceLocation(for: identifier)
+            updateSourceLocation(for: protocolListNode, with: identifier)
             protocolListNode.addChild(protNameNode)
         }
         
@@ -52,7 +52,7 @@ class ASTNodeFactory {
     
     func makePointer(from context: ObjectiveCParser.PointerContext) -> PointerNode {
         let node = PointerNode(isInNonnullContext: isInNonnullContext(context))
-        node.location = sourceLocation(for: context)
+        updateSourceLocation(for: node, with: context)
         if let pointer = context.pointer() {
             node.addChild(makePointer(from: pointer))
         }
@@ -61,7 +61,7 @@ class ASTNodeFactory {
     
     func makeTypeDeclarator(from context: ObjectiveCParser.DeclaratorContext) -> TypeDeclaratorNode {
         let node = TypeDeclaratorNode(isInNonnullContext: isInNonnullContext(context))
-        node.location = sourceLocation(for: context)
+        updateSourceLocation(for: node, with: context)
         if let identifierNode = context.directDeclarator()?.identifier().map(makeIdentifier) {
             node.addChild(identifierNode)
         }
@@ -74,14 +74,14 @@ class ASTNodeFactory {
     func makeNullabilitySpecifier(from rule: Parser.NullabilitySpecifierContext) -> NullabilitySpecifier {
         let spec = NullabilitySpecifier(name: rule.getText(),
                                         isInNonnullContext: isInNonnullContext(rule))
-        spec.location = sourceLocation(for: rule)
+        updateSourceLocation(for: spec, with: rule)
         
         return spec
     }
     
     func makeMethodBody(from rule: Parser.MethodDefinitionContext) -> MethodBody {
         let methodBody = MethodBody(isInNonnullContext: isInNonnullContext(rule))
-        methodBody.location = sourceLocation(for: rule)
+        updateSourceLocation(for: methodBody, with: rule)
         methodBody.statements = rule.compoundStatement()
         
         return methodBody
@@ -93,7 +93,7 @@ class ASTNodeFactory {
         
         let body = MethodBody(isInNonnullContext: nonnull)
         body.statements = rule
-        body.location = sourceLocation(for: rule)
+        updateSourceLocation(for: body, with: rule)
         
         return body
     }
@@ -102,7 +102,7 @@ class ASTNodeFactory {
         let nonnull = nonnullContextQuerier.isInNonnullContext(rule)
         
         let enumCase = ObjcEnumCase(isInNonnullContext: nonnull)
-        enumCase.location = sourceLocation(for: rule)
+        updateSourceLocation(for: enumCase, with: rule)
         
         let identifierNode = makeIdentifier(from: identifier)
         enumCase.addChild(identifierNode)
@@ -110,22 +110,41 @@ class ASTNodeFactory {
         if let expression = rule.expression() {
             let expressionNode = ExpressionNode(isInNonnullContext: nonnull)
             expressionNode.expression = expression
-            expressionNode.location = sourceLocation(for: expression)
+            updateSourceLocation(for: expressionNode, with: expression)
             enumCase.addChild(expressionNode)
         }
         
         return enumCase
     }
     
-    func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
+    func updateSourceLocation(for node: ASTNode, with rule: ParserRuleContext) {
+        (node.location, node.length) = sourceLocationAndLength(for: rule)
+    }
+    
+    func sourceLocationAndLength(for rule: ParserRuleContext) -> (SourceLocation, SourceLength) {
         guard let startIndex = rule.start?.getStartIndex(), let endIndex = rule.stop?.getStopIndex() else {
-            return .invalid
+            return (.invalid, .zero)
         }
         
         let sourceStartIndex = source.stringIndex(forCharOffset: startIndex)
         let sourceEndIndex = source.stringIndex(forCharOffset: endIndex)
         
-        return SourceLocation(source: source, range: .range(sourceStartIndex..<sourceEndIndex))
+        let startLine = source.lineNumber(at: sourceStartIndex)
+        let startColumn = source.columnNumber(at: sourceStartIndex)
+        let endLine = source.lineNumber(at: sourceEndIndex)
+        let endColumn = source.columnNumber(at: sourceEndIndex)
+        
+        let location =
+            SourceLocation(line: startLine,
+                            column: startColumn,
+                            utf8Offset: startIndex)
+        
+        let length =
+            SourceLength(newlines: endLine - startLine,
+                          columnsAtLastLine: endColumn,
+                          utf8Length: endIndex - startIndex)
+        
+        return (location, length)
     }
     
 }

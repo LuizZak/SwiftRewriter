@@ -18,6 +18,14 @@ class SourceTests: XCTestCase {
                 return "".startIndex
             }
             
+            func charOffset(forStringIndex index: String.Index) -> Int {
+                return 0
+            }
+            
+            func utf8Index(forCharOffset offset: Int) -> Int {
+                return 0
+            }
+            
             func isEqual(to other: Source) -> Bool {
                 return other is TestSource
             }

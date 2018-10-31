@@ -47,34 +47,46 @@ public class PropertyAttributeNode: ASTNode {
     
     public convenience init(name: String,
                             isInNonnullContext: Bool,
-                            location: SourceLocation = .invalid) {
+                            location: SourceLocation = .invalid,
+                            length: SourceLength = .zero) {
         
         self.init(modifier: .keyword(name),
                   isInNonnullContext: isInNonnullContext,
-                  location: location)
+                  location: location,
+                  length: length)
     }
     
     public convenience init(getter: String,
                             isInNonnullContext: Bool,
-                            location: SourceLocation = .invalid) {
+                            location: SourceLocation = .invalid,
+                            length: SourceLength = .zero) {
         
         self.init(modifier: .getter(getter),
                   isInNonnullContext: isInNonnullContext,
-                  location: location)
+                  location: location,
+                  length: length)
     }
     
     public convenience init(setter: String,
                             isInNonnullContext: Bool,
-                            location: SourceLocation = .invalid) {
+                            location: SourceLocation = .invalid,
+                            length: SourceLength = .zero) {
         
         self.init(modifier: .setter(setter),
                   isInNonnullContext: isInNonnullContext,
-                  location: location)
+                  location: location,
+                  length: length)
     }
     
-    public init(modifier: Attribute, isInNonnullContext: Bool, location: SourceLocation = .invalid) {
+    public init(modifier: Attribute,
+                isInNonnullContext: Bool,
+                location: SourceLocation = .invalid,
+                length: SourceLength = .zero) {
+        
         self.attribute = modifier
-        super.init(isInNonnullContext: isInNonnullContext, location: location)
+        super.init(isInNonnullContext: isInNonnullContext,
+                   location: location,
+                   length: length)
     }
     
     public enum Attribute {

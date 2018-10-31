@@ -464,7 +464,9 @@ public class ObjcParser {
         do {
             try parseTokenNode(openBrace)
         } catch {
-            diagnostics.error("Expected \(openBrace) to open list", location: location())
+            diagnostics.error("Expected \(openBrace) to open list",
+                              origin: source.filePath,
+                              location: location())
         }
         
         var expectsItem = true
@@ -493,19 +495,25 @@ public class ObjcParser {
                 }
             } catch {
                 // Panic!
-                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item", location: location())
+                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item",
+                                 origin: source.filePath,
+                                 location: location())
             }
         }
         
         // Closed list after comma
         if expectsItem {
-            diagnostics.error("Expected item after comma", location: location())
+            diagnostics.error("Expected item after comma",
+                              origin: source.filePath,
+                              location: location())
         }
         
         do {
             try parseTokenNode(closeBrace)
         } catch {
-            diagnostics.error("Expected \(closeBrace) to close list", location: location())
+            diagnostics.error("Expected \(closeBrace) to close list",
+                              origin: source.filePath,
+                              location: location())
         }
         
         return items
@@ -528,6 +536,7 @@ public class DiagnosticsErrorListener: BaseErrorListener {
                                         _ charPositionInLine: Int,
                                         _ msg: String,
                                         _ e: AnyObject?) where T : ATNSimulator {
-        diagnostics.error(msg, location: .invalid)
+        
+        diagnostics.error(msg, origin: source.filePath, location: .invalid)
     }
 }

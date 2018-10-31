@@ -6,6 +6,8 @@ import ObjcParserAntlr
 open class ASTNode {
     /// Location for this node within the original source code
     public var location: SourceLocation
+    /// The total length of this node's span in the original source code
+    public var length: SourceLength
     
     /// Original source for this node.
     public var originalSource: Source?
@@ -34,10 +36,12 @@ open class ASTNode {
     /// Defaults to an invalid range
     public init(isInNonnullContext: Bool,
                 location: SourceLocation = .invalid,
+                length: SourceLength = .zero,
                 existsInSource: Bool = true) {
         
         self.isInNonnullContext = isInNonnullContext
         self.location = location
+        self.length = length
         self.existsInSource = existsInSource
     }
     
@@ -131,15 +135,18 @@ open class ASTNode {
     /// children's ranges combined.
     /// Does nothing if resulting range is .invalid.
     public func updateSourceRange() {
-        let range = children.reduce(SourceRange.invalid, { $0.union(with: $1.location.range) })
-        
-        switch range {
-        case .invalid:
-            break
-        default:
-            self.location.source = children[0].location.source
-            self.location.range = range
+        guard let startNode = children.min(by: { $0.location < $1.location }) else {
+            return
         }
+        guard let endNode = children.max(by: { ($0.location + $0.length) < ($1.location + $1.length) }) else {
+            return
+        }
+        
+        self.location = startNode.location
+        self.length =
+            SourceLength(newlines: endNode.location.line - startNode.location.line,
+                          columnsAtLastLine: endNode.location.column,
+                          utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
     }
     
     /// Overriden by subclasses to provide custom short descriptions to be used

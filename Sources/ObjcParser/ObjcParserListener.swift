@@ -32,26 +32,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         typeParser = TypeParsing(state: state, antlrSettings: antlrSettings)
         context = NodeCreationContext()
         rootNode = GlobalContextNode(isInNonnullContext: false)
-        mapper = GenericParseTreeContextMapper(source: source,
-                                               nonnullContextQuerier: nonnullContextQuerier)
+        mapper = GenericParseTreeContextMapper(
+            source: source,
+            nonnullContextQuerier: nonnullContextQuerier,
+            nodeFactory: nodeFactory)
         
         super.init()
         
         configureMappers()
-    }
-    
-    private func sourceLocation(for rule: ParserRuleContext) -> SourceLocation {
-        let startIndex = rule.start?.getStartIndex() ?? 0
-        let endIndex = rule.stop?.getStopIndex() ?? 0
-        
-        let line = rule.start?.getLine() ?? 0
-        let column = (rule.start?.getCharPositionInLine()).map { $0 + 1 } ?? 0
-        
-        return
-            SourceLocation(source: source,
-                           intRange: startIndex..<endIndex,
-                           line: line,
-                           column: column)
     }
     
     /// Configures mappers in `self.mapper` so they are automatically pushed and
@@ -252,7 +240,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 
                 let typeNode = TypeNameNode(type: type, isInNonnullContext: nonnull)
                 let ident = nodeFactory.makeIdentifier(from: identifier)
-                typeNode.location = sourceLocation(for: fieldDeclarator)
+                nodeFactory.updateSourceLocation(for: typeNode, with: fieldDeclarator)
                 
                 let ivar = IVarDeclaration(isInNonnullContext: nonnull)
                 ivar.addChild(typeNode)
@@ -301,7 +289,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         let listener = PropertyListener(isInNonnullContext: isInNonnullContext(ctx),
                                         typeParser: typeParser,
                                         nonnullContextQuerier: nonnullContextQuerier,
-                                        sourceLocation: sourceLocation)
+                                        updateSourceLocation: nodeFactory.updateSourceLocation)
         let walker = ParseTreeWalker()
         try? walker.walk(listener, ctx)
         
@@ -320,7 +308,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         }
         
         let node = TypeNameNode(type: type, isInNonnullContext: isInNonnullContext(ctx))
-        node.location = sourceLocation(for: ctx)
+        nodeFactory.updateSourceLocation(for: node, with: ctx)
         context.addChildNode(node)
     }
     
@@ -489,7 +477,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             
             let typeNameNode = TypeNameNode(type: type,
                                             isInNonnullContext: isInNonnullContext(ctx))
-            typeNameNode.location = sourceLocation(for: typeDeclarator)
+            nodeFactory.updateSourceLocation(for: typeNameNode, with: typeDeclarator)
             typedefNode.addChild(typeNameNode)
         }
     }
@@ -532,8 +520,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
             let typeNameNode =
                 TypeNameNode(type: type,
                              isInNonnullContext: isInNonnullContext(typeVariableDeclaratorOrName))
-            typeNameNode.location = sourceLocation(for: typeVariableDeclaratorOrName)
-            
+            nodeFactory.updateSourceLocation(for: typeNameNode, with: typeVariableDeclaratorOrName)
             context.addChildNode(typeNameNode)
         }
     }
@@ -564,7 +551,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 let typeNameNode =
                     TypeNameNode(type: returnType,
                                  isInNonnullContext: isInNonnullContext(declarationSpecifiers))
-                typeNameNode.location = sourceLocation(for: declarationSpecifiers)
+                nodeFactory.updateSourceLocation(for: typeNameNode, with: declarationSpecifiers)
                 function.addChild(typeNameNode)
             }
         }
@@ -605,14 +592,14 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
                 
                 let typeNode = TypeNameNode(type: type,
                                             isInNonnullContext: isInNonnullContext(param))
-                typeNode.location = sourceLocation(for: param)
+                nodeFactory.updateSourceLocation(for: typeNode, with: param)
                 context.addChildNode(typeNode)
             }
             
             if params.ELIPSIS() != nil {
                 let variadicParameter =
                     VariadicParameter(isInNonnullContext: isInNonnullContext(ctx))
-                variadicParameter.location = sourceLocation(for: params)
+                nodeFactory.updateSourceLocation(for: variadicParameter, with: params)
                 context.addChildNode(variadicParameter)
             }
         }
@@ -716,7 +703,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 
                 let identifierNode = nodeFactory.makeIdentifier(from: identifier)
                 let typeNameNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
-                typeNameNode.location = nodeFactory.sourceLocation(for: ctx)
+                nodeFactory.updateSourceLocation(for: typeNameNode, with: ctx)
                 
                 varDecl.addChild(identifierNode)
                 varDecl.addChild(typeNameNode)
@@ -725,7 +712,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                     let expression = ExpressionNode(isInNonnullContext: inNonnull)
                     expression.expression = initializer.expression()
                     if let exp = initializer.expression() {
-                        expression.location = nodeFactory.sourceLocation(for: exp)
+                        nodeFactory.updateSourceLocation(for: expression, with: exp)
                     }
                     let constantExpression = ConstantExpressionNode(isInNonnullContext: inNonnull)
                     constantExpression.addChild(expression)
@@ -787,7 +774,7 @@ private class StructListener: ObjectiveCParserBaseListener {
         let inNonnull = nonnullContextQuerier.isInNonnullContext(ctx)
         
         let str = ObjcStructDeclaration(isInNonnullContext: inNonnull)
-        str.location = nodeFactory.sourceLocation(for: ctx)
+        nodeFactory.updateSourceLocation(for: str, with: ctx)
         
         if let identifier = ctx.identifier() {
             let identifier = nodeFactory.makeIdentifier(from: identifier)
@@ -809,11 +796,11 @@ private class StructListener: ObjectiveCParserBaseListener {
                 let identifierNode = nodeFactory.makeIdentifier(from: identifier)
                 
                 let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
-                typeNode.location = nodeFactory.sourceLocation(for: fieldDeclaration)
+                nodeFactory.updateSourceLocation(for: typeNode, with: fieldDeclaration)
                 
                 field.addChild(identifierNode)
                 field.addChild(typeNode)
-                field.location = nodeFactory.sourceLocation(for: fieldDeclaration)
+                nodeFactory.updateSourceLocation(for: field, with: fieldDeclaration)
                 
                 str.addChild(field)
             }
@@ -827,17 +814,17 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     var property: PropertyDefinition
     var typeParser: TypeParsing
     var nonnullContextQuerier: NonnullContextQuerier
-    var sourceLocation: (ParserRuleContext) -> SourceLocation
+    var updateSourceLocation: (ASTNode, ParserRuleContext) -> Void
     
     init(isInNonnullContext: Bool,
          typeParser: TypeParsing,
          nonnullContextQuerier: NonnullContextQuerier,
-         sourceLocation: @escaping (ParserRuleContext) -> SourceLocation) {
+         updateSourceLocation: @escaping (ASTNode, ParserRuleContext) -> Void) {
         
         self.property = PropertyDefinition(isInNonnullContext: isInNonnullContext)
         self.typeParser = typeParser
         self.nonnullContextQuerier = nonnullContextQuerier
-        self.sourceLocation = sourceLocation
+        self.updateSourceLocation = updateSourceLocation
     }
     
     override func enterPropertyDeclaration(_ ctx: ObjectiveCParser.PropertyDeclarationContext) {
@@ -845,7 +832,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         let node =
             KeywordNode(keyword: .atProperty,
                         isInNonnullContext: nonnullContextQuerier.isInNonnullContext(ctx))
-        node.location = sourceLocation(ctx)
+        updateSourceLocation(node, ctx)
         property.addChild(node)
         
         if let ident =
@@ -860,7 +847,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
             
             let node = Identifier(name: ident.getText(),
                                   isInNonnullContext: inNonnull)
-            node.location = sourceLocation(ident)
+            updateSourceLocation(node, ident)
             
             property.addChild(node)
         }
@@ -870,7 +857,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
             
             if let type = typeParser.parseObjcType(inDeclaration: fieldDeclaration) {
                 let typeNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
-                typeNode.location = sourceLocation(fieldDeclaration)
+                updateSourceLocation(typeNode, fieldDeclaration)
                 property.addChild(typeNode)
             }
         }
@@ -880,7 +867,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         let inNonnull = nonnullContextQuerier.isInNonnullContext(ctx)
         
         let node = PropertyAttributesList(isInNonnullContext: inNonnull)
-        node.location = sourceLocation(ctx)
+        updateSourceLocation(node, ctx)
         property.addChild(node)
     }
     
@@ -903,7 +890,7 @@ private class PropertyListener: ObjectiveCParserBaseListener {
         
         let node = PropertyAttributeNode(modifier: modifier,
                                          isInNonnullContext: inNonnull)
-        node.location = sourceLocation(ctx)
+        updateSourceLocation(node, ctx)
         property.attributesList?.addChild(node)
     }
 }
@@ -938,12 +925,12 @@ private class FunctionPointerVisitor: ObjectiveCParserBaseVisitor<TypedefNode> {
         
         let identifierNode = nodeFactory.makeIdentifier(from: identifier)
         let typeNameNode = TypeNameNode(type: type, isInNonnullContext: inNonnull)
-        typeNameNode.location = nodeFactory.sourceLocation(for: ctx)
+        nodeFactory.updateSourceLocation(for: typeNameNode, with: ctx)
         
         typedefNode.addChild(identifierNode)
         typedefNode.addChild(typeNameNode)
         
-        typedefNode.location = nodeFactory.sourceLocation(for: ctx)
+        nodeFactory.updateSourceLocation(for: typedefNode, with: ctx)
         
         return nil
     }
@@ -958,10 +945,12 @@ private class GenericParseTreeContextMapper {
     private var source: Source
     
     private var nonnullContextQuerier: NonnullContextQuerier
+    private var nodeFactory: ASTNodeFactory
     
-    init(source: Source, nonnullContextQuerier: NonnullContextQuerier) {
+    init(source: Source, nonnullContextQuerier: NonnullContextQuerier, nodeFactory: ASTNodeFactory) {
         self.source = source
         self.nonnullContextQuerier = nonnullContextQuerier
+        self.nodeFactory = nodeFactory
     }
     
     func addRuleMap<T: ParserRuleContext, U: NodeType>(rule: T.Type, nodeType: U.Type) {
@@ -996,19 +985,10 @@ private class GenericParseTreeContextMapper {
                 nodeType.init(isInNonnullContext:
                     nonnullContextQuerier.isInNonnullContext(rule))
             
-            let startIndex = rule.start?.getStartIndex() ?? 0
-            let endIndex = rule.stop?.getStopIndex() ?? 0
-            
-            let line = rule.start?.getLine() ?? 0
-            let column = (rule.start?.getCharPositionInLine()).map { $0 + 1 } ?? 0
-            
-            node.location =
-                SourceLocation(source: source,
-                               intRange: startIndex..<endIndex,
-                               line: line,
-                               column: column)
+            nodeFactory.updateSourceLocation(for: node, with: rule)
             
             context.pushContext(node: node)
+            
         case .instance(_, let node):
             context.pushContext(node: node)
         }
