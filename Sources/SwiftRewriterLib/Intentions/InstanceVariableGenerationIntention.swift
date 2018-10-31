@@ -2,7 +2,7 @@ import GrammarModels
 import SwiftAST
 
 /// An intention to create an instance variable (Objective-C's 'ivar').
-public class InstanceVariableGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
+public final class InstanceVariableGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
     public var typedSource: IVarDeclaration? {
         return source as? IVarDeclaration
     }
@@ -19,6 +19,29 @@ public class InstanceVariableGenerationIntention: MemberGenerationIntention, Val
         self.name = name
         self.storage = storage
         super.init(accessLevel: accessLevel, source: source)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        name = try container.decode(String.self, forKey: .name)
+        storage = try container.decode(ValueStorage.self, forKey: .storage)
+        
+        try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(name, forKey: .name)
+        try container.encode(storage, forKey: .storage)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case storage
     }
 }
 

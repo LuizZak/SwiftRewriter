@@ -34,4 +34,27 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)
     }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.signature = try container.decode(FunctionSignature.self, forKey: .signature)
+        self.functionBody = try container.decodeIfPresent(FunctionBodyIntention.self, forKey: .functionBody)
+        
+        try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(signature, forKey: .signature)
+        try container.encodeIfPresent(functionBody, forKey: .functionBody)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case signature
+        case functionBody
+    }
 }

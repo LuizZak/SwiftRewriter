@@ -16,4 +16,24 @@ public class FunctionBodyIntention: FromSourceIntention, KnownMethodBody {
         
         super.init(accessLevel: .public, source: source)
     }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.body = try container.decodeStatement(forKey: .body)
+        
+        try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encodeStatement(body, forKey: .body)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case body
+    }
 }

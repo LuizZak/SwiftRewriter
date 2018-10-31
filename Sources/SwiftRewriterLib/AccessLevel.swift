@@ -1,5 +1,5 @@
 /// Access level visibility for a member or type
-public enum AccessLevel: String {
+public enum AccessLevel: String, Codable {
     case `private`
     case `fileprivate`
     case `internal`

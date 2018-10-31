@@ -1,5 +1,6 @@
 import SwiftAST
 import GrammarModels
+import Foundation
 
 /// An intention to generate a class, struct or enumeration in swift.
 public class TypeGenerationIntention: FromSourceIntention {
@@ -57,6 +58,16 @@ public class TypeGenerationIntention: FromSourceIntention {
         }()
         
         super.init(accessLevel: accessLevel, source: source)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        origin = try container.decode(String.self, forKey: .origin)
+        typeName = try container.decode(String.self, forKey: .typeName)
+        typeName = try container.decode(String.self, forKey: .typeName)
+        
+        try super.init(from: container.superDecoder())
     }
     
     /// Generates a new protocol conformance intention from a given known protocol
@@ -195,6 +206,18 @@ public class TypeGenerationIntention: FromSourceIntention {
         return methods.filter {
             $0.signature.asIdentifier == identifier
         }
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case origin
+        case typeName
+        case supertype
+        case protocols
+        case properties
+        case methods
+        case constructors
+        case knownTraits
+        case semantics
     }
 }
 

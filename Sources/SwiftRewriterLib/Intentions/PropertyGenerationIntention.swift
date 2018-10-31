@@ -87,25 +87,108 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     public var mode: Mode = .asField
     public var attributes: [PropertyAttribute]
     
-    public convenience init(name: String, type: SwiftType, attributes: [PropertyAttribute],
-                            accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public convenience init(name: String,
+                            type: SwiftType,
+                            attributes: [PropertyAttribute],
+                            accessLevel: AccessLevel = .internal,
+                            source: ASTNode? = nil) {
+        
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
-        self.init(name: name, storage: storage, attributes: attributes,
-                  accessLevel: accessLevel, source: source)
+        
+        self.init(name: name,
+                  storage: storage,
+                  attributes: attributes,
+                  accessLevel: accessLevel,
+                  source: source)
     }
     
-    public init(name: String, storage: ValueStorage, attributes: [PropertyAttribute],
-                accessLevel: AccessLevel = .internal, source: ASTNode? = nil) {
+    public init(name: String,
+                storage: ValueStorage,
+                attributes: [PropertyAttribute],
+                accessLevel: AccessLevel = .internal,
+                source: ASTNode? = nil) {
+        
         self.name = name
         self.storage = storage
         self.attributes = attributes
+        
         super.init(accessLevel: accessLevel, source: source)
     }
     
-    public enum Mode {
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        isOverride = try container.decode(Bool.self, forKey: .isOverride)
+        setterAccessLevel = try container.decodeIfPresent(AccessLevel.self, forKey: .setterAccessLevel)
+        name = try container.decode(String.self, forKey: .name)
+        storage = try container.decode(ValueStorage.self, forKey: .storage)
+        mode = try container.decode(Mode.self, forKey: .mode)
+        attributes = try container.decode([PropertyAttribute].self, forKey: .attributes)
+        
+        try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(isOverride, forKey: .isOverride)
+        try container.encodeIfPresent(setterAccessLevel, forKey: .setterAccessLevel)
+        try container.encode(name, forKey: .name)
+        try container.encode(storage, forKey: .storage)
+        try container.encode(mode, forKey: .mode)
+        try container.encode(attributes, forKey: .attributes)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    public enum Mode: Codable {
         case asField
         case computed(FunctionBodyIntention)
         case property(get: FunctionBodyIntention, set: Setter)
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            let key = try container.decode(Int.self, forKey: .discriminator)
+            
+            switch key {
+            case 0:
+                self = .asField
+                
+            case 1:
+                self = try .computed(container.decode(FunctionBodyIntention.self, forKey: .payload0))
+                
+            case 2:
+                let getter = try container.decode(FunctionBodyIntention.self, forKey: .payload0)
+                let setter = try container.decode(Setter.self, forKey: .payload1)
+                
+                self = .property(get: getter, set: setter)
+                
+            default:
+                throw DecodingError.dataCorruptedError(
+                    forKey: .discriminator,
+                    in: container,
+                    debugDescription: "Unknown discriminator value \(key); expected either 0, 1 or 2")
+            }
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            
+            switch self {
+            case .asField:
+                try container.encode(0, forKey: .discriminator)
+                
+            case .computed(let body):
+                try container.encode(1, forKey: .discriminator)
+                try container.encode(body, forKey: .payload0)
+                
+            case let .property(get, set):
+                try container.encode(2, forKey: .discriminator)
+                try container.encode(get, forKey: .payload0)
+                try container.encode(set, forKey: .payload1)
+            }
+        }
         
         public var isField: Bool {
             switch self {
@@ -115,9 +198,15 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
                 return false
             }
         }
+        
+        private enum CodingKeys: String, CodingKey {
+            case discriminator
+            case payload0
+            case payload1
+        }
     }
     
-    public struct Setter {
+    public struct Setter: Codable {
         /// Identifier for the setter's received value
         public var valueIdentifier: String
         /// The body for the setter
@@ -127,6 +216,15 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
             self.valueIdentifier = valueIdentifier
             self.body = body
         }
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case isOverride
+        case name
+        case storage
+        case setterAccessLevel
+        case attributes
+        case mode
     }
 }
 
