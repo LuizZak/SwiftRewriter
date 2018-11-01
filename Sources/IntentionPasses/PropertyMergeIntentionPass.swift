@@ -434,8 +434,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // Synthesize a simple getter that has the following statement within:
             // return self._backingField
             let getterIntention =
-                FunctionBodyIntention(body: [.return(.identifier(backingFieldName))],
-                                      source: propertySet.setter?.functionBody?.source)
+                FunctionBodyIntention(body: [.return(.identifier(backingFieldName))])
             
             propertySet.property.mode = .property(get: getterIntention, set: newSetter)
             
@@ -502,8 +501,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         let field =
             InstanceVariableGenerationIntention(name: name,
                                                 storage: property.storage,
-                                                accessLevel: .private,
-                                                source: property.source)
+                                                accessLevel: .private)
         
         type.addInstanceVariable(field)
         

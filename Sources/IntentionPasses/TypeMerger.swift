@@ -403,8 +403,7 @@ class TypeMerger {
                 FunctionBodyIntention(body: body.body)
             
             target.functionBody?.history.recordCreation(
-                description: "Merged from existing type body",
-                relatedIntentions: [source]
+                description: "Merged from existing type body"
             )
             
             let funcSign = TypeFormatter.asString(signature: source.signature, includeName: false)

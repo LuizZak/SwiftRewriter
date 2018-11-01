@@ -4,7 +4,7 @@ import GrammarModels
 
 /// An intention to generate a static/instance function for a type.
 public class MethodGenerationIntention: MemberGenerationIntention, FunctionIntention {
-    public var typedSource: MethodDefinition? {
+    var typedSource: MethodDefinition? {
         return source as? MethodDefinition
     }
     

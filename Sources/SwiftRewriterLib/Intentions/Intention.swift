@@ -10,12 +10,14 @@ public protocol IntentionProtocol: class {
 /// An intention represents the intent of the code transpiler to generate a
 /// file/class/struct/property/etc. with Swift code.
 public class Intention: IntentionProtocol, Historic, Codable {
+    private var _history = IntentionHistoryTracker()
+    
     /// Original source location of the node that generated this intention
     public var originLocation: SourceLocation?
     
     /// Reference to an AST node that originated this source-code generation
     /// intention
-    public var source: ASTNode? {
+    var source: ASTNode? {
         didSet {
             if let source = source {
                 originLocation = source.location
@@ -27,7 +29,9 @@ public class Intention: IntentionProtocol, Historic, Codable {
     public internal(set) weak var parent: Intention?
     
     /// Gets the history tracker for this intention
-    public let history: IntentionHistory = IntentionHistoryTracker()
+    public var history: IntentionHistory {
+        return _history
+    }
     
     public init() {
         
@@ -39,11 +43,20 @@ public class Intention: IntentionProtocol, Historic, Codable {
     }
     
     public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
         
+        _history = try container.decode(IntentionHistoryTracker.self,
+                                        forKey: .history)
     }
     
     public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
         
+        try container.encode(_history, forKey: .history)
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case history
     }
 }
 
