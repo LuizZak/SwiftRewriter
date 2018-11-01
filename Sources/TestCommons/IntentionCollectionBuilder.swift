@@ -274,6 +274,13 @@ public class MemberBuilder<T: MemberGenerationIntention> {
     }
     
     @discardableResult
+    public func addHistory(tag: String, description: String) -> MemberBuilder {
+        targetMember.history.recordChange(tag: tag, description: description)
+        
+        return self
+    }
+    
+    @discardableResult
     public func setAccessLevel(_ accessLevel: AccessLevel) -> MemberBuilder {
         targetMember.accessLevel = accessLevel
         return self
@@ -358,6 +365,13 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     
     public init(targetType: T) {
         self.targetType = targetType
+    }
+    
+    @discardableResult
+    public func addHistory(tag: String, description: String) -> TypeBuilder {
+        targetType.history.recordChange(tag: tag, description: description)
+        
+        return self
     }
     
     @discardableResult

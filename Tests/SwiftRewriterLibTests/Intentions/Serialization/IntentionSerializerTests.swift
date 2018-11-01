@@ -17,6 +17,7 @@ class IntentionSerializerTests: XCTestCase {
                             .createProperty(named: "b", type: .float)
                             .createMethod("method(_ a: Int, b: Float)") { method in
                                 method
+                                    .addHistory(tag: "Test", description: "A test history")
                                     .addSemantics(Semantics.collectionMutator)
                                     .addAttributes([KnownAttribute(name: "attr", parameters: nil)])
                                     .addAnnotations(["annotation"])
