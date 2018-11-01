@@ -146,6 +146,10 @@ public class PostfixExpression: Expression {
     }
     
     public static func == (lhs: PostfixExpression, rhs: PostfixExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.exp == rhs.exp && lhs.op == rhs.op
     }
     
@@ -278,6 +282,10 @@ public final class MemberPostfix: Postfix {
     }
     
     public static func == (lhs: MemberPostfix, rhs: MemberPostfix) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.name == rhs.name
     }
     
@@ -356,6 +364,10 @@ public final class SubscriptPostfix: Postfix {
     }
     
     public static func == (lhs: SubscriptPostfix, rhs: SubscriptPostfix) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.expression == rhs.expression
     }
     
@@ -464,7 +476,12 @@ public final class FunctionCallPostfix: Postfix {
     }
     
     public static func == (lhs: FunctionCallPostfix, rhs: FunctionCallPostfix) -> Bool {
-        return lhs.optionalAccessKind == rhs.optionalAccessKind && lhs.arguments == rhs.arguments
+        if lhs === rhs {
+            return true
+        }
+        
+        return lhs.optionalAccessKind == rhs.optionalAccessKind
+            && lhs.arguments == rhs.arguments
     }
     
     private enum CodingKeys: String, CodingKey {

@@ -10,11 +10,15 @@ public class IntentionCollection: Codable {
     }
     
     public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
         
+        _intentions = try container.decodeIntentions(forKey: .files)
     }
     
     public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
         
+        try container.encodeIntentions(_intentions, forKey: .files)
     }
     
     public func fileIntentions() -> [FileGenerationIntention] {

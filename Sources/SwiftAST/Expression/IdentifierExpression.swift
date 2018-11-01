@@ -51,6 +51,10 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
     }
     
     public static func == (lhs: IdentifierExpression, rhs: IdentifierExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.identifier == rhs.identifier
     }
     

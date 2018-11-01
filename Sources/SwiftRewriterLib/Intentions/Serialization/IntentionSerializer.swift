@@ -61,6 +61,15 @@ public final class IntentionSerializer {
             case is FunctionBodyIntention:
                 kind = .functionBody
                 
+            case is ProtocolInheritanceIntention:
+                kind = .protocolInheritance
+                
+            case is ProtocolGenerationIntention:
+                kind = .protocol
+                
+            case is PropertySynthesizationIntention:
+                kind = .propertySynthesize
+                
             default:
                 throw Error.unknownIntentionType(type(of: intention))
             }
@@ -128,6 +137,12 @@ public final class IntentionSerializer {
                 
             case .functionBody:
                 intention = try container.decode(FunctionBodyIntention.self, forKey: .intention)
+                
+            case .protocol:
+                intention = try container.decode(ProtocolGenerationIntention.self, forKey: .intention)
+                
+            case .propertySynthesize:
+                intention = try container.decode(PropertySynthesizationIntention.self, forKey: .intention)
             }
         }
         
@@ -149,9 +164,11 @@ public final class IntentionSerializer {
         case `class`
         case `enum`
         case `struct`
+        case `protocol`
         case classExtension
         case initializer
         case property
+        case propertySynthesize
         case method
         case field
         case globalFunction
@@ -168,5 +185,20 @@ public final class IntentionSerializer {
     public enum Error: Swift.Error {
         case unknownIntentionType(Intention.Type)
         case unexpectedIntentionType(Intention.Type)
+    }
+}
+
+public extension IntentionSerializer {
+    
+    public static func encode(intentions: IntentionCollection,
+                              encoder: JSONEncoder) throws -> Data {
+        
+        return try encoder.encode(intentions)
+    }
+    
+    public static func decodeIntentions(decoder: JSONDecoder,
+                                        data: Data) throws -> IntentionCollection {
+        
+        return try decoder.decode(IntentionCollection.self, from: data)
     }
 }

@@ -58,6 +58,10 @@ public class ArrayLiteralExpression: Expression {
     }
     
     public static func == (lhs: ArrayLiteralExpression, rhs: ArrayLiteralExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.items == rhs.items
     }
     

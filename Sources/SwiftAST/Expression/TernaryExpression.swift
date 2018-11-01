@@ -84,7 +84,13 @@ public class TernaryExpression: Expression {
     }
     
     public static func == (lhs: TernaryExpression, rhs: TernaryExpression) -> Bool {
-        return lhs.exp == rhs.exp && lhs.ifTrue == rhs.ifTrue && lhs.ifFalse == rhs.ifFalse
+        if lhs === rhs {
+            return true
+        }
+        
+        return lhs.exp == rhs.exp
+            && lhs.ifTrue == rhs.ifTrue
+            && lhs.ifFalse == rhs.ifFalse
     }
     
     private enum CodingKeys: String, CodingKey {

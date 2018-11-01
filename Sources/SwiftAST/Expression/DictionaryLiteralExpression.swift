@@ -68,6 +68,10 @@ public class DictionaryLiteralExpression: Expression {
     }
     
     public static func == (lhs: DictionaryLiteralExpression, rhs: DictionaryLiteralExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.pairs == rhs.pairs
     }
     

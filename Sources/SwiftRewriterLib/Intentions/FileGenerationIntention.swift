@@ -35,11 +35,10 @@ public final class FileGenerationIntention: Intention {
     /// Returns `true` if there are no intentions registered for this file, not
     /// counting any recorded preprocessor directive.
     public var isEmptyExceptDirectives: Bool {
-        return
-            typeIntentions.isEmpty &&
-                typealiasIntentions.isEmpty &&
-                globalFunctionIntentions.isEmpty &&
-                globalVariableIntentions.isEmpty
+        return typeIntentions.isEmpty
+            && typealiasIntentions.isEmpty
+            && globalFunctionIntentions.isEmpty
+            && globalVariableIntentions.isEmpty
     }
     
     /// Gets the class extensions (but not main class declarations) to create
@@ -105,12 +104,16 @@ public final class FileGenerationIntention: Intention {
             try container.decode([String].self, forKey: .importDirectives)
         
         typeIntentions = try container.decodeIntentions(forKey: .typeIntentions)
+        typealiasIntentions = try container.decodeIntentions(forKey: .typealiasIntentions)
         globalFunctionIntentions = try container.decodeIntentions(forKey: .globalFunctionIntentions)
         globalVariableIntentions = try container.decodeIntentions(forKey: .globalVariableIntentions)
         
         try super.init(from: container.superDecoder())
         
         for intention in typeIntentions {
+            intention.parent = self
+        }
+        for intention in typealiasIntentions {
             intention.parent = self
         }
         for intention in globalFunctionIntentions {
@@ -130,8 +133,11 @@ public final class FileGenerationIntention: Intention {
         try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
         try container.encode(importDirectives, forKey: .importDirectives)
         try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
-        try container.encodeIntentions(globalFunctionIntentions, forKey: .globalFunctionIntentions)
-        try container.encodeIntentions(globalVariableIntentions, forKey: .globalVariableIntentions)
+        try container.encodeIntentions(typealiasIntentions, forKey: .typealiasIntentions)
+        try container.encodeIntentions(globalFunctionIntentions,
+                                       forKey: .globalFunctionIntentions)
+        try container.encodeIntentions(globalVariableIntentions,
+                                       forKey: .globalVariableIntentions)
         
         try super.encode(to: container.superEncoder())
     }
@@ -222,6 +228,7 @@ public final class FileGenerationIntention: Intention {
         case preprocessorDirectives
         case importDirectives
         case typeIntentions
+        case typealiasIntentions
         case globalFunctionIntentions
         case globalVariableIntentions
     }

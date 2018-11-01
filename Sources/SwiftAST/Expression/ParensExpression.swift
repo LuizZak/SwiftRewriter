@@ -63,6 +63,10 @@ public class ParensExpression: Expression {
     }
     
     public static func == (lhs: ParensExpression, rhs: ParensExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.exp == rhs.exp
     }
     

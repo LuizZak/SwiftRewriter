@@ -92,6 +92,10 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
     }
     
     public static func == (lhs: ConstantExpression, rhs: ConstantExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.constant == rhs.constant
     }
     

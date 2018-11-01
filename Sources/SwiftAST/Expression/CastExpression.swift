@@ -67,6 +67,10 @@ public class CastExpression: Expression {
     }
     
     public static func == (lhs: CastExpression, rhs: CastExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.exp == rhs.exp &&
             lhs.type == rhs.type &&
             lhs.isOptionalCast == rhs.isOptionalCast
