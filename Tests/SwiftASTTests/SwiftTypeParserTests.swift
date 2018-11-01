@@ -562,11 +562,11 @@ class SwiftTypePermutator {
     }
     
     private func random(upTo max: Int) -> Int {
-        return Int(context.mersenne.random()) % (max + 1)
+        return Int(context.randomNumberGenerator.next()) % (max + 1)
     }
     
     private func randomNormal() -> Double {
-        let value = context.mersenne.random()
+        let value = context.randomNumberGenerator.next()
         let double = Double(value) / Double(UInt32.max)
         
         return double
@@ -575,13 +575,13 @@ class SwiftTypePermutator {
     // MARK: Context
     
     private class Context {
-        var mersenne: MersenneTwister
+        var randomNumberGenerator: RandomNumberGenerator
         
         // Used to generate unique identifier type names "Type1", "Type2", etc.
         var counter: Int = 0
         
-        init(mersenne: MersenneTwister) {
-            self.mersenne = mersenne
+        init(mersenne: RandomNumberGenerator) {
+            self.randomNumberGenerator = mersenne
         }
     }
 }
