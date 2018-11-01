@@ -42,21 +42,8 @@ public class Intention: IntentionProtocol, Historic, Codable {
         self.originLocation = source?.location
     }
     
-    public required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        
-        _history = try container.decode(IntentionHistoryTracker.self,
-                                        forKey: .history)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        
-        try container.encode(_history, forKey: .history)
-    }
-    
     private enum CodingKeys: String, CodingKey {
-        case history
+        case _history = "history"
     }
 }
 

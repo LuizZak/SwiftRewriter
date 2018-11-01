@@ -27,6 +27,12 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
     /// macros.
     public var inNonnullContext: Bool = false
     
+    public init(accessLevel: AccessLevel, source: ASTNode?) {
+        self.accessLevel = accessLevel
+        
+        super.init(source: source)
+    }
+    
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
@@ -34,12 +40,6 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
         self.inNonnullContext = try container.decode(Bool.self, forKey: .inNonnullContext)
         
         try super.init(from: container.superDecoder())
-    }
-    
-    public init(accessLevel: AccessLevel, source: ASTNode?) {
-        self.accessLevel = accessLevel
-        
-        super.init(source: source)
     }
     
     public override func encode(to encoder: Encoder) throws {
