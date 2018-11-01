@@ -75,6 +75,12 @@ final public class MersenneTwister {
     }
 }
 
+extension MersenneTwister: RandomNumberGenerator {
+    public func next() -> UInt32 {
+        return random()
+    }
+}
+
 /// Multiply two `UInt32`'s and discard the overflow.
 ///
 private func discardMultiply(_ a: UInt32, _ b: UInt32) -> UInt32 {
