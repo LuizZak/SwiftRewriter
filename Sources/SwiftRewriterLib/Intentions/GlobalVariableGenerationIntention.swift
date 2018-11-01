@@ -3,7 +3,7 @@ import SwiftAST
 
 /// An intention to generate a global variable.
 public final class GlobalVariableGenerationIntention: FromSourceIntention, FileLevelIntention, ValueStorageIntention {
-    public var variableSource: VariableDeclaration? {
+    var variableSource: VariableDeclaration? {
         return source as? VariableDeclaration
     }
     

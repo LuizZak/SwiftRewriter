@@ -3,7 +3,7 @@ import SwiftAST
 
 /// An intention to generate a Swift enumeration type
 public final class EnumGenerationIntention: TypeGenerationIntention {
-    public var typedSource: ObjcEnumDeclaration? {
+    var typedSource: ObjcEnumDeclaration? {
         return source as? ObjcEnumDeclaration
     }
     

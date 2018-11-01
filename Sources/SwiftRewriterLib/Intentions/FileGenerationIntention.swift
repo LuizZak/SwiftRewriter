@@ -105,8 +105,20 @@ public final class FileGenerationIntention: Intention {
             try container.decode([String].self, forKey: .importDirectives)
         
         typeIntentions = try container.decodeIntentions(forKey: .typeIntentions)
+        globalFunctionIntentions = try container.decodeIntentions(forKey: .globalFunctionIntentions)
+        globalVariableIntentions = try container.decodeIntentions(forKey: .globalVariableIntentions)
         
         try super.init(from: container.superDecoder())
+        
+        for intention in typeIntentions {
+            intention.parent = self
+        }
+        for intention in globalFunctionIntentions {
+            intention.parent = self
+        }
+        for intention in globalVariableIntentions {
+            intention.parent = self
+        }
     }
     
     public override func encode(to encoder: Encoder) throws {
@@ -118,6 +130,8 @@ public final class FileGenerationIntention: Intention {
         try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
         try container.encode(importDirectives, forKey: .importDirectives)
         try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
+        try container.encodeIntentions(globalFunctionIntentions, forKey: .globalFunctionIntentions)
+        try container.encodeIntentions(globalVariableIntentions, forKey: .globalVariableIntentions)
         
         try super.encode(to: container.superEncoder())
     }
@@ -208,5 +222,7 @@ public final class FileGenerationIntention: Intention {
         case preprocessorDirectives
         case importDirectives
         case typeIntentions
+        case globalFunctionIntentions
+        case globalVariableIntentions
     }
 }

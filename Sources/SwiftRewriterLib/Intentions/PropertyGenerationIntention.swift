@@ -4,11 +4,8 @@ import SwiftAST
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
-    public var propertySource: PropertyDefinition? {
+    var propertySource: PropertyDefinition? {
         return source as? PropertyDefinition
-    }
-    public var synthesizeSource: PropertySynthesizeItem? {
-        return source as? PropertySynthesizeItem
     }
     
     public var isOverride: Bool = false
@@ -84,7 +81,12 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     
     public var name: String
     public var storage: ValueStorage
-    public var mode: Mode = .asField
+    public var mode: Mode = .asField {
+        didSet {
+            oldValue.setParent(nil)
+            mode.setParent(self)
+        }
+    }
     public var attributes: [PropertyAttribute]
     
     public convenience init(name: String,
@@ -93,7 +95,11 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
                             accessLevel: AccessLevel = .internal,
                             source: ASTNode? = nil) {
         
-        let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
+        let storage =
+            ValueStorage(
+                type: type,
+                ownership: .strong,
+                isConstant: false)
         
         self.init(name: name,
                   storage: storage,
@@ -119,11 +125,15 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         isOverride = try container.decode(Bool.self, forKey: .isOverride)
-        setterAccessLevel = try container.decodeIfPresent(AccessLevel.self, forKey: .setterAccessLevel)
+        setterAccessLevel =
+            try container.decodeIfPresent(AccessLevel.self,
+                                          forKey: .setterAccessLevel)
+        
         name = try container.decode(String.self, forKey: .name)
         storage = try container.decode(ValueStorage.self, forKey: .storage)
         mode = try container.decode(Mode.self, forKey: .mode)
-        attributes = try container.decode([PropertyAttribute].self, forKey: .attributes)
+        attributes = try container.decode([PropertyAttribute].self,
+                                          forKey: .attributes)
         
         try super.init(from: container.superDecoder())
     }
@@ -132,7 +142,8 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(isOverride, forKey: .isOverride)
-        try container.encodeIfPresent(setterAccessLevel, forKey: .setterAccessLevel)
+        try container.encodeIfPresent(setterAccessLevel,
+                                      forKey: .setterAccessLevel)
         try container.encode(name, forKey: .name)
         try container.encode(storage, forKey: .storage)
         try container.encode(mode, forKey: .mode)
@@ -159,7 +170,10 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
                 self = try .computed(container.decodeIntention(forKey: .payload0))
                 
             case 2:
-                let getter = try container.decodeIntention(FunctionBodyIntention.self, forKey: .payload0)
+                let getter =
+                    try container.decodeIntention(FunctionBodyIntention.self,
+                                                  forKey: .payload0)
+                
                 let setter = try container.decode(Setter.self, forKey: .payload1)
                 
                 self = .property(get: getter, set: setter)
@@ -199,6 +213,18 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
             }
         }
         
+        func setParent(_ intention: Intention?) {
+            switch self {
+            case .asField:
+                break
+            case .computed(let body):
+                body.parent = intention
+            case let .property(getter, setter):
+                getter.parent = intention
+                setter.body.parent = intention
+            }
+        }
+        
         private enum CodingKeys: String, CodingKey {
             case discriminator
             case payload0
@@ -220,7 +246,8 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             
-            valueIdentifier = try container.decode(String.self, forKey: .valueIdentifier)
+            valueIdentifier = try container.decode(String.self,
+                                                   forKey: .valueIdentifier)
             body = try container.decodeIntention(forKey: .body)
         }
         

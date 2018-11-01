@@ -589,15 +589,7 @@ class InternalSwiftWriter {
         }
         
         if prop.ownership != .strong {
-            // Check for non-pointers
-            if let original = prop.propertySource?.type?.type, !original.isPointer {
-                diagnostics.warning("""
-                    Property '\(prop.name)' specified as '\(prop.ownership.rawValue)' \
-                    but original type '\(original)' is not a pointer type.
-                    """, location: prop.propertySource?.location ?? .invalid)
-            } else {
-                target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
-            }
+            target.outputInlineWithSpace(prop.ownership.rawValue, style: .keyword)
         }
         if prop.isClassProperty {
             target.outputInlineWithSpace("static", style: .keyword)

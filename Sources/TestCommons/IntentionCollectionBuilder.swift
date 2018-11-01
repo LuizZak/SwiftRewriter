@@ -449,7 +449,7 @@ public extension TypeBuilder where T: ClassExtensionGenerationIntention {
     /// category extension interface declaration.
     @discardableResult
     public func setAsCategoryImplementation(categoryName: String) -> TypeBuilder {
-        targetType.source = ObjcClassCategoryInterface(isInNonnullContext: false)
+        targetType.categoryName = categoryName
         
         return self
     }

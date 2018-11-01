@@ -73,6 +73,22 @@ public class TypeGenerationIntention: FromSourceIntention {
         semantics = try container.decode(Set<Semantic>.self, forKey: .semantics)
         
         try super.init(from: container.superDecoder())
+        
+        for intention in protocols {
+            intention.parent = self
+        }
+        for intention in methods {
+            intention.type = self
+            intention.parent = self
+        }
+        for intention in properties {
+            intention.type = self
+            intention.parent = self
+        }
+        for intention in constructors {
+            intention.type = self
+            intention.parent = self
+        }
     }
     
     public override func encode(to encoder: Encoder) throws {

@@ -3,7 +3,7 @@ import SwiftAST
 
 /// An intention to generate a global function.
 public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, FunctionIntention {
-    public var typedSource: FunctionDefinition? {
+    var typedSource: FunctionDefinition? {
         return source as? FunctionDefinition
     }
     

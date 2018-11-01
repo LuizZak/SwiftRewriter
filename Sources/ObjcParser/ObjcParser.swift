@@ -107,7 +107,8 @@ public class ObjcParser {
                             fileName: String = "",
                             state: ObjcParserState) {
         
-        self.init(source: StringCodeSource(source: string, fileName: fileName), state: state)
+        self.init(source: StringCodeSource(source: string, fileName: fileName),
+                  state: state)
     }
     
     public convenience init(source: CodeSource) {
@@ -334,15 +335,18 @@ public class ObjcParser {
         var lastBegin: Int?
         
         for tok in allTokens {
-            let tokType = tok.getType()
-            if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN {
+            switch tok.getType() {
+            case ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN:
                 lastBegin = tok.getTokenIndex()
-            } else if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END {
                 
+            case ObjectiveCLexer.NS_ASSUME_NONNULL_END:
                 if let lastBeginIndex = lastBegin {
                     nonnullMacroRegionsTokenRange.append((start: lastBeginIndex, end: tok.getTokenIndex()))
                     lastBegin = nil
                 }
+                
+            default:
+                break
             }
         }
     }
@@ -365,8 +369,10 @@ public class ObjcParser {
             // '<' : Protocol list
             if lexer.tokenType() == .operator(.lessThan) {
                 let types =
-                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             itemParser: { try lexer.advance(matching: { $0.tokenType.isIdentifier }) })
+                    _parseCommaSeparatedList(
+                        braces: .operator(.lessThan), .operator(.greaterThan),
+                        itemParser: { try lexer.advance(matching: { $0.tokenType.isIdentifier }) })
+                
                 type = .id(protocols: types.map { String($0.value) })
             } else {
                 type = .id(protocols: [])

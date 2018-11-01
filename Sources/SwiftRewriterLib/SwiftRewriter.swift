@@ -495,8 +495,7 @@ public final class SwiftRewriter {
         let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)
         
         let collectorDelegate =
-            CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser,
-                              nonnullTokenRanges: parser.nonnullMacroRegionsTokenRange)
+            CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
             // TODO: Would be interesting if we could simply print ASTNodes
@@ -622,22 +621,15 @@ public final class SwiftRewriter {
 // MARK: - IntentionCollectorDelegate
 fileprivate extension SwiftRewriter {
     fileprivate class CollectorDelegate: IntentionCollectorDelegate {
-        /// During parsing, the index of each NS_ASSUME_NONNULL_BEGIN/END pair is
-        /// collected so during source analysis by SwiftRewriter we can verify whether
-        /// or not a declaration is under the effects of NS_ASSUME_NONNULL by checking
-        /// whether it is contained within one of these ranges.
-        var nonnullTokenRanges: [NonnullTokenRange]
-        
         var typeMapper: TypeMapper
         var typeParser: TypeParsing
         
         var lazyParse: [LazyParseItem] = []
         var lazyResolve: [LazyTypeResolveItem] = []
         
-        init(typeMapper: TypeMapper, typeParser: TypeParsing, nonnullTokenRanges: [NonnullTokenRange]) {
+        init(typeMapper: TypeMapper, typeParser: TypeParsing) {
             self.typeMapper = typeMapper
             self.typeParser = typeParser
-            self.nonnullTokenRanges = nonnullTokenRanges
         }
         
         func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
