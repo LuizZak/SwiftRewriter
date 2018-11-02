@@ -151,6 +151,7 @@ public class SizeOfExpression: Expression {
     }
 }
 extension Expression {
+    @inlinable
     public var asSizeOf: SizeOfExpression? {
         return cast()
     }

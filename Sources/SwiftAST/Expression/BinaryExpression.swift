@@ -101,6 +101,7 @@ public class BinaryExpression: Expression {
     }
 }
 extension Expression {
+    @inlinable
     public var asBinary: BinaryExpression? {
         return cast()
     }

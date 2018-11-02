@@ -66,6 +66,7 @@ public class VariableDeclarationsStatement: Statement {
     }
 }
 public extension Statement {
+    @inlinable
     public var asVariableDeclaration: VariableDeclarationsStatement? {
         return cast()
     }

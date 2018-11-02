@@ -141,6 +141,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
         return lhs.isEqual(to: rhs)
     }
     
+    @usableFromInline
     final func cast<T: Expression>() -> T? {
         return self as? T
     }

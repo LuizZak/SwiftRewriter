@@ -16,7 +16,7 @@ public class PostfixExpression: Expression {
             op.subExpressions.forEach { $0.parent = self }
             op.postfixExpression = self
             
-            _subExpressions = [exp] + op.subExpressions
+            _subExpressions[1...] = op.subExpressions[...]
         }
     }
     
@@ -166,6 +166,7 @@ public class PostfixExpression: Expression {
     }
 }
 extension Expression {
+    @inlinable
     public var asPostfix: PostfixExpression? {
         return cast()
     }
@@ -298,12 +299,14 @@ public extension Postfix {
         return MemberPostfix(name: name)
     }
     
+    @inlinable
     public var asMember: MemberPostfix? {
         return self as? MemberPostfix
     }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
+    @inlinable
     var member: MemberPostfix? {
         return op as? MemberPostfix
     }
@@ -380,12 +383,14 @@ public extension Postfix {
         return SubscriptPostfix(expression: exp)
     }
     
+    @inlinable
     public var asSubscription: SubscriptPostfix? {
         return self as? SubscriptPostfix
     }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
+    @inlinable
     var subscription: SubscriptPostfix? {
         return op as? SubscriptPostfix
     }
@@ -493,12 +498,14 @@ public extension Postfix {
         return FunctionCallPostfix(arguments: arguments)
     }
     
+    @inlinable
     public var asFunctionCall: FunctionCallPostfix? {
         return self as? FunctionCallPostfix
     }
 }
 // Helper casting getter extensions to postfix expression
 public extension PostfixExpression {
+    @inlinable
     var functionCall: FunctionCallPostfix? {
         return op as? FunctionCallPostfix
     }

@@ -103,6 +103,7 @@ public class ForStatement: Statement {
     }
 }
 public extension Statement {
+    @inlinable
     public var asFor: ForStatement? {
         return cast()
     }

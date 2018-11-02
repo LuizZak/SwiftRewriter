@@ -100,6 +100,7 @@ public class TernaryExpression: Expression {
     }
 }
 public extension Expression {
+    @inlinable
     public var asTernary: TernaryExpression? {
         return cast()
     }

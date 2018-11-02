@@ -85,6 +85,7 @@ public class PrefixExpression: Expression {
     }
 }
 extension Expression {
+    @inlinable
     public var asPrefix: PrefixExpression? {
         return cast()
     }

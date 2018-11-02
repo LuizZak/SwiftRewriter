@@ -193,8 +193,10 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         switch ptn {
         case .expression(let exp):
             return .expression(visitExpression(exp))
+            
         case .tuple(let patterns):
             return .tuple(patterns.map(visitPattern))
+            
         case .identifier:
             return ptn
         }
@@ -221,8 +223,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: A CompoundStatement to visit
     /// - Returns: Result of visiting the compound statement
     open func visitCompound(_ stmt: CompoundStatement) -> Statement {
-        for (i, s) in stmt.statements.enumerated() {
-            stmt.statements[i] = visitStatement(s)
+        for i in 0..<stmt.statements.count {
+            stmt.statements[i] = visitStatement(stmt.statements[i])
         }
         
         return stmt
@@ -351,8 +353,8 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
     /// - Parameter stmt: An ExpressionsStatement to visit
     /// - Returns: Result of visiting the expressions statement
     open func visitExpressions(_ stmt: ExpressionsStatement) -> Statement {
-        for (i, e) in stmt.expressions.enumerated() {
-            stmt.expressions[i] = visitExpression(e)
+        for i in 0..<stmt.expressions.count {
+            stmt.expressions[i] = visitExpression(stmt.expressions[i])
         }
         
         return stmt

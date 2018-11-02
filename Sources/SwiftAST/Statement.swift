@@ -63,6 +63,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         try container.encodeIfPresent(label, forKey: .label)
     }
     
+    @usableFromInline
     final func cast<T: Statement>() -> T? {
         return self as? T
     }
