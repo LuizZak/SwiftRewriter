@@ -139,7 +139,8 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             iteratorType = iterator
             
         // Sub-types of `NSArray` iterate as .any
-        case .nominal(.typeName(let typeName))? where typeSystem.isType(typeName, subtypeOf: "NSArray"):
+        case .nominal(.typeName(let typeName))?
+            where typeSystem.isType(typeName, subtypeOf: "NSArray"):
             iteratorType = .any
             
         case .nominal(.generic("Range", .tail(let type)))?,

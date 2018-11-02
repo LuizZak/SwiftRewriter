@@ -2,6 +2,9 @@ import SwiftAST
 
 /// Class responsible for building the intrinsics exposed to type resolvers during
 /// resolution of member lookups.
+///
+/// Intrinsics builders are not thread-safe, and should be instantiated on a per-thread
+/// basis to ensure no accidental thread racing occurs.
 class TypeResolverIntrinsicsBuilder {
     private var pushedReturnType: Bool = false
     
@@ -9,8 +12,9 @@ class TypeResolverIntrinsicsBuilder {
     
     private var globals: DefinitionsSource
     private var typeSystem: TypeSystem
-    private var miscellaneousDefinitions: DefaultCodeScope = DefaultCodeScope()
+    private var miscellaneousDefinitions = DefaultCodeScope()
     private var intentionGlobals: IntentionCollectionGlobals
+    private var knownTypeDefinitionsSource: KnownTypePropertiesDefinitionsSource?
     
     init(typeResolver: ExpressionTypeResolver,
          globals: DefinitionsSource,
@@ -22,6 +26,14 @@ class TypeResolverIntrinsicsBuilder {
         self.typeResolver = typeResolver
         self.typeSystem = typeSystem
         self.intentionGlobals = intentionGlobals
+    }
+    
+    func makeCache() {
+        knownTypeDefinitionsSource?.makeCache()
+    }
+    
+    func tearDownCache() {
+        knownTypeDefinitionsSource?.tearDownCache()
     }
     
     func setForceResolveExpressions(_ force: Bool) {
@@ -77,10 +89,12 @@ class TypeResolverIntrinsicsBuilder {
         
         typeResolver.intrinsicVariables = EmptyCodeScope()
         miscellaneousDefinitions.removeAllDefinitions()
+        knownTypeDefinitionsSource = nil
     }
     
     private func createIntrinsics(forFunction function: GlobalFunctionGenerationIntention,
                                   intentions: IntentionCollection) -> DefinitionsSource {
+        
         let intrinsics = DefaultCodeScope()
         
         // Push function parameters as intrinsics, if member is a method type
@@ -108,6 +122,9 @@ class TypeResolverIntrinsicsBuilder {
     
     private func createIntrinsics(forMember member: MemberGenerationIntention,
                                   intentions: IntentionCollection) -> DefinitionsSource {
+        
+        var propertyIntrinsics: DefinitionsSource?
+        var functionArgumentsIntrinsics: DefinitionsSource?
         
         let intrinsics = DefaultCodeScope()
         
@@ -162,27 +179,29 @@ class TypeResolverIntrinsicsBuilder {
             
             // Record all known static properties visible
             if let knownType = typeSystem.knownTypeWithName(type.typeName) {
-                for prop in knownType.knownProperties where prop.isStatic == member.isStatic {
-                    intrinsics.recordDefinition(
-                        CodeDefinition(variableNamed: prop.name, storage: prop.storage)
-                    )
-                }
                 
-                for field in knownType.knownFields where field.isStatic == member.isStatic {
-                    intrinsics.recordDefinition(
-                        CodeDefinition(variableNamed: field.name, storage: field.storage)
+                let knownTypeSource =
+                    KnownTypePropertiesDefinitionsSource(
+                        type: knownType,
+                        staticMembers: member.isStatic
                     )
-                }
+                
+                knownTypeDefinitionsSource = knownTypeSource
+                propertyIntrinsics = knownTypeSource
             }
         }
         
         // Push function parameters as intrinsics, if member is a method type
         if let function = member as? FunctionIntention {
+            let functionIntrinsics = DefaultCodeScope()
+            
             for param in function.parameters {
-                intrinsics.recordDefinition(
+                functionIntrinsics.recordDefinition(
                     CodeDefinition(variableNamed: param.name, type: param.type)
                 )
             }
+            
+            functionArgumentsIntrinsics = functionIntrinsics
         }
         
         // Push file-level global definitions (variables and functions)
@@ -190,8 +209,14 @@ class TypeResolverIntrinsicsBuilder {
             IntentionCollectionGlobalsDefinitionsSource(globals: self.intentionGlobals,
                                                         symbol: member)
         
-        // Push global definitions
         let compoundIntrinsics = CompoundDefinitionsSource()
+        
+        if let functionArgumentsIntrinsics = functionArgumentsIntrinsics {
+            compoundIntrinsics.addSource(functionArgumentsIntrinsics)
+        }
+        if let propertyIntrinsics = propertyIntrinsics {
+            compoundIntrinsics.addSource(propertyIntrinsics)
+        }
         
         compoundIntrinsics.addSource(intrinsics)
         compoundIntrinsics.addSource(intentionGlobals)
@@ -200,6 +225,71 @@ class TypeResolverIntrinsicsBuilder {
         
         return compoundIntrinsics
     }
+}
+
+class KnownTypePropertiesDefinitionsSource: DefinitionsSource {
+    
+    var usingCache = false
+    var lookupCache: [String: CodeDefinition?] = [:]
+    let type: KnownType
+    let staticMembers: Bool
+    
+    init(type: KnownType, staticMembers: Bool) {
+        self.type = type
+        self.staticMembers = staticMembers
+    }
+    
+    func makeCache() {
+        usingCache = true
+        lookupCache = [:]
+    }
+    
+    func tearDownCache() {
+        usingCache = false
+        lookupCache = [:]
+    }
+    
+    func firstDefinition(named name: String) -> CodeDefinition? {
+        
+        if usingCache {
+            if let result = lookupCache[name] {
+                return result
+            }
+        }
+        
+        var definition: CodeDefinition?
+        
+        for prop in type.knownProperties where prop.isStatic == staticMembers {
+            if prop.name == name {
+                definition = CodeDefinition(variableNamed: prop.name, storage: prop.storage)
+                break
+            }
+        }
+        
+        if definition == nil {
+            for field in type.knownFields where field.isStatic == staticMembers {
+                if field.name == name {
+                    definition = CodeDefinition(variableNamed: field.name, storage: field.storage)
+                    break
+                }
+            }
+        }
+        
+        if usingCache {
+            lookupCache[name] = definition
+        }
+        
+        return definition
+    }
+    
+    func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+        return []
+    }
+    
+    func allDefinitions() -> [CodeDefinition] {
+        return []
+    }
+    
 }
 
 class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {

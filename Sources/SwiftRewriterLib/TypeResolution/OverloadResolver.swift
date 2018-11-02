@@ -130,9 +130,9 @@ public class OverloadResolver {
                         continue
                     }
                     
-                    // Integer/float literals must be handled specially: they can
-                    // be implicitly casted to other numeric types (float cannot
-                    // be casted to integers, however)
+                    // Integer/float literals must be handled specially: they
+                    // can be implicitly casted to other numeric types (except
+                    // for float-to-integer casts)
                     if argument.isLiteral {
                         switch argument.literalKind {
                         case .integer? where typeSystem.isNumeric(parameterType.deepUnwrapped),
