@@ -77,7 +77,7 @@ final public class MersenneTwister {
 
 extension MersenneTwister: RandomNumberGenerator {
     public func next() -> UInt64 {
-        return UInt64(random() * 2)
+        return UInt64(random()) &* 2
     }
 }
 
