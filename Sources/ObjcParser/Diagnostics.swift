@@ -55,20 +55,24 @@ public class Diagnostics {
         diagnostics.append(contentsOf: other.diagnostics)
     }
     
-    public func error(_ message: String, location: SourceLocation) {
-        let diag = DiagnosticMessage.error(ErrorDiagnostic(message: message, location: location))
+    public func error(_ message: String, origin: String? = nil, location: SourceLocation) {
+        let diag =
+            DiagnosticMessage.error(
+                ErrorDiagnostic(message: message, origin: origin, location: location))
         
         diagnostics.append(diag)
     }
     
-    public func warning(_ message: String, location: SourceLocation) {
-        let diag = DiagnosticMessage.warning(message: message, location: location)
+    public func warning(_ message: String, origin: String? = nil, location: SourceLocation) {
+        let diag =
+            DiagnosticMessage.warning(message: message, origin: origin, location: location)
         
         diagnostics.append(diag)
     }
     
-    public func note(_ message: String, location: SourceLocation) {
-        let diag = DiagnosticMessage.note(message: message, location: location)
+    public func note(_ message: String, origin: String? = nil, location: SourceLocation) {
+        let diag =
+            DiagnosticMessage.note(message: message, origin: origin, location: location)
         
         diagnostics.append(diag)
     }
@@ -91,16 +95,21 @@ public class Diagnostics {
 
 /// A single diagnostic message
 public enum DiagnosticMessage: CustomStringConvertible {
-    case note(message: String, location: SourceLocation)
-    case warning(message: String, location: SourceLocation)
+    case note(message: String, origin: String?, location: SourceLocation)
+    case warning(message: String, origin: String?, location: SourceLocation)
     case error(ErrorDiagnostic)
     
     public var description: String {
         switch self {
-        case let .warning(message, loc):
-            return "\(message) at \(loc)"
-        case let .note(message, loc):
-            return "\(message) at \(loc)"
+        case let .warning(message, origin, location),
+             let .note(message, origin, location):
+            
+            if let origin = origin {
+                return "\(message) at \(origin) line \(location.line) column \(location.column)"
+            }
+            
+            return "\(message) line \(location.line) column \(location.column)"
+            
         case let .error(error):
             return error.description
         }
@@ -108,9 +117,9 @@ public enum DiagnosticMessage: CustomStringConvertible {
     
     public var location: SourceLocation {
         switch self {
-        case .warning(_, let loc):
+        case .warning(_, _, let loc):
             return loc
-        case .note(_, let loc):
+        case .note(_, _, let loc):
             return loc
         case .error(let error):
             return error.location
@@ -120,9 +129,14 @@ public enum DiagnosticMessage: CustomStringConvertible {
 
 public struct ErrorDiagnostic: CustomStringConvertible, Error {
     var message: String
+    var origin: String?
     var location: SourceLocation
     
     public var description: String {
-        return "\(message) at \(location)"
+        if let origin = origin {
+            return "\(message) at \(origin) line \(location.line) column \(location.column)"
+        }
+        
+        return "\(message) line \(location.line) column \(location.column)"
     }
 }

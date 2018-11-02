@@ -94,7 +94,7 @@ public struct FunctionSignature: Hashable {
     /// foo:bar:
     /// foo:bar:baz:
     /// foo:bar::
-    /// foo:bar:baz:
+    /// foo:bar:baz::
     /// ```
     ///
     /// or the Swift equivalent signature:

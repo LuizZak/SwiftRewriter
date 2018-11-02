@@ -33,6 +33,24 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
         super.init(source: source)
     }
     
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.accessLevel = try container.decode(AccessLevel.self, forKey: .accessLevel)
+        self.inNonnullContext = try container.decode(Bool.self, forKey: .inNonnullContext)
+        
+        try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(accessLevel, forKey: .accessLevel)
+        try container.encode(inNonnullContext, forKey: .inNonnullContext)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     /// Returns `true` if this intention's symbol is visible for a given intention.
     ///
     /// - Parameter intention: A source-based intention to compare the visibility
@@ -87,5 +105,10 @@ public class FromSourceIntention: Intention, NonNullScopedIntention {
                 return false
             }
         }
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case accessLevel
+        case inNonnullContext
     }
 }

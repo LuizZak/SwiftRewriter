@@ -21,9 +21,9 @@ public enum PropertyAttribute: Hashable, Codable {
             self = .getterName(try container.decode(String.self))
         default:
             let message = """
-            Unknown PropertyAttribute flag \(flag). Maybe data was encoded \
-            using a different version of SwiftRewriter?
-            """
+                Unknown PropertyAttribute flag \(flag). Maybe data was encoded \
+                using a different version of SwiftRewriter?
+                """
             
             throw DecodingError.dataCorruptedError(in: container, debugDescription: message)
         }
@@ -36,9 +36,11 @@ public enum PropertyAttribute: Hashable, Codable {
         case .attribute(let name):
             try container.encode(0)
             try container.encode(name)
+            
         case .setterName(let name):
             try container.encode(1)
             try container.encode(name)
+            
         case .getterName(let name):
             try container.encode(2)
             try container.encode(name)

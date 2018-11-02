@@ -24,6 +24,14 @@ public struct StringCodeSource: CodeSource {
         return _indices[offset]
     }
     
+    public func charOffset(forStringIndex index: String.Index) -> Int {
+        return _indices.firstIndex(of: index) ?? 0
+    }
+    
+    public func utf8Index(forCharOffset offset: Int) -> Int {
+        return offset
+    }
+    
     public func isEqual(to other: Source) -> Bool {
         guard let strSource = other as? StringCodeSource else {
             return false

@@ -21,11 +21,6 @@ public protocol IntentionHistory {
     @discardableResult
     func recordCreation(description: String) -> IntentionHistoryEntryEcho
     
-    /// A shortcut method to record the creation of the intention this history is
-    /// contained within.
-    @discardableResult
-    func recordCreation(description: String, relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho
-    
     /// A shortcut method to record a change to this intention history
     @discardableResult
     func recordChange(tag: String, description: String, relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho
@@ -61,17 +56,7 @@ public extension IntentionHistory {
     @discardableResult
     public func recordCreation(description: String) -> IntentionHistoryEntryEcho {
         return record(IntentionHistoryEntry(tag: "Creation",
-                                            description: description,
-                                            relatedIntentions: []))
-    }
-    
-    @discardableResult
-    public func recordCreation(description: String,
-                               relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
-        
-        return record(IntentionHistoryEntry(tag: "Creation",
-                                            description: description,
-                                            relatedIntentions: relatedIntentions))
+                                            description: description))
     }
     
     @discardableResult
@@ -87,8 +72,7 @@ public extension IntentionHistory {
                              relatedIntentions: [Intention]) -> IntentionHistoryEntryEcho {
         
         return record(IntentionHistoryEntry(tag: tag,
-                                            description: description,
-                                            relatedIntentions: relatedIntentions))
+                                            description: description))
     }
     
     @discardableResult
@@ -97,8 +81,7 @@ public extension IntentionHistory {
                             description: String) -> IntentionHistoryEntryEcho {
         
         return record(IntentionHistoryEntry(tag: tag,
-                                            description: description,
-                                            relatedIntentions: intentions))
+                                            description: description))
     }
     
     @discardableResult
@@ -107,8 +90,7 @@ public extension IntentionHistory {
                             description: String) -> IntentionHistoryEntryEcho {
         
         return record(IntentionHistoryEntry(tag: tag,
-                                            description: description,
-                                            relatedIntentions: [intention]))
+                                            description: description))
     }
 }
 

@@ -274,8 +274,33 @@ public class MemberBuilder<T: MemberGenerationIntention> {
     }
     
     @discardableResult
+    public func addHistory(tag: String, description: String) -> MemberBuilder {
+        targetMember.history.recordChange(tag: tag, description: description)
+        
+        return self
+    }
+    
+    @discardableResult
     public func setAccessLevel(_ accessLevel: AccessLevel) -> MemberBuilder {
         targetMember.accessLevel = accessLevel
+        return self
+    }
+    
+    @discardableResult
+    public func addSemantics<S: Sequence>(_ semantics: S) -> MemberBuilder where S.Element == Semantic {
+        targetMember.semantics.formUnion(semantics)
+        return self
+    }
+    
+    @discardableResult
+    public func addAnnotations(_ annotations: [String]) -> MemberBuilder {
+        targetMember.annotations.append(contentsOf: annotations)
+        return self
+    }
+    
+    @discardableResult
+    public func addAttributes(_ attributes: [KnownAttribute]) -> MemberBuilder {
+        targetMember.knownAttributes.append(contentsOf: attributes)
         return self
     }
     
@@ -343,6 +368,13 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     }
     
     @discardableResult
+    public func addHistory(tag: String, description: String) -> TypeBuilder {
+        targetType.history.recordChange(tag: tag, description: description)
+        
+        return self
+    }
+    
+    @discardableResult
     public func createProperty(named name: String,
                                type: SwiftType,
                                attributes: [PropertyAttribute] = []) -> TypeBuilder {
@@ -355,14 +387,22 @@ public class TypeBuilder<T: TypeGenerationIntention> {
                                type: SwiftType,
                                mode: PropertyGenerationIntention.Mode = .asField,
                                attributes: [PropertyAttribute] = [],
-                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = emptyInit)
-            -> TypeBuilder {
+                               builder: (MemberBuilder<PropertyGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
-        let prop = PropertyGenerationIntention(name: name,
+        let prop: PropertyGenerationIntention
+        
+        if targetType is ProtocolGenerationIntention {
+            prop = ProtocolPropertyGenerationIntention(name: name,
+                                                       storage: storage,
+                                                       attributes: attributes)
+        } else {
+            prop = PropertyGenerationIntention(name: name,
                                                storage: storage,
                                                attributes: attributes)
+        }
+        
         prop.mode = mode
         
         let mbuilder = MemberBuilder(targetMember: prop)
@@ -427,7 +467,14 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     public func createMethod(_ signature: FunctionSignature,
                              builder: (MemberBuilder<MethodGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
-        let method = MethodGenerationIntention(signature: signature)
+        let method: MethodGenerationIntention
+        
+        if targetType is ProtocolGenerationIntention {
+            method = ProtocolMethodGenerationIntention(signature: signature)
+        } else {
+            method = MethodGenerationIntention(signature: signature)
+        }
+        
         method.functionBody = FunctionBodyIntention(body: [])
         
         let mbuilder = MemberBuilder(targetMember: method)
@@ -449,7 +496,7 @@ public extension TypeBuilder where T: ClassExtensionGenerationIntention {
     /// category extension interface declaration.
     @discardableResult
     public func setAsCategoryImplementation(categoryName: String) -> TypeBuilder {
-        targetType.source = ObjcClassCategoryInterface(isInNonnullContext: false)
+        targetType.categoryName = categoryName
         
         return self
     }

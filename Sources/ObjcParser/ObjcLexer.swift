@@ -15,7 +15,15 @@ public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {
     
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
-        return SourceLocation(source: source, range: locationAsRange())
+        guard let range = token().range else {
+            return .invalid
+        }
+        
+        let line = source.lineNumber(at: range.lowerBound)
+        let column = source.columnNumber(at: range.lowerBound)
+        let offset = source.charOffset(forStringIndex: range.lowerBound)
+        
+        return SourceLocation(line: line, column: column, utf8Offset: offset)
     }
     
     /// Current lexer's location as a `SourceRange.location` enum case
@@ -29,10 +37,12 @@ public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {
     
     private struct _RangeMarker: RangeMarker {
         let objcLexer: ObjcLexer
+        let location: SourceLocation
         let index: Lexer.Index
         
         init(objcLexer: ObjcLexer) {
             self.objcLexer = objcLexer
+            self.location = objcLexer.location()
             self.index = _RangeMarker.lexerIndex(in: objcLexer)
         }
         
@@ -49,7 +59,7 @@ public class ObjcLexer: TokenizerLexer<FullToken<TokenType>> {
         }
         
         func makeLocation() -> SourceLocation {
-            return SourceLocation(source: objcLexer.source, range: makeRange())
+            return location
         }
         
         private func rawRange() -> Range<Lexer.Index> {

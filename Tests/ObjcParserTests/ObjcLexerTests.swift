@@ -1,6 +1,8 @@
 import XCTest
 @testable import ObjcParser
 
+// TODO: Refactor these tests; they don't make much sense since SourceLocation was
+// refactored with a struct with just line/column indexes
 class ObjcLexerTests: XCTestCase {
     func testStartRange() {
         let source = "@end abc def"
@@ -9,7 +11,8 @@ class ObjcLexerTests: XCTestCase {
         let range = sut.startRange()
         
         XCTAssertEqual(range.makeString(), "")
-        XCTAssertEqual(range.makeLocation().range, .location(source.startIndex))
+        XCTAssertEqual(range.makeLocation().line, 1)
+        XCTAssertEqual(range.makeLocation().column, 1)
     }
     
     func testStartRangeAfterInvokingToken() {
@@ -20,7 +23,8 @@ class ObjcLexerTests: XCTestCase {
         let range = sut.startRange()
         
         XCTAssertEqual(range.makeString(), "")
-        XCTAssertEqual(range.makeLocation().range, .location(source.startIndex))
+        XCTAssertEqual(range.makeLocation().line, 1)
+        XCTAssertEqual(range.makeLocation().column, 1)
     }
     
     func testStartRangeNextToken() {
@@ -31,8 +35,8 @@ class ObjcLexerTests: XCTestCase {
         _=sut.nextToken()
         
         XCTAssertEqual(range.makeString(), "@end")
-        XCTAssertEqual(range.makeLocation().range,
-                       .range(source.startIndex..<source.index(source.startIndex, offsetBy: 4)))
+        XCTAssertEqual(range.makeLocation().line, 1)
+        XCTAssertEqual(range.makeLocation().column, 1)
     }
     
     func testStartRangeSkippingToken() {
@@ -43,8 +47,8 @@ class ObjcLexerTests: XCTestCase {
         sut.skipToken()
         
         XCTAssertEqual(range.makeString(), "@end")
-        XCTAssertEqual(range.makeLocation().range,
-                       .range(source.startIndex..<source.index(source.startIndex, offsetBy: 4)))
+        XCTAssertEqual(range.makeLocation().line, 1)
+        XCTAssertEqual(range.makeLocation().column, 1)
     }
     
     func testStartRangeSkippingTokenAfterConsumingToken() {
@@ -56,8 +60,8 @@ class ObjcLexerTests: XCTestCase {
         sut.skipToken()
         
         XCTAssertEqual(range.makeString(), "@end")
-        XCTAssertEqual(range.makeLocation().range,
-                       .range(source.startIndex..<source.index(source.startIndex, offsetBy: 4)))
+        XCTAssertEqual(range.makeLocation().line, 1)
+        XCTAssertEqual(range.makeLocation().column, 1)
     }
     
     private func makeLexer(_ str: String) -> ObjcLexer {

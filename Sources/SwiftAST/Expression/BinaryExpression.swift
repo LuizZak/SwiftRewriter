@@ -77,6 +77,10 @@ public class BinaryExpression: Expression {
     }
     
     public static func == (lhs: BinaryExpression, rhs: BinaryExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
     }
     

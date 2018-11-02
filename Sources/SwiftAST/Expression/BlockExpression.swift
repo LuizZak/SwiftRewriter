@@ -77,6 +77,10 @@ public class BlockLiteralExpression: Expression {
     }
     
     public static func == (lhs: BlockLiteralExpression, rhs: BlockLiteralExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.parameters == rhs.parameters &&
             lhs.returnType == rhs.returnType &&
             lhs.body == rhs.body

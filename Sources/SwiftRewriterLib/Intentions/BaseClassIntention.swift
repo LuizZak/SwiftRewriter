@@ -19,6 +19,35 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         return instanceVariables
     }
     
+    public override init(typeName: String,
+                         accessLevel: AccessLevel = .internal,
+                         source: ASTNode? = nil) {
+        
+        super.init(typeName: typeName,
+                   accessLevel: accessLevel,
+                   source: source)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        isInterfaceSource = try container.decode(Bool.self, forKey: .isInterfaceSource)
+        instanceVariables = try container.decodeIntentions(forKey: .instanceVariables)
+        synthesizations = try container.decodeIntentions(forKey: .synthesizations)
+        
+        try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(isInterfaceSource, forKey: .isInterfaceSource)
+        try container.encodeIntentions(instanceVariables, forKey: .instanceVariables)
+        try container.encodeIntentions(synthesizations, forKey: .synthesizations)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
     public func addInstanceVariable(_ intention: InstanceVariableGenerationIntention) {
         if let previousParent = intention.parent as? BaseClassIntention {
             previousParent.removeInstanceVariable(named: intention.name)
@@ -55,5 +84,11 @@ public class BaseClassIntention: TypeGenerationIntention, InstanceVariableContai
         
         synthesizations[index].parent = nil
         synthesizations.remove(at: index)
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case isInterfaceSource
+        case instanceVariables
+        case synthesizations
     }
 }

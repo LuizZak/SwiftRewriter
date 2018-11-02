@@ -61,6 +61,14 @@ public class FileCodeSource: CodeSource {
         return _source.stringIndex(forCharOffset: offset)
     }
     
+    public func charOffset(forStringIndex index: String.Index) -> Int {
+        return _source.charOffset(forStringIndex: index)
+    }
+    
+    public func utf8Index(forCharOffset offset: Int) -> Int {
+        return _source.utf8Index(forCharOffset: offset)
+    }
+    
     public func isEqual(to other: Source) -> Bool {
         guard let other = other as? FileCodeSource else {
             return false

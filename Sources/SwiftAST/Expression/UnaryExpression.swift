@@ -72,6 +72,10 @@ public class UnaryExpression: Expression {
     }
     
     public static func == (lhs: UnaryExpression, rhs: UnaryExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.op == rhs.op && lhs.exp == rhs.exp
     }
     

@@ -87,6 +87,10 @@ public class SizeOfExpression: Expression {
     }
     
     public static func == (lhs: SizeOfExpression, rhs: SizeOfExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.value == rhs.value
     }
     

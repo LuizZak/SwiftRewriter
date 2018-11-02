@@ -17,11 +17,14 @@ public class Identifier: ASTNode {
     
     public init(name: String,
                 isInNonnullContext: Bool,
-                location: SourceLocation = .invalid) {
+                location: SourceLocation = .invalid,
+                length: SourceLength = .zero) {
         
         self.name = name
         
-        super.init(isInNonnullContext: isInNonnullContext, location: location)
+        super.init(isInNonnullContext: isInNonnullContext,
+                   location: location,
+                   length: length)
     }
     
     override public func shortDescription() -> String {
@@ -34,12 +37,15 @@ public class KeywordNode: ASTNode {
     public var keyword: Keyword
     
     public init(keyword: Keyword,
+                isInNonnullContext: Bool,
                 location: SourceLocation = .invalid,
-                isInNonnullContext: Bool) {
+                length: SourceLength = .zero) {
         
         self.keyword = keyword
         
-        super.init(isInNonnullContext: isInNonnullContext, location: location)
+        super.init(isInNonnullContext: isInNonnullContext,
+                   location: location,
+                   length: length)
     }
     
     override public func shortDescription() -> String {

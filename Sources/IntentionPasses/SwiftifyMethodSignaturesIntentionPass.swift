@@ -51,8 +51,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                 
                 let initIntention =
                     InitGenerationIntention(parameters: method.signature.parameters,
-                                            accessLevel: method.accessLevel,
-                                            source: method.source)
+                                            accessLevel: method.accessLevel)
                 
                 initIntention.isOverride = method.isOverride
                 initIntention.inNonnullContext = method.inNonnullContext

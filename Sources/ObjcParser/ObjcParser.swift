@@ -107,7 +107,8 @@ public class ObjcParser {
                             fileName: String = "",
                             state: ObjcParserState) {
         
-        self.init(source: StringCodeSource(source: string, fileName: fileName), state: state)
+        self.init(source: StringCodeSource(source: string, fileName: fileName),
+                  state: state)
     }
     
     public convenience init(source: CodeSource) {
@@ -334,15 +335,18 @@ public class ObjcParser {
         var lastBegin: Int?
         
         for tok in allTokens {
-            let tokType = tok.getType()
-            if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN {
+            switch tok.getType() {
+            case ObjectiveCLexer.NS_ASSUME_NONNULL_BEGIN:
                 lastBegin = tok.getTokenIndex()
-            } else if tokType == ObjectiveCLexer.NS_ASSUME_NONNULL_END {
                 
+            case ObjectiveCLexer.NS_ASSUME_NONNULL_END:
                 if let lastBeginIndex = lastBegin {
                     nonnullMacroRegionsTokenRange.append((start: lastBeginIndex, end: tok.getTokenIndex()))
                     lastBegin = nil
                 }
+                
+            default:
+                break
             }
         }
     }
@@ -365,8 +369,10 @@ public class ObjcParser {
             // '<' : Protocol list
             if lexer.tokenType() == .operator(.lessThan) {
                 let types =
-                    _parseCommaSeparatedList(braces: .operator(.lessThan), .operator(.greaterThan),
-                                             itemParser: { try lexer.advance(matching: { $0.tokenType.isIdentifier }) })
+                    _parseCommaSeparatedList(
+                        braces: .operator(.lessThan), .operator(.greaterThan),
+                        itemParser: { try lexer.advance(matching: { $0.tokenType.isIdentifier }) })
+                
                 type = .id(protocols: types.map { String($0.value) })
             } else {
                 type = .id(protocols: [])
@@ -464,7 +470,9 @@ public class ObjcParser {
         do {
             try parseTokenNode(openBrace)
         } catch {
-            diagnostics.error("Expected \(openBrace) to open list", location: location())
+            diagnostics.error("Expected \(openBrace) to open list",
+                              origin: source.filePath,
+                              location: location())
         }
         
         var expectsItem = true
@@ -493,19 +501,25 @@ public class ObjcParser {
                 }
             } catch {
                 // Panic!
-                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item", location: location())
+                diagnostics.error("Expected \(TokenType.comma) or \(closeBrace) after an item",
+                                 origin: source.filePath,
+                                 location: location())
             }
         }
         
         // Closed list after comma
         if expectsItem {
-            diagnostics.error("Expected item after comma", location: location())
+            diagnostics.error("Expected item after comma",
+                              origin: source.filePath,
+                              location: location())
         }
         
         do {
             try parseTokenNode(closeBrace)
         } catch {
-            diagnostics.error("Expected \(closeBrace) to close list", location: location())
+            diagnostics.error("Expected \(closeBrace) to close list",
+                              origin: source.filePath,
+                              location: location())
         }
         
         return items
@@ -528,6 +542,7 @@ public class DiagnosticsErrorListener: BaseErrorListener {
                                         _ charPositionInLine: Int,
                                         _ msg: String,
                                         _ e: AnyObject?) where T : ATNSimulator {
-        diagnostics.error(msg, location: .invalid)
+        
+        diagnostics.error(msg, origin: source.filePath, location: .invalid)
     }
 }

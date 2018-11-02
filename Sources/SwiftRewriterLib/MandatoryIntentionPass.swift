@@ -264,8 +264,7 @@ class MandatoryIntentionPass: IntentionPass {
                                                         accessLevel: .private)
                 intent.history.recordCreation(description: """
                     Synthesized backing field for \(prop.name) due to @synthesize
-                    """,
-                    relatedIntentions: [synth])
+                    """)
                 type.addInstanceVariable(intent)
             }
             

@@ -1,4 +1,4 @@
-class IntentionHistoryTracker: IntentionHistory {
+final class IntentionHistoryTracker: IntentionHistory, Codable {
     var entries: [IntentionHistoryEntry] = []
     
     init(entries: [IntentionHistoryEntry] = []) {

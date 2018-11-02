@@ -4,7 +4,7 @@ import GrammarModels
 
 /// An intention to generate a static/instance function for a type.
 public class MethodGenerationIntention: MemberGenerationIntention, FunctionIntention {
-    public var typedSource: MethodDefinition? {
+    var typedSource: MethodDefinition? {
         return source as? MethodDefinition
     }
     
@@ -62,6 +62,32 @@ public class MethodGenerationIntention: MemberGenerationIntention, FunctionInten
         
         self.signature = signature
         super.init(accessLevel: accessLevel, source: source)
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        isOverride = try container.decode(Bool.self, forKey: .isOverride)
+        signature = try container.decode(FunctionSignature.self, forKey: .signature)
+        functionBody = try container.decodeIntentionIfPresent(forKey: .functionBody)
+        
+        try super.init(from: container.superDecoder())
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(isOverride, forKey: .isOverride)
+        try container.encode(signature, forKey: .signature)
+        try container.encodeIntentionIfPresent(functionBody, forKey: .functionBody)
+        
+        try super.encode(to: container.superEncoder())
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case isOverride
+        case signature
+        case functionBody
     }
 }
 

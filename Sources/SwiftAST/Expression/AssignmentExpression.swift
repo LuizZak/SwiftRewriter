@@ -82,6 +82,10 @@ public class AssignmentExpression: Expression {
     }
     
     public static func == (lhs: AssignmentExpression, rhs: AssignmentExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.lhs == rhs.lhs && lhs.op == rhs.op && lhs.rhs == rhs.rhs
     }
     

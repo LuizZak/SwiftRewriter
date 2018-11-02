@@ -72,6 +72,10 @@ public class PrefixExpression: Expression {
     }
     
     public static func == (lhs: PrefixExpression, rhs: PrefixExpression) -> Bool {
+        if lhs === rhs {
+            return true
+        }
+        
         return lhs.op == rhs.op && lhs.exp == rhs.exp
     }
     

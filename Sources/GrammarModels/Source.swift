@@ -8,6 +8,8 @@ public protocol Source {
     func isEqual(to other: Source) -> Bool
     
     func stringIndex(forCharOffset offset: Int) -> String.Index
+    func charOffset(forStringIndex index: String.Index) -> Int
+    func utf8Index(forCharOffset offset: Int) -> Int
     
     /// Gets the line number at a given source location
     func lineNumber(at index: String.Index) -> Int
@@ -30,6 +32,14 @@ public struct InvalidSource: Source {
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
         return InvalidSource._stringIndex
+    }
+    
+    public func charOffset(forStringIndex index: String.Index) -> Int {
+        return 0
+    }
+    
+    public func utf8Index(forCharOffset offset: Int) -> Int {
+        return 0
     }
     
     public func isEqual(to other: Source) -> Bool {

@@ -2,7 +2,7 @@ import GrammarModels
 import SwiftAST
 
 /// An intention to create a .swift file
-public class FileGenerationIntention: Intention {
+public final class FileGenerationIntention: Intention {
     /// Used to sort file generation intentions after multi-threaded parsing is
     /// finished.
     var _index: Int = 0
@@ -35,11 +35,10 @@ public class FileGenerationIntention: Intention {
     /// Returns `true` if there are no intentions registered for this file, not
     /// counting any recorded preprocessor directive.
     public var isEmptyExceptDirectives: Bool {
-        return
-            typeIntentions.isEmpty &&
-                typealiasIntentions.isEmpty &&
-                globalFunctionIntentions.isEmpty &&
-                globalVariableIntentions.isEmpty
+        return typeIntentions.isEmpty
+            && typealiasIntentions.isEmpty
+            && globalFunctionIntentions.isEmpty
+            && globalVariableIntentions.isEmpty
     }
     
     /// Gets the class extensions (but not main class declarations) to create
@@ -89,6 +88,58 @@ public class FileGenerationIntention: Intention {
         super.init()
         
         self.history.recordCreation(description: "Created from file \(sourcePath) to file \(targetPath)")
+    }
+    
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        _index = try container.decode(Int.self, forKey: ._index)
+        
+        sourcePath = try container.decode(String.self, forKey: .sourcePath)
+        targetPath = try container.decode(String.self, forKey: .targetPath)
+        
+        preprocessorDirectives =
+            try container.decode([String].self, forKey: .preprocessorDirectives)
+        importDirectives =
+            try container.decode([String].self, forKey: .importDirectives)
+        
+        typeIntentions = try container.decodeIntentions(forKey: .typeIntentions)
+        typealiasIntentions = try container.decodeIntentions(forKey: .typealiasIntentions)
+        globalFunctionIntentions = try container.decodeIntentions(forKey: .globalFunctionIntentions)
+        globalVariableIntentions = try container.decodeIntentions(forKey: .globalVariableIntentions)
+        
+        try super.init(from: container.superDecoder())
+        
+        for intention in typeIntentions {
+            intention.parent = self
+        }
+        for intention in typealiasIntentions {
+            intention.parent = self
+        }
+        for intention in globalFunctionIntentions {
+            intention.parent = self
+        }
+        for intention in globalVariableIntentions {
+            intention.parent = self
+        }
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        
+        try container.encode(_index, forKey: ._index)
+        try container.encode(sourcePath, forKey: .sourcePath)
+        try container.encode(targetPath, forKey: .targetPath)
+        try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
+        try container.encode(importDirectives, forKey: .importDirectives)
+        try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
+        try container.encodeIntentions(typealiasIntentions, forKey: .typealiasIntentions)
+        try container.encodeIntentions(globalFunctionIntentions,
+                                       forKey: .globalFunctionIntentions)
+        try container.encodeIntentions(globalVariableIntentions,
+                                       forKey: .globalVariableIntentions)
+        
+        try super.encode(to: container.superEncoder())
     }
     
     public func addType(_ intention: TypeGenerationIntention) {
@@ -168,5 +219,17 @@ public class FileGenerationIntention: Intention {
     public func addGlobalVariable(_ intention: GlobalVariableGenerationIntention) {
         globalVariableIntentions.append(intention)
         intention.parent = self
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case _index
+        case sourcePath
+        case targetPath
+        case preprocessorDirectives
+        case importDirectives
+        case typeIntentions
+        case typealiasIntentions
+        case globalFunctionIntentions
+        case globalVariableIntentions
     }
 }

@@ -16,7 +16,9 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
         
     }
     
-    public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
+    public func apply(on intentionCollection: IntentionCollection,
+                      context: IntentionPassContext) {
+        
         self.intentions = intentionCollection
         self.context = context
         
@@ -86,8 +88,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
                         \(TypeFormatter.asString(method: methods[0], ofType: type)) \
                         into a property due to a matching property requirement \
                         from protocol: \(TypeFormatter.asString(property: prop, ofType: prot))
-                        """
-                )
+                        """)
                 
                 if let body = methods[0].functionBody {
                     property.history.mergeHistories(methods[0].history)
