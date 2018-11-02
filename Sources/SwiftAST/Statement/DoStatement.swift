@@ -28,10 +28,12 @@ public class DoStatement: Statement {
         body.parent = self
     }
     
+    @inlinable
     public override func copy() -> DoStatement {
         return DoStatement(body: body.copy()).copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitDo(self)
     }

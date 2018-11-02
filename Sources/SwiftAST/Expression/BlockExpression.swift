@@ -47,12 +47,14 @@ public class BlockLiteralExpression: Expression {
         self.body.parent = self
     }
     
+    @inlinable
     public override func copy() -> BlockLiteralExpression {
         return BlockLiteralExpression(parameters: parameters,
                                       returnType: returnType,
                                       body: body.copy()).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitBlock(self)
     }

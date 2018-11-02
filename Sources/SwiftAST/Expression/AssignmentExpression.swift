@@ -49,6 +49,7 @@ public class AssignmentExpression: Expression {
         rhs.parent = self
     }
     
+    @inlinable
     public override func copy() -> AssignmentExpression {
         return
             AssignmentExpression(
@@ -58,6 +59,7 @@ public class AssignmentExpression: Expression {
             ).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitAssignment(self)
     }

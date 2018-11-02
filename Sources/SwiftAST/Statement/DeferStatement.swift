@@ -29,10 +29,12 @@ public class DeferStatement: Statement {
         body.parent = self
     }
     
+    @inlinable
     public override func copy() -> DeferStatement {
         return DeferStatement(body: body.copy()).copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitDefer(self)
     }

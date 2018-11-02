@@ -108,6 +108,7 @@ public class PostfixExpression: Expression {
         return PostfixExpression(exp: exp.copy(), op: op.copy()).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitPostfix(self)
     }
@@ -532,6 +533,7 @@ public struct FunctionArgument: Codable, Equatable {
         self.expression = try container.decodeExpression(forKey: .expression)
     }
     
+    @inlinable
     public func copy() -> FunctionArgument {
         return FunctionArgument(label: label, expression: expression.copy())
     }
@@ -569,6 +571,7 @@ extension FunctionArgument: CustomStringConvertible {
 
 extension Postfix {
     
+    @inlinable
     public func copyTypeAndMetadata(from other: Postfix) -> Self {
         self.metadata = other.metadata
         self.returnType = other.returnType
@@ -581,6 +584,7 @@ extension Postfix {
 
 extension FunctionCallPostfix {
     
+    @inlinable
     public func copyTypeAndMetadata(from other: FunctionCallPostfix) -> Self {
         _ = (self as Postfix).copyTypeAndMetadata(from: other)
         

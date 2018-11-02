@@ -18,6 +18,7 @@ open class SyntaxNode {
         
     }
     
+    @inlinable
     open func copy() -> SyntaxNode {
         fatalError("Must be overriden by subclasses")
     }

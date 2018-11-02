@@ -61,10 +61,12 @@ public class SizeOfExpression: Expression {
         }
     }
     
+    @inlinable
     public override func copy() -> SizeOfExpression {
         return SizeOfExpression(value: value.copy()).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V>(_ visitor: V) -> V.ExprResult where V : ExpressionVisitor {
         return visitor.visitSizeOf(self)
     }

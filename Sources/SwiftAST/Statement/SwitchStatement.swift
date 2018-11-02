@@ -83,6 +83,7 @@ public class SwitchStatement: Statement {
         reloadChildrenNodes()
     }
     
+    @inlinable
     public override func copy() -> SwitchStatement {
         return
             SwitchStatement(exp: exp.copy(),
@@ -107,6 +108,7 @@ public class SwitchStatement: Statement {
         }
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitSwitch(self)
     }
@@ -164,6 +166,7 @@ public struct SwitchCase: Codable, Equatable {
         self.statements = try container.decodeStatements(forKey: .statements)
     }
     
+    @inlinable
     public func copy() -> SwitchCase {
         return SwitchCase(patterns: patterns.map { $0.copy() },
                           statements: statements.map { $0.copy() })

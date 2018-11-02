@@ -42,10 +42,12 @@ public class DictionaryLiteralExpression: Expression {
         _subExpressions = pairs.flatMap { [$0.key, $0.value] }
     }
     
+    @inlinable
     public override func copy() -> DictionaryLiteralExpression {
         return DictionaryLiteralExpression(pairs: pairs.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitDictionary(self)
     }

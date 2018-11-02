@@ -54,6 +54,7 @@ public class BinaryExpression: Expression {
         rhs.parent = self
     }
     
+    @inlinable
     public override func copy() -> BinaryExpression {
         return
             BinaryExpression(
@@ -63,6 +64,7 @@ public class BinaryExpression: Expression {
             ).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitBinary(self)
     }

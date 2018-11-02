@@ -47,10 +47,12 @@ public class CompoundStatement: Statement, ExpressibleByArrayLiteral {
         statements.forEach { $0.parent = self }
     }
     
+    @inlinable
     public override func copy() -> CompoundStatement {
         return CompoundStatement(statements: statements.map { $0.copy() }).copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitCompound(self)
     }

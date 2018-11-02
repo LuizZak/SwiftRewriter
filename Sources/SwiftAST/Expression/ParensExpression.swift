@@ -37,10 +37,12 @@ public class ParensExpression: Expression {
         exp.parent = self
     }
     
+    @inlinable
     public override func copy() -> ParensExpression {
         return ParensExpression(exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitParens(self)
     }

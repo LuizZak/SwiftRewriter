@@ -3,10 +3,12 @@ public class ContinueStatement: Statement {
         return true
     }
     
+    @inlinable
     public override func copy() -> ContinueStatement {
         return ContinueStatement().copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitContinue(self)
     }

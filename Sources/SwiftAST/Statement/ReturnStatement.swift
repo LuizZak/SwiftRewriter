@@ -36,10 +36,12 @@ public class ReturnStatement: Statement {
         exp?.parent = self
     }
     
+    @inlinable
     public override func copy() -> ReturnStatement {
         return ReturnStatement(exp: exp?.copy()).copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitReturn(self)
     }

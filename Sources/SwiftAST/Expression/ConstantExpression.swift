@@ -66,10 +66,12 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
         try super.init(from: container.superDecoder())
     }
     
+    @inlinable
     public override func copy() -> ConstantExpression {
         return ConstantExpression(constant: constant).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitConstant(self)
     }

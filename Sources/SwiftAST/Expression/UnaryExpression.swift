@@ -45,10 +45,12 @@ public class UnaryExpression: Expression {
         exp.parent = self
     }
     
+    @inlinable
     public override func copy() -> UnaryExpression {
         return UnaryExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitUnary(self)
     }

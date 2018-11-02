@@ -64,6 +64,7 @@ public enum Pattern: Codable, Equatable {
         return .tuple(expr.map { .expression($0) })
     }
     
+    @inlinable
     public func copy() -> Pattern {
         switch self {
         case .identifier:

@@ -39,10 +39,12 @@ public class CastExpression: Expression {
         exp.parent = self
     }
     
+    @inlinable
     public override func copy() -> CastExpression {
         return CastExpression(exp: exp.copy(), type: type).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitCast(self)
     }

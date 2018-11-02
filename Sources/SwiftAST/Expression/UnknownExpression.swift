@@ -21,10 +21,12 @@ public class UnknownExpression: Expression {
         try super.init(from: container.superDecoder())
     }
     
+    @inlinable
     public override func copy() -> UnknownExpression {
         return UnknownExpression(context: context).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitUnknown(self)
     }

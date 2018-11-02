@@ -102,7 +102,8 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     /// This overwrites any existing type that may be assigned.
     /// Returns self for potential chaining support.
     @discardableResult
-    open func makeErrorTyped() -> Expression {
+    @inlinable
+    public func makeErrorTyped() -> Expression {
         resolvedType = .errorType
         return self
     }
@@ -113,10 +114,12 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     /// - Parameter visitor: The visitor to accept
     /// - Returns: The result of the visitor's `visit-` call when applied to this
     /// expression
+    @inlinable
     open func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitExpression(self)
     }
     
+    @inlinable
     open override func copy() -> Expression {
         fatalError("Must be overriden by subclasses")
     }
@@ -276,6 +279,7 @@ public extension Expression {
 
 extension Expression {
     
+    @inlinable
     public func copyTypeAndMetadata(from other: Expression) -> Self {
         self.metadata = other.metadata
         self.resolvedType = other.resolvedType

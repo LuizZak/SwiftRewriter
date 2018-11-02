@@ -3,10 +3,12 @@ public class BreakStatement: Statement {
         return true
     }
     
+    @inlinable
     public override func copy() -> BreakStatement {
         return BreakStatement().copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitBreak(self)
     }

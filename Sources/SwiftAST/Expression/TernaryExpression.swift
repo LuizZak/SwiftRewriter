@@ -51,6 +51,7 @@ public class TernaryExpression: Expression {
         ifFalse.parent = self
     }
     
+    @inlinable
     public override func copy() -> TernaryExpression {
         return
             TernaryExpression(
@@ -60,6 +61,7 @@ public class TernaryExpression: Expression {
             ).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitTernary(self)
     }

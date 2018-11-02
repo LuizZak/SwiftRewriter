@@ -57,6 +57,7 @@ public class ForStatement: Statement {
         body.parent = self
     }
     
+    @inlinable
     public override func copy() -> ForStatement {
         return
             ForStatement(pattern: pattern.copy(), exp: exp.copy(), body: body.copy())
@@ -73,6 +74,7 @@ public class ForStatement: Statement {
         _childrenNodes.append(body)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitFor(self)
     }

@@ -28,6 +28,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
         super.init()
     }
     
+    @inlinable
     open override func copy() -> Statement {
         fatalError("Must be overriden by subclasses")
     }
@@ -38,6 +39,7 @@ public class Statement: SyntaxNode, Codable, Equatable {
     /// - Parameter visitor: The visitor to accept
     /// - Returns: The result of the visitor's `visit-` call when applied to this
     /// statement
+    @inlinable
     public func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitStatement(self)
     }
@@ -157,7 +159,8 @@ public extension Statement {
 
 public extension Statement {
     
-    func copyMetadata(from other: Statement) -> Self {
+    @inlinable
+    public func copyMetadata(from other: Statement) -> Self {
         self.label = other.label
         
         return self

@@ -56,6 +56,7 @@ public class IfStatement: Statement {
         pattern?.setParent(self)
     }
     
+    @inlinable
     public override func copy() -> IfStatement {
         let copy =
             IfStatement(exp: exp.copy(),
@@ -69,6 +70,7 @@ public class IfStatement: Statement {
         return copy
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitIf(self)
     }

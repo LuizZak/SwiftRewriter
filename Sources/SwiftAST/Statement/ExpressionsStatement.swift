@@ -28,12 +28,14 @@ public class ExpressionsStatement: Statement {
         expressions.forEach { $0.parent = self }
     }
     
+    @inlinable
     public override func copy() -> ExpressionsStatement {
         return
             ExpressionsStatement(expressions: expressions.map { $0.copy() })
                 .copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitExpressions(self)
     }

@@ -1,5 +1,6 @@
 /// An empty semicolon statement with no semantic functionality.
 public class SemicolonStatement: Statement {
+    @inlinable
     public override func copy() -> SemicolonStatement {
         return SemicolonStatement().copyMetadata(from: self)
     }
@@ -8,6 +9,7 @@ public class SemicolonStatement: Statement {
         return other is SemicolonStatement
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitSemicolon(self)
     }

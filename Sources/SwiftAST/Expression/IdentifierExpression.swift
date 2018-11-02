@@ -25,14 +25,17 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
         try super.init(from: container.superDecoder())
     }
     
+    @inlinable
     public override func copy() -> IdentifierExpression {
         return IdentifierExpression(identifier: identifier).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitIdentifier(self)
     }
     
+    @inlinable
     public override func isEqual(to other: Expression) -> Bool {
         switch other {
         case let rhs as IdentifierExpression:

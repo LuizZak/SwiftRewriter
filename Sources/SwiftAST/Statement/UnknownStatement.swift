@@ -13,10 +13,12 @@ public class UnknownStatement: Statement {
         try self.init(context: UnknownASTContext(context: container.decode(String.self)))
     }
     
+    @inlinable
     public override func copy() -> UnknownStatement {
         return UnknownStatement(context: context).copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitUnknown(self)
     }

@@ -36,10 +36,12 @@ public class VariableDeclarationsStatement: Statement {
         }
     }
     
+    @inlinable
     public override func copy() -> VariableDeclarationsStatement {
         return VariableDeclarationsStatement(decl: decl.map { $0.copy() }).copyMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
         return visitor.visitVariableDeclarations(self)
     }

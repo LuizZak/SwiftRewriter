@@ -45,10 +45,12 @@ public class PrefixExpression: Expression {
         exp.parent = self
     }
     
+    @inlinable
     public override func copy() -> PrefixExpression {
         return PrefixExpression(op: op, exp: exp.copy()).copyTypeAndMetadata(from: self)
     }
     
+    @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
         return visitor.visitPrefix(self)
     }
