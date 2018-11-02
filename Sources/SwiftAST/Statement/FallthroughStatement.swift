@@ -16,6 +16,7 @@ public class FallthroughStatement: Statement {
     }
 }
 public extension Statement {
+    @inlinable
     public var asFallthrough: FallthroughStatement? {
         return cast()
     }

@@ -13,6 +13,7 @@ public class SemicolonStatement: Statement {
     }
 }
 public extension Statement {
+    @inlinable
     public var asSemicolon: SemicolonStatement? {
         return cast()
     }

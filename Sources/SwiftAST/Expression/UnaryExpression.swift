@@ -81,6 +81,7 @@ public class UnaryExpression: Expression {
     }
 }
 extension Expression {
+    @inlinable
     public var asUnary: UnaryExpression? {
         return cast()
     }

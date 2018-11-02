@@ -66,6 +66,7 @@ public class ArrayLiteralExpression: Expression {
     }
 }
 public extension Expression {
+    @inlinable
     public var asArray: ArrayLiteralExpression? {
         return cast()
     }

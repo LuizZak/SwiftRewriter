@@ -100,6 +100,7 @@ public class ConstantExpression: Expression, ExpressibleByStringLiteral,
     }
 }
 public extension Expression {
+    @inlinable
     public var asConstant: ConstantExpression? {
         return self as? ConstantExpression
     }

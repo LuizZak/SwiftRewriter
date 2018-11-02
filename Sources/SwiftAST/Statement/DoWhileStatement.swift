@@ -70,6 +70,7 @@ public class DoWhileStatement: Statement {
     }
 }
 public extension Statement {
+    @inlinable
     public var asDoWhile: DoWhileStatement? {
         return cast()
     }

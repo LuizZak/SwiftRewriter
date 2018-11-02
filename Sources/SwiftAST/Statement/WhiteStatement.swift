@@ -70,6 +70,7 @@ public class WhileStatement: Statement {
     }
 }
 public extension Statement {
+    @inlinable
     public var asWhile: WhileStatement? {
         return cast()
     }

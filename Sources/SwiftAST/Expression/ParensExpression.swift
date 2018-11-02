@@ -71,6 +71,7 @@ public class ParensExpression: Expression {
     }
 }
 public extension Expression {
+    @inlinable
     public var asParens: ParensExpression? {
         return cast()
     }

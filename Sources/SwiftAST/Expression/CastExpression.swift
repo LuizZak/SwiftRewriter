@@ -79,6 +79,7 @@ public class CastExpression: Expression {
     }
 }
 public extension Expression {
+    @inlinable
     public var asCast: CastExpression? {
         return cast()
     }

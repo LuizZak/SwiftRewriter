@@ -50,6 +50,7 @@ public class UnknownExpression: Expression {
     }
 }
 public extension Expression {
+    @inlinable
     public var asUnknown: UnknownExpression? {
         return cast()
     }

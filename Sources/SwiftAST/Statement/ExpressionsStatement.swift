@@ -60,6 +60,7 @@ public class ExpressionsStatement: Statement {
     }
 }
 public extension Statement {
+    @inlinable
     public var asExpressions: ExpressionsStatement? {
         return cast()
     }

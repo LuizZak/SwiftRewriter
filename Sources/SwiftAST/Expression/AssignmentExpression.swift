@@ -92,6 +92,7 @@ public class AssignmentExpression: Expression {
     }
 }
 public extension Expression {
+    @inlinable
     public var asAssignment: AssignmentExpression? {
         return cast()
     }
