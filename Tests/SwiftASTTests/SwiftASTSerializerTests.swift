@@ -91,7 +91,7 @@ class SwiftASTSerializerTests: XCTestCase {
         
         let writer = SwiftASTWriter(options: ASTWriterOptions.default,
                                     typeMapper: DefaultTypeMapper(),
-                                    typeSystem: DefaultTypeSystem())
+                                    typeSystem: TypeSystem())
         
         let expBuffer = StringRewriterOutput()
         let resBuffer = StringRewriterOutput()

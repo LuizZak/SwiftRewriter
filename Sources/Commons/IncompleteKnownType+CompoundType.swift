@@ -4,7 +4,7 @@ import SwiftRewriterLib
 extension IncompleteKnownType {
     
     func toCompoundedKnownType(
-        _ typeSystem: TypeSystem = DefaultTypeSystem.defaultTypeSystem) throws -> CompoundedMappingType {
+        _ typeSystem: TypeSystem = TypeSystem.defaultTypeSystem) throws -> CompoundedMappingType {
         
         let type = complete(typeSystem: typeSystem)
         let extractor = SwiftAttributeTransformationsExtractor(type: type)

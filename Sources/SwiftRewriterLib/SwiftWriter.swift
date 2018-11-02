@@ -31,10 +31,9 @@ public final class SwiftWriter {
     }
     
     public func execute() {
-        let cacheableTypeSystem = typeSystem as? DefaultTypeSystem
-        cacheableTypeSystem?.makeCache()
+        typeSystem.makeCache()
         defer {
-            cacheableTypeSystem?.tearDownCache()
+            typeSystem.tearDownCache()
         }
         
         var unique = Set<String>()
@@ -115,7 +114,8 @@ class InternalSwiftWriter {
         self.typeMapper = typeMapper
         self.typeSystem = typeSystem
         astWriter =
-            SwiftASTWriter(options: options, typeMapper: typeMapper,
+            SwiftASTWriter(options: options,
+                           typeMapper: typeMapper,
                            typeSystem: typeSystem)
     }
     
@@ -309,7 +309,8 @@ class InternalSwiftWriter {
             target.outputInline(" = ")
             
             let rewriter =
-                SwiftASTWriter(options: options, typeMapper: typeMapper,
+                SwiftASTWriter(options: options,
+                               typeMapper: typeMapper,
                                typeSystem: typeSystem)
             
             rewriter.write(expression: expression, into: target)

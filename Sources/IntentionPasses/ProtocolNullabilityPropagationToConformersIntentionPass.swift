@@ -15,10 +15,9 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
     }
     
     public func apply(on intentionCollection: IntentionCollection, context: IntentionPassContext) {
-        let typeSystem = context.typeSystem as? DefaultTypeSystem
-        typeSystem?.makeCache()
+        context.typeSystem.makeCache()
         defer {
-            typeSystem?.tearDownCache()
+            context.typeSystem.tearDownCache()
         }
         
         let typeMerger =

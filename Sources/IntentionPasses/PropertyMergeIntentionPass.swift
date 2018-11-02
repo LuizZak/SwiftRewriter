@@ -24,8 +24,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         self.intentions = intentionCollection
         self.context = context
         
-        let typeSystem = context.typeSystem as? DefaultTypeSystem
-        typeSystem?.makeCache()
+        context.typeSystem.makeCache()
         
         var matches: [PropertySet] = []
         
@@ -64,7 +63,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
             }
         }
         
-        typeSystem?.tearDownCache()
+        context.typeSystem.tearDownCache()
         
         // Flatten properties now
         for match in matches {

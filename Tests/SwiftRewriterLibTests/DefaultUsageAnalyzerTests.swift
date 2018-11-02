@@ -30,7 +30,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -72,7 +72,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -107,7 +107,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let property = intentions.fileIntentions()[0].typeIntentions[1].properties[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -139,7 +139,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let property = intentions.fileIntentions()[0].enumIntentions[0].cases[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -178,7 +178,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: DefaultTypeSystem())
+        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let property = intentions.fileIntentions()[0].classIntentions[0].properties[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -200,11 +200,11 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     .identifier("a")
             )
         ]
-        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
         let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: DefaultTypeSystem())
+                                     typeSystem: TypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
@@ -232,11 +232,11 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     .assignment(op: .assign, rhs: .constant(0))
             )
         ]
-        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
         let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: DefaultTypeSystem())
+                                     typeSystem: TypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
@@ -303,11 +303,11 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     .assignment(op: .assign, rhs: .constant(0))
             )
         ]
-        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
         let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: DefaultTypeSystem())
+                                     typeSystem: TypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
@@ -346,11 +346,11 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     ])
             )
         ]
-        let typeResolver = ExpressionTypeResolver(typeSystem: DefaultTypeSystem())
+        let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
         let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: DefaultTypeSystem())
+                                     typeSystem: TypeSystem())
         
         let usages = sut.findUsagesOf(localNamed: "a")
         
@@ -362,7 +362,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
     func testFindUsagesOfLocalVariableDetectingWritingUsagesOfReferenceFields() {
         // Mutating fields of reference types embedded within value types should
         // not produce write usage references
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .struct)
                 .property(named: "b", type: "B")
@@ -414,7 +414,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
     func testFindUsagesOfLocalVariableDoesNotReportWritingUsagesWhenMutatingFieldsOfReferenceType() {
         // Mutating any field of a reference type local variable should not be
         // considered a variable writing usage.
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .class)
                 .property(named: "b", type: .int)
@@ -450,7 +450,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
     
     func testFindUsagesOfLocalVariableDetectingMutatingCallsToValueType() {
         // Make sure we can properly detect calls of mutating functions on value-types
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .struct)
                 .method(named: "b", isMutating: true)
@@ -496,7 +496,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
     func testFindUsagesOfLocalVariableDetectingMutatingCallsToReferenceTypes() {
         // Calling mutating members on reference types should not be considered
         // writing usages of locals.
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         typeSystem.addType(
             KnownTypeBuilder(typeName: "A", kind: .class)
                 .method(named: "b", isMutating: true)

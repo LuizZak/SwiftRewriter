@@ -3,7 +3,7 @@ import SwiftAST
 /// Context for an `ASTRewriterPass` execution.
 public struct ASTRewriterPassContext {
     public static let empty =
-        ASTRewriterPassContext(typeSystem: DefaultTypeSystem.defaultTypeSystem)
+        ASTRewriterPassContext(typeSystem: TypeSystem.defaultTypeSystem)
     
     public let typeSystem: TypeSystem
     public let typeResolver: ExpressionTypeResolver

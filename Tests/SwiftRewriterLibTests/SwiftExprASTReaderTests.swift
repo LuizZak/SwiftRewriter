@@ -233,7 +233,7 @@ extension SwiftExprASTReaderTests {
                 file: String = #file,
                 line: Int = #line) {
         
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         let typeParser = TypeParsing(state: SwiftExprASTReaderTests._state)
         

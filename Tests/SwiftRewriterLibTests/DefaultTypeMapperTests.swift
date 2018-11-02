@@ -5,12 +5,12 @@ import GrammarModels
 import SwiftAST
 
 class DefaultTypeMapperTests: XCTestCase {
-    var typeSystem = DefaultTypeSystem()
+    var typeSystem = TypeSystem()
     
     override func setUp() {
         super.setUp()
         
-        typeSystem = DefaultTypeSystem()
+        typeSystem = TypeSystem()
     }
     
     func testTypeNameString() {

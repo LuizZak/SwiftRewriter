@@ -50,9 +50,9 @@ class MandatoryIntentionPass: IntentionPass {
     }
     
     private func applyOverrideDetection(_ intentions: IntentionCollection) {
-        (context.typeSystem as? DefaultTypeSystem)?.makeCache()
+        context.typeSystem.makeCache()
         defer {
-            (context.typeSystem as? DefaultTypeSystem)?.tearDownCache()
+            context.typeSystem.tearDownCache()
         }
         
         let queue = OperationQueue()

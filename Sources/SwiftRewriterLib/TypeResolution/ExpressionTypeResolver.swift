@@ -22,7 +22,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public var ignoreResolvedExpressions: Bool = false
     
     public override init() {
-        self.typeSystem = DefaultTypeSystem.defaultTypeSystem
+        self.typeSystem = TypeSystem.defaultTypeSystem
         self.intrinsicVariables = EmptyCodeScope()
         contextFunctionReturnTypeStack = []
         super.init()
@@ -35,7 +35,9 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         super.init()
     }
     
-    public init(typeSystem: TypeSystem, intrinsicVariables: DefinitionsSource) {
+    public init(typeSystem: TypeSystem,
+                intrinsicVariables: DefinitionsSource) {
+        
         self.typeSystem = typeSystem
         self.intrinsicVariables = intrinsicVariables
         contextFunctionReturnTypeStack = []
@@ -44,6 +46,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     
     public init(typeSystem: TypeSystem,
                 contextFunctionReturnType: SwiftType) {
+        
         self.typeSystem = typeSystem
         self.intrinsicVariables = EmptyCodeScope()
         contextFunctionReturnTypeStack = [contextFunctionReturnType]
@@ -53,6 +56,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public init(typeSystem: TypeSystem,
                 intrinsicVariables: DefinitionsSource,
                 contextFunctionReturnType: SwiftType) {
+        
         self.typeSystem = typeSystem
         self.intrinsicVariables = intrinsicVariables
         contextFunctionReturnTypeStack = [contextFunctionReturnType]

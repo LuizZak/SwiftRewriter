@@ -3,10 +3,10 @@ import SwiftAST
 import SwiftRewriterLib
 
 class DefaultTypeSystemTests: XCTestCase {
-    var sut: DefaultTypeSystem!
+    var sut: TypeSystem!
     
     override func setUp() {
-        sut = DefaultTypeSystem()
+        sut = TypeSystem()
     }
     
     // MARK: - typesMatch

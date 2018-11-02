@@ -7,7 +7,7 @@ import Commons
 protocol ExpressionTestResolverTestFixture {
     var scope: CodeScopeNode { get }
     var intrinsics: CodeScope { get }
-    var typeSystem: DefaultTypeSystem { get }
+    var typeSystem: TypeSystem { get }
     
     /// Defines a variable on the test fixture's context
     func definingLocal(name: String, type: SwiftType) -> Self
@@ -107,7 +107,7 @@ extension ExpressionTypeResolverTests {
         let testCase: XCTestCase
         let sut: ExpressionTypeResolver
         let statement: T
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         let scope: CodeScopeNode
         let intrinsics: CodeScope = DefaultCodeScope()
         var applied: Bool = false
@@ -290,7 +290,7 @@ extension ExpressionTypeResolverTests {
         let testCase: XCTestCase
         let sut: ExpressionTypeResolver
         let expression: T
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         let intrinsics: CodeScope = DefaultCodeScope()
         let scope: CodeScopeNode
         

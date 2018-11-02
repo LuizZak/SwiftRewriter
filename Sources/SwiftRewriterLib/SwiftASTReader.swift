@@ -9,7 +9,10 @@ public class SwiftASTReader {
     let typeParser: TypeParsing
     let typeSystem: TypeSystem?
     
-    public init(typeMapper: TypeMapper, typeParser: TypeParsing, typeSystem: TypeSystem? = nil) {
+    public init(typeMapper: TypeMapper,
+                typeParser: TypeParsing,
+                typeSystem: TypeSystem? = nil) {
+        
         self.typeMapper = typeMapper
         self.typeParser = typeParser
         self.typeSystem = typeSystem

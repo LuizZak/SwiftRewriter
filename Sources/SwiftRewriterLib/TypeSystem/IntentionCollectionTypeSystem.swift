@@ -2,7 +2,7 @@ import SwiftAST
 
 /// An extension over the default type system that enables using an intention
 /// collection to search for types
-public class IntentionCollectionTypeSystem: DefaultTypeSystem {
+public class IntentionCollectionTypeSystem: TypeSystem {
     public var intentions: IntentionCollection
     
     private var intentionsProvider: IntentionCollectionProvider
@@ -284,9 +284,9 @@ public class IntentionCollectionTypeSystem: DefaultTypeSystem {
         var cache: Cache?
         
         var intentions: IntentionCollection
-        weak var typeSystem: DefaultTypeSystem?
+        weak var typeSystem: TypeSystem?
         
-        init(intentions: IntentionCollection, typeSystem: DefaultTypeSystem?) {
+        init(intentions: IntentionCollection, typeSystem: TypeSystem?) {
             self.intentions = intentions
             self.typeSystem = typeSystem
         }

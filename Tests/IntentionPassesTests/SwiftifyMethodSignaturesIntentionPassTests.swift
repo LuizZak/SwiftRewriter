@@ -206,7 +206,7 @@ private class SwiftifyMethodSignaturesIntentionPassTestBuilder {
                                                  typeSystem: typeSystem,
                                                  numThreads: 8)
         let mapper = DefaultTypeMapper(typeSystem: typeSystem)
-        let context = IntentionPassContext(typeSystem: DefaultTypeSystem.defaultTypeSystem,
+        let context = IntentionPassContext(typeSystem: TypeSystem.defaultTypeSystem,
                                            typeMapper: mapper,
                                            typeResolverInvoker: invoker,
                                            numThreads: 8)

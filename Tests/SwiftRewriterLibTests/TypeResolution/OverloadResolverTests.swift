@@ -3,13 +3,13 @@ import XCTest
 import SwiftAST
 
 class OverloadResolverTests: XCTestCase {
-    var typeSystem: DefaultTypeSystem!
+    var typeSystem: TypeSystem!
     var sut: OverloadResolver!
     
     override func setUp() {
         super.setUp()
         
-        typeSystem = DefaultTypeSystem()
+        typeSystem = TypeSystem()
         sut = OverloadResolver(typeSystem: typeSystem, state: OverloadResolverState())
     }
     
