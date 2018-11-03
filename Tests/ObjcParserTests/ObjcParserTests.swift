@@ -477,6 +477,13 @@ class ObjcParserTests: XCTestCase {
             };
             """)
     }
+    
+    func testParseGenericArgumentsInAtClassDeclaration() {
+        _=parserTest("""
+            @class NSArray<__covariant ObjectType>;
+            @class NSDictionary<KeyType, __contravariant ValueType>;
+            """)
+    }
 }
 
 extension ObjcParserTests {

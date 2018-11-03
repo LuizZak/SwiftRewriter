@@ -796,22 +796,42 @@ public class TypeSystem {
     /// Looks through supertype and protocol hierarchies, if available, resulting
     /// in all known protocol conformances of a type.
     public func allConformances(of type: KnownType) -> [KnownProtocolConformance] {
+        return _allConformances(of: type, visitedTypes: [])
+    }
+    
+    private func _allConformances(of type: KnownType,
+                                  visitedTypes: Set<String>) -> [KnownProtocolConformance] {
+        
+        var visitedTypes = visitedTypes
+        
+        visitedTypes.insert(type.typeName)
+        
         if allConformancesCache.usingCache {
             if let result = allConformancesCache.readingValue({ $0?[type.typeName] }) {
                 return result
             }
         }
         
-        var protocols = type.knownProtocolConformances
+        var protocols =
+            type.knownProtocolConformances
+                .filter { !visitedTypes.contains($0.protocolName) }
         
         for prot in type.knownProtocolConformances {
+            if visitedTypes.contains(prot.protocolName) {
+                continue
+            }
+            
             if let type = knownTypeWithName(prot.protocolName) {
-                protocols.append(contentsOf: allConformances(of: type))
+                protocols.append(contentsOf:
+                    _allConformances(of: type, visitedTypes: visitedTypes)
+                )
             }
         }
         
-        if let supertype = supertype(of: type) {
-            protocols.append(contentsOf: allConformances(of: supertype))
+        if let supertype = supertype(of: type), !visitedTypes.contains(supertype.typeName) {
+            protocols.append(contentsOf:
+                _allConformances(of: supertype, visitedTypes: visitedTypes)
+            )
         }
         
         if allConformancesCache.usingCache {

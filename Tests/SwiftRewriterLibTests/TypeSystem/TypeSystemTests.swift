@@ -974,7 +974,7 @@ class TypeSystemTests: XCTestCase {
     }
     
     func testLookupMethodInCyclicProtocolType() {
-        let prot = KnownTypeBuilder(typeName: "A")
+        let prot = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "A")
             .method(named: "test")
             .build()
@@ -998,10 +998,10 @@ class TypeSystemTests: XCTestCase {
     }
     
     func testLookupMethodInCyclicProtocolTypeIndirect() {
-        let protA = KnownTypeBuilder(typeName: "A")
+        let protA = KnownTypeBuilder(typeName: "A", kind: .protocol)
             .protocolConformance(protocolName: "B")
             .build()
-        let protB = KnownTypeBuilder(typeName: "B")
+        let protB = KnownTypeBuilder(typeName: "B", kind: .protocol)
             .protocolConformance(protocolName: "A")
             .method(named: "test")
             .build()
@@ -1023,6 +1023,53 @@ class TypeSystemTests: XCTestCase {
         
         XCTAssertNil(notFound)
         XCTAssertNotNil(found)
+    }
+    
+    func testAllConformancesOf() {
+        let typeA = KnownTypeBuilder(typeName: "A")
+            .protocolConformance(protocolName: "Z")
+            .build()
+        let typeB = KnownTypeBuilder(typeName: "B")
+            .settingSupertype("A")
+            .protocolConformance(protocolName: "P")
+            .build()
+        let protP = KnownTypeBuilder(typeName: "P", kind: .protocol)
+            .protocolConformance(protocolName: "Q")
+            .build()
+        let protZ = KnownTypeBuilder(typeName: "Z", kind: .protocol)
+            .protocolConformance(protocolName: "W")
+            .build()
+        sut.addType(typeA)
+        sut.addType(typeB)
+        sut.addType(protP)
+        sut.addType(protZ)
+        
+        XCTAssertEqual(Set(sut.allConformances(of: typeB).map { $0.protocolName }),
+                       ["P", "Q", "Z", "W"])
+    }
+    
+    func testAllConformancesOfInCyclicProtocolType() {
+        let prot = KnownTypeBuilder(typeName: "A", kind: .protocol)
+            .protocolConformance(protocolName: "A")
+            .method(named: "test")
+            .build()
+        sut.addType(prot)
+        
+        XCTAssertEqual(sut.allConformances(of: prot).count, 0)
+    }
+    
+    func testAllConformancesOfInProtocolTypeIndirect() {
+        let protA = KnownTypeBuilder(typeName: "A", kind: .protocol)
+            .protocolConformance(protocolName: "B")
+            .build()
+        let protB = KnownTypeBuilder(typeName: "B", kind: .protocol)
+            .protocolConformance(protocolName: "A")
+            .build()
+        sut.addType(protA)
+        sut.addType(protB)
+        
+        XCTAssertEqual(Set(sut.allConformances(of: protA).map { $0.protocolName }),
+                       ["B"])
     }
 }
 

@@ -1882,11 +1882,11 @@ open class ObjectiveCParser: Parser {
 	}
 	open class ClassDeclarationListContext:ParserRuleContext {
 		open func CLASS() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.CLASS.rawValue, 0) }
-		open func identifier() -> Array<IdentifierContext> {
-			return getRuleContexts(IdentifierContext.self)
+		open func className() -> Array<ClassNameContext> {
+			return getRuleContexts(ClassNameContext.self)
 		}
-		open func identifier(_ i: Int) -> IdentifierContext? {
-			return getRuleContext(IdentifierContext.self,i)
+		open func className(_ i: Int) -> ClassNameContext? {
+			return getRuleContext(ClassNameContext.self,i)
 		}
 		open func SEMI() -> TerminalNode? { return getToken(ObjectiveCParser.Tokens.SEMI.rawValue, 0) }
 		open func COMMA() -> Array<TerminalNode> { return getTokens(ObjectiveCParser.Tokens.COMMA.rawValue) }
@@ -1931,7 +1931,7 @@ open class ObjectiveCParser: Parser {
 		 	setState(475)
 		 	try match(ObjectiveCParser.Tokens.CLASS.rawValue)
 		 	setState(476)
-		 	try identifier()
+		 	try className()
 		 	setState(481)
 		 	try _errHandler.sync(self)
 		 	_la = try _input.LA(1)
@@ -1943,7 +1943,7 @@ open class ObjectiveCParser: Parser {
 		 		setState(477)
 		 		try match(ObjectiveCParser.Tokens.COMMA.rawValue)
 		 		setState(478)
-		 		try identifier()
+		 		try className()
 
 
 		 		setState(483)
