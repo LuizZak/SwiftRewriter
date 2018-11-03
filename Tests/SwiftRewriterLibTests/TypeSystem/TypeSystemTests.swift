@@ -972,6 +972,58 @@ class TypeSystemTests: XCTestCase {
         assertCoerce(between: "UInt32", "Double", resultsIn: "Double")
         assertCoerce(between: "UInt64", "Double", resultsIn: "Double")
     }
+    
+    func testLookupMethodInCyclicProtocolType() {
+        let prot = KnownTypeBuilder(typeName: "A")
+            .protocolConformance(protocolName: "A")
+            .method(named: "test")
+            .build()
+        sut.addType(prot)
+        
+        let notFound =
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: []),
+                       invocationTypeHints: nil,
+                       static: false,
+                       includeOptional: false,
+                       in: prot)
+        let found =
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["test"]),
+                       invocationTypeHints: nil,
+                       static: false,
+                       includeOptional: false,
+                       in: prot)
+        
+        XCTAssertNil(notFound)
+        XCTAssertNotNil(found)
+    }
+    
+    func testLookupMethodInCyclicProtocolTypeIndirect() {
+        let protA = KnownTypeBuilder(typeName: "A")
+            .protocolConformance(protocolName: "B")
+            .build()
+        let protB = KnownTypeBuilder(typeName: "B")
+            .protocolConformance(protocolName: "A")
+            .method(named: "test")
+            .build()
+        sut.addType(protA)
+        sut.addType(protB)
+        
+        let notFound =
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: []),
+                       invocationTypeHints: nil,
+                       static: false,
+                       includeOptional: false,
+                       in: protA)
+        let found =
+            sut.method(withObjcSelector: SelectorSignature(isStatic: false, keywords: ["test"]),
+                       invocationTypeHints: nil,
+                       static: false,
+                       includeOptional: false,
+                       in: protA)
+        
+        XCTAssertNil(notFound)
+        XCTAssertNotNil(found)
+    }
 }
 
 private extension TypeSystemTests {
