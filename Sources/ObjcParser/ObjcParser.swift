@@ -543,6 +543,9 @@ public class DiagnosticsErrorListener: BaseErrorListener {
                                         _ msg: String,
                                         _ e: AnyObject?) where T : ATNSimulator {
         
-        diagnostics.error(msg, origin: source.filePath, location: .invalid)
+        diagnostics.error(
+            msg,
+            origin: source.filePath,
+            location: SourceLocation(line: line, column: charPositionInLine, utf8Offset: 0))
     }
 }
