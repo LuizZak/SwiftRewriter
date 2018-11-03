@@ -491,7 +491,7 @@ public final class SwiftRewriter {
         parser.antlrSettings = makeAntlrSettings()
         try parser.parse()
         
-        let typeMapper = DefaultTypeMapper(typeSystem: DefaultTypeSystem.defaultTypeSystem)
+        let typeMapper = DefaultTypeMapper(typeSystem: TypeSystem.defaultTypeSystem)
         let typeParser = TypeParsing(state: state, antlrSettings: parser.antlrSettings)
         
         let collectorDelegate =

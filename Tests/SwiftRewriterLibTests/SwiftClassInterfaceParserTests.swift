@@ -5,12 +5,12 @@ import MiniLexer
 
 class SwiftClassInterfaceParserTests: XCTestCase {
     
-    var typeSystem: DefaultTypeSystem!
+    var typeSystem: TypeSystem!
     
     override func setUp() {
         super.setUp()
         
-        typeSystem = DefaultTypeSystem()
+        typeSystem = TypeSystem()
     }
     
     func testParseEmptyClass() throws {

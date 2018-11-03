@@ -10,7 +10,7 @@ class SwiftASTReaderContextTests: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        typeSystem = DefaultTypeSystem()
+        typeSystem = TypeSystem()
         typeContext = KnownTypeBuilder(typeName: "TestType").build()
         sut = SwiftASTReaderContext(typeSystem: typeSystem, typeContext: typeContext)
     }

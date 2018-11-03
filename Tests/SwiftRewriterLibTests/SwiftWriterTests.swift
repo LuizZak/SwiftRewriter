@@ -18,7 +18,7 @@ class SwiftWriterTests: XCTestCase {
         
         intentions = IntentionCollection()
         output = TestSingleFileWriterOutput()
-        typeSystem = DefaultTypeSystem()
+        typeSystem = TypeSystem()
         typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         options = .default
         sut =

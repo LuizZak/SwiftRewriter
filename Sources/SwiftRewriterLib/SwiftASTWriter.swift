@@ -56,7 +56,9 @@ class SwiftASTWriter {
     
     public func write(compoundStatement: CompoundStatement, into target: RewriterOutputTarget) {
         let rewriter =
-            StatementWriter(options: options, target: target, typeMapper: typeMapper,
+            StatementWriter(options: options,
+                            target: target,
+                            typeMapper: typeMapper,
                             typeSystem: typeSystem)
         
         rewriter.visitStatement(compoundStatement)
@@ -64,14 +66,17 @@ class SwiftASTWriter {
     
     public func write(expression: Expression, into target: RewriterOutputTarget) {
         let rewriter =
-            ExpressionWriter(options: options, target: target, typeMapper: typeMapper,
+            ExpressionWriter(options: options,
+                             target: target,
+                             typeMapper: typeMapper,
                              typeSystem: typeSystem)
         
         rewriter.rewrite(expression)
     }
     
     public func rewrite(compoundStatement: ObjectiveCParser.CompoundStatementContext,
-                        typeParser: TypeParsing, into target: RewriterOutputTarget) {
+                        typeParser: TypeParsing,
+                        into target: RewriterOutputTarget) {
         
         let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
         
@@ -80,7 +85,8 @@ class SwiftASTWriter {
     }
     
     public func rewrite(expression: ObjectiveCParser.ExpressionContext,
-                        typeParser: TypeParsing, into target: RewriterOutputTarget) {
+                        typeParser: TypeParsing,
+                        into target: RewriterOutputTarget) {
         
         let reader = SwiftASTReader(typeMapper: typeMapper, typeParser: typeParser)
         

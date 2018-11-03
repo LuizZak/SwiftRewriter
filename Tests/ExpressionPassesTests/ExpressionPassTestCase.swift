@@ -10,14 +10,14 @@ class ExpressionPassTestCase: XCTestCase {
     
     var notified: Bool = false
     var sutType: ASTRewriterPass.Type!
-    var typeSystem: DefaultTypeSystem!
+    var typeSystem: TypeSystem!
     var intentionContext: FunctionBodyCarryingIntention?
     var functionBodyContext: FunctionBodyIntention?
     
     override func setUp() {
         super.setUp()
         
-        typeSystem = DefaultTypeSystem()
+        typeSystem = TypeSystem()
         notified = false
         intentionContext = nil
         functionBodyContext = nil
@@ -137,13 +137,13 @@ class ExpressionPassTestCase: XCTestCase {
                 StatementWriter(options: .default,
                                 target: StringRewriterOutput(settings: .defaults),
                                 typeMapper: DefaultTypeMapper(),
-                                typeSystem: DefaultTypeSystem())
+                                typeSystem: TypeSystem())
             
             let prettyPrintResWriter =
                 StatementWriter(options: .default,
                                 target: StringRewriterOutput(settings: .defaults),
                                 typeMapper: DefaultTypeMapper(),
-                                typeSystem: DefaultTypeSystem())
+                                typeSystem: TypeSystem())
             
             prettyPrintExpWriter.visitStatement(expected)
             prettyPrintResWriter.visitStatement(result)

@@ -288,7 +288,7 @@ extension SwiftStatementASTReaderTests {
                 file: String = #file,
                 line: Int = #line) -> Statement? {
         
-        let typeSystem = DefaultTypeSystem()
+        let typeSystem = TypeSystem()
         let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
         let typeParser = TypeParsing(state: SwiftStatementASTReaderTests._state)
         
@@ -325,13 +325,13 @@ extension SwiftStatementASTReaderTests {
                     StatementWriter(options: .default,
                                     target: StringRewriterOutput(settings: .defaults),
                                     typeMapper: DefaultTypeMapper(),
-                                    typeSystem: DefaultTypeSystem())
+                                    typeSystem: TypeSystem())
                 
                 let prettyPrintResWriter =
                     StatementWriter(options: .default,
                                     target: StringRewriterOutput(settings: .defaults),
                                     typeMapper: DefaultTypeMapper(),
-                                    typeSystem: DefaultTypeSystem())
+                                    typeSystem: TypeSystem())
                 
                 prettyPrintExpWriter.visitStatement(expected)
                 result.map(prettyPrintResWriter.visitStatement)

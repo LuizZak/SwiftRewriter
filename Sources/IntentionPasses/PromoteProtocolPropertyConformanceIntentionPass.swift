@@ -27,8 +27,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
                 .typeIntentions()
                 .compactMap { $0 as? BaseClassIntention }
         
-        let typeSystem = context.typeSystem as? DefaultTypeSystem
-        typeSystem?.makeCache()
+        context.typeSystem.makeCache()
         
         for type in types where !type.isInterfaceSource {
             guard let knownType = context.typeSystem.knownTypeWithName(type.typeName) else {
@@ -53,7 +52,7 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
             }
         }
         
-        typeSystem?.tearDownCache()
+        context.typeSystem.tearDownCache()
     }
     
     private func apply(to type: BaseClassIntention,

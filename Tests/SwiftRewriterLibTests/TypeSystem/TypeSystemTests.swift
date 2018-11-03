@@ -2,11 +2,11 @@ import XCTest
 import SwiftAST
 import SwiftRewriterLib
 
-class DefaultTypeSystemTests: XCTestCase {
-    var sut: DefaultTypeSystem!
+class TypeSystemTests: XCTestCase {
+    var sut: TypeSystem!
     
     override func setUp() {
-        sut = DefaultTypeSystem()
+        sut = TypeSystem()
     }
     
     // MARK: - typesMatch
@@ -974,7 +974,7 @@ class DefaultTypeSystemTests: XCTestCase {
     }
 }
 
-private extension DefaultTypeSystemTests {
+private extension TypeSystemTests {
     
     func assertIsNumeric(_ type: SwiftType, line: Int) {
         if !sut.isNumeric(type) {
