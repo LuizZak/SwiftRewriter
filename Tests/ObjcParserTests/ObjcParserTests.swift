@@ -467,6 +467,16 @@ class ObjcParserTests: XCTestCase {
             typedef int (*cmpfn234_3)(void (^)(), void *);
             """)
     }
+    
+    func testParseAttributesInStructDeclaration() {
+        _=parserTest("""
+            struct __attribute__((__packed__)) AStruct {
+                UInt8  aField;
+                UInt16 anotherField;
+                UInt32 thirdField;
+            };
+            """)
+    }
 }
 
 extension ObjcParserTests {
