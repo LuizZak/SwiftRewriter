@@ -899,30 +899,38 @@ public class TypeSystem {
             }
         }
         
+        // Search on supertypes
+        let onSupertype =
+            supertype(of: type)
+                .flatMap {
+                    method(withObjcSelector: selector,
+                           invocationTypeHints: invocationTypeHints,
+                           static: isStatic,
+                           includeOptional: includeOptional,
+                           in: $0)
+                }
+        
+        if let result = onSupertype {
+            return result
+        }
+        
         // Search on protocol conformances
         for conformance in type.knownProtocolConformances {
             guard let prot = knownTypeWithName(conformance.protocolName) else {
                 continue
             }
             
-            if let method = _method(withObjcSelector: selector,
-                                    invocationTypeHints: invocationTypeHints,
-                                    static: isStatic,
-                                    includeOptional: includeOptional,
-                                    in: prot) {
+            if let method = method(withObjcSelector: selector,
+                                   invocationTypeHints: invocationTypeHints,
+                                   static: isStatic,
+                                   includeOptional: includeOptional,
+                                   in: prot) {
                 
                 return method
             }
         }
         
-        // Search on supertypes
-        return supertype(of: type).flatMap {
-            _method(withObjcSelector: selector,
-                    invocationTypeHints: invocationTypeHints,
-                    static: isStatic,
-                    includeOptional: includeOptional,
-                    in: $0)
-        }
+        return nil
     }
     
     /// Gets a property with a given name on a given known type, also specifying
@@ -974,7 +982,10 @@ public class TypeSystem {
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            _property(named: name, static: isStatic, includeOptional: includeOptional, in: $0)
+            property(named: name,
+                     static: isStatic,
+                     includeOptional: includeOptional,
+                     in: $0)
         }
     }
     
@@ -1010,7 +1021,7 @@ public class TypeSystem {
         
         // Search on supertypes
         return supertype(of: type).flatMap {
-            _field(named: name, static: isStatic, in: $0)
+            field(named: name, static: isStatic, in: $0)
         }
     }
     
