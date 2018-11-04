@@ -81,6 +81,15 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
                 return .binary(lhs: lhs, op: op, rhs: rhs)
             }
         }
+        // Nested expression
+        if let compound = ctx.compoundStatement() {
+            let visitor = compoundStatementVisitor()
+            guard let statement = compound.accept(visitor) else {
+                return .unknown(UnknownASTContext(context: ctx.getText()))
+            }
+            
+            return Expression.block(body: statement).call()
+        }
         
         return .unknown(UnknownASTContext(context: ctx.getText()))
     }
@@ -362,10 +371,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             parameters = []
         }
         
-        let compoundVisitor =
-            SwiftStatementASTReader
-                .CompoundStatementVisitor(expressionReader: self,
-                                          context: context)
+        let compoundVisitor = self.compoundStatementVisitor()
         
         guard let body = ctx.compoundStatement()?.accept(compoundVisitor) else {
             return .unknown(UnknownASTContext(context: ctx.getText()))
@@ -458,6 +464,13 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         }
         
         return nil
+    }
+    
+    private func compoundStatementVisitor() -> SwiftStatementASTReader.CompoundStatementVisitor {
+        return
+            SwiftStatementASTReader
+                .CompoundStatementVisitor(expressionReader: self,
+                                          context: context)
     }
     
     private class FunctionArgumentVisitor: ObjectiveCParserBaseVisitor<FunctionArgument> {

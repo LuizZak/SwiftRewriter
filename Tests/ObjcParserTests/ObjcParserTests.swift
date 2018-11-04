@@ -492,6 +492,16 @@ class ObjcParserTests: XCTestCase {
             }
             """)
     }
+    
+    func testParseCompoundStatementInExpression() {
+        _=parserTest("""
+            void test() {
+                self.value=({
+                    1 + 1;
+                });
+            }
+            """)
+    }
 }
 
 extension ObjcParserTests {

@@ -223,6 +223,19 @@ class SwiftExprASTReaderTests: XCTestCase {
                readsAs: .binary(lhs: .identifier("ident"), op: .closedRange, rhs: .constant(20))
         )
     }
+    
+    func testNestedCompoundStatementInExpression() {
+        assert(
+            objcExpr: """
+            ({ 1 + 1; })
+            """,
+            readsAs: Expression
+                .block(body: [
+                    .expression(Expression.constant(1).binary(op: .add, rhs: .constant(1)))
+                ])
+                .call()
+        )
+    }
 }
 
 extension SwiftExprASTReaderTests {
