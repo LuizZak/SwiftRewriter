@@ -1804,7 +1804,7 @@ open class ObjectiveCParser: Parser {
 
 		 				break
 		 			default:
-		 				throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 				throw ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
 		 			setState(467); 
 		 			try _errHandler.sync(self)
@@ -1813,7 +1813,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -2508,7 +2508,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -2756,7 +2756,7 @@ open class ObjectiveCParser: Parser {
 
 		 				break
 		 			default:
-		 				throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 				throw ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
 		 			setState(568); 
 		 			try _errHandler.sync(self)
@@ -2765,7 +2765,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -2947,7 +2947,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(581); 
 		 		try _errHandler.sync(self)
@@ -3628,7 +3628,7 @@ open class ObjectiveCParser: Parser {
 
 		 				break
 		 			default:
-		 				throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 				throw ANTLRException.recognition(e: NoViableAltException(self))
 		 			}
 		 			setState(640); 
 		 			try _errHandler.sync(self)
@@ -3907,7 +3907,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -4039,7 +4039,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -4920,7 +4920,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 
 		 		break
@@ -6715,7 +6715,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -7097,7 +7097,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 
 		}
@@ -8202,7 +8202,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1090); 
 		 		try _errHandler.sync(self)
@@ -8828,7 +8828,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1160); 
 		 		try _errHandler.sync(self)
@@ -8908,7 +8908,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -9262,7 +9262,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -9979,7 +9979,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 
 		 		break
@@ -10018,7 +10018,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -10364,7 +10364,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1296)
 		 		try _errHandler.sync(self)
@@ -11446,7 +11446,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -11567,7 +11567,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -12346,7 +12346,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -12678,7 +12678,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -13324,7 +13324,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -13553,7 +13553,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1658)
 						if (!(precpred(_ctx, 13))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 13)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 13)"))
 						}
 						setState(1659)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -13581,7 +13581,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1661)
 						if (!(precpred(_ctx, 12))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 12)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 12)"))
 						}
 						setState(1662)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -13606,7 +13606,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1664)
 						if (!(precpred(_ctx, 11))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 11)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 11)"))
 						}
 						setState(1669)
 						try _errHandler.sync(self)
@@ -13627,7 +13627,7 @@ open class ObjectiveCParser: Parser {
 
 							break
 						default:
-							throw try ANTLRException.recognition(e: NoViableAltException(self))
+							throw ANTLRException.recognition(e: NoViableAltException(self))
 						}
 						setState(1671)
 						try expression(12)
@@ -13638,7 +13638,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1672)
 						if (!(precpred(_ctx, 10))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 10)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 10)"))
 						}
 						setState(1673)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -13666,7 +13666,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1675)
 						if (!(precpred(_ctx, 9))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 9)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 9)"))
 						}
 						setState(1676)
 						_localctx.castdown(ExpressionContext.self).op = try _input.LT(1)
@@ -13691,7 +13691,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1678)
 						if (!(precpred(_ctx, 8))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 8)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 8)"))
 						}
 						setState(1679)
 						try {
@@ -13708,7 +13708,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1681)
 						if (!(precpred(_ctx, 7))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 7)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 7)"))
 						}
 						setState(1682)
 						try {
@@ -13725,7 +13725,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1684)
 						if (!(precpred(_ctx, 6))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 6)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 6)"))
 						}
 						setState(1685)
 						try {
@@ -13742,7 +13742,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1687)
 						if (!(precpred(_ctx, 5))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 5)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 5)"))
 						}
 						setState(1688)
 						try {
@@ -13759,7 +13759,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1690)
 						if (!(precpred(_ctx, 4))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 4)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 4)"))
 						}
 						setState(1691)
 						try {
@@ -13776,7 +13776,7 @@ open class ObjectiveCParser: Parser {
 						try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_expression)
 						setState(1693)
 						if (!(precpred(_ctx, 3))) {
-						    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 3)"))
+						    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 3)"))
 						}
 						setState(1694)
 						try match(ObjectiveCParser.Tokens.QUESTION.rawValue)
@@ -14183,7 +14183,7 @@ open class ObjectiveCParser: Parser {
 
 		 		break
 		 	default:
-		 		throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 		throw ANTLRException.recognition(e: NoViableAltException(self))
 		 	}
 		}
 		catch ANTLRException.recognition(let re) {
@@ -14482,7 +14482,7 @@ open class ObjectiveCParser: Parser {
 					try pushNewRecursionContext(_localctx, _startState, ObjectiveCParser.RULE_postfixExpression)
 					setState(1753)
 					if (!(precpred(_ctx, 1))) {
-					    throw try ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 1)"))
+					    throw ANTLRException.recognition(e:FailedPredicateException(self, "precpred(_ctx, 1)"))
 					}
 					setState(1754)
 					_la = try _input.LA(1)
@@ -15307,7 +15307,7 @@ open class ObjectiveCParser: Parser {
 
 		 			break
 		 		default:
-		 			throw try ANTLRException.recognition(e: NoViableAltException(self))
+		 			throw ANTLRException.recognition(e: NoViableAltException(self))
 		 		}
 		 		setState(1846); 
 		 		try _errHandler.sync(self)
