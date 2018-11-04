@@ -512,6 +512,15 @@ class ObjcParserTests: XCTestCase {
             @end
             """)
     }
+    
+    func testParseAttributesInDirectDeclarators() {
+        _=parserTest(
+            """
+            void test() {
+                __strong NSObject *object __attribute__((objc_precise_lifetime)) = (__bridge __strong id)objectPtr;
+            }
+            """)
+    }
 }
 
 extension ObjcParserTests {
