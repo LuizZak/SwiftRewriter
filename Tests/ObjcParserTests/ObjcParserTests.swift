@@ -507,7 +507,7 @@ class ObjcParserTests: XCTestCase {
         _=parserTest(
             """
             @interface A
-            - (void)switch:(NSInteger)a;
+            - (void)switch:(NSInteger)a default:(NSInteger)b;
             - (void)if:(NSInteger)a else:(NSInteger)b;
             @end
             """)
