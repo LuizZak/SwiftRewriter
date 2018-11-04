@@ -90,11 +90,13 @@ public class PropertyMergeIntentionPass: IntentionPass {
             
             // Getters: Parameterless methods that match the property's name,
             // with the return type matching the property's type
-            let potentialGetters =
-                methods.filter { $0.name == property.name }
+            let potentialGetters: [MethodGenerationIntention] =
+                methods
+                    .lazy
+                    .filter { $0.name == property.name }
                     .filter { $0.isStatic == property.isStatic }
                     .filter {
-                        context.typeSystem
+                        self.context.typeSystem
                             .typesMatch($0.returnType,
                                         property.type,
                                         ignoreNullability: true)
@@ -105,11 +107,13 @@ public class PropertyMergeIntentionPass: IntentionPass {
             // `[Name]` is the same as the property's name with the first letter
             // uppercased
             let potentialSetters: [MethodGenerationIntention] =
-                methods.filter { $0.returnType == .void }
+                methods
+                    .lazy
+                    .filter { $0.returnType == .void }
                     .filter { $0.isStatic == property.isStatic }
                     .filter { $0.parameters.count == 1 }
                     .filter {
-                        context.typeSystem
+                        self.context.typeSystem
                             .typesMatch($0.parameters[0].type,
                                         property.type,
                                         ignoreNullability: true)

@@ -156,6 +156,20 @@ class CompiledMultiFileTestResults {
         
     }
     
+    func assertGeneratedFileCount(_ count: Int,
+                                  file: String = #file,
+                                  line: Int = #line) {
+        if results.count != count {
+            test.recordFailure(
+                withDescription: """
+                Expected to generate \(count) file(s), but generated \(results.count)
+                """,
+                inFile: file,
+                atLine: line,
+                expected: true)
+        }
+    }
+    
     /// Asserts expected Swift files recorded with `expectSwiftFile(name:contents:)`
     /// where produced correctly.
     ///
