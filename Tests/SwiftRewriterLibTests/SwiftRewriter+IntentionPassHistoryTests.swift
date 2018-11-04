@@ -113,9 +113,9 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
             typealias node234 = node234_Tag
             // [Creation] A.h line 5 column 28
             typealias tree234 = tree234_Tag
-            // [Creation] A.h line 6 column 9
+            // [Creation] A.h line 6 column 1
             typealias cmpfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> CInt
-            // [Creation] A.h line 7 column 9
+            // [Creation] A.h line 7 column 1
             typealias copyfn234 = @convention(c) (UnsafeMutableRawPointer?, UnsafeMutableRawPointer?) -> UnsafeMutableRawPointer?
 
             // [Creation] A.c line 24 column 1

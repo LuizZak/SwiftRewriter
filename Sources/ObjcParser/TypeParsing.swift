@@ -172,13 +172,19 @@ public class TypeParsing {
         if let directDeclarator = declarator.directDeclarator(),
             let blockParameters = directDeclarator.blockParameters() {
             
+            let isFunctionPointer = directDeclarator.MUL() != nil
             let blockParameterTypes = parseObjcTypes(fromBlockParameters: blockParameters)
-            
             let blockIdentifier = directDeclarator.identifier()
             
-            type = .blockType(name: blockIdentifier?.getText(),
-                              returnType: type,
-                              parameters: blockParameterTypes)
+            if isFunctionPointer {
+                type = .functionPointer(name: blockIdentifier?.getText(),
+                                        returnType: type,
+                                        parameters: blockParameterTypes)
+            } else {
+                type = .blockType(name: blockIdentifier?.getText(),
+                                  returnType: type,
+                                  parameters: blockParameterTypes)
+            }
             
             // Verify qualifiers
             if !qualifiers.isEmpty {

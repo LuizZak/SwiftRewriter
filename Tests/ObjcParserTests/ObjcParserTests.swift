@@ -484,6 +484,14 @@ class ObjcParserTests: XCTestCase {
             @class NSDictionary<KeyType, __contravariant ValueType>;
             """)
     }
+    
+    func testParseVariableDeclarationOfPointerToFunction() {
+        _=parserTest("""
+            void test() {
+                void (*msgSend)(struct objc_super *, SEL) = (__typeof__(msgSend))objc_msgSendSuper;
+            }
+            """)
+    }
 }
 
 extension ObjcParserTests {

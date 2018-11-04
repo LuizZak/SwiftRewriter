@@ -572,6 +572,22 @@ class SwiftRewriterTests: XCTestCase {
             """)
     }
     
+    func testRewriteLocalFunctionPointerDeclaration() {
+        assertObjcParse(
+            objc: """
+            void test() {
+                void (*msgSend)(struct objc_super *, SEL) = ^{
+                };
+            }
+            """,
+            swift: """
+            func test() {
+                let msgSend: (@convention(c) (UnsafeMutablePointer<structobjc_super>?, SEL) -> Void)! = { () -> Void in
+                }
+            }
+            """)
+    }
+    
     func testNSAssumeNonnullContextCollectionWorksWithCompilerDirectivesInFile() {
         assertObjcParse(
             objc: """
