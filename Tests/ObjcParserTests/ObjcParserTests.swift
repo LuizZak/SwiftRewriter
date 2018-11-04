@@ -502,6 +502,16 @@ class ObjcParserTests: XCTestCase {
             }
             """)
     }
+    
+    func testParseKeywordsInSelectors() {
+        _=parserTest(
+            """
+            @interface A
+            - (void)switch:(NSInteger)a;
+            - (void)if:(NSInteger)a else:(NSInteger)b;
+            @end
+            """)
+    }
 }
 
 extension ObjcParserTests {
