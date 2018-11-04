@@ -1071,6 +1071,29 @@ class TypeSystemTests: XCTestCase {
         XCTAssertEqual(Set(sut.allConformances(of: protA).map { $0.protocolName }),
                        ["B"])
     }
+    
+    func testConformanceToProtocolNameInCyclicProtocolType() {
+        let prot = KnownTypeBuilder(typeName: "A", kind: .protocol)
+            .protocolConformance(protocolName: "A")
+            .method(named: "test")
+            .build()
+        sut.addType(prot)
+        
+        XCTAssertNil(sut.conformance(toProtocolName: "B", in: prot))
+    }
+    
+    func testConformanceToProtocolNameInCyclicProtocolTypeIndirect() {
+        let protA = KnownTypeBuilder(typeName: "A", kind: .protocol)
+            .protocolConformance(protocolName: "B")
+            .build()
+        let protB = KnownTypeBuilder(typeName: "B", kind: .protocol)
+            .protocolConformance(protocolName: "A")
+            .build()
+        sut.addType(protA)
+        sut.addType(protB)
+        
+        XCTAssertNil(sut.conformance(toProtocolName: "C", in: protA))
+    }
 }
 
 private extension TypeSystemTests {

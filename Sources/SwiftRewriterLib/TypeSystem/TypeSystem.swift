@@ -762,6 +762,17 @@ public class TypeSystem {
     
     /// Gets a protocol conformance to a given protocol name on a given known type.
     public func conformance(toProtocolName name: String, in type: KnownType) -> KnownProtocolConformance? {
+        return _conformance(toProtocolName: name, in: type, visitedTypes: [])
+    }
+    
+    private func _conformance(toProtocolName name: String,
+                              in type: KnownType,
+                              visitedTypes: Set<String>) -> KnownProtocolConformance? {
+        
+        var visitedTypes = visitedTypes
+        
+        visitedTypes.insert(type.typeName)
+        
         if let conformance =
             type.knownProtocolConformances
                 .first(where: { $0.protocolName == name }) {
@@ -769,21 +780,27 @@ public class TypeSystem {
         }
         
         // Search on supertypes
-        let supertypeConformance = supertype(of: type).flatMap {
-            conformance(toProtocolName: name, in: $0)
-        }
-        
-        if let supertypeConformance = supertypeConformance {
-            return supertypeConformance
+        if let supertype = supertype(of: type), !visitedTypes.contains(supertype.typeName) {
+            if let supertypeConformance = _conformance(toProtocolName: name,
+                                                       in: supertype,
+                                                       visitedTypes: visitedTypes) {
+                return supertypeConformance
+            }
         }
         
         // Search on protocols
         for prot in type.knownProtocolConformances {
+            if visitedTypes.contains(prot.protocolName) {
+                continue
+            }
+            
             guard let type = knownTypeWithName(prot.protocolName) else {
                 continue
             }
             
-            if let conformance = conformance(toProtocolName: name, in: type) {
+            if let conformance = _conformance(toProtocolName: name,
+                                              in: type,
+                                              visitedTypes: visitedTypes) {
                 return conformance
             }
         }
