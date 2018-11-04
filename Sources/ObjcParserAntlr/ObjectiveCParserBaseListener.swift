@@ -67,6 +67,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	open func enterClassInterfaceName(_ ctx: ObjectiveCParser.ClassInterfaceNameContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitClassInterfaceName(_ ctx: ObjectiveCParser.ClassInterfaceNameContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	open func enterCategoryInterface(_ ctx: ObjectiveCParser.CategoryInterfaceContext) { }
 	/**
 	 * {@inheritDoc}
@@ -87,6 +100,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext) { }
 
 	/**
 	 * {@inheritDoc}
@@ -126,6 +152,19 @@ open class ObjectiveCParserBaseListener: ObjectiveCParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	open func exitSuperclassName(_ ctx: ObjectiveCParser.SuperclassNameContext) { }
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func enterGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	open func exitGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext) { }
 
 	/**
 	 * {@inheritDoc}

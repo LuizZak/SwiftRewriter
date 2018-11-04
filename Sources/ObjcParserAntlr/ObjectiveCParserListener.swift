@@ -55,6 +55,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	 */
 	func exitClassInterface(_ ctx: ObjectiveCParser.ClassInterfaceContext)
 	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#classInterfaceName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterClassInterfaceName(_ ctx: ObjectiveCParser.ClassInterfaceNameContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#classInterfaceName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitClassInterfaceName(_ ctx: ObjectiveCParser.ClassInterfaceNameContext)
+	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#categoryInterface}.
 	 - Parameters:
 	   - ctx: the parse tree
@@ -78,6 +90,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#classImplementatioName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#classImplementatioName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#categoryImplementation}.
 	 - Parameters:
@@ -114,6 +138,18 @@ public protocol ObjectiveCParserListener: ParseTreeListener {
 	   - ctx: the parse tree
 	 */
 	func exitSuperclassName(_ ctx: ObjectiveCParser.SuperclassNameContext)
+	/**
+	 * Enter a parse tree produced by {@link ObjectiveCParser#genericSuperclassName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func enterGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext)
+	/**
+	 * Exit a parse tree produced by {@link ObjectiveCParser#genericSuperclassName}.
+	 - Parameters:
+	   - ctx: the parse tree
+	 */
+	func exitGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext)
 	/**
 	 * Enter a parse tree produced by {@link ObjectiveCParser#genericTypeSpecifier}.
 	 - Parameters:

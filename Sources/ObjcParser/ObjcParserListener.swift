@@ -105,21 +105,28 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         guard let classNode = context.currentContextNode(as: ObjcClassInterface.self) else {
             return
         }
+        guard let classInterfaceName = ctx.classInterfaceName() else {
+            return
+        }
         
         // Class name
-        if let identifier = ctx.className()?.identifier() {
+        if let identifier = classInterfaceName.className()?.identifier() {
             let identifierNode = nodeFactory.makeIdentifier(from: identifier)
             classNode.addChild(identifierNode)
         }
         
         // Super class name
-        if let sup = ctx.superclassName() {
+        if let sup = classInterfaceName.superclassName() {
             let supName = nodeFactory.makeSuperclassName(from: sup)
+            context.addChildNode(supName)
+        }
+        if let sup = classInterfaceName.genericSuperclassName(), let ident = sup.identifier() {
+            let supName = nodeFactory.makeSuperclassName(from: sup, identifier: ident)
             context.addChildNode(supName)
         }
         
         // Protocol list
-        if let protocolList = ctx.protocolList() {
+        if let protocolList = classInterfaceName.protocolList() {
             let protocolListNode =
                 nodeFactory.makeProtocolReferenceList(from: protocolList)
             
@@ -161,15 +168,18 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         guard let classNode = context.currentContextNode(as: ObjcClassImplementation.self) else {
             return
         }
+        guard let classImplementationName = ctx.classImplementatioName() else {
+            return
+        }
         
         // Class name
-        if let identifier = ctx.className()?.identifier() {
+        if let identifier = classImplementationName.className()?.identifier() {
             let identNode = nodeFactory.makeIdentifier(from: identifier)
             classNode.addChild(identNode)
         }
         
         // Super class name
-        if let sup = ctx.superclassName() {
+        if let sup = classImplementationName.superclassName() {
             let supName = nodeFactory.makeSuperclassName(from: sup)
             context.addChildNode(supName)
         }

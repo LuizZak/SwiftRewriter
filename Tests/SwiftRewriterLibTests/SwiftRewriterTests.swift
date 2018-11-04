@@ -2584,4 +2584,16 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteGenericSuperclass() {
+        assertObjcParse(
+            objc: """
+            @interface Sub : Base<NSString*>
+            @end
+            """,
+            swift: """
+            class Sub: Base {
+            }
+            """)
+    }
 }

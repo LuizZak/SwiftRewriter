@@ -50,6 +50,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	}
 
 	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#classInterfaceName}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitClassInterfaceName(_ ctx: ObjectiveCParser.ClassInterfaceNameContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
 	 * Visit a parse tree produced by {@link ObjectiveCParser#categoryInterface}.
 	- Parameters:
 	  - ctx: the parse tree
@@ -66,6 +76,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitClassImplementation(_ ctx: ObjectiveCParser.ClassImplementationContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#classImplementatioName}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitClassImplementatioName(_ ctx: ObjectiveCParser.ClassImplementatioNameContext) -> T{
 	 	fatalError(#function + " must be overridden")
 	}
 
@@ -96,6 +116,16 @@ open class ObjectiveCParserVisitor<T>: ParseTreeVisitor<T> {
 	- returns: the visitor result
 	 */
 	open func visitSuperclassName(_ ctx: ObjectiveCParser.SuperclassNameContext) -> T{
+	 	fatalError(#function + " must be overridden")
+	}
+
+	/**
+	 * Visit a parse tree produced by {@link ObjectiveCParser#genericSuperclassName}.
+	- Parameters:
+	  - ctx: the parse tree
+	- returns: the visitor result
+	 */
+	open func visitGenericSuperclassName(_ ctx: ObjectiveCParser.GenericSuperclassNameContext) -> T{
 	 	fatalError(#function + " must be overridden")
 	}
 
