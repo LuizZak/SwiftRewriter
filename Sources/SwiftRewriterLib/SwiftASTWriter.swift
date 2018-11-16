@@ -379,9 +379,7 @@ internal class ExpressionWriter: ExpressionVisitor {
         
         target.idented {
             // Print each statement now
-            for statement in body.statements {
-                visitor.visitStatement(statement)
-            }
+            visitor.emitStatements(body.statements)
         }
         
         target.outputIdentation()
@@ -451,15 +449,7 @@ internal class StatementWriter: StatementVisitor {
         target.outputLineFeed()
         target.increaseIdentation()
         
-        var last: Statement?
-        for statement in compound.statements {
-            if let last = last, shouldEmitNewlineSpacing(between: last, stmt2: statement) {
-                target.outputLineFeed()
-            }
-            
-            visitStatement(statement)
-            last = statement
-        }
+        emitStatements(compound.statements)
         
         target.decreaseIdentation()
         if lineFeedAfter {
@@ -671,6 +661,18 @@ internal class StatementWriter: StatementVisitor {
         }
         
         target.outputLineFeed()
+    }
+    
+    fileprivate func emitStatements(_ statements: [Statement]) {
+        var last: Statement?
+        for statement in statements {
+            if let last = last, shouldEmitNewlineSpacing(between: last, stmt2: statement) {
+                target.outputLineFeed()
+            }
+            
+            visitStatement(statement)
+            last = statement
+        }
     }
     
     private func shouldEmitNewlineSpacing(between stmt1: Statement, stmt2: Statement) -> Bool {

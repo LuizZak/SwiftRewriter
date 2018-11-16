@@ -617,6 +617,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 func myMethod() {
                     if ({
                         a -= 10
+
                         return true
                     })() {
                         print(10)
