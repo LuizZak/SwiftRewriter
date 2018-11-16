@@ -451,7 +451,15 @@ internal class StatementWriter: StatementVisitor {
         target.outputLineFeed()
         target.increaseIdentation()
         
-        compound.statements.forEach(visitStatement)
+        var last: Statement?
+        for statement in compound.statements {
+            if let last = last, shouldEmitNewlineSpacing(between: last, stmt2: statement) {
+                target.outputLineFeed()
+            }
+            
+            visitStatement(statement)
+            last = statement
+        }
         
         target.decreaseIdentation()
         if lineFeedAfter {
@@ -663,6 +671,19 @@ internal class StatementWriter: StatementVisitor {
         }
         
         target.outputLineFeed()
+    }
+    
+    private func shouldEmitNewlineSpacing(between stmt1: Statement, stmt2: Statement) -> Bool {
+        switch (stmt1, stmt2) {
+        case (is ExpressionsStatement, is ExpressionsStatement):
+            return false
+        case (is VariableDeclarationsStatement, is ExpressionsStatement),
+             (is VariableDeclarationsStatement, is VariableDeclarationsStatement):
+            return false
+            
+        default:
+            return true
+        }
     }
     
     private func emitLetPattern(_ pattern: Pattern) {

@@ -1345,10 +1345,13 @@ class SwiftRewriterTests: XCTestCase {
                 func recreatePath() {
                     let top: CGFloat = startsAtTop ? 0 : circle.center.y
                     let bottom = max(self.bounds.size.height, top)
+
                     if top == bottom {
                         shapeLayer.path = nil
+
                         return
                     }
+
                     let path = CGMutablePath()
                     path.move(to: CGPoint(x: 0, y: top))
                     path.addLine(to: CGPoint(x: 0, y: bottom))
@@ -1356,11 +1359,13 @@ class SwiftRewriterTests: XCTestCase {
                     shapeLayer.lineWidth = 1
                     shapeLayer.lineCap = kCALineCapSquare
                     shapeLayer.lineJoin = kCALineJoinRound
+
                     if dashType == CPTimeSeparatorDash_Dash {
                         shapeLayer.lineDashPattern = [3, 5]
                     } else {
                         shapeLayer.lineDashPattern = nil
                     }
+
                     shapeLayer.path = path
                 }
             }
@@ -2392,6 +2397,7 @@ class SwiftRewriterTests: XCTestCase {
             class B: A {
                 override init(a: A) {
                     self = super.init(a: a)
+
                     return self
                 }
                 convenience init(b: B) {
@@ -2435,6 +2441,7 @@ class SwiftRewriterTests: XCTestCase {
             func test() {
                 let array = NSMutableArray()
                 let object: NSObject?
+
                 if let object = object {
                     array.add(object)
                 }
@@ -2454,6 +2461,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             func test() {
                 Date() == Date()
+
                 let date: Date?
                 date == Date()
             }

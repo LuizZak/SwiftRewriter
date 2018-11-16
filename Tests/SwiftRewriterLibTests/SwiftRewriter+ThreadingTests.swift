@@ -71,13 +71,16 @@ private extension SwiftRewriter_ThreadingTests {
             
                 func myMethod() {
                     var i: CInt = 0
+            
                     while i < CInt(self.myOtherMethod()) {
                         defer {
                             i += 1
                         }
+            
                         self.a
                         self.b
                     }
+            
                     self.window?.bounds
                 }
                 func myOtherMethod() -> CGFloat {

@@ -482,6 +482,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                     if true {
                         stmt(abc)
                     }
+            
                     if true {
                         stmt()
                     }
@@ -775,6 +776,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                     while true {
                         stmt()
                     }
+
                     while true {
                         stmt()
                     }
@@ -819,6 +821,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass {
                 func myMethod() {
                     let count: Int = 5
+
                     for i in 0..<count {
                     }
                 }
@@ -842,6 +845,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass {
                 func myMethod() {
                     let count: Int = 5
+
                     for i in 0..<count {
                     }
                 }
@@ -865,6 +869,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             class MyClass {
                 func myMethod() {
                     let array = []
+
                     for i in 0..<array.count {
                     }
                 }
@@ -890,10 +895,12 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 func myMethod() {
                     var count: Int = 5
                     var i: Int = 0
+
                     while i < count {
                         defer {
                             i += 1
                         }
+
                         count = 0
                     }
                 }
@@ -918,6 +925,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 func myMethod() {
                     let count: Int = 5
                     i = 0
+
                     while i < count {
                         defer {
                             i += 1
@@ -968,9 +976,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 func myMethod() {
                     let _lockTarget = self
                     objc_sync_enter(_lockTarget)
+
                     defer {
                         objc_sync_exit(_lockTarget)
                     }
+
                     stuff()
                 }
             }
@@ -1057,6 +1067,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                     // label:
                     if true {
                     }
+
                     // label2:
                     if true {
                     }
@@ -1085,6 +1096,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                     // label:
                     if true {
                     }
+
                     return
                 }
             }

@@ -124,6 +124,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                         self
                         // type: NSObject
                         super
+
                         return false
                     }
                     set {
@@ -636,6 +637,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 func method() {
                     // type: Bool?
                     self.b?.responds(to: Selector("abc:"))
+
                     if self.b?.responds(to: Selector("abc:")) == true {
                     }
                 }
@@ -1207,6 +1209,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 let prot: Protocol!
                 // type: Bool?
                 prot.method?()
+
                 if prot.method?() == true {
                 }
             }
