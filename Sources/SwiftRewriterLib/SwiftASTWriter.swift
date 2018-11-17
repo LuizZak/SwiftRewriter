@@ -733,16 +733,21 @@ internal class StatementWriter: StatementVisitor {
             return true
         }
         
-        if !exp.isLiteralExpression {
+        guard exp.isLiteralExpression else {
             return false
         }
         
         if let type = exp.resolvedType {
             switch type {
-            case .int, .float:
-                return true
+            case .int:
+                return varType != .int
+                
+            case .float:
+                return varType != .double
+                
             case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
                 return true
+                
             default:
                 break
             }
@@ -751,6 +756,7 @@ internal class StatementWriter: StatementVisitor {
         switch deduceType(from: exp) {
         case .int, .float, .nil:
             return true
+            
         default:
             return false
         }
@@ -764,6 +770,7 @@ internal class StatementWriter: StatementVisitor {
             if constant.isInteger {
                 return .int
             }
+            
             switch constant {
             case .float:
                 return .float
@@ -776,13 +783,17 @@ internal class StatementWriter: StatementVisitor {
             default:
                 break
             }
+            
             return .other
         } else if let binary = exp.asBinary {
             return deduceType(binary)
+        
         } else if let assignment = exp.asAssignment {
             return deduceType(from: assignment.rhs)
+        
         } else if let parens = exp.asParens {
             return deduceType(from: parens.exp)
+        
         } else if exp is PrefixExpression || exp is UnaryExpression {
             let op = exp.asPrefix?.op ?? exp.asUnary?.op
             

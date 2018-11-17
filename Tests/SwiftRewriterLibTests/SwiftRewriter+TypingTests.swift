@@ -1240,7 +1240,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             func test() {
                 let cgFloat: CGFloat = 0
                 let cInt: CInt = 0
-                let nsInteger: Int = 0
+                let nsInteger = 0
                 // type: CGFloat
                 max(0, cgFloat)
                 // type: CInt

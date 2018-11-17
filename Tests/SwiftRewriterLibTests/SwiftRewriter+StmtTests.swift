@@ -187,9 +187,11 @@ class SwiftRewriter_StmtTests: XCTestCase {
     /// initial expressions.
     /// Aid the compiler by keeping the type patterns for int/float literals.
     func testKeepVarTypePatternsOnNumericTypes() {
+        // Integer literals default to `Int` in Swift, so no need to repeat type
+        // signatures
         assertSingleStatement(
             objc: "NSInteger x = 10;",
-            swift: "let x: Int = 10"
+            swift: "let x = 10"
         )
         assertSingleStatement(
             objc: "NSUInteger x = 10;",
@@ -203,7 +205,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: "double x = 10;",
             swift: "let x: CDouble = 10"
         )
-        // Should avoid omitting types for nil values, as well
+        // Should emit types for nil literals, as well
         assertSingleStatement(
             objc: "NSString *x = nil;",
             swift: "let x: String! = nil"
@@ -212,7 +214,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         // Keep inferring on for literal-based expressions as well
         assertSingleStatement(
             objc: "NSInteger x = 10 + 5;",
-            swift: "let x: Int = 10 + 5"
+            swift: "let x = 10 + 5"
         )
         assertSingleStatement(
             objc: "NSUInteger x = 10 + 5;",
@@ -416,7 +418,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             """)
     }
     
-    func testVarDeclarationOmitsTypeOnLocalWithInitialValue() {
+    func testVarDeclarationOmitsTypeOnLocalWithInitialValueMatchingLiteralType() {
         assertObjcParse(
             objc: """
             NSInteger myInt;
@@ -436,10 +438,10 @@ class SwiftRewriter_StmtTests: XCTestCase {
             
             class MyClass {
                 func myMethod() {
-                    let local: Int = 5
-                    let constLocal: Int = 5
+                    let local = 5
+                    let constLocal = 5
                     let local2: Int
-                    let localS1: Int = 5, localS2: Int
+                    let localS1 = 5, localS2: Int
                 }
             }
             """)
@@ -821,7 +823,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    let count: Int = 5
+                    let count = 5
 
                     for i in 0..<count {
                     }
@@ -845,7 +847,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    let count: Int = 5
+                    let count = 5
 
                     for i in 0..<count {
                     }
@@ -894,8 +896,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    var count: Int = 5
-                    var i: Int = 0
+                    var count = 5
+                    var i = 0
 
                     while i < count {
                         defer {
@@ -924,7 +926,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    let count: Int = 5
+                    let count = 5
                     i = 0
 
                     while i < count {
