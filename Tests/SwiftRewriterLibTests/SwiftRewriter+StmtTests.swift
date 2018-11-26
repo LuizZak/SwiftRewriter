@@ -208,7 +208,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         // Should emit types for nil literals, as well
         assertSingleStatement(
             objc: "NSString *x = nil;",
-            swift: "let x: String! = nil"
+            swift: "let x: String? = nil"
         )
         
         // Keep inferring on for literal-based expressions as well
@@ -257,6 +257,22 @@ class SwiftRewriter_StmtTests: XCTestCase {
         assertSingleStatement(
             objc: "NSString *x = @\"A string\";",
             swift: "let x = \"A string\""
+        )
+    }
+    
+    // An extension of the test above (testKeepVarTypePatternsOnNumericTypes)
+    func testKeepVarTypePatternsOnUpcastings() {
+        // Should emit types for upcasts
+        assertSingleStatement(
+            objc: "NSObject *x = self; x = self;",
+            swift: "var x: NSObject = self\n        x = self"
+        )
+        // For literals, no need to emit type signature as the expression won't
+        // change values, so there's no later potential re-assignments of other
+        // values that are supertypes of the original assignment value.
+        assertSingleStatement(
+            objc: "NSObject *x = self;",
+            swift: "let x = self"
         )
     }
     
@@ -392,7 +408,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    let myBlock: (() -> Void)! = {
+                    let myBlock: () -> Void = {
                     }
                 }
             }
@@ -410,7 +426,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             class MyClass {
                 func myMethod() {
-                    let myBlock: (() -> Void)! = {
+                    let myBlock: () -> Void = {
                         self.doThing()
                     }
                 }

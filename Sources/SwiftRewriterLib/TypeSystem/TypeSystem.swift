@@ -396,13 +396,13 @@ public class TypeSystem {
     }
     
     /// Returns `true` if a given type can be assigned to a value of another type.
-    public func isType(_ type: SwiftType, assignableTo baseTypeName: SwiftType) -> Bool {
-        if type == baseTypeName {
+    public func isType(_ type: SwiftType, assignableTo baseType: SwiftType) -> Bool {
+        if type == baseType {
             return true
         }
         
         let unaliasedType = resolveAlias(in: type)
-        let unaliasedBaseType = resolveAlias(in: baseTypeName)
+        let unaliasedBaseType = resolveAlias(in: baseType)
         
         if unaliasedType == unaliasedBaseType {
             return true

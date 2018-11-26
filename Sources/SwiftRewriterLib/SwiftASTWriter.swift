@@ -616,18 +616,31 @@ internal class StatementWriter: StatementVisitor {
     
     func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         func emitDeclaration(_ declaration: StatementVariableDeclaration) {
-            let typeString = typeMapper.typeNameString(for: declaration.type)
-            
             target.outputInline(declaration.identifier)
             
             let shouldEmitType =
                 declaration
                     .initialization
-                    .map { shouldEmitTypeSignature(forInitVal: $0, varType: declaration.type) }
+                    .map { shouldEmitTypeSignature(forInitVal: $0,
+                                                   varType: declaration.type,
+                                                   isConstant: declaration.isConstant) }
                     ?? true
             
+            // (Optional) Type signature
             if shouldEmitType {
-                // Type signature
+                let declarationType: SwiftType
+                
+                if declaration.initialization?.isErrorTyped == false, let initType = declaration.initialization?.resolvedType {
+                    if typeSystem.isType(initType.deepUnwrapped, assignableTo: declaration.type.deepUnwrapped) {
+                        declarationType = declaration.type.withSameOptionalityAs(initType)
+                    } else {
+                        declarationType = declaration.type
+                    }
+                } else {
+                    declarationType = declaration.type
+                }
+                
+                let typeString = typeMapper.typeNameString(for: declarationType)
                 target.outputInline(": ")
                 target.outputInline(typeString, style: .typeName)
             }
@@ -724,8 +737,11 @@ internal class StatementWriter: StatementVisitor {
         rewriter.rewrite(exp)
     }
     
-    private func shouldEmitTypeSignature(forInitVal exp: Expression, varType: SwiftType) -> Bool {
-        if exp.isErrorTyped && typeSystem.isNumeric(varType) {
+    private func shouldEmitTypeSignature(forInitVal exp: Expression,
+                                         varType: SwiftType,
+                                         isConstant: Bool) -> Bool {
+        
+        if exp.isErrorTyped {
             return true
         }
         
@@ -733,33 +749,43 @@ internal class StatementWriter: StatementVisitor {
             return true
         }
         
-        guard exp.isLiteralExpression else {
-            return false
-        }
-        
-        if let type = exp.resolvedType {
-            switch type {
-            case .int:
-                return varType != .int
-                
-            case .float:
-                return varType != .double
-                
-            case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
+        if exp.isLiteralExpression {
+            if let type = exp.resolvedType {
+                switch type {
+                case .int:
+                    return varType != .int
+                    
+                case .float:
+                    return varType != .double
+                    
+                case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
+                    return true
+                    
+                default:
+                    break
+                }
+            }
+            
+            switch deduceType(from: exp) {
+            case .int, .float, .nil:
                 return true
                 
             default:
-                break
+                return false
             }
+        } else if let type = exp.resolvedType {
+            guard typeSystem.isClassInstanceType(type) else {
+                return false
+            }
+            
+            if isConstant {
+                return false
+            }
+            
+            return !typeSystem.typesMatch(type, varType, ignoreNullability: true)
         }
         
-        switch deduceType(from: exp) {
-        case .int, .float, .nil:
-            return true
-            
-        default:
-            return false
-        }
+        return false
     }
     
     /// Attempts to make basic deductions about an expression's resulting type.

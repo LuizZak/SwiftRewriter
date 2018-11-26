@@ -1939,6 +1939,8 @@ class SwiftRewriterTests: XCTestCase {
     func testFloorMethodRecastingIssue() {
         assertObjcParse(
             objc: """
+            static const CGFloat FLT_EPSILON = 1e-10;
+            
             @interface A : NSObject
             @property CGFloat b;
             @end
@@ -1950,6 +1952,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
+            let FLT_EPSILON: CGFloat = 1e-10
+            
             class A: NSObject {
                 var b: CGFloat = 0.0
                 

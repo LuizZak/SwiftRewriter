@@ -705,9 +705,11 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 NSString *local1 = [self optional];
                 NSString *local2 = [self nonOptional];
                 NSString *local3 = [self unspecifiedOptional];
+                NSString *local4 = @"Literal";
                 (local1);
                 (local2);
                 (local3);
+                (local4);
             }
             @end
             """,
@@ -717,18 +719,74 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     let local1 = self.optional()
                     let local2 = self.nonOptional()
                     let local3 = self.unspecifiedOptional()
+                    let local4 = "Literal"
                     // type: String?
                     local1
                     // type: String
                     local2
                     // type: String?
                     local3
+                    // type: String
+                    local4
                 }
                 func optional() -> String? {
                 }
                 func nonOptional() -> String {
                 }
                 func unspecifiedOptional() -> String! {
+                }
+            }
+            """,
+            options: ASTWriterOptions(outputExpressionTypes: true))
+    }
+    
+    func testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSideWithSubclassing() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            @end
+            @interface B: A
+            @end
+            @interface MyClass
+            - (nullable B*)optional;
+            - (nonnull B*)nonOptional;
+            - (null_unspecified B*)unspecifiedOptional;
+            - (B*)unspecifiedOptional;
+            @end
+            
+            @implementation MyClass
+            - (void)method {
+                A *local1 = [self optional];
+                A *local2 = [self nonOptional];
+                A *local3 = [self unspecifiedOptional];
+                (local1);
+                (local2);
+                (local3);
+            }
+            @end
+            """,
+            swift: """
+            class A {
+            }
+            class B: A {
+            }
+            class MyClass {
+                func method() {
+                    let local1 = self.optional()
+                    let local2 = self.nonOptional()
+                    let local3 = self.unspecifiedOptional()
+                    // type: A?
+                    local1
+                    // type: A
+                    local2
+                    // type: A?
+                    local3
+                }
+                func optional() -> B? {
+                }
+                func nonOptional() -> B {
+                }
+                func unspecifiedOptional() -> B! {
                 }
             }
             """,
