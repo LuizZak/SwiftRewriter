@@ -17,6 +17,7 @@ public class DefaultExpressionPasses: ASTRewriterPassSource {
         NumberCommonsExpressionPass.self,
         EnumRewriterExpressionPass.self,
         LocalConstantPromotionExpressionPass.self,
+        VariableNullabilityPromotionExpressionPass.self,
         // Do a last simplification pass after all other passes
         ASTSimplifier.self
     ]

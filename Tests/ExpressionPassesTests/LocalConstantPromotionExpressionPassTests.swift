@@ -16,13 +16,11 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
     }
     
     func testDetectTrivialLetConstant() {
-        
         let body: CompoundStatement = [
             Statement.variableDeclaration(identifier: "test",
                                           type: .int,
                                           initialization: .constant(0))
         ]
-        
         functionBodyContext = FunctionBodyIntention(body: body)
         
         assertTransform(
@@ -34,5 +32,33 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
                                               initialization: .constant(0))
             ])
         ); assertNotifiedChange()
+    }
+    
+    func testNonConstantCase() {
+        let body: CompoundStatement = [
+            Statement.variableDeclaration(identifier: "test",
+                                          type: .int,
+                                          initialization: .constant(0)),
+            Statement.expression(
+                Expression
+                    .identifier("test").setDefinition(localName: "test", type: .int)
+                    .assignment(op: .equals, rhs: .constant(1))
+            )
+        ]
+        functionBodyContext = FunctionBodyIntention(body: body)
+        
+        assertTransform(
+            statement: body,
+            into: CompoundStatement(statements: [
+                Statement.variableDeclaration(identifier: "test",
+                                              type: .int,
+                                              isConstant: false,
+                                              initialization: .constant(0)),
+                Statement.expression(
+                    Expression
+                        .identifier("test").setDefinition(localName: "test", type: .int)
+                        .assignment(op: .equals, rhs: .constant(1)))
+            ])
+        ); assertDidNotNotifyChange()
     }
 }
