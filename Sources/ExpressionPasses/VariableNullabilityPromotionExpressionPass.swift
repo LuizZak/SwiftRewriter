@@ -39,7 +39,10 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
             if decl.initialization == nil && decl.isConstant {
                 continue
             }
-            if usages.isEmpty, let initialization = decl.initialization {
+            if decl.initialization?.isErrorTyped == true {
+                continue
+            }
+            if let initialization = decl.initialization {
                 if initialization.literalExpressionKind == .nil || initialization.resolvedType?.isOptional == true {
                     continue
                 }

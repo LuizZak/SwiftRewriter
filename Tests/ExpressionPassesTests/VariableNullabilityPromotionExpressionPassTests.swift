@@ -73,6 +73,25 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
         ); assertDidNotNotifyChange()
     }
     
+    func testDontPromoteErrorTypedInitializedVariables() {
+        let statement = Statement
+            .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.nullabilityUnspecified("A"),
+                                     initialization: Expression.identifier("_a").makeErrorTyped())
+                ])
+        functionBodyContext = FunctionBodyIntention(body: statement)
+        
+        assertTransform(
+            statement: statement,
+            into: .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.nullabilityUnspecified("A"),
+                                     initialization: Expression.identifier("_a").makeErrorTyped())
+                ])
+        ); assertDidNotNotifyChange()
+    }
+    
     func testAvoidPromotingVariableLaterAssignedAsNil() {
         let statement = Statement
             .compound([
@@ -97,6 +116,35 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                     Expression
                         .identifier("a").setDefinition(localName: "a", type: .nullabilityUnspecified("A"))
                         .assignment(op: .assign, rhs: .constant(.nil))
+                )
+            ])
+        ); assertDidNotNotifyChange()
+    }
+    
+    func testAvoidPromotingVariableInitializedAsNilAndLaterAssignedAsNonNil() {
+        let statement = Statement
+            .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.nullabilityUnspecified("A"),
+                                     initialization: Expression.constant(.nil)),
+                .expression(
+                    Expression
+                        .identifier("a").setDefinition(localName: "a", type: .nullabilityUnspecified("A"))
+                        .assignment(op: .assign, rhs: Expression.identifier("_a").typed("A"))
+                )
+            ])
+        functionBodyContext = FunctionBodyIntention(body: statement)
+        
+        assertTransform(
+            statement: statement,
+            into: .compound([
+                .variableDeclaration(identifier: "a",
+                                     type: SwiftType.nullabilityUnspecified("A"),
+                                     initialization: Expression.constant(.nil)),
+                .expression(
+                    Expression
+                        .identifier("a").setDefinition(localName: "a", type: .nullabilityUnspecified("A"))
+                        .assignment(op: .assign, rhs: Expression.identifier("_a").typed("A"))
                 )
             ])
         ); assertDidNotNotifyChange()
