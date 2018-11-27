@@ -208,7 +208,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
         // Should emit types for nil literals, as well
         assertSingleStatement(
             objc: "NSString *x = nil;",
-            swift: "let x: String? = nil"
+            swift: "let x: String! = nil"
         )
         
         // Keep inferring on for literal-based expressions as well

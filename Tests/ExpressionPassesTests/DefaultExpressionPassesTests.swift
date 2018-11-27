@@ -21,6 +21,7 @@ class DefaultExpressionPassesTests: XCTestCase {
         XCTAssert(passes.next() == NumberCommonsExpressionPass.self)
         XCTAssert(passes.next() == EnumRewriterExpressionPass.self)
         XCTAssert(passes.next() == LocalConstantPromotionExpressionPass.self)
+        XCTAssert(passes.next() == VariableNullabilityPromotionExpressionPass.self)
         XCTAssert(passes.next() == ASTSimplifier.self)
         XCTAssertNil(passes.next())
     }

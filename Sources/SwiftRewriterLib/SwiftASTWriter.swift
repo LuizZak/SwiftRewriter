@@ -628,19 +628,7 @@ internal class StatementWriter: StatementVisitor {
             
             // (Optional) Type signature
             if shouldEmitType {
-                let declarationType: SwiftType
-                
-                if declaration.initialization?.isErrorTyped == false, let initType = declaration.initialization?.resolvedType {
-                    if typeSystem.isType(initType.deepUnwrapped, assignableTo: declaration.type.deepUnwrapped) {
-                        declarationType = declaration.type.withSameOptionalityAs(initType)
-                    } else {
-                        declarationType = declaration.type
-                    }
-                } else {
-                    declarationType = declaration.type
-                }
-                
-                let typeString = typeMapper.typeNameString(for: declarationType)
+                let typeString = typeMapper.typeNameString(for: declaration.type)
                 target.outputInline(": ")
                 target.outputInline(typeString, style: .typeName)
             }
@@ -780,6 +768,10 @@ internal class StatementWriter: StatementVisitor {
             
             if isConstant {
                 return false
+            }
+            
+            if type.isOptional != varType.isOptional {
+                return true
             }
             
             return !typeSystem.typesMatch(type, varType, ignoreNullability: true)

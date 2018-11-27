@@ -12,7 +12,7 @@ public protocol UsageAnalyzer {
 /// A refined usage analyzer capable of inspecting usages of local variables by
 /// name within a method body.
 public protocol LocalsUsageAnalyzer: UsageAnalyzer {
-    func findUsagesOf(local: String) -> [DefinitionUsage]
+    func findUsagesOf(localNamed: String) -> [DefinitionUsage]
 }
 
 public class BaseUsageAnalyzer: UsageAnalyzer {
@@ -163,7 +163,7 @@ public class DefaultUsageAnalyzer: BaseUsageAnalyzer {
     }
 }
 
-public class LocalUsageAnalyzer: BaseUsageAnalyzer {
+public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalsUsageAnalyzer {
     public var functionBody: FunctionBodyIntention
     
     public init(functionBody: FunctionBodyIntention, typeSystem: TypeSystem) {
