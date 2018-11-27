@@ -48,14 +48,12 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
                 }
             }
             
+            let values = collectAssignments(for: decl)
+            
             var isNilSet = false
             
-            for usage in usages where !usage.isReadOnlyUsage {
-                guard let assignExp = usage.expression.parentExpression?.asAssignment else {
-                    continue
-                }
-                
-                if assignExp.rhs.literalExpressionKind == .nil || assignExp.rhs.resolvedType?.isOptional == true {
+            for value in values {
+                if value.literalExpressionKind == .nil || value.resolvedType?.isOptional == true {
                     isNilSet = true
                     break
                 }
@@ -68,5 +66,33 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
         }
         
         return varDeclStmt
+    }
+    
+    private func collectAssignments(for decl: StatementVariableDeclaration) -> [Expression] {
+        guard let localsAnalyzer = localsAnalyzer else {
+            return []
+        }
+        
+        var assignments: [Expression] = []
+        
+        let usages = localsAnalyzer.findUsagesOf(localNamed: decl.identifier)
+        
+        if let exp = decl.initialization {
+            assignments.append(exp)
+        } else if !decl.isConstant && decl.type.isOptional {
+            // Initializing a non-constant optional declaration results in an
+            // implicit `nil` initial value
+            assignments.append(Expression.constant(.nil))
+        }
+        
+        for usage in usages where !usage.isReadOnlyUsage {
+            guard let assignExp = usage.expression.parentExpression?.asAssignment else {
+                continue
+            }
+            
+            assignments.append(assignExp.rhs)
+        }
+        
+        return assignments
     }
 }

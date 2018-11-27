@@ -45,4 +45,37 @@ class SwiftRewriterNullabilityTests: XCTestCase {
             }
             """)
     }
+    
+    func testNilInitialValueWithSubsequentNonNilAssignment() {
+        assertObjcParse(
+            objc: """
+            @interface A
+            - (instancetype)init;
+            @end
+            
+            void test() {
+                NSString *local;
+                 if (test) {
+                     local = @"value";
+                 }
+                 [self foo:local];
+            }
+            """,
+            swift: """
+            func test() {
+                var local: String!
+
+                if test {
+                    local = "value"
+                }
+
+                self.foo(local)
+            }
+
+            class A {
+                override init() {
+                }
+            }
+            """)
+    }
 }
