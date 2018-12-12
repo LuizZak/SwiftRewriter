@@ -6,21 +6,81 @@ A program that aims to aid in automatization of conversion of Objective-C code i
 
 For information about how it's structured, see the [Architecture](Architecture.md) page.
 
+#### Example
+
+Given the following files:
+
+MyClass.h:
+```objc
+@interface MyClass : NSObject
+@property (nonnull) NSString *name;
+@property (nonnull) NSString *surname;
+
+- (nonnull instancetype)initWithName:(nonnull NSString*)name surname:(nonnull NSString*)surname;
+- (void)printMyName;
+@end
+```
+
+MyClass.m:
+```objc
+@implementation MyClass
+- (instancetype)initWithName:(NSString*)name surname:(NSString*)surname {
+    self = [super init];
+    if(self) {
+        self.name = name;
+        self.surname = surname;
+    }
+    return self;
+}
+- (void)printMyName {
+    NSLog(@"%@ %@", self.name, self.surname);
+}
+@end
+```
+
+Running SwiftRewriter as shown:
+
+```bash
+$ swift run SwiftRewriter --colorize --target stdout files MyClass.h MyClass.m
+```
+
+will produce the following Swift file in the standard output:
+
+```swift
+class MyClass: NSObject {
+    var name: String
+    var surname: String
+    
+    init(name: String, surname: String) {
+        self.name = name
+        self.surname = surname
+        super.init()
+    }
+    func printMyName() {
+        NSLog("%@ %@", self.name, self.surname)
+    }
+}
+```
+
 #### Requirements
 
 Xcode 10.1 & Swift 4.2
 
 #### Usage
 
-- From the working directory execute as follow:
+- From the working directory execute as follows:
 
 ```bash
-swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/MyClass.h /path/to/MyClass.m
+$ swift run -c=release SwiftRewriter --colorize --target stdout files /path/to/MyClass.h /path/to/MyClass.m
 ```
 
-###### Ommit `--colorize` to produce a clean string proper for saving to a file
+- To convert a directory containing Objective-C files (recursively), saving resulting .swift files to disk, execute as follows:
 
-- Run `swift run SwiftRewriter --help` flag to print usage information.
+```bash
+$ swift run -c=release SwiftRewriter path /path/to/project/
+```
+
+- Run `swift run SwiftRewriter --help` to print the full reference of command line arguments SwiftRewriter accepts. Reference also available bellow:
 
 Usage:
 
@@ -60,54 +120,6 @@ SUBCOMMANDS:
 ```
 
 The program should output the contents of the files you pass into the standard output.
-
-Example:
-
-MyClass.h:
-```objc
-@interface MyClass : NSObject
-@property (nonnull) NSString *name;
-@property (nonnull) NSString *surname;
-
-- (nonnull instancetype)initWithName:(nonnull NSString*)name surname:(nonnull NSString*)surname;
-- (void)printMyName;
-@end
-```
-
-MyClass.m:
-```objc
-@implementation MyClass
-- (instancetype)initWithName:(NSString*)name surname:(NSString*)surname {
-    self = [super init];
-    if(self) {
-        self.name = name;
-        self.surname = surname;
-    }
-    return self;
-}
-- (void)printMyName {
-    NSLog(@"%@ %@", self.name, self.surname);
-}
-@end
-```
-
-SwiftRewriter will output the given Swift code:
-
-```swift
-class MyClass: NSObject {
-    var name: String
-    var surname: String
-    
-    init(name: String, surname: String) {
-        self.name = name
-        self.surname = surname
-        super.init()
-    }
-    func printMyName() {
-        NSLog("%@ %@", self.name, self.surname)
-    }
-}
-```
 
 #### Project goals
 
