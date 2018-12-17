@@ -195,8 +195,6 @@ public final class ControlFlowGraphEdge {
     public var isBackEdge: Bool = false
     
     init(start: ControlFlowGraphNode, end: ControlFlowGraphNode) {
-        assert(start !== end)
-        
         self.start = start
         self.end = end
     }

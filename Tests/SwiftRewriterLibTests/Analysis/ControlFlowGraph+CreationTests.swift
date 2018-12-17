@@ -6,6 +6,7 @@ import TestCommons
 class ControlFlowGraphCreationTests: XCTestCase {
     func testCreateEmpty() {
         let stmt: CompoundStatement = []
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
@@ -24,6 +25,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let stmt: CompoundStatement = [
             CompoundStatement(statements: [])
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
@@ -176,6 +178,26 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
     
+    func testEmptyWhileLoop() {
+        let stmt: CompoundStatement = [
+            Statement.expression(Expression.identifier("v").call()),
+            Statement.while(
+                .identifier("v"),
+                body: []
+            )
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[1])!).count, 1)
+        XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
     func testDoWhileLoop() {
         let stmt: CompoundStatement = [
             Statement.expression(Expression.identifier("v").call()),
@@ -186,11 +208,32 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 ]
             )
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
         printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testEmptyDoWhileLoop() {
+        let stmt: CompoundStatement = [
+            Statement.expression(Expression.identifier("v").call()),
+            Statement.doWhile(
+                .identifier("v"),
+                body: []
+            )
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -205,11 +248,31 @@ class ControlFlowGraphCreationTests: XCTestCase {
                     .expression(.identifier("b"))
                 ])
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
         printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testEmptyForLoop() {
+        let stmt: CompoundStatement = [
+            Statement.for(
+                .identifier("i"),
+                .identifier("i"),
+                body: [])
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 3)
+        XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[0])!).count, 1)
+        XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[0])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -231,6 +294,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 ]
             )
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
@@ -249,6 +313,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 ]
             )
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
@@ -267,6 +332,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 ]
             )
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
@@ -285,6 +351,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 ]
             )
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
@@ -304,6 +371,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 ]
             )
         ]
+        
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph, expectsUnreachable: true)

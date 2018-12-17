@@ -17,8 +17,6 @@ extension ControlFlowGraph {
     
     @discardableResult
     func addEdge(from node1: ControlFlowGraphNode, to node2: ControlFlowGraphNode) -> ControlFlowGraphEdge {
-        assert(node1 !== node2, "Attempting to connect a node to itself!")
-        
         let edge = ControlFlowGraphEdge(start: node1, end: node2)
         edges.append(edge)
         
@@ -380,6 +378,9 @@ public extension ControlFlowGraph {
                 for backEdge in backEdges {
                     backEdge.isBackEdge = true
                 }
+            } else {
+                // connect loop back on itself
+                graph.addBackEdge(from: node, to: node)
             }
             
             let connections = [EdgeConstructor(for: node, in: graph)]
@@ -402,6 +403,9 @@ public extension ControlFlowGraph {
                 for backEdge in backEdges {
                     backEdge.isBackEdge = true
                 }
+            } else {
+                // connect loop back on itself
+                graph.addBackEdge(from: node, to: node)
             }
             
             let connections = [EdgeConstructor(for: node, in: graph)]
@@ -422,6 +426,9 @@ public extension ControlFlowGraph {
                 bodyNode.endings.connect(to: node)
                 loopHead = bodyNode.start
                 graph.addBackEdge(from: node, to: bodyNode.start)
+            } else {
+                // connect loop back on itself
+                graph.addBackEdge(from: node, to: node)
             }
             
             let connections = [
