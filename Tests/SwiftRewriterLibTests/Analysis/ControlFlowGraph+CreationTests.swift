@@ -446,7 +446,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         sanitize(graph, expectsUnreachable: false)
         printGraphviz(graph: graph)
-        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssertEqual(graph.nodes.count, 8)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }

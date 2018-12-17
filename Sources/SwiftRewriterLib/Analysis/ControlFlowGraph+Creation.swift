@@ -243,24 +243,17 @@ public extension ControlFlowGraph {
         let exit = ControlFlowGraphExitNode.makeNode(compoundStatement)
         
         let context = Context()
-        _=context.pushScope(entry)
         
         let graph = ControlFlowGraph(entry: entry, exit: exit)
         
         var prev: NodeCreationResult = (entry, [EdgeConstructor(for: entry, in: graph)])
         
-        for subStmt in compoundStatement.statements {
-            guard let cur = _connections(for: subStmt, in: graph, context: context) else {
-                continue
-            }
-            
-            prev.endings.connect(to: cur.start)
-            prev = cur
+        if let connection = _connections(for: compoundStatement, in: graph, context: context) {
+            prev.endings.connect(to: connection.start)
+            prev = connection
         }
         
-        let result = context.popScope(entry, start: entry, outConnections: prev.endings, in: graph)
-        
-        result.endings.connect(to: exit)
+        prev.endings.connect(to: exit)
         
         return graph
     }
@@ -304,6 +297,8 @@ public extension ControlFlowGraph {
                 return nil
             }
             
+            _=context.pushScope(node)
+            
             var start: ControlFlowGraphNode?
             var prev: NodeCreationResult?
             for subStmt in stmt.statements {
@@ -321,7 +316,9 @@ public extension ControlFlowGraph {
             }
             
             if let prev = prev, let start = start {
-                return (start, prev.endings)
+                let result = context.popScope(node, start: start, outConnections: prev.endings, in: graph)
+                
+                return result
             }
             
             return nil
@@ -342,10 +339,6 @@ public extension ControlFlowGraph {
                                     outConnections: [],
                                     in: graph)
             
-        // TODO: Properly handle flows through defer statements
-        // Defer statements are sensitive to code scopes, and are executed after
-        // a code scope finishes execution, in backwards order than they where
-        // defined.
         case let stmt as DeferStatement:
             let body = ControlFlowGraph.forCompoundStatement(stmt.body)
             
@@ -514,7 +507,7 @@ public extension ControlFlowGraph {
     
     private class Context {
         /// Stack of opened defer statement sub-graphs for the current stack
-        var openDefers: [[ControlFlowGraph]] = []
+        var openDefers: [[ControlFlowGraph]] = [[]]
         
         var breakTargetStack: [ControlFlowGraphJumpTarget] = []
         var continueTargetStack: [ControlFlowGraphNode] = []
