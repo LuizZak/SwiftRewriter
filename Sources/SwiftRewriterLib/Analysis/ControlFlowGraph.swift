@@ -1,11 +1,24 @@
 import SwiftAST
 
-/// Class used to generate control flow graphs (CFGs) of method bodies.
+/// Class that represents control flow graphs (CFGs) of functions.
 public final class ControlFlowGraph {
+    /// The entry point of this control flow graph
+    private(set) public var entry: ControlFlowGraphEntryNode
+    /// The exit point of this control flow graph
+    private(set) public var exit: ControlFlowGraphExitNode
+    
     /// A list of all nodes contained in this graph
-    private(set) public var nodes: [ControlFlowGraphNode] = []
+    internal(set) public var nodes: [ControlFlowGraphNode] = []
     /// A list of all edges contained in this graph
-    private(set) public var edges: [ControlFlowGraphEdge] = []
+    internal(set) public var edges: [ControlFlowGraphEdge] = []
+    
+    init(entry: ControlFlowGraphEntryNode, exit: ControlFlowGraphExitNode) {
+        self.entry = entry
+        self.exit = exit
+        
+        addNode(entry)
+        addNode(exit)
+    }
     
     /// Returns the control flow graph node that represents a given syntax node,
     /// if available.
@@ -52,17 +65,109 @@ public final class ControlFlowGraph {
     public func nodesConnected(towards node: ControlFlowGraphNode) -> [ControlFlowGraphNode] {
         return edges.compactMap { $0.end === node ? $0.start : nil }
     }
+    
+    /// Returns all graph nodes that are connected towards and from the given
+    /// graph node.
+    ///
+    /// A reference equality test (===) is used to determine graph node equality.
+    public func allNodesConnected(to node: ControlFlowGraphNode) -> [ControlFlowGraphNode] {
+        return nodesConnected(towards: node) + nodesConnected(from: node)
+    }
+    
+    /// Performs a depth-first visiting of this control flow graph
+    public func depthFirstVisit(_ visitor: (ControlFlowGraphNode) -> Void) {
+        var visited: Set<ObjectIdentifier> = []
+        var queue: [ControlFlowGraphNode] = []
+        
+        queue.append(entry)
+        
+        while let next = queue.popLast() {
+            let identifier = ObjectIdentifier(next)
+            visited.insert(identifier)
+            
+            visitor(next)
+            
+            for nextNode in nodesConnected(from: next) {
+                guard !visited.contains(ObjectIdentifier(nextNode)) else {
+                    continue
+                }
+                
+                queue.append(nextNode)
+            }
+        }
+    }
+    
+    /// Performs a breadth-first visiting of this control flow graph
+    public func breadthFirstVisit(_ visitor: (ControlFlowGraphNode) -> Void) {
+        var visited: Set<ObjectIdentifier> = []
+        var queue: [ControlFlowGraphNode] = []
+        
+        queue.append(entry)
+        
+        while !queue.isEmpty {
+            let next = queue.removeFirst()
+            
+            let identifier = ObjectIdentifier(next)
+            visited.insert(identifier)
+            
+            visitor(next)
+            
+            for nextNode in nodesConnected(from: next) {
+                guard !visited.contains(ObjectIdentifier(nextNode)) else {
+                    continue
+                }
+                
+                queue.append(nextNode)
+            }
+        }
+    }
+}
+
+extension ControlFlowGraph {
+    /// Returns a list of nodes collected in depth-first order
+    func depthFirstList() -> [ControlFlowGraphNode] {
+        var list: [ControlFlowGraphNode] = []
+        
+        depthFirstVisit {
+            list.append($0)
+        }
+        
+        return list
+    }
+    
+    /// Returns a list of nodes collected in breadth-first order
+    func breadthFirstList() -> [ControlFlowGraphNode] {
+        var list: [ControlFlowGraphNode] = []
+        
+        breadthFirstVisit {
+            list.append($0)
+        }
+        
+        return list
+    }
 }
 
 /// Specifies a control flow graph node
-public final class ControlFlowGraphNode {
+public class ControlFlowGraphNode {
     /// An associated node for this control flow graph node.
-    /// This node is the top-most node which satisfies the rule that its parent
-    /// syntax node is also referenced directly by another graph node.
     public let node: SyntaxNode
     
-    init(node: SyntaxNode) {
+    required init(node: SyntaxNode) {
         self.node = node
+    }
+}
+
+/// Represents an entry node for a control flow graph
+public final class ControlFlowGraphEntryNode: ControlFlowGraphNode {
+    required init(node: SyntaxNode) {
+        super.init(node: node)
+    }
+}
+
+/// Represents an exit node for a control flow graph
+public final class ControlFlowGraphExitNode: ControlFlowGraphNode {
+    required init(node: SyntaxNode) {
+        super.init(node: node)
     }
 }
 
@@ -70,6 +175,10 @@ public final class ControlFlowGraphNode {
 public final class ControlFlowGraphEdge {
     public let start: ControlFlowGraphNode
     public let end: ControlFlowGraphNode
+    
+    /// True if this is a back edge which points backwards towards the start of
+    /// a flow
+    public var isBackEdge: Bool = false
     
     init(start: ControlFlowGraphNode, end: ControlFlowGraphNode) {
         assert(start !== end)
