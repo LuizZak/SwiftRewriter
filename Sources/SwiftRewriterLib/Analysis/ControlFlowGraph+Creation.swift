@@ -7,6 +7,36 @@ extension ControlFlowGraphNode {
 }
 
 extension ControlFlowGraph {
+    func merge(with other: ControlFlowGraph) {
+        let nodes = other.nodes.filter {
+            $0 !== other.entry && $0 !== other.exit
+        }
+        
+        let edges = other.edges.filter {
+            $0.start !== other.entry && $0.start !== other.exit
+            && $0.end !== other.entry && $0.end !== other.exit
+        }
+        
+        for node in nodes {
+            addNode(node)
+        }
+        for edge in edges {
+            let e = addEdge(from: edge.start, to: edge.end)
+            e.isBackEdge = edge.isBackEdge
+        }
+    }
+    
+    func reset(entry: ControlFlowGraphEntryNode, exit: ControlFlowGraphExitNode) {
+        nodes.removeAll()
+        edges.removeAll()
+        
+        self.entry = entry
+        self.exit = exit
+        
+        nodes.append(entry)
+        nodes.append(exit)
+    }
+    
     func addNode(_ node: ControlFlowGraphNode) {
         nodes.append(node)
     }
@@ -213,6 +243,7 @@ public extension ControlFlowGraph {
         let exit = ControlFlowGraphExitNode.makeNode(compoundStatement)
         
         let context = Context()
+        _=context.pushScope(entry)
         
         let graph = ControlFlowGraph(entry: entry, exit: exit)
         
@@ -227,7 +258,9 @@ public extension ControlFlowGraph {
             prev = cur
         }
         
-        prev.endings.connect(to: exit)
+        let result = context.popScope(entry, start: entry, outConnections: prev.endings, in: graph)
+        
+        result.endings.connect(to: exit)
         
         return graph
     }
@@ -294,17 +327,37 @@ public extension ControlFlowGraph {
             return nil
             
         case let stmt as DoStatement:
-            return _connections(for: stmt.body, in: graph, context: context)
+            // TODO: Support breaking out of labeled do statements
+            _=context.pushScope(node)
+            
+            if let result = _connections(for: stmt.body, in: graph, context: context) {
+                return context.popScope(node,
+                                        start: result.start,
+                                        outConnections: result.endings,
+                                        in: graph)
+            }
+            
+            return context.popScope(node,
+                                    start: node,
+                                    outConnections: [],
+                                    in: graph)
             
         // TODO: Properly handle flows through defer statements
         // Defer statements are sensitive to code scopes, and are executed after
         // a code scope finishes execution, in backwards order than they where
         // defined.
         case let stmt as DeferStatement:
-            return _connections(for: stmt.body, in: graph, context: context)
+            let body = ControlFlowGraph.forCompoundStatement(stmt.body)
+            
+            context.pushDefer(body)
+            
+            return nil
             
         case let stmt as IfStatement:
             graph.addNode(node)
+            
+            // TODO: Support breaking out of labeled if statements
+            _=context.pushScope(node)
             
             var connections: [EdgeConstructor] = []
             
@@ -312,27 +365,37 @@ public extension ControlFlowGraph {
                 graph.addEdge(from: node, to: bodyNode.start)
                 connections.append(contentsOf: bodyNode.endings)
             }
+            
+            let hasElse: Bool
+            
             if let elseBody = stmt.elseBody,
                 let elseBodyNode = _connections(for: elseBody, in: graph, context: context) {
+                
+                hasElse = true
                 
                 graph.addEdge(from: node, to: elseBodyNode.start)
                 connections.append(contentsOf: elseBodyNode.endings)
             } else {
-                connections.append(EdgeConstructor(for: node, in: graph))
+                hasElse = false
             }
             
-            return (node, connections)
+            var result = context.popScope(node,
+                                          start: node,
+                                          outConnections: connections,
+                                          in: graph)
+            
+            if !hasElse {
+                result.endings.append(EdgeConstructor(for: node, in: graph))
+            }
+            
+            return result
             
         case let stmt as SwitchStatement:
             graph.addNode(node)
             
-            let breaks = context.pushJumpTarget(node)
-            defer {
-                context.popJumpTarget(node)
-            }
+            let breaks = context.pushScope(node)
             
-            var connections: [EdgeConstructor] = [
-            ]
+            var connections: [EdgeConstructor] = []
             
             let caseStatements =
                 stmt.cases.map { $0.statements }
@@ -360,15 +423,15 @@ public extension ControlFlowGraph {
                 connections.append(EdgeConstructor(for: node, in: graph))
             }
             
-            return (node, connections + breaks.edgeConstructors(in: graph))
+            return context.popScope(node,
+                                    start: node,
+                                    outConnections: connections + breaks.edgeConstructors(in: graph),
+                                    in: graph)
             
         case let stmt as ForStatement:
             graph.addNode(node)
             
-            let breaks = context.pushJumpTarget(node)
-            defer {
-                context.popJumpTarget(node)
-            }
+            let breaks = context.pushScope(node)
             
             if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
                 graph.addEdge(from: node, to: bodyNode.start)
@@ -383,17 +446,19 @@ public extension ControlFlowGraph {
                 graph.addBackEdge(from: node, to: node)
             }
             
-            let connections = [EdgeConstructor(for: node, in: graph)]
+            var result = context.popScope(node,
+                                          start: node,
+                                          outConnections: breaks.edgeConstructors(in: graph),
+                                          in: graph)
             
-            return (node, connections + breaks.edgeConstructors(in: graph))
+            result.endings.append(EdgeConstructor(for: node, in: graph))
+            
+            return result
             
         case let stmt as WhileStatement:
             graph.addNode(node)
             
-            let breaks = context.pushJumpTarget(node)
-            defer {
-                context.popJumpTarget(node)
-            }
+            let breaks = context.pushScope(node)
             
             if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
                 graph.addEdge(from: node, to: bodyNode.start)
@@ -408,17 +473,19 @@ public extension ControlFlowGraph {
                 graph.addBackEdge(from: node, to: node)
             }
             
-            let connections = [EdgeConstructor(for: node, in: graph)]
+            var result = context.popScope(node,
+                                          start: node,
+                                          outConnections: breaks.edgeConstructors(in: graph),
+                                          in: graph)
             
-            return (node, connections + breaks.edgeConstructors(in: graph))
+            result.endings.append(EdgeConstructor(for: node, in: graph))
+            
+            return result
             
         case let stmt as DoWhileStatement:
             graph.addNode(node)
             
-            let breaks = context.pushJumpTarget(node)
-            defer {
-                context.popJumpTarget(node)
-            }
+            let breaks = context.pushScope(node)
             
             var loopHead: ControlFlowGraphNode = node
             
@@ -431,11 +498,14 @@ public extension ControlFlowGraph {
                 graph.addBackEdge(from: node, to: node)
             }
             
-            let connections = [
-                EdgeConstructor(for: node, in: graph)
-            ]
+            var result = context.popScope(node,
+                                          start: loopHead,
+                                          outConnections: breaks.edgeConstructors(in: graph),
+                                          in: graph)
             
-            return (loopHead, connections + breaks.edgeConstructors(in: graph))
+            result.endings.append(EdgeConstructor(for: node, in: graph))
+            
+            return result
             
         default:
             return nil
@@ -443,6 +513,9 @@ public extension ControlFlowGraph {
     }
     
     private class Context {
+        /// Stack of opened defer statement sub-graphs for the current stack
+        var openDefers: [[ControlFlowGraph]] = []
+        
         var breakTargetStack: [ControlFlowGraphJumpTarget] = []
         var continueTargetStack: [ControlFlowGraphNode] = []
         
@@ -455,7 +528,9 @@ public extension ControlFlowGraph {
         
         // TODO: Support for pushing/popping and breaking/continuing labeled
         // statements
-        func pushJumpTarget(_ node: ControlFlowGraphNode) -> ControlFlowGraphJumpTarget {
+        func pushScope(_ node: ControlFlowGraphNode) -> ControlFlowGraphJumpTarget {
+            openDefers.append([])
+            
             let target = ControlFlowGraphJumpTarget()
             
             switch node.node {
@@ -467,13 +542,17 @@ public extension ControlFlowGraph {
                 breakTargetStack.append(target)
                 
             default:
-                assertionFailure("tried to push invalid jump target node type \(type(of: node.node))")
+                break
             }
             
             return target
         }
         
-        func popJumpTarget(_ node: ControlFlowGraphNode) {
+        func popScope(_ node: ControlFlowGraphNode,
+                      start: ControlFlowGraphNode,
+                      outConnections: [EdgeConstructor],
+                      in graph: ControlFlowGraph) -> NodeCreationResult {
+            
             switch node.node {
             case is ForStatement, is WhileStatement, is DoWhileStatement:
                 breakTargetStack.removeLast()
@@ -483,8 +562,34 @@ public extension ControlFlowGraph {
                 breakTargetStack.removeLast()
                 
             default:
-                assertionFailure("tried to pop invalid jump target node type \(type(of: node.node))")
+                break
             }
+            
+            let defers = openDefers.removeLast()
+            
+            var lastConnections: [EdgeConstructor] = outConnections
+            
+            for deferGraph in defers.reversed() {
+                graph.merge(with: deferGraph)
+                
+                let entrances = deferGraph.edges(from: deferGraph.entry)
+                let exits = deferGraph.edges(towards: deferGraph.exit)
+                
+                assert(entrances.count == 1)
+                
+                let entrance = entrances[0].end
+                
+                lastConnections.connect(to: entrance)
+                lastConnections = exits.map {
+                    EdgeConstructor(for: $0.start, in: graph)
+                }
+            }
+            
+            return (start, lastConnections)
+        }
+        
+        func pushDefer(_ node: ControlFlowGraph) {
+            openDefers[openDefers.count - 1].append(node)
         }
     }
     

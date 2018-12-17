@@ -3,9 +3,9 @@ import SwiftAST
 /// Class that represents control flow graphs (CFGs) of functions.
 public final class ControlFlowGraph {
     /// The entry point of this control flow graph
-    private(set) public var entry: ControlFlowGraphEntryNode
+    internal(set) public var entry: ControlFlowGraphEntryNode
     /// The exit point of this control flow graph
-    private(set) public var exit: ControlFlowGraphExitNode
+    internal(set) public var exit: ControlFlowGraphExitNode
     
     /// A list of all nodes contained in this graph
     internal(set) public var nodes: [ControlFlowGraphNode] = []

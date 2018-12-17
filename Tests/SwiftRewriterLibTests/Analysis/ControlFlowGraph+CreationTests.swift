@@ -380,6 +380,123 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
+    
+    func testDeferStatement() {
+        let stmt: CompoundStatement = [
+            Statement.defer([
+                Statement.expression(.identifier("a"))
+            ]),
+            Statement.expression(.identifier("b"))
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph, expectsUnreachable: false)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testDeferStatementInIf() {
+        let stmt: CompoundStatement = [
+            Statement.if(
+                .identifier("a"),
+                body: [
+                    Statement.defer([
+                        Statement.expression(.identifier("b"))
+                    ]),
+                    Statement.expression(.identifier("c"))
+                ],
+                else: nil
+            ),
+            Statement.expression(.identifier("d"))
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph, expectsUnreachable: false)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testDeferStatementInIfElse() {
+        let stmt: CompoundStatement = [
+            Statement.if(
+                .identifier("a"),
+                body: [
+                    Statement.defer([
+                        Statement.expression(.identifier("b"))
+                    ]),
+                    Statement.expression(.identifier("c"))
+                ],
+                else: [
+                    Statement.defer([
+                        Statement.expression(.identifier("d"))
+                    ]),
+                    Statement.expression(.identifier("e"))
+                ]
+            ),
+            Statement.expression(.identifier("f"))
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph, expectsUnreachable: false)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testDeferStatementInLoop() {
+        let stmt: CompoundStatement = [
+            Statement.while(
+                .identifier("a"),
+                body: [
+                    Statement.defer([
+                        Statement.expression(.identifier("b"))
+                    ]),
+                    Statement.expression(.identifier("c"))
+                ]
+            ),
+            Statement.expression(.identifier("d"))
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph, expectsUnreachable: false)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testDeferStatementInLoopWithBreak() {
+        let stmt: CompoundStatement = [
+            Statement.while(
+                .identifier("a"),
+                body: [
+                    Statement.defer([
+                        Statement.expression(.identifier("b"))
+                    ]),
+                    Statement.expression(.identifier("c")),
+                    Statement.break
+                ]
+            ),
+            Statement.expression(.identifier("d"))
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph, expectsUnreachable: false)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 7)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
 }
 
 private extension ControlFlowGraphCreationTests {
