@@ -408,6 +408,28 @@ public extension ControlFlowGraph {
             
             return (node, connections + breaks.edgeConstructors(in: graph))
             
+        case let stmt as DoWhileStatement:
+            graph.addNode(node)
+            
+            let breaks = context.pushJumpTarget(node)
+            defer {
+                context.popJumpTarget(node)
+            }
+            
+            var loopHead: ControlFlowGraphNode = node
+            
+            if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
+                bodyNode.endings.connect(to: node)
+                loopHead = bodyNode.start
+                graph.addBackEdge(from: node, to: bodyNode.start)
+            }
+            
+            let connections = [
+                EdgeConstructor(for: node, in: graph)
+            ]
+            
+            return (loopHead, connections + breaks.edgeConstructors(in: graph))
+            
         default:
             return nil
         }
@@ -430,7 +452,7 @@ public extension ControlFlowGraph {
             let target = ControlFlowGraphJumpTarget()
             
             switch node.node {
-            case is ForStatement, is WhileStatement:
+            case is ForStatement, is WhileStatement, is DoWhileStatement:
                 breakTargetStack.append(target)
                 continueTargetStack.append(node)
                 
@@ -446,7 +468,7 @@ public extension ControlFlowGraph {
         
         func popJumpTarget(_ node: ControlFlowGraphNode) {
             switch node.node {
-            case is ForStatement, is WhileStatement:
+            case is ForStatement, is WhileStatement, is DoWhileStatement:
                 breakTargetStack.removeLast()
                 continueTargetStack.removeLast()
                 
