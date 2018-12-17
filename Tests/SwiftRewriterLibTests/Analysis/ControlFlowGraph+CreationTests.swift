@@ -9,6 +9,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
+        printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 2)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -26,6 +27,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
+        printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 2)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -49,7 +51,70 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
+        printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testCreateForLoop() {
+        let stmt: CompoundStatement = [
+            Statement.for(
+                .identifier("i"),
+                .identifier("i"),
+                body: [
+                    .expression(.identifier("b"))
+                ])
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testCreateWhileLoopWithBreak() {
+        let stmt: CompoundStatement = [
+            Statement.expression(Expression.identifier("v").call()),
+            Statement.while(
+                .identifier("v"),
+                body: [
+                    .expression(.identifier("a")),
+                    Statement.if(
+                        .identifier("a"),
+                        body: [.break],
+                        else: [
+                            .expression(.identifier("b")),
+                            .continue
+                        ])
+                ]
+            )
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 9)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+    
+    func testReturnStatement() {
+        let stmt: CompoundStatement = [
+            Statement.while(
+                .identifier("v"),
+                body: [
+                    .return(nil)
+                ]
+            )
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
@@ -66,6 +131,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
+        printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
@@ -83,7 +149,28 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
+        printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    // TODO: Make this test pass
+    func _testContinueStatementSkippingOverRemainingOfMethod() {
+        let stmt: CompoundStatement = [
+            Statement.while(
+                .identifier("v"),
+                body: [
+                    .continue,
+                    .expression(.identifier("v"))
+                ]
+            )
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -109,9 +196,10 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
+        printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
     
     func testCreateIfElse() {
@@ -135,11 +223,12 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
+        printGraphviz(graph: graph)
         XCTAssertEqual(graph.nodes.count, 7)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
 }
 
@@ -207,5 +296,55 @@ private extension ControlFlowGraphCreationTests {
                     expected: true)
             }
         }
+    }
+    
+    func printGraphviz(graph: ControlFlowGraph) {
+        let buffer = StringRewriterOutput(settings: .defaults)
+        buffer.output(line: "digraph flow {")
+        buffer.idented {
+            var nodeIds: [ObjectIdentifier: String] = [:]
+            
+            // Prepare nodes
+            for (i, node) in graph.nodes.enumerated() {
+                let id = "n\(i + 1)"
+                nodeIds[ObjectIdentifier(node)] = id
+                
+                var label: String = "\(type(of: node.node))"
+                if node === graph.entry {
+                    label = "entry"
+                }
+                if node === graph.exit {
+                    label = "exit"
+                }
+                if let exp = node.node as? ExpressionsStatement {
+                    label = exp.expressions[0].description
+                    label = label.replacingOccurrences(of: "\"", with: "\\\"")
+                }
+                
+                buffer.output(line: "\(id) [label=\"\(label)\"]")
+            }
+            
+            // Output connections
+            for node in graph.nodes {
+                let nodeId = nodeIds[ObjectIdentifier(node)]!
+                
+                let edges = graph.edges(from: node)
+                
+                for edge in edges {
+                    let target = edge.end
+                    
+                    let targetId = nodeIds[ObjectIdentifier(target)]!
+                    buffer.outputIdentation()
+                    buffer.outputInline("\(nodeId) -> \(targetId)")
+                    if edge.isBackEdge {
+                        buffer.outputInline(" [color=\"#aa3333\",penwidth=0.5]")
+                    }
+                    buffer.outputLineFeed()
+                }
+            }
+        }
+        buffer.output(line: "}")
+        
+        print(buffer.buffer)
     }
 }

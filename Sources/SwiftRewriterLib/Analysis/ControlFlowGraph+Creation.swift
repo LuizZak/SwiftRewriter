@@ -273,6 +273,7 @@ public extension ControlFlowGraph {
                 return nil
             }
             
+            var start: ControlFlowGraphNode?
             var prev: NodeCreationResult?
             for subStmt in stmt.statements {
                 guard let cur = _connections(for: subStmt, in: graph, context: context) else {
@@ -281,19 +282,25 @@ public extension ControlFlowGraph {
                 
                 if let prev = prev {
                     prev.endings.connect(to: cur.start)
+                } else {
+                    start = cur.start
                 }
                 
                 prev = cur
             }
             
-            return prev
+            if let prev = prev, let start = start {
+                return (start, prev.endings)
+            }
+            
+            return nil
             
         case let stmt as DoStatement:
             return _connections(for: stmt.body, in: graph, context: context)
             
-            // TODO: Properly handle flows through defer statements
-            // Defer statements are sensitive to code scopes, and are executed after
-            // a code scope finishes execution, in backwards order than they where
+        // TODO: Properly handle flows through defer statements
+        // Defer statements are sensitive to code scopes, and are executed after
+        // a code scope finishes execution, in backwards order than they where
         // defined.
         case let stmt as DeferStatement:
             return _connections(for: stmt.body, in: graph, context: context)
@@ -301,9 +308,7 @@ public extension ControlFlowGraph {
         case let stmt as IfStatement:
             graph.addNode(node)
             
-            var connections: [EdgeConstructor] = [
-                EdgeConstructor(for: node, in: graph)
-            ]
+            var connections: [EdgeConstructor] = []
             
             if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
                 graph.addEdge(from: node, to: bodyNode.start)
@@ -314,6 +319,8 @@ public extension ControlFlowGraph {
                 
                 graph.addEdge(from: node, to: elseBodyNode.start)
                 connections.append(contentsOf: elseBodyNode.endings)
+            } else {
+                connections.append(EdgeConstructor(for: node, in: graph))
             }
             
             return (node, connections)
@@ -327,7 +334,6 @@ public extension ControlFlowGraph {
             }
             
             var connections: [EdgeConstructor] = [
-                EdgeConstructor(for: node, in: graph)
             ]
             
             let caseStatements =
@@ -352,6 +358,10 @@ public extension ControlFlowGraph {
                 connections.append(contentsOf: caseConnections.last!.endings)
             }
             
+            if stmt.defaultCase == nil {
+                connections.append(EdgeConstructor(for: node, in: graph))
+            }
+            
             return (node, connections + breaks.edgeConstructors(in: graph))
             
         case let stmt as ForStatement:
@@ -362,13 +372,8 @@ public extension ControlFlowGraph {
                 context.popJumpTarget(node)
             }
             
-            var connections: [EdgeConstructor] = [
-                EdgeConstructor(for: node, in: graph)
-            ]
-            
             if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
                 graph.addEdge(from: node, to: bodyNode.start)
-                connections.append(contentsOf: bodyNode.endings)
                 
                 // Add a back edge pointing back to the beginning of the loop
                 let backEdges = bodyNode.endings.connect(to: node)
@@ -376,6 +381,8 @@ public extension ControlFlowGraph {
                     backEdge.isBackEdge = true
                 }
             }
+            
+            let connections = [EdgeConstructor(for: node, in: graph)]
             
             return (node, connections + breaks.edgeConstructors(in: graph))
             
@@ -387,13 +394,8 @@ public extension ControlFlowGraph {
                 context.popJumpTarget(node)
             }
             
-            var connections: [EdgeConstructor] = [
-                EdgeConstructor(for: node, in: graph)
-            ]
-            
             if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
                 graph.addEdge(from: node, to: bodyNode.start)
-                connections.append(contentsOf: bodyNode.endings)
                 
                 // Add a back edge pointing back to the beginning of the loop
                 let backEdges = bodyNode.endings.connect(to: node)
@@ -401,6 +403,8 @@ public extension ControlFlowGraph {
                     backEdge.isBackEdge = true
                 }
             }
+            
+            let connections = [EdgeConstructor(for: node, in: graph)]
             
             return (node, connections + breaks.edgeConstructors(in: graph))
             
