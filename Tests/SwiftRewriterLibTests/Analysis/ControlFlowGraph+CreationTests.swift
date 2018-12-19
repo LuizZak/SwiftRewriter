@@ -497,6 +497,34 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
+    
+    func testInterwindedDeferStatement() {
+        let stmt: CompoundStatement = [
+            Statement.defer([
+                Statement.expression(.identifier("a"))
+            ]),
+            Statement.expression(.identifier("b")),
+            Statement.if(
+                .identifier("predicate"),
+                body: [
+                    .return(nil)
+                ],
+                else: nil
+            ),
+            Statement.defer([
+                Statement.expression(.identifier("c"))
+            ]),
+            Statement.expression(.identifier("d"))
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph, expectsUnreachable: false)
+        printGraphviz(graph: graph)
+        XCTAssertEqual(graph.nodes.count, 8)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
 }
 
 private extension ControlFlowGraphCreationTests {

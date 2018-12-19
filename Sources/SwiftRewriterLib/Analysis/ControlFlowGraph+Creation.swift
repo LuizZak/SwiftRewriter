@@ -79,7 +79,10 @@ extension ControlFlowGraph {
     ///
     /// Asserts in case `existingNode` is not part of this graph.
     @discardableResult
-    func insert(node: SyntaxNode, after existingNode: SyntaxNode, mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
+    func insert(node: SyntaxNode,
+                after existingNode: SyntaxNode,
+                mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
+        
         guard let existingGraphNode = graphNode(for: existingNode) else {
             assertionFailure("Expected 'existingNode' to be part of this graph")
             return ControlFlowGraphNode.makeNode(node)
@@ -91,7 +94,10 @@ extension ControlFlowGraph {
     /// Inserts a given syntax node after a given control flow graph in this
     /// graph.
     @discardableResult
-    func insert(node: SyntaxNode, after existingNode: ControlFlowGraphNode, mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
+    func insert(node: SyntaxNode,
+                after existingNode: ControlFlowGraphNode,
+                mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
+        
         let node = ControlFlowGraphNode.makeNode(node)
         return insert(node: node, after: existingNode, mode: mode)
     }
@@ -99,7 +105,10 @@ extension ControlFlowGraph {
     /// Inserts a given syntax node after a given control flow graph in this
     /// graph.
     @discardableResult
-    func insert(node: ControlFlowGraphNode, after existingNode: ControlFlowGraphNode, mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
+    func insert(node: ControlFlowGraphNode,
+                after existingNode: ControlFlowGraphNode,
+                mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
+        
         switch mode {
         case .add:
             addNode(node)
@@ -123,7 +132,10 @@ extension ControlFlowGraph {
     /// Inserts a given syntax node before a given control flow graph in this
     /// graph.
     @discardableResult
-    func insert(node: SyntaxNode, before existingNode: ControlFlowGraphNode, mode: BeforeInsertionMode = .add) -> ControlFlowGraphNode {
+    func insert(node: SyntaxNode,
+                before existingNode: ControlFlowGraphNode,
+                mode: BeforeInsertionMode = .add) -> ControlFlowGraphNode {
+        
         let node = ControlFlowGraphNode.makeNode(node)
         
         switch mode {
@@ -424,56 +436,12 @@ public extension ControlFlowGraph {
         case let stmt as ForStatement:
             graph.addNode(node)
             
-            let breaks = context.pushScope(node)
-            
-            if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
-                graph.addEdge(from: node, to: bodyNode.start)
-                
-                // Add a back edge pointing back to the beginning of the loop
-                let backEdges = bodyNode.endings.connect(to: node)
-                for backEdge in backEdges {
-                    backEdge.isBackEdge = true
-                }
-            } else {
-                // connect loop back on itself
-                graph.addBackEdge(from: node, to: node)
-            }
-            
-            var result = context.popScope(node,
-                                          start: node,
-                                          outConnections: breaks.edgeConstructors(in: graph),
-                                          in: graph)
-            
-            result.endings.append(EdgeConstructor(for: node, in: graph))
-            
-            return result
+            return _makeLoop(node: node, body: stmt.body, in: graph, context: context)
             
         case let stmt as WhileStatement:
             graph.addNode(node)
             
-            let breaks = context.pushScope(node)
-            
-            if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
-                graph.addEdge(from: node, to: bodyNode.start)
-                
-                // Add a back edge pointing back to the beginning of the loop
-                let backEdges = bodyNode.endings.connect(to: node)
-                for backEdge in backEdges {
-                    backEdge.isBackEdge = true
-                }
-            } else {
-                // connect loop back on itself
-                graph.addBackEdge(from: node, to: node)
-            }
-            
-            var result = context.popScope(node,
-                                          start: node,
-                                          outConnections: breaks.edgeConstructors(in: graph),
-                                          in: graph)
-            
-            result.endings.append(EdgeConstructor(for: node, in: graph))
-            
-            return result
+            return _makeLoop(node: node, body: stmt.body, in: graph, context: context)
             
         case let stmt as DoWhileStatement:
             graph.addNode(node)
@@ -503,6 +471,36 @@ public extension ControlFlowGraph {
         default:
             return nil
         }
+    }
+    
+    private static func _makeLoop(node: ControlFlowGraphNode,
+                                  body: CompoundStatement,
+                                  in graph: ControlFlowGraph,
+                                  context: Context) -> NodeCreationResult? {
+        
+        let breaks = context.pushScope(node)
+        
+        if let bodyNode = _connections(for: body, in: graph, context: context) {
+            graph.addEdge(from: node, to: bodyNode.start)
+            
+            // Add a back edge pointing back to the beginning of the loop
+            let backEdges = bodyNode.endings.connect(to: node)
+            for backEdge in backEdges {
+                backEdge.isBackEdge = true
+            }
+        } else {
+            // connect loop back on itself
+            graph.addBackEdge(from: node, to: node)
+        }
+        
+        var result = context.popScope(node,
+                                      start: node,
+                                      outConnections: breaks.edgeConstructors(in: graph),
+                                      in: graph)
+        
+        result.endings.append(EdgeConstructor(for: node, in: graph))
+        
+        return result
     }
     
     private class Context {
@@ -579,6 +577,10 @@ public extension ControlFlowGraph {
             }
             
             return (start, lastConnections)
+        }
+        
+        func jump(from source: ControlFlowGraphNode, to target: ControlFlowGraphNode) {
+            
         }
         
         func pushDefer(_ node: ControlFlowGraph) {
