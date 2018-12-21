@@ -1,11 +1,5 @@
 import SwiftAST
 
-extension ControlFlowGraphNode {
-    static func makeNode(_ node: SyntaxNode) -> Self {
-        return self.init(node: node)
-    }
-}
-
 extension ControlFlowGraph {
     func merge(with other: ControlFlowGraph) {
         let nodes = other.nodes.filter {
@@ -14,7 +8,7 @@ extension ControlFlowGraph {
         
         let edges = other.edges.filter {
             $0.start !== other.entry && $0.start !== other.exit
-            && $0.end !== other.entry && $0.end !== other.exit
+                && $0.end !== other.entry && $0.end !== other.exit
         }
         
         for node in nodes {
@@ -23,6 +17,33 @@ extension ControlFlowGraph {
         for edge in edges {
             let e = addEdge(from: edge.start, to: edge.end)
             e.isBackEdge = edge.isBackEdge
+        }
+    }
+    
+    func insert(graph: ControlFlowGraph, between start: ControlFlowGraphNode, _ end: ControlFlowGraphNode) {
+        let nodes = graph.nodes.filter {
+            $0 !== graph.entry && $0 !== graph.exit
+        }
+        
+        let edges = graph.edges.filter {
+            $0.start !== graph.entry && $0.start !== graph.exit
+                && $0.end !== graph.entry && $0.end !== graph.exit
+        }
+        
+        for node in nodes {
+            addNode(node)
+        }
+        for edge in edges {
+            let e = addEdge(from: edge.start, to: edge.end)
+            e.isBackEdge = edge.isBackEdge
+        }
+        
+        // Re-connect original entry/exit edges
+        for node in graph.nodesConnected(from: graph.entry) {
+            addEdge(from: start, to: node)
+        }
+        for node in graph.nodesConnected(towards: graph.exit) {
+            addEdge(from: node, to: end)
         }
     }
     
@@ -42,13 +63,16 @@ extension ControlFlowGraph {
     }
     
     func addEdge(_ edge: ControlFlowGraphEdge) {
+        assert(self.edge(from: edge.start, to: edge.end) == nil,
+               "There already is an edge between nodes \(edge.start.node) and \(edge.end.node) in this graph")
+        
         edges.append(edge)
     }
     
     @discardableResult
     func addEdge(from node1: ControlFlowGraphNode, to node2: ControlFlowGraphNode) -> ControlFlowGraphEdge {
         let edge = ControlFlowGraphEdge(start: node1, end: node2)
-        edges.append(edge)
+        addEdge(edge)
         
         return edge
     }
@@ -85,7 +109,7 @@ extension ControlFlowGraph {
         
         guard let existingGraphNode = graphNode(for: existingNode) else {
             assertionFailure("Expected 'existingNode' to be part of this graph")
-            return ControlFlowGraphNode.makeNode(node)
+            return ControlFlowGraphNode(node: node)
         }
         
         return insert(node: node, after: existingGraphNode, mode: mode)
@@ -98,7 +122,7 @@ extension ControlFlowGraph {
                 after existingNode: ControlFlowGraphNode,
                 mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
         
-        let node = ControlFlowGraphNode.makeNode(node)
+        let node = ControlFlowGraphNode(node: node)
         return insert(node: node, after: existingNode, mode: mode)
     }
     
@@ -136,7 +160,7 @@ extension ControlFlowGraph {
                 before existingNode: ControlFlowGraphNode,
                 mode: BeforeInsertionMode = .add) -> ControlFlowGraphNode {
         
-        let node = ControlFlowGraphNode.makeNode(node)
+        let node = ControlFlowGraphNode(node: node)
         
         switch mode {
         case .add:
@@ -156,6 +180,18 @@ extension ControlFlowGraph {
         }
         
         return node
+    }
+    
+    @discardableResult
+    private func connectChain<S: Sequence>(start: ControlFlowGraphNode, rest: S) -> EdgeConstructor where S.Element == ControlFlowGraphNode {
+        var last = EdgeConstructor(for: start, in: self)
+        
+        for node in rest {
+            last.connect(to: node)
+            last = EdgeConstructor(for: node, in: self)
+        }
+        
+        return last
     }
     
     enum AfterInsertionMode {
@@ -251,19 +287,31 @@ public extension ControlFlowGraph {
     /// statement itself, with its inner nodes being the statements contained
     /// within.
     public static func forCompoundStatement(_ compoundStatement: CompoundStatement) -> ControlFlowGraph {
-        let entry = ControlFlowGraphEntryNode.makeNode(compoundStatement)
-        let exit = ControlFlowGraphExitNode.makeNode(compoundStatement)
+        return forStatementList(compoundStatement.statements, baseNode: compoundStatement)
+    }
+    
+    static func forStatementList(_ statements: [Statement], baseNode: SyntaxNode) -> ControlFlowGraph {
+        let entry = ControlFlowGraphEntryNode(node: baseNode)
+        let exit = ControlFlowGraphExitNode(node: baseNode)
         
         let context = Context()
+        
+        _=context.pushScope(entry)
         
         let graph = ControlFlowGraph(entry: entry, exit: exit)
         
         var prev: NodeCreationResult = (entry, [EdgeConstructor(for: entry, in: graph)])
         
-        if let connection = _connections(for: compoundStatement, in: graph, context: context) {
-            prev.endings.connect(to: connection.start)
-            prev = connection
+        for subStmt in statements {
+            guard let cur = _connections(for: subStmt, in: graph, context: context) else {
+                continue
+            }
+            
+            prev.endings.connect(to: cur.start)
+            prev = cur
         }
+        
+        prev = context.popScope(entry, start: entry, outConnections: prev.endings, in: graph)
         
         prev.endings.connect(to: exit)
         
@@ -274,7 +322,7 @@ public extension ControlFlowGraph {
                                      in graph: ControlFlowGraph,
                                      context: Context) -> NodeCreationResult? {
         
-        let node = ControlFlowGraphNode.makeNode(stmt)
+        let node = ControlFlowGraphNode(node: stmt)
         
         switch stmt {
         case is ExpressionsStatement,
@@ -286,21 +334,33 @@ public extension ControlFlowGraph {
             
         case is ReturnStatement:
             graph.addNode(node)
+            
+            let activeDeferNodes = context.activeDeferNodes
+            if activeDeferNodes.count > 0 {
+                graph.connectChain(start: node, rest: context.activeDeferNodes)
+                
+                return (node, [])
+            }
+            
             graph.addEdge(from: node, to: graph.exit)
             
             return (node, [])
             
         case is BreakStatement:
             graph.addNode(node)
-            context.breakTarget?.addBreak(node)
+            if let breakTarget = context.breakTarget {
+                for def in breakTarget.defers {
+                    context.satisfyDefer(node: def)
+                }
+                
+                breakTarget.target.addNode(node, defers: breakTarget.defers)
+            }
             
             return (node, [])
             
         case is ContinueStatement:
             graph.addNode(node)
-            if let target = context.continueTarget {
-                graph.addBackEdge(from: node, to: target)
-            }
+            context.continueTarget?.addNode(node, defers: context.activeDeferNodes)
             
             return (node, [])
             
@@ -354,7 +414,11 @@ public extension ControlFlowGraph {
         case let stmt as DeferStatement:
             let body = ControlFlowGraph.forCompoundStatement(stmt.body)
             
-            context.pushDefer(body)
+            let subgraph = ControlFlowSubgraphNode(node: stmt, graph: body)
+            
+            graph.addNode(subgraph)
+            
+            context.pushDefer(graph: subgraph)
             
             return nil
             
@@ -398,7 +462,7 @@ public extension ControlFlowGraph {
         case let stmt as SwitchStatement:
             graph.addNode(node)
             
-            let breaks = context.pushScope(node)
+            let scope = context.pushScope(node)
             
             var connections: [EdgeConstructor] = []
             
@@ -428,6 +492,8 @@ public extension ControlFlowGraph {
                 connections.append(EdgeConstructor(for: node, in: graph))
             }
             
+            let breaks = scope.breakTarget!
+            
             return context.popScope(node,
                                     start: node,
                                     outConnections: connections + breaks.edgeConstructors(in: graph),
@@ -446,7 +512,7 @@ public extension ControlFlowGraph {
         case let stmt as DoWhileStatement:
             graph.addNode(node)
             
-            let breaks = context.pushScope(node)
+            let scope = context.pushScope(node)
             
             var loopHead: ControlFlowGraphNode = node
             
@@ -459,6 +525,7 @@ public extension ControlFlowGraph {
                 graph.addBackEdge(from: node, to: node)
             }
             
+            let breaks = scope.breakTarget!
             var result = context.popScope(node,
                                           start: loopHead,
                                           outConnections: breaks.edgeConstructors(in: graph),
@@ -478,7 +545,7 @@ public extension ControlFlowGraph {
                                   in graph: ControlFlowGraph,
                                   context: Context) -> NodeCreationResult? {
         
-        let breaks = context.pushScope(node)
+        let scope = context.pushScope(node)
         
         if let bodyNode = _connections(for: body, in: graph, context: context) {
             graph.addEdge(from: node, to: bodyNode.start)
@@ -488,11 +555,19 @@ public extension ControlFlowGraph {
             for backEdge in backEdges {
                 backEdge.isBackEdge = true
             }
+            
+            if let continues = context.continueTarget {
+                for continueNode in continues.nodes {
+                    let backEdge = graph.addEdge(from: continueNode.node, to: node)
+                    backEdge.isBackEdge = true
+                }
+            }
         } else {
             // connect loop back on itself
             graph.addBackEdge(from: node, to: node)
         }
         
+        let breaks = scope.breakTarget!
         var result = context.popScope(node,
                                       start: node,
                                       outConnections: breaks.edgeConstructors(in: graph),
@@ -504,39 +579,66 @@ public extension ControlFlowGraph {
     }
     
     private class Context {
-        /// Stack of opened defer statement sub-graphs for the current stack
-        var openDefers: [[ControlFlowGraph]] = [[]]
+        private(set) var scopes: [Scope] = []
         
-        var breakTargetStack: [ControlFlowGraphJumpTarget] = []
-        var continueTargetStack: [ControlFlowGraphNode] = []
-        
-        var breakTarget: ControlFlowGraphJumpTarget? {
-            return breakTargetStack.last
+        var currentScope: Scope? {
+            return scopes.last
         }
-        var continueTarget: ControlFlowGraphNode? {
-            return continueTargetStack.last
+        
+        /// Returns the stack of defer statements node, in reverse order (defers
+        /// defined later appear first)
+        var activeDeferNodes: [ControlFlowSubgraphNode] {
+            return scopes.flatMap { $0.openDefers }.reversed()
+        }
+        
+        var breakTarget: (target: ControlFlowGraphJumpTarget, defers: [ControlFlowSubgraphNode])? {
+            var defers: [ControlFlowSubgraphNode] = []
+            
+            for scope in scopes.reversed() {
+                defers.append(contentsOf: scope.openDefers)
+                
+                if let breakTarget = scope.breakTarget {
+                    return (breakTarget, defers)
+                }
+            }
+            
+            return nil
+        }
+        
+        var continueTarget: ControlFlowGraphJumpTarget? {
+            for scope in scopes.reversed() {
+                if let continueTarget = scope.continueTarget {
+                    return continueTarget
+                }
+            }
+            
+            return nil
         }
         
         // TODO: Support for pushing/popping and breaking/continuing labeled
         // statements
-        func pushScope(_ node: ControlFlowGraphNode) -> ControlFlowGraphJumpTarget {
-            openDefers.append([])
-            
-            let target = ControlFlowGraphJumpTarget()
+        func pushScope(_ node: ControlFlowGraphNode) -> Scope {
+            let scope = Scope()
             
             switch node.node {
             case is ForStatement, is WhileStatement, is DoWhileStatement:
-                breakTargetStack.append(target)
-                continueTargetStack.append(node)
+                scope.breakTarget = ControlFlowGraphJumpTarget()
+                scope.continueTarget = ControlFlowGraphJumpTarget()
+                scope.isLoopScope = true
                 
             case is SwitchStatement:
-                breakTargetStack.append(target)
+                scope.breakTarget = ControlFlowGraphJumpTarget()
+                
+            case is CompoundStatement where currentScope?.isLoopScope == true:
+                scope.isLoopScope = true
                 
             default:
                 break
             }
             
-            return target
+            scopes.append(scope)
+            
+            return scope
         }
         
         func popScope(_ node: ControlFlowGraphNode,
@@ -544,61 +646,83 @@ public extension ControlFlowGraph {
                       outConnections: [EdgeConstructor],
                       in graph: ControlFlowGraph) -> NodeCreationResult {
             
-            switch node.node {
-            case is ForStatement, is WhileStatement, is DoWhileStatement:
-                breakTargetStack.removeLast()
-                continueTargetStack.removeLast()
-                
-            case is SwitchStatement:
-                breakTargetStack.removeLast()
-                
-            default:
-                break
-            }
-            
-            let defers = openDefers.removeLast()
+            let scope = scopes.removeLast()
             
             var lastConnections: [EdgeConstructor] = outConnections
             
+            let defers = scope.openDefers
+
             for deferGraph in defers.reversed() {
-                graph.merge(with: deferGraph)
-                
-                let entrances = deferGraph.edges(from: deferGraph.entry)
-                let exits = deferGraph.edges(towards: deferGraph.exit)
-                
-                assert(entrances.count == 1)
-                
-                let entrance = entrances[0].end
-                
-                lastConnections.connect(to: entrance)
-                lastConnections = exits.map {
-                    EdgeConstructor(for: $0.start, in: graph)
-                }
+                lastConnections.connect(to: deferGraph)
+                lastConnections = [EdgeConstructor(for: deferGraph, in: graph)]
             }
             
             return (start, lastConnections)
         }
         
-        func jump(from source: ControlFlowGraphNode, to target: ControlFlowGraphNode) {
-            
+        func pushDefer(graph: ControlFlowSubgraphNode) {
+            scopes[scopes.count - 1].openDefers.append(graph)
         }
         
-        func pushDefer(_ node: ControlFlowGraph) {
-            openDefers[openDefers.count - 1].append(node)
+        func satisfyDefer(node: ControlFlowSubgraphNode) {
+            for scope in scopes.reversed() {
+                if let index = scope.openDefers.firstIndex(where: { $0 === node }) {
+                    scope.openDefers.remove(at: index)
+                    return
+                }
+            }
+        }
+        
+        class Scope {
+            /// Stack of opened defer statement sub-graphs for the current scope
+            var openDefers: [ControlFlowSubgraphNode] = []
+            var continueTarget: ControlFlowGraphJumpTarget?
+            var breakTarget: ControlFlowGraphJumpTarget?
+            var isLoopScope: Bool = false
         }
     }
     
     private class ControlFlowGraphJumpTarget {
-        private(set) var breakNodes: [ControlFlowGraphNode] = []
+        private(set) var nodes: [(node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode])] = []
         
-        func addBreak(_ node: ControlFlowGraphNode) {
-            breakNodes.append(node)
+        func addNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) {
+            nodes.append((node, defers))
         }
         
         func edgeConstructors(in graph: ControlFlowGraph) -> [EdgeConstructor] {
-            return breakNodes.map { EdgeConstructor(for: $0, in: graph) }
+            return nodes.map { node in
+                graph.connectChain(start: node.node, rest: node.defers)
+            }
         }
     }
+}
+
+private extension ControlFlowGraph {
+    
+    private func insert(graph: ControlFlowGraph, ingoingConnections: [EdgeConstructor], _ end: ControlFlowGraphNode) {
+        let nodes = graph.nodes.filter {
+            $0 !== graph.entry && $0 !== graph.exit
+        }
+        
+        let edges = graph.edges.filter {
+            $0.start !== graph.entry && $0.start !== graph.exit
+                && $0.end !== graph.entry && $0.end !== graph.exit
+        }
+        
+        for node in nodes {
+            addNode(node)
+        }
+        for edge in edges {
+            let e = addEdge(from: edge.start, to: edge.end)
+            e.isBackEdge = edge.isBackEdge
+        }
+        
+        // Re-connect original entry/exit edges
+        for node in graph.nodesConnected(from: graph.entry) {
+            ingoingConnections.connect(to: node)
+        }
+    }
+    
 }
 
 /// Represents a free connection that is meant to be connected to next nodes
@@ -617,7 +741,7 @@ private struct EdgeConstructor {
     }
     
     @discardableResult
-    func create(_ node: ControlFlowGraphNode) -> ControlFlowGraphEdge {
+    func connect(to node: ControlFlowGraphNode) -> ControlFlowGraphEdge {
         return _constructor(node)
     }
 }
@@ -625,6 +749,6 @@ private struct EdgeConstructor {
 private extension Sequence where Element == EdgeConstructor {
     @discardableResult
     func connect(to node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return self.map { $0.create(node) }
+        return self.map { $0.connect(to: node) }
     }
 }

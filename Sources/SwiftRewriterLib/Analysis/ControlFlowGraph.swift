@@ -50,6 +50,14 @@ public final class ControlFlowGraph {
         return edges.filter { $0.end === node }
     }
     
+    /// Returns an existing edge between two nodes, or `nil`, if no edges between
+    /// them currently exist.
+    ///
+    /// A reference equality test (===) is used to determine graph node equality.
+    public func edge(from start: ControlFlowGraphNode, to end: ControlFlowGraphNode) -> ControlFlowGraphEdge? {
+        return edges.first { $0.start === start && $0.end === end }
+    }
+ 
     /// Returns all outgoing back edges for a given control flow graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
@@ -166,21 +174,29 @@ public class ControlFlowGraphNode {
     /// An associated node for this control flow graph node.
     public let node: SyntaxNode
     
-    required init(node: SyntaxNode) {
+    init(node: SyntaxNode) {
         self.node = node
     }
 }
 
 /// Represents an entry node for a control flow graph
 public final class ControlFlowGraphEntryNode: ControlFlowGraphNode {
-    required init(node: SyntaxNode) {
-        super.init(node: node)
-    }
+    
 }
 
 /// Represents an exit node for a control flow graph
 public final class ControlFlowGraphExitNode: ControlFlowGraphNode {
-    required init(node: SyntaxNode) {
+    
+}
+
+/// A graph node which contains a complete subgraph
+public final class ControlFlowSubgraphNode: ControlFlowGraphNode {
+    /// An associated node for this control flow graph node.
+    public let graph: ControlFlowGraph
+    
+    init(node: SyntaxNode, graph: ControlFlowGraph) {
+        self.graph = graph
+        
         super.init(node: node)
     }
 }
