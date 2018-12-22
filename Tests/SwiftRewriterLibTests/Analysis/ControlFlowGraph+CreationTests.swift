@@ -10,7 +10,15 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n1 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 2)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -29,7 +37,15 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n1 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 2)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -57,7 +73,24 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="var v: Int"]
+                n4 [label="v()"]
+                n5 [label="{if}"]
+                n6 [label="print(\\"Did work!\\")"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n5
+                n5 -> n6
+                n5 -> n2
+                n6 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 6)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -86,7 +119,26 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="var v: Int"]
+                n4 [label="v()"]
+                n5 [label="{if}"]
+                n6 [label="print(\\"Did work!\\")"]
+                n7 [label="print(\\"Did no work\\")"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n5
+                n5 -> n6
+                n5 -> n7
+                n6 -> n2
+                n7 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 7)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -124,7 +176,31 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="var v: Int"]
+                n4 [label="v()"]
+                n5 [label="{if}"]
+                n6 [label="print(\\"Did work!\\")"]
+                n7 [label="{if}"]
+                n8 [label="print(\\"Did work twice!\\")"]
+                n9 [label="print(\\"Did no work twice\\")"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n5
+                n5 -> n6
+                n5 -> n7
+                n6 -> n2
+                n7 -> n8
+                n7 -> n9
+                n8 -> n2
+                n9 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 9)
         XCTAssert(graph.entry.node === stmt)
         XCTAssert(graph.exit.node === stmt)
@@ -153,7 +229,22 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="SwitchStatement"]
+                n4 [label="b"]
+                n5 [label="c"]
+                n1 -> n3
+                n3 -> n4
+                n3 -> n5
+                n4 -> n2
+                n5 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
@@ -172,7 +263,22 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="v()"]
+                n4 [label="{while}"]
+                n5 [label="a"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n5
+                n4 -> n2
+                n5 -> n4 [color="#aa3333",penwidth=0.5]
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -190,7 +296,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="v()"]
+                n4 [label="{while}"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n4 [color="#aa3333",penwidth=0.5]
+                n4 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
@@ -212,7 +331,22 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="v()"]
+                n4 [label="{do-while}"]
+                n5 [label="a"]
+                n1 -> n3
+                n3 -> n5
+                n4 -> n5 [color="#aa3333",penwidth=0.5]
+                n4 -> n2
+                n5 -> n4
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
@@ -231,7 +365,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="v()"]
+                n4 [label="{do-while}"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n4 [color="#aa3333",penwidth=0.5]
+                n4 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
@@ -252,7 +399,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{for}"]
+                n4 [label="b"]
+                n1 -> n3
+                n3 -> n4
+                n3 -> n2
+                n4 -> n3 [color="#aa3333",penwidth=0.5]
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -269,7 +429,18 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{for}"]
+                n1 -> n3
+                n3 -> n3 [color="#aa3333",penwidth=0.5]
+                n3 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 3)
         XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[0])!).count, 1)
         XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[0])!).count, 1)
@@ -298,7 +469,31 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="v()"]
+                n4 [label="{while}"]
+                n5 [label="a"]
+                n6 [label="{if}"]
+                n7 [label="BreakStatement"]
+                n8 [label="b"]
+                n9 [label="ContinueStatement"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n5
+                n4 -> n2
+                n5 -> n6
+                n6 -> n7
+                n6 -> n8
+                n7 -> n2
+                n8 -> n9
+                n9 -> n4 [color="#aa3333",penwidth=0.5]
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 9)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
@@ -317,7 +512,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{while}"]
+                n4 [label="ReturnStatement"]
+                n1 -> n3
+                n3 -> n4
+                n3 -> n2
+                n4 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
@@ -336,7 +544,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{while}"]
+                n4 [label="BreakStatement"]
+                n1 -> n3
+                n3 -> n4
+                n3 -> n2
+                n4 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
@@ -355,7 +576,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{while}"]
+                n4 [label="ContinueStatement"]
+                n1 -> n3
+                n3 -> n4
+                n3 -> n2
+                n4 -> n3 [color="#aa3333",penwidth=0.5]
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -375,7 +609,22 @@ class ControlFlowGraphCreationTests: XCTestCase {
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
         sanitize(graph, expectsUnreachable: true)
-        printGraphviz(graph: graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{while}"]
+                n4 [label="ContinueStatement"]
+                n5 [label="v"]
+                n1 -> n3
+                n3 -> n4
+                n3 -> n2
+                n4 -> n3 [color="#aa3333",penwidth=0.5]
+                n5 -> n3 [color="#aa3333",penwidth=0.5]
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -391,8 +640,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
-        sanitize(graph, expectsUnreachable: false)
-        printGraphviz(graph: graph)
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="DeferStatement"]
+                n4 [label="b"]
+                n1 -> n4
+                n3 -> n2
+                n4 -> n3
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 4)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -415,8 +676,25 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
-        sanitize(graph, expectsUnreachable: false)
-        printGraphviz(graph: graph)
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{if}"]
+                n4 [label="DeferStatement"]
+                n5 [label="c"]
+                n6 [label="d"]
+                n1 -> n3
+                n3 -> n5
+                n3 -> n6
+                n4 -> n6
+                n5 -> n4
+                n6 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 6)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -444,8 +722,29 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
-        sanitize(graph, expectsUnreachable: false)
-        printGraphviz(graph: graph)
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{if}"]
+                n4 [label="DeferStatement"]
+                n5 [label="c"]
+                n6 [label="DeferStatement"]
+                n7 [label="e"]
+                n8 [label="f"]
+                n1 -> n3
+                n3 -> n5
+                n3 -> n7
+                n4 -> n8
+                n5 -> n4
+                n6 -> n8
+                n7 -> n6
+                n8 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 8)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -467,8 +766,25 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
-        sanitize(graph, expectsUnreachable: false)
-        printGraphviz(graph: graph)
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{while}"]
+                n4 [label="DeferStatement"]
+                n5 [label="c"]
+                n6 [label="d"]
+                n1 -> n3
+                n3 -> n5
+                n3 -> n6
+                n4 -> n3 [color="#aa3333",penwidth=0.5]
+                n5 -> n4
+                n6 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 6)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -491,8 +807,27 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
-        sanitize(graph, expectsUnreachable: false)
-        printGraphviz(graph: graph)
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="{while}"]
+                n4 [label="DeferStatement"]
+                n5 [label="c"]
+                n6 [label="BreakStatement"]
+                n7 [label="d"]
+                n1 -> n3
+                n3 -> n5
+                n3 -> n7
+                n4 -> n7
+                n5 -> n6
+                n6 -> n4
+                n7 -> n2
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 7)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -519,8 +854,29 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
-        sanitize(graph, expectsUnreachable: false)
-        printGraphviz(graph: graph)
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="DeferStatement"]
+                n4 [label="b"]
+                n5 [label="{if}"]
+                n6 [label="ReturnStatement"]
+                n7 [label="DeferStatement"]
+                n8 [label="d"]
+                n1 -> n4
+                n3 -> n2
+                n4 -> n5
+                n5 -> n6
+                n5 -> n8
+                n6 -> n3
+                n7 -> n3
+                n8 -> n7
+            }
+            """)
         XCTAssertEqual(graph.nodes.count, 8)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
@@ -596,7 +952,32 @@ private extension ControlFlowGraphCreationTests {
         }
     }
     
+    func assertGraphviz(graph: ControlFlowGraph, matches expected: String, line: Int = #line) {
+        let text = graphviz(graph: graph)
+        if text == expected {
+            return
+        }
+        
+        recordFailure(withDescription: """
+            Expected produced graph to be
+            
+            \(expected)
+            
+            But found:
+            
+            \(text.makeDifferenceMarkString(against: expected))
+            """,
+                      inFile: #file,
+                      atLine: line,
+                      expected: true)
+    }
+    
     func printGraphviz(graph: ControlFlowGraph) {
+        let string = graphviz(graph: graph)
+        print(string)
+    }
+    
+    func graphviz(graph: ControlFlowGraph) -> String {
         let buffer = StringRewriterOutput(settings: .defaults)
         buffer.output(line: "digraph flow {")
         buffer.idented {
@@ -636,7 +1017,7 @@ private extension ControlFlowGraphCreationTests {
                         declLabel += ": \(decl.type)"
                         
                         return declLabel
-                    }.joined(separator: "\n")
+                        }.joined(separator: "\n")
                     
                 default:
                     break
@@ -666,6 +1047,6 @@ private extension ControlFlowGraphCreationTests {
         }
         buffer.output(line: "}")
         
-        print(buffer.buffer)
+        return buffer.buffer.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
