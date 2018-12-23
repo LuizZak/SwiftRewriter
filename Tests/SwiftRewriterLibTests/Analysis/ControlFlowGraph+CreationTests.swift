@@ -386,6 +386,38 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
     
+    func testBreakInDoWhileLoop() {
+        let stmt: CompoundStatement = [
+            Statement.expression(Expression.identifier("v").call()),
+            Statement.doWhile(
+                .identifier("v"),
+                body: [
+                    .break
+                ]
+            )
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="v()"]
+                n4 [label="BreakStatement"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n2
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
     func testForLoop() {
         let stmt: CompoundStatement = [
             Statement.for(
@@ -519,7 +551,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="{while}"]
-                n4 [label="ReturnStatement"]
+                n4 [label="{return}"]
                 n1 -> n3
                 n3 -> n4
                 n3 -> n2
@@ -842,7 +874,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             Statement.if(
                 .identifier("predicate"),
                 body: [
-                    .return(nil)
+                    .return(.constant(0))
                 ],
                 else: nil
             ),
@@ -863,7 +895,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n2 [label="exit"]
                 n3 [label="b"]
                 n4 [label="{if}"]
-                n5 [label="ReturnStatement"]
+                n5 [label="{return 0}"]
                 n6 [label="d"]
                 n7 [label="a"]
                 n8 [label="c"]
@@ -1013,12 +1045,22 @@ private extension ControlFlowGraphCreationTests {
                     
                 case is IfStatement:
                     label = "{if}"
+                    
                 case is ForStatement:
                     label = "{for}"
+                    
                 case is WhileStatement:
                     label = "{while}"
+                    
                 case is DoWhileStatement:
                     label = "{do-while}"
+                    
+                case let ret as ReturnStatement:
+                    if let exp = ret.exp {
+                        label = "{return \(exp)}"
+                    } else {
+                        label = "{return}"
+                    }
                     
                 case let varDecl as VariableDeclarationsStatement:
                     label = varDecl.decl.map { decl -> String in
@@ -1027,7 +1069,7 @@ private extension ControlFlowGraphCreationTests {
                         declLabel += ": \(decl.type)"
                         
                         return declLabel
-                        }.joined(separator: "\n")
+                    }.joined(separator: "\n")
                     
                 default:
                     break

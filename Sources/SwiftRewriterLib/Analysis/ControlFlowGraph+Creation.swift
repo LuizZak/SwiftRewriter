@@ -560,15 +560,23 @@ public extension ControlFlowGraph {
             
             let scope = context.pushScope(node)
             
+            var didPushHead = false
             var loopHead: ControlFlowGraphNode = node
             
             if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
                 bodyNode.endings.connect(to: node)
                 loopHead = bodyNode.start
-                graph.addBackEdge(from: node, to: bodyNode.start)
+                
+                if bodyNode.endings.isEmpty {
+                    graph.removeNode(node)
+                } else {
+                    graph.addBackEdge(from: node, to: bodyNode.start)
+                    didPushHead = true
+                }
             } else {
                 // connect loop back on itself
                 graph.addBackEdge(from: node, to: node)
+                didPushHead = true
             }
             
             let breaks = scope.breakTarget!
@@ -577,7 +585,9 @@ public extension ControlFlowGraph {
                                           outConnections: breaks.edgeConstructors(in: graph),
                                           in: graph)
             
-            result.endings.append(EdgeConstructor(for: node, in: graph))
+            if didPushHead {
+                result.endings.append(EdgeConstructor(for: node, in: graph))
+            }
             
             return result
             
