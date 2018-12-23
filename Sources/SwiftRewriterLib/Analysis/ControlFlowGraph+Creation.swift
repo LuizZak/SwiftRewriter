@@ -22,33 +22,6 @@ extension ControlFlowGraph {
         }
     }
     
-    func insert(graph: ControlFlowGraph, between start: ControlFlowGraphNode, _ end: ControlFlowGraphNode) {
-        let nodes = graph.nodes.filter {
-            $0 !== graph.entry && $0 !== graph.exit
-        }
-        
-        let edges = graph.edges.filter {
-            $0.start !== graph.entry && $0.start !== graph.exit
-                && $0.end !== graph.entry && $0.end !== graph.exit
-        }
-        
-        for node in nodes {
-            addNode(node)
-        }
-        for edge in edges {
-            let e = addEdge(from: edge.start, to: edge.end)
-            e.isBackEdge = edge.isBackEdge
-        }
-        
-        // Re-connect original entry/exit edges
-        for node in graph.nodesConnected(from: graph.entry) {
-            addEdge(from: start, to: node)
-        }
-        for node in graph.nodesConnected(towards: graph.exit) {
-            addEdge(from: node, to: end)
-        }
-    }
-    
     func reset(entry: ControlFlowGraphEntryNode, exit: ControlFlowGraphExitNode) {
         nodes.removeAll()
         edges.removeAll()
@@ -105,90 +78,6 @@ extension ControlFlowGraph {
         }
     }
     
-    /// Inserts a given syntax node after a given syntax node's corresponding
-    /// graph node in this graph.
-    ///
-    /// Asserts in case `existingNode` is not part of this graph.
-    @discardableResult
-    func insert(node: SyntaxNode,
-                after existingNode: SyntaxNode,
-                mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
-        
-        guard let existingGraphNode = graphNode(for: existingNode) else {
-            assertionFailure("Expected 'existingNode' to be part of this graph")
-            return ControlFlowGraphNode(node: node)
-        }
-        
-        return insert(node: node, after: existingGraphNode, mode: mode)
-    }
-    
-    /// Inserts a given syntax node after a given control flow graph in this
-    /// graph.
-    @discardableResult
-    func insert(node: SyntaxNode,
-                after existingNode: ControlFlowGraphNode,
-                mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
-        
-        let node = ControlFlowGraphNode(node: node)
-        return insert(node: node, after: existingNode, mode: mode)
-    }
-    
-    /// Inserts a given syntax node after a given control flow graph in this
-    /// graph.
-    @discardableResult
-    func insert(node: ControlFlowGraphNode,
-                after existingNode: ControlFlowGraphNode,
-                mode: AfterInsertionMode = .add) -> ControlFlowGraphNode {
-        
-        switch mode {
-        case .add:
-            addNode(node)
-            addEdge(from: existingNode, to: node)
-            
-        case .beforeOutgoingNodes:
-            let edges = self.edges(from: existingNode)
-            removeEdges(edges)
-            
-            addNode(node)
-            addEdge(from: existingNode, to: node)
-            
-            for edge in edges {
-                addEdge(from: node, to: edge.end)
-            }
-        }
-        
-        return node
-    }
-    
-    /// Inserts a given syntax node before a given control flow graph in this
-    /// graph.
-    @discardableResult
-    func insert(node: SyntaxNode,
-                before existingNode: ControlFlowGraphNode,
-                mode: BeforeInsertionMode = .add) -> ControlFlowGraphNode {
-        
-        let node = ControlFlowGraphNode(node: node)
-        
-        switch mode {
-        case .add:
-            addNode(node)
-            addEdge(from: node, to: existingNode)
-            
-        case .beforeIngoingNodes:
-            let edges = self.edges(towards: existingNode)
-            removeEdges(edges)
-            
-            addNode(node)
-            addEdge(from: node, to: existingNode)
-            
-            for edge in edges {
-                addEdge(from: edge.start, to: node)
-            }
-        }
-        
-        return node
-    }
-    
     @discardableResult
     private func connectChain<S: Sequence>(start: ControlFlowGraphNode, rest: S) -> EdgeConstructor where S.Element == ControlFlowGraphNode {
         var last = EdgeConstructor(for: start, in: self)
@@ -199,90 +88,6 @@ extension ControlFlowGraph {
         }
         
         return last
-    }
-    
-    enum AfterInsertionMode {
-        /// Adds a new outgoing edge on the target node for the new node:
-        ///
-        /// ```
-        ///     target      N - new node
-        ///      node       |
-        ///        |        V
-        ///        |
-        ///                /-> O
-        ///        O --------> O    - existing nodes
-        ///                \-> O
-        ///
-        /// result:
-        ///
-        ///                /-> N
-        ///                |-> O
-        ///        O --------> O
-        ///                \-> O
-        /// ```
-        case add
-        
-        /// Adds a new edge between the inserted node and the target node, and
-        /// move all previous outgoing nodes from the target to the new node:
-        ///
-        /// ```
-        ///     target  N - new node
-        ///      node   |
-        ///        |    |
-        ///        |    V
-        ///                /-> O
-        ///        O --------> O    - existing nodes
-        ///                \-> O
-        ///
-        /// result:
-        ///
-        ///                /-> O
-        ///        O -> N ---> O
-        ///                \-> O
-        /// ```
-        case beforeOutgoingNodes
-    }
-    
-    enum BeforeInsertionMode {
-        /// Adds a new ingoing edge on the target node for the new node:
-        ///
-        /// ```
-        ///       N - new     target
-        ///       |   node     node
-        ///       V              |
-        ///                      |
-        ///       O --\
-        ///       O -----------> O
-        ///       O --/
-        ///
-        /// result:
-        ///
-        ///       N --\
-        ///       O --|
-        ///       O -----------> O
-        ///       O --/
-        /// ```
-        case add
-        
-        /// Adds a new edge between the inserted node and the target node, and
-        /// move all previous ingoing nodes from the target to the new node:
-        ///
-        /// ```
-        ///     new node - N   target
-        ///                |    node
-        ///                |      |
-        ///                V      |
-        ///       O --\
-        ///       O ------------> O
-        ///       O --/
-        ///
-        /// result:
-        ///
-        ///       O --\
-        ///       O ----> N ----> O
-        ///       O --/
-        /// ```
-        case beforeIngoingNodes
     }
 }
 
@@ -751,34 +556,6 @@ public extension ControlFlowGraph {
             }
         }
     }
-}
-
-private extension ControlFlowGraph {
-    
-    private func insert(graph: ControlFlowGraph, ingoingConnections: [EdgeConstructor], _ end: ControlFlowGraphNode) {
-        let nodes = graph.nodes.filter {
-            $0 !== graph.entry && $0 !== graph.exit
-        }
-        
-        let edges = graph.edges.filter {
-            $0.start !== graph.entry && $0.start !== graph.exit
-                && $0.end !== graph.entry && $0.end !== graph.exit
-        }
-        
-        for node in nodes {
-            addNode(node)
-        }
-        for edge in edges {
-            let e = addEdge(from: edge.start, to: edge.end)
-            e.isBackEdge = edge.isBackEdge
-        }
-        
-        // Re-connect original entry/exit edges
-        for node in graph.nodesConnected(from: graph.entry) {
-            ingoingConnections.connect(to: node)
-        }
-    }
-    
 }
 
 /// Represents a free connection that is meant to be connected to next nodes
