@@ -865,6 +865,47 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
     
+    func testDeferStatementInDoWhileLoop() {
+        let stmt: CompoundStatement = [
+            Statement.expression(Expression.identifier("v").call()),
+            Statement.doWhile(
+                .identifier("v"),
+                body: [
+                    .defer([
+                        .expression(.identifier("a"))
+                    ]),
+                    .expression(.identifier("b"))
+                ]
+            )
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="v()"]
+                n4 [label="{do-while}"]
+                n5 [label="b"]
+                n6 [label="a"]
+                n1 -> n3
+                n3 -> n5
+                n4 -> n5 [color="#aa3333",penwidth=0.5]
+                n4 -> n2
+                n5 -> n6
+                n6 -> n4
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
     func testInterwindedDeferStatement() {
         let stmt: CompoundStatement = [
             Statement.defer([
@@ -947,6 +988,27 @@ private extension ControlFlowGraphCreationTests {
                 inFile: #file,
                 atLine: line,
                 expected: true)
+        }
+        
+        for edge in graph.edges {
+            if !graph.containsNode(edge.start) {
+                recordFailure(
+                    withDescription: """
+                    Edge contains reference for node that is not present in graph: \(edge.start)
+                    """,
+                    inFile: #file,
+                    atLine: line,
+                    expected: true)
+            }
+            if !graph.containsNode(edge.end) {
+                recordFailure(
+                    withDescription: """
+                    Edge contains reference for node that is not present in graph: \(edge.end)
+                    """,
+                    inFile: #file,
+                    atLine: line,
+                    expected: true)
+            }
         }
         
         for node in graph.nodes {

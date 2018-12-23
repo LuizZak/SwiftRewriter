@@ -20,6 +20,14 @@ public final class ControlFlowGraph {
         addNode(exit)
     }
     
+    /// Returns whether a given control flow graph node exists in this control
+    /// flow graph.
+    ///
+    /// A reference equality test (===) is used to determine syntax node equality.
+    public func containsNode(_ node: ControlFlowGraphNode) -> Bool {
+        return nodes.contains { $0 === node }
+    }
+    
     /// Returns the control flow graph node that represents a given syntax node,
     /// if available.
     /// Returns `nil`, if no graph node represents the given syntax node directly.
