@@ -2,6 +2,8 @@ import SwiftAST
 
 extension ControlFlowGraph {
     func merge(with other: ControlFlowGraph) {
+        assert(other !== self, "attempting to merge a graph with itself!")
+        
         let nodes = other.nodes.filter {
             $0 !== other.entry && $0 !== other.exit
         }
@@ -64,7 +66,7 @@ extension ControlFlowGraph {
     
     func addEdge(_ edge: ControlFlowGraphEdge) {
         assert(self.edge(from: edge.start, to: edge.end) == nil,
-               "There already is an edge between nodes \(edge.start.node) and \(edge.end.node) in this graph")
+               "An edge between nodes \(edge.start.node) and \(edge.end.node) already exists within this graph")
         
         edges.append(edge)
     }
@@ -90,6 +92,11 @@ extension ControlFlowGraph {
         return nodes.map {
             addEdge(from: $0, to: node2)
         }
+    }
+    
+    func removeNode(_ node: ControlFlowGraphNode) {
+        removeEdges(allEdges(for: node))
+        nodes.removeAll(where: { $0 === node })
     }
     
     func removeEdges<S: Sequence>(_ edgesToRemove: S) where S.Element == ControlFlowGraphEdge {
@@ -287,10 +294,49 @@ public extension ControlFlowGraph {
     /// statement itself, with its inner nodes being the statements contained
     /// within.
     public static func forCompoundStatement(_ compoundStatement: CompoundStatement) -> ControlFlowGraph {
-        return forStatementList(compoundStatement.statements, baseNode: compoundStatement)
+        let graph = forStatementList(compoundStatement.statements, baseNode: compoundStatement)
+        
+        expandSubgraphs(in: graph)
+        
+        return graph
     }
     
-    static func forStatementList(_ statements: [Statement], baseNode: SyntaxNode) -> ControlFlowGraph {
+    private static func expandSubgraphs(in graph: ControlFlowGraph) {
+        for case let node as ControlFlowSubgraphNode in graph.nodes {
+            let edgesTo = graph.edges(towards: node)
+            let edgesFrom = graph.edges(from: node)
+            
+            let entryEdges = node.graph.edges(from: node.graph.entry)
+            let exitEdges = node.graph.edges(towards: node.graph.exit)
+            
+            graph.removeNode(node)
+            
+            graph.merge(with: node.graph)
+            
+            for edgeTo in edgesTo {
+                let source = edgeTo.start
+                
+                for entryEdge in entryEdges {
+                    let target = entryEdge.end
+                    
+                    let edge = graph.addEdge(from: source, to: target)
+                    edge.isBackEdge = edgeTo.isBackEdge
+                }
+            }
+            for edgeFrom in edgesFrom {
+                let target = edgeFrom.end
+                
+                for exitEdge in exitEdges {
+                    let source = exitEdge.start
+                    
+                    let edge = graph.addEdge(from: source, to: target)
+                    edge.isBackEdge = edgeFrom.isBackEdge
+                }
+            }
+        }
+    }
+    
+    private static func forStatementList(_ statements: [Statement], baseNode: SyntaxNode) -> ControlFlowGraph {
         let entry = ControlFlowGraphEntryNode(node: baseNode)
         let exit = ControlFlowGraphExitNode(node: baseNode)
         

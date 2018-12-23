@@ -647,11 +647,11 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="DeferStatement"]
-                n4 [label="b"]
-                n1 -> n4
-                n3 -> n2
-                n4 -> n3
+                n3 [label="b"]
+                n4 [label="a"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n2
             }
             """)
         XCTAssertEqual(graph.nodes.count, 4)
@@ -684,15 +684,15 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="{if}"]
-                n4 [label="DeferStatement"]
-                n5 [label="c"]
-                n6 [label="d"]
+                n4 [label="c"]
+                n5 [label="d"]
+                n6 [label="b"]
                 n1 -> n3
+                n3 -> n4
                 n3 -> n5
-                n3 -> n6
                 n4 -> n6
-                n5 -> n4
-                n6 -> n2
+                n5 -> n2
+                n6 -> n5
             }
             """)
         XCTAssertEqual(graph.nodes.count, 6)
@@ -730,19 +730,19 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="{if}"]
-                n4 [label="DeferStatement"]
-                n5 [label="c"]
-                n6 [label="DeferStatement"]
-                n7 [label="e"]
-                n8 [label="f"]
+                n4 [label="c"]
+                n5 [label="e"]
+                n6 [label="f"]
+                n7 [label="b"]
+                n8 [label="d"]
                 n1 -> n3
+                n3 -> n4
                 n3 -> n5
-                n3 -> n7
-                n4 -> n8
-                n5 -> n4
-                n6 -> n8
+                n4 -> n7
+                n5 -> n8
+                n6 -> n2
                 n7 -> n6
-                n8 -> n2
+                n8 -> n6
             }
             """)
         XCTAssertEqual(graph.nodes.count, 8)
@@ -774,15 +774,15 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="{while}"]
-                n4 [label="DeferStatement"]
-                n5 [label="c"]
-                n6 [label="d"]
+                n4 [label="c"]
+                n5 [label="d"]
+                n6 [label="b"]
                 n1 -> n3
+                n3 -> n4
                 n3 -> n5
-                n3 -> n6
-                n4 -> n3 [color="#aa3333",penwidth=0.5]
-                n5 -> n4
-                n6 -> n2
+                n4 -> n6
+                n5 -> n2
+                n6 -> n3 [color="#aa3333",penwidth=0.5]
             }
             """)
         XCTAssertEqual(graph.nodes.count, 6)
@@ -815,17 +815,17 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="{while}"]
-                n4 [label="DeferStatement"]
-                n5 [label="c"]
-                n6 [label="BreakStatement"]
-                n7 [label="d"]
+                n4 [label="c"]
+                n5 [label="BreakStatement"]
+                n6 [label="d"]
+                n7 [label="b"]
                 n1 -> n3
-                n3 -> n5
-                n3 -> n7
-                n4 -> n7
-                n5 -> n6
-                n6 -> n4
-                n7 -> n2
+                n3 -> n4
+                n3 -> n6
+                n4 -> n5
+                n5 -> n7
+                n6 -> n2
+                n7 -> n6
             }
             """)
         XCTAssertEqual(graph.nodes.count, 7)
@@ -861,19 +861,19 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="DeferStatement"]
-                n4 [label="b"]
-                n5 [label="{if}"]
-                n6 [label="ReturnStatement"]
-                n7 [label="DeferStatement"]
-                n8 [label="d"]
-                n1 -> n4
-                n3 -> n2
+                n3 [label="b"]
+                n4 [label="{if}"]
+                n5 [label="ReturnStatement"]
+                n6 [label="d"]
+                n7 [label="a"]
+                n8 [label="c"]
+                n1 -> n3
+                n3 -> n4
                 n4 -> n5
-                n5 -> n6
-                n5 -> n8
-                n6 -> n3
-                n7 -> n3
+                n4 -> n6
+                n5 -> n7
+                n6 -> n8
+                n7 -> n2
                 n8 -> n7
             }
             """)
@@ -918,6 +918,16 @@ private extension ControlFlowGraphCreationTests {
         }
         
         for node in graph.nodes {
+            if node is ControlFlowSubgraphNode {
+                recordFailure(
+                    withDescription: """
+                    Found non-expanded subgraph node: \(node.node)
+                    """,
+                    inFile: #file,
+                    atLine: line,
+                    expected: true)
+            }
+            
             if graph.allEdges(for: node).isEmpty {
                 recordFailure(
                     withDescription: """
