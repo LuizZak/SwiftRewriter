@@ -168,8 +168,7 @@ public extension ControlFlowGraph {
         
         return graph
     }
-    
-    private static func _connections(for stmt: Statement,
+        private static func _connections(for stmt: Statement,
                                      in graph: ControlFlowGraph,
                                      context: Context) -> NodeCreationResult? {
         
@@ -184,171 +183,28 @@ public extension ControlFlowGraph {
             return (node, [EdgeConstructor(for: node, in: graph)])
             
         case is ReturnStatement:
-            graph.addNode(node)
-            
-            let activeDeferNodes = context.activeDeferNodes
-            if activeDeferNodes.count > 0 {
-                graph.connectChain(start: node, rest: context.activeDeferNodes)
-                
-                return (node, [])
-            }
-            
-            graph.addEdge(from: node, to: graph.exit)
-            
-            return (node, [])
+            return _connectionsForReturn(graph, node, context)
             
         case is BreakStatement:
-            graph.addNode(node)
-            if let breakTarget = context.breakTarget {
-                for def in breakTarget.defers {
-                    context.satisfyDefer(node: def)
-                }
-                
-                breakTarget.target.addNode(node, defers: breakTarget.defers)
-            }
-            
-            return (node, [])
+            return _connectionsForBreak(graph, node, context)
             
         case is ContinueStatement:
-            graph.addNode(node)
-            context.continueTarget?.addNode(node, defers: context.activeDeferNodes)
-            
-            return (node, [])
+            return _connectionsForContinue(graph, node, context)
             
         case let stmt as CompoundStatement:
-            if stmt.isEmpty {
-                return nil
-            }
-            
-            _=context.pushScope(node)
-            
-            var start: ControlFlowGraphNode?
-            var prev: NodeCreationResult?
-            for subStmt in stmt.statements {
-                guard let cur = _connections(for: subStmt, in: graph, context: context) else {
-                    continue
-                }
-                
-                if let prev = prev {
-                    prev.endings.connect(to: cur.start)
-                } else {
-                    start = cur.start
-                }
-                
-                prev = cur
-            }
-            
-            if let prev = prev, let start = start {
-                let result = context.popScope(node, start: start, outConnections: prev.endings, in: graph)
-                
-                return result
-            }
-            
-            return nil
+            return _connectionsForCompound(stmt, context, node, graph)
             
         case let stmt as DoStatement:
-            // TODO: Support breaking out of labeled do statements
-            _=context.pushScope(node)
-            
-            if let result = _connections(for: stmt.body, in: graph, context: context) {
-                return context.popScope(node,
-                                        start: result.start,
-                                        outConnections: result.endings,
-                                        in: graph)
-            }
-            
-            return context.popScope(node,
-                                    start: node,
-                                    outConnections: [],
-                                    in: graph)
+            return _connectionsForDo(context, node, stmt, graph)
             
         case let stmt as DeferStatement:
-            let body = ControlFlowGraph.forCompoundStatement(stmt.body)
-            
-            let subgraph = ControlFlowSubgraphNode(node: stmt, graph: body)
-            
-            graph.addNode(subgraph)
-            
-            context.pushDefer(graph: subgraph)
-            
-            return nil
+            return _connectionsForDefer(stmt, graph, context)
             
         case let stmt as IfStatement:
-            graph.addNode(node)
-            
-            // TODO: Support breaking out of labeled if statements
-            _=context.pushScope(node)
-            
-            var connections: [EdgeConstructor] = []
-            
-            if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
-                graph.addEdge(from: node, to: bodyNode.start)
-                connections.append(contentsOf: bodyNode.endings)
-            }
-            
-            let hasElse: Bool
-            
-            if let elseBody = stmt.elseBody,
-                let elseBodyNode = _connections(for: elseBody, in: graph, context: context) {
-                
-                hasElse = true
-                
-                graph.addEdge(from: node, to: elseBodyNode.start)
-                connections.append(contentsOf: elseBodyNode.endings)
-            } else {
-                hasElse = false
-            }
-            
-            var result = context.popScope(node,
-                                          start: node,
-                                          outConnections: connections,
-                                          in: graph)
-            
-            if !hasElse {
-                result.endings.append(EdgeConstructor(for: node, in: graph))
-            }
-            
-            return result
+            return _connectionsForIf(graph, node, context, stmt)
             
         case let stmt as SwitchStatement:
-            graph.addNode(node)
-            
-            let scope = context.pushScope(node)
-            
-            var connections: [EdgeConstructor] = []
-            
-            let caseStatements =
-                stmt.cases.map { $0.statements }
-            
-            // TODO: Support detecting fallthrough in switch cases
-            for stmts in caseStatements + [stmt.defaultCase ?? []] {
-                let caseConnections =
-                    stmts.compactMap {
-                        _connections(for: $0, in: graph, context: context)
-                    }
-                
-                if caseConnections.isEmpty {
-                    continue
-                }
-                
-                graph.addEdge(from: node, to: caseConnections[0].start)
-                zip(caseConnections, caseConnections.dropFirst()).forEach {
-                    $0.endings.connect(to: $1.start)
-                }
-                
-                connections.append(contentsOf: caseConnections.last!.endings)
-            }
-            
-            if stmt.defaultCase == nil {
-                connections.append(EdgeConstructor(for: node, in: graph))
-            }
-            
-            let breaks = scope.breakTarget!
-            
-            return context.popScope(node,
-                                    start: node,
-                                    outConnections: connections + breaks.edgeConstructors(in: graph),
-                                    in: graph)
+            return _connectionsForSwitch(graph, node, context, stmt)
             
         case let stmt as ForStatement:
             graph.addNode(node)
@@ -361,44 +217,253 @@ public extension ControlFlowGraph {
             return _makeLoop(node: node, body: stmt.body, in: graph, context: context)
             
         case let stmt as DoWhileStatement:
-            graph.addNode(node)
-            
-            let scope = context.pushScope(node)
-            
-            var didPushHead = false
-            var loopHead: ControlFlowGraphNode = node
-            
-            if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
-                bodyNode.endings.connect(to: node)
-                loopHead = bodyNode.start
-                
-                if bodyNode.endings.isEmpty {
-                    graph.removeNode(node)
-                } else {
-                    graph.addBackEdge(from: node, to: bodyNode.start)
-                    didPushHead = true
-                }
-            } else {
-                // connect loop back on itself
-                graph.addBackEdge(from: node, to: node)
-                didPushHead = true
-            }
-            
-            let breaks = scope.breakTarget!
-            var result = context.popScope(node,
-                                          start: loopHead,
-                                          outConnections: breaks.edgeConstructors(in: graph),
-                                          in: graph)
-            
-            if didPushHead {
-                result.endings.append(EdgeConstructor(for: node, in: graph))
-            }
-            
-            return result
+            return _connectionsForDoWhile(graph, node, context, stmt)
             
         default:
             return nil
         }
+    }
+    
+    private static func _connectionsForReturn(_ graph: ControlFlowGraph,
+                                              _ node: ControlFlowGraphNode,
+                                              _ context: ControlFlowGraph.Context) -> ControlFlowGraph.NodeCreationResult? {
+        graph.addNode(node)
+        
+        let activeDeferNodes = context.activeDeferNodes
+        if activeDeferNodes.count > 0 {
+            graph.connectChain(start: node, rest: context.activeDeferNodes)
+            
+            return (node, [])
+        }
+        
+        graph.addEdge(from: node, to: graph.exit)
+        
+        return (node, [])
+    }
+    
+    private static func _connectionsForBreak(_ graph: ControlFlowGraph,
+                                             _ node: ControlFlowGraphNode,
+                                             _ context: ControlFlowGraph.Context) -> ControlFlowGraph.NodeCreationResult? {
+        graph.addNode(node)
+        if let breakTarget = context.breakTarget {
+            for def in breakTarget.defers {
+                context.satisfyDefer(node: def)
+            }
+            
+            breakTarget.target.addNode(node, defers: breakTarget.defers)
+        }
+        
+        return (node, [])
+    }
+    
+    private static func _connectionsForContinue(_ graph: ControlFlowGraph,
+                                                _ node: ControlFlowGraphNode,
+                                                _ context: ControlFlowGraph.Context) -> ControlFlowGraph.NodeCreationResult? {
+        
+        graph.addNode(node)
+        context.continueTarget?.addNode(node, defers: context.activeDeferNodes)
+        
+        return (node, [])
+    }
+    
+    private static func _connectionsForCompound(_ stmt: CompoundStatement,
+                                                _ context: ControlFlowGraph.Context,
+                                                _ node: ControlFlowGraphNode,
+                                                _ graph: ControlFlowGraph) -> ControlFlowGraph.NodeCreationResult? {
+        
+        if stmt.isEmpty {
+            return nil
+        }
+        
+        _=context.pushScope(node)
+        
+        var start: ControlFlowGraphNode?
+        var prev: NodeCreationResult?
+        for subStmt in stmt.statements {
+            guard let cur = _connections(for: subStmt, in: graph, context: context) else {
+                continue
+            }
+            
+            if let prev = prev {
+                prev.endings.connect(to: cur.start)
+            } else {
+                start = cur.start
+            }
+            
+            prev = cur
+        }
+        
+        if let prev = prev, let start = start {
+            let result = context.popScope(node, start: start, outConnections: prev.endings, in: graph)
+            
+            return result
+        }
+        
+        return nil
+    }
+    
+    private static func _connectionsForDo(_ context: ControlFlowGraph.Context,
+                                          _ node: ControlFlowGraphNode,
+                                          _ stmt: DoStatement,
+                                          _ graph: ControlFlowGraph) -> ControlFlowGraph.NodeCreationResult? {
+        
+        // TODO: Support breaking out of labeled do statements
+        _=context.pushScope(node)
+        
+        if let result = _connections(for: stmt.body, in: graph, context: context) {
+            return context.popScope(node,
+                                    start: result.start,
+                                    outConnections: result.endings,
+                                    in: graph)
+        }
+        
+        return context.popScope(node,
+                                start: node,
+                                outConnections: [],
+                                in: graph)
+    }
+    
+    private static func _connectionsForDefer(_ stmt: DeferStatement,
+                                             _ graph: ControlFlowGraph,
+                                             _ context: ControlFlowGraph.Context) -> ControlFlowGraph.NodeCreationResult? {
+        
+        let body = ControlFlowGraph.forCompoundStatement(stmt.body)
+        
+        let subgraph = ControlFlowSubgraphNode(node: stmt, graph: body)
+        
+        graph.addNode(subgraph)
+        
+        context.pushDefer(graph: subgraph)
+        
+        return nil
+    }
+    
+    private static func _connectionsForIf(_ graph: ControlFlowGraph,
+                                          _ node: ControlFlowGraphNode,
+                                          _ context: ControlFlowGraph.Context,
+                                          _ stmt: IfStatement) -> ControlFlowGraph.NodeCreationResult? {
+        
+        graph.addNode(node)
+        
+        // TODO: Support breaking out of labeled if statements
+        _=context.pushScope(node)
+        
+        var connections: [EdgeConstructor] = []
+        
+        if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
+            graph.addEdge(from: node, to: bodyNode.start)
+            connections.append(contentsOf: bodyNode.endings)
+        }
+        
+        let hasElse: Bool
+        
+        if let elseBody = stmt.elseBody,
+            let elseBodyNode = _connections(for: elseBody, in: graph, context: context) {
+            
+            hasElse = true
+            
+            graph.addEdge(from: node, to: elseBodyNode.start)
+            connections.append(contentsOf: elseBodyNode.endings)
+        } else {
+            hasElse = false
+        }
+        
+        var result = context.popScope(node,
+                                      start: node,
+                                      outConnections: connections,
+                                      in: graph)
+        
+        if !hasElse {
+            result.endings.append(EdgeConstructor(for: node, in: graph))
+        }
+        
+        return result
+    }
+    
+    private static func _connectionsForSwitch(_ graph: ControlFlowGraph,
+                                              _ node: ControlFlowGraphNode,
+                                              _ context: ControlFlowGraph.Context,
+                                              _ stmt: SwitchStatement) -> ControlFlowGraph.NodeCreationResult? {
+        
+        graph.addNode(node)
+        
+        let scope = context.pushScope(node)
+        
+        var connections: [EdgeConstructor] = []
+        
+        let caseStatements =
+            stmt.cases.map { $0.statements }
+        
+        // TODO: Support detecting fallthrough in switch cases
+        for stmts in caseStatements + [stmt.defaultCase ?? []] {
+            let caseConnections =
+                stmts.compactMap {
+                    _connections(for: $0, in: graph, context: context)
+            }
+            
+            if caseConnections.isEmpty {
+                continue
+            }
+            
+            graph.addEdge(from: node, to: caseConnections[0].start)
+            zip(caseConnections, caseConnections.dropFirst()).forEach {
+                $0.endings.connect(to: $1.start)
+            }
+            
+            connections.append(contentsOf: caseConnections.last!.endings)
+        }
+        
+        if stmt.defaultCase == nil {
+            connections.append(EdgeConstructor(for: node, in: graph))
+        }
+        
+        let breaks = scope.breakTarget!
+        
+        return context.popScope(node,
+                                start: node,
+                                outConnections: connections + breaks.edgeConstructors(in: graph),
+                                in: graph)
+    }
+    
+    private static func _connectionsForDoWhile(_ graph: ControlFlowGraph,
+                                               _ node: ControlFlowGraphNode,
+                                               _ context: ControlFlowGraph.Context,
+                                               _ stmt: DoWhileStatement) -> ControlFlowGraph.NodeCreationResult? {
+        
+        graph.addNode(node)
+        
+        let scope = context.pushScope(node)
+        
+        var didPushHead = false
+        var loopHead: ControlFlowGraphNode = node
+        
+        if let bodyNode = _connections(for: stmt.body, in: graph, context: context) {
+            bodyNode.endings.connect(to: node)
+            loopHead = bodyNode.start
+            
+            if bodyNode.endings.isEmpty {
+                graph.removeNode(node)
+            } else {
+                graph.addBackEdge(from: node, to: bodyNode.start)
+                didPushHead = true
+            }
+        } else {
+            // connect loop back on itself
+            graph.addBackEdge(from: node, to: node)
+            didPushHead = true
+        }
+        
+        let breaks = scope.breakTarget!
+        var result = context.popScope(node,
+                                      start: loopHead,
+                                      outConnections: breaks.edgeConstructors(in: graph),
+                                      in: graph)
+        
+        if didPushHead {
+            result.endings.append(EdgeConstructor(for: node, in: graph))
+        }
+        
+        return result
     }
     
     private static func _makeLoop(node: ControlFlowGraphNode,

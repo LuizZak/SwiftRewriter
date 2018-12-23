@@ -101,11 +101,7 @@ public extension DirectedGraph {
             
             visitor(next)
             
-            for nextNode in nodesConnected(from: next) {
-                guard !visited.contains(nextNode) else {
-                    continue
-                }
-                
+            for nextNode in nodesConnected(from: next) where !visited.contains(nextNode) {
                 queue.append(nextNode)
             }
         }
@@ -126,11 +122,7 @@ public extension DirectedGraph {
             
             visitor(next)
             
-            for nextNode in nodesConnected(from: next) {
-                guard !visited.contains(nextNode) else {
-                    continue
-                }
-                
+            for nextNode in nodesConnected(from: next) where !visited.contains(nextNode) {
                 queue.append(nextNode)
             }
         }
