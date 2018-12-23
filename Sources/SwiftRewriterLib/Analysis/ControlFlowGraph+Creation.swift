@@ -168,7 +168,8 @@ public extension ControlFlowGraph {
         
         return graph
     }
-        private static func _connections(for stmt: Statement,
+    
+    private static func _connections(for stmt: Statement,
                                      in graph: ControlFlowGraph,
                                      context: Context) -> NodeCreationResult? {
         
@@ -577,7 +578,7 @@ public extension ControlFlowGraph {
             var lastConnections: [EdgeConstructor] = outConnections
             
             let defers = scope.openDefers
-
+            
             for deferGraph in defers.reversed() {
                 lastConnections.connect(to: deferGraph)
                 lastConnections = [EdgeConstructor(for: deferGraph, in: graph)]
