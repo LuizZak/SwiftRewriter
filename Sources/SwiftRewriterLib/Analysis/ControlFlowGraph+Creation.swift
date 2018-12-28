@@ -22,17 +22,6 @@ extension ControlFlowGraph {
         }
     }
     
-    func reset(entry: ControlFlowGraphEntryNode, exit: ControlFlowGraphExitNode) {
-        nodes.removeAll()
-        edges.removeAll()
-        
-        self.entry = entry
-        self.exit = exit
-        
-        nodes.append(entry)
-        nodes.append(exit)
-    }
-    
     func addNode(_ node: ControlFlowGraphNode) {
         nodes.append(node)
     }
@@ -58,13 +47,6 @@ extension ControlFlowGraph {
         edge.isBackEdge = true
         
         return edge
-    }
-    
-    @discardableResult
-    func addEdges(from nodes: [ControlFlowGraphNode], to node2: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return nodes.map {
-            addEdge(from: $0, to: node2)
-        }
     }
     
     func removeNode(_ node: ControlFlowGraphNode) {

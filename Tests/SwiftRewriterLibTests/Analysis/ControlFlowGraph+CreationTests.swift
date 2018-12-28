@@ -665,9 +665,10 @@ class ControlFlowGraphCreationTests: XCTestCase {
     func testDeferStatement() {
         let stmt: CompoundStatement = [
             Statement.defer([
-                Statement.expression(.identifier("a"))
+                Statement.expression(.identifier("a")),
+                Statement.expression(.identifier("b"))
             ]),
-            Statement.expression(.identifier("b"))
+            Statement.expression(.identifier("c"))
         ]
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -679,14 +680,16 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="b"]
+                n3 [label="c"]
                 n4 [label="a"]
+                n5 [label="b"]
                 n1 -> n3
                 n3 -> n4
-                n4 -> n2
+                n4 -> n5
+                n5 -> n2
             }
             """)
-        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -697,13 +700,14 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 .identifier("a"),
                 body: [
                     Statement.defer([
-                        Statement.expression(.identifier("b"))
+                        Statement.expression(.identifier("b")),
+                        Statement.expression(.identifier("c"))
                     ]),
-                    Statement.expression(.identifier("c"))
+                    Statement.expression(.identifier("d"))
                 ],
                 else: nil
             ),
-            Statement.expression(.identifier("d"))
+            Statement.expression(.identifier("e"))
         ]
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
@@ -716,18 +720,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="{if}"]
-                n4 [label="c"]
-                n5 [label="d"]
+                n4 [label="d"]
+                n5 [label="e"]
                 n6 [label="b"]
+                n7 [label="c"]
                 n1 -> n3
                 n3 -> n4
                 n3 -> n5
                 n4 -> n6
                 n5 -> n2
-                n6 -> n5
+                n6 -> n7
+                n7 -> n5
             }
             """)
-        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssertEqual(graph.nodes.count, 7)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
