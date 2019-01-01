@@ -654,7 +654,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n3 -> n4
                 n3 -> n2
                 n4 -> n3 [color="#aa3333",penwidth=0.5]
-                n5 -> n3 [color="#aa3333",penwidth=0.5]
+                n5 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)

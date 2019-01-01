@@ -81,6 +81,35 @@ public extension ControlFlowGraph {
     /// statement itself, with its inner nodes being the statements contained
     /// within.
     public static func forCompoundStatement(_ compoundStatement: CompoundStatement) -> ControlFlowGraph {
+        let graph = innerForCompoundStatement(compoundStatement)
+        
+        markBackEdges(in: graph)
+        
+        return graph
+    }
+    
+    private static func markBackEdges(in graph: ControlFlowGraph) {
+        var visited: Set<ControlFlowGraphNode> = []
+        var queue: [(ControlFlowGraphNode, [ControlFlowGraphNode])] = []
+        
+        queue.append((graph.entry, [graph.entry]))
+        
+        while let next = queue.popLast() {
+            visited.insert(next.0)
+        
+            for nextEdge in graph.edges(from: next.0) {
+                let node = nextEdge.end
+                if next.1.contains(node) {
+                    nextEdge.isBackEdge = true
+                    continue
+                }
+                
+                queue.append((node, next.1 + [node]))
+            }
+        }
+    }
+    
+    private static func innerForCompoundStatement(_ compoundStatement: CompoundStatement) -> ControlFlowGraph {
         let graph = forStatementList(compoundStatement.statements, baseNode: compoundStatement)
         
         expandSubgraphs(in: graph)
@@ -310,7 +339,7 @@ public extension ControlFlowGraph {
                                              _ graph: ControlFlowGraph,
                                              _ context: ControlFlowGraph.Context) -> ControlFlowGraph.NodeCreationResult? {
         
-        let body = ControlFlowGraph.forCompoundStatement(stmt.body)
+        let body = ControlFlowGraph.innerForCompoundStatement(stmt.body)
         
         let subgraph = ControlFlowSubgraphNode(node: stmt, graph: body)
         
@@ -460,15 +489,10 @@ public extension ControlFlowGraph {
             graph.addEdge(from: node, to: bodyNode.start)
             
             // Add a back edge pointing back to the beginning of the loop
-            let backEdges = bodyNode.endings.connect(to: node)
-            for backEdge in backEdges {
-                backEdge.isBackEdge = true
-            }
-            
+            bodyNode.endings.connect(to: node)
             if let continues = context.continueTarget {
                 for continueNode in continues.nodes {
-                    let backEdge = graph.addEdge(from: continueNode.node, to: node)
-                    backEdge.isBackEdge = true
+                    graph.addEdge(from: continueNode.node, to: node)
                 }
             }
         } else {

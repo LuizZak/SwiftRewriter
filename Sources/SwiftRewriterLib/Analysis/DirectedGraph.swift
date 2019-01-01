@@ -74,11 +74,27 @@ public protocol DirectedGraph {
     
     /// Performs a depth-first visiting of this control flow graph
     @inlinable
-    func depthFirstVisit(_ visitor: (Node) -> Void)
+    func depthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
     
     /// Performs a breadth-first visiting of this control flow graph
     @inlinable
-    func breadthFirstVisit(_ visitor: (Node) -> Void)
+    func breadthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
+}
+
+/// Element for a graph visiting operation.
+///
+/// - root: The item represents the root of a directed graph
+/// - edge: The item represents an edge, pointing to a node of the graph
+public enum DirectedGraphVisitElement<E: DirectedGraphEdge, N: DirectedGraphNode> {
+    case root(N)
+    case edge(E, towards: N)
+    
+    public var node: N {
+        switch self {
+        case .root(let node), .edge(_, let node):
+            return node
+        }
+    }
 }
 
 public extension DirectedGraph {
@@ -88,50 +104,82 @@ public extension DirectedGraph {
             && areNodesEqual(endNode(for: edge1), endNode(for: edge2))
     }
     
+    @inlinable
+    public func allEdges(for node: Node) -> [Edge] {
+        return edges(towards: node) + edges(from: node)
+    }
+    
+    @inlinable
+    public func nodesConnected(from node: Node) -> [Node] {
+        return edges(from: node).map(self.endNode(for:))
+    }
+    
+    @inlinable
+    public func nodesConnected(towards node: Node) -> [Node] {
+        return edges(towards: node).map(self.startNode(for:))
+    }
+    
+    @inlinable
+    public func allNodesConnected(to node: Node) -> [Node] {
+        return nodesConnected(towards: node) + nodesConnected(from: node)
+    }
+    
     /// Performs a depth-first visiting of this control flow graph
     @inlinable
-    public func depthFirstVisit(_ visitor: (Node) -> Void) {
+    public func depthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
-        var queue: [Node] = []
+        var queue: [DirectedGraphVisitElement<Edge, Node>] = []
         
-        queue.append(entry)
+        queue.append(.root(entry))
         
         while let next = queue.popLast() {
-            visited.insert(next)
+            visited.insert(next.node)
             
             visitor(next)
             
-            for nextNode in nodesConnected(from: next) where !visited.contains(nextNode) {
-                queue.append(nextNode)
+            for nextEdge in edges(from: next.node) {
+                let node = endNode(for: nextEdge)
+                if visited.contains(node) {
+                    continue
+                }
+                
+                queue.append(.edge(nextEdge, towards: node))
             }
         }
     }
     
     /// Performs a breadth-first visiting of this control flow graph
     @inlinable
-    public func breadthFirstVisit(_ visitor: (Node) -> Void) {
+    public func breadthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
-        var queue: [Node] = []
+        var queue: [DirectedGraphVisitElement<Edge, Node>] = []
         
-        queue.append(entry)
+        queue.append(.root(entry))
         
         while !queue.isEmpty {
             let next = queue.removeFirst()
-            
-            visited.insert(next)
+            visited.insert(next.node)
             
             visitor(next)
             
-            for nextNode in nodesConnected(from: next) where !visited.contains(nextNode) {
-                queue.append(nextNode)
+            for nextEdge in edges(from: next.node) {
+                let node = endNode(for: nextEdge)
+                if visited.contains(node) {
+                    continue
+                }
+                
+                queue.append(.edge(nextEdge, towards: node))
             }
         }
     }
 }
 
+/// A protocol for representing a directed graph's edge
 public protocol DirectedGraphEdge: Hashable {
     
 }
+
+/// A protocol for representing a directed graph's node
 public protocol DirectedGraphNode: Hashable {
     
 }

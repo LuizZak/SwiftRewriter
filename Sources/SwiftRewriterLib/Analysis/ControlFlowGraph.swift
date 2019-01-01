@@ -53,13 +53,6 @@ public final class ControlFlowGraph: DirectedGraph {
         return nodes.first { $0.node === node }
     }
     
-    /// Returns all ingoing and outgoing edges for a given control flow graph node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func allEdges(for node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return edges.filter { $0.start === node || $0.end === node }
-    }
-    
     /// Returns all outgoing edges for a given control flow graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
@@ -96,22 +89,6 @@ public final class ControlFlowGraph: DirectedGraph {
         return edges.filter { $0.end === node && $0.isBackEdge }
     }
     
-    /// Returns all graph nodes that are connected from a given control flow graph
-    /// node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func nodesConnected(from node: ControlFlowGraphNode) -> [ControlFlowGraphNode] {
-        return edges.compactMap { $0.start === node ? $0.end : nil }
-    }
-    
-    /// Returns all graph nodes that are connected towards a given control flow
-    /// graph node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func nodesConnected(towards node: ControlFlowGraphNode) -> [ControlFlowGraphNode] {
-        return edges.compactMap { $0.end === node ? $0.start : nil }
-    }
-    
     /// Returns all graph nodes that are connected towards and from the given
     /// graph node.
     ///
@@ -127,7 +104,7 @@ extension ControlFlowGraph {
         var list: [ControlFlowGraphNode] = []
         
         depthFirstVisit {
-            list.append($0)
+            list.append($0.node)
         }
         
         return list
@@ -138,7 +115,7 @@ extension ControlFlowGraph {
         var list: [ControlFlowGraphNode] = []
         
         breadthFirstVisit {
-            list.append($0)
+            list.append($0.node)
         }
         
         return list
