@@ -411,21 +411,21 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="SwitchStatement"]
-                n4 [label="b"]
-                n5 [label="{if}"]
-                n6 [label="BreakStatement"]
-                n7 [label="d"]
+                n3 [label="{if}"]
+                n4 [label="BreakStatement"]
+                n5 [label="b"]
+                n6 [label="d"]
+                n7 [label="SwitchStatement"]
                 n8 [label="e"]
                 n9 [label="c"]
-                n1 -> n3
+                n1 -> n7
                 n3 -> n4
-                n3 -> n8
-                n4 -> n5
-                n5 -> n6
-                n5 -> n7
+                n3 -> n6
+                n4 -> n9
+                n5 -> n3
                 n6 -> n9
-                n7 -> n9
+                n7 -> n5
+                n7 -> n8
                 n8 -> n2
                 n9 -> n2
             }

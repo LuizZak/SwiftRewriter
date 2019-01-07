@@ -166,7 +166,9 @@ private extension ControlFlowGraph {
         var previous = _NodeCreationResult(startNode: entry)
             .addingExitNode(entry, defers: [])
         
-        previous = _connections(for: statements, start: previous, in: graph)
+        previous =
+            _connections(for: statements, start: previous, in: graph)
+                .returnToExits()
         
         previous.exitNodes
             .edgeConstructors(in: graph)
@@ -188,25 +190,16 @@ private extension ControlFlowGraph {
         var previous = start
         
         for statement in statements {
-            if let stmt = statement as? DeferStatement {
-                let subgraph = forStatementList(stmt.body.statements, baseNode: stmt)
-                let defNode = ControlFlowSubgraphNode(node: stmt, graph: subgraph)
-                
-                activeDefers.append(defNode)
-                
-                graph.addNode(defNode)
-                
+            let connections = _connections(for: statement, in: graph)
+            if connections.isDefer {
+                activeDefers.append(connections.startNode as! ControlFlowSubgraphNode)
                 continue
             }
             
-            let result =
-                _connections(for: statement, in: graph)
-                    .appendingDefers(activeDefers)
-            
-            previous = previous.chainResult(next: result, in: graph)
+            previous = previous.chainResult(next: connections, in: graph)
         }
         
-        return previous
+        return previous.appendingDefers(activeDefers)
     }
     
     private static func _connections(for statements: [Statement],
@@ -244,8 +237,20 @@ private extension ControlFlowGraph {
             return _NodeCreationResult(startNode: node)
                 .addingContinueNode(node, defers: [])
             
-        case is DeferStatement:
-            return .invalid
+        case is ReturnStatement:
+            let node = ControlFlowGraphNode(node: statement)
+            
+            return _NodeCreationResult(startNode: node)
+                .addingReturnNode(node, defers: [])
+            
+        case let stmt as DeferStatement:
+            let subgraph = forStatementList(stmt.body.statements, baseNode: stmt)
+            let defNode = ControlFlowSubgraphNode(node: stmt, graph: subgraph)
+            
+            graph.addNode(defNode)
+            
+            return _NodeCreationResult(startNode: defNode)
+                .appendingDefer(defNode)
             
         case let stmt as FallthroughStatement:
             return _connections(forFallthrough: stmt)
@@ -327,7 +332,9 @@ private extension ControlFlowGraph {
                     .connect(to: branch.startNode)
             }
             
-            result = result.addingBranch(branch, in: graph)
+            result =
+                result
+                    .addingBranch(branch.breakToExits(), in: graph)
             
             lastFallthrough = branch.fallthroughNodes
         }
@@ -382,6 +389,10 @@ private extension ControlFlowGraph {
         
         var isValid: Bool {
             return !(startNode.node is _InvalidSyntaxNode)
+        }
+        
+        var isDefer: Bool {
+            return (startNode.node is DeferStatement)
         }
         
         var startNode: ControlFlowGraphNode
@@ -462,6 +473,13 @@ private extension ControlFlowGraph {
             var result = self
             result.exitNodes.merge(with: result.breakNodes)
             result.breakNodes.clear()
+            return result
+        }
+        
+        func returnToExits() -> _NodeCreationResult {
+            var result = self
+            result.exitNodes.merge(with: result.returnNodes)
+            result.returnNodes.clear()
             return result
         }
         
