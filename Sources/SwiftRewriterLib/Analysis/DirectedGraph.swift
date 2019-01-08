@@ -26,19 +26,19 @@ public protocol DirectedGraph {
     @inlinable
     func endNode(for edge: Edge) -> Node
     
-    /// Returns all ingoing and outgoing edges for a given control flow graph node.
+    /// Returns all ingoing and outgoing edges for a given directed graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     @inlinable
     func allEdges(for node: Node) -> [Edge]
     
-    /// Returns all outgoing edges for a given control flow graph node.
+    /// Returns all outgoing edges for a given directed graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     @inlinable
     func edges(from node: Node) -> [Edge]
     
-    /// Returns all ingoing edges for a given control flow graph node.
+    /// Returns all ingoing edges for a given directed graph node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     @inlinable
@@ -51,15 +51,15 @@ public protocol DirectedGraph {
     @inlinable
     func edge(from start: Node, to end: Node) -> Edge?
     
-    /// Returns all graph nodes that are connected from a given control flow graph
+    /// Returns all graph nodes that are connected from a given directed graph
     /// node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     @inlinable
     func nodesConnected(from node: Node) -> [Node]
     
-    /// Returns all graph nodes that are connected towards a given control flow
-    /// graph node.
+    /// Returns all graph nodes that are connected towards a given directed graph
+    /// node.
     ///
     /// A reference equality test (===) is used to determine graph node equality.
     @inlinable
@@ -72,11 +72,11 @@ public protocol DirectedGraph {
     @inlinable
     func allNodesConnected(to node: Node) -> [Node]
     
-    /// Performs a depth-first visiting of this control flow graph
+    /// Performs a depth-first visiting of this directed graph
     @inlinable
     func depthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
     
-    /// Performs a breadth-first visiting of this control flow graph
+    /// Performs a breadth-first visiting of this directed graph
     @inlinable
     func breadthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
 }
@@ -124,7 +124,7 @@ public extension DirectedGraph {
         return nodesConnected(towards: node) + nodesConnected(from: node)
     }
     
-    /// Performs a depth-first visiting of this control flow graph
+    /// Performs a depth-first visiting of this directed graph
     @inlinable
     public func depthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
@@ -148,7 +148,7 @@ public extension DirectedGraph {
         }
     }
     
-    /// Performs a breadth-first visiting of this control flow graph
+    /// Performs a breadth-first visiting of this directed graph
     @inlinable
     public func breadthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
