@@ -452,19 +452,23 @@ class ControlFlowGraphCreationTests: XCTestCase {
                                 body: [
                                     .fallthrough
                                 ],
-                                else: nil)
+                                else: nil),
+                            .expression(.identifier("d")),
+                            .defer([
+                                .expression(.identifier("e"))
+                            ])
                         ]
                     ),
                     SwitchCase(
                         patterns: [],
                         statements: [
-                            .expression(.identifier("d"))
+                            .expression(.identifier("f"))
                         ]
                     ),
                     SwitchCase(patterns: [], statements: [])
                 ],
                 default: [
-                    .expression(.identifier("e"))
+                    .expression(.identifier("g"))
                 ]
             )
         ]
@@ -480,25 +484,119 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n3 [label="{if}"]
                 n4 [label="FallthroughStatement"]
                 n5 [label="b"]
-                n6 [label="SwitchStatement"]
-                n7 [label="d"]
-                n8 [label="e"]
-                n9 [label="c"]
-                n1 -> n6
+                n6 [label="d"]
+                n7 [label="SwitchStatement"]
+                n8 [label="f"]
+                n9 [label="g"]
+                n10 [label="c"]
+                n11 [label="e"]
+                n1 -> n7
                 n3 -> n4
-                n3 -> n9
-                n4 -> n9
+                n3 -> n6
+                n4 -> n10
                 n5 -> n3
-                n6 -> n5
-                n6 -> n7
-                n6 -> n8
-                n7 -> n2
+                n6 -> n11
+                n7 -> n5
+                n7 -> n8
+                n7 -> n9
                 n8 -> n2
-                n9 -> n7
                 n9 -> n2
+                n10 -> n8
+                n10 -> n2
+                n11 -> n10
             }
             """)
-        XCTAssertEqual(graph.nodes.count, 9)
+        XCTAssertEqual(graph.nodes.count, 11)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+    }
+    
+    func testSwitchStatementFallthroughWithDeferInterwindedWithReturn() {
+        let stmt: CompoundStatement = [
+            Statement.switch(
+                .identifier("a"),
+                cases: [
+                    SwitchCase(
+                        patterns: [],
+                        statements: [
+                            .expression(.identifier("b")),
+                            .defer([
+                                .expression(.identifier("c"))
+                            ]),
+                            Statement.if(
+                                .identifier("predicate"),
+                                body: [
+                                    .expression(.identifier("d")),
+                                    .fallthrough
+                                ],
+                                else: nil),
+                            .expression(.identifier("e")),
+                            Statement.if(
+                                .identifier("predicate"),
+                                body: [
+                                    .return(nil)
+                                ],
+                                else: nil),
+                            .defer([
+                                .expression(.identifier("f"))
+                            ])
+                        ]
+                    ),
+                    SwitchCase(
+                        patterns: [],
+                        statements: [
+                            .expression(.identifier("g"))
+                        ]
+                    ),
+                    SwitchCase(patterns: [], statements: [])
+                ],
+                default: [
+                    .expression(.identifier("g"))
+                ]
+            )
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="d"]
+                n4 [label="FallthroughStatement"]
+                n5 [label="{if}"]
+                n6 [label="b"]
+                n7 [label="e"]
+                n8 [label="{if}"]
+                n9 [label="{return}"]
+                n10 [label="SwitchStatement"]
+                n11 [label="g"]
+                n12 [label="g"]
+                n13 [label="c"]
+                n14 [label="f"]
+                n1 -> n10
+                n3 -> n4
+                n4 -> n13
+                n5 -> n3
+                n5 -> n7
+                n6 -> n5
+                n7 -> n8
+                n8 -> n9
+                n8 -> n14
+                n9 -> n13
+                n10 -> n6
+                n10 -> n11
+                n10 -> n12
+                n11 -> n2
+                n12 -> n2
+                n13 -> n11
+                n13 -> n2
+                n14 -> n13
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 14)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
     }
