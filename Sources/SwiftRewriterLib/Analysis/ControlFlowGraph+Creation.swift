@@ -192,7 +192,7 @@ private extension ControlFlowGraph {
             
             previous =
                 previous
-                    .chainingResult(with: connections.appendingDefers(activeDefers),
+                    .chainingExits(to: connections.appendingDefers(activeDefers),
                                     in: graph)
         }
         
@@ -335,13 +335,13 @@ private extension ControlFlowGraph {
         if bodyConnections.isValid {
             result =
                 result.addingBranch(bodyConnections, in: graph)
-                    .chainingResult(with: result, in: graph)
+                    .chainingExits(to: result, in: graph)
                     .breakToExits()
-                    .chainContinues(to: result, in: graph)
+                    .chainingContinues(to: result, in: graph)
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainingResult(with: result, in: graph)
+                .chainingExits(to: result, in: graph)
         }
         
         result = result.addingExitNode(node, defers: [])
@@ -358,8 +358,8 @@ private extension ControlFlowGraph {
         if bodyConnections.isValid {
             result =
                 bodyConnections
-                    .chainingResult(with: result, in: graph)
-                    .chainContinues(to: bodyConnections, in: graph)
+                    .chainingExits(to: result, in: graph)
+                    .chainingContinues(to: bodyConnections, in: graph)
             
             result =
                 result
@@ -370,7 +370,7 @@ private extension ControlFlowGraph {
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainingResult(with: result, in: graph)
+                .chainingExits(to: result, in: graph)
                 .addingExitNode(node, defers: [])
         }
         
@@ -386,13 +386,13 @@ private extension ControlFlowGraph {
         if bodyConnections.isValid {
             result =
                 result.addingBranch(bodyConnections, in: graph)
-                    .chainingResult(with: result, in: graph)
+                    .chainingExits(to: result, in: graph)
                     .breakToExits()
-                    .chainContinues(to: result, in: graph)
+                    .chainingContinues(to: result, in: graph)
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainingResult(with: result, in: graph)
+                .chainingExits(to: result, in: graph)
         }
         
         result = result.addingExitNode(node, defers: [])
@@ -547,7 +547,7 @@ private extension ControlFlowGraph {
             return self.satisfyingExits()
         }
         
-        func chainingResult(with next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        func chainingExits(to next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
             if !next.isValid {
                 return self
             }
@@ -574,7 +574,7 @@ private extension ControlFlowGraph {
             return newResult
         }
         
-        func chainContinues(to next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        func chainingContinues(to next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
             if !next.isValid {
                 return self
             }
@@ -589,11 +589,15 @@ private extension ControlFlowGraph {
                 graph.addNode(next.startNode)
             }
             
-            let newResult = self
+            var newResult = self
             
             continueNodes
                 .edgeConstructors(in: graph)
                 .connect(to: next.startNode)
+            
+            newResult.breakNodes.merge(with: next.breakNodes)
+            newResult.fallthroughNodes.merge(with: next.fallthroughNodes)
+            newResult.returnNodes.merge(with: next.returnNodes)
             
             return newResult.satisfyingContinues()
         }
