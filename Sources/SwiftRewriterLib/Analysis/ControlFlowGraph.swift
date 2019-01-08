@@ -74,28 +74,6 @@ public final class ControlFlowGraph: DirectedGraph {
     public func edge(from start: ControlFlowGraphNode, to end: ControlFlowGraphNode) -> ControlFlowGraphEdge? {
         return edges.first { $0.start === start && $0.end === end }
     }
- 
-    /// Returns all outgoing back edges for a given control flow graph node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func backEdges(from node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return edges.filter { $0.start === node && $0.isBackEdge }
-    }
-    
-    /// Returns all ingoing back edges for a given control flow graph node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func backEdges(towards node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return edges.filter { $0.end === node && $0.isBackEdge }
-    }
-    
-    /// Returns all graph nodes that are connected towards and from the given
-    /// graph node.
-    ///
-    /// A reference equality test (===) is used to determine graph node equality.
-    public func allNodesConnected(to node: ControlFlowGraphNode) -> [ControlFlowGraphNode] {
-        return nodesConnected(towards: node) + nodesConnected(from: node)
-    }
 }
 
 extension ControlFlowGraph {
