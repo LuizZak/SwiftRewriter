@@ -389,7 +389,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                             Statement.if(
                                 .identifier("predicate"),
                                 body: [
-                                    .break
+                                    .break()
                                 ],
                                 else: nil),
                             .expression(.identifier("d"))
@@ -738,7 +738,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             Statement.doWhile(
                 .identifier("v"),
                 body: [
-                    .break
+                    .break()
                 ]
             )
         ]
@@ -836,10 +836,10 @@ class ControlFlowGraphCreationTests: XCTestCase {
                     .expression(.identifier("a")),
                     Statement.if(
                         .identifier("a"),
-                        body: [.break],
+                        body: [.break()],
                         else: [
                             .expression(.identifier("b")),
-                            .continue
+                            .continue()
                         ])
                 ]
             )
@@ -915,7 +915,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             Statement.while(
                 .identifier("v"),
                 body: [
-                    .break
+                    .break()
                 ]
             )
         ]
@@ -947,7 +947,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             Statement.while(
                 .identifier("v"),
                 body: [
-                    .continue
+                    .continue()
                 ]
             )
         ]
@@ -979,7 +979,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             Statement.while(
                 .identifier("v"),
                 body: [
-                    .continue,
+                    .continue(),
                     .expression(.identifier("v"))
                 ]
             )
@@ -1184,7 +1184,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                         Statement.expression(.identifier("b"))
                     ]),
                     Statement.expression(.identifier("c")),
-                    Statement.break
+                    Statement.break()
                 ]
             ),
             Statement.expression(.identifier("d"))

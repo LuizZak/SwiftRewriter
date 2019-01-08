@@ -192,8 +192,8 @@ private extension ControlFlowGraph {
             
             previous =
                 previous
-                    .chainResult(next: connections.appendingDefers(activeDefers),
-                                 in: graph)
+                    .chainingResult(with: connections.appendingDefers(activeDefers),
+                                    in: graph)
         }
         
         return previous.appendingExitDefers(activeDefers)
@@ -335,13 +335,13 @@ private extension ControlFlowGraph {
         if bodyConnections.isValid {
             result =
                 result.addingBranch(bodyConnections, in: graph)
-                    .chainResult(next: result, in: graph)
+                    .chainingResult(with: result, in: graph)
                     .breakToExits()
                     .chainContinues(to: result, in: graph)
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainResult(next: result, in: graph)
+                .chainingResult(with: result, in: graph)
         }
         
         result = result.addingExitNode(node, defers: [])
@@ -358,19 +358,19 @@ private extension ControlFlowGraph {
         if bodyConnections.isValid {
             result =
                 bodyConnections
-                    .chainResult(next: result, in: graph)
+                    .chainingResult(with: result, in: graph)
                     .chainContinues(to: bodyConnections, in: graph)
             
             result =
                 result
                     .addingExitNode(node, defers: [])
-                    .connect(to: bodyConnections.startNode, in: graph)
+                    .connecting(to: bodyConnections.startNode, in: graph)
                     .addingExitNode(node, defers: [])
                     .breakToExits()
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainResult(next: result, in: graph)
+                .chainingResult(with: result, in: graph)
                 .addingExitNode(node, defers: [])
         }
         
@@ -386,13 +386,13 @@ private extension ControlFlowGraph {
         if bodyConnections.isValid {
             result =
                 result.addingBranch(bodyConnections, in: graph)
-                    .chainResult(next: result, in: graph)
+                    .chainingResult(with: result, in: graph)
                     .breakToExits()
                     .chainContinues(to: result, in: graph)
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainResult(next: result, in: graph)
+                .chainingResult(with: result, in: graph)
         }
         
         result = result.addingExitNode(node, defers: [])
@@ -539,7 +539,7 @@ private extension ControlFlowGraph {
             return newResult
         }
         
-        func connect(to node: ControlFlowGraphNode, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        func connecting(to node: ControlFlowGraphNode, in graph: ControlFlowGraph) -> _NodeCreationResult {
             exitNodes
                 .edgeConstructors(in: graph)
                 .connect(to: node)
@@ -547,7 +547,7 @@ private extension ControlFlowGraph {
             return self.satisfyingExits()
         }
         
-        func chainResult(next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        func chainingResult(with next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
             if !next.isValid {
                 return self
             }
@@ -563,7 +563,7 @@ private extension ControlFlowGraph {
             }
             
             var newResult =
-                self.connect(to: next.startNode, in: graph)
+                self.connecting(to: next.startNode, in: graph)
             
             newResult.exitNodes = next.exitNodes
             newResult.breakNodes.merge(with: next.breakNodes)
