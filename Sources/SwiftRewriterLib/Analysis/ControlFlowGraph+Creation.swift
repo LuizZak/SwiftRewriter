@@ -46,14 +46,6 @@ extension ControlFlowGraph {
         return edge
     }
     
-    @discardableResult
-    func addBackEdge(from node1: ControlFlowGraphNode, to node2: ControlFlowGraphNode) -> ControlFlowGraphEdge {
-        let edge = addEdge(from: node1, to: node2)
-        edge.isBackEdge = true
-        
-        return edge
-    }
-    
     func removeNode(_ node: ControlFlowGraphNode) {
         removeEdges(allEdges(for: node))
         nodes.removeAll(where: { $0 === node })
@@ -196,10 +188,13 @@ private extension ControlFlowGraph {
                 continue
             }
             
-            previous = previous.chainResult(next: connections, in: graph)
+            previous =
+                previous
+                    .chainResult(next: connections.appendingDefers(activeDefers),
+                                 in: graph)
         }
         
-        return previous.appendingDefers(activeDefers)
+        return previous.appendingExitDefers(activeDefers)
     }
     
     private static func _connections(for statements: [Statement],
@@ -261,11 +256,17 @@ private extension ControlFlowGraph {
         case let stmt as IfStatement:
             return _connections(forIf: stmt, in: graph)
             
+        case let stmt as SwitchStatement:
+            return _connections(forSwitch: stmt, in: graph)
+            
         case let stmt as WhileStatement:
             return _connections(forWhile: stmt, in: graph)
             
-        case let stmt as SwitchStatement:
-            return _connections(forSwitch: stmt, in: graph)
+        case let stmt as DoWhileStatement:
+            return _connections(forDoWhile: stmt, in: graph)
+            
+        case let stmt as ForStatement:
+            return _connections(forForLoop: stmt, in: graph)
             
         default:
             let node = ControlFlowGraphNode(node: statement)
@@ -295,23 +296,6 @@ private extension ControlFlowGraph {
         } else {
             result = result.addingExitNode(node, defers: [])
         }
-        
-        return result
-    }
-    
-    static func _connections(forWhile stmt: WhileStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
-        let node = ControlFlowGraphNode(node: stmt)
-        var result = _NodeCreationResult(startNode: node)
-        
-        let bodyConnections = _connections(for: stmt.body, in: graph)
-        
-        result =
-            result.addingBranch(bodyConnections, in: graph)
-                .chainResult(next: result, in: graph)
-                .breakToExits()
-                .chainContinues(to: result, in: graph)
-        
-        result = result.addingExitNode(node, defers: [])
         
         return result
     }
@@ -349,39 +333,78 @@ private extension ControlFlowGraph {
         return result
     }
     
-    class Context {
-        private(set) var scopes: [Scope] = []
+    static func _connections(forWhile stmt: WhileStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        let node = ControlFlowGraphNode(node: stmt)
+        var result = _NodeCreationResult(startNode: node)
         
-        var currentScope: Scope? {
-            return scopes.last
+        let bodyConnections = _connections(for: stmt.body, in: graph)
+        
+        if bodyConnections.isValid {
+            result =
+                result.addingBranch(bodyConnections, in: graph)
+                    .chainResult(next: result, in: graph)
+                    .breakToExits()
+                    .chainContinues(to: result, in: graph)
+        } else {
+            result = result
+                .addingExitNode(node, defers: [])
+                .chainResult(next: result, in: graph)
         }
         
-        /// Returns the stack of defer statements node, in reverse order (defers
-        /// defined later appear first)
-        var activeDeferNodes: [ControlFlowSubgraphNode] {
-            return scopes.flatMap { $0.openDefers }.reversed()
-        }
+        result = result.addingExitNode(node, defers: [])
         
-        func pushScope() -> Scope {
-            let scope = Scope()
+        return result
+    }
+    
+    static func _connections(forDoWhile stmt: DoWhileStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        let node = ControlFlowGraphNode(node: stmt)
+        var result = _NodeCreationResult(startNode: node)
+        
+        let bodyConnections = _connections(for: stmt.body, in: graph)
+        
+        if bodyConnections.isValid {
+            result =
+                bodyConnections
+                    .chainResult(next: result, in: graph)
+                    .chainContinues(to: bodyConnections, in: graph)
             
-            scopes.append(scope)
-            
-            return scope
+            result =
+                result
+                    .addingExitNode(node, defers: [])
+                    .connect(to: bodyConnections.startNode, in: graph)
+                    .addingExitNode(node, defers: [])
+                    .breakToExits()
+        } else {
+            result = result
+                .addingExitNode(node, defers: [])
+                .chainResult(next: result, in: graph)
+                .addingExitNode(node, defers: [])
         }
         
-        func popScope() -> Scope {
-            return scopes.removeLast()
+        return result
+    }
+    
+    static func _connections(forForLoop stmt: ForStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        let node = ControlFlowGraphNode(node: stmt)
+        var result = _NodeCreationResult(startNode: node)
+        
+        let bodyConnections = _connections(for: stmt.body, in: graph)
+        
+        if bodyConnections.isValid {
+            result =
+                result.addingBranch(bodyConnections, in: graph)
+                    .chainResult(next: result, in: graph)
+                    .breakToExits()
+                    .chainContinues(to: result, in: graph)
+        } else {
+            result = result
+                .addingExitNode(node, defers: [])
+                .chainResult(next: result, in: graph)
         }
         
-        func pushDefer(graph: ControlFlowSubgraphNode) {
-            scopes[scopes.count - 1].openDefers.append(graph)
-        }
+        result = result.addingExitNode(node, defers: [])
         
-        class Scope {
-            /// Stack of opened defer statement sub-graphs for the current scope
-            var openDefers: [ControlFlowSubgraphNode] = []
-        }
+        return result
     }
     
     struct _NodeCreationResult {
@@ -404,22 +427,6 @@ private extension ControlFlowGraph {
         
         init(startNode: ControlFlowGraphNode) {
             self.startNode = startNode
-        }
-        
-        mutating func addExitNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) {
-            self = addingExitNode(node, defers: defers)
-        }
-        mutating func addBreakNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) {
-            self = addingBreakNode(node, defers: defers)
-        }
-        mutating func addContinueNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) {
-            self = addingContinueNode(node, defers: defers)
-        }
-        mutating func addFallthroughNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) {
-            self = addingFallthroughNode(node, defers: defers)
-        }
-        mutating func addReturnNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) {
-            self = addingReturnNode(node, defers: defers)
         }
         
         func addingExitNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
@@ -468,28 +475,40 @@ private extension ControlFlowGraph {
             result.fallthroughNodes.clear()
             return result
         }
+        func satisfyingReturns() -> _NodeCreationResult {
+            var result = self
+            result.returnNodes.clear()
+            return result
+        }
         
         func breakToExits() -> _NodeCreationResult {
             var result = self
             result.exitNodes.merge(with: result.breakNodes)
-            result.breakNodes.clear()
-            return result
+            return result.satisfyingBreaks()
         }
         
         func returnToExits() -> _NodeCreationResult {
             var result = self
             result.exitNodes.merge(with: result.returnNodes)
-            result.returnNodes.clear()
-            return result
+            return result.satisfyingReturns()
         }
         
         func appendingDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
             return defers.reduce(self, { $0.appendingDefer($1) })
         }
         
-        func appendingDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
+        func appendingExitDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
+            return defers.reduce(self, { $0.appendingExitDefer($1) })
+        }
+        
+        func appendingExitDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
             var result = self
             result.exitNodes.appendDefer(node)
+            return result
+        }
+        
+        func appendingDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
+            var result = self
             result.breakNodes.appendDefer(node)
             result.continueNodes.appendDefer(node)
             result.fallthroughNodes.appendDefer(node)
@@ -527,6 +546,14 @@ private extension ControlFlowGraph {
             return newResult
         }
         
+        func connect(to node: ControlFlowGraphNode, in graph: ControlFlowGraph) -> _NodeCreationResult {
+            exitNodes
+                .edgeConstructors(in: graph)
+                .connect(to: node)
+            
+            return self.satisfyingExits()
+        }
+        
         func chainResult(next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
             if !next.isValid {
                 return self
@@ -542,11 +569,8 @@ private extension ControlFlowGraph {
                 graph.addNode(next.startNode)
             }
             
-            var newResult = self
-            
-            exitNodes
-                .edgeConstructors(in: graph)
-                .connect(to: next.startNode)
+            var newResult =
+                self.connect(to: next.startNode, in: graph)
             
             newResult.exitNodes = next.exitNodes
             newResult.breakNodes.merge(with: next.breakNodes)
@@ -572,19 +596,13 @@ private extension ControlFlowGraph {
                 graph.addNode(next.startNode)
             }
             
-            var newResult = self
+            let newResult = self
             
             continueNodes
                 .edgeConstructors(in: graph)
                 .connect(to: next.startNode)
             
-            newResult.exitNodes.merge(with: next.exitNodes)
-            newResult.breakNodes.merge(with: next.breakNodes)
-            newResult.continueNodes.merge(with: next.continueNodes)
-            newResult.fallthroughNodes.merge(with: next.fallthroughNodes)
-            newResult.returnNodes.merge(with: next.returnNodes)
-            
-            return newResult
+            return newResult.satisfyingContinues()
         }
         
         private class _InvalidSyntaxNode: SyntaxNode {
@@ -594,9 +612,6 @@ private extension ControlFlowGraph {
     
     struct ControlFlowGraphJumpTarget {
         private(set) var nodes: [(node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode])] = []
-        var defers: [ControlFlowSubgraphNode] {
-            return nodes.flatMap { $0.defers }
-        }
         
         mutating func clear() {
             nodes.removeAll()
@@ -618,7 +633,7 @@ private extension ControlFlowGraph {
         
         func edgeConstructors(in graph: ControlFlowGraph) -> [EdgeConstructor] {
             return nodes.map { node in
-                graph.connectChain(start: node.node, rest: node.defers)
+                graph.connectChain(start: node.node, rest: node.defers.reversed())
             }
         }
         

@@ -430,7 +430,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n9 -> n2
             }
             """)
-        XCTAssertEqual(graph.nodes.count, 7)
+        XCTAssertEqual(graph.nodes.count, 9)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
@@ -477,24 +477,30 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="SwitchStatement"]
-                n4 [label="b"]
-                n5 [label="FallthroughStatement"]
-                n6 [label="c"]
+                n3 [label="{if}"]
+                n4 [label="FallthroughStatement"]
+                n5 [label="b"]
+                n6 [label="SwitchStatement"]
                 n7 [label="d"]
-                n1 -> n3
+                n8 [label="e"]
+                n9 [label="c"]
+                n1 -> n6
                 n3 -> n4
-                n3 -> n6
-                n3 -> n7
-                n4 -> n5
-                n5 -> n6
-                n6 -> n2
+                n3 -> n9
+                n4 -> n9
+                n5 -> n3
+                n6 -> n5
+                n6 -> n7
+                n6 -> n8
                 n7 -> n2
+                n8 -> n2
+                n9 -> n7
+                n9 -> n2
             }
             """)
-        XCTAssertEqual(graph.nodes.count, 7)
+        XCTAssertEqual(graph.nodes.count, 9)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
     }
     
     func testWhileLoop() {
@@ -558,8 +564,6 @@ class ControlFlowGraphCreationTests: XCTestCase {
             }
             """)
         XCTAssertEqual(graph.nodes.count, 4)
-        //XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[1])!).count, 1)
-        //XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -585,17 +589,16 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="v()"]
-                n4 [label="{do-while}"]
-                n5 [label="a"]
+                n4 [label="a"]
+                n5 [label="{do-while}"]
                 n1 -> n3
-                n3 -> n5
-                n4 -> n5 [color="#aa3333",penwidth=0.5]
-                n4 -> n2
-                n5 -> n4
+                n3 -> n4
+                n4 -> n5
+                n5 -> n4 [color="#aa3333",penwidth=0.5]
+                n5 -> n2
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)
-        //XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -627,8 +630,6 @@ class ControlFlowGraphCreationTests: XCTestCase {
             }
             """)
         XCTAssertEqual(graph.nodes.count, 4)
-        //XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[1])!).count, 1)
-        //XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -646,7 +647,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
         
         let graph = ControlFlowGraph.forCompoundStatement(stmt)
         
-        sanitize(graph)
+        sanitize(graph, expectsUnreachable: true)
         assertGraphviz(
             graph: graph,
             matches: """
@@ -655,14 +656,17 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n2 [label="exit"]
                 n3 [label="v()"]
                 n4 [label="BreakStatement"]
+                n5 [label="{do-while}"]
                 n1 -> n3
                 n3 -> n4
                 n4 -> n2
+                n5 -> n4
+                n5 -> n2
             }
             """)
-        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodes.count, 5)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
     
     func testForLoop() {
@@ -721,8 +725,6 @@ class ControlFlowGraphCreationTests: XCTestCase {
             }
             """)
         XCTAssertEqual(graph.nodes.count, 3)
-        //XCTAssertEqual(graph.backEdges(towards: graph.graphNode(for: stmt.statements[0])!).count, 1)
-        //XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[0])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
@@ -894,14 +896,14 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="{while}"]
-                n4 [label="ContinueStatement"]
-                n5 [label="v"]
-                n1 -> n3
-                n3 -> n4
-                n3 -> n2
-                n4 -> n3 [color="#aa3333",penwidth=0.5]
+                n3 [label="ContinueStatement"]
+                n4 [label="v"]
+                n5 [label="{while}"]
+                n1 -> n5
+                n3 -> n5 [color="#aa3333",penwidth=0.5]
+                n4 -> n5
                 n5 -> n3
+                n5 -> n2
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)
@@ -1099,16 +1101,16 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="{while}"]
-                n4 [label="c"]
-                n5 [label="BreakStatement"]
+                n3 [label="c"]
+                n4 [label="BreakStatement"]
+                n5 [label="{while}"]
                 n6 [label="d"]
                 n7 [label="b"]
-                n1 -> n3
+                n1 -> n5
                 n3 -> n4
-                n3 -> n6
-                n4 -> n5
-                n5 -> n7
+                n4 -> n7
+                n5 -> n3
+                n5 -> n6
                 n6 -> n2
                 n7 -> n6
             }
@@ -1142,19 +1144,18 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 [label="entry"]
                 n2 [label="exit"]
                 n3 [label="v()"]
-                n4 [label="{do-while}"]
-                n5 [label="b"]
+                n4 [label="b"]
+                n5 [label="{do-while}"]
                 n6 [label="a"]
                 n1 -> n3
-                n3 -> n5
-                n4 -> n5 [color="#aa3333",penwidth=0.5]
-                n4 -> n2
-                n5 -> n6
-                n6 -> n4
+                n3 -> n4
+                n4 -> n6
+                n5 -> n4 [color="#aa3333",penwidth=0.5]
+                n5 -> n2
+                n6 -> n5
             }
             """)
         XCTAssertEqual(graph.nodes.count, 6)
-        //XCTAssertEqual(graph.backEdges(from: graph.graphNode(for: stmt.statements[1])!).count, 1)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
