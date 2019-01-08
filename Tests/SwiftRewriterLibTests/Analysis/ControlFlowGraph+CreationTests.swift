@@ -551,7 +551,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                     SwitchCase(patterns: [], statements: [])
                 ],
                 default: [
-                    .expression(.identifier("g"))
+                    .expression(.identifier("h"))
                 ]
             )
         ]
@@ -573,7 +573,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n9 [label="{return}"]
                 n10 [label="SwitchStatement"]
                 n11 [label="g"]
-                n12 [label="g"]
+                n12 [label="h"]
                 n13 [label="c"]
                 n14 [label="f"]
                 n1 -> n10
