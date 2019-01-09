@@ -342,6 +342,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n1 -> n2
                 n1 -> n3
                 n1 -> n4
+                n1 -> n6
                 n2 -> n6
                 n3 -> n6
                 n4 -> n6
@@ -350,7 +351,86 @@ class ControlFlowGraphCreationTests: XCTestCase {
             """)
         XCTAssertEqual(graph.nodes.count, 6)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 4)
+    }
+    
+    func testEmptySwitchStatement() {
+        let stmt: CompoundStatement = [
+            Statement.switch(
+                .identifier("a"),
+                cases: [
+                    SwitchCase(
+                        patterns: [],
+                        statements: []
+                    ),
+                    SwitchCase(
+                        patterns: [],
+                        statements: []
+                    ),
+                    SwitchCase(patterns: [], statements: [])
+                ],
+                default: []
+            )
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="SwitchStatement"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n1 -> n3
+                n2 -> n1
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 3)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testEmptySwitchStatementWithFallthrough() {
+        let stmt: CompoundStatement = [
+            Statement.switch(
+                .identifier("a"),
+                cases: [
+                    SwitchCase(
+                        patterns: [],
+                        statements: [
+                            .fallthrough
+                        ]
+                    ),
+                    SwitchCase(
+                        patterns: [],
+                        statements: []
+                    ),
+                    SwitchCase(patterns: [], statements: [])
+                ],
+                default: []
+            )
+        ]
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="FallthroughStatement"]
+                n2 [label="SwitchStatement"]
+                n3 [label="entry"]
+                n4 [label="exit"]
+                n1 -> n4
+                n2 -> n1
+                n2 -> n4
+                n3 -> n2
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
     
     func testSwitchStatementFallthrough() {
@@ -396,6 +476,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                 n2 -> n3
                 n2 -> n4
                 n2 -> n5
+                n2 -> n7
                 n3 -> n1
                 n4 -> n7
                 n5 -> n7
@@ -404,7 +485,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
             """)
         XCTAssertEqual(graph.nodes.count, 7)
         XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
-        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 3)
     }
     
     func testSwitchStatementBreakDefer() {
@@ -427,8 +508,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                                 else: nil),
                             .expression(.identifier("d"))
                         ]
-                    ),
-                    SwitchCase(patterns: [], statements: [])
+                    )
                 ],
                 default: [
                     .expression(.identifier("e"))
@@ -497,8 +577,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                         statements: [
                             .expression(.identifier("f"))
                         ]
-                    ),
-                    SwitchCase(patterns: [], statements: [])
+                    )
                 ],
                 default: [
                     .expression(.identifier("g"))
@@ -580,8 +659,7 @@ class ControlFlowGraphCreationTests: XCTestCase {
                         statements: [
                             .expression(.identifier("g"))
                         ]
-                    ),
-                    SwitchCase(patterns: [], statements: [])
+                    )
                 ],
                 default: [
                     .expression(.identifier("h"))
