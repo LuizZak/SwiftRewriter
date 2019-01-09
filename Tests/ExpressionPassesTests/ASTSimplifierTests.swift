@@ -257,12 +257,12 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     cases: [
                         SwitchCase(patterns: [], statements: [
                             Statement.expression(.identifier("stmt")),
-                            Statement.break
+                            Statement.break()
                         ])
                     ],
                     default: [
                         Statement.expression(.identifier("stmt")),
-                        Statement.break
+                        Statement.break()
                     ]),
             into: Statement
                 .switch(
@@ -286,22 +286,22 @@ class ASTSimplifierTests: ExpressionPassTestCase {
                     .constant(0),
                     cases: [
                         SwitchCase(patterns: [], statements: [
-                            Statement.break
+                            Statement.break()
                         ])
                     ],
                     default: [
-                        Statement.break
+                        Statement.break()
                     ]),
             into: Statement
                 .switch(
                     .constant(0),
                     cases: [
                         SwitchCase(patterns: [], statements: [
-                            Statement.break
+                            Statement.break()
                         ])
                     ],
                     default: [
-                        Statement.break
+                        Statement.break()
                     ])
         ); assertDidNotNotifyChange()
     }

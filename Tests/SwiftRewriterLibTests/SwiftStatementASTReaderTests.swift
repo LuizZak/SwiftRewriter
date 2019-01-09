@@ -189,25 +189,25 @@ class SwiftStatementASTReaderTests: XCTestCase {
     func testSwitch() {
         assert(objcStmt: "switch(value) { case 0: break; }",
                readsAs: .switch(.identifier("value"),
-                                cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [.break])],
-                                default: [.break])
+                                cases: [SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()])],
+                                default: [.break()])
         )
         
         assert(objcStmt: "switch(value) { case 0: break; case 1: break; }",
                readsAs: .switch(.identifier("value"),
                                 cases: [
-                                    SwitchCase(patterns: [.expression(.constant(0))], statements: [.break]),
-                                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break])
+                                    SwitchCase(patterns: [.expression(.constant(0))], statements: [.break()]),
+                                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()])
                                 ],
-                                default: [.break])
+                                default: [.break()])
         )
         
         assert(objcStmt: "switch(value) { case 0: case 1: break; }",
                readsAs: .switch(.identifier("value"),
                                 cases: [
-                                    SwitchCase(patterns: [.expression(.constant(0)), .expression(.constant(1))], statements: [.break])
+                                    SwitchCase(patterns: [.expression(.constant(0)), .expression(.constant(1))], statements: [.break()])
                                 ],
-                                default: [.break])
+                                default: [.break()])
         )
         
         assert(objcStmt: "switch(value) { case 0: case 1: break; default: stmt(); }",
@@ -215,7 +215,7 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                 cases: [
                                     SwitchCase(patterns: [.expression(.constant(0)),
                                                           .expression(.constant(1))],
-                                               statements: [.break])
+                                               statements: [.break()])
                                 ],
                                 default: [
                                     .expression(
@@ -234,9 +234,9 @@ class SwiftStatementASTReaderTests: XCTestCase {
                                                 .expression(Expression.identifier("stmt").call()),
                                                 .fallthrough
                                                 ]),
-                                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break])
+                                    SwitchCase(patterns: [.expression(.constant(1))], statements: [.break()])
                                 ],
-                                default: [.break])
+                                default: [.break()])
         )
     }
     

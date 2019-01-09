@@ -17,11 +17,11 @@ class SyntaxNodeRewriterTests: XCTestCase {
                     else: nil),
                 .while(Expression.identifier("a"),
                        body: [
-                        .break
+                        .break()
                     ]),
                 .for(.identifier("i"), .arrayLiteral([.constant(1), .constant(2), .constant(3)]),
                      body: [
-                        .continue
+                        .continue()
                     ])
             ])
         }

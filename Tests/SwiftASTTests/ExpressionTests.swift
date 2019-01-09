@@ -20,7 +20,7 @@ class ExpressionTests: XCTestCase {
     }
     
     func testAssignBlock() {
-        let stmt = Statement.break
+        let stmt = Statement.break()
         let exp = Expression.block(parameters: [], return: .void, body: [stmt])
         
         XCTAssert(stmt.parent === exp.body)

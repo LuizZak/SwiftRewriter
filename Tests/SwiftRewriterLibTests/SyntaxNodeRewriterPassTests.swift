@@ -42,13 +42,13 @@ class ASTRewriterPassTests: XCTestCase {
     }
     
     func testTraverseStatement() {
-        let stmt: Statement = Statement.compound([.continue, .break])
+        let stmt: Statement = Statement.compound([.continue(), .break()])
         
         let sut = TestExpressionPass(context: .empty)
         let result = stmt.accept(sut)
         
         XCTAssert(sut.foundNeedle)
-        XCTAssertEqual(result, .compound([.continue, .continue]))
+        XCTAssertEqual(result, .compound([.continue(), .continue()]))
     }
     
     func testTraverseDeepNestedBlockStatement() {
@@ -182,7 +182,7 @@ class ASTRewriterPassTests: XCTestCase {
         override func visitBreak(_ stmt: BreakStatement) -> Statement {
             foundNeedle = true
             
-            return .continue
+            return .continue()
         }
     }
 }

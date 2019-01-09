@@ -31,7 +31,7 @@ class SwiftASTSerializerTests: XCTestCase {
                             Expression.sizeof(Expression.identifier("Int"))
                         ])
                 )
-                ]),
+            ]),
             Statement.semicolon,
             Statement.if(
                 Expression.constant(true),
@@ -61,23 +61,23 @@ class SwiftASTSerializerTests: XCTestCase {
                         SwiftAST.Pattern.identifier("i"),
                         Expression.constant(0).binary(op: .openRange, rhs: .constant(100)),
                         body: [
-                            
+                            Statement.continue(targetLabel: "label")
                         ]),
-                    Statement.continue
+                    Statement.continue()
                 ]),
             Statement.defer([
                 Statement.fallthrough,
                 Statement.variableDeclaration(identifier: "abc", type: .int, initialization: nil)
-                ]),
+            ]),
             Statement.doWhile(
                 Expression.cast(.constant(0), type: .int),
                 body: [
                     Statement.expressions([
                         Expression.block(body: [
-                            
+                                Statement.break(targetLabel: "label")
                             ])
                         ]),
-                    Statement.break
+                    Statement.break()
                 ]
             )
         ]

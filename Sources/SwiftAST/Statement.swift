@@ -119,14 +119,20 @@ public extension Statement {
     public static func `return`(_ exp: Expression?) -> ReturnStatement {
         return ReturnStatement(exp: exp)
     }
-    public static var `break`: BreakStatement {
+    public static func `break`() -> BreakStatement {
         return BreakStatement()
+    }
+    public static func `break`(targetLabel: String?) -> BreakStatement {
+        return BreakStatement(targetLabel: targetLabel)
     }
     public static var `fallthrough`: FallthroughStatement {
         return FallthroughStatement()
     }
-    public static var `continue`: ContinueStatement {
+    public static func `continue`() -> ContinueStatement {
         return ContinueStatement()
+    }
+    public static func `continue`(targetLabel: String?) -> ContinueStatement {
+        return ContinueStatement(targetLabel: targetLabel)
     }
     public static func expressions(_ exp: [Expression]) -> ExpressionsStatement {
         return ExpressionsStatement(expressions: exp)

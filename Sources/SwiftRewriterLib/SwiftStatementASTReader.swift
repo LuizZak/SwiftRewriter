@@ -166,10 +166,10 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
             return .return(ctx.expression()?.accept(expressionReader))
         }
         if ctx.CONTINUE() != nil {
-            return .continue
+            return .continue()
         }
         if ctx.BREAK() != nil {
-            return .break
+            return .break()
         }
         
         return .unknown(UnknownASTContext(context: ctx.getText()))
@@ -261,7 +261,7 @@ public final class SwiftStatementASTReader: ObjectiveCParserBaseVisitor<Statemen
         // If no default is present, always emit a `default: break` statement,
         // since switches in Swift must be exhaustive
         if def == nil {
-            def = [.break]
+            def = [.break()]
         }
         
         return .switch(exp, cases: cases, default: def)

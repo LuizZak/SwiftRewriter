@@ -160,44 +160,44 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
     
     func testIf() {
-        assertStatement(.if(.constant(true), body: [.do([.break])], else: [.do([.continue])]),
+        assertStatement(.if(.constant(true), body: [.do([.break()])], else: [.do([.continue()])]),
                         iteratesAs: [
-                            Statement.if(.constant(true), body: [.do([.break])], else: [.do([.continue])]),
+                            Statement.if(.constant(true), body: [.do([.break()])], else: [.do([.continue()])]),
                             Expression.constant(true),
-                            Statement.compound([Statement.do([.break])]),
-                            Statement.compound([Statement.do([.continue])]),
-                            Statement.do([.break]),
-                            Statement.do([.continue]),
-                            Statement.compound([.break]),
-                            Statement.compound([.continue]),
-                            Statement.break,
-                            Statement.continue
+                            Statement.compound([Statement.do([.break()])]),
+                            Statement.compound([Statement.do([.continue()])]),
+                            Statement.do([.break()]),
+                            Statement.do([.continue()]),
+                            Statement.compound([.break()]),
+                            Statement.compound([.continue()]),
+                            Statement.break(),
+                            Statement.continue()
             ]
         )
     }
     
     func testDo() {
-        assertStatement(.do([.break, .continue]),
+        assertStatement(.do([.break(), .continue()]),
                         iteratesAs: [
-                            Statement.do([.break, .continue]),
-                            Statement.compound([.break, .continue]),
-                            Statement.break,
-                            Statement.continue
+                            Statement.do([.break(), .continue()]),
+                            Statement.compound([.break(), .continue()]),
+                            Statement.break(),
+                            Statement.continue()
             ]
         )
     }
     
     func testWhileStatement() {
-        assertStatement(.while(.constant(true), body: [.break, .continue]),
+        assertStatement(.while(.constant(true), body: [.break(), .continue()]),
                         iteratesAs: [
-                            Statement.while(.constant(true), body: [.break, .continue]),
+                            Statement.while(.constant(true), body: [.break(), .continue()]),
                             Expression.constant(true),
                             Statement.compound([
-                                Statement.break,
-                                Statement.continue
-                                ]),
-                            Statement.break,
-                            Statement.continue
+                                Statement.break(),
+                                Statement.continue()
+                            ]),
+                            Statement.break(),
+                            Statement.continue()
             ]
         )
     }
@@ -439,11 +439,11 @@ class SyntaxNodeIteratorTests: XCTestCase {
     }
     
     func testBreak() {
-        assertStatement(.break, iteratesAs: [Statement.break])
+        assertStatement(.break(), iteratesAs: [Statement.break()])
     }
     
     func testContinue() {
-        assertStatement(.continue, iteratesAs: [Statement.continue])
+        assertStatement(.continue(), iteratesAs: [Statement.continue()])
     }
     
     func testFallthourh() {
