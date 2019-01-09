@@ -1490,6 +1490,121 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
     
+    func testLabeledBreakLoopDefer() {
+        let stmt: CompoundStatement = [
+            Statement.for(
+                .identifier("a"),
+                .identifier("a"),
+                body: [
+                    Statement.while(
+                        .identifier("b"),
+                        body: [
+                            .defer([
+                                .expression(.identifier("deferred"))
+                            ]),
+                            .if(.identifier("precidate"),
+                                body: [
+                                    .break(targetLabel: "outer")
+                                ],
+                                else: nil)
+                        ]
+                    )
+                ]
+            ).labeled("outer"),
+            .expression(.identifier("b"))
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="BreakStatement"]
+                n2 [label="b"]
+                n3 [label="deferred"]
+                n4 [label="entry"]
+                n5 [label="exit"]
+                n6 [label="{for}"]
+                n7 [label="{if}"]
+                n8 [label="{while}"]
+                n1 -> n3
+                n2 -> n5
+                n3 -> n8 [color="#aa3333",penwidth=0.5]
+                n3 -> n2
+                n4 -> n6
+                n6 -> n8
+                n6 -> n2
+                n7 -> n1
+                n7 -> n3
+                n8 -> n7
+                n8 -> n6 [color="#aa3333",penwidth=0.5]
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 8)
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
+    func testLabeledContinueLoopDefer() {
+        let stmt: CompoundStatement = [
+            Statement.for(
+                .identifier("a"),
+                .identifier("a"),
+                body: [
+                    Statement.while(
+                        .identifier("b"),
+                        body: [
+                            .defer([
+                                .expression(.identifier("deferred"))
+                            ]),
+                            .if(.identifier("precidate"),
+                                body: [
+                                    .continue(targetLabel: "outer")
+                                ],
+                                else: nil)
+                        ]
+                    )
+                ]
+            ).labeled("outer")
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="ContinueStatement"]
+                n2 [label="deferred"]
+                n3 [label="entry"]
+                n4 [label="exit"]
+                n5 [label="{for}"]
+                n6 [label="{if}"]
+                n7 [label="{while}"]
+                n1 -> n2
+                n2 -> n7 [color="#aa3333",penwidth=0.5]
+                n2 -> n5 [color="#aa3333",penwidth=0.5]
+                n3 -> n5
+                n5 -> n7
+                n5 -> n4
+                n6 -> n1
+                n6 -> n2
+                n7 -> n6
+                n7 -> n5 [color="#aa3333",penwidth=0.5]
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 7)
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
     func testInterwindedDeferStatement() {
         let stmt: CompoundStatement = [
             Statement.defer([
