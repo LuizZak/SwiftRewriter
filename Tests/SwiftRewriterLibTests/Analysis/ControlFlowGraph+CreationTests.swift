@@ -117,6 +117,38 @@ class ControlFlowGraphCreationTests: XCTestCase {
             [stmt, stmt.statements[0], stmt.statements[1], stmt])
     }
     
+    func testVariableDeclaration() {
+        let stmt: CompoundStatement = [
+            .variableDeclaration(identifier: "v1", type: .int, initialization: nil),
+            .variableDeclaration(identifier: "v2", type: .int, initialization: nil)
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="var v1: Int"]
+                n4 [label="var v2: Int"]
+                n1 -> n3
+                n3 -> n4
+                n4 -> n2
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 4)
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+        XCTAssertEqual(
+            graph.depthFirstList().compactMap { $0.node as? Statement },
+            [stmt, stmt.statements[0], stmt.statements[1], stmt])
+    }
+    
     func testIf() {
         let stmt: CompoundStatement = [
             Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
