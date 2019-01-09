@@ -228,6 +228,91 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
     }
     
+    func testLabeledBreakStatement() {
+        let stmt: CompoundStatement = [
+            Statement.do([
+                .expression(.identifier("a")),
+                .break(targetLabel: "doLabel"),
+                .expression(.identifier("b"))
+            ]).labeled("doLabel")
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph, expectsUnreachable: true)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="BreakStatement"]
+                n2 [label="a"]
+                n3 [label="b"]
+                n4 [label="entry"]
+                n5 [label="exit"]
+                n1 -> n5
+                n2 -> n1
+                n3 -> n5
+                n4 -> n2
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
+    }
+    
+    func testLabeledContinueStatement() {
+        let stmt: CompoundStatement = [
+            Statement.for(
+                .identifier("a"),
+                .identifier("a"),
+                body: [
+                    Statement.while(
+                        .identifier("b"),
+                        body: [
+                            Statement.if(
+                                .identifier("precidate"),
+                                body: [
+                                    .continue(targetLabel: "outer")
+                                ],
+                                else: nil)
+                        ]
+                    )
+                ]
+            ).labeled("outer")
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="ContinueStatement"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n4 [label="{for}"]
+                n5 [label="{if}"]
+                n6 [label="{while}"]
+                n1 -> n4 [color="#aa3333",penwidth=0.5]
+                n2 -> n4
+                n4 -> n6
+                n4 -> n3
+                n5 -> n1
+                n5 -> n6 [color="#aa3333",penwidth=0.5]
+                n6 -> n5
+                n6 -> n4 [color="#aa3333",penwidth=0.5]
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 6)
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
     func testIfElse() {
         let stmt: CompoundStatement = [
             Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),

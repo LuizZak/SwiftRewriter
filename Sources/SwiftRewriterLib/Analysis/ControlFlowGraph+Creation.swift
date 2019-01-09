@@ -188,66 +188,76 @@ private extension ControlFlowGraph {
     
     private static func _connections(for statement: Statement) -> _NodeCreationResult {
         
+        var result: _NodeCreationResult
+        
         switch statement {
         case is ExpressionsStatement,
              is VariableDeclarationsStatement:
             let node = ControlFlowGraphNode(node: statement)
             
-            return _NodeCreationResult(startNode: node)
+            result = _NodeCreationResult(startNode: node)
                 .addingExitNode(node)
             
-        case is BreakStatement:
+        case let statement as BreakStatement:
             let node = ControlFlowGraphNode(node: statement)
             
-            return _NodeCreationResult(startNode: node)
-                .addingBreakNode(node)
+            result = _NodeCreationResult(startNode: node)
+                .addingBreakNode(node, targetLabel: statement.targetLabel)
             
-        case is ContinueStatement:
+        case let statement as ContinueStatement:
             let node = ControlFlowGraphNode(node: statement)
             
-            return _NodeCreationResult(startNode: node)
-                .addingContinueNode(node)
+            result = _NodeCreationResult(startNode: node)
+                .addingContinueNode(node, targetLabel: statement.targetLabel)
             
         case is ReturnStatement:
             let node = ControlFlowGraphNode(node: statement)
             
-            return _NodeCreationResult(startNode: node)
+            result = _NodeCreationResult(startNode: node)
                 .addingReturnNode(node)
             
         // Handled separately in _connections(for:start:in) above
         case is DeferStatement:
-            return .invalid
+            result = .invalid
             
         case let stmt as FallthroughStatement:
-            return _connections(forFallthrough: stmt)
+            result = _connections(forFallthrough: stmt)
             
         case let stmt as CompoundStatement:
-            return _connections(for: stmt.statements)
+            result = _connections(for: stmt.statements)
             
         case let stmt as DoStatement:
-            return _connections(for: stmt.body)
+            result = _connections(for: stmt.body)
             
         case let stmt as IfStatement:
-            return _connections(forIf: stmt)
+            result = _connections(forIf: stmt)
             
         case let stmt as SwitchStatement:
-            return _connections(forSwitch: stmt)
+            result = _connections(forSwitch: stmt)
             
         case let stmt as WhileStatement:
-            return _connections(forWhile: stmt)
+            result = _connections(forWhile: stmt)
             
         case let stmt as DoWhileStatement:
-            return _connections(forDoWhile: stmt)
+            result = _connections(forDoWhile: stmt)
             
         case let stmt as ForStatement:
-            return _connections(forForLoop: stmt)
+            result = _connections(forForLoop: stmt)
             
         default:
             let node = ControlFlowGraphNode(node: statement)
             
-            return _NodeCreationResult(startNode: node)
+            result = _NodeCreationResult(startNode: node)
                 .addingExitNode(node)
         }
+        
+        if let label = statement.label {
+            result = result
+                .breakToExits(targetLabel: label)
+                .satisfyingBreaks(labeled: label)
+        }
+        
+        return result
     }
     
     static func _connections(forFallthrough stmt: FallthroughStatement) -> _NodeCreationResult {
@@ -325,8 +335,9 @@ private extension ControlFlowGraph {
             result =
                 result.addingBranch(towards: bodyConnections)
                     .connectingExits(to: result.startNode)
-                    .breakToExits()
-                    .connectingContinues(to: result.startNode)
+                    .breakToExits(targetLabel: stmt.label)
+                    .connectingContinues(label: stmt.label, to: result.startNode)
+                    .satisfyingContinues(label: stmt.label)
         } else {
             result = result
                 .addingExitNode(node)
@@ -348,14 +359,15 @@ private extension ControlFlowGraph {
             result =
                 bodyConnections
                     .connectingExits(to: result.startNode)
-                    .connectingContinues(to: bodyConnections.startNode)
+                    .connectingContinues(label: stmt.label, to: bodyConnections.startNode)
+                    .satisfyingContinues(label: stmt.label)
             
             result =
                 result
                     .addingExitNode(node)
                     .connectingExits(to: bodyConnections.startNode)
                     .addingExitNode(node)
-                    .breakToExits()
+                    .breakToExits(targetLabel: stmt.label)
         } else {
             result = result
                 .addingExitNode(node)
@@ -376,8 +388,9 @@ private extension ControlFlowGraph {
             result =
                 result.addingBranch(towards: bodyConnections)
                     .connectingExits(to: result.startNode)
-                    .breakToExits()
-                    .connectingContinues(to: result.startNode)
+                    .breakToExits(targetLabel: stmt.label)
+                    .connectingContinues(label: stmt.label, to: result.startNode)
+                    .satisfyingContinues(label: stmt.label)
         } else {
             result = result
                 .addingExitNode(node)
@@ -436,14 +449,14 @@ private extension ControlFlowGraph {
             result.exitNodes.addNode(node)
             return result
         }
-        func addingBreakNode(_ node: ControlFlowGraphNode) -> _NodeCreationResult {
+        func addingBreakNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) -> _NodeCreationResult {
             var result = self
-            result.breakNodes.addNode(node)
+            result.breakNodes.addNode(node, targetLabel: targetLabel)
             return result
         }
-        func addingContinueNode(_ node: ControlFlowGraphNode) -> _NodeCreationResult {
+        func addingContinueNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) -> _NodeCreationResult {
             var result = self
-            result.continueNodes.addNode(node)
+            result.continueNodes.addNode(node, targetLabel: targetLabel)
             return result
         }
         func addingFallthroughNode(_ node: ControlFlowGraphNode) -> _NodeCreationResult {
@@ -462,14 +475,16 @@ private extension ControlFlowGraph {
             result.exitNodes.clear()
             return result
         }
-        func satisfyingBreaks() -> _NodeCreationResult {
+        func satisfyingBreaks(labeled targetLabel: String? = nil) -> _NodeCreationResult {
             var result = self
-            result.breakNodes.clear()
+            result.breakNodes.clear(labeled: nil)
+            result.breakNodes.clear(labeled: targetLabel)
             return result
         }
-        func satisfyingContinues() -> _NodeCreationResult {
+        func satisfyingContinues(label targetLabel: String? = nil) -> _NodeCreationResult {
             var result = self
-            result.continueNodes.clear()
+            result.continueNodes.clear(labeled: nil)
+            result.continueNodes.clear(labeled: targetLabel)
             return result
         }
         func satisfyingFallthroughs() -> _NodeCreationResult {
@@ -483,10 +498,11 @@ private extension ControlFlowGraph {
             return result
         }
         
-        func breakToExits() -> _NodeCreationResult {
+        func breakToExits(targetLabel: String? = nil) -> _NodeCreationResult {
             var result = self
-            result.exitNodes.merge(with: result.breakNodes)
-            return result.satisfyingBreaks()
+            result.exitNodes.merge(with: result.breakNodes.matchingTargetLabel(targetLabel))
+            result.exitNodes.merge(with: result.breakNodes.matchingTargetLabel(nil))
+            return result.satisfyingBreaks(labeled: targetLabel)
         }
         
         func returnToExits() -> _NodeCreationResult {
@@ -561,13 +577,16 @@ private extension ControlFlowGraph {
             return result.satisfyingExits()
         }
         
-        func connectingContinues(to node: ControlFlowGraphNode) -> _NodeCreationResult {
+        func connectingContinues(label targetLabel: String? = nil, to node: ControlFlowGraphNode) -> _NodeCreationResult {
             var newResult = self
             
-            newResult.operations.append(contentsOf:
-                continueNodes.chainOperations(endingIn: node))
+            let operations = continueNodes
+                .matchingTargetLabel(targetLabel)
+                .chainOperations(endingIn: node)
             
-            return newResult.satisfyingContinues()
+            newResult.operations.append(contentsOf: operations)
+            
+            return newResult.satisfyingContinues(label: targetLabel)
         }
         
         func chainingExits(to next: _NodeCreationResult) -> _NodeCreationResult {
@@ -602,14 +621,22 @@ private extension ControlFlowGraph {
     }
     
     struct ControlFlowGraphJumpTarget {
-        private(set) var nodes: [(node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode])] = []
+        private(set) var nodes: [JumpNodeEntry] = []
         
-        mutating func clear() {
-            nodes.removeAll()
+        mutating func clear(labeled targetLabel: String? = nil) {
+            nodes.removeAll(where: { $0.jumpLabel == targetLabel })
         }
         
-        mutating func addNode(_ node: ControlFlowGraphNode) {
-            nodes.append((node, []))
+        mutating func addNode(_ node: ControlFlowGraphNode, targetLabel: String? = nil) {
+            nodes.append(JumpNodeEntry(node: node, defers: [], jumpLabel: targetLabel))
+        }
+        
+        func matchingTargetLabel(_ targetLabel: String?) -> ControlFlowGraphJumpTarget {
+            return ControlFlowGraphJumpTarget(nodes: entriesForTargetLabel(targetLabel))
+        }
+        
+        func entriesForTargetLabel(_ label: String?) -> [JumpNodeEntry] {
+            return nodes.filter({ $0.jumpLabel == label })
         }
         
         mutating func appendDefer(_ node: ControlFlowSubgraphNode) {
@@ -643,6 +670,12 @@ private extension ControlFlowGraph {
                           _ second: ControlFlowGraphJumpTarget) -> ControlFlowGraphJumpTarget {
             
             return ControlFlowGraphJumpTarget(nodes: first.nodes + second.nodes)
+        }
+        
+        struct JumpNodeEntry {
+            var node: ControlFlowGraphNode
+            var defers: [ControlFlowSubgraphNode]
+            var jumpLabel: String?
         }
     }
 }
