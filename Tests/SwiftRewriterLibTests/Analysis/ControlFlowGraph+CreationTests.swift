@@ -1,4 +1,5 @@
 import XCTest
+import Cocoa
 @testable import SwiftRewriterLib
 import SwiftAST
 import TestCommons
@@ -172,15 +173,15 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="var v: Int"]
+                n3 [label="print(\\"Did work!\\")"]
                 n4 [label="v()"]
-                n5 [label="{if}"]
-                n6 [label="print(\\"Did work!\\")"]
-                n1 -> n3
-                n3 -> n4
-                n4 -> n5
-                n5 -> n6
-                n5 -> n2
+                n5 [label="var v: Int"]
+                n6 [label="{if}"]
+                n1 -> n5
+                n3 -> n2
+                n4 -> n6
+                n5 -> n4
+                n6 -> n3
                 n6 -> n2
             }
             """)
@@ -218,18 +219,18 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="var v: Int"]
-                n4 [label="v()"]
-                n5 [label="{if}"]
-                n6 [label="print(\\"Did work!\\")"]
-                n7 [label="print(\\"Did no work\\")"]
-                n1 -> n3
-                n3 -> n4
-                n4 -> n5
-                n5 -> n6
+                n3 [label="print(\\"Did no work\\")"]
+                n4 [label="print(\\"Did work!\\")"]
+                n5 [label="v()"]
+                n6 [label="var v: Int"]
+                n7 [label="{if}"]
+                n1 -> n6
+                n3 -> n2
+                n4 -> n2
                 n5 -> n7
-                n6 -> n2
-                n7 -> n2
+                n6 -> n5
+                n7 -> n4
+                n7 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 7)
@@ -275,23 +276,23 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="var v: Int"]
-                n4 [label="v()"]
-                n5 [label="{if}"]
-                n6 [label="print(\\"Did work!\\")"]
-                n7 [label="{if}"]
-                n8 [label="print(\\"Did work twice!\\")"]
-                n9 [label="print(\\"Did no work twice\\")"]
-                n1 -> n3
-                n3 -> n4
-                n4 -> n5
-                n5 -> n6
-                n5 -> n7
-                n6 -> n2
-                n7 -> n8
-                n7 -> n9
-                n8 -> n2
-                n9 -> n2
+                n3 [label="print(\\"Did no work twice\\")"]
+                n4 [label="print(\\"Did work twice!\\")"]
+                n5 [label="print(\\"Did work!\\")"]
+                n6 [label="v()"]
+                n7 [label="var v: Int"]
+                n8 [label="{if}"]
+                n9 [label="{if}"]
+                n1 -> n7
+                n3 -> n2
+                n4 -> n2
+                n5 -> n2
+                n6 -> n8
+                n7 -> n6
+                n8 -> n5
+                n8 -> n9
+                n9 -> n4
+                n9 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 9)
@@ -332,19 +333,19 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="SwitchStatement"]
-                n4 [label="b"]
-                n5 [label="c"]
-                n6 [label="d"]
+                n1 [label="SwitchStatement"]
+                n2 [label="b"]
+                n3 [label="c"]
+                n4 [label="d"]
+                n5 [label="entry"]
+                n6 [label="exit"]
+                n1 -> n2
                 n1 -> n3
-                n3 -> n4
-                n3 -> n5
+                n1 -> n4
+                n2 -> n6
                 n3 -> n6
-                n4 -> n2
-                n5 -> n2
-                n6 -> n2
+                n4 -> n6
+                n5 -> n1
             }
             """)
         XCTAssertEqual(graph.nodes.count, 6)
@@ -384,21 +385,21 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
+                n1 [label="FallthroughStatement"]
+                n2 [label="SwitchStatement"]
                 n3 [label="b"]
-                n4 [label="FallthroughStatement"]
-                n5 [label="SwitchStatement"]
-                n6 [label="c"]
-                n7 [label="d"]
-                n1 -> n5
-                n3 -> n4
-                n4 -> n6
-                n5 -> n3
-                n5 -> n6
+                n4 [label="c"]
+                n5 [label="d"]
+                n6 [label="entry"]
+                n7 [label="exit"]
+                n1 -> n4
+                n2 -> n3
+                n2 -> n4
+                n2 -> n5
+                n3 -> n1
+                n4 -> n7
                 n5 -> n7
                 n6 -> n2
-                n7 -> n2
             }
             """)
         XCTAssertEqual(graph.nodes.count, 7)
@@ -441,25 +442,25 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{if}"]
-                n4 [label="BreakStatement"]
-                n5 [label="b"]
-                n6 [label="d"]
-                n7 [label="SwitchStatement"]
-                n8 [label="e"]
-                n9 [label="c"]
-                n1 -> n7
-                n3 -> n4
-                n3 -> n6
-                n4 -> n9
-                n5 -> n3
-                n6 -> n9
-                n7 -> n5
-                n7 -> n8
-                n8 -> n2
-                n9 -> n2
+                n1 [label="BreakStatement"]
+                n2 [label="SwitchStatement"]
+                n3 [label="b"]
+                n4 [label="c"]
+                n5 [label="d"]
+                n6 [label="e"]
+                n7 [label="entry"]
+                n8 [label="exit"]
+                n9 [label="{if}"]
+                n1 -> n4
+                n2 -> n3
+                n2 -> n6
+                n3 -> n9
+                n4 -> n8
+                n5 -> n4
+                n6 -> n8
+                n7 -> n2
+                n9 -> n1
+                n9 -> n5
             }
             """)
         XCTAssertEqual(graph.nodes.count, 9)
@@ -511,31 +512,31 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{if}"]
-                n4 [label="FallthroughStatement"]
-                n5 [label="b"]
-                n6 [label="d"]
-                n7 [label="SwitchStatement"]
-                n8 [label="f"]
-                n9 [label="g"]
-                n10 [label="c"]
-                n11 [label="e"]
-                n1 -> n7
-                n3 -> n4
-                n3 -> n6
-                n4 -> n10
-                n5 -> n3
-                n6 -> n11
-                n7 -> n5
-                n7 -> n8
-                n7 -> n9
-                n8 -> n2
-                n9 -> n2
+                n1 [label="FallthroughStatement"]
+                n2 [label="SwitchStatement"]
+                n3 [label="b"]
+                n4 [label="c"]
+                n5 [label="d"]
+                n6 [label="e"]
+                n7 [label="entry"]
+                n8 [label="exit"]
+                n9 [label="f"]
+                n10 [label="g"]
+                n11 [label="{if}"]
+                n1 -> n4
+                n2 -> n3
+                n2 -> n9
+                n2 -> n10
+                n3 -> n11
+                n4 -> n9
+                n4 -> n8
+                n5 -> n6
+                n6 -> n4
+                n7 -> n2
+                n9 -> n8
                 n10 -> n8
-                n10 -> n2
-                n11 -> n10
+                n11 -> n1
+                n11 -> n5
             }
             """)
         XCTAssertEqual(graph.nodes.count, 11)
@@ -594,38 +595,38 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="d"]
-                n4 [label="FallthroughStatement"]
-                n5 [label="{if}"]
-                n6 [label="b"]
-                n7 [label="e"]
-                n8 [label="{if}"]
-                n9 [label="{return}"]
-                n10 [label="SwitchStatement"]
-                n11 [label="g"]
-                n12 [label="h"]
-                n13 [label="c"]
-                n14 [label="f"]
-                n1 -> n10
-                n3 -> n4
-                n4 -> n13
-                n5 -> n3
-                n5 -> n7
-                n6 -> n5
-                n7 -> n8
-                n8 -> n9
-                n8 -> n14
-                n9 -> n13
-                n10 -> n6
-                n10 -> n11
-                n10 -> n12
-                n11 -> n2
-                n12 -> n2
-                n13 -> n11
-                n13 -> n2
-                n14 -> n13
+                n1 [label="FallthroughStatement"]
+                n2 [label="SwitchStatement"]
+                n3 [label="b"]
+                n4 [label="c"]
+                n5 [label="d"]
+                n6 [label="e"]
+                n7 [label="entry"]
+                n8 [label="exit"]
+                n9 [label="f"]
+                n10 [label="g"]
+                n11 [label="h"]
+                n12 [label="{if}"]
+                n13 [label="{if}"]
+                n14 [label="{return}"]
+                n1 -> n4
+                n2 -> n3
+                n2 -> n10
+                n2 -> n11
+                n3 -> n12
+                n4 -> n10
+                n4 -> n8
+                n5 -> n1
+                n6 -> n13
+                n7 -> n2
+                n9 -> n4
+                n10 -> n8
+                n11 -> n8
+                n12 -> n5
+                n12 -> n6
+                n13 -> n14
+                n13 -> n9
+                n14 -> n4
             }
             """)
         XCTAssertEqual(graph.nodes.count, 14)
@@ -650,16 +651,16 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="v()"]
-                n4 [label="{while}"]
-                n5 [label="a"]
-                n1 -> n3
-                n3 -> n4
+                n1 [label="a"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n4 [label="v()"]
+                n5 [label="{while}"]
+                n1 -> n5 [color="#aa3333",penwidth=0.5]
+                n2 -> n4
                 n4 -> n5
-                n4 -> n2
-                n5 -> n4 [color="#aa3333",penwidth=0.5]
+                n5 -> n1
+                n5 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)
@@ -716,16 +717,16 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="v()"]
-                n4 [label="a"]
+                n1 [label="a"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n4 [label="v()"]
                 n5 [label="{do-while}"]
-                n1 -> n3
-                n3 -> n4
-                n4 -> n5
-                n5 -> n4 [color="#aa3333",penwidth=0.5]
-                n5 -> n2
+                n1 -> n5
+                n2 -> n4
+                n4 -> n1
+                n5 -> n1 [color="#aa3333",penwidth=0.5]
+                n5 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)
@@ -782,16 +783,16 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="v()"]
-                n4 [label="BreakStatement"]
+                n1 [label="BreakStatement"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n4 [label="v()"]
                 n5 [label="{do-while}"]
                 n1 -> n3
-                n3 -> n4
-                n4 -> n2
-                n5 -> n4
-                n5 -> n2
+                n2 -> n4
+                n4 -> n1
+                n5 -> n1
+                n5 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)
@@ -816,14 +817,14 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{for}"]
-                n4 [label="b"]
-                n1 -> n3
-                n3 -> n4
-                n3 -> n2
-                n4 -> n3 [color="#aa3333",penwidth=0.5]
+                n1 [label="b"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n4 [label="{for}"]
+                n1 -> n4 [color="#aa3333",penwidth=0.5]
+                n2 -> n4
+                n4 -> n1
+                n4 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 4)
@@ -884,25 +885,25 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="v()"]
-                n4 [label="{if}"]
-                n5 [label="BreakStatement"]
-                n6 [label="b"]
-                n7 [label="ContinueStatement"]
-                n8 [label="a"]
+                n1 [label="BreakStatement"]
+                n2 [label="ContinueStatement"]
+                n3 [label="a"]
+                n4 [label="b"]
+                n5 [label="entry"]
+                n6 [label="exit"]
+                n7 [label="v()"]
+                n8 [label="{if}"]
                 n9 [label="{while}"]
-                n1 -> n3
-                n3 -> n9
-                n4 -> n5
-                n4 -> n6
-                n5 -> n2
-                n6 -> n7
-                n7 -> n9 [color="#aa3333",penwidth=0.5]
+                n1 -> n6
+                n2 -> n9 [color="#aa3333",penwidth=0.5]
+                n3 -> n8
+                n4 -> n2
+                n5 -> n7
+                n7 -> n9
+                n8 -> n1
                 n8 -> n4
-                n9 -> n8
-                n9 -> n2
+                n9 -> n3
+                n9 -> n6
             }
             """)
         XCTAssertEqual(graph.nodes.count, 9)
@@ -929,11 +930,11 @@ class ControlFlowGraphCreationTests: XCTestCase {
             digraph flow {
                 n1 [label="entry"]
                 n2 [label="exit"]
-                n3 [label="{while}"]
-                n4 [label="{return}"]
-                n1 -> n3
-                n3 -> n4
+                n3 [label="{return}"]
+                n4 [label="{while}"]
+                n1 -> n4
                 n3 -> n2
+                n4 -> n3
                 n4 -> n2
             }
             """)
@@ -959,14 +960,14 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{while}"]
-                n4 [label="BreakStatement"]
+                n1 [label="BreakStatement"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n4 [label="{while}"]
                 n1 -> n3
-                n3 -> n4
-                n3 -> n2
-                n4 -> n2
+                n2 -> n4
+                n4 -> n1
+                n4 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 4)
@@ -991,14 +992,14 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{while}"]
-                n4 [label="ContinueStatement"]
-                n1 -> n3
-                n3 -> n4
-                n3 -> n2
-                n4 -> n3 [color="#aa3333",penwidth=0.5]
+                n1 [label="ContinueStatement"]
+                n2 [label="entry"]
+                n3 [label="exit"]
+                n4 [label="{while}"]
+                n1 -> n4 [color="#aa3333",penwidth=0.5]
+                n2 -> n4
+                n4 -> n1
+                n4 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 4)
@@ -1024,16 +1025,16 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="ContinueStatement"]
+                n1 [label="ContinueStatement"]
+                n2 [label="entry"]
+                n3 [label="exit"]
                 n4 [label="v"]
                 n5 [label="{while}"]
-                n1 -> n5
-                n3 -> n5 [color="#aa3333",penwidth=0.5]
+                n1 -> n5 [color="#aa3333",penwidth=0.5]
+                n2 -> n5
                 n4 -> n5
+                n5 -> n1
                 n5 -> n3
-                n5 -> n2
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)
@@ -1057,15 +1058,15 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
+                n1 [label="a"]
+                n2 [label="b"]
                 n3 [label="c"]
-                n4 [label="a"]
-                n5 [label="b"]
-                n1 -> n3
-                n3 -> n4
-                n4 -> n5
-                n5 -> n2
+                n4 [label="entry"]
+                n5 [label="exit"]
+                n1 -> n2
+                n2 -> n5
+                n3 -> n1
+                n4 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 5)
@@ -1096,20 +1097,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{if}"]
-                n4 [label="d"]
-                n5 [label="e"]
-                n6 [label="b"]
-                n7 [label="c"]
-                n1 -> n3
-                n3 -> n4
-                n3 -> n5
+                n1 [label="b"]
+                n2 [label="c"]
+                n3 [label="d"]
+                n4 [label="e"]
+                n5 [label="entry"]
+                n6 [label="exit"]
+                n7 [label="{if}"]
+                n1 -> n2
+                n2 -> n4
+                n3 -> n1
                 n4 -> n6
-                n5 -> n2
-                n6 -> n7
-                n7 -> n5
+                n5 -> n7
+                n7 -> n3
+                n7 -> n4
             }
             """)
         XCTAssertEqual(graph.nodes.count, 7)
@@ -1144,22 +1145,22 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{if}"]
-                n4 [label="c"]
-                n5 [label="e"]
-                n6 [label="f"]
-                n7 [label="b"]
-                n8 [label="d"]
-                n1 -> n3
-                n3 -> n4
-                n3 -> n5
-                n4 -> n7
+                n1 [label="b"]
+                n2 [label="c"]
+                n3 [label="d"]
+                n4 [label="e"]
+                n5 [label="entry"]
+                n6 [label="exit"]
+                n7 [label="f"]
+                n8 [label="{if}"]
+                n1 -> n7
+                n2 -> n1
+                n3 -> n7
+                n4 -> n3
                 n5 -> n8
-                n6 -> n2
                 n7 -> n6
-                n8 -> n6
+                n8 -> n2
+                n8 -> n4
             }
             """)
         XCTAssertEqual(graph.nodes.count, 8)
@@ -1188,18 +1189,18 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="{while}"]
-                n4 [label="c"]
-                n5 [label="d"]
-                n6 [label="b"]
-                n1 -> n3
-                n3 -> n4
+                n1 [label="b"]
+                n2 [label="c"]
+                n3 [label="d"]
+                n4 [label="entry"]
+                n5 [label="exit"]
+                n6 [label="{while}"]
+                n1 -> n6 [color="#aa3333",penwidth=0.5]
+                n2 -> n1
                 n3 -> n5
                 n4 -> n6
-                n5 -> n2
-                n6 -> n3 [color="#aa3333",penwidth=0.5]
+                n6 -> n2
+                n6 -> n3
             }
             """)
         XCTAssertEqual(graph.nodes.count, 6)
@@ -1229,20 +1230,20 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
+                n1 [label="BreakStatement"]
+                n2 [label="b"]
                 n3 [label="c"]
-                n4 [label="BreakStatement"]
-                n5 [label="{while}"]
-                n6 [label="d"]
-                n7 [label="b"]
-                n1 -> n5
-                n3 -> n4
-                n4 -> n7
-                n5 -> n3
-                n5 -> n6
-                n6 -> n2
-                n7 -> n6
+                n4 [label="d"]
+                n5 [label="entry"]
+                n6 [label="exit"]
+                n7 [label="{while}"]
+                n1 -> n2
+                n2 -> n4
+                n3 -> n1
+                n4 -> n6
+                n5 -> n7
+                n7 -> n3
+                n7 -> n4
             }
             """)
         XCTAssertEqual(graph.nodes.count, 7)
@@ -1271,18 +1272,18 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="v()"]
-                n4 [label="b"]
-                n5 [label="{do-while}"]
-                n6 [label="a"]
-                n1 -> n3
-                n3 -> n4
-                n4 -> n6
-                n5 -> n4 [color="#aa3333",penwidth=0.5]
+                n1 [label="a"]
+                n2 [label="b"]
+                n3 [label="entry"]
+                n4 [label="exit"]
+                n5 [label="v()"]
+                n6 [label="{do-while}"]
+                n1 -> n6
+                n2 -> n1
+                n3 -> n5
                 n5 -> n2
-                n6 -> n5
+                n6 -> n2 [color="#aa3333",penwidth=0.5]
+                n6 -> n4
             }
             """)
         XCTAssertEqual(graph.nodes.count, 6)
@@ -1316,22 +1317,22 @@ class ControlFlowGraphCreationTests: XCTestCase {
             graph: graph,
             matches: """
             digraph flow {
-                n1 [label="entry"]
-                n2 [label="exit"]
-                n3 [label="b"]
-                n4 [label="{if}"]
-                n5 [label="{return 0}"]
-                n6 [label="d"]
-                n7 [label="a"]
-                n8 [label="c"]
-                n1 -> n3
-                n3 -> n4
-                n4 -> n5
-                n4 -> n6
-                n5 -> n7
-                n6 -> n8
-                n7 -> n2
-                n8 -> n7
+                n1 [label="a"]
+                n2 [label="b"]
+                n3 [label="c"]
+                n4 [label="d"]
+                n5 [label="entry"]
+                n6 [label="exit"]
+                n7 [label="{if}"]
+                n8 [label="{return 0}"]
+                n1 -> n6
+                n2 -> n7
+                n3 -> n1
+                n4 -> n3
+                n5 -> n2
+                n7 -> n8
+                n7 -> n4
+                n8 -> n1
             }
             """)
         XCTAssertEqual(graph.nodes.count, 8)
@@ -1471,11 +1472,10 @@ private extension ControlFlowGraphCreationTests {
         buffer.idented {
             var nodeIds: [ObjectIdentifier: String] = [:]
             
+            var nodeDefinitions: [(node: ControlFlowGraphNode, label: String)] = []
+            
             // Prepare nodes
-            for (i, node) in graph.nodes.enumerated() {
-                let id = "n\(i + 1)"
-                nodeIds[ObjectIdentifier(node)] = id
-                
+            for node in graph.nodes {
                 var label: String = "\(type(of: node.node))"
                 if node === graph.entry {
                     label = "entry"
@@ -1521,11 +1521,22 @@ private extension ControlFlowGraphCreationTests {
                     break
                 }
                 
+                nodeDefinitions.append((node: node, label: label))
+            }
+            
+            // Sort nodes so the result is more stable
+            nodeDefinitions.sort { $0.label < $1.label }
+            
+            // Prepare nodes
+            for (i, (node: node, label: label)) in nodeDefinitions.enumerated() {
+                let id = "n\(i + 1)"
+                nodeIds[ObjectIdentifier(node)] = id
+                
                 buffer.output(line: "\(id) [label=\"\(label)\"]")
             }
             
             // Output connections
-            for node in graph.nodes {
+            for (node, _) in nodeDefinitions {
                 let nodeId = nodeIds[ObjectIdentifier(node)]!
                 
                 let edges = graph.edges(from: node)

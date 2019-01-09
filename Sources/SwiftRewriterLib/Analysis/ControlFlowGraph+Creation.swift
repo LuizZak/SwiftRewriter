@@ -159,19 +159,16 @@ private extension ControlFlowGraph {
             .addingExitNode(entry, defers: [])
         
         previous =
-            _connections(for: statements, start: previous, in: graph)
+            _connections(for: statements, start: previous)
                 .returnToExits()
         
-        previous.exitNodes
-            .edgeConstructors(in: graph)
-            .connect(to: exit)
+        previous.apply(to: graph, endNode: exit)
         
         return graph
     }
     
     private static func _connections(for statements: [Statement],
-                                     start: _NodeCreationResult,
-                                     in graph: ControlFlowGraph) -> _NodeCreationResult {
+                                     start: _NodeCreationResult) -> _NodeCreationResult {
         
         var activeDefers: [ControlFlowSubgraphNode] = []
         
@@ -182,33 +179,26 @@ private extension ControlFlowGraph {
                 let subgraph = forStatementList(stmt.body.statements, baseNode: stmt)
                 let defNode = ControlFlowSubgraphNode(node: stmt, graph: subgraph)
                 
-                graph.addNode(defNode)
-                
                 activeDefers.append(defNode)
                 continue
             }
             
-            let connections = _connections(for: statement, in: graph)
+            let connections = _connections(for: statement)
             
             previous =
                 previous
-                    .chainingExits(to: connections.appendingDefers(activeDefers),
-                                    in: graph)
+                    .chainingExits(to: connections.appendingDefers(activeDefers))
         }
         
         return previous.appendingExitDefers(activeDefers)
     }
     
-    private static func _connections(for statements: [Statement],
-                                     in graph: ControlFlowGraph) -> _NodeCreationResult {
+    private static func _connections(for statements: [Statement]) -> _NodeCreationResult {
         
-        return _connections(for: statements,
-                            start: _NodeCreationResult.invalid,
-                            in: graph)
+        return _connections(for: statements, start: .invalid)
     }
     
-    private static func _connections(for statement: Statement,
-                                     in graph: ControlFlowGraph) -> _NodeCreationResult {
+    private static func _connections(for statement: Statement) -> _NodeCreationResult {
         
         switch statement {
         case is ExpressionsStatement,
@@ -244,22 +234,22 @@ private extension ControlFlowGraph {
             return _connections(forFallthrough: stmt)
             
         case let stmt as CompoundStatement:
-            return _connections(for: stmt.statements, in: graph)
+            return _connections(for: stmt.statements)
             
         case let stmt as IfStatement:
-            return _connections(forIf: stmt, in: graph)
+            return _connections(forIf: stmt)
             
         case let stmt as SwitchStatement:
-            return _connections(forSwitch: stmt, in: graph)
+            return _connections(forSwitch: stmt)
             
         case let stmt as WhileStatement:
-            return _connections(forWhile: stmt, in: graph)
+            return _connections(forWhile: stmt)
             
         case let stmt as DoWhileStatement:
-            return _connections(forDoWhile: stmt, in: graph)
+            return _connections(forDoWhile: stmt)
             
         case let stmt as ForStatement:
-            return _connections(forForLoop: stmt, in: graph)
+            return _connections(forForLoop: stmt)
             
         default:
             let node = ControlFlowGraphNode(node: statement)
@@ -276,16 +266,16 @@ private extension ControlFlowGraph {
             .addingFallthroughNode(node, defers: [])
     }
     
-    static func _connections(forIf stmt: IfStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+    static func _connections(forIf stmt: IfStatement) -> _NodeCreationResult {
         let node = ControlFlowGraphNode(node: stmt)
         var result = _NodeCreationResult(startNode: node)
         
-        let bodyConnections = _connections(for: stmt.body, in: graph)
-        result = result.addingBranch(bodyConnections, in: graph)
+        let bodyConnections = _connections(for: stmt.body)
+        result = result.addingBranch(bodyConnections)
         
         if let elseBody = stmt.elseBody {
-            let elseConnections = _connections(for: elseBody, in: graph)
-            result = result.addingBranch(elseConnections, in: graph)
+            let elseConnections = _connections(for: elseBody)
+            result = result.addingBranch(elseConnections)
         } else {
             result = result.addingExitNode(node, defers: [])
         }
@@ -293,32 +283,30 @@ private extension ControlFlowGraph {
         return result
     }
     
-    static func _connections(forSwitch stmt: SwitchStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+    static func _connections(forSwitch stmt: SwitchStatement) -> _NodeCreationResult {
         let node = ControlFlowGraphNode(node: stmt)
         var result = _NodeCreationResult(startNode: node)
         
         var lastFallthrough: ControlFlowGraphJumpTarget?
         
         for cs in stmt.cases {
-            let branch =
-                _connections(for: cs.statements, in: graph)
+            var branch =
+                _connections(for: cs.statements)
             
             if let lastFallthrough = lastFallthrough {
-                lastFallthrough
-                    .edgeConstructors(in: graph)
-                    .connect(to: branch.startNode)
+                branch = branch.addingJumpInto(from: lastFallthrough)
             }
             
             result =
                 result
-                    .addingBranch(branch.breakToExits(), in: graph)
+                    .addingBranch(branch.breakToExits())
             
             lastFallthrough = branch.fallthroughNodes
         }
         
         if let def = stmt.defaultCase {
-            let defResult = _connections(for: def, in: graph)
-            result = result.addingBranch(defResult, in: graph)
+            let defResult = _connections(for: def)
+            result = result.addingBranch(defResult)
         } else {
             result = result.addingExitNode(node, defers: [])
         }
@@ -326,22 +314,22 @@ private extension ControlFlowGraph {
         return result
     }
     
-    static func _connections(forWhile stmt: WhileStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+    static func _connections(forWhile stmt: WhileStatement) -> _NodeCreationResult {
         let node = ControlFlowGraphNode(node: stmt)
         var result = _NodeCreationResult(startNode: node)
         
-        let bodyConnections = _connections(for: stmt.body, in: graph)
+        let bodyConnections = _connections(for: stmt.body)
         
         if bodyConnections.isValid {
             result =
-                result.addingBranch(bodyConnections, in: graph)
-                    .chainingExits(to: result, in: graph)
+                result.addingBranch(bodyConnections)
+                    .chainingExits(to: result)
                     .breakToExits()
-                    .chainingContinues(to: result, in: graph)
+                    .chainingContinues(to: result)
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainingExits(to: result, in: graph)
+                .chainingExits(to: result)
         }
         
         result = result.addingExitNode(node, defers: [])
@@ -349,50 +337,50 @@ private extension ControlFlowGraph {
         return result
     }
     
-    static func _connections(forDoWhile stmt: DoWhileStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+    static func _connections(forDoWhile stmt: DoWhileStatement) -> _NodeCreationResult {
         let node = ControlFlowGraphNode(node: stmt)
         var result = _NodeCreationResult(startNode: node)
         
-        let bodyConnections = _connections(for: stmt.body, in: graph)
+        let bodyConnections = _connections(for: stmt.body)
         
         if bodyConnections.isValid {
             result =
                 bodyConnections
-                    .chainingExits(to: result, in: graph)
-                    .chainingContinues(to: bodyConnections, in: graph)
+                    .chainingExits(to: result)
+                    .chainingContinues(to: bodyConnections)
             
             result =
                 result
                     .addingExitNode(node, defers: [])
-                    .connecting(to: bodyConnections.startNode, in: graph)
+                    .connecting(to: bodyConnections.startNode)
                     .addingExitNode(node, defers: [])
                     .breakToExits()
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainingExits(to: result, in: graph)
+                .chainingExits(to: result)
                 .addingExitNode(node, defers: [])
         }
         
         return result
     }
     
-    static func _connections(forForLoop stmt: ForStatement, in graph: ControlFlowGraph) -> _NodeCreationResult {
+    static func _connections(forForLoop stmt: ForStatement) -> _NodeCreationResult {
         let node = ControlFlowGraphNode(node: stmt)
         var result = _NodeCreationResult(startNode: node)
         
-        let bodyConnections = _connections(for: stmt.body, in: graph)
+        let bodyConnections = _connections(for: stmt.body)
         
         if bodyConnections.isValid {
             result =
-                result.addingBranch(bodyConnections, in: graph)
-                    .chainingExits(to: result, in: graph)
+                result.addingBranch(bodyConnections)
+                    .chainingExits(to: result)
                     .breakToExits()
-                    .chainingContinues(to: result, in: graph)
+                    .chainingContinues(to: result)
         } else {
             result = result
                 .addingExitNode(node, defers: [])
-                .chainingExits(to: result, in: graph)
+                .chainingExits(to: result)
         }
         
         result = result.addingExitNode(node, defers: [])
@@ -418,8 +406,32 @@ private extension ControlFlowGraph {
         var fallthroughNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
         var returnNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
         
+        private var operations: [GraphOperation] = []
+        
         init(startNode: ControlFlowGraphNode) {
             self.startNode = startNode
+            
+            operations = [.addNode(startNode)]
+        }
+        
+        func apply(to graph: ControlFlowGraph, endNode: ControlFlowGraphNode) {
+            let operations =
+                self.operations
+                    + exitNodes.chainOperations(endingIn: endNode)
+            
+            for operation in operations {
+                switch operation {
+                case .addNode(let node):
+                    if !graph.containsNode(node) {
+                        graph.addNode(node)
+                    }
+                    
+                case let .addEdge(start, end):
+                    if graph.edge(from: start, to: end) == nil {
+                        graph.addEdge(from: start, to: end)
+                    }
+                }
+            }
         }
         
         func addingExitNode(_ node: ControlFlowGraphNode, defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
@@ -486,20 +498,24 @@ private extension ControlFlowGraph {
             return result.satisfyingReturns()
         }
         
+        // TODO: What do we do if self.isValid == true?
         func appendingDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
             return defers.reduce(self, { $0.appendingDefer($1) })
         }
         
+        // TODO: What do we do if self.isValid == true?
         func appendingExitDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
             return defers.reduce(self, { $0.appendingExitDefer($1) })
         }
         
+        // TODO: What do we do if self.isValid == true?
         func appendingExitDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
             var result = self
             result.exitNodes.appendDefer(node)
             return result
         }
         
+        // TODO: What do we do if self.isValid == true?
         func appendingDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
             var result = self
             result.breakNodes.appendDefer(node)
@@ -509,7 +525,14 @@ private extension ControlFlowGraph {
             return result
         }
         
-        func addingBranch(_ result: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        // TODO: What do we do if self.isValid == true?
+        func addingJumpInto(from target: ControlFlowGraphJumpTarget) -> _NodeCreationResult {
+            var result = self
+            result.operations.append(contentsOf: target.chainOperations(endingIn: startNode))
+            return result
+        }
+        
+        func addingBranch(_ result: _NodeCreationResult) -> _NodeCreationResult {
             if !result.isValid {
                 return self
             }
@@ -517,18 +540,12 @@ private extension ControlFlowGraph {
                 return result
             }
             
-            if !graph.containsNode(startNode) {
-                graph.addNode(startNode)
-            }
-            if !graph.containsNode(result.startNode) {
-                graph.addNode(result.startNode)
-            }
-            
             var newResult = self
             
-            if graph.edge(from: startNode, to: result.startNode) == nil {
-                graph.addEdge(from: startNode, to: result.startNode)
-            }
+            newResult.operations.append(.addNode(startNode))
+            newResult.operations.append(.addNode(result.startNode))
+            newResult.operations.append(.addEdge(start: startNode, end: result.startNode))
+            newResult.operations.append(contentsOf: result.operations)
             
             newResult.exitNodes.merge(with: result.exitNodes)
             newResult.breakNodes.merge(with: result.breakNodes)
@@ -539,15 +556,15 @@ private extension ControlFlowGraph {
             return newResult
         }
         
-        func connecting(to node: ControlFlowGraphNode, in graph: ControlFlowGraph) -> _NodeCreationResult {
-            exitNodes
-                .edgeConstructors(in: graph)
-                .connect(to: node)
+        func connecting(to node: ControlFlowGraphNode) -> _NodeCreationResult {
+            var result = self
             
-            return self.satisfyingExits()
+            result.operations.append(contentsOf: exitNodes.chainOperations(endingIn: node))
+            
+            return result.satisfyingExits()
         }
         
-        func chainingExits(to next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        func chainingExits(to next: _NodeCreationResult) -> _NodeCreationResult {
             if !next.isValid {
                 return self
             }
@@ -555,15 +572,9 @@ private extension ControlFlowGraph {
                 return next
             }
             
-            if !graph.containsNode(startNode) {
-                graph.addNode(startNode)
-            }
-            if !graph.containsNode(next.startNode) {
-                graph.addNode(next.startNode)
-            }
+            var newResult = self.connecting(to: next.startNode)
             
-            var newResult =
-                self.connecting(to: next.startNode, in: graph)
+            newResult.operations.append(contentsOf: next.operations)
             
             newResult.exitNodes = next.exitNodes
             newResult.breakNodes.merge(with: next.breakNodes)
@@ -574,7 +585,7 @@ private extension ControlFlowGraph {
             return newResult
         }
         
-        func chainingContinues(to next: _NodeCreationResult, in graph: ControlFlowGraph) -> _NodeCreationResult {
+        func chainingContinues(to next: _NodeCreationResult) -> _NodeCreationResult {
             if !next.isValid {
                 return self
             }
@@ -582,18 +593,11 @@ private extension ControlFlowGraph {
                 return next
             }
             
-            if !graph.containsNode(startNode) {
-                graph.addNode(startNode)
-            }
-            if !graph.containsNode(next.startNode) {
-                graph.addNode(next.startNode)
-            }
-            
             var newResult = self
             
-            continueNodes
-                .edgeConstructors(in: graph)
-                .connect(to: next.startNode)
+            newResult.operations.append(contentsOf: next.operations)
+            newResult.operations.append(contentsOf:
+                continueNodes.chainOperations(endingIn: next.startNode))
             
             newResult.breakNodes.merge(with: next.breakNodes)
             newResult.fallthroughNodes.merge(with: next.fallthroughNodes)
@@ -604,6 +608,11 @@ private extension ControlFlowGraph {
         
         private class _InvalidSyntaxNode: SyntaxNode {
             
+        }
+        
+        enum GraphOperation {
+            case addNode(ControlFlowGraphNode)
+            case addEdge(start: ControlFlowGraphNode, end: ControlFlowGraphNode)
         }
     }
     
@@ -632,6 +641,33 @@ private extension ControlFlowGraph {
             return nodes.map { node in
                 graph.connectChain(start: node.node, rest: node.defers.reversed())
             }
+        }
+        
+        func chainOperations(endingIn ending: ControlFlowGraphNode) -> [_NodeCreationResult.GraphOperation] {
+            var operations: [_NodeCreationResult.GraphOperation] = []
+            for node in nodes {
+                let defers = Array(node.defers.reversed())
+                
+                operations.append(.addNode(node.node))
+                
+                for (i, def) in defers.enumerated() {
+                    operations.append(.addNode(def))
+                    
+                    if i == 0 {
+                        operations.append(.addEdge(start: node.node, end: def))
+                    } else {
+                        operations.append(.addEdge(start: defers[i - 1], end: def))
+                    }
+                }
+                
+                if let last = defers.last {
+                    operations.append(.addEdge(start: last, end: ending))
+                } else {
+                    operations.append(.addEdge(start: node.node, end: ending))
+                }
+            }
+            
+            return operations
         }
         
         static func merge(_ first: ControlFlowGraphJumpTarget,
