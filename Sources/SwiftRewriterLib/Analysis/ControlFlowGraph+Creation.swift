@@ -482,24 +482,20 @@ private extension ControlFlowGraph {
             return result.satisfyingReturns()
         }
         
-        // TODO: What do we do if self.isValid == true?
         func appendingDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
             return defers.reduce(self, { $0.appendingDefer($1) })
         }
         
-        // TODO: What do we do if self.isValid == true?
         func appendingExitDefers(_ defers: [ControlFlowSubgraphNode]) -> _NodeCreationResult {
             return defers.reduce(self, { $0.appendingExitDefer($1) })
         }
         
-        // TODO: What do we do if self.isValid == true?
         func appendingExitDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
             var result = self
             result.exitNodes.appendDefer(node)
             return result
         }
         
-        // TODO: What do we do if self.isValid == true?
         func appendingDefer(_ node: ControlFlowSubgraphNode) -> _NodeCreationResult {
             var result = self
             result.breakNodes.appendDefer(node)
@@ -511,6 +507,10 @@ private extension ControlFlowGraph {
         
         // TODO: What do we do if self.isValid == true?
         func addingJumpInto(from target: ControlFlowGraphJumpTarget) -> _NodeCreationResult {
+            if !isValid {
+                return self
+            }
+            
             var result = self
             result.operations.append(contentsOf: target.chainOperations(endingIn: startNode))
             return result
