@@ -623,25 +623,15 @@ private extension ControlFlowGraph {
         
         func chainOperations(endingIn ending: ControlFlowGraphNode) -> [_NodeCreationResult.GraphOperation] {
             var operations: [_NodeCreationResult.GraphOperation] = []
-            for node in nodes {
-                let defers = Array(node.defers.reversed())
+            for target in nodes {
+                let targetNodes =
+                    [target.node]
+                        + Array(target.defers.reversed())
+                        + [ending]
                 
-                operations.append(.addNode(node.node))
-                
-                for (i, def) in defers.enumerated() {
-                    operations.append(.addNode(def))
-                    
-                    if i == 0 {
-                        operations.append(.addEdge(start: node.node, end: def))
-                    } else {
-                        operations.append(.addEdge(start: defers[i - 1], end: def))
-                    }
-                }
-                
-                if let last = defers.last {
-                    operations.append(.addEdge(start: last, end: ending))
-                } else {
-                    operations.append(.addEdge(start: node.node, end: ending))
+                for (first, second) in zip(targetNodes, targetNodes.dropFirst()) {
+                    operations.append(.addNode(first))
+                    operations.append(.addEdge(start: first, end: second))
                 }
             }
             
