@@ -287,7 +287,7 @@ private extension ControlFlowGraph {
             
             result =
                 result
-                    .addingBranch(branch.breakToExits())
+                    .addingBranch(branch.satisfyingFallthroughs().breakToExits())
             
             lastFallthrough = branch.fallthroughNodes
         }
