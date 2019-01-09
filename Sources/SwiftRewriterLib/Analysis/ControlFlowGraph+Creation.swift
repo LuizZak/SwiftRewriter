@@ -56,18 +56,6 @@ extension ControlFlowGraph {
             !edgesToRemove.contains { $0 === e }
         }
     }
-    
-    @discardableResult
-    private func connectChain<S: Sequence>(start: ControlFlowGraphNode, rest: S) -> EdgeConstructor where S.Element == ControlFlowGraphNode {
-        var last = EdgeConstructor(for: start, in: self)
-        
-        for node in rest {
-            last.connect(to: node)
-            last = EdgeConstructor(for: node, in: self)
-        }
-        
-        return last
-    }
 }
 
 public extension ControlFlowGraph {
@@ -395,10 +383,6 @@ private extension ControlFlowGraph {
             return !(startNode.node is _InvalidSyntaxNode)
         }
         
-        var isDefer: Bool {
-            return (startNode.node is DeferStatement)
-        }
-        
         var startNode: ControlFlowGraphNode
         var exitNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
         var breakNodes: ControlFlowGraphJumpTarget = ControlFlowGraphJumpTarget()
@@ -637,12 +621,6 @@ private extension ControlFlowGraph {
             self = ControlFlowGraphJumpTarget.merge(self, second)
         }
         
-        func edgeConstructors(in graph: ControlFlowGraph) -> [EdgeConstructor] {
-            return nodes.map { node in
-                graph.connectChain(start: node.node, rest: node.defers.reversed())
-            }
-        }
-        
         func chainOperations(endingIn ending: ControlFlowGraphNode) -> [_NodeCreationResult.GraphOperation] {
             var operations: [_NodeCreationResult.GraphOperation] = []
             for node in nodes {
@@ -675,35 +653,5 @@ private extension ControlFlowGraph {
             
             return ControlFlowGraphJumpTarget(nodes: first.nodes + second.nodes)
         }
-    }
-}
-
-/// Represents a free connection that is meant to be connected to next nodes
-/// when traversing AST nodes to construct control flow graphs.
-private struct EdgeConstructor {
-    private let line: Int
-    private let node: ControlFlowGraphNode
-    private let graph: ControlFlowGraph
-    
-    init(for node: ControlFlowGraphNode, in graph: ControlFlowGraph, line: Int = #line) {
-        self.line = line
-        self.node = node
-        self.graph = graph
-    }
-    
-    @discardableResult
-    func connect(to node: ControlFlowGraphNode) -> ControlFlowGraphEdge {
-        if let edge = graph.edge(from: self.node, to: node) {
-            return edge
-        }
-        
-        return graph.addEdge(from: self.node, to: node)
-    }
-}
-
-private extension Sequence where Element == EdgeConstructor {
-    @discardableResult
-    func connect(to node: ControlFlowGraphNode) -> [ControlFlowGraphEdge] {
-        return self.map { $0.connect(to: node) }
     }
 }
