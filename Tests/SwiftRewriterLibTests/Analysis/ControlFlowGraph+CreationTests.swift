@@ -192,6 +192,42 @@ class ControlFlowGraphCreationTests: XCTestCase {
         XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 2)
     }
     
+    func testDoStatement() {
+        let stmt: CompoundStatement = [
+            Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),
+            Statement.expression(Expression.identifier("v").call()),
+            Statement.do([
+                .expression(
+                    Expression.identifier("exp")
+                )
+            ])
+        ]
+        
+        let graph = ControlFlowGraph.forCompoundStatement(stmt)
+        
+        sanitize(graph)
+        assertGraphviz(
+            graph: graph,
+            matches: """
+            digraph flow {
+                n1 [label="entry"]
+                n2 [label="exit"]
+                n3 [label="exp"]
+                n4 [label="v()"]
+                n5 [label="var v: Int"]
+                n1 -> n5
+                n3 -> n2
+                n4 -> n3
+                n5 -> n4
+            }
+            """)
+        XCTAssertEqual(graph.nodes.count, 5)
+        XCTAssert(graph.entry.node === stmt)
+        XCTAssert(graph.exit.node === stmt)
+        XCTAssertEqual(graph.nodesConnected(from: graph.entry).count, 1)
+        XCTAssertEqual(graph.nodesConnected(towards: graph.exit).count, 1)
+    }
+    
     func testIfElse() {
         let stmt: CompoundStatement = [
             Statement.variableDeclaration(identifier: "v", type: .int, initialization: nil),

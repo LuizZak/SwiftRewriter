@@ -224,6 +224,9 @@ private extension ControlFlowGraph {
         case let stmt as CompoundStatement:
             return _connections(for: stmt.statements)
             
+        case let stmt as DoStatement:
+            return _connections(for: stmt.body)
+            
         case let stmt as IfStatement:
             return _connections(forIf: stmt)
             
