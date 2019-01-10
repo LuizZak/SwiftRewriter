@@ -3,10 +3,10 @@ public protocol DirectedGraph {
     associatedtype Edge: DirectedGraphEdge
     associatedtype Node: DirectedGraphNode
     
-    /// The entry node for this graph
-    var entry: Node { get }
-    /// The exit node for this graph
-    var exit: Node { get }
+    /// Gets a list of all nodes in this directed graph
+    var nodes: [Node] { get }
+    /// Gets a list of all edges in this directed graph
+    var edges: [Edge] { get }
     
     /// Returns `true` iff two edges are equivalent (i.e. have the same start/end
     /// nodes).
@@ -74,11 +74,11 @@ public protocol DirectedGraph {
     
     /// Performs a depth-first visiting of this directed graph
     @inlinable
-    func depthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
+    func depthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
     
     /// Performs a breadth-first visiting of this directed graph
     @inlinable
-    func breadthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
+    func breadthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void)
 }
 
 /// Element for a graph visiting operation.
@@ -126,11 +126,11 @@ public extension DirectedGraph {
     
     /// Performs a depth-first visiting of this directed graph
     @inlinable
-    public func depthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
+    public func depthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
         var queue: [DirectedGraphVisitElement<Edge, Node>] = []
         
-        queue.append(.root(entry))
+        queue.append(.root(start))
         
         while let next = queue.popLast() {
             visited.insert(next.node)
@@ -150,11 +150,11 @@ public extension DirectedGraph {
     
     /// Performs a breadth-first visiting of this directed graph
     @inlinable
-    public func breadthFirstVisit(_ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
+    public func breadthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
         var queue: [DirectedGraphVisitElement<Edge, Node>] = []
         
-        queue.append(.root(entry))
+        queue.append(.root(start))
         
         while !queue.isEmpty {
             let next = queue.removeFirst()
@@ -171,6 +171,51 @@ public extension DirectedGraph {
                 queue.append(.edge(nextEdge, towards: node))
             }
         }
+    }
+}
+
+public extension DirectedGraph {
+    /// Returns a list which represents the [topologically sorted](https://en.wikipedia.org/wiki/Topological_sorting)
+    /// nodes of this graph.
+    ///
+    /// Returns nil, in case it cannot be topologically sorted, e.g. when any
+    /// cycles are found.
+    ///
+    /// - Returns: A list of the nodes from this graph, topologically sorted, or
+    /// `nil`, in case it cannot be sorted.
+    @inlinable
+    public func topologicalSorted() -> [Node]? {
+        var permanentMark: Set<Node> = []
+        var temporaryMark: Set<Node> = []
+        
+        var unmarkedNodes: [Node] = nodes
+        var list: [Node] = []
+        
+        func visit(_ node: Node) -> Bool {
+            if temporaryMark.contains(node) {
+                return true
+            }
+            if permanentMark.contains(node) {
+                return false
+            }
+            temporaryMark.insert(node)
+            for next in nodesConnected(from: node) {
+                if !visit(next) {
+                    return false
+                }
+            }
+            permanentMark.insert(node)
+            list.insert(node, at: 0)
+            return true
+        }
+        
+        while let node = unmarkedNodes.popLast() {
+            if !visit(node) {
+                return nil
+            }
+        }
+        
+        return list
     }
 }
 

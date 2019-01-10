@@ -81,7 +81,7 @@ extension ControlFlowGraph {
     func depthFirstList() -> [ControlFlowGraphNode] {
         var list: [ControlFlowGraphNode] = []
         
-        depthFirstVisit {
+        depthFirstVisit(start: entry) {
             list.append($0.node)
         }
         
@@ -92,7 +92,7 @@ extension ControlFlowGraph {
     func breadthFirstList() -> [ControlFlowGraphNode] {
         var list: [ControlFlowGraphNode] = []
         
-        breadthFirstVisit {
+        breadthFirstVisit(start: entry) {
             list.append($0.node)
         }
         
