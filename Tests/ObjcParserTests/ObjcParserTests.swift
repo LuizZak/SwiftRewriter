@@ -354,6 +354,28 @@ class ObjcParserTests: XCTestCase {
         XCTAssertEqual(fields?[0].type?.type, ObjcType.struct("int"))
     }
     
+    func testParseIBOutletProperty() {
+        let node = parserTest("""
+            @interface Foo
+            @property (weak, nonatomic) IBOutlet UILabel *label;
+            @end
+            """)
+        
+        let implementation: ObjcClassInterface? = node.firstChild()
+        XCTAssertEqual(implementation?.properties[0].hasIbOutletSpecifier, true)
+    }
+    
+    func testParseIBInspectableProperty() {
+        let node = parserTest("""
+            @interface Foo
+            @property (weak, nonatomic) IBInspectable UILabel *label;
+            @end
+            """)
+        
+        let implementation: ObjcClassInterface? = node.firstChild()
+        XCTAssertEqual(implementation?.properties[0].hasIbInspectableSpecifier, true)
+    }
+    
     func testParseError() {
         _=parserTest("""
             @interface ViewController (Private)

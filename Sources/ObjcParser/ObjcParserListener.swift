@@ -299,11 +299,11 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
         let listener = PropertyListener(isInNonnullContext: isInNonnullContext(ctx),
                                         typeParser: typeParser,
                                         nonnullContextQuerier: nonnullContextQuerier,
+                                        inOptionalContext: inOptionalContext,
                                         updateSourceLocation: nodeFactory.updateSourceLocation)
+        
         let walker = ParseTreeWalker()
         try? walker.walk(listener, ctx)
-        
-        listener.property.isOptionalProperty = inOptionalContext
         
         context.pushContext(node: listener.property)
     }
@@ -824,16 +824,19 @@ private class PropertyListener: ObjectiveCParserBaseListener {
     var property: PropertyDefinition
     var typeParser: TypeParsing
     var nonnullContextQuerier: NonnullContextQuerier
+    var inOptionalContext: Bool
     var updateSourceLocation: (ASTNode, ParserRuleContext) -> Void
     
     init(isInNonnullContext: Bool,
          typeParser: TypeParsing,
          nonnullContextQuerier: NonnullContextQuerier,
+         inOptionalContext: Bool,
          updateSourceLocation: @escaping (ASTNode, ParserRuleContext) -> Void) {
         
         self.property = PropertyDefinition(isInNonnullContext: isInNonnullContext)
         self.typeParser = typeParser
         self.nonnullContextQuerier = nonnullContextQuerier
+        self.inOptionalContext = inOptionalContext
         self.updateSourceLocation = updateSourceLocation
     }
     
@@ -844,6 +847,13 @@ private class PropertyListener: ObjectiveCParserBaseListener {
                         isInNonnullContext: nonnullContextQuerier.isInNonnullContext(ctx))
         updateSourceLocation(node, ctx)
         property.addChild(node)
+        
+        if ctx.ibOutletQualifier() != nil {
+            property.hasIbOutletSpecifier = true
+        }
+        if ctx.IB_INSPECTABLE() != nil {
+            property.hasIbInspectableSpecifier = true
+        }
         
         if let ident =
             ctx.fieldDeclaration()?
