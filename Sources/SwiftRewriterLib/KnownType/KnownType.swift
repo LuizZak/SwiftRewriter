@@ -270,10 +270,10 @@ public struct KnownAttribute: Codable {
             return "@\(name)(\(parameters))"
         }
         
-        return "@\(name)()"
+        return "@\(name)"
     }
     
-    public init(name: String, parameters: String?) {
+    public init(name: String, parameters: String? = nil) {
         self.name = name
         self.parameters = parameters
     }

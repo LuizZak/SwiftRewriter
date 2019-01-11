@@ -2608,4 +2608,32 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteIBOutlet() {
+        assertObjcParse(
+            objc: """
+            @interface Foo : NSObject
+            @property (weak, nonatomic) IBOutlet UILabel *label;
+            @end
+            """,
+            swift: """
+            class Foo: NSObject {
+                @IBOutlet weak var label: UILabel?
+            }
+            """)
+    }
+    
+    func testRewriteIBInspectable() {
+        assertObjcParse(
+            objc: """
+            @interface Foo : NSObject
+            @property (weak, nonatomic) IBInspectable UILabel *label;
+            @end
+            """,
+            swift: """
+            class Foo: NSObject {
+                @IBInspectable weak var label: UILabel?
+            }
+            """)
+    }
 }

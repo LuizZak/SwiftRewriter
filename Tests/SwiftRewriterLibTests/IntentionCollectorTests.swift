@@ -53,7 +53,6 @@ class IntentionCollectorTests: XCTestCase {
     }
     
     func testCollectFunctionDefinitionBody() throws {
-        // Arrange
         let parser = ObjcParser(string: "void global() { stmt(); }")
         try parser.parse()
         let rootNode = parser.rootNode
@@ -63,6 +62,34 @@ class IntentionCollectorTests: XCTestCase {
         XCTAssertEqual(file.globalFunctionIntentions.count, 1)
         XCTAssertEqual(delegate.reportedForLazyParsing.count, 1)
         XCTAssert(delegate.reportedForLazyParsing.first === file.globalFunctionIntentions.first?.functionBody)
+    }
+    
+    func testCollectPropertyIBOutletAttribute() throws {
+        let parser = ObjcParser(string: """
+            @interface Foo
+            @property (weak, nonatomic) IBOutlet UILabel *label;
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssert(file.classIntentions[0].properties[0].knownAttributes.contains { $0.name == "IBOutlet" })
+    }
+    
+    func testCollectPropertyIBInspectableAttribute() throws {
+        let parser = ObjcParser(string: """
+            @interface Foo
+            @property (weak, nonatomic) IBInspectable UILabel *label;
+            @end
+            """)
+        try parser.parse()
+        let rootNode = parser.rootNode
+        
+        sut.collectIntentions(rootNode)
+        
+        XCTAssert(file.classIntentions[0].properties[0].knownAttributes.contains { $0.name == "IBInspectable" })
     }
 }
 

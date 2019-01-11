@@ -572,6 +572,10 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("@objc", style: .keyword)
         }
         
+        for attribute in prop.knownAttributes {
+            target.outputInlineWithSpace(attribute.attributeString, style: .attribute)
+        }
+        
         let accessModifier = _accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: prop.type)
         
