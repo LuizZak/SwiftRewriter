@@ -403,7 +403,7 @@ internal class ExpressionWriter: ExpressionVisitor {
     }
 }
 
-internal class StatementWriter: StatementVisitor {
+public class StatementWriter: StatementVisitor {
     public typealias StmtResult = Void
     
     let options: ASTWriterOptions
@@ -411,10 +411,10 @@ internal class StatementWriter: StatementVisitor {
     let typeMapper: TypeMapper
     let typeSystem: TypeSystem
     
-    init(options: ASTWriterOptions,
-         target: RewriterOutputTarget,
-         typeMapper: TypeMapper,
-         typeSystem: TypeSystem) {
+    public init(options: ASTWriterOptions,
+                target: RewriterOutputTarget,
+                typeMapper: TypeMapper,
+                typeSystem: TypeSystem) {
         
         self.options = options
         self.target = target
@@ -422,7 +422,7 @@ internal class StatementWriter: StatementVisitor {
         self.typeSystem = typeSystem
     }
     
-    func visitStatement(_ statement: Statement) {
+    public func visitStatement(_ statement: Statement) {
         if let label = statement.label {
             target.output(line: "// \(label):")
         }
@@ -430,21 +430,21 @@ internal class StatementWriter: StatementVisitor {
         statement.accept(self)
     }
     
-    func visitSemicolon(_ stmt: SemicolonStatement) {
+    public func visitSemicolon(_ stmt: SemicolonStatement) {
         target.output(line: ";")
     }
     
-    func visitUnknown(_ stmt: UnknownStatement) {
+    public func visitUnknown(_ stmt: UnknownStatement) {
         target.output(line: "/*", style: .comment)
         target.output(line: stmt.context.description, style: .comment)
         target.output(line: "*/", style: .comment)
     }
     
-    func visitCompound(_ compound: CompoundStatement) {
+    public func visitCompound(_ compound: CompoundStatement) {
         visitCompound(compound, lineFeedAfter: true)
     }
     
-    func visitCompound(_ compound: CompoundStatement, lineFeedAfter: Bool) {
+    public func visitCompound(_ compound: CompoundStatement, lineFeedAfter: Bool) {
         target.outputInline(" {")
         target.outputLineFeed()
         target.increaseIdentation()
@@ -460,11 +460,11 @@ internal class StatementWriter: StatementVisitor {
         }
     }
     
-    func visitIf(_ stmt: IfStatement) {
+    public func visitIf(_ stmt: IfStatement) {
         visitIf(stmt, withIdent: true)
     }
     
-    func visitIf(_ stmt: IfStatement, withIdent: Bool) {
+    public func visitIf(_ stmt: IfStatement, withIdent: Bool) {
         if withIdent {
             target.outputIdentation()
         }
@@ -490,7 +490,7 @@ internal class StatementWriter: StatementVisitor {
         }
     }
     
-    func visitWhile(_ stmt: WhileStatement) {
+    public func visitWhile(_ stmt: WhileStatement) {
         target.outputIdentation()
         target.outputInlineWithSpace("while", style: .keyword)
         emitExpr(stmt.exp)
@@ -498,7 +498,7 @@ internal class StatementWriter: StatementVisitor {
         visitCompound(stmt.body)
     }
     
-    func visitSwitch(_ stmt: SwitchStatement) {
+    public func visitSwitch(_ stmt: SwitchStatement) {
         let exp = stmt.exp
         let cases = stmt.cases
         let def = stmt.defaultCase
@@ -548,7 +548,7 @@ internal class StatementWriter: StatementVisitor {
         target.output(line: "}")
     }
     
-    func visitDoWhile(_ stmt: DoWhileStatement) {
+    public func visitDoWhile(_ stmt: DoWhileStatement) {
         target.outputIdentation()
         target.outputInline("repeat", style: .keyword)
         visitCompound(stmt.body, lineFeedAfter: false)
@@ -557,7 +557,7 @@ internal class StatementWriter: StatementVisitor {
         target.outputLineFeed()
     }
     
-    func visitFor(_ stmt: ForStatement) {
+    public func visitFor(_ stmt: ForStatement) {
         target.outputIdentation()
         target.outputInlineWithSpace("for", style: .keyword)
         emitPattern(stmt.pattern)
@@ -567,19 +567,19 @@ internal class StatementWriter: StatementVisitor {
         visitCompound(stmt.body)
     }
     
-    func visitDo(_ stmt: DoStatement) {
+    public func visitDo(_ stmt: DoStatement) {
         target.outputIdentation()
         target.outputInline("do", style: .keyword)
         visitCompound(stmt.body)
     }
     
-    func visitDefer(_ stmt: DeferStatement) {
+    public func visitDefer(_ stmt: DeferStatement) {
         target.outputIdentation()
         target.outputInline("defer", style: .keyword)
         visitCompound(stmt.body)
     }
     
-    func visitReturn(_ stmt: ReturnStatement) {
+    public func visitReturn(_ stmt: ReturnStatement) {
         if let exp = stmt.exp {
             target.outputIdentation()
             target.outputInline("return ", style: .keyword)
@@ -590,19 +590,19 @@ internal class StatementWriter: StatementVisitor {
         }
     }
     
-    func visitContinue(_ stmt: ContinueStatement) {
+    public func visitContinue(_ stmt: ContinueStatement) {
         target.output(line: "continue", style: .keyword)
     }
     
-    func visitBreak(_ stmt: BreakStatement) {
+    public func visitBreak(_ stmt: BreakStatement) {
         target.output(line: "break", style: .keyword)
     }
 
-    func visitFallthrough(_ stmt: FallthroughStatement) {
+    public func visitFallthrough(_ stmt: FallthroughStatement) {
         target.output(line: "fallthrough", style: .keyword)
     }
     
-    func visitExpressions(_ stmt: ExpressionsStatement) {
+    public func visitExpressions(_ stmt: ExpressionsStatement) {
         for exp in stmt.expressions {
             if options.outputExpressionTypes {
                 emitExprType(exp)
@@ -614,7 +614,7 @@ internal class StatementWriter: StatementVisitor {
         }
     }
     
-    func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
+    public func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) {
         func emitDeclaration(_ declaration: StatementVariableDeclaration) {
             target.outputInline(declaration.identifier)
             
