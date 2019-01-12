@@ -108,7 +108,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         _=super.visitVariableDeclarations(stmt)
         
-        for decl in stmt.decl {
+        for (i, decl) in stmt.decl.enumerated() {
             var type = decl.type
             
             if !typeSystem.isScalarType(decl.type), let initValueType = decl.initialization?.resolvedType {
@@ -122,8 +122,13 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             
             decl.initialization?.expectedType = type
             
-            let definition = CodeDefinition(variableNamed: decl.identifier,
-                                            type: type)
+            let definition =
+                CodeDefinition
+                    .forLocalIdentifier(decl.identifier,
+                                        type: type,
+                                        isConstant: decl.isConstant,
+                                        location: .variableDeclaration(stmt, index: i))
+            
             nearestScope(for: stmt)?.recordDefinition(definition)
         }
         
@@ -155,17 +160,29 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
             iteratorType = .errorType
         }
         
-        collectInPattern(stmt.pattern, type: iteratorType, to: stmt.body)
+        collectInPattern(stmt.pattern,
+                         type: iteratorType,
+                         location: .forLoop(stmt, .`self`),
+                         to: stmt.body)
         
         _=super.visitFor(stmt)
         
         return stmt
     }
     
-    func collectInPattern(_ pattern: Pattern, type: SwiftType, to scope: CodeScope) {
+    func collectInPattern(_ pattern: Pattern,
+                          type: SwiftType,
+                          location: LocalCodeDefinition.DefinitionLocation,
+                          to scope: CodeScope) {
+        
         switch pattern {
         case .identifier(let ident):
-            scope.recordDefinition(CodeDefinition(variableNamed: ident, type: type))
+            scope.recordDefinition(
+                .forLocalIdentifier(ident,
+                                    type: type,
+                                    isConstant: true,
+                                    location: location)
+            )
         default:
             // Other (more complex) patterns are not (yet) supported!
             break
@@ -408,15 +425,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         // Visit identifier's type from current context
         if let definition = searchIdentifierDefinition(exp) {
             exp.definition = definition
-            
-            switch definition {
-            case .local(let def), .global(let def):
-                exp.resolvedType = def.type
-            case .type(let typeName):
-                exp.resolvedType = .metatype(for: .typeName(typeName))
-            case .member:
-                break
-            }
+            exp.resolvedType = definition.type
         } else {
             exp.definition = nil
             exp.resolvedType = .errorType
@@ -576,16 +585,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         }
         
         // Apply definitions for function parameters
-        for param in exp.parameters {
-            let storage = ValueStorage(type: param.type,
-                                       ownership: .strong,
-                                       isConstant: true)
-            
-            let definition = CodeDefinition(variableNamed: param.name,
-                                            storage: storage)
-            
-            exp.recordDefinition(definition)
-        }
+        exp.recordDefinitions(CodeDefinition.forParameters(exp.parameters))
         
         // Push context of return type during expression resolving
         pushContainingFunctionReturnType(blockReturnType)
@@ -596,7 +596,19 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         return super.visitBlock(exp)
     }
     
+    // TODO: Handle if-let variable definition
     public override func visitIf(_ stmt: IfStatement) -> Statement {
+        if let pattern = stmt.pattern {
+            let result = super.visitIf(stmt)
+            
+            collectInPattern(pattern,
+                             type: stmt.exp.resolvedType ?? .errorType,
+                             location: .ifLet(stmt, .`self`),
+                             to: stmt.body)
+            
+            return result
+        }
+        
         stmt.exp.expectedType = .bool
         
         return super.visitIf(stmt)
@@ -643,36 +655,36 @@ extension ExpressionTypeResolver {
         return typeSystem.resolveAlias(in: type)
     }
     
-    func searchIdentifierDefinition(_ exp: IdentifierExpression) -> IdentifierExpression.Definition? {
+    func searchIdentifierDefinition(_ exp: IdentifierExpression) -> CodeDefinition? {
         // Visit identifier's type from current context
         if let definition = nearestScope(for: exp)?.firstDefinition(named: exp.identifier) {
-            return .local(definition)
+            return definition
         }
         
         // Look into intrinsics first, since they always take precedence
         if let intrinsic = intrinsicVariables.firstDefinition(named: exp.identifier) {
-            return .local(intrinsic)
+            return intrinsic
         }
         
         // Check type system for a metatype with the identifier name
         if typeSystem.typeExists(exp.identifier) {
-            return .type(named: exp.identifier)
+            return CodeDefinition.forType(named: exp.identifier)
         }
         
         return nil
     }
     
     func searchFunctionDefinitions(matching identifier: FunctionIdentifier,
-                                   _ exp: IdentifierExpression) -> [IdentifierExpression.Definition] {
+                                   _ exp: IdentifierExpression) -> [CodeDefinition] {
         
-        var definitions: [IdentifierExpression.Definition] = []
+        var definitions: [CodeDefinition] = []
         
         if let def = nearestScope(for: exp)?.functionDefinitions(matching: identifier) {
-            definitions.append(contentsOf: def.map { .local($0) })
+            definitions.append(contentsOf: def)
         }
         
         let intrinsics = intrinsicVariables.functionDefinitions(matching: identifier)
-        definitions.append(contentsOf: intrinsics.map { .local($0) })
+        definitions.append(contentsOf: intrinsics)
         
         return definitions
     }

@@ -251,7 +251,7 @@ public class FoundationExpressionPass: BaseExpressionPass {
         }
         // Make sure we don't convert local/globals that some reason have an NS-
         // prefix.
-        guard exp.definition?.local == nil && exp.definition?.global == nil else {
+        guard !(exp.definition is LocalCodeDefinition) && !(exp.definition is GlobalCodeDefinition) else {
             return nil
         }
         // Can only convert known instance types

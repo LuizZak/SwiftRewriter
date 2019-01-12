@@ -267,205 +267,23 @@ public final class DefaultCodeScope: CodeScope {
     }
 }
 
-/// Specifies a definition for a global function or variable, or a local variable
-/// of a function.
-public class CodeDefinition {
-    public var name: String {
-        get {
-            return kind.name
-        }
-        set {
-            kind.name = newValue
-        }
-    }
-    
-    public var kind: Kind
-    
-    /// Gets the type signature for this definition.
-    /// In case this is a function definition, the type represents the closure
-    /// signature of the function.
-    public var type: SwiftType {
-        switch kind {
-        case .variable(_, let storage):
-            return storage.type
-        case .function(let signature):
-            return signature.swiftClosureType
-        }
-    }
-    
-    public convenience init(variableNamed name: String, type: SwiftType) {
-        self.init(variableNamed: name,
-                  storage: ValueStorage(type: type,
-                                        ownership: .strong,
-                                        isConstant: false))
-    }
-    
-    public convenience init(constantNamed name: String, type: SwiftType) {
-        self.init(variableNamed: name,
-                  storage: ValueStorage(type: type,
-                                        ownership: .strong,
-                                        isConstant: true))
-    }
-    
-    public init(variableNamed name: String, storage: ValueStorage) {
-        kind = .variable(name: name, storage: storage)
-    }
-    
-    public init(functionSignature: FunctionSignature) {
-        kind = .function(signature: functionSignature)
-    }
-    
-    public enum Kind {
-        case variable(name: String, storage: ValueStorage)
-        case function(signature: FunctionSignature)
-        
-        public var name: String {
-            get {
-                switch self {
-                case .variable(let name, _):
-                    return name
-                    
-                case .function(let signature):
-                    return signature.name
-                }
-            }
-            set {
-                switch self {
-                case .variable(_, let storage):
-                    self = .variable(name: newValue, storage: storage)
-                    
-                case .function(var signature):
-                    signature.name = newValue
-                    self = .function(signature: signature)
-                }
-            }
-        }
-    }
-}
-
 public extension IdentifierExpression {
     /// Gets the definition this identifier references.
     /// To gather definitions to identifiers, use a `ExpressionTypeResolver` on
     /// the syntax tree this identifier is contained in.
-    public var definition: Definition? {
+    public var definition: CodeDefinition? {
         get {
-            return metadata[_identifierDefinitionKey] as? Definition
+            return metadata[_identifierDefinitionKey] as? CodeDefinition
         }
         set {
             metadata[_identifierDefinitionKey] = newValue
         }
     }
     
-    public enum Definition {
-        case global(CodeDefinition)
-        case local(CodeDefinition)
-        case member(type: KnownType, member: KnownMember)
-        case type(named: String)
-        
-        public var asFunctionSignature: FunctionSignature? {
-            switch self {
-            case .local(let def), .global(let def):
-                switch def.kind {
-                case .function(let signature):
-                    return signature
-                    
-                case .variable:
-                    return nil
-                }
-                
-            case .member(_, let member as KnownMethod):
-                return member.signature
-                
-            default:
-                return nil
-            }
-        }
-        
-        public var global: CodeDefinition? {
-            switch self {
-            case .global(let def):
-                return def
-            case .local, .type, .member:
-                return nil
-            }
-        }
-        
-        public var local: CodeDefinition? {
-            switch self {
-            case .local(let def):
-                return def
-            case .type, .member, .global:
-                return nil
-            }
-        }
-        
-        public var typeName: String? {
-            switch self {
-            case .type(let name):
-                return name
-            case .local, .member, .global:
-                return nil
-            }
-        }
-        
-        public var member: (type: KnownType, member: KnownMember)? {
-            switch self {
-            case let .member(type, member):
-                return (type, member)
-                
-            case .local, .type, .global:
-                return nil
-            }
-        }
-    }
-}
-
-extension IdentifierExpression {
-    
-    public func setDefinition(localName: String,
-                              type: SwiftType,
-                              isConstant: Bool = false) -> Self {
-        
-        let storage =
-            ValueStorage(type: type,
-                         ownership: .strong,
-                         isConstant: isConstant)
-        
-        definition =
-            Definition
-                .local(CodeDefinition(variableNamed: localName,
-                                      storage: storage))
-        
-        return self
-    }
-    
-    public func setDefinition(globalName: String,
-                              type: SwiftType,
-                              isConstant: Bool = false) -> Self {
-        
-        let storage =
-            ValueStorage(type: type,
-                         ownership: .strong,
-                         isConstant: isConstant)
-        
-        definition =
-            Definition
-                .global(CodeDefinition(variableNamed: globalName,
-                                       storage: storage))
-        
-        return self
-    }
-    
-    public func setDefinition(typeName: String) -> Self {
-        definition = Definition.type(named: typeName)
-        
-        return self
-    }
-    
-    public func setDefinition(memberOf type: KnownType, member: KnownMember) -> Self {
-        definition = Definition.member(type: type, member: member)
-        
-        return self
+    public func settingDefinition(_ definition: CodeDefinition) -> IdentifierExpression {
+        let new = copy()
+        new.definition = definition
+        return new
     }
 }
 

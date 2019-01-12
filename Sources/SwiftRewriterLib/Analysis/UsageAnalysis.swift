@@ -12,7 +12,24 @@ public protocol UsageAnalyzer {
 /// A refined usage analyzer capable of inspecting usages of local variables by
 /// name within a method body.
 public protocol LocalsUsageAnalyzer: UsageAnalyzer {
-    func findUsagesOf(localNamed: String) -> [DefinitionUsage]
+    /// Finds all usages of a local with a given name.
+    /// Returns all usages of any local named `local`, even those which are shadowed
+    /// by other, deeper scoped definitions.
+    func findUsagesOf(localNamed local: String) -> [DefinitionUsage]
+    
+    /// Finds all usages of a local with a given name in the scope of a given
+    /// `SyntaxNode`.
+    /// `syntaxNode` must either be a `Statement` node, or any node which is a
+    /// descendent of a `Statement` node, otherwise a fatal error is raised.
+    func findUsagesOf(localNamed local: String, inScopeOf syntaxNode: SyntaxNode) -> [DefinitionUsage]
+    
+    /// Finds the definition of a local with a given name within the scope of a
+    /// given `SyntaxNode`.
+    /// `syntaxNode` must either be a `Statement` node, or any node which is a
+    /// descendent of a `Statement` node, otherwise a fatal error is raised.
+    /// Returns `nil`, in case no definition with the given name could be found
+    /// within scope of `syntaxNode`
+    func findDefinitionOf(localNamed local: String, inScopeOf syntaxNode: SyntaxNode) -> LocalCodeDefinition?
 }
 
 public class BaseUsageAnalyzer: UsageAnalyzer {
@@ -185,9 +202,11 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalsUsageAnalyzer {
                     guard let identifier = node as? IdentifierExpression else {
                         return
                     }
+                    guard let def = identifier.definition as? LocalCodeDefinition else {
+                        return
+                    }
                     
-                    switch identifier.definition {
-                    case .local(let definition)? where definition.name == local:
+                    if def.name == local {
                         let readOnly = self.isReadOnlyContext(identifier)
                         
                         let usage = DefinitionUsage(intention: functionBody,
@@ -195,9 +214,6 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalsUsageAnalyzer {
                                                     isReadOnlyUsage: readOnly)
                         
                         usages.append(usage)
-                        
-                    default:
-                        break
                     }
                 }
             
@@ -205,6 +221,62 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer, LocalsUsageAnalyzer {
         }
         
         return usages
+    }
+    
+    public func findUsagesOf(localNamed local: String, inScopeOf syntaxNode: SyntaxNode) -> [DefinitionUsage] {
+        guard let definition = findDefinitionOf(localNamed: local, inScopeOf: syntaxNode) else {
+            return []
+        }
+        
+        let bodies = functionBodies()
+        
+        var usages: [DefinitionUsage] = []
+        
+        for functionBody in bodies {
+            let body = functionBody.body
+            
+            let visitor =
+                AnonymousSyntaxNodeVisitor { node in
+                    guard let identifier = node as? IdentifierExpression else {
+                        return
+                    }
+                    
+                    guard let def = identifier.definition as? LocalCodeDefinition else {
+                        return
+                    }
+                    
+                    if def != definition {
+                        let readOnly = self.isReadOnlyContext(identifier)
+                        
+                        let usage = DefinitionUsage(intention: functionBody,
+                                                    expression: identifier,
+                                                    isReadOnlyUsage: readOnly)
+                        
+                        usages.append(usage)
+                    }
+                }
+            
+            visitor.visitStatement(body)
+        }
+        
+        return usages
+    }
+    
+    public func findDefinitionOf(localNamed local: String, inScopeOf syntaxNode: SyntaxNode) -> LocalCodeDefinition? {
+        let scope = scopeFor(syntaxNode: syntaxNode)
+        
+        return scope?.firstDefinition(named: local) as? LocalCodeDefinition
+    }
+    
+    private func scopeFor(syntaxNode: SyntaxNode) -> CodeScope? {
+        if let statement = syntaxNode as? Statement {
+            return statement.nearestScope
+        }
+        if let statement = syntaxNode.firstAncestor(ofType: Statement.self) {
+            return scopeFor(syntaxNode: statement)
+        }
+        
+        fatalError("Unknown syntax node type \(type(of: syntaxNode)) with no \(Statement.self)-typed parent node!")
     }
     
     override func functionBodies() -> [FunctionBodyIntention] {

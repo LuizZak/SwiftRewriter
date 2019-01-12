@@ -389,14 +389,16 @@ class ExpressionTypeResolverTests: XCTestCase {
     }
     
     func testIdentifier() {
-        let definition = CodeDefinition(variableNamed: "i", type: .int)
+        let definition =
+            CodeDefinition
+                .forGlobalVariable(name: "i", isConstant: false, type: .int)
         
         startScopedTest(with: IdentifierExpression(identifier: "i"), sut: ExpressionTypeResolver())
             .definingLocal(definition)
             .resolve()
             .thenAssertExpression(resolvedAs: .int)
             .thenAssert(with: { ident in
-                XCTAssert(ident.definition?.local === definition)
+                XCTAssert(ident.definition === definition)
             })
     }
     
@@ -502,7 +504,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
     }
     
     func testForLoopArrayTypeResolving_NSArray() {
@@ -517,7 +519,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
             .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .any)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .any)
     }
 
     func testForLoopArrayTypeResolving_NSMutableArray() {
@@ -532,7 +534,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
             .usingCompoundedType(FoundationCompoundTypes.nsArray.create())
             .usingCompoundedType(FoundationCompoundTypes.nsMutableArray.create())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .any)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .any)
     }
     
     func testForLoopArrayTypeResolving_OpenRange() {
@@ -545,7 +547,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
     }
     
     func testForLoopArrayTypeResolving_ClosedRange() {
@@ -558,7 +560,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .int)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .int)
     }
     
     func testForLoopArrayTypeResolving_NonArray() {
@@ -571,7 +573,7 @@ class ExpressionTypeResolverTests: XCTestCase {
             .for(.identifier("i"), exp, body: [])
         
         startScopedTest(with: stmt, sut: ExpressionTypeResolver())
-            .thenAssertDefined(in: stmt.body, localNamed: "i", type: .errorType)
+            .thenAssertDefined(in: stmt.body, localNamed: "i", isConstant: true, type: .errorType)
     }
     
     func testMemberLookup() {
@@ -1016,7 +1018,9 @@ class ExpressionTypeResolverTests: XCTestCase {
     func testOptionalReturnTypeFromCodeDefinition() {
         startScopedTest(with: Expression.identifier("a").call(),
                         sut: ExpressionTypeResolver())
-            .definingLocal(CodeDefinition(functionSignature: FunctionSignature(name: "a", returnType: .optional(.string))))
+            .definingLocal(
+                .forGlobalFunction(signature: FunctionSignature(name: "a", returnType: .optional(.string)))
+            )
             .resolve()
             .thenAssertExpression(resolvedAs: .optional(.string))
     }
@@ -1170,7 +1174,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(
             with: Expression.identifier("f").call([Expression.identifier("myBlock").call()]),
             sut: ExpressionTypeResolver())
-            .definingLocal(CodeDefinition(functionSignature: signature))
+            .definingLocal(CodeDefinition.forGlobalFunction(signature: signature))
             .resolve()
             .thenAssertExpression(
                 at: \Expression.asPostfix?.functionCall?.subExpressions[0].asPostfix?.exp,
@@ -1181,7 +1185,7 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(
             with: Expression.identifier("f").call([Expression.identifier("myBlock").call([.constant(0)])]),
             sut: ExpressionTypeResolver())
-            .definingLocal(CodeDefinition(functionSignature: signature))
+            .definingLocal(CodeDefinition.forGlobalFunction(signature: signature))
             .resolve()
             .thenAssertExpression(
                 at: \Expression.asPostfix?.functionCall?.subExpressions[0].asPostfix?.exp,
@@ -1208,11 +1212,11 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: Expression.identifier("f").call([.constant(0)]),
                         sut: ExpressionTypeResolver())
             .definingIntrinsic(
-                CodeDefinition(functionSignature:
+                CodeDefinition.forGlobalFunction(signature:
                     try! FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
             )
             .definingIntrinsic(
-                CodeDefinition(functionSignature:
+                CodeDefinition.forGlobalFunction(signature:
                     try! FunctionSignature(signatureString: "f(_ d: Double) -> String"))
             )
             .resolve()
@@ -1221,11 +1225,11 @@ class ExpressionTypeResolverTests: XCTestCase {
         startScopedTest(with: Expression.identifier("f").call([.constant(0.0)]),
                         sut: ExpressionTypeResolver())
             .definingIntrinsic(
-                CodeDefinition(functionSignature:
+                CodeDefinition.forGlobalFunction(signature:
                     try! FunctionSignature(signatureString: "f(_ i: Int) -> Bool"))
             )
             .definingIntrinsic(
-                CodeDefinition(functionSignature:
+                CodeDefinition.forGlobalFunction(signature:
                     try! FunctionSignature(signatureString: "f(_ d: Double) -> String"))
             )
             .resolve()

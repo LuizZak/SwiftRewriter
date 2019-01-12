@@ -41,11 +41,13 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
                                           initialization: .constant(0)),
             Statement.expression(
                 Expression
-                    .identifier("test").setDefinition(localName: "test", type: .int)
+                    .identifier("test")
                     .assignment(op: .equals, rhs: .constant(1))
             )
         ]
         functionBodyContext = FunctionBodyIntention(body: body)
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _=resolver.resolveTypes(in: body)
         
         assertTransform(
             statement: body,
@@ -56,7 +58,7 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
                                               initialization: .constant(0)),
                 Statement.expression(
                     Expression
-                        .identifier("test").setDefinition(localName: "test", type: .int)
+                        .identifier("test")
                         .assignment(op: .equals, rhs: .constant(1)))
             ])
         ); assertDidNotNotifyChange()

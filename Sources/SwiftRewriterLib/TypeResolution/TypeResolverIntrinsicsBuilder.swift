@@ -76,9 +76,8 @@ class TypeResolverIntrinsicsBuilder {
     func addSetterIntrinsics(setter: PropertyGenerationIntention.Setter, type: SwiftType) {
         miscellaneousDefinitions
             .recordDefinition(
-                CodeDefinition(variableNamed: setter.valueIdentifier,
-                               type: type
-                )
+                CodeDefinition.forSetterValue(named: setter.valueIdentifier,
+                                              type: type)
             )
     }
     
@@ -97,12 +96,9 @@ class TypeResolverIntrinsicsBuilder {
         
         let intrinsics = DefaultCodeScope()
         
-        // Push function parameters as intrinsics, if member is a method type
-        for param in function.parameters {
-            intrinsics.recordDefinition(
-                CodeDefinition(variableNamed: param.name, type: param.type)
-            )
-        }
+        intrinsics.recordDefinitions(
+            CodeDefinition.forParameters(inSignature: function.signature)
+        )
         
         // Push file-level global definitions (variables and functions)
         let intentionGlobals =
@@ -131,49 +127,19 @@ class TypeResolverIntrinsicsBuilder {
         // Push `self` intrinsic member variable, as well as all properties visible
         if let type = member.type {
             let selfType = SwiftType.typeName(type.typeName)
-            let selfStorage: ValueStorage
-            
-            if member.isStatic {
-                // Class `self` points to metatype of the class
-                selfStorage =
-                    ValueStorage(type: .metatype(for: selfType),
-                                 ownership: .strong,
-                                 isConstant: true)
-            } else {
-                // Instance `self` points to the actual instance
-                selfStorage =
-                    ValueStorage(type: selfType,
-                                 ownership: .strong,
-                                 isConstant: true)
-            }
             
             intrinsics.recordDefinition(
-                CodeDefinition(variableNamed: "self",
-                               storage: selfStorage)
+                CodeDefinition.forSelf(type: selfType,
+                                       isStatic: member.isStatic)
             )
             
             // Record 'super', if available
             if let supertype = type.supertype {
                 let superType = SwiftType.typeName(supertype.asTypeName)
-                let superStorage: ValueStorage
-                
-                if member.isStatic {
-                    // Class `super` points to metatype of the class
-                    superStorage =
-                        ValueStorage(type: .metatype(for: superType),
-                                     ownership: .strong,
-                                     isConstant: true)
-                } else {
-                    // Instance `super` points to the actual instance's super type
-                    superStorage =
-                        ValueStorage(type: superType,
-                                     ownership: .strong,
-                                     isConstant: true)
-                }
                 
                 intrinsics.recordDefinition(
-                    CodeDefinition(variableNamed: "super",
-                                   storage: superStorage)
+                    CodeDefinition.forSuper(type: superType,
+                                            isStatic: member.isStatic)
                 )
             }
             
@@ -195,11 +161,9 @@ class TypeResolverIntrinsicsBuilder {
         if let function = member as? FunctionIntention {
             let functionIntrinsics = DefaultCodeScope()
             
-            for param in function.parameters {
-                functionIntrinsics.recordDefinition(
-                    CodeDefinition(variableNamed: param.name, type: param.type)
-                )
-            }
+            functionIntrinsics.recordDefinitions(
+                CodeDefinition.forParameters(function.parameters)
+            )
             
             functionArgumentsIntrinsics = functionIntrinsics
         }
@@ -261,7 +225,7 @@ class KnownTypePropertiesDefinitionsSource: DefinitionsSource {
         
         for prop in type.knownProperties where prop.isStatic == staticMembers {
             if prop.name == name {
-                definition = CodeDefinition(variableNamed: prop.name, storage: prop.storage)
+                definition = CodeDefinition.forKnownMember(prop)
                 break
             }
         }
@@ -269,7 +233,7 @@ class KnownTypePropertiesDefinitionsSource: DefinitionsSource {
         if definition == nil {
             for field in type.knownFields where field.isStatic == staticMembers {
                 if field.name == name {
-                    definition = CodeDefinition(variableNamed: field.name, storage: field.storage)
+                    definition = CodeDefinition.forKnownMember(field)
                     break
                 }
             }
@@ -305,19 +269,14 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
         if let functions = globals.funcMap[name] {
             for function in functions {
                 if function.isVisible(for: symbol) {
-                    let def = CodeDefinition(functionSignature: function.signature)
-                    return def
+                    return CodeDefinition.forGlobalFunction(function)
                 }
             }
         }
         if let variables = globals.varMap[name] {
             for variable in variables {
                 if variable.isVisible(for: symbol) {
-                    let def =
-                        CodeDefinition(variableNamed: variable.name,
-                                       storage: variable.storage)
-                    
-                    return def
+                    return CodeDefinition.forGlobalVariable(variable)
                 }
             }
         }
@@ -333,7 +292,7 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
         return
             functions.compactMap { function in
                 if function.isVisible(for: symbol) {
-                    return CodeDefinition(functionSignature: function.signature)
+                    return CodeDefinition.forGlobalFunction(function)
                 }
                 
                 return nil
@@ -341,21 +300,20 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
     }
     
     func allDefinitions() -> [CodeDefinition] {
-        let variables =
+        let variables: [CodeDefinition] =
             globals.varMap.flatMap { $0.value }
                 .filter { global in
                     global.isVisible(for: symbol)
                 }.map { global in
-                    CodeDefinition(variableNamed: global.name,
-                                   storage: global.storage)
+                    CodeDefinition.forGlobalVariable(global)
                 }
         
-        let functions =
+        let functions: [CodeDefinition] =
             globals.funcMap.flatMap { $0.value }
                 .filter { global in
                     global.isVisible(for: symbol)
                 }.map { global in
-                    CodeDefinition(functionSignature: global.signature)
+                    CodeDefinition.forGlobalFunction(global)
                 }
         
         return variables + functions
