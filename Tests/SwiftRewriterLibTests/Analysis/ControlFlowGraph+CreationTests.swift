@@ -1,5 +1,4 @@
 import XCTest
-import Cocoa
 @testable import SwiftRewriterLib
 import SwiftAST
 import TestCommons
@@ -1757,9 +1756,6 @@ private extension ControlFlowGraphCreationTests {
     
     func assertGraphviz(graph: ControlFlowGraph, matches expected: String, line: Int = #line) {
         let text = graphviz(graph: graph)
-        
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.writeObjects([text as NSPasteboardWriting])
         
         if text == expected {
             return
