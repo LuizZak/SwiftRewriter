@@ -10,11 +10,11 @@ public class LocalConstantPromotionExpressionPass: ASTRewriterPass {
             return super.visitVariableDeclarations(stmt)
         }
         
-        let usage = LocalUsageAnalyzer(functionBody: functionBody,
-                                       typeSystem: typeSystem)
+        let usage = LocalUsageAnalyzer(typeSystem: typeSystem)
         
         for (i, decl) in stmt.decl.enumerated() where !decl.isConstant {
-            let usages = usage.findUsagesOf(localNamed: decl.identifier)
+            let usages = usage.findUsagesOf(localNamed: decl.identifier,
+                                            in: functionBody)
             
             // Look for read-only usages
             if usages.contains(where: { !$0.isReadOnlyUsage }) {

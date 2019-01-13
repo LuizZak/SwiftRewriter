@@ -144,7 +144,7 @@ public extension CodeDefinition {
     static func forLocalIdentifier(_ identifier: String,
                                    type: SwiftType,
                                    isConstant: Bool,
-                                   location: LocalCodeDefinition.DefinitionLocation) -> CodeDefinition {
+                                   location: LocalCodeDefinition.DefinitionLocation) -> LocalCodeDefinition {
         
         if isConstant {
             return LocalCodeDefinition(constantNamed: identifier,
@@ -155,6 +155,18 @@ public extension CodeDefinition {
         return LocalCodeDefinition(variableNamed: identifier,
                                    type: type,
                                    location: location)
+    }
+    
+    static func forVarDeclStatement(_ stmt: VariableDeclarationsStatement) -> [LocalCodeDefinition] {
+        return stmt.decl.enumerated().map { (i, decl) in
+            CodeDefinition
+                .forLocalIdentifier(
+                    decl.identifier,
+                    type: decl.type,
+                    isConstant: decl.isConstant,
+                    location: .variableDeclaration(stmt, index: i)
+                )
+        }
     }
     
     static func forGlobalFunction(_ function: GlobalFunctionGenerationIntention) -> CodeDefinition {
@@ -340,14 +352,17 @@ public class LocalCodeDefinition: CodeDefinition {
                 hasher.combine(index)
                 
             case let .variableDeclaration(stmt, index):
+                hasher.combine(5)
                 hasher.combine(ObjectIdentifier(stmt))
                 hasher.combine(index)
                 
             case let .forLoop(stmt, loc):
+                hasher.combine(6)
                 hasher.combine(ObjectIdentifier(stmt))
                 hasher.combine(loc)
                 
             case let .ifLet(stmt, loc):
+                hasher.combine(7)
                 hasher.combine(ObjectIdentifier(stmt))
                 hasher.combine(loc)
             }
