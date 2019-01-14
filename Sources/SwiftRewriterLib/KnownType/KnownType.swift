@@ -213,6 +213,24 @@ public enum TraitType: Equatable, Codable {
     case swiftType(SwiftType)
     case semantics([Semantic])
     
+    public var asSwiftType: SwiftType? {
+        switch self {
+        case .swiftType(let type):
+            return type
+        default:
+            return nil
+        }
+    }
+    
+    public var asSemantics: [Semantic]? {
+        switch self {
+        case .semantics(let semantics):
+            return semantics
+        default:
+            return nil
+        }
+    }
+    
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         

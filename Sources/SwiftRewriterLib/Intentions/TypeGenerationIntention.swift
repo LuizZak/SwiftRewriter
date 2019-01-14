@@ -33,6 +33,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     }
     
     public var knownTraits: [String: TraitType] = [:]
+    public var knownAttributes: [KnownAttribute] = []
     
     public var kind: KnownTypeKind {
         return .class
@@ -269,8 +270,5 @@ extension TypeGenerationIntention: KnownType {
     }
     public var knownProtocolConformances: [KnownProtocolConformance] {
         return protocols
-    }
-    public var knownAttributes: [KnownAttribute] {
-        return []
     }
 }

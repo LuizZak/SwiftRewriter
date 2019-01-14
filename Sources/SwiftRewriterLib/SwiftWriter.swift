@@ -239,6 +239,7 @@ class InternalSwiftWriter {
         if options.emitObjcCompatibility {
             target.outputInlineWithSpace("@objc", style: .keyword)
         }
+        outputAttributes(intention.knownAttributes, inline: false, into: target)
         target.outputInlineWithSpace("enum", style: .keyword)
         target.outputInline(intention.typeName, style: .typeName)
         target.outputInline(": ")
@@ -267,6 +268,7 @@ class InternalSwiftWriter {
     func outputStruct(_ str: StructGenerationIntention, target: RewriterOutputTarget) {
         outputHistory(for: str, target: target)
         
+        outputAttributes(str.knownAttributes, inline: false, into: target)
         target.outputInlineWithSpace("struct", style: .keyword)
         target.outputInline(str.typeName, style: .typeName)
         
@@ -322,6 +324,8 @@ class InternalSwiftWriter {
     func outputFunctionDeclaration(_ funcDef: GlobalFunctionGenerationIntention, target: RewriterOutputTarget) {
         outputHistory(for: funcDef, target: target)
         
+        outputAttributes(funcDef.knownAttributes, inline: false, into: target)
+        
         let accessModifier =
             _accessModifierFor(accessLevel: funcDef.accessLevel)
         
@@ -368,6 +372,7 @@ class InternalSwiftWriter {
         if options.emitObjcCompatibility {
             target.output(line: "@objc", style: .keyword)
         }
+        outputAttributes(cls.knownAttributes, inline: false, into: target)
         target.outputIdentation()
         target.outputInlineWithSpace("extension", style: .keyword)
         target.outputInline(cls.typeName, style: .typeName)
@@ -381,6 +386,7 @@ class InternalSwiftWriter {
         if options.emitObjcCompatibility {
             target.output(line: "@objc", style: .keyword)
         }
+        outputAttributes(cls.knownAttributes, inline: false, into: target)
         target.outputIdentation()
         target.outputInlineWithSpace("class", style: .keyword)
         target.outputInline(cls.typeName, style: .typeName)
@@ -486,7 +492,7 @@ class InternalSwiftWriter {
         if emitObjcAttribute {
             target.output(line: "@objc", style: .keyword)
         }
-        
+        outputAttributes(prot.knownAttributes, inline: false, into: target)
         target.outputIdentation()
         target.outputInlineWithSpace("protocol", style: .keyword)
         target.outputInline(prot.typeName, style: .typeName)
@@ -572,9 +578,7 @@ class InternalSwiftWriter {
             target.outputInlineWithSpace("@objc", style: .keyword)
         }
         
-        for attribute in prop.knownAttributes {
-            target.outputInlineWithSpace(attribute.attributeString, style: .attribute)
-        }
+        outputAttributes(prop.knownAttributes, inline: true, into: target)
         
         let accessModifier = _accessModifierFor(accessLevel: prop.accessLevel)
         let typeName = typeMapper.typeNameString(for: prop.type)
@@ -693,6 +697,7 @@ class InternalSwiftWriter {
         if options.emitObjcCompatibility && (selfType.kind == .class || selfType.kind == .protocol) {
             target.output(line: "@objc", style: .keyword)
         }
+        outputAttributes(initMethod.knownAttributes, inline: false, into: target)
         target.outputIdentation()
         
         let accessModifier = _accessModifierFor(accessLevel: initMethod.accessLevel)
@@ -773,7 +778,7 @@ class InternalSwiftWriter {
         if options.emitObjcCompatibility {
             target.output(line: "@objc", style: .keyword)
         }
-        
+        outputAttributes(method.knownAttributes, inline: false, into: target)
         target.outputIdentation()
         
         let accessModifier = _accessModifierFor(accessLevel: method.accessLevel)
@@ -853,6 +858,19 @@ class InternalSwiftWriter {
         }
         
         target.outputInline(")")
+    }
+    
+    func outputAttributes(_ attributes: [KnownAttribute],
+                          inline: Bool,
+                          into target: RewriterOutputTarget) {
+        
+        for attribute in attributes {
+            if inline {
+                target.outputInlineWithSpace(attribute.attributeString, style: .attribute)
+            } else {
+                target.output(line: attribute.attributeString, style: .attribute)
+            }
+        }
     }
     
     func outputHistory(for intention: Intention, target: RewriterOutputTarget) {
