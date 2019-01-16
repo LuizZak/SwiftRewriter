@@ -1,6 +1,8 @@
 import XCTest
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import Intentions
+import SwiftRewriterLib
 import TestCommons
 
 class DefaultUsageAnalyzerTests: XCTestCase {

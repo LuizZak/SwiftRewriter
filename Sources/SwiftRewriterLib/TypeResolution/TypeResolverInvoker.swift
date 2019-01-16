@@ -1,5 +1,6 @@
 import Foundation
 import SwiftAST
+import Intentions
 
 /// A basic protocol with two front-end methods for requesting resolving of types
 /// of expression and statements on intention collections.

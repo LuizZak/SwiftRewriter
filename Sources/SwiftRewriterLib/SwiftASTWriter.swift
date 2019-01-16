@@ -4,6 +4,7 @@ import Antlr4
 import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
+import WriterTargetOutput
 
 /// Options for an AST writer invocation
 public struct ASTWriterOptions {

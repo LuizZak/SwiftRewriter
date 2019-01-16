@@ -1,5 +1,6 @@
 import SwiftAST
 import SwiftRewriterLib
+import WriterTargetOutput
 
 public enum StatementPrinter {
     public static func print(statement: Statement) {

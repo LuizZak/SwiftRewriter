@@ -1,6 +1,7 @@
 import XCTest
 import ExpressionPasses
 import SwiftAST
+import KnownType
 import SwiftRewriterLib
 
 class CanonicalNameExpressionPassTests: ExpressionPassTestCase {

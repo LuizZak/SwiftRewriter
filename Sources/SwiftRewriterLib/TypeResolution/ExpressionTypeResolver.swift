@@ -1,4 +1,5 @@
 import SwiftAST
+import KnownType
 import ObjcParser
 
 public final class ExpressionTypeResolver: SyntaxNodeRewriter {

@@ -2,6 +2,7 @@ import XCTest
 @testable import SwiftRewriterLib
 import SwiftAST
 import TestCommons
+import WriterTargetOutput
 
 class ControlFlowGraphCreationTests: XCTestCase {
     func testCreateEmpty() {

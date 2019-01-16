@@ -1,4 +1,6 @@
 import SwiftAST
+import KnownType
+import Intentions
 
 /// An extension over the default type system that enables using an intention
 /// collection to search for types

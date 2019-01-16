@@ -2,6 +2,7 @@ import SwiftAST
 import GrammarModels
 import ObjcParserAntlr
 import ObjcParser
+import KnownType
 
 /// Reader that reads Objective-C AST and outputs equivalent a Swift AST
 public class SwiftASTReader {

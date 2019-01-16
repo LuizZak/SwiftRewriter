@@ -1,4 +1,5 @@
 import SwiftAST
+import KnownType
 import MiniLexer
 import Utils
 

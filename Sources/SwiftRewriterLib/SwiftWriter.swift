@@ -3,6 +3,9 @@ import GrammarModels
 import ObjcParser
 import ObjcParserAntlr
 import SwiftAST
+import KnownType
+import Intentions
+import WriterTargetOutput
 import Utils
 
 /// Gets as inputs a series of intentions and outputs actual files and script

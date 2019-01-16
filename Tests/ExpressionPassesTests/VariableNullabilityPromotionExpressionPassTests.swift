@@ -1,7 +1,8 @@
 import XCTest
 import ExpressionPasses
-import SwiftRewriterLib
 import SwiftAST
+import Intentions
+import SwiftRewriterLib
 import TestCommons
 
 class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {

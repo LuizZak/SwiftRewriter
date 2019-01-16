@@ -1,3 +1,5 @@
+import WriterTargetOutput
+
 /// Manages output of a Swift Rewriter invocation by providing file targets to
 /// output Swift code to.
 public protocol WriterOutput {

@@ -1,6 +1,8 @@
 import XCTest
 import SwiftAST
+import Intentions
 import SwiftRewriterLib
+import WriterTargetOutput
 import ObjcParser
 
 class SwiftRewriterJobTests: XCTestCase {

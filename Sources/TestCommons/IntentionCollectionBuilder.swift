@@ -1,7 +1,9 @@
 import Foundation
-import SwiftRewriterLib
-import SwiftAST
 import GrammarModels
+import SwiftAST
+import KnownType
+import Intentions
+import SwiftRewriterLib
 
 /// An empty initializer used as default argument of initializer closure parameters
 /// for `IntentionCollectionBuilder` and related classes.

@@ -1,6 +1,7 @@
 import XCTest
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import SwiftRewriterLib
 
 class SwiftASTReaderContextTests: XCTestCase {
     var typeSystem: TypeSystem!

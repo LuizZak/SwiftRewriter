@@ -1,3 +1,5 @@
+import Intentions
+
 public class AnonymousIntentionVisitor {
     public var onVisitFile: ((FileGenerationIntention) -> Void)?
     public var onVisitGlobalVariable: ((GlobalVariableGenerationIntention) -> Void)?

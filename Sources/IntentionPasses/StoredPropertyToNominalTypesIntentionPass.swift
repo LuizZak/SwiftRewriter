@@ -1,5 +1,7 @@
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import Intentions
+import SwiftRewriterLib
 
 /// An intention to move all instance variables/properties from extensions into
 /// the nominal types.

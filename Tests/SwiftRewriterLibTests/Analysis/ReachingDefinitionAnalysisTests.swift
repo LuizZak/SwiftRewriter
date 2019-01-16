@@ -1,5 +1,6 @@
 import XCTest
 @testable import SwiftRewriterLib
+import Intentions
 import SwiftAST
 import TestCommons
 

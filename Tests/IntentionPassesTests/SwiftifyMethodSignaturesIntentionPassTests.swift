@@ -2,8 +2,10 @@ import XCTest
 import GrammarModels
 import ObjcParser
 import ObjcParserAntlr
-import SwiftAST
 import IntentionPasses
+import SwiftAST
+import KnownType
+import Intentions
 import SwiftRewriterLib
 
 class SwiftifyMethodSignaturesIntentionPassTests: XCTestCase {

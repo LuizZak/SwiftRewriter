@@ -1,5 +1,6 @@
 import Foundation
 import Utils
+import Intentions
 
 public protocol FunctionBodyQueueDelegate: class {
     associatedtype Context

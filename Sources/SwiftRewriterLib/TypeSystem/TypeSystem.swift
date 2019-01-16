@@ -1,7 +1,9 @@
-import SwiftAST
-import TypeDefinitions
-import Utils
 import Dispatch
+import TypeDefinitions
+import SwiftAST
+import KnownType
+import Intentions
+import Utils
 
 /// Standard type system implementation
 public class TypeSystem {

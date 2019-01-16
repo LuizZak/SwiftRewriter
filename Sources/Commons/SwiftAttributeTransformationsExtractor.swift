@@ -1,4 +1,6 @@
 import SwiftAST
+import KnownType
+import Intentions
 import SwiftRewriterLib
 import MiniLexer
 

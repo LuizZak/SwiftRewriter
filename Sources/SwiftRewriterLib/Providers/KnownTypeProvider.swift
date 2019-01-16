@@ -1,3 +1,6 @@
+import KnownType
+import Intentions
+
 /// Gives support for querying an object for types by name.
 public protocol KnownTypeProvider {
     /// Returns a type with a given (unaliased) name to this type provider.

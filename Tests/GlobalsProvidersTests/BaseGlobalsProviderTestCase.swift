@@ -1,5 +1,6 @@
 import XCTest
 import SwiftAST
+import KnownType
 import SwiftRewriterLib
 
 let cInt = SwiftType.typeName("CInt")

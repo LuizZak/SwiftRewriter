@@ -1,5 +1,6 @@
 import XCTest
 import Commons
+import KnownType
 import SwiftRewriterLib
 import Utils
 

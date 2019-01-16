@@ -1,4 +1,5 @@
 import SwiftAST
+import KnownType
 import SwiftRewriterLib
 
 /// Converts top-level enumeration accesses into Swift's enum syntax

@@ -1,7 +1,8 @@
 import XCTest
-import SwiftRewriterLib
 import IntentionPasses
 import SwiftAST
+import Intentions
+import SwiftRewriterLib
 import TestCommons
 
 class StoredPropertyToNominalTypesIntentionPassTests: XCTestCase {

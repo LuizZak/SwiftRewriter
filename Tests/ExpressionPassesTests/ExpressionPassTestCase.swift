@@ -2,6 +2,9 @@ import XCTest
 import Antlr4
 import ObjcParser
 import ObjcParserAntlr
+import SwiftAST
+import Intentions
+import WriterTargetOutput
 @testable import SwiftRewriterLib
 import SwiftAST
 

@@ -1,6 +1,8 @@
 import XCTest
 import ObjcParser
 import SwiftAST
+import KnownType
+@testable import Intentions
 @testable import SwiftRewriterLib
 
 class SwiftWriterTests: XCTestCase {
