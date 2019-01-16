@@ -102,6 +102,28 @@ public enum Pattern: Codable, Equatable {
         }
     }
     
+    /// Returns a sub-pattern in this pattern on a specified pattern location.
+    ///
+    /// - Parameter location: Location of pattern to search
+    /// - Returns: `self`, if `location == .self`, or a subpattern within.
+    /// Returns `nil`, if the location is invalid within this pattern.
+    func subpattern(at location: PatternLocation) -> Pattern? {
+        switch (location, self) {
+        case (.self, _):
+            return self
+            
+        case let (.tuple(index, subLocation), .tuple(subpatterns)):
+            if index >= subpatterns.count {
+                return nil
+            }
+            
+            return subpatterns[index].subpattern(at: subLocation)
+            
+        default:
+            return nil
+        }
+    }
+    
     public enum CodingKeys: String, CodingKey {
         case discriminator
         case payload
@@ -119,4 +141,15 @@ extension Pattern: CustomStringConvertible {
             return ident
         }
     }
+}
+
+/// Allows referencing a location within a pattern for an identifier, an
+/// expression or a tuple-pattern.
+///
+/// - `self`: Returns the root pattern itself
+/// - tuple: Returns the tuple within the pattern, at a given index, with a given
+/// nested subpattern.
+public enum PatternLocation: Hashable {
+    case `self`
+    indirect case tuple(index: Int, pattern: PatternLocation)
 }

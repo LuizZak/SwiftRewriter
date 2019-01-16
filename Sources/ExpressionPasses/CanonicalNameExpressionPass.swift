@@ -11,7 +11,7 @@ public class CanonicalNameExpressionPass: ASTRewriterPass {
         // Identifiers with definitions (that are not type definitions) cannot
         // be type names
         switch exp.definition {
-        case nil, IdentifierExpression.Definition.type?:
+        case nil, is TypeCodeDefinition:
             break
         default:
             return super.visitIdentifier(exp)

@@ -76,23 +76,23 @@ public class BaseGlobalsProvider: GlobalsProvider {
     }
     
     func constant(name: String, type: SwiftType) -> CodeDefinition {
-        return CodeDefinition(constantNamed: name, type: type)
+        return .forGlobalVariable(name: name, isConstant: true, type: type)
     }
     
     func variable(name: String, type: SwiftType) -> CodeDefinition {
-        return CodeDefinition(variableNamed: name, type: type)
+        return .forGlobalVariable(name: name, isConstant: false, type: type)
     }
     
     func function(name: String, paramsSignature: String, returnType: SwiftType = .void) -> CodeDefinition {
         let params = try! FunctionSignatureParser.parseParameters(from: paramsSignature)
         
         let signature =
-            FunctionSignature(name: name, parameters: params,
-                              returnType: returnType, isStatic: false)
+            FunctionSignature(name: name,
+                              parameters: params,
+                              returnType: returnType,
+                              isStatic: false)
         
-        let definition = CodeDefinition(functionSignature: signature)
-        
-        return definition
+        return .forGlobalFunction(signature: signature)
     }
     
     func function(name: String, paramTypes: [SwiftType], returnType: SwiftType = .void) -> CodeDefinition {
@@ -102,11 +102,11 @@ public class BaseGlobalsProvider: GlobalsProvider {
         }
         
         let signature =
-            FunctionSignature(name: name, parameters: paramSignatures,
-                              returnType: returnType, isStatic: false)
+            FunctionSignature(name: name,
+                              parameters: paramSignatures,
+                              returnType: returnType,
+                              isStatic: false)
         
-        let definition = CodeDefinition(functionSignature: signature)
-        
-        return definition
+        return .forGlobalFunction(signature: signature)
     }
 }

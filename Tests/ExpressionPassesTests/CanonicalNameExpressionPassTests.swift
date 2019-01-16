@@ -23,7 +23,7 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
         ); assertNotifiedChange()
         
         assertTransform(
-            expression: Expression.identifier("NonCanon").setDefinition(typeName: "NonCanon"),
+            expression: Expression.identifier("NonCanon").settingDefinition(.forType(named: "NonCanon")),
             into: .identifier("Canon")
         ); assertNotifiedChange()
     }
@@ -46,7 +46,7 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             expression: Expression
                 .identifier("NonCanon")
-                .setDefinition(localName: "local", type: .int),
+                .settingDefinition(CodeDefinition.forSetterValue(named: "setter", type: .int)),
             into: Expression
                 .identifier("NonCanon")
         ); assertDidNotNotifyChange()
@@ -54,7 +54,7 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             expression: Expression
                 .identifier("NonCanon")
-                .setDefinition(globalName: "local", type: .int),
+                .settingDefinition(.forGlobalVariable(name: "global", isConstant: false, type: .int)),
             into: Expression
                 .identifier("NonCanon")
         ); assertDidNotNotifyChange()
@@ -62,11 +62,14 @@ class CanonicalNameExpressionPassTests: ExpressionPassTestCase {
         assertTransform(
             expression: Expression
                 .identifier("NonCanon")
-                .setDefinition(memberOf: KnownTypeBuilder(typeName: "A").build(),
-                               member: KnownTypeBuilder(typeName: "A")
-                                .property(named: "a", type: .int)
-                                .build()
-                                .knownProperties[0]),
+                .settingDefinition(
+                    .forKnownMember(
+                        KnownTypeBuilder(typeName: "A")
+                            .property(named: "a", type: .int)
+                            .build()
+                            .knownProperties[0]
+                    )
+                ),
             into: Expression
                 .identifier("NonCanon")
         ); assertDidNotNotifyChange()

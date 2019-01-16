@@ -48,14 +48,14 @@ private class InnerUIKitGlobalsProvider: BaseGlobalsProvider {
                      paramTypes: [],
                      returnType: .optional("CGContext")))
         
-        add(CodeDefinition(variableNamed: "UIViewNoIntrinsicMetric",
-                           storage: .constant(ofType: .cgFloat)))
-        add(CodeDefinition(variableNamed: "UILayoutFittingCompressedSize",
-                           storage: .constant(ofType: "CGSize")))
-        add(CodeDefinition(variableNamed: "UILayoutFittingExpandedSize",
-                           storage: .constant(ofType: "CGSize")))
-        add(CodeDefinition(variableNamed: "UITableViewAutomaticDimension",
-                           storage: .constant(ofType: .cgFloat)))
+        add(constant(name: "UIViewNoIntrinsicMetric",
+                     type: .cgFloat))
+        add(constant(name: "UILayoutFittingCompressedSize",
+                     type: "CGSize"))
+        add(constant(name: "UILayoutFittingExpandedSize",
+                     type: "CGSize"))
+        add(constant(name: "UITableViewAutomaticDimension",
+                     type: .cgFloat))
         
         definitions = ArrayDefinitionsSource(definitions: globals)
     }

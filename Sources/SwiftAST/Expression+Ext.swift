@@ -29,6 +29,8 @@ public extension ExpressionPostfixBuildable {
         return .postfix(expressionToBuild, op)
     }
     
+    /// Returns a postfix call with this expression as a function, and a series
+    /// of unlabeled arguments as input.
     public func call(_ unlabeledArguments: [Expression],
                      type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {

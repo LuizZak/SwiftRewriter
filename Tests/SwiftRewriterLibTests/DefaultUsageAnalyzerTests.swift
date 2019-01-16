@@ -30,7 +30,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -72,7 +72,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let method = intentions.fileIntentions()[0].typeIntentions[1].methods[0]
         
         let usages = sut.findUsagesOf(method: method)
@@ -107,7 +107,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
                     }
             }
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let property = intentions.fileIntentions()[0].typeIntentions[1].properties[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -139,7 +139,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let property = intentions.fileIntentions()[0].enumIntentions[0].cases[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -178,7 +178,7 @@ class DefaultUsageAnalyzerTests: XCTestCase {
             }
         
         let intentions = builder.build(typeChecked: true)
-        let sut = DefaultUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
+        let sut = IntentionCollectionUsageAnalyzer(intentions: intentions, typeSystem: TypeSystem())
         let property = intentions.fileIntentions()[0].classIntentions[0].properties[0]
         
         let usages = sut.findUsagesOf(property: property)
@@ -203,10 +203,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: TypeSystem())
+        let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 1)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -235,10 +234,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: TypeSystem())
+        let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -306,10 +304,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: TypeSystem())
+        let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 5)
         XCTAssertEqual(usages[0].isReadOnlyUsage, false)
@@ -349,10 +346,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: TypeSystem())
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: TypeSystem())
+        let sut = LocalUsageAnalyzer(typeSystem: TypeSystem())
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -401,10 +397,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: typeSystem)
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -439,10 +434,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: typeSystem)
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 1)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
@@ -483,10 +477,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: typeSystem)
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, false)
@@ -529,10 +522,9 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
         _=typeResolver.resolveTypes(in: body)
         
-        let sut = LocalUsageAnalyzer(functionBody: FunctionBodyIntention(body: body),
-                                     typeSystem: typeSystem)
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
         
-        let usages = sut.findUsagesOf(localNamed: "a")
+        let usages = sut.findUsagesOf(localNamed: "a", in: FunctionBodyIntention(body: body))
         
         XCTAssertEqual(usages.count, 2)
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)

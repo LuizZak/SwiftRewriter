@@ -43,6 +43,8 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                                      initialization: nil)
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _=resolver.resolveTypes(in: statement)
         
         assertTransform(
             statement: statement,
@@ -62,6 +64,8 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                                      initialization: .constant(.nil))
                 ])
         functionBodyContext = FunctionBodyIntention(body: statement)
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _=resolver.resolveTypes(in: statement)
         
         assertTransform(
             statement: statement,
@@ -81,6 +85,8 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                                      initialization: Expression.identifier("_a").makeErrorTyped())
                 ])
         functionBodyContext = FunctionBodyIntention(body: statement)
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _=resolver.resolveTypes(in: statement)
         
         assertTransform(
             statement: statement,
@@ -100,11 +106,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                                      initialization: Expression.identifier("_a").typed("A")),
                 .expression(
                     Expression
-                        .identifier("a").setDefinition(localName: "a", type: .nullabilityUnspecified("A"))
+                        .identifier("a")
                         .assignment(op: .assign, rhs: .constant(.nil))
                 )
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _=resolver.resolveTypes(in: statement)
         
         assertTransform(
             statement: statement,
@@ -114,7 +122,7 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                                      initialization: Expression.identifier("_a").typed("A")),
                 .expression(
                     Expression
-                        .identifier("a").setDefinition(localName: "a", type: .nullabilityUnspecified("A"))
+                        .identifier("a")
                         .assignment(op: .assign, rhs: .constant(.nil))
                 )
             ])
@@ -129,11 +137,13 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                                      initialization: Expression.constant(.nil)),
                 .expression(
                     Expression
-                        .identifier("a").setDefinition(localName: "a", type: .nullabilityUnspecified("A"))
+                        .identifier("a")
                         .assignment(op: .assign, rhs: Expression.identifier("_a").typed("A"))
                 )
             ])
         functionBodyContext = FunctionBodyIntention(body: statement)
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _=resolver.resolveTypes(in: statement)
         
         assertTransform(
             statement: statement,
@@ -143,7 +153,7 @@ class VariableNullabilityPromotionExpressionPassTests: ExpressionPassTestCase {
                                      initialization: Expression.constant(.nil)),
                 .expression(
                     Expression
-                        .identifier("a").setDefinition(localName: "a", type: .nullabilityUnspecified("A"))
+                        .identifier("a")
                         .assignment(op: .assign, rhs: Expression.identifier("_a").typed("A"))
                 )
             ])

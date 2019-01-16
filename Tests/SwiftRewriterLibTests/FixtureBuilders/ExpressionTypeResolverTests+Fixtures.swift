@@ -37,7 +37,14 @@ protocol ExpressionTestResolverTestFixture {
 
 extension ExpressionTestResolverTestFixture {
     func definingLocal(name: String, type: SwiftType) -> Self {
-        let definition = CodeDefinition(variableNamed: name, type: type)
+        let definition =
+            CodeDefinition
+                .forLocalIdentifier(
+                    name,
+                    type: type,
+                    isConstant: false,
+                    location: .setterValue
+                )
         
         return definingLocal(definition)
     }
@@ -49,7 +56,9 @@ extension ExpressionTestResolverTestFixture {
     }
     
     func definingIntrinsic(name: String, type: SwiftType) -> Self {
-        let definition = CodeDefinition(variableNamed: name, type: type)
+        let definition =
+            CodeDefinition
+                .forGlobalVariable(name: name, isConstant: false, type: type)
         
         return definingIntrinsic(definition)
     }
@@ -138,10 +147,11 @@ extension ExpressionTypeResolverTests {
         @discardableResult
         func thenAssertDefined(in scope: CodeScopeNode,
                                localNamed name: String,
+                               isConstant: Bool,
                                type: SwiftType,
                                file: String = #file, line: Int = #line) -> StatementTypeTestBuilder {
             let storage =
-                ValueStorage(type: type, ownership: .strong, isConstant: false)
+                ValueStorage(type: type, ownership: .strong, isConstant: isConstant)
                 
             return
                 thenAssertDefined(in: scope,

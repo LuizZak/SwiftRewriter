@@ -6,16 +6,12 @@ import Utils
 /// Promotes local variables in method bodies to non-nil if all assignment sites
 /// are detected to be non-nil as well.
 public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
-    let localsAnalyzer: LocalsUsageAnalyzer?
+    let localsAnalyzer: LocalUsageAnalyzer
+    let body: FunctionBodyIntention?
     
     public required init(context: ASTRewriterPassContext) {
-        if let body = context.functionBodyIntention {
-            localsAnalyzer =
-                LocalUsageAnalyzer(functionBody: body,
-                                   typeSystem: context.typeSystem)
-        } else {
-            localsAnalyzer = nil
-        }
+        self.localsAnalyzer = LocalUsageAnalyzer(typeSystem: context.typeSystem)
+        body = context.functionBodyIntention
         
         super.init(context: context)
     }
@@ -23,7 +19,7 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
     public override func visitVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> Statement {
         let stmt = super.visitVariableDeclarations(stmt)
         
-        guard let localsAnalyzer = localsAnalyzer else {
+        guard let body = body else {
             return stmt
         }
         guard let varDeclStmt = stmt.asVariableDeclaration else {
@@ -31,7 +27,9 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
         }
         
         for (i, decl) in varDeclStmt.decl.enumerated() {
-            let usages = localsAnalyzer.findUsagesOf(localNamed: decl.identifier)
+            let usages =
+                localsAnalyzer
+                    .findUsagesOf(localNamed: decl.identifier, in: body)
             
             if usages.isEmpty && decl.initialization == nil {
                 continue
@@ -69,13 +67,15 @@ public class VariableNullabilityPromotionExpressionPass: ASTRewriterPass {
     }
     
     private func collectAssignments(for decl: StatementVariableDeclaration) -> [Expression] {
-        guard let localsAnalyzer = localsAnalyzer else {
+        guard let body = body else {
             return []
         }
         
         var assignments: [Expression] = []
         
-        let usages = localsAnalyzer.findUsagesOf(localNamed: decl.identifier)
+        let usages =
+            localsAnalyzer
+                .findUsagesOf(localNamed: decl.identifier, in: body)
         
         if let exp = decl.initialization {
             assignments.append(exp)

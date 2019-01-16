@@ -31,7 +31,7 @@ public class EnumRewriterExpressionPass: ASTRewriterPass {
             
             let ident = Expression.identifier(_enum.typeName)
             ident.resolvedType = .metatype(for: .typeName(_enum.typeName))
-            ident.definition = .type(named: _enum.typeName)
+            ident.definition = .forType(named: _enum.typeName)
             
             let result = ident.dot(_case.name)
             
