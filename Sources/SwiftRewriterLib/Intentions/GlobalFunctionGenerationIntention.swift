@@ -2,7 +2,7 @@ import GrammarModels
 import SwiftAST
 
 /// An intention to generate a global function.
-public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, FunctionIntention {
+public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIntention, FunctionIntention, AttributeTaggeableObject {
     var typedSource: FunctionDefinition? {
         return source as? FunctionDefinition
     }
@@ -26,6 +26,8 @@ public class GlobalFunctionGenerationIntention: FromSourceIntention, FileLevelIn
     }
     
     public var functionBody: FunctionBodyIntention?
+    
+    public var knownAttributes: [KnownAttribute] = []
     
     public init(signature: FunctionSignature,
                 accessLevel: AccessLevel = .internal,

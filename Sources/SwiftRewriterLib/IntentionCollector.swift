@@ -380,6 +380,15 @@ public class IntentionCollector {
             return
         }
         
+        var knownAttributes: [KnownAttribute] = []
+        
+        if node.hasIbOutletSpecifier {
+            knownAttributes.append(KnownAttribute(name: "IBOutlet"))
+        }
+        if node.hasIbInspectableSpecifier {
+            knownAttributes.append(KnownAttribute(name: "IBInspectable"))
+        }
+        
         let swiftType: SwiftType = .anyObject
         
         var ownership: Ownership = .strong
@@ -412,17 +421,20 @@ public class IntentionCollector {
                                                     source: node)
             prop.isOptional = node.isOptionalProperty
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+            prop.knownAttributes = knownAttributes
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)
             
             delegate?.reportForLazyResolving(intention: prop)
         } else {
-            let prop = PropertyGenerationIntention(name: node.identifier?.name ?? "",
-                                                   storage: storage,
-                                                   attributes: attributes,
-                                                   source: node)
+            let prop =
+                PropertyGenerationIntention(name: node.identifier?.name ?? "",
+                                            storage: storage,
+                                            attributes: attributes,
+                                            source: node)
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
+            prop.knownAttributes = knownAttributes
             recordSourceHistory(intention: prop, node: node)
             
             ctx.addProperty(prop)

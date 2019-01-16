@@ -16,6 +16,9 @@ public class PropertyDefinition: ASTNode, InitializableNode {
     // For use in protocol methods only
     public var isOptionalProperty: Bool = false
     
+    public var hasIbOutletSpecifier: Bool = false
+    public var hasIbInspectableSpecifier: Bool = false
+    
     public required init(isInNonnullContext: Bool) {
         super.init(isInNonnullContext: isInNonnullContext)
     }
