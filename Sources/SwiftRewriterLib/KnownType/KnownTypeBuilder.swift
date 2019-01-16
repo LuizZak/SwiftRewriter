@@ -479,7 +479,7 @@ public struct KnownTypeBuilder {
     
     /// Returns a type generation intention built from this builder.
     /// Method and computed property bodies are left empty.
-    public func buildIntention() -> TypeGenerationIntention {
+    internal func buildIntention() -> TypeGenerationIntention {
         let typeIntention: TypeGenerationIntention
         
         switch type.kind {
