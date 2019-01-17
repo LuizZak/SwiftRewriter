@@ -7,6 +7,8 @@ class SwiftSyntaxProducer {
     private var indentationMode: TriviaPiece = .spaces(4)
     private var indentationLevel: Int = 0
     
+    private var extraLeading: Trivia?
+    
     init() {
         
     }
@@ -58,13 +60,40 @@ class SwiftSyntaxProducer {
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken())
             builder.useRightBrace(SyntaxFactory.makeRightBraceToken().withLeadingTrivia(.newlines(1)))
             
-            for prop in intention.properties {
+            // TODO: Probably shouldn't detect ivar containers like this.
+            if let ivarHolder = intention as? InstanceVariableContainerIntention {
+                iterateWriting(ivarHolder.instanceVariables) { ivar in
+                    builder.addDecl(generateInstanceVariable(ivar))
+                }
+            }
+            
+            iterateWriting(intention.properties) { prop in
                 builder.addDecl(generateProperty(prop))
             }
         }
     }
     
+    private func iterateWriting<T>(_ elements: [T], do block: (T) -> Void) {
+        for item in elements {
+            block(item)
+        }
+        
+        if !elements.isEmpty {
+            extraLeading = Trivia.newlines(1)
+        } else {
+            extraLeading = nil
+        }
+    }
+    
+    private func generateInstanceVariable(_ intention: InstanceVariableGenerationIntention) -> DeclSyntax {
+        return generateValueStorage(intention)
+    }
+    
     private func generateProperty(_ intention: PropertyGenerationIntention) -> DeclSyntax {
+        return generateValueStorage(intention)
+    }
+    
+    private func generateValueStorage(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
         return VariableDeclSyntax { builder in
             let letOrVar =
                 intention.isStatic
@@ -74,8 +103,9 @@ class SwiftSyntaxProducer {
             builder.useLetOrVarKeyword(
                 letOrVar
                     .withLeadingTrivia(Trivia.newlines(1) + indentation())
+                    .withExtraLeading(consuming: &extraLeading)
                     .withSpace()
-                )
+            )
             
             for attribute in intention.knownAttributes {
                 builder.addAttribute(makeAttributeSyntax(attribute))
@@ -310,6 +340,14 @@ private func makeNominalTypeSyntax(_ nominal: NominalSwiftType) -> SimpleTypeIde
 }
 
 private extension TokenSyntax {
+    func withExtraLeading(consuming trivia: inout Trivia?) -> TokenSyntax {
+        if let t = trivia {
+            trivia = t
+            return withLeadingTrivia(t + leadingTrivia)
+        }
+        
+        return self
+    }
     func withSpace(count: Int = 1) -> TokenSyntax {
         return withTrailingTrivia(.spaces(count))
     }

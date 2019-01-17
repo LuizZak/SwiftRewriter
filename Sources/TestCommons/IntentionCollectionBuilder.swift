@@ -370,6 +370,13 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
         
         return self
     }
+    
+    @discardableResult
+    public func setInitialValue(expression: Expression?) -> MemberBuilder {
+        targetMember.mode = .computed(FunctionBodyIntention(body: []))
+        
+        return self
+    }
 }
 
 public class TypeBuilder<T: TypeGenerationIntention> {

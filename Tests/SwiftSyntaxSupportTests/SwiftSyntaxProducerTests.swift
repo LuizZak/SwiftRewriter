@@ -53,13 +53,11 @@ class SwiftSyntaxProducerTests: XCTestCase {
             """)
     }
     
-    func testGenerateFileWithClassWithProperties() {
+    func testGenerateFileWithClassWithField() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createClass(withName: "A") { builder in
-                    builder
-                        .createProperty(named: "propertyA", type: .int)
-                        .createProperty(named: "propertyB", type: .int)
+                    builder.createInstanceVariable(named: "ivarA", type: .int)
                 }
         }
         let sut = SwiftSyntaxProducer()
@@ -70,8 +68,31 @@ class SwiftSyntaxProducerTests: XCTestCase {
             result,
             matches: """
             class A {
+                var ivarA: Int
+            }
+            """)
+    }
+    
+    func testGenerateFileWithClassWithFieldAndProperty() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder
+                        .createProperty(named: "propertyA", type: .int)
+                        .createInstanceVariable(named: "ivarA", type: .int)
+                }
+        }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            class A {
+                var ivarA: Int
+            
                 var propertyA: Int
-                var propertyB: Int
             }
             """)
     }
