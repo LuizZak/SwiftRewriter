@@ -52,6 +52,29 @@ class SwiftSyntaxProducerTests: XCTestCase {
             }
             """)
     }
+    
+    func testGenerateFileWithClassWithProperties() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder
+                        .createProperty(named: "propertyA", type: .int)
+                        .createProperty(named: "propertyB", type: .int)
+                }
+        }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            class A {
+                var propertyA: Int
+                var propertyB: Int
+            }
+            """)
+    }
 }
 
 extension SwiftSyntaxProducerTests {
