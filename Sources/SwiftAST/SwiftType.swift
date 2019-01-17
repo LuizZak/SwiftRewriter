@@ -746,6 +746,9 @@ extension TwoOrMore {
     public var first: T {
         return self[0]
     }
+    public var second: T {
+        return self[1]
+    }
     public var last: T {
         return self[count - 1]
     }

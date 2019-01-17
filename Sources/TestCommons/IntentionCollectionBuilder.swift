@@ -70,6 +70,16 @@ public class FileIntentionBuilder {
     var inNonnullContext = false
     var intention: FileGenerationIntention
     
+    public static func makeFileIntention(fileName: String,
+                                         _ builderBlock: (FileIntentionBuilder) -> Void) -> FileGenerationIntention {
+        
+        let builder = FileIntentionBuilder(fileNamed: fileName)
+        
+        builderBlock(builder)
+        
+        return builder.build()
+    }
+    
     public init(fileNamed name: String) {
         intention = FileGenerationIntention(sourcePath: name, targetPath: name)
     }
