@@ -202,6 +202,26 @@ extension SwiftSyntaxProducerTests {
     }
 }
 
+// MARK: - Protocol Generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithProtocol() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createProtocol(withName: "A")
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            protocol A {
+            }
+            """)
+    }
+}
+
 extension SwiftSyntaxProducerTests {
     func assertSwiftSyntax(_ node: Syntax, matches expected: String, line: Int = #line) {
         if node.description != expected {
