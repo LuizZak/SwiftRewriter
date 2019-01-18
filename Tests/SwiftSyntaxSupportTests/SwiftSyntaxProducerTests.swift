@@ -18,6 +18,31 @@ class SwiftSyntaxProducerTests: XCTestCase {
     
 }
 
+// MARK: - Function body generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithFunctionBody() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalFunction(withName: "a") { builder in
+                    builder.setBody([
+                        .return(nil)
+                    ])
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            func a() {
+                return
+            }
+            """)
+    }
+}
+
 // MARK: - Global function generation
 extension SwiftSyntaxProducerTests {
     func testGenerateFileWithGlobalFunction() {

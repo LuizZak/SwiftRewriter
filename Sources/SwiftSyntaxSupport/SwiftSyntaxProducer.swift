@@ -373,6 +373,11 @@ extension SwiftSyntaxProducer {
             
             extraLeading = .newlines(1)
             
+            indent()
+            defer {
+                deindent()
+            }
+            
             for stmt in body.body {
                 let stmtSyntax = generateStatement(stmt)
                 
