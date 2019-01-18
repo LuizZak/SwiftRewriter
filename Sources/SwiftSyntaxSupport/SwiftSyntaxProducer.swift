@@ -27,6 +27,14 @@ class SwiftSyntaxProducer {
     func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
             
+            iterateWithBlankLineAfter(file.globalFunctionIntentions) { function in
+                let syntax = generateFunction(function)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+            }
+            
             iterateWithBlankLineAfter(file.protocolIntentions) { _protocol in
                 let syntax = generateProtocol(_protocol)
                 
@@ -254,7 +262,12 @@ extension SwiftSyntaxProducer {
                 builder.useOptionalMark(SyntaxFactory.makeInfixQuestionMarkToken())
             }
             
-            builder.useParameters(generateParameterList(initializer.parameters))
+            builder.useParameters(
+                generateParameterList(
+                    initializer.parameters,
+                    addTrailingSpace: initializer.functionBody != nil
+                )
+            )
             
             if let body = initializer.functionBody {
                 builder.useBody(generateFunctionBody(body))
@@ -262,18 +275,67 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateMethod(_ method: FunctionIntention) -> FunctionDeclSyntax {
+    func generateFunction(_ function: SignatureFunctionIntention) -> FunctionDeclSyntax {
         return FunctionDeclSyntax { builder in
-            builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword))
+            builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).addingTrailingSpace())
+            builder.useSignature(
+                generateSignature(
+                    function.signature,
+                    addTrailingSpace: function.functionBody != nil
+                )
+            )
+            builder.useIdentifier(makeIdentifier(function.signature.name))
             
+            if function.signature.isMutating {
+                builder.addModifier(SyntaxFactory
+                    .makeDeclModifier(
+                        name: makeIdentifier("mutating").withTrailingSpace(),
+                        detail: nil
+                    )
+                )
+            }
+            if function.signature.isStatic {
+                builder.addModifier(SyntaxFactory
+                    .makeDeclModifier(
+                        name: SyntaxFactory.makeStaticKeyword().withTrailingSpace(),
+                        detail: nil
+                    )
+                )
+            }
             
+            if let body = function.functionBody {
+                builder.useBody(generateFunctionBody(body))
+            }
         }
     }
     
-    func generateParameterList(_ parameters: [ParameterSignature]) -> ParameterClauseSyntax {
+    func generateSignature(_ signature: FunctionSignature, addTrailingSpace: Bool) -> FunctionSignatureSyntax {
+        return FunctionSignatureSyntax { builder in
+            builder.useInput(generateParameterList(signature.parameters, addTrailingSpace: addTrailingSpace))
+            
+            if signature.returnType != .void {
+                builder.useOutput(generateReturn(signature.returnType))
+            }
+        }
+    }
+    
+    func generateReturn(_ ret: SwiftType) -> ReturnClauseSyntax {
+        return ReturnClauseSyntax { builder in
+            builder.useArrow(SyntaxFactory.makeArrowToken().addingTrailingSpace())
+            builder.useReturnType(makeTypeSyntax(ret))
+        }
+    }
+    
+    func generateParameterList(_ parameters: [ParameterSignature],
+                               addTrailingSpace: Bool) -> ParameterClauseSyntax {
         return ParameterClauseSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-            builder.useRightParen(SyntaxFactory.makeRightParenToken())
+            
+            if addTrailingSpace {
+                builder.useRightParen(SyntaxFactory.makeRightParenToken().addingTrailingSpace())
+            } else {
+                builder.useRightParen(SyntaxFactory.makeRightParenToken())
+            }
             
             iterateWithComma(parameters) { (item, hasComma) in
                 builder.addFunctionParameter(
@@ -287,6 +349,17 @@ extension SwiftSyntaxProducer {
                            withTrailingComma: Bool) -> FunctionParameterSyntax {
         
         return FunctionParameterSyntax { builder in
+            if parameter.label == parameter.name {
+                builder.useFirstName(makeIdentifier(parameter.name))
+            } else if parameter.label == nil {
+                builder.useFirstName(SyntaxFactory.makeWildcardKeyword())
+                builder.useSecondName(makeIdentifier(parameter.name))
+            }
+            
+            builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+            
+            builder.useType(makeTypeSyntax(parameter.type))
+            
             if withTrailingComma {
                 builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
             }
@@ -296,7 +369,7 @@ extension SwiftSyntaxProducer {
     func generateFunctionBody(_ body: FunctionBodyIntention) -> CodeBlockSyntax {
         return CodeBlockSyntax { builder in
             builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
-            builder.useRightBrace(SyntaxFactory.makeRightParenToken().onNewline())
+            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline())
             
             extraLeading = .newlines(1)
             
@@ -448,7 +521,7 @@ func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
             return makeTupleTypeSyntax(types)
             
         case .empty:
-            return SyntaxFactory.makeVoidTupleType()
+            return SyntaxFactory.makeTypeIdentifier("Void")
         }
         
     case .protocolComposition(let composition):

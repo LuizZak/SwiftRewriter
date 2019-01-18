@@ -313,7 +313,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
         XCTAssertEqual(files[0].globalFunctionIntentions.first?.signature,
                        FunctionSignature(name: "a", parameters: [],
                                          returnType: .typeName("A"),
-                                         isStatic: true)
+                                         isStatic: false)
                        )
         XCTAssertEqual(files[0].globalFunctionIntentions.first?.functionBody?.body,
                        [.expression(Expression.identifier("a").call())])
@@ -367,7 +367,7 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "a") { method in
-                            method.setIsStatic(true)
+                            method.signature.isStatic = true
                         }
                     }
                 }.build()
@@ -387,14 +387,14 @@ class FileTypeMergingIntentionPassTests: XCTestCase {
                     file.createClass(withName: "A") { builder in
                         builder
                             .createVoidMethod(named: "a") { method in
-                                method.setIsStatic(true)
+                                method.signature.isStatic = true
                             }
                             .setAsInterfaceSource()
                     }
                 }.createFile(named: "A.m") { file in
                     file.createClass(withName: "A") { builder in
                         builder.createVoidMethod(named: "a") { method in
-                            method.setIsStatic(true)
+                            method.signature.isStatic = true
                         }
                     }
                 }.build()
