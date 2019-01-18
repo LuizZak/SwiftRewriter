@@ -16,6 +16,10 @@ class SwiftSyntaxProducerTests: XCTestCase {
         assertSwiftSyntax(result, matches: "")
     }
     
+}
+
+// MARK: - Class Generation
+extension SwiftSyntaxProducerTests {
     func testGenerateFileWithEmptyClass() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
@@ -172,6 +176,27 @@ class SwiftSyntaxProducerTests: XCTestCase {
             matches: """
             class A {
                 init()
+            }
+            """)
+    }
+    
+}
+
+// MARK: - Struct Generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithStruct() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createStruct(withName: "A")
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            struct A {
             }
             """)
     }

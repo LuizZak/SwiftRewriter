@@ -26,18 +26,28 @@ class SwiftSyntaxProducer {
     
     func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
-            for cls in file.classIntentions {
+            
+            iterateWithBlankLineAfter(file.structIntentions) { _struct in
+                let syntax = generateStruct(_struct)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+            }
+            
+            iterateWithBlankLineAfter(file.classIntentions) { cls in
                 let syntax = generateClass(cls)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
                 builder.addCodeBlockItem(codeBlock)
-                
-                extraLeading = Trivia.newlines(1)
             }
         }
     }
-    
+}
+
+// MARK: - Class Generation
+extension SwiftSyntaxProducer {
     func generateClass(_ type: ClassGenerationIntention) -> ClassDeclSyntax {
         return ClassDeclSyntax { builder in
             builder.useClassKeyword(
@@ -104,7 +114,41 @@ class SwiftSyntaxProducer {
             }
         }
     }
-    
+}
+
+// MARK: - Struct generation
+extension SwiftSyntaxProducer {
+    func generateStruct(_ type: StructGenerationIntention) -> StructDeclSyntax {
+        return StructDeclSyntax { builder in
+            builder.useStructKeyword(
+                SyntaxFactory
+                    .makeStructKeyword()
+                    .withExtraLeading(consuming: &extraLeading)
+                    .withTrailingTrivia(.spaces(1)))
+            
+            let identifier = makeIdentifier(type.typeName)
+            
+            if let inheritanceClause = generateInheritanceClause(type) {
+                builder.useIdentifier(identifier)
+                
+                builder.useInheritanceClause(inheritanceClause)
+            } else {
+                builder.useIdentifier(identifier.withTrailingSpace())
+            }
+            
+            indent()
+            
+            let members = generateMembers(type)
+            
+            deindent()
+            
+            builder.useMembers(members)
+        }
+    }
+}
+
+// MARK: - Type member generation
+extension SwiftSyntaxProducer {
     func generateMembers(_ intention: TypeGenerationIntention) -> MemberDeclBlockSyntax {
         return MemberDeclBlockSyntax { builder in
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken())
@@ -238,6 +282,7 @@ extension SwiftSyntaxProducer {
     }
 }
 
+// MARK: - Utilities
 extension SwiftSyntaxProducer {
     
     func iterateWithBlankLineAfter<T>(_ elements: [T],
