@@ -32,6 +32,8 @@ class SwiftSyntaxProducer {
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
                 builder.addCodeBlockItem(codeBlock)
+                
+                extraLeading = Trivia.newlines(1)
             }
         }
     }
@@ -41,9 +43,18 @@ class SwiftSyntaxProducer {
             builder.useClassKeyword(
                 SyntaxFactory
                     .makeClassKeyword()
+                    .withExtraLeading(consuming: &extraLeading)
                     .withTrailingTrivia(.spaces(1)))
             
-            builder.useIdentifier(makeIdentifier(type.typeName).withTrailingTrivia(.spaces(1)))
+            let identifier = makeIdentifier(type.typeName)
+            
+            if let inheritanceClause = generateInheritanceClause(type) {
+                builder.useIdentifier(identifier)
+                
+                builder.useInheritanceClause(inheritanceClause)
+            } else {
+                builder.useIdentifier(identifier.withTrailingSpace())
+            }
             
             indent()
             
@@ -55,10 +66,49 @@ class SwiftSyntaxProducer {
         }
     }
     
+    public func generateInheritanceClause(_ type: KnownType) -> TypeInheritanceClauseSyntax? {
+        var inheritances: [String] = []
+        if let supertype = type.supertype?.asTypeName {
+            inheritances.append(supertype)
+        }
+        inheritances.append(contentsOf:
+            type.knownProtocolConformances.map { $0.protocolName }
+        )
+        
+        if inheritances.isEmpty {
+            return nil
+        }
+        
+        return TypeInheritanceClauseSyntax { builder in
+            builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+            
+            for (i, inheritance) in inheritances.enumerated() {
+                let type = InheritedTypeSyntax { builder in
+                    var identifier = makeIdentifier(inheritance)
+                    
+                    if i != inheritances.count - 1 {
+                        builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
+                    } else {
+                        identifier = identifier.withTrailingSpace()
+                    }
+                    
+                    builder.useTypeName(SyntaxFactory
+                        .makeSimpleTypeIdentifier(
+                            name: identifier,
+                            genericArgumentClause: nil
+                        )
+                    )
+                }
+                
+                builder.addInheritedType(type)
+            }
+        }
+    }
+    
     private func generateMembers(_ intention: TypeGenerationIntention) -> MemberDeclBlockSyntax {
         return MemberDeclBlockSyntax { builder in
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken())
-            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().withLeadingTrivia(.newlines(1)))
+            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline())
             
             // TODO: Probably shouldn't detect ivar containers like this.
             if let ivarHolder = intention as? InstanceVariableContainerIntention {
@@ -104,7 +154,7 @@ class SwiftSyntaxProducer {
                 letOrVar
                     .withLeadingTrivia(Trivia.newlines(1) + indentation())
                     .withExtraLeading(consuming: &extraLeading)
-                    .withSpace()
+                    .withTrailingSpace()
             )
             
             for attribute in intention.knownAttributes {
@@ -117,7 +167,7 @@ class SwiftSyntaxProducer {
                 })
                 
                 return builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
-                    builder.useColon(SyntaxFactory.makeColonToken().withSpace())
+                    builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
                     builder.useType(makeTypeSyntax(intention.type))
                 })
             })
@@ -348,7 +398,15 @@ private extension TokenSyntax {
         
         return self
     }
-    func withSpace(count: Int = 1) -> TokenSyntax {
+    func withLeadingSpace(count: Int = 1) -> TokenSyntax {
+        return withLeadingTrivia(.spaces(count))
+    }
+    
+    func withTrailingSpace(count: Int = 1) -> TokenSyntax {
         return withTrailingTrivia(.spaces(count))
+    }
+    
+    func onNewline() -> TokenSyntax {
+        return withLeadingTrivia(.newlines(1))
     }
 }

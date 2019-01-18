@@ -33,6 +33,65 @@ class SwiftSyntaxProducerTests: XCTestCase {
             """)
     }
     
+    func testGenerateFileWithEmptyClasses() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A")
+                builder.createClass(withName: "B")
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            class A {
+            }
+            class B {
+            }
+            """)
+    }
+    
+    func testGenerateFileWithClassWithInheritance() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.inherit(from: "Supertype")
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            class A: Supertype {
+            }
+            """)
+    }
+    
+    func testGenerateFileWithClassWithProtocolConformances() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.createConformance(protocolName: "ProtocolA")
+                    builder.createConformance(protocolName: "ProtocolB")
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assertSwiftSyntax(
+            result,
+            matches: """
+            class A: ProtocolA, ProtocolB {
+            }
+            """)
+    }
+    
     func testGenerateFileWithClassWithProperty() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
