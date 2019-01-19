@@ -3,13 +3,13 @@ import Intentions
 import SwiftAST
 import KnownType
 
-class SwiftSyntaxProducer {
+public class SwiftSyntaxProducer {
     var indentationMode: TriviaPiece = .spaces(4)
     var indentationLevel: Int = 0
     
     var extraLeading: Trivia?
     
-    init() {
+    public init() {
         
     }
     
@@ -31,8 +31,11 @@ class SwiftSyntaxProducer {
             extraLeading = trivia
         }
     }
-    
-    func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
+}
+
+// MARK: - Identation
+extension SwiftSyntaxProducer {
+    public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
             
             iterateWithBlankLineAfter(file.globalFunctionIntentions) { function in

@@ -41,13 +41,13 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    private func generateExpressions(_ stmt: ExpressionsStatement) -> [CodeBlockItemSyntax] {
+    func generateExpressions(_ stmt: ExpressionsStatement) -> [CodeBlockItemSyntax] {
         return stmt.expressions
             .map(generateExpression)
             .map { SyntaxFactory.makeCodeBlockItem(item: $0, semicolon: nil) }
     }
     
-    private func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
+    func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
         return ReturnStmtSyntax { builder in
             var returnToken = makeStartToken(SyntaxFactory.makeReturnKeyword)
             
@@ -60,7 +60,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    private func generateIfStmt(_ stmt: IfStatement) -> IfStmtSyntax {
+    func generateIfStmt(_ stmt: IfStatement) -> IfStmtSyntax {
         return IfStmtSyntax { builder in
             builder.useIfKeyword(makeStartToken(SyntaxFactory.makeIfKeyword).withTrailingSpace())
             
@@ -85,7 +85,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    private func generatePattern(_ pattern: Pattern) -> PatternSyntax {
+    func generatePattern(_ pattern: Pattern) -> PatternSyntax {
         switch pattern {
         case .identifier(let ident):
             return IdentifierPatternSyntax { $0.useIdentifier(makeIdentifier(ident)) }

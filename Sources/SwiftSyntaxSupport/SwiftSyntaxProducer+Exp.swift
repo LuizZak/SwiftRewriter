@@ -22,13 +22,13 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    private func generateIdentifier(_ identifier: IdentifierExpression) -> IdentifierExprSyntax {
+    func generateIdentifier(_ identifier: IdentifierExpression) -> IdentifierExprSyntax {
         return IdentifierExprSyntax { builder in
             builder.useIdentifier(prepareStartToken(makeIdentifier(identifier.identifier)))
         }
     }
     
-    private func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
+    func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
         let lhs = generateExpression(exp.lhs)
         extraLeading = .spaces(1)
         let op = generateOperator(exp.op, mode: .infix)
@@ -42,7 +42,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    private func generatePostfix(_ exp: PostfixExpression) -> ExprSyntax {
+    func generatePostfix(_ exp: PostfixExpression) -> ExprSyntax {
         let subExp = generateExpression(exp.exp)
         
         switch exp.op {
@@ -93,7 +93,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    private func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
+    func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
         switch constant.constant {
         case .boolean(let bool):
             let tokenFactory = bool ? SyntaxFactory.makeTrueKeyword : SyntaxFactory.makeFalseKeyword
@@ -138,7 +138,7 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    private func generateOperator(_ op: SwiftOperator, mode: OperatorMode) -> ExprSyntax {
+    func generateOperator(_ op: SwiftOperator, mode: OperatorMode) -> ExprSyntax {
         let producer: (SwiftOperator) -> ExprSyntax
         
         switch mode {
@@ -167,7 +167,7 @@ extension SwiftSyntaxProducer {
         return producer(op)
     }
     
-    private enum OperatorMode {
+    enum OperatorMode {
         case prefix(ExprSyntax)
         case infix
         case postfix(ExprSyntax)
