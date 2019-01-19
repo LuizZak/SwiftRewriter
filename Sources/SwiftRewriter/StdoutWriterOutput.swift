@@ -1,5 +1,6 @@
 import Foundation
 import SwiftRewriterLib
+import WriterTargetOutput
 import Console
 
 public class StdoutWriterOutput: WriterOutput {

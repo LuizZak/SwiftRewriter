@@ -1,4 +1,5 @@
 import SwiftAST
+import Intentions
 import SwiftRewriterLib
 
 public class ClassVisitingIntentionPass: IntentionPass {

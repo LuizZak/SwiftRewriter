@@ -4,6 +4,7 @@ import ObjcParser
 import ObjcParserAntlr
 @testable import SwiftRewriterLib
 import SwiftAST
+import WriterTargetOutput
 
 class SwiftStatementASTReaderTests: XCTestCase {
     var tokens: CommonTokenStream!

@@ -1,7 +1,9 @@
 import XCTest
 import ExpressionPasses
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import Intentions
+import SwiftRewriterLib
 import TestCommons
 
 class InitRewriterExpressionPassTests: ExpressionPassTestCase {

@@ -1,4 +1,5 @@
 import XCTest
+import Intentions
 import SwiftRewriterLib
 import IntentionPasses
 

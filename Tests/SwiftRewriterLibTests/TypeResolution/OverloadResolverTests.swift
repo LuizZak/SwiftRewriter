@@ -1,4 +1,6 @@
 import XCTest
+import SwiftAST
+import KnownType
 @testable import SwiftRewriterLib
 import SwiftAST
 

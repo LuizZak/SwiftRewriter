@@ -1,5 +1,6 @@
 import Foundation
 import SwiftAST
+import Intentions
 import Utils
 
 /// Handy class used to apply a series of `ASTRewriterPass` instances to

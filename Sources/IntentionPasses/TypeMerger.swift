@@ -1,5 +1,7 @@
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import Intentions
+import SwiftRewriterLib
 
 class TypeMerger {
     let typeSystem: TypeSystem

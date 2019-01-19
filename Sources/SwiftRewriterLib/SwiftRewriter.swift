@@ -2,6 +2,8 @@ import Foundation
 import GrammarModels
 import ObjcParser
 import SwiftAST
+import WriterTargetOutput
+import Intentions
 import Utils
 
 private typealias NonnullTokenRange = (start: Int, end: Int)
@@ -507,7 +509,7 @@ public final class SwiftRewriter {
         
         let fileIntent = FileGenerationIntention(sourcePath: source.sourceName(), targetPath: path)
         fileIntent.preprocessorDirectives = parser.preprocessorDirectives
-        fileIntent._index = index
+        fileIntent.index = index
         ctx.pushContext(fileIntent)
         
         let intentionCollector = IntentionCollector(delegate: collectorDelegate, context: ctx)

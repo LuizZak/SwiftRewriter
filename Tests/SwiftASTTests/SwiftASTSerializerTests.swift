@@ -1,6 +1,7 @@
 import XCTest
 
 import SwiftAST
+import WriterTargetOutput
 @testable import SwiftRewriterLib
 
 class SwiftASTSerializerTests: XCTestCase {

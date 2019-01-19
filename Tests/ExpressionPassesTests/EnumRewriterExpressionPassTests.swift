@@ -1,7 +1,8 @@
 import XCTest
 import TestCommons
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import SwiftRewriterLib
 import ExpressionPasses
 
 class EnumRewriterExpressionPassTests: ExpressionPassTestCase {

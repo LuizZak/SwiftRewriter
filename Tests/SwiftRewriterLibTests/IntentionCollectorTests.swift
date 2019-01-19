@@ -1,8 +1,9 @@
 import XCTest
+import SwiftAST
+import Intentions
 import SwiftRewriterLib
 import ObjcParser
 import GrammarModels
-import SwiftAST
 
 class IntentionCollectorTests: XCTestCase {
     private var file: FileGenerationIntention!

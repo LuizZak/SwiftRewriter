@@ -4,6 +4,7 @@ import ObjcParser
 import ExpressionPasses
 import IntentionPasses
 import GlobalsProviders
+import WriterTargetOutput
 
 class SingleFileTestBuilder {
     var test: XCTestCase

@@ -1,6 +1,8 @@
 import GrammarModels
 import ObjcParser
 import SwiftAST
+import KnownType
+import Intentions
 
 public protocol IntentionCollectorDelegate: class {
     func isNodeInNonnullContext(_ node: ASTNode) -> Bool

@@ -1,6 +1,7 @@
 import Foundation
-import SwiftRewriterLib
 import SwiftAST
+import Intentions
+import SwiftRewriterLib
 
 public class FileTypeMergingIntentionPass: IntentionPass {
     private let headerExtensions: [String] = [".h"]

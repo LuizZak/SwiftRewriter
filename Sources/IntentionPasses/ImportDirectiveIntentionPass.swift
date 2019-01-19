@@ -1,4 +1,6 @@
 import Foundation
+import SwiftAST
+import Intentions
 import SwiftRewriterLib
 import MiniLexer
 

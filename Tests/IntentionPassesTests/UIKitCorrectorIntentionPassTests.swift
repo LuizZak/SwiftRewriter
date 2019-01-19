@@ -1,5 +1,7 @@
 import XCTest
 import SwiftAST
+import KnownType
+import Intentions
 import SwiftRewriterLib
 import TestCommons
 import IntentionPasses

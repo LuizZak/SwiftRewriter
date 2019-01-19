@@ -1,6 +1,7 @@
 import XCTest
-import SwiftRewriterLib
 import SwiftAST
+import Intentions
+import SwiftRewriterLib
 import TestCommons
 
 class FunctionBodyQueueTests: XCTestCase {

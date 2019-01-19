@@ -1,5 +1,6 @@
 import Foundation
 import SwiftRewriterLib
+import WriterTargetOutput
 
 class FileDiskWriterOutput: WriterOutput {
     func createFile(path: String) throws -> FileOutput {

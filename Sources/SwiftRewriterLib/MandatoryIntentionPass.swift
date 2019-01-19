@@ -1,5 +1,6 @@
-import SwiftAST
 import Foundation
+import SwiftAST
+import Intentions
 
 // TODO: Detect indirect super-type calling (i.e. `[aVarWithSuperAssociatedWithinIt method]`)
 // on override detection code

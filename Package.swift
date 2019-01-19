@@ -51,23 +51,32 @@ let package = Package(
             name: "SwiftAST",
             dependencies: ["GrammarModels", "MiniLexer"]),
         .target(
+            name: "KnownType",
+            dependencies: ["SwiftAST", "WriterTargetOutput"]),
+        .target(
+            name: "Intentions",
+            dependencies: ["SwiftAST", "GrammarModels", "KnownType"]),
+        .target(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser",
-                           "TypeDefinitions", "Utils"]),
+                           "TypeDefinitions", "Utils", "Intentions",
+                           "KnownType", "WriterTargetOutput"]),
         .target(
             name: "Commons",
             dependencies: ["SwiftAST", "SwiftRewriterLib", "Utils"]),
         .target(
+            name: "WriterTargetOutput"),
+        .target(
             name: "IntentionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
-                           "MiniLexer"]),
+                           "MiniLexer", "Intentions"]),
         .target(
             name: "GlobalsProviders",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons"]),
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
-                           "TestCommons"]),
+                           "TestCommons", "Intentions"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["SwiftRewriterLib", "Utils", "MiniLexer"]),
@@ -105,13 +114,20 @@ let package = Package(
                            // to TestCommons and use that one, instead.
                            "SwiftRewriterLib"]),
         .testTarget(
+            name: "IntentionsTests",
+            dependencies: ["TestCommons", "SwiftAST", "Intentions"]),
+        .testTarget(
+            name: "KnownTypeTests",
+            dependencies: ["TestCommons", "SwiftAST", "KnownType", "WriterTargetOutput"]),
+        .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",
                            "ObjcParser", "ExpressionPasses", "IntentionPasses",
-                           "TestCommons", "GlobalsProviders"]),
+                           "TestCommons", "GlobalsProviders", "Intentions",
+                           "WriterTargetOutput"]),
         .testTarget(
             name: "CommonsTests",
-            dependencies: ["Commons", "SwiftAST", "SwiftRewriterLib"]),
+            dependencies: ["Commons", "SwiftAST", "KnownType", "SwiftRewriterLib"]),
         .testTarget(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",

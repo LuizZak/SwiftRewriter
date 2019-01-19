@@ -1,7 +1,8 @@
 import XCTest
-import SwiftAST
 import IntentionPasses
 import TestCommons
+import SwiftAST
+import Intentions
 import SwiftRewriterLib
 
 class InitAnalysisIntentionPassTests: XCTestCase {

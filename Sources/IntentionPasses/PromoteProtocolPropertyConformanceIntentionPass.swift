@@ -1,5 +1,7 @@
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import Intentions
+import SwiftRewriterLib
 
 /// Searches for matching property protocol conformance implementations in types
 /// and promotes them into getter or getter/setter property pairs.

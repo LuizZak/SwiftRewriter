@@ -1,4 +1,5 @@
 import SwiftAST
+import KnownType
 
 private let _codeScopeKey = "_codeScopeKey"
 private let _identifierDefinitionKey = "_identifierDefinitionKey"

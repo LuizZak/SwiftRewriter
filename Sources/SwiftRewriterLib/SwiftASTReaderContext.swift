@@ -1,4 +1,5 @@
 import SwiftAST
+import KnownType
 
 public final class SwiftASTReaderContext {
     private var localsStack: [[Local]] = [[]]

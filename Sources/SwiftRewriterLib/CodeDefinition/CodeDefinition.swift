@@ -1,4 +1,6 @@
 import SwiftAST
+import KnownType
+import Intentions
 
 /// Specifies a definition for a global function or variable, or a local variable
 /// of a function.

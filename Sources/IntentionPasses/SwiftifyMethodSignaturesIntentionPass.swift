@@ -1,5 +1,7 @@
-import SwiftRewriterLib
 import SwiftAST
+import KnownType
+import Intentions
+import SwiftRewriterLib
 
 // TODO: Move task of converting `init` methods to a separate intention pass.
 

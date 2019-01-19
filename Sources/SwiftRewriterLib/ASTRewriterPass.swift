@@ -1,4 +1,5 @@
 import SwiftAST
+import Intentions
 
 /// Context for an `ASTRewriterPass` execution.
 public struct ASTRewriterPassContext {

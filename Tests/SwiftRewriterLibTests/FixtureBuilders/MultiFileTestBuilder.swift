@@ -5,6 +5,7 @@ import ExpressionPasses
 import IntentionPasses
 import GlobalsProviders
 import Utils
+import WriterTargetOutput
 
 class MultiFileTestBuilder {
     typealias File = (path: String, source: String)

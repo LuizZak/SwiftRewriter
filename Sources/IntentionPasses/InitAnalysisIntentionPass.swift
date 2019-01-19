@@ -1,5 +1,6 @@
-import SwiftRewriterLib
 import SwiftAST
+import Intentions
+import SwiftRewriterLib
 
 // TODO: Also support failable init detection by inspecting `nullable` in the
 // return type of intializers in Objective-C.
