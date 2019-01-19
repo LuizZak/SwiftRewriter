@@ -24,6 +24,14 @@ class SwiftSyntaxProducer {
         indentationLevel -= 1
     }
     
+    func addExtraLeading(_ trivia: Trivia) {
+        if let lead = extraLeading {
+            extraLeading = lead + trivia
+        } else {
+            extraLeading = trivia
+        }
+    }
+    
     func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
             
@@ -66,6 +74,8 @@ class SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateClass(_ type: ClassGenerationIntention) -> ClassDeclSyntax {
         return ClassDeclSyntax { builder in
+            addExtraLeading(indentation())
+            
             builder.useClassKeyword(
                 makeStartToken(SyntaxFactory.makeClassKeyword).addingTrailingSpace())
             
@@ -133,6 +143,8 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateStruct(_ type: StructGenerationIntention) -> StructDeclSyntax {
         return StructDeclSyntax { builder in
+            addExtraLeading(indentation())
+            
             builder.useStructKeyword(
                 makeStartToken(SyntaxFactory.makeStructKeyword)
                     .addingTrailingSpace())
@@ -162,6 +174,8 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateProtocol(_ type: ProtocolGenerationIntention) -> ProtocolDeclSyntax {
         return ProtocolDeclSyntax.init { builder in
+            addExtraLeading(indentation())
+            
             builder.useProtocolKeyword(
                 makeStartToken(SyntaxFactory.makeProtocolKeyword).addingTrailingSpace())
             
@@ -176,12 +190,11 @@ extension SwiftSyntaxProducer {
             }
             
             indent()
+            defer {
+                deindent()
+            }
             
-            let members = generateMembers(type)
-            
-            deindent()
-            
-            builder.useMembers(members)
+            builder.useMembers(generateMembers(type))
         }
     }
 }
@@ -193,20 +206,26 @@ extension SwiftSyntaxProducer {
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken())
             builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline())
             
-            extraLeading = .newlines(1)
+            addExtraLeading(.newlines(1))
             
             // TODO: Probably shouldn't detect ivar containers like this.
             if let ivarHolder = intention as? InstanceVariableContainerIntention {
                 iterateWithBlankLineAfter(ivarHolder.instanceVariables) { ivar in
+                    addExtraLeading(indentation())
+                    
                     builder.addDecl(generateInstanceVariable(ivar))
                 }
             }
             
             iterateWithBlankLineAfter(intention.properties) { prop in
+                addExtraLeading(indentation())
+                
                 builder.addDecl(generateProperty(prop))
             }
             
             iterateWithBlankLineAfter(intention.constructors) { _init in
+                addExtraLeading(indentation())
+                
                 builder.addDecl(generateInitializer(_init))
             }
         }
@@ -226,16 +245,16 @@ extension SwiftSyntaxProducer {
     
     func generateValueStorage(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
         return VariableDeclSyntax { builder in
+            for attribute in intention.knownAttributes {
+                builder.addAttribute(generateAttributeSyntax(attribute))
+            }
+            
             let letOrVar =
                 intention.isStatic
                     ? SyntaxFactory.makeLetKeyword
                     : SyntaxFactory.makeVarKeyword
             
             builder.useLetOrVarKeyword(makeStartToken(letOrVar).addingTrailingSpace())
-            
-            for attribute in intention.knownAttributes {
-                builder.addAttribute(makeAttributeSyntax(attribute))
-            }
             
             builder.addPatternBinding(PatternBindingSyntax { builder in
                 builder.usePattern(IdentifierPatternSyntax { builder in
@@ -262,12 +281,7 @@ extension SwiftSyntaxProducer {
                 builder.useOptionalMark(SyntaxFactory.makeInfixQuestionMarkToken())
             }
             
-            builder.useParameters(
-                generateParameterList(
-                    initializer.parameters,
-                    addTrailingSpace: initializer.functionBody != nil
-                )
-            )
+            builder.useParameters(generateParameterList(initializer.parameters))
             
             if let body = initializer.functionBody {
                 builder.useBody(generateFunctionBody(body))
@@ -278,12 +292,7 @@ extension SwiftSyntaxProducer {
     func generateFunction(_ function: SignatureFunctionIntention) -> FunctionDeclSyntax {
         return FunctionDeclSyntax { builder in
             builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).addingTrailingSpace())
-            builder.useSignature(
-                generateSignature(
-                    function.signature,
-                    addTrailingSpace: function.functionBody != nil
-                )
-            )
+            builder.useSignature(generateSignature(function.signature))
             builder.useIdentifier(makeIdentifier(function.signature.name))
             
             if function.signature.isMutating {
@@ -309,9 +318,9 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateSignature(_ signature: FunctionSignature, addTrailingSpace: Bool) -> FunctionSignatureSyntax {
+    func generateSignature(_ signature: FunctionSignature) -> FunctionSignatureSyntax {
         return FunctionSignatureSyntax { builder in
-            builder.useInput(generateParameterList(signature.parameters, addTrailingSpace: addTrailingSpace))
+            builder.useInput(generateParameterList(signature.parameters))
             
             if signature.returnType != .void {
                 builder.useOutput(generateReturn(signature.returnType))
@@ -326,16 +335,10 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateParameterList(_ parameters: [ParameterSignature],
-                               addTrailingSpace: Bool) -> ParameterClauseSyntax {
+    func generateParameterList(_ parameters: [ParameterSignature]) -> ParameterClauseSyntax {
         return ParameterClauseSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-            
-            if addTrailingSpace {
-                builder.useRightParen(SyntaxFactory.makeRightParenToken().addingTrailingSpace())
-            } else {
-                builder.useRightParen(SyntaxFactory.makeRightParenToken())
-            }
+            builder.useRightParen(SyntaxFactory.makeRightParenToken())
             
             iterateWithComma(parameters) { (item, hasComma) in
                 builder.addFunctionParameter(
@@ -350,9 +353,9 @@ extension SwiftSyntaxProducer {
         
         return FunctionParameterSyntax { builder in
             if parameter.label == parameter.name {
-                builder.useFirstName(makeIdentifier(parameter.name))
+                builder.useFirstName(prepareStartToken(makeIdentifier(parameter.name)))
             } else if parameter.label == nil {
-                builder.useFirstName(SyntaxFactory.makeWildcardKeyword())
+                builder.useFirstName(prepareStartToken(SyntaxFactory.makeWildcardKeyword()))
                 builder.useSecondName(makeIdentifier(parameter.name))
             }
             
@@ -367,25 +370,20 @@ extension SwiftSyntaxProducer {
     }
     
     func generateFunctionBody(_ body: FunctionBodyIntention) -> CodeBlockSyntax {
-        return CodeBlockSyntax { builder in
-            builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
-            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline())
-            
-            extraLeading = .newlines(1)
-            
-            indent()
-            defer {
-                deindent()
-            }
-            
-            for stmt in body.body {
-                let stmtSyntax = generateStatement(stmt)
-                
-                for item in stmtSyntax {
-                    builder.addCodeBlockItem(item)
-                }
-            }
-        }
+        return generateCompound(body.body)
+    }
+    
+    func generateAttributeListSyntax<S: Sequence>(_ attributes: S) -> AttributeListSyntax where S.Element == KnownAttribute {
+        return SyntaxFactory.makeAttributeList(attributes.map(generateAttributeSyntax))
+    }
+    
+    func generateAttributeSyntax(_ attribute: KnownAttribute) -> AttributeSyntax {
+        return SyntaxFactory
+            .makeAttribute(
+                atSignToken: prepareStartToken(SyntaxFactory.makeAtSignToken()),
+                attributeName: makeIdentifier(attribute.name),
+                balancedTokens: SyntaxFactory.makeTokenList(attribute.parameters.map { [SyntaxFactory.makeIdentifier($0)] } ?? [])
+        )
     }
 }
 
@@ -393,7 +391,11 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     
     func makeStartToken(_ builder: (_ leading: Trivia, _ trailing: Trivia) -> TokenSyntax) -> TokenSyntax {
-        return builder([], []).withLeadingTrivia(indentation()).withExtraLeading(consuming: &extraLeading)
+        return prepareStartToken(builder([], []))
+    }
+    
+    func prepareStartToken(_ token: TokenSyntax) -> TokenSyntax {
+        return token.withExtraLeading(consuming: &extraLeading)
     }
     
     func iterateWithBlankLineAfter<T>(_ elements: [T],
@@ -405,7 +407,7 @@ extension SwiftSyntaxProducer {
         }
         
         if !elements.isEmpty {
-            extraLeading = postSeparator
+            addExtraLeading(postSeparator)
         }
     }
     
@@ -419,22 +421,9 @@ extension SwiftSyntaxProducer {
     }
 }
 
-// MARK: - General
+// MARK: - General/commons
 func makeIdentifier(_ identifier: String) -> TokenSyntax {
     return SyntaxFactory.makeIdentifier(identifier)
-}
-
-func makeAttributeListSyntax<S: Sequence>(_ attributes: S) -> AttributeListSyntax where S.Element == KnownAttribute {
-    return SyntaxFactory.makeAttributeList(attributes.map(makeAttributeSyntax))
-}
-
-func makeAttributeSyntax(_ attribute: KnownAttribute) -> AttributeSyntax {
-    return SyntaxFactory
-        .makeAttribute(
-            atSignToken: SyntaxFactory.makeAtSignToken(),
-            attributeName: makeIdentifier(attribute.name),
-            balancedTokens: SyntaxFactory.makeTokenList(attribute.parameters.map { [SyntaxFactory.makeIdentifier($0)] } ?? [])
-        )
 }
 
 func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
@@ -651,11 +640,19 @@ extension TokenSyntax {
     }
     
     func addingLeadingSpace(count: Int = 1) -> TokenSyntax {
-        return withLeadingTrivia(.spaces(count) + leadingTrivia)
+        return addingLeadingTrivia(.spaces(count))
     }
     
     func addingTrailingSpace(count: Int = 1) -> TokenSyntax {
-        return withTrailingTrivia(.spaces(count) + trailingTrivia)
+        return addingTrailingTrivia(.spaces(count))
+    }
+    
+    func addingLeadingTrivia(_ trivia: Trivia) -> TokenSyntax {
+        return withLeadingTrivia(leadingTrivia + trivia)
+    }
+    
+    func addingTrailingTrivia(_ trivia: Trivia) -> TokenSyntax {
+        return withTrailingTrivia(trailingTrivia + trivia)
     }
     
     func onNewline() -> TokenSyntax {

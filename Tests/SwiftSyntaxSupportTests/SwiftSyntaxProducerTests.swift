@@ -27,7 +27,7 @@ extension SwiftSyntaxProducerTests {
                 builder.createGlobalFunction(withName: "a") { builder in
                     builder.setBody([
                         Statement.if(
-                            .constant(true),
+                            Expression.identifier("abc").binary(op: .equals, rhs: .constant(true)),
                             body: [
                                 .expression(Expression
                                     .identifier("print")
@@ -48,7 +48,7 @@ extension SwiftSyntaxProducerTests {
             result,
             matches: """
             func a() {
-                if true {
+                if abc == true {
                     print("Hello,", "World!")
                 }
                 return
