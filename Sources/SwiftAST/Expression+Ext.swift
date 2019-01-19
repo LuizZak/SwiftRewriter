@@ -18,6 +18,34 @@ public protocol ExpressionPostfixBuildable {
     func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression
 }
 
+extension ExpressionPostfixBuildable {
+    public func call() -> PostfixExpression {
+        return call([] as [FunctionArgument], type: nil, callableSignature: nil)
+    }
+    
+    public func call(_ arguments: [FunctionArgument]) -> PostfixExpression {
+        return call(arguments, type: nil, callableSignature: nil)
+    }
+    
+    public func call(_ unlabeledArguments: [Expression]) -> PostfixExpression {
+        return call(unlabeledArguments, type: nil, callableSignature: nil)
+    }
+    
+    public func call(_ unlabeledArguments: [Expression],
+                     callableSignature: SwiftType?) -> PostfixExpression {
+        
+        return call(unlabeledArguments, type: nil, callableSignature: callableSignature)
+    }
+    
+    public func dot(_ member: String) -> PostfixExpression {
+        return dot(member, type: nil)
+    }
+    
+    public func sub(_ exp: Expression) -> PostfixExpression {
+        return sub(exp, type: nil)
+    }
+}
+
 public extension ExpressionPostfixBuildable {
     public func call(_ arguments: [FunctionArgument],
                      type: SwiftType?,
@@ -61,32 +89,6 @@ public extension ExpressionPostfixBuildable {
 
 extension Expression: ExpressionPostfixBuildable {
     public var expressionToBuild: Expression { return self }
-    
-    public func call() -> PostfixExpression {
-        return call([] as [FunctionArgument], type: nil, callableSignature: nil)
-    }
-    
-    public func call(_ arguments: [FunctionArgument]) -> PostfixExpression {
-        return call(arguments, type: nil, callableSignature: nil)
-    }
-    
-    public func call(_ unlabeledArguments: [Expression]) -> PostfixExpression {
-        return call(unlabeledArguments, type: nil, callableSignature: nil)
-    }
-    
-    public func call(_ unlabeledArguments: [Expression],
-                     callableSignature: SwiftType?) -> PostfixExpression {
-        
-        return call(unlabeledArguments, type: nil, callableSignature: callableSignature)
-    }
-    
-    public func dot(_ member: String) -> PostfixExpression {
-        return dot(member, type: nil)
-    }
-    
-    public func sub(_ exp: Expression) -> PostfixExpression {
-        return sub(exp, type: nil)
-    }
 }
 
 extension Expression {
