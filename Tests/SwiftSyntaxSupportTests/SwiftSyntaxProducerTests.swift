@@ -6,7 +6,7 @@ import Intentions
 import TestCommons
 import Utils
 
-class SwiftSyntaxProducerTests: XCTestCase {
+class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
     
     func testGenerateEmptyFile() {
         let file = FileGenerationIntention(sourcePath: "", targetPath: "")
@@ -14,7 +14,7 @@ class SwiftSyntaxProducerTests: XCTestCase {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(result, matches: "")
+        assert(result, matches: "")
     }
     
 }
@@ -44,7 +44,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             func a() {
@@ -73,7 +73,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             func a(test: Int) {
@@ -93,7 +93,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A {
@@ -111,7 +111,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A {
@@ -132,7 +132,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A: Supertype {
@@ -152,7 +152,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A: ProtocolA, ProtocolB {
@@ -171,7 +171,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A {
@@ -191,7 +191,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A {
@@ -213,7 +213,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A {
@@ -235,7 +235,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             class A {
@@ -257,7 +257,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             struct A {
@@ -277,39 +277,11 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assertSwiftSyntax(
+        assert(
             result,
             matches: """
             protocol A {
             }
             """)
-    }
-}
-
-// MARK: - Assertions
-extension SwiftSyntaxProducerTests {
-    func assertSwiftSyntax(_ node: Syntax, matches expected: String, line: Int = #line) {
-        if node.description != expected {
-            let diff = node.description.makeDifferenceMarkString(against: expected)
-            
-            recordFailure(
-                withDescription: """
-                Expected to produce file matching:
-                
-                \(expected)
-                
-                But found:
-                
-                \(node.description)
-                
-                Diff:
-                
-                \(diff)
-                """,
-                inFile: #file,
-                atLine: line,
-                expected: true
-            )
-        }
     }
 }

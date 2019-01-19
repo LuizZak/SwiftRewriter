@@ -117,8 +117,11 @@ extension Expression: ExpressionPostfixBuildable {
     }
     
     /// Creates a type-cast expression with this expression
-    public func casted(to type: SwiftType) -> CastExpression {
-        return .cast(expressionToBuild, type: type)
+    public func casted(to type: SwiftType, optional: Bool = false) -> CastExpression {
+        let exp = Expression.cast(expressionToBuild, type: type)
+        exp.isOptionalCast = optional
+        
+        return exp
     }
     
     /// Begins an optional postfix creation from this expression.

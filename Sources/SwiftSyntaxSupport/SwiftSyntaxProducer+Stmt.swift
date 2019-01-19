@@ -81,6 +81,9 @@ extension SwiftSyntaxProducer {
         case is CompoundStatement:
             fatalError("Use generateCompound(_:) to generate syntaxes for compound statements")
             
+        case is UnknownStatement:
+            return [{ SyntaxFactory.makeBlankUnknownStmt().inCodeBlock() }]
+            
         default:
             return [{ SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
         }

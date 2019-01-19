@@ -6,7 +6,7 @@ import Intentions
 import TestCommons
 import Utils
 
-class SwiftSyntaxProducer_StmtTests: XCTestCase {
+class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     
     func testExpressions() {
         let stmt = Statement.expressions([.identifier("foo"), .identifier("bar")])
@@ -390,59 +390,11 @@ class SwiftSyntaxProducer_StmtTests: XCTestCase {
                 }
                 """)
     }
-}
-
-// MARK: - Assertions
-private extension SwiftSyntaxProducer_StmtTests {
-    func assert<T: Statement, S: Syntax>(_ stmt: T, producer: (SwiftSyntaxProducer) -> (T) -> S, matches expected: String, line: Int = #line) {
-        let syntax = producer(SwiftSyntaxProducer())(stmt)
-        
-        if syntax.description != expected {
-            let diff = syntax.description.makeDifferenceMarkString(against: expected)
-            
-            recordFailure(
-                withDescription: """
-                Expected to produce file matching:
-                
-                \(expected)
-                
-                But found:
-                
-                \(syntax.description)
-                
-                Diff:
-                
-                \(diff)
-                """,
-                inFile: #file,
-                atLine: line,
-                expected: true
-            )
-        }
-    }
     
-    func assert(_ syntax: Syntax, matches expected: String, line: Int = #line) {
-        if syntax.description != expected {
-            let diff = syntax.description.makeDifferenceMarkString(against: expected)
-            
-            recordFailure(
-                withDescription: """
-                Expected to produce file matching:
-                
-                \(expected)
-                
-                But found:
-                
-                \(syntax.description)
-                
-                Diff:
-                
-                \(diff)
-                """,
-                inFile: #file,
-                atLine: line,
-                expected: true
-            )
-        }
+    func testUnknownStatement() {
+        let stmt = Statement.unknown(UnknownASTContext(context: "abc"))
+        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        
+        assert(syntaxes[0](), matches: "")
     }
 }
