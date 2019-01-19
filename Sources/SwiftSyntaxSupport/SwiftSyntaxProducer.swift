@@ -381,10 +381,9 @@ extension SwiftSyntaxProducer {
             for stmt in body.body {
                 let stmtSyntax = generateStatement(stmt)
                 
-                builder.addCodeBlockItem(
-                    SyntaxFactory
-                        .makeCodeBlockItem(item: stmtSyntax, semicolon: nil)
-                )
+                for item in stmtSyntax {
+                    builder.addCodeBlockItem(item)
+                }
             }
         }
     }
