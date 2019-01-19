@@ -231,6 +231,12 @@ extension SwiftSyntaxProducer {
                 
                 builder.addDecl(generateInitializer(_init))
             }
+            
+            iterateWithBlankLineAfter(intention.methods) { method in
+                addExtraLeading(indentation())
+                
+                builder.addDecl(generateFunction(method))
+            }
         }
     }
 }
@@ -375,7 +381,7 @@ extension SwiftSyntaxProducer {
             if parameter.label == parameter.name {
                 builder.useFirstName(prepareStartToken(makeIdentifier(parameter.name)))
             } else if parameter.label == nil {
-                builder.useFirstName(prepareStartToken(SyntaxFactory.makeWildcardKeyword()))
+                builder.useFirstName(prepareStartToken(SyntaxFactory.makeWildcardKeyword()).withTrailingSpace())
                 builder.useSecondName(makeIdentifier(parameter.name))
             }
             

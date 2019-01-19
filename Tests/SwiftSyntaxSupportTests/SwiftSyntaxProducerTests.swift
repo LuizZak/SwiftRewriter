@@ -244,6 +244,27 @@ extension SwiftSyntaxProducerTests {
             """)
     }
     
+    func testGenerateFileWithClassWithMethod() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.createMethod("foo(_ a: Bar)")
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            class A {
+                func foo(_ a: Bar) {
+                }
+            }
+            """)
+    }
+    
 }
 
 // MARK: - Struct Generation
