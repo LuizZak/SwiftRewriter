@@ -239,21 +239,31 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     
     func generateInstanceVariable(_ intention: InstanceVariableGenerationIntention) -> DeclSyntax {
-        return generateValueStorage(intention)
+        return generateVariableDecl(intention)
     }
     
     func generateProperty(_ intention: PropertyGenerationIntention) -> DeclSyntax {
-        return generateValueStorage(intention)
+        return generateVariableDecl(intention)
     }
     
-    func generateValueStorage(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
+    func generateVariableDecl(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
+        return generateVariableDecl(name: intention.name,
+                                    storage: intention.storage,
+                                    attributes: intention.knownAttributes)
+    }
+    
+    func generateVariableDecl(name: String,
+                              storage: ValueStorage,
+                              attributes: [KnownAttribute],
+                              initialization: Expression? = nil) -> VariableDeclSyntax {
+        
         return VariableDeclSyntax { builder in
-            for attribute in intention.knownAttributes {
+            for attribute in attributes {
                 builder.addAttribute(generateAttributeSyntax(attribute))
             }
             
             let letOrVar =
-                intention.isStatic
+                storage.isConstant
                     ? SyntaxFactory.makeLetKeyword
                     : SyntaxFactory.makeVarKeyword
             
@@ -261,13 +271,20 @@ extension SwiftSyntaxProducer {
             
             builder.addPatternBinding(PatternBindingSyntax { builder in
                 builder.usePattern(IdentifierPatternSyntax { builder in
-                    builder.useIdentifier(makeIdentifier(intention.name))
+                    builder.useIdentifier(makeIdentifier(name))
                 })
                 
-                return builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
+                builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
                     builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                    builder.useType(makeTypeSyntax(intention.type))
+                    builder.useType(makeTypeSyntax(storage.type))
                 })
+                
+                if let initialization = initialization {
+                    builder.useInitializer(InitializerClauseSyntax { builder in
+                        builder.useEqual(SyntaxFactory.makeEqualToken().withLeadingSpace().withTrailingSpace())
+                        builder.useValue(generateExpression(initialization))
+                    })
+                }
             })
         }
     }

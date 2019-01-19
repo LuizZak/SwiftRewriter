@@ -77,10 +77,42 @@ public extension Statement {
 /// A variable declaration statement
 public struct StatementVariableDeclaration: Codable, Equatable {
     public var identifier: String
-    public var type: SwiftType
-    public var ownership: Ownership
-    public var isConstant: Bool
+    public var storage: ValueStorage
     public var initialization: Expression?
+    
+    public var type: SwiftType {
+        get {
+            return storage.type
+        }
+        set {
+            storage.type = newValue
+        }
+    }
+    public var ownership: Ownership {
+        get {
+            return storage.ownership
+        }
+        set {
+            storage.ownership = newValue
+        }
+    }
+    public var isConstant: Bool {
+        get {
+            return storage.isConstant
+        }
+        set {
+            storage.isConstant = newValue
+        }
+    }
+    
+    public init(identifier: String,
+                storage: ValueStorage,
+                initialization: Expression? = nil) {
+        
+        self.identifier = identifier
+        self.storage = storage
+        self.initialization = initialization
+    }
     
     public init(identifier: String,
                 type: SwiftType,
@@ -88,11 +120,11 @@ public struct StatementVariableDeclaration: Codable, Equatable {
                 isConstant: Bool = false,
                 initialization: Expression? = nil) {
         
-        self.identifier = identifier
-        self.type = type
-        self.ownership = ownership
-        self.isConstant = isConstant
-        self.initialization = initialization
+        self.init(identifier: identifier,
+                  storage: ValueStorage(type: type,
+                                        ownership: ownership,
+                                        isConstant: isConstant),
+                  initialization: initialization)
     }
     
     public init(from decoder: Decoder) throws {
@@ -100,9 +132,7 @@ public struct StatementVariableDeclaration: Codable, Equatable {
         
         
         try self.identifier = container.decode(String.self, forKey: .identifier)
-        try self.type = container.decode(SwiftType.self, forKey: .type)
-        try self.ownership = container.decode(Ownership.self, forKey: .ownership)
-        try self.isConstant = container.decode(Bool.self, forKey: .isConstant)
+        try self.storage = container.decode(ValueStorage.self, forKey: .storage)
         try self.initialization = container.decodeExpressionIfPresent(forKey: .initialization)
         
     }
@@ -117,18 +147,14 @@ public struct StatementVariableDeclaration: Codable, Equatable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         
         try container.encode(identifier, forKey: .identifier)
-        try container.encode(type, forKey: .type)
-        try container.encode(ownership, forKey: .ownership)
-        try container.encode(isConstant, forKey: .isConstant)
+        try container.encode(storage, forKey: .storage)
         try container.encodeExpressionIfPresent(initialization, forKey: .initialization)
         
     }
     
     private enum CodingKeys: String, CodingKey {
         case identifier
-        case type
-        case ownership
-        case isConstant
+        case storage
         case initialization
     }
 }
