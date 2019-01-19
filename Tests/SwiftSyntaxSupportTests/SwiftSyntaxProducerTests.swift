@@ -286,6 +286,7 @@ extension SwiftSyntaxProducerTests {
     }
 }
 
+// MARK: - Assertions
 extension SwiftSyntaxProducerTests {
     func assertSwiftSyntax(_ node: Syntax, matches expected: String, line: Int = #line) {
         if node.description != expected {

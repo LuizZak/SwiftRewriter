@@ -79,7 +79,7 @@ extension SwiftSyntaxProducer {
             builder.useBody(generateCompound(stmt.body))
             
             if let _else = stmt.elseBody {
-                builder.useElseKeyword(SyntaxFactory.makeElseKeyword())
+                builder.useElseKeyword(makeStartToken(SyntaxFactory.makeElseKeyword).addingLeadingSpace())
                 builder.useElseBody(generateCompound(_else))
             }
         }
