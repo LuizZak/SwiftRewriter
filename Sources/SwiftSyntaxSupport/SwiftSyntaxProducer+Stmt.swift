@@ -13,10 +13,6 @@ extension SwiftSyntaxProducer {
         }
     }
     
-    func generateExpression(_ expression: Expression) -> ExprSyntax {
-        return SyntaxFactory.makeBlankAsExpr()
-    }
-    
     func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
         return ReturnStmtSyntax { builder in
             var returnToken = makeStartToken(SyntaxFactory.makeReturnKeyword)

@@ -1,5 +1,6 @@
 import XCTest
 import SwiftSyntax
+import SwiftAST
 @testable import SwiftSyntaxSupport
 import Intentions
 import TestCommons
@@ -25,6 +26,16 @@ extension SwiftSyntaxProducerTests {
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createGlobalFunction(withName: "a") { builder in
                     builder.setBody([
+                        Statement.if(
+                            .constant(true),
+                            body: [
+                                .expression(Expression
+                                    .identifier("print")
+                                    .call([.constant("Hello,"),
+                                           .constant("World!")]))
+                            ],
+                            else: nil
+                        ),
                         .return(nil)
                     ])
                 }
@@ -37,6 +48,9 @@ extension SwiftSyntaxProducerTests {
             result,
             matches: """
             func a() {
+                if true {
+                    print("Hello,", "World!")
+                }
                 return
             }
             """)
