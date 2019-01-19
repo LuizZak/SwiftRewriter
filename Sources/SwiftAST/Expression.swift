@@ -196,8 +196,8 @@ public extension Expression {
         return IdentifierExpression(identifier: ident)
     }
     
-    public static func cast(_ exp: Expression, type: SwiftType) -> CastExpression {
-        return CastExpression(exp: exp, type: type)
+    public static func cast(_ exp: Expression, type: SwiftType, isOptionalCast: Bool = true) -> CastExpression {
+        return CastExpression(exp: exp, type: type, isOptionalCast: isOptionalCast)
     }
     
     public static func arrayLiteral(_ array: [Expression]) -> ArrayLiteralExpression {

@@ -201,7 +201,7 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
     
     func testCast() {
         assert(
-            Expression.identifier("foo").casted(to: .int),
+            Expression.identifier("foo").casted(to: .int, optional: false),
             producer: SwiftSyntaxProducer.generateCast,
             matches: "foo as Int")
     }

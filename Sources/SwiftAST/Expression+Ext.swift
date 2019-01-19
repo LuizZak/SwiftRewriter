@@ -59,7 +59,9 @@ public extension ExpressionPostfixBuildable {
     }
 }
 
-public extension ExpressionPostfixBuildable {
+extension Expression: ExpressionPostfixBuildable {
+    public var expressionToBuild: Expression { return self }
+    
     public func call() -> PostfixExpression {
         return call([] as [FunctionArgument], type: nil, callableSignature: nil)
     }
@@ -88,22 +90,6 @@ public extension ExpressionPostfixBuildable {
 }
 
 extension Expression {
-    public func typed(_ type: SwiftType?) -> Self {
-        resolvedType = type
-        
-        return self
-    }
-    
-    public func typed(expected: SwiftType?) -> Self {
-        expectedType = expected
-        
-        return self
-    }
-}
-
-extension Expression: ExpressionPostfixBuildable {
-    public var expressionToBuild: Expression { return self }
-    
     /// Creates a BinaryExpression between this expression and a right-hand-side
     /// expression.
     public func binary(op: SwiftOperator, rhs: Expression) -> BinaryExpression {
@@ -117,9 +103,8 @@ extension Expression: ExpressionPostfixBuildable {
     }
     
     /// Creates a type-cast expression with this expression
-    public func casted(to type: SwiftType, optional: Bool = false) -> CastExpression {
-        let exp = Expression.cast(expressionToBuild, type: type)
-        exp.isOptionalCast = optional
+    public func casted(to type: SwiftType, optional: Bool = true) -> CastExpression {
+        let exp = Expression.cast(expressionToBuild, type: type, isOptionalCast: optional)
         
         return exp
     }
@@ -132,6 +117,20 @@ extension Expression: ExpressionPostfixBuildable {
     /// Begins a force-unwrap optional postfix creation from this expression.
     public func forceUnwrap() -> OptionalAccessPostfixBuilder {
         return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: true)
+    }
+}
+
+extension Expression {
+    public func typed(_ type: SwiftType?) -> Self {
+        resolvedType = type
+        
+        return self
+    }
+    
+    public func typed(expected: SwiftType?) -> Self {
+        expectedType = expected
+        
+        return self
     }
 }
 
