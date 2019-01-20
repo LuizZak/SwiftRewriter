@@ -75,7 +75,11 @@ public class SwiftSyntaxProducer {
 
 // MARK: - Identation
 extension SwiftSyntaxProducer {
-    func addHistoryTrackingLeading(_ intention: IntentionProtocol) {
+    func addHistoryTrackingLeadingIfEnabled(_ intention: IntentionProtocol) {
+        if !settings.printIntentionHistory {
+            return
+        }
+        
         for entry in intention.history.entries {
             addExtraLeading(.lineComment("// \(entry.summary)"))
             addExtraLeading(.newlines(1) + indentation())
@@ -133,7 +137,7 @@ extension SwiftSyntaxProducer {
 // MARK: - Class Generation
 extension SwiftSyntaxProducer {
     func generateClass(_ intention: ClassGenerationIntention) -> ClassDeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return ClassDeclSyntax { builder in
             addExtraLeading(indentation())
@@ -204,7 +208,7 @@ extension SwiftSyntaxProducer {
 // MARK: - Struct generation
 extension SwiftSyntaxProducer {
     func generateStruct(_ intention: StructGenerationIntention) -> StructDeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return StructDeclSyntax { builder in
             addExtraLeading(indentation())
@@ -237,7 +241,7 @@ extension SwiftSyntaxProducer {
 // MARK: - Protocol generation
 extension SwiftSyntaxProducer {
     func generateProtocol(_ intention: ProtocolGenerationIntention) -> ProtocolDeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return ProtocolDeclSyntax.init { builder in
             addExtraLeading(indentation())
@@ -328,7 +332,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateProperty(_ intention: PropertyGenerationIntention) -> DeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
@@ -339,7 +343,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateVariableDecl(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
@@ -349,7 +353,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
@@ -489,7 +493,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     
     func generateInitializer(_ intention: InitGenerationIntention) -> DeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return InitializerDeclSyntax { builder in
             let modifiers = self.modifiers(for: intention)
@@ -513,7 +517,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateFunction(_ intention: SignatureFunctionIntention) -> FunctionDeclSyntax {
-        addHistoryTrackingLeading(intention)
+        addHistoryTrackingLeadingIfEnabled(intention)
         
         return FunctionDeclSyntax { builder in
             let modifiers = self.modifiers(for: intention)

@@ -166,8 +166,34 @@ extension SwiftSyntaxProducerTests {
     }
 }
 
-// MARK: - Property generation
+// MARK: - Property / global variable generation
 extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithOwnershippedGlobalVariables() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalVariable(withName: "foo",
+                                             type: .optional(.anyObject),
+                                             ownership: .weak)
+                builder.createGlobalVariable(withName: "bar",
+                                             type: .optional(.anyObject),
+                                             ownership: .unownedSafe)
+                builder.createGlobalVariable(withName: "baz",
+                                             type: .optional(.anyObject),
+                                             ownership: .unownedUnsafe)
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            weak var foo: AnyObject?
+            unowned(safe) var bar: AnyObject?
+            unowned(unsafe) var baz: AnyObject?
+            """)
+    }
+    
     func testGenerateFileWithClassWithComputedProperty() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in

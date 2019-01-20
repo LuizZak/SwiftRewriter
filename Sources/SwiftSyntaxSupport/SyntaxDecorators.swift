@@ -9,6 +9,7 @@ class ModifiersSyntaxDecoratorApplier {
         decorator.addDecorator(AccessLevelModifiersDecorator())
         decorator.addDecorator(StaticModifiersDecorator())
         decorator.addDecorator(MutatingModifiersDecorator())
+        decorator.addDecorator(OwnershipModifierDecorator())
         return decorator
     }
     
@@ -123,6 +124,59 @@ class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
                         .addingTrailingSpace()
                         .withExtraLeading(consuming: &extraLeading),
                     detail: nil
+                )
+        
+        list.append(modifier)
+    }
+}
+
+/// A modifier to apply `weak`, `unowned(safe)`, and `unowned(unsafe)` modifiers
+/// to variable declarations
+class OwnershipModifierDecorator: ModifiersSyntaxDecorator {
+    func appendModifiers(for intention: IntentionProtocol,
+                         _ list: inout [DeclModifierSyntax],
+                         extraLeading: inout Trivia?) {
+        
+        guard let intention = intention as? ValueStorageIntention else {
+            return
+        }
+        
+        let token: TokenSyntax
+        let detail: TokenListSyntax?
+        
+        switch intention.ownership {
+        case .strong:
+            return
+            
+        case .weak:
+            token = makeIdentifier("weak").addingTrailingSpace()
+            detail = nil
+            
+        case .unownedSafe:
+            token = makeIdentifier("unowned")
+            detail = SyntaxFactory
+                .makeTokenList([
+                    SyntaxFactory.makeLeftParenToken(),
+                    makeIdentifier("safe"),
+                    SyntaxFactory.makeRightParenToken().withTrailingSpace()
+                    ])
+            
+        case .unownedUnsafe:
+            token = makeIdentifier("unowned")
+            detail = SyntaxFactory
+                .makeTokenList([
+                    SyntaxFactory.makeLeftParenToken(),
+                    makeIdentifier("unsafe"),
+                    SyntaxFactory.makeRightParenToken().withTrailingSpace()
+                    ])
+        }
+        
+        let modifier =
+            SyntaxFactory
+                .makeDeclModifier(
+                    name: token
+                        .withExtraLeading(consuming: &extraLeading),
+                    detail: detail
                 )
         
         list.append(modifier)
