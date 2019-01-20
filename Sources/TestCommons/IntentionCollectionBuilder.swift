@@ -358,7 +358,14 @@ public class FunctionSignatureBuilder {
         return self
     }
     
-    public func build() -> FunctionSignature {
+    @discardableResult
+    public func setReturnType(_ type: SwiftType) -> FunctionSignatureBuilder {
+        signature.returnType = type
+        
+        return self
+    }
+    
+    func build() -> FunctionSignature {
         return signature
     }
 }

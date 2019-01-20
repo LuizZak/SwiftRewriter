@@ -4,6 +4,7 @@ import SwiftAST
 public protocol ValueStorageIntention: IntentionProtocol {
     var name: String { get }
     var storage: ValueStorage { get }
+    var initialValue: Expression? { get }
 }
 
 public extension ValueStorageIntention {

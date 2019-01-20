@@ -9,8 +9,18 @@ public class SwiftSyntaxProducer {
     
     var extraLeading: Trivia?
     
+    var settings: Settings
+    
+    let modifiersDecorations =
+        ModifiersSyntaxDecoratorApplier
+            .makeDefaultDecoratorApplier()
+    
     public init() {
-        
+        settings = .default
+    }
+    
+    public init(settings: Settings) {
+        self.settings = settings
     }
     
     func indentation() -> Trivia {
@@ -31,12 +41,52 @@ public class SwiftSyntaxProducer {
             extraLeading = trivia
         }
     }
+    
+    public struct Settings {
+        /// Default settings instance
+        public static let `default` = Settings()
+        
+        /// If `true`, when outputting expression statements, print the resulting type
+        /// of the expression before the expression statement as a comment for inspection.
+        public var outputExpressionTypes: Bool
+        
+        /// If `true`, when outputting final intentions, print any history information
+        /// tracked on its `IntentionHistory` property before the intention's declaration
+        /// as a comment for inspection.
+        public var printIntentionHistory: Bool
+        
+        /// If `true`, `@objc` attributes and `: NSObject` are emitted for declarations
+        /// during output.
+        ///
+        /// This may increase compatibility with previous Objective-C code when compiled
+        /// and executed.
+        public var emitObjcCompatibility: Bool
+        
+        public init(outputExpressionTypes: Bool = false,
+                    printIntentionHistory: Bool = false,
+                    emitObjcCompatibility: Bool = false) {
+            
+            self.outputExpressionTypes = outputExpressionTypes
+            self.printIntentionHistory = printIntentionHistory
+            self.emitObjcCompatibility = emitObjcCompatibility
+        }
+    }
 }
 
 // MARK: - Identation
 extension SwiftSyntaxProducer {
     public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
+            
+            iterateWithBlankLineAfter(file.globalVariableIntentions) { variable in
+                let syntax = generateGlobalVariable(variable)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+                
+                addExtraLeading(.newlines(1))
+            }
             
             iterateWithBlankLineAfter(file.globalFunctionIntentions) { function in
                 let syntax = generateFunction(function)
@@ -217,6 +267,12 @@ extension SwiftSyntaxProducer {
                     addExtraLeading(indentation())
                     
                     builder.addDecl(generateInstanceVariable(ivar))
+                    
+                    addExtraLeading(.newlines(1))
+                }
+                
+                if !intention.properties.isEmpty {
+                    extraLeading = .newlines(1)
                 }
             }
             
@@ -224,20 +280,30 @@ extension SwiftSyntaxProducer {
                 addExtraLeading(indentation())
                 
                 builder.addDecl(generateProperty(prop))
+                
+                addExtraLeading(.newlines(1))
             }
             
             iterateWithBlankLineAfter(intention.constructors) { _init in
                 addExtraLeading(indentation())
                 
                 builder.addDecl(generateInitializer(_init))
+                
+                addExtraLeading(.newlines(1))
             }
             
             iterateWithBlankLineAfter(intention.methods) { method in
                 addExtraLeading(indentation())
                 
                 builder.addDecl(generateFunction(method))
+                
+                addExtraLeading(.newlines(1))
             }
         }
+    }
+    
+    private func modifiers(for intention: IntentionProtocol) -> [DeclModifierSyntax] {
+        return modifiersDecorations.modifiers(for: intention, extraLeading: &extraLeading)
     }
 }
 
@@ -255,17 +321,32 @@ extension SwiftSyntaxProducer {
     func generateVariableDecl(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
-                                    attributes: intention.knownAttributes)
+                                    attributes: intention.knownAttributes,
+                                    modifiers: modifiers(for: intention),
+                                    initialization: intention.initialValue)
+    }
+    
+    func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
+        return generateVariableDecl(name: intention.name,
+                                    storage: intention.storage,
+                                    attributes: [],
+                                    modifiers: modifiers(for: intention),
+                                    initialization: intention.initialValue)
     }
     
     func generateVariableDecl(name: String,
                               storage: ValueStorage,
                               attributes: [KnownAttribute],
+                              modifiers: [DeclModifierSyntax],
                               initialization: Expression? = nil) -> VariableDeclSyntax {
         
         return VariableDeclSyntax { builder in
             for attribute in attributes {
                 builder.addAttribute(generateAttributeSyntax(attribute))
+            }
+            
+            for modifier in modifiers {
+                builder.addModifier(modifier)
             }
             
             let letOrVar =
@@ -299,47 +380,44 @@ extension SwiftSyntaxProducer {
 // MARK: - Function syntax
 extension SwiftSyntaxProducer {
     
-    func generateInitializer(_ initializer: InitGenerationIntention) -> DeclSyntax {
+    func generateInitializer(_ intention: InitGenerationIntention) -> DeclSyntax {
         return InitializerDeclSyntax { builder in
+            let modifiers = self.modifiers(for: intention)
+            
+            for modifier in modifiers {
+                builder.addModifier(modifier)
+            }
+            
             builder.useInitKeyword(makeStartToken(SyntaxFactory.makeInitKeyword))
             
-            if initializer.isFailable {
+            if intention.isFailable {
                 builder.useOptionalMark(SyntaxFactory.makeInfixQuestionMarkToken())
             }
             
-            builder.useParameters(generateParameterList(initializer.parameters))
+            builder.useParameters(generateParameterList(intention.parameters))
             
-            if let body = initializer.functionBody {
+            if let body = intention.functionBody {
                 builder.useBody(generateFunctionBody(body))
             }
         }
     }
     
-    func generateFunction(_ function: SignatureFunctionIntention) -> FunctionDeclSyntax {
+    func generateFunction(_ intention: SignatureFunctionIntention) -> FunctionDeclSyntax {
         return FunctionDeclSyntax { builder in
+            let modifiers = self.modifiers(for: intention)
+            
+            for modifier in modifiers {
+                builder.addModifier(modifier)
+            }
+            
             builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).addingTrailingSpace())
-            builder.useSignature(generateSignature(function.signature))
-            builder.useIdentifier(makeIdentifier(function.signature.name))
+            builder.useSignature(generateSignature(intention.signature))
+            builder.useIdentifier(makeIdentifier(intention.signature.name))
             
-            if function.signature.isMutating {
-                builder.addModifier(SyntaxFactory
-                    .makeDeclModifier(
-                        name: makeIdentifier("mutating").withTrailingSpace(),
-                        detail: nil
-                    )
-                )
-            }
-            if function.signature.isStatic {
-                builder.addModifier(SyntaxFactory
-                    .makeDeclModifier(
-                        name: SyntaxFactory.makeStaticKeyword().withTrailingSpace(),
-                        detail: nil
-                    )
-                )
-            }
-            
-            if let body = function.functionBody {
+            if let body = intention.functionBody {
                 builder.useBody(generateFunctionBody(body))
+            } else {
+                builder.useBody(generateEmptyFunctionBody())
             }
         }
     }
@@ -356,7 +434,7 @@ extension SwiftSyntaxProducer {
     
     func generateReturn(_ ret: SwiftType) -> ReturnClauseSyntax {
         return ReturnClauseSyntax { builder in
-            builder.useArrow(SyntaxFactory.makeArrowToken().addingTrailingSpace())
+            builder.useArrow(SyntaxFactory.makeArrowToken().addingLeadingSpace().addingTrailingSpace())
             builder.useReturnType(makeTypeSyntax(ret))
         }
     }
@@ -399,6 +477,13 @@ extension SwiftSyntaxProducer {
         return generateCompound(body.body)
     }
     
+    func generateEmptyFunctionBody() -> CodeBlockSyntax {
+        return CodeBlockSyntax { builder in
+            builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
+            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline().addingLeadingTrivia(indentation()))
+        }
+    }
+    
     func generateAttributeListSyntax<S: Sequence>(_ attributes: S) -> AttributeListSyntax where S.Element == KnownAttribute {
         return SyntaxFactory.makeAttributeList(attributes.map(generateAttributeSyntax))
     }
@@ -433,7 +518,7 @@ extension SwiftSyntaxProducer {
         }
         
         if !elements.isEmpty {
-            addExtraLeading(postSeparator)
+            extraLeading = postSeparator
         }
     }
     
@@ -679,6 +764,10 @@ extension TokenSyntax {
     
     func addingTrailingTrivia(_ trivia: Trivia) -> TokenSyntax {
         return withTrailingTrivia(trailingTrivia + trivia)
+    }
+    
+    func addingSurroundingSpaces() -> TokenSyntax {
+        return addingLeadingSpace().addingTrailingSpace()
     }
     
     func onNewline() -> TokenSyntax {

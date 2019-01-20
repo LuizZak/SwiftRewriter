@@ -92,7 +92,15 @@ extension SwiftSyntaxProducer {
     func generateExpressions(_ stmt: ExpressionsStatement) -> [() -> CodeBlockItemSyntax] {
         return stmt.expressions
             .map { exp -> () -> CodeBlockItemSyntax in
-                return { SyntaxFactory.makeCodeBlockItem(item: self.generateExpression(exp), semicolon: nil) }
+                return {
+                    if self.settings.outputExpressionTypes {
+                        self.addExtraLeading(Trivia.lineComment("// type: \(exp.resolvedType ?? "<nil>")"))
+                        self.addExtraLeading(.newlines(1))
+                        self.addExtraLeading(self.indentation())
+                    }
+                    
+                    return SyntaxFactory.makeCodeBlockItem(item: self.generateExpression(exp), semicolon: nil)
+                }
             }
     }
     
@@ -100,13 +108,14 @@ extension SwiftSyntaxProducer {
         return stmt.decl
             .map { decl -> () -> CodeBlockItemSyntax in
                 return { SyntaxFactory.makeCodeBlockItem(item: self.generateVariableDecl(decl), semicolon: nil) }
-        }
+            }
     }
     
     func generateVariableDecl(_ decl: StatementVariableDeclaration) -> VariableDeclSyntax {
         return generateVariableDecl(name: decl.identifier,
                                     storage: decl.storage,
                                     attributes: [],
+                                    modifiers: [],
                                     initialization: decl.initialization)
     }
     
@@ -191,13 +200,15 @@ extension SwiftSyntaxProducer {
             var syntaxes: [Syntax] = []
             
             for _case in stmt.cases {
-                addExtraLeading(.newlines(1))
+                addExtraLeading(.newlines(1) + indentation())
+                
                 let label = generateSwitchCaseLabel(_case)
                 syntaxes.append(generateSwitchCase(label, statements: _case.statements))
             }
             
             if let _default = stmt.defaultCase {
-                addExtraLeading(.newlines(1))
+                addExtraLeading(.newlines(1) + indentation())
+                
                 let label = SwitchDefaultLabelSyntax { builder in
                     builder.useDefaultKeyword(makeStartToken(SyntaxFactory.makeDefaultKeyword))
                     builder.useColon(SyntaxFactory.makeColonToken())
@@ -258,7 +269,7 @@ extension SwiftSyntaxProducer {
     func generateDoWhileStmt(_ stmt: DoWhileStatement) -> RepeatWhileStmtSyntax {
         return RepeatWhileStmtSyntax { builder in
             builder.useRepeatKeyword(makeStartToken(SyntaxFactory.makeRepeatKeyword))
-            builder.useWhileKeyword(SyntaxFactory.makeWhileKeyword().withLeadingSpace().withTrailingSpace())
+            builder.useWhileKeyword(SyntaxFactory.makeWhileKeyword().addingSurroundingSpaces())
             
             builder.useBody(generateCompound(stmt.body))
             builder.useCondition(generateExpression(stmt.exp))
@@ -268,7 +279,7 @@ extension SwiftSyntaxProducer {
     func generateForIn(_ stmt: ForStatement) -> ForInStmtSyntax {
         return ForInStmtSyntax { builder in
             builder.useForKeyword(makeStartToken(SyntaxFactory.makeForKeyword).withTrailingSpace())
-            builder.useInKeyword(SyntaxFactory.makeInKeyword().withTrailingSpace().withLeadingSpace())
+            builder.useInKeyword(SyntaxFactory.makeInKeyword().addingSurroundingSpaces())
             builder.useBody(generateCompound(stmt.body))
             builder.usePattern(generatePattern(stmt.pattern))
             builder.useSequenceExpr(generateExpression(stmt.exp))

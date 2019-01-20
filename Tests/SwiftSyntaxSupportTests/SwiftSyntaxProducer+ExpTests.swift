@@ -254,4 +254,11 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateSizeOf,
             matches: "MemoryLayout<Int>.size")
     }
+    
+    func testTernary() {
+        assert(
+            Expression.ternary(.constant(true), true: .identifier("foo"), false: .identifier("bar")),
+            producer: SwiftSyntaxProducer.generateTernary,
+            matches: "true ? foo : bar")
+    }
 }

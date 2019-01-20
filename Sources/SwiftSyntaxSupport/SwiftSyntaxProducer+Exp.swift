@@ -41,6 +41,9 @@ extension SwiftSyntaxProducer {
         case let exp as CastExpression:
             return generateCast(exp)
             
+        case let exp as TernaryExpression:
+            return generateTernary(exp)
+            
         case is UnknownExpression:
             return SyntaxFactory.makeBlankUnknownExpr()
             
@@ -111,7 +114,7 @@ extension SwiftSyntaxProducer {
                     builder.useAsTok(SyntaxFactory.makeAsKeyword().withLeadingSpace())
                     builder.useQuestionOrExclamationMark(SyntaxFactory.makePostfixQuestionMarkToken().withTrailingSpace())
                 } else {
-                    builder.useAsTok(SyntaxFactory.makeAsKeyword().withLeadingSpace().withTrailingSpace())
+                    builder.useAsTok(SyntaxFactory.makeAsKeyword().addingSurroundingSpaces())
                 }
                 
                 builder.useTypeName(makeTypeSyntax(exp.type))
@@ -180,11 +183,11 @@ extension SwiftSyntaxProducer {
     }
     
     func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix(generateExpression(exp.exp)))
+        return generateOperator(exp.op, mode: .prefix({ self.generateExpression(exp.exp) }))
     }
     
     func generatePrefix(_ exp: PrefixExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix(generateExpression(exp.exp)))
+        return generateOperator(exp.op, mode: .prefix({ self.generateExpression(exp.exp) }))
     }
     
     func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
@@ -273,6 +276,16 @@ extension SwiftSyntaxProducer {
         }
     }
     
+    func generateTernary(_ exp: TernaryExpression) -> ExprSyntax {
+        return TernaryExprSyntax { builder in
+            builder.useConditionExpression(generateExpression(exp.exp))
+            builder.useQuestionMark(SyntaxFactory.makeInfixQuestionMarkToken().addingSurroundingSpaces())
+            builder.useFirstChoice(generateExpression(exp.ifTrue))
+            builder.useColonMark(SyntaxFactory.makeColonToken().addingSurroundingSpaces())
+            builder.useSecondChoice(generateExpression(exp.ifFalse))
+        }
+    }
+    
     func generateConstant(_ constant: ConstantExpression) -> ExprSyntax {
         switch constant.constant {
         case .boolean(let bool):
@@ -333,7 +346,7 @@ extension SwiftSyntaxProducer {
             producer = { op in
                 return PrefixOperatorExprSyntax { builder in
                     builder.useOperatorToken(self.prepareStartToken(SyntaxFactory.makePrefixOperator(op.rawValue)))
-                    builder.usePostfixExpression(exp)
+                    builder.usePostfixExpression(exp())
                 }
             }
         case .infix:
@@ -346,7 +359,7 @@ extension SwiftSyntaxProducer {
             producer = { op in
                 return PostfixUnaryExprSyntax { builder in
                     builder.useOperatorToken(self.prepareStartToken(SyntaxFactory.makePrefixOperator(op.rawValue)))
-                    builder.useExpression(exp)
+                    builder.useExpression(exp())
                 }
             }
         }
@@ -356,8 +369,8 @@ extension SwiftSyntaxProducer {
     
     enum OperatorMode {
         case assignment
-        case prefix(ExprSyntax)
+        case prefix(() -> ExprSyntax)
         case infix
-        case postfix(ExprSyntax)
+        case postfix(() -> ExprSyntax)
     }
 }

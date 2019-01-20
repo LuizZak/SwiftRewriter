@@ -152,18 +152,20 @@ class SwiftRewriter_StmtTests: XCTestCase {
             objc: "const NSInteger myInt = 5;",
             swift: "let myInt: Int = 5"
         )
+        assertSingleStatement(
+            objc: "CGFloat x = [self offsetForDate:cell.startDate];",
+            swift: "let x: CGFloat = self.offsetForDate(cell.startDate)"
+        )
+    }
+    
+    func testMultipleVarDeclarationInSameStatement() {
         assertObjcParse(
             objc: "NSInteger a = 5, b, c = 6;",
             swift: """
                 var a: Int = 5
                 var b: Int
                 var c: Int = 6
-                """
-        )
-        assertSingleStatement(
-            objc: "CGFloat x = [self offsetForDate:cell.startDate];",
-            swift: "let x: CGFloat = self.offsetForDate(cell.startDate)"
-        )
+                """)
     }
     
     /// Tests __block specifier on local variable declaration

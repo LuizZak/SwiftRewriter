@@ -80,6 +80,28 @@ extension SwiftSyntaxProducerTests {
             }
             """)
     }
+    
+    func testGenerateFileWithGlobalFunctionWithReturnType() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalFunction(withName: "a") { builder in
+                    builder.setBody([])
+                    builder.createSignature(name: "a") { builder in
+                        builder.setReturnType(.int)
+                    }
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            func a() -> Int {
+            }
+            """)
+    }
 }
 
 // MARK: - Class Generation
@@ -218,7 +240,6 @@ extension SwiftSyntaxProducerTests {
             matches: """
             class A {
                 var ivarA: Int
-            
                 var propertyA: Int
             }
             """)
