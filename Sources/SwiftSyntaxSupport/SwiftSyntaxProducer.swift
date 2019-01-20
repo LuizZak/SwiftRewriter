@@ -7,7 +7,12 @@ public class SwiftSyntaxProducer {
     var indentationMode: TriviaPiece = .spaces(4)
     var indentationLevel: Int = 0
     
-    var extraLeading: Trivia?
+    var didModifyExtraLeading = false
+    var extraLeading: Trivia? {
+        didSet {
+            didModifyExtraLeading = true
+        }
+    }
     
     var settings: Settings
     weak var delegate: SwiftSyntaxProducerDelegate?
@@ -91,6 +96,23 @@ extension SwiftSyntaxProducer {
     public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
             
+            if let headerTrivia = generatePreprocessorDirectivesTrivia(file) {
+                addExtraLeading(headerTrivia)
+                addExtraLeading(.newlines(1))
+            }
+            
+            didModifyExtraLeading = false
+            
+            iterateWithBlankLineAfter(file.typealiasIntentions) { intention in
+                let syntax = generateTypealias(intention)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+                
+                addExtraLeading(.newlines(1))
+            }
+            
             iterateWithBlankLineAfter(file.globalVariableIntentions) { variable in
                 let syntax = generateGlobalVariable(variable)
                 
@@ -132,6 +154,99 @@ extension SwiftSyntaxProducer {
                 
                 builder.addCodeBlockItem(codeBlock)
             }
+            
+            iterateWithBlankLineAfter(file.extensionIntentions) { _class in
+                let syntax = generateExtension(_class)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+            }
+            
+            // Noone consumed the leading trivia - emit a dummy token just so we
+            // can have a file with preprocessor directives in place
+            if !didModifyExtraLeading {
+                let item = CodeBlockItemSyntax { builder in
+                    builder.useItem(SyntaxFactory
+                        .makeToken(TokenKind.identifier(""),
+                                   presence: .present)
+                        .withExtraLeading(consuming: &extraLeading)
+                    )
+                }
+                
+                builder.addCodeBlockItem(item)
+            }
+        }
+    }
+    
+    func generatePreprocessorDirectivesTrivia(_ file: FileGenerationIntention) -> Trivia? {
+        if file.preprocessorDirectives.isEmpty {
+            return nil
+        }
+        
+        var trivia: Trivia = .lineComment("// Preprocessor directives found in file:")
+        
+        for directive in file.preprocessorDirectives {
+            trivia = trivia + .newlines(1) + .lineComment("// \(directive)")
+        }
+        
+        return trivia
+    }
+}
+
+// MARK: - Typealias Intention
+extension SwiftSyntaxProducer {
+    func generateTypealias(_ intention: TypealiasIntention) -> TypealiasDeclSyntax {
+        addHistoryTrackingLeadingIfEnabled(intention)
+        
+        return TypealiasDeclSyntax { builder in
+            builder.useTypealiasKeyword(makeStartToken(SyntaxFactory.makeTypealiasKeyword).withTrailingSpace())
+            builder.useIdentifier(makeIdentifier(intention.name))
+            builder.useInitializer(TypeInitializerClauseSyntax { builder in
+                builder.useEqual(SyntaxFactory.makeEqualToken().addingSurroundingSpaces())
+                builder.useValue(makeTypeSyntax(intention.fromType))
+            })
+        }
+    }
+}
+
+// MARK: - Extension Generation
+extension SwiftSyntaxProducer {
+    
+    func generateExtension(_ intention: ClassExtensionGenerationIntention) -> ExtensionDeclSyntax {
+        addHistoryTrackingLeadingIfEnabled(intention)
+        
+        return ExtensionDeclSyntax { builder in
+            addExtraLeading(indentation())
+            
+            if let categoryName = intention.categoryName, !categoryName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                addExtraLeading(.lineComment("// MARK: - \(categoryName)"))
+            } else {
+                addExtraLeading(.lineComment("// MARK: -"))
+            }
+            
+            addExtraLeading(.newlines(1) + indentation())
+            
+            builder.useExtensionKeyword(
+                makeStartToken(SyntaxFactory.makeExtensionKeyword).addingTrailingSpace())
+            
+            builder.useExtendedType(
+                makeTypeSyntax(.typeName(intention.typeName))
+            )
+            
+            addExtraLeading(.spaces(1))
+            
+            if let inheritanceClause = generateInheritanceClause(intention) {
+                builder.useInheritanceClause(inheritanceClause)
+            }
+            
+            indent()
+            
+            let members = generateMembers(intention)
+            
+            deindent()
+            
+            builder.useMembers(members)
         }
     }
 }
@@ -275,7 +390,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateMembers(_ intention: TypeGenerationIntention) -> MemberDeclBlockSyntax {
         return MemberDeclBlockSyntax { builder in
-            builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken())
+            builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline())
             
             addExtraLeading(.newlines(1))
@@ -329,6 +444,14 @@ extension SwiftSyntaxProducer {
 // MARK: - Variable/property syntax
 extension SwiftSyntaxProducer {
     
+    private func _initialValue(for intention: ValueStorageIntention) -> Expression? {
+        if let intention = intention.initialValue {
+            return intention
+        }
+        
+        return delegate?.swiftSyntaxProducer(self, initialValueFor: intention)
+    }
+    
     func generateInstanceVariable(_ intention: InstanceVariableGenerationIntention) -> DeclSyntax {
         return generateVariableDecl(intention)
     }
@@ -339,9 +462,10 @@ extension SwiftSyntaxProducer {
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
                                     attributes: intention.knownAttributes,
+                                    intention: intention,
                                     modifiers: modifiers(for: intention),
                                     accessor: makeAccessorBlockCreator(intention),
-                                    initialization: intention.initialValue)
+                                    initialization: _initialValue(for: intention))
     }
     
     func generateVariableDecl(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
@@ -350,8 +474,9 @@ extension SwiftSyntaxProducer {
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
                                     attributes: intention.knownAttributes,
+                                    intention: intention,
                                     modifiers: modifiers(for: intention),
-                                    initialization: intention.initialValue)
+                                    initialization: _initialValue(for: intention))
     }
     
     func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
@@ -360,13 +485,15 @@ extension SwiftSyntaxProducer {
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
                                     attributes: [],
+                                    intention: intention,
                                     modifiers: modifiers(for: intention),
-                                    initialization: intention.initialValue)
+                                    initialization: _initialValue(for: intention))
     }
     
     func generateVariableDecl(name: String,
                               storage: ValueStorage,
                               attributes: [KnownAttribute],
+                              intention: Intention?,
                               modifiers: [DeclModifierSyntax],
                               accessor: (() -> AccessorBlockSyntax)? = nil,
                               initialization: Expression? = nil) -> VariableDeclSyntax {
@@ -394,6 +521,7 @@ extension SwiftSyntaxProducer {
                 
                 if delegate?.swiftSyntaxProducer(self,
                                                  shouldEmitTypeFor: storage,
+                                                 intention: intention,
                                                  initialValue: initialization) != false {
                     
                     builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
@@ -644,15 +772,6 @@ extension SwiftSyntaxProducer {
             extraLeading = postSeparator
         }
     }
-    
-    func iterateWithComma<T>(_ elements: [T],
-                             postSeparator: Trivia = .newlines(1),
-                             do block: (T, Bool) -> Void) {
-        
-        for (i, item) in elements.enumerated() {
-            block(item, i < elements.count - 1)
-        }
-    }
 }
 
 // MARK: - General/commons
@@ -697,7 +816,7 @@ func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
         
         return AttributedTypeSyntax { builder in
             let functionType = FunctionTypeSyntax { builder in
-                builder.useArrow(SyntaxFactory.makeArrowToken())
+                builder.useArrow(SyntaxFactory.makeArrowToken().addingSurroundingSpaces())
                 builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
                 builder.useRightParen(SyntaxFactory.makeRightParenToken())
                 builder.useReturnType(makeTypeSyntax(returnType))
@@ -735,7 +854,11 @@ func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
                         .makeAttribute(
                             atSignToken: SyntaxFactory.makeAtSignToken(),
                             attributeName: makeIdentifier("convention"),
-                            balancedTokens: SyntaxFactory.makeTokenList([makeIdentifier(convention.rawValue)])
+                            balancedTokens: SyntaxFactory.makeTokenList([
+                                SyntaxFactory.makeLeftParenToken(),
+                                makeIdentifier(convention.rawValue),
+                                SyntaxFactory.makeRightParenToken().withTrailingSpace()
+                            ])
                         )
                     )
                 }
@@ -777,16 +900,14 @@ func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
 
 func makeTupleTypeSyntax<C: Collection>(_ types: C) -> TupleTypeSyntax where C.Element == SwiftType {
     return TupleTypeSyntax { builder in
-        for (i, type) in types.enumerated() {
-            let syntax = TupleTypeElementSyntax { builder in
+        iterateWithComma(types) { (type, hasComma) in
+            builder.addTupleTypeElement(TupleTypeElementSyntax { builder in
                 builder.useType(makeTypeSyntax(type))
                 
-                if i == types.count - 1 {
-                    builder.useTrailingComma(SyntaxFactory.makeCommaToken())
+                if hasComma {
+                    builder.useTrailingComma(SyntaxFactory.makeCommaToken().withTrailingSpace())
                 }
-            }
-            
-            builder.addTupleTypeElement(syntax)
+            })
         }
     }
 }
@@ -853,6 +974,15 @@ func makeNominalTypeSyntax(_ nominal: NominalSwiftType) -> SimpleTypeIdentifierS
             name: SyntaxFactory.makeIdentifier(name),
             genericArgumentClause: genericArgumentClause
         )
+    }
+}
+
+func iterateWithComma<T>(_ elements: T,
+                         postSeparator: Trivia = .newlines(1),
+                         do block: (T.Element, Bool) -> Void) where T: Collection {
+    
+    for (i, item) in elements.enumerated() {
+        block(item, i < elements.count - 1)
     }
 }
 

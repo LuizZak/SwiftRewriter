@@ -52,6 +52,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                         builder.addHistory(tag: "Tag", description: "History 3")
                     }
                     builder.createConstructor(withParameters: []) { builder in
+                        builder.setBody([])
                         builder.addHistory(tag: "Tag", description: "History 4")
                     }
                     builder.createMethod(named: "method") { builder in
@@ -71,11 +72,59 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                 var prop: Int
 
                 // [Tag] History 4
-                init()
+                init() {
+                }
 
                 // [Tag] History 5
                 func method() {
                 }
+            }
+            """)
+    }
+}
+
+// MARK: - File generation
+extension SwiftSyntaxProducerTests {
+    func testGeneratePreprocessorDirectivesInEmptyFile() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.addPreprocessorDirective("#import <Abc.h>")
+                builder.addPreprocessorDirective("#define MAX(a, b) ((a) > (b) ? (a) : (b))")
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        // TODO: Consider removing the extra line feed in case an empty file is
+        // generated.
+        assert(
+            result,
+            matches: """
+            // Preprocessor directives found in file:
+            // #import <Abc.h>
+            // #define MAX(a, b) ((a) > (b) ? (a) : (b))
+            
+            """)
+    }
+    
+    func testGeneratePreprocessorDirectivesInPopulatedFile() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.addPreprocessorDirective("#import <Abc.h>")
+                builder.addPreprocessorDirective("#define MAX(a, b) ((a) > (b) ? (a) : (b))")
+                builder.createClass(withName: "A")
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            // Preprocessor directives found in file:
+            // #import <Abc.h>
+            // #define MAX(a, b) ((a) > (b) ? (a) : (b))
+            class A {
             }
             """)
     }
@@ -284,6 +333,52 @@ extension SwiftSyntaxProducerTests {
                         _bar = _newBar
                     }
                 }
+            }
+            """)
+    }
+}
+
+// MARK: - Typealias Generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithTypealias() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createTypealias(withName: "Alias",
+                                        swiftType: .int,
+                                        type: .void)
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            typealias Alias = Int
+            """)
+    }
+}
+
+// MARK: - Extension Generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithExtension() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createExtension(forClassNamed: "A")
+                builder.createExtension(forClassNamed: "B", categoryName: "BExtension")
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            // MARK: -
+            extension A {
+            }
+            // MARK: - BExtension
+            extension B {
             }
             """)
     }

@@ -129,6 +129,7 @@ extension SwiftSyntaxProducer {
         return generateVariableDecl(name: decl.identifier,
                                     storage: decl.storage,
                                     attributes: [],
+                                    intention: nil,
                                     modifiers: [],
                                     initialization: decl.initialization)
     }
