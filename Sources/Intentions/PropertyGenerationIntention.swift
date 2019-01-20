@@ -244,6 +244,11 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         /// The body for the setter
         public var body: FunctionBodyIntention
         
+        public init(valueIdentifier: String, body: CompoundStatement) {
+            self.init(valueIdentifier: valueIdentifier,
+                      body: FunctionBodyIntention(body: body))
+        }
+        
         public init(valueIdentifier: String, body: FunctionBodyIntention) {
             self.valueIdentifier = valueIdentifier
             self.body = body

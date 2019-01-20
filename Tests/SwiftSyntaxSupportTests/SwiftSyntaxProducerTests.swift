@@ -17,6 +17,68 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
         assert(result, matches: "")
     }
     
+    func testGenerateExpressionTypes() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createGlobalFunction(withName: "foo") { builder in
+                    builder.setBody([
+                        Statement.expression(Expression.identifier("foo").typed("Bar")),
+                        Statement.expression(Expression.identifier("baz").typed(.errorType))
+                        ])
+                }
+            }
+        let sut = SwiftSyntaxProducer(settings: .init(outputExpressionTypes: true))
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            func foo() {
+                // type: Bar
+                foo
+                // type: <<error type>>
+                baz
+            }
+            """)
+    }
+    
+    func testGenerateIntentionHistory() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.addHistory(tag: "Tag", description: "History 1")
+                    builder.addHistory(tag: "Tag", description: "History 2")
+                    
+                    builder.createProperty(named: "prop", type: .int) { builder in
+                        builder.addHistory(tag: "Tag", description: "History 3")
+                    }
+                    builder.createConstructor(withParameters: []) { builder in
+                        builder.addHistory(tag: "Tag", description: "History 4")
+                    }
+                    builder.createMethod(named: "method") { builder in
+                        builder.addHistory(tag: "Tag", description: "History 5")
+                    }
+                }
+            }
+        let sut = SwiftSyntaxProducer(settings: .init(printIntentionHistory: true))
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            // [Tag] History 1
+            // [Tag] History 2
+            class A {
+                // [Tag] History 3
+                var prop: Int
+
+                // [Tag] History 4
+                init()
+
+                // [Tag] History 5
+                func method() {
+                }
+            }
+            """)
+    }
 }
 
 // MARK: - Function body generation
@@ -99,6 +161,102 @@ extension SwiftSyntaxProducerTests {
             result,
             matches: """
             func a() -> Int {
+            }
+            """)
+    }
+}
+
+// MARK: - Property generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithClassWithComputedProperty() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.createProperty(named: "foo", type: .int) { builder in
+                        builder.setAsComputedProperty(body: [
+                            .return(.constant(1))
+                            ])
+                    }
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            class A {
+                var foo: Int {
+                    return 1
+                }
+            }
+            """)
+    }
+    
+    func testGenerateFileWithClassWithGetterAndSetterProperties() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createClass(withName: "A") { builder in
+                    builder.createProperty(named: "foo", type: .int) { builder in
+                        builder.setAsGetterSetter(
+                            getter: [
+                                .return(.constant(1))
+                            ],
+                            setter: .init(
+                                valueIdentifier: "newValue",
+                                body: [
+                                    .expression(Expression
+                                        .identifier("_foo")
+                                        .assignment(op: .assign,
+                                                    rhs: .identifier("newValue")))
+                                ]
+                            )
+                        )
+                    }
+                    
+                    builder.createProperty(named: "bar", type: .int) { builder in
+                        builder.setAsGetterSetter(
+                            getter: [
+                                .return(.constant(1))
+                            ],
+                            setter: .init(
+                                valueIdentifier: "_newBar",
+                                body: [
+                                    .expression(Expression
+                                        .identifier("_bar")
+                                        .assignment(op: .assign,
+                                                    rhs: .identifier("_newBar")))
+                                ]
+                            )
+                        )
+                    }
+                }
+        }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            class A {
+                var foo: Int {
+                    get {
+                        return 1
+                    }
+                    set {
+                        _foo = newValue
+                    }
+                }
+                var bar: Int {
+                    get {
+                        return 1
+                    }
+                    set(_newBar) {
+                        _bar = _newBar
+                    }
+                }
             }
             """)
     }

@@ -441,8 +441,25 @@ extension MemberBuilder: _FunctionBuilder where T: FunctionIntention {
 
 public extension MemberBuilder where T: PropertyGenerationIntention {
     @discardableResult
+    public func setAsField() -> MemberBuilder {
+        targetMember.mode = .asField
+        
+        return self
+    }
+    
+    @discardableResult
     public func setAsComputedProperty(body: CompoundStatement) -> MemberBuilder {
         targetMember.mode = .computed(FunctionBodyIntention(body: body))
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setAsGetterSetter(getter: CompoundStatement,
+                                  setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
+        
+        targetMember.mode = .property(get: FunctionBodyIntention(body: getter),
+                                      set: setter)
         
         return self
     }

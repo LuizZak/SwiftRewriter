@@ -6,6 +6,7 @@ import SwiftAST
 import KnownType
 import Intentions
 import WriterTargetOutput
+import SwiftSyntaxSupport
 import Utils
 
 /// Gets as inputs a series of intentions and outputs actual files and script
@@ -91,6 +92,58 @@ public final class SwiftWriter {
                                    origin: error.0,
                                    location: .invalid)
         }
+    }
+}
+
+class _SwiftSyntaxWriter {
+    var intentions: IntentionCollection
+    var output: WriterOutput
+    let typeMapper: TypeMapper
+    var diagnostics: Diagnostics
+    var options: ASTWriterOptions
+    let astWriter: SwiftASTWriter
+    let typeSystem: TypeSystem
+    
+    init(intentions: IntentionCollection,
+         options: ASTWriterOptions,
+         diagnostics: Diagnostics,
+         output: WriterOutput,
+         typeMapper: TypeMapper,
+         typeSystem: TypeSystem) {
+        
+        self.intentions = intentions
+        self.options = options
+        self.diagnostics = diagnostics
+        self.output = output
+        self.typeMapper = typeMapper
+        self.typeSystem = typeSystem
+        astWriter =
+            SwiftASTWriter(options: options,
+                           typeMapper: typeMapper,
+                           typeSystem: typeSystem)
+    }
+    
+    func outputFile(_ fileIntent: FileGenerationIntention) throws {
+        let target = try output.createFile(path: fileIntent.targetPath)
+        
+        outputFile(fileIntent, targetFile: target)
+    }
+    
+    func outputFile(_ fileIntent: FileGenerationIntention, targetFile: FileOutput) {
+        let out = targetFile.outputTarget()
+        
+        let settings = SwiftSyntaxProducer
+            .Settings(outputExpressionTypes: options.outputExpressionTypes,
+                      printIntentionHistory: options.printIntentionHistory,
+                      emitObjcCompatibility: options.emitObjcCompatibility)
+        
+        let producer = SwiftSyntaxProducer(settings: settings)
+        
+        let fileSyntax = producer.generateFile(fileIntent)
+        
+        out.outputRaw(fileSyntax.description)
+        
+        targetFile.close()
     }
 }
 

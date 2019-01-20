@@ -75,6 +75,13 @@ public class SwiftSyntaxProducer {
 
 // MARK: - Identation
 extension SwiftSyntaxProducer {
+    func addHistoryTrackingLeading(_ intention: IntentionProtocol) {
+        for entry in intention.history.entries {
+            addExtraLeading(.lineComment("// \(entry.summary)"))
+            addExtraLeading(.newlines(1) + indentation())
+        }
+    }
+    
     public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
             
@@ -125,16 +132,18 @@ extension SwiftSyntaxProducer {
 
 // MARK: - Class Generation
 extension SwiftSyntaxProducer {
-    func generateClass(_ type: ClassGenerationIntention) -> ClassDeclSyntax {
+    func generateClass(_ intention: ClassGenerationIntention) -> ClassDeclSyntax {
+        addHistoryTrackingLeading(intention)
+        
         return ClassDeclSyntax { builder in
             addExtraLeading(indentation())
             
             builder.useClassKeyword(
                 makeStartToken(SyntaxFactory.makeClassKeyword).addingTrailingSpace())
             
-            let identifier = makeIdentifier(type.typeName)
+            let identifier = makeIdentifier(intention.typeName)
             
-            if let inheritanceClause = generateInheritanceClause(type) {
+            if let inheritanceClause = generateInheritanceClause(intention) {
                 builder.useIdentifier(identifier)
                 
                 builder.useInheritanceClause(inheritanceClause)
@@ -144,7 +153,7 @@ extension SwiftSyntaxProducer {
             
             indent()
             
-            let members = generateMembers(type)
+            let members = generateMembers(intention)
             
             deindent()
             
@@ -194,7 +203,9 @@ extension SwiftSyntaxProducer {
 
 // MARK: - Struct generation
 extension SwiftSyntaxProducer {
-    func generateStruct(_ type: StructGenerationIntention) -> StructDeclSyntax {
+    func generateStruct(_ intention: StructGenerationIntention) -> StructDeclSyntax {
+        addHistoryTrackingLeading(intention)
+        
         return StructDeclSyntax { builder in
             addExtraLeading(indentation())
             
@@ -202,9 +213,9 @@ extension SwiftSyntaxProducer {
                 makeStartToken(SyntaxFactory.makeStructKeyword)
                     .addingTrailingSpace())
             
-            let identifier = makeIdentifier(type.typeName)
+            let identifier = makeIdentifier(intention.typeName)
             
-            if let inheritanceClause = generateInheritanceClause(type) {
+            if let inheritanceClause = generateInheritanceClause(intention) {
                 builder.useIdentifier(identifier)
                 
                 builder.useInheritanceClause(inheritanceClause)
@@ -214,7 +225,7 @@ extension SwiftSyntaxProducer {
             
             indent()
             
-            let members = generateMembers(type)
+            let members = generateMembers(intention)
             
             deindent()
             
@@ -225,16 +236,18 @@ extension SwiftSyntaxProducer {
 
 // MARK: - Protocol generation
 extension SwiftSyntaxProducer {
-    func generateProtocol(_ type: ProtocolGenerationIntention) -> ProtocolDeclSyntax {
+    func generateProtocol(_ intention: ProtocolGenerationIntention) -> ProtocolDeclSyntax {
+        addHistoryTrackingLeading(intention)
+        
         return ProtocolDeclSyntax.init { builder in
             addExtraLeading(indentation())
             
             builder.useProtocolKeyword(
                 makeStartToken(SyntaxFactory.makeProtocolKeyword).addingTrailingSpace())
             
-            let identifier = makeIdentifier(type.typeName)
+            let identifier = makeIdentifier(intention.typeName)
             
-            if let inheritanceClause = generateInheritanceClause(type) {
+            if let inheritanceClause = generateInheritanceClause(intention) {
                 builder.useIdentifier(identifier)
                 
                 builder.useInheritanceClause(inheritanceClause)
@@ -247,7 +260,7 @@ extension SwiftSyntaxProducer {
                 deindent()
             }
             
-            builder.useMembers(generateMembers(type))
+            builder.useMembers(generateMembers(intention))
         }
     }
 }
@@ -315,10 +328,19 @@ extension SwiftSyntaxProducer {
     }
     
     func generateProperty(_ intention: PropertyGenerationIntention) -> DeclSyntax {
-        return generateVariableDecl(intention)
+        addHistoryTrackingLeading(intention)
+        
+        return generateVariableDecl(name: intention.name,
+                                    storage: intention.storage,
+                                    attributes: intention.knownAttributes,
+                                    modifiers: modifiers(for: intention),
+                                    accessor: makeAccessorBlockCreator(intention),
+                                    initialization: intention.initialValue)
     }
     
     func generateVariableDecl(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
+        addHistoryTrackingLeading(intention)
+        
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
                                     attributes: intention.knownAttributes,
@@ -327,6 +349,8 @@ extension SwiftSyntaxProducer {
     }
     
     func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
+        addHistoryTrackingLeading(intention)
+        
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
                                     attributes: [],
@@ -338,6 +362,7 @@ extension SwiftSyntaxProducer {
                               storage: ValueStorage,
                               attributes: [KnownAttribute],
                               modifiers: [DeclModifierSyntax],
+                              accessor: (() -> AccessorBlockSyntax)? = nil,
                               initialization: Expression? = nil) -> VariableDeclSyntax {
         
         return VariableDeclSyntax { builder in
@@ -366,6 +391,10 @@ extension SwiftSyntaxProducer {
                     builder.useType(makeTypeSyntax(storage.type))
                 })
                 
+                if let accessor = accessor {
+                    builder.useAccessor(accessor())
+                }
+                
                 if let initialization = initialization {
                     builder.useInitializer(InitializerClauseSyntax { builder in
                         builder.useEqual(SyntaxFactory.makeEqualToken().withLeadingSpace().withTrailingSpace())
@@ -375,12 +404,93 @@ extension SwiftSyntaxProducer {
             })
         }
     }
+    
+    private func makeAccessorBlockCreator(_ property: PropertyGenerationIntention) -> (() -> AccessorBlockSyntax)? {
+        switch property.mode {
+        case .asField:
+            return nil
+            
+        case .computed(let body):
+            return {
+                return AccessorBlockSyntax { builder in
+                    builder.useLeftBrace(self.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
+                    
+                    self.indent()
+                    let blocks = self._generateStatements(body.body.statements)
+                    self.deindent()
+                    
+                    let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
+                    
+                    builder.useAccessorListOrStmtList(stmtList)
+                    
+                    self.addExtraLeading(.newlines(1) + self.indentation())
+                    builder.useRightBrace(self.makeStartToken(SyntaxFactory.makeRightBraceToken))
+                }
+            }
+            
+        case let .property(get, set):
+            return {
+                return AccessorBlockSyntax { builder in
+                    builder.useLeftBrace(self.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
+                    
+                    self.indent()
+                    
+                    self.addExtraLeading(.newlines(1) + self.indentation())
+                    
+                    let getter = AccessorDeclSyntax { builder in
+                        builder.useAccessorKind(
+                            self.prepareStartToken(
+                                SyntaxFactory
+                                    .makeToken(.contextualKeyword("get"),
+                                               presence: .present)
+                            )
+                        )
+                        
+                        builder.useBody(self.generateFunctionBody(get))
+                    }
+                    
+                    self.addExtraLeading(.newlines(1) + self.indentation())
+                    
+                    let setter = AccessorDeclSyntax { builder in
+                        builder.useAccessorKind(
+                            self.prepareStartToken(
+                                SyntaxFactory
+                                    .makeToken(.contextualKeyword("set"),
+                                               presence: .present)
+                            )
+                        )
+                        
+                        if set.valueIdentifier != "newValue" {
+                            builder.useParameter(AccessorParameterSyntax { builder in
+                                builder.useLeftParen(self.makeStartToken(SyntaxFactory.makeLeftParenToken))
+                                builder.useName(makeIdentifier(set.valueIdentifier))
+                                builder.useRightParen(SyntaxFactory.makeRightParenToken())
+                            })
+                        }
+                        
+                        builder.useBody(self.generateFunctionBody(set.body))
+                    }
+                    
+                    self.deindent()
+                    
+                    let accessorList = SyntaxFactory.makeAccessorList([getter, setter])
+                    
+                    builder.useAccessorListOrStmtList(accessorList)
+                    
+                    self.addExtraLeading(.newlines(1) + self.indentation())
+                    builder.useRightBrace(self.makeStartToken(SyntaxFactory.makeRightBraceToken))
+                }
+            }
+        }
+    }
 }
 
 // MARK: - Function syntax
 extension SwiftSyntaxProducer {
     
     func generateInitializer(_ intention: InitGenerationIntention) -> DeclSyntax {
+        addHistoryTrackingLeading(intention)
+        
         return InitializerDeclSyntax { builder in
             let modifiers = self.modifiers(for: intention)
             
@@ -403,6 +513,8 @@ extension SwiftSyntaxProducer {
     }
     
     func generateFunction(_ intention: SignatureFunctionIntention) -> FunctionDeclSyntax {
+        addHistoryTrackingLeading(intention)
+        
         return FunctionDeclSyntax { builder in
             let modifiers = self.modifiers(for: intention)
             
