@@ -10,6 +10,7 @@ public class SwiftSyntaxProducer {
     var extraLeading: Trivia?
     
     var settings: Settings
+    weak var delegate: SwiftSyntaxProducerDelegate?
     
     let modifiersDecorations =
         ModifiersSyntaxDecoratorApplier
@@ -19,8 +20,9 @@ public class SwiftSyntaxProducer {
         settings = .default
     }
     
-    public init(settings: Settings) {
+    public init(settings: Settings, delegate: SwiftSyntaxProducerDelegate? = nil) {
         self.settings = settings
+        self.delegate = delegate
     }
     
     func indentation() -> Trivia {
@@ -390,10 +392,15 @@ extension SwiftSyntaxProducer {
                     builder.useIdentifier(makeIdentifier(name))
                 })
                 
-                builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
-                    builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                    builder.useType(makeTypeSyntax(storage.type))
-                })
+                if delegate?.swiftSyntaxProducer(self,
+                                                 shouldEmitTypeFor: storage,
+                                                 initialValue: initialization) != false {
+                    
+                    builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
+                        builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+                        builder.useType(makeTypeSyntax(storage.type))
+                    })
+                }
                 
                 if let accessor = accessor {
                     builder.useAccessor(accessor())

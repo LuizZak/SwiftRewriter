@@ -13,30 +13,44 @@ extension SwiftSyntaxProducer {
                 deindent()
             }
             
-            for stmt in compoundStmt {
-                let stmtSyntax = generateStatement(stmt)
-                
-                for item in stmtSyntax {
-                    addExtraLeading(.newlines(1) + indentation())
-                    builder.addCodeBlockItem(item())
-                }
+            let stmts = _generateStatements(compoundStmt.statements)
+            
+            for stmt in stmts {
+                builder.addCodeBlockItem(stmt)
             }
         }
     }
     
-    func _generateStatements(_ stmt: [Statement]) -> [CodeBlockItemSyntax] {
+    func _generateStatements(_ stmtList: [Statement]) -> [CodeBlockItemSyntax] {
         var items: [CodeBlockItemSyntax] = []
         
-        for stmt in stmt {
+        for (i, stmt) in stmtList.enumerated() {
             let stmtSyntax = generateStatement(stmt)
             
             for item in stmtSyntax {
                 addExtraLeading(.newlines(1) + indentation())
                 items.append(item())
             }
+            
+            if i < stmtList.count - 1 && _shouldEmitNewlineSpacing(between: stmt, stmt2: stmtList[i + 1]) {
+                addExtraLeading(.newlines(1))
+            }
         }
         
         return items
+    }
+    
+    private func _shouldEmitNewlineSpacing(between stmt1: Statement, stmt2: Statement) -> Bool {
+        switch (stmt1, stmt2) {
+        case (is ExpressionsStatement, is ExpressionsStatement):
+            return false
+        case (is VariableDeclarationsStatement, is ExpressionsStatement),
+             (is VariableDeclarationsStatement, is VariableDeclarationsStatement):
+            return false
+            
+        default:
+            return true
+        }
     }
     
     // TODO: Support for labeling in statements
