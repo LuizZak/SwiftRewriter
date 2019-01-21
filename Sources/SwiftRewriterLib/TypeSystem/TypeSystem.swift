@@ -1575,6 +1575,12 @@ private class TypealiasExpander {
             
         case .protocolComposition(let composition):
             return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
+            
+        case .array(let inner):
+            return .array(expand(in: inner))
+            
+        case let .dictionary(key, value):
+            return .dictionary(key: expand(in: key), value: expand(in: value))
         }
     }
     

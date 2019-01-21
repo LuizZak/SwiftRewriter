@@ -77,7 +77,7 @@ extension SwiftSyntaxProducer {
                         builder.useLeftAngleBracket(SyntaxFactory.makeLeftAngleToken())
                         builder.useRightAngleBracket(SyntaxFactory.makeRightAngleToken())
                         builder.addGenericArgument(GenericArgumentSyntax { builder in
-                            builder.useArgumentType(makeTypeSyntax(type))
+                            builder.useArgumentType(SwiftTypeConverter.makeTypeSyntax(type))
                         })
                     })
                 }
@@ -117,7 +117,7 @@ extension SwiftSyntaxProducer {
                     builder.useAsTok(SyntaxFactory.makeAsKeyword().addingSurroundingSpaces())
                 }
                 
-                builder.useTypeName(makeTypeSyntax(exp.type))
+                builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type))
             })
         }
     }

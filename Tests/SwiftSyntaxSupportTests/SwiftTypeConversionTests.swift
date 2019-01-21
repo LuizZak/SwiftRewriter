@@ -1,36 +1,17 @@
 import XCTest
 import SwiftRewriterLib
+import SwiftSyntaxSupport
 import ObjcParser
 import GrammarModels
 import SwiftAST
 
-class DefaultTypeMapperTests: XCTestCase {
+class SwiftTypeConversionTests: XCTestCase {
     var typeSystem = TypeSystem()
     
     override func setUp() {
         super.setUp()
         
         typeSystem = TypeSystem()
-    }
-    
-    func testSugarizeArraySwiftType() {
-        let sut = makeDefaultTypeMapper()
-        
-        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Array", parameters: ["Inner"])),
-                       SwiftType.array("Inner"))
-        
-        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Array", parameters: ["Inner", "Inner2"])),
-                       SwiftType.generic("Array", parameters: ["Inner", "Inner2"]))
-    }
-    
-    func testSugarizeArrayDictionarySwiftType() {
-        let sut = makeDefaultTypeMapper()
-        
-        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Dictionary", parameters: ["Key", "Value"])),
-                       SwiftType.dictionary(key: "Key", value: "Value"))
-        
-        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Dictionary", parameters: ["Element"])),
-                       SwiftType.generic("Dictionary", parameters: ["Element"]))
     }
     
     func testTypeNameString() {
@@ -250,27 +231,6 @@ class DefaultTypeMapperTests: XCTestCase {
                toConvertTo: "NSArray")
     }
     
-    func testNestedNSArray() {
-        expect(
-            .pointer(
-                .generic(
-                    "NSArray",
-                    parameters: [
-                        .pointer(
-                            .generic(
-                                "NSArray",
-                                parameters: [
-                                    .pointer(
-                                        .struct("NSObject"))
-                                ]
-                            )
-                        )
-                    ]
-                )
-            ),
-               toConvertTo: "[[NSObject]]")
-    }
-    
     func testNSDictionary() {
         expect(.pointer(.generic("NSDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))])),
                toConvertTo: "[String: NSObject]")
@@ -425,7 +385,7 @@ class DefaultTypeMapperTests: XCTestCase {
     }
 }
 
-extension DefaultTypeMapperTests {
+extension SwiftTypeConversionTests {
     private func expect(_ type: ObjcType,
                         inNonnullContext: Bool = false,
                         withExplicitNullability nullability: TypeNullability? = .nonnull,
@@ -472,7 +432,7 @@ extension DefaultTypeMapperTests {
                                    nullability: TypeNullability?,
                                    typeSystem: TypeSystem) -> String {
         
-        let mapper = makeDefaultTypeMapper()
+        let mapper = DefaultTypeMapper(typeSystem: typeSystem)
         
         var ctx: TypeMappingContext = .empty
         if let nul = nullability {
@@ -480,10 +440,8 @@ extension DefaultTypeMapperTests {
         }
         ctx.inNonnullContext = inNonnullContext
         
-        return mapper.typeNameString(for: type, context: ctx)
-    }
-    
-    private func makeDefaultTypeMapper() -> DefaultTypeMapper {
-        return DefaultTypeMapper(typeSystem: typeSystem)
+        let type = mapper.swiftType(forObjcType: type, context: ctx)
+        
+        return SwiftTypeConverter.makeTypeSyntax(type).description
     }
 }

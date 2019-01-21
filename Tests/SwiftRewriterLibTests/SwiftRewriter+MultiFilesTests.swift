@@ -37,13 +37,12 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             class MyClass: NSObject {
                 var name: String
                 var surname: String
-            
+                
                 init(name: String, surname: String) {
                     self.name = name
                     self.surname = surname
                     super.init()
                 }
-            
                 func printMyName() {
                     NSLog("%@ %@", self.name, self.surname)
                 }
@@ -495,7 +494,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """
             class A: UIView {
                 var b: B?
-            
+                
                 func test() {
                     // type: CGRect?
                     self.window?.bounds

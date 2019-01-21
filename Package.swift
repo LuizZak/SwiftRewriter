@@ -126,7 +126,8 @@ let package = Package(
         .testTarget(
             name: "SwiftSyntaxSupportTests",
             dependencies: ["SwiftSyntaxSupport", "SwiftSyntax", "KnownType",
-                           "Intentions", "SwiftAST", "TestCommons"]),
+                           "Intentions", "SwiftAST", "TestCommons",
+                           "SwiftRewriterLib"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",
