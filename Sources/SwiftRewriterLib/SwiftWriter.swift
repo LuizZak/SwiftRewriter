@@ -864,7 +864,7 @@ class InternalSwiftWriter {
         if let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreVisible(than: setterLevel) {
             let setter =
                 _accessModifierFor(accessLevel: setterLevel,
-                                                       omitInternal: false)
+                                   omitInternal: false)
             
             target.outputInlineWithSpace("\(setter)(set)", style: .keyword)
         }

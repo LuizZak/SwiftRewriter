@@ -459,7 +459,8 @@ class SwiftRewriter_StmtTests: XCTestCase {
                     let local = 5
                     let constLocal = 5
                     let local2: Int
-                    let localS1 = 5, localS2: Int
+                    let localS1 = 5
+                    let localS2: Int
                 }
             }
             """)

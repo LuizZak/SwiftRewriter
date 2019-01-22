@@ -335,8 +335,8 @@ class ASTCorrectorExpressionPassTests: ExpressionPassTestCase {
     }
     
     /// Tests that base expressions (i.e. those that form a complete statement,
-    /// that form a function argument, or a subscript operand) have their nullability
-    /// corrected by default.
+    /// that form a function argument, or a subscript operand) do not have their
+    /// nullability corrected by default.
     func testDontCorrectBaseExpressionsScalarTypesForConstantExpressions() {
         let expMaker = { Expression.constant(0) }
         

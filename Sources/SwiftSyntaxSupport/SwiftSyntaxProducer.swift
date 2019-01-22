@@ -135,6 +135,9 @@ public class SwiftSyntaxProducer {
             return false
         }
         
+        if intention is PropertyGenerationIntention {
+            return true
+        }
         if let method = intention as? MethodGenerationIntention {
             if !isDeallocMethod(method) {
                 return true
@@ -316,6 +319,12 @@ extension SwiftSyntaxProducer {
         return EnumDeclSyntax { builder in
             addExtraLeading(indentation())
             
+            let attributes = self.attributes(for: intention, inline: false)
+            
+            for attribute in attributes {
+                builder.addAttribute(attribute)
+            }
+            
             builder.useEnumKeyword(makeStartToken(SyntaxFactory.makeEnumKeyword).withTrailingSpace())
             builder.useIdentifier(makeIdentifier(intention.typeName))
             
@@ -404,6 +413,10 @@ extension SwiftSyntaxProducer {
         
         return ClassDeclSyntax { builder in
             addExtraLeading(indentation())
+            
+            for attribute in attributes(for: intention, inline: false) {
+                builder.addAttribute(attribute)
+            }
             
             builder.useClassKeyword(
                 makeStartToken(SyntaxFactory.makeClassKeyword)

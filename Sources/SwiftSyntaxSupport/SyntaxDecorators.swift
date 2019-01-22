@@ -1,4 +1,5 @@
 import Intentions
+import SwiftAST
 import SwiftSyntax
 
 class ModifiersSyntaxDecoratorApplier {
@@ -7,6 +8,7 @@ class ModifiersSyntaxDecoratorApplier {
     static func makeDefaultDecoratorApplier() -> ModifiersSyntaxDecoratorApplier {
         let decorator = ModifiersSyntaxDecoratorApplier()
         decorator.addDecorator(AccessLevelModifiersDecorator())
+        decorator.addDecorator(PropertySetterAccessModifiersDecorator())
         decorator.addDecorator(ProtocolOptionalModifierDecorator())
         decorator.addDecorator(StaticModifiersDecorator())
         decorator.addDecorator(OverrideModifierDecorator())
@@ -98,26 +100,8 @@ class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
             return
         }
         
-        let token: TokenSyntax
-        
-        switch intention.accessLevel {
-        case .internal:
-            // We don't emit `internal` explicitly by default here
+        guard let token = _accessModifierFor(accessLevel: intention.accessLevel, omitInternal: true) else {
             return
-            
-        case .open:
-            // TODO: There's no `open` keyword currently in the SwiftSyntax version
-            // we're using;
-            token = SyntaxFactory.makeIdentifier("open")
-            
-        case .private:
-            token = SyntaxFactory.makePrivateKeyword()
-            
-        case .fileprivate:
-            token = SyntaxFactory.makeFileprivateKeyword()
-            
-        case .public:
-            token = SyntaxFactory.makePublicKeyword()
         }
         
         let modifier =
@@ -130,6 +114,35 @@ class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
                 )
         
         list.append(modifier)
+    }
+}
+
+/// Decorator that adds `public(set)`, `internal(set)`, `fileprivate(set)`, `private(set)`
+/// setter modifiers to properties and instance variables
+class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
+    func appendModifiers(for intention: IntentionProtocol,
+                         _ list: inout [DeclModifierSyntax],
+                         extraLeading: inout Trivia?) {
+        
+        guard let prop = intention as? PropertyGenerationIntention else {
+            return
+        }
+        
+        guard let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreVisible(than: setterLevel) else {
+            return
+        }
+        guard let setterAccessLevel = _accessModifierFor(accessLevel: setterLevel, omitInternal: true) else {
+            return
+        }
+                
+        let decl = DeclModifierSyntax { builder in
+            builder.useName(setterAccessLevel.withExtraLeading(consuming: &extraLeading))
+            builder.addToken(SyntaxFactory.makeLeftParenToken())
+            builder.addToken(makeIdentifier("set"))
+            builder.addToken(SyntaxFactory.makeRightParenToken().withTrailingSpace())
+        }
+        
+        list.append(decl)
     }
 }
 
@@ -282,4 +295,30 @@ class ProtocolOptionalModifierDecorator: ModifiersSyntaxDecorator {
         
         return false
     }
+}
+
+func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool) -> TokenSyntax? {
+    let token: TokenSyntax
+    
+    switch accessLevel {
+    case .internal:
+        // We don't emit `internal` explicitly by default here
+        return nil
+        
+    case .open:
+        // TODO: There's no `open` keyword currently in the SwiftSyntax version
+        // we're using;
+        token = SyntaxFactory.makeIdentifier("open")
+        
+    case .private:
+        token = SyntaxFactory.makePrivateKeyword()
+        
+    case .fileprivate:
+        token = SyntaxFactory.makeFileprivateKeyword()
+        
+    case .public:
+        token = SyntaxFactory.makePublicKeyword()
+    }
+    
+    return token
 }
