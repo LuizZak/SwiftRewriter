@@ -699,6 +699,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
                     switch value {
                     case 0:
                         stmt()
+
                         fallthrough
                     case 1:
                         otherStmt()
