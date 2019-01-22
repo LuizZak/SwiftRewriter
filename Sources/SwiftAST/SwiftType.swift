@@ -9,6 +9,8 @@ indirect public enum SwiftType: Hashable {
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)
     case nullabilityUnspecified(SwiftType)
+    case array(SwiftType)
+    case dictionary(key: SwiftType, value: SwiftType)
 }
 
 extension SwiftType: ExpressibleByStringLiteral {
@@ -83,9 +85,9 @@ public extension SwiftType {
         }
     }
     
-    /// Whether this type requires trailing parenthesis when this type is used
+    /// Whether this type requires surrounding parenthesis when this type is used
     /// within an optional or metatype.
-    public var requiresTrailingParens: Bool {
+    public var requiresSurroundingParens: Bool {
         switch self {
         case .protocolComposition, .block:
             return true
@@ -289,14 +291,6 @@ public extension SwiftType {
         return .nominal(.generic("ClosedRange", parameters: .tail(operand)))
     }
     
-    public static func array(_ type: SwiftType) -> SwiftType {
-        return .nominal(.generic("Array", parameters: .tail(type)))
-    }
-    
-    public static func dictionary(key: SwiftType, value: SwiftType) -> SwiftType {
-        return .nominal(.generic("Dictionary", parameters: .list(key, .tail(value))))
-    }
-    
     public static func typeName(_ name: String) -> SwiftType {
         return .nominal(.typeName(name))
     }
@@ -360,18 +354,7 @@ extension NominalSwiftType: CustomStringConvertible {
             return name
             
         case let .generic(name, params):
-            let params = Array(params)
-            
-            switch name {
-            case "Array" where params.count == 1:
-                return "[" + params[0].description + "]"
-                
-            case "Dictionary" where params.count == 2:
-                return "[\(params[0]): \(params[1])]"
-                
-            default:
-                return name + "<" + params.map { $0.description }.joined(separator: ", ") + ">"
-            }
+            return name + "<" + params.map { $0.description }.joined(separator: ", ") + ">"
         }
     }
     
@@ -443,11 +426,17 @@ extension SwiftType: CustomStringConvertible {
             
         case .nested(let items):
             return items.map { $0.description }.joined(separator: ".")
+            
+        case .array(let type):
+            return "[\(type)]"
+            
+        case let .dictionary(key, value):
+            return "[\(key): \(value)]"
         }
     }
     
     private var descriptionWithParens: String {
-        if requiresTrailingParens {
+        if requiresSurroundingParens {
             return "(\(self))"
         }
         
@@ -745,6 +734,9 @@ extension TwoOrMore: Collection {
 extension TwoOrMore {
     public var first: T {
         return self[0]
+    }
+    public var second: T {
+        return self[1]
     }
     public var last: T {
         return self[count - 1]

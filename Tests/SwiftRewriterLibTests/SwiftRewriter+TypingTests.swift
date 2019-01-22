@@ -79,7 +79,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // type: NSObject
                     super
                 }
-                
+            
                 static func classMethod() {
                     // type: MyClass.Type
                     self
@@ -181,7 +181,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 var aValue: Int = 0
-                
+            
                 func method() {
                     // type: Int
                     self.aValue
@@ -396,7 +396,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             class A: NSObject {
                 private var field: Int = 0
                 var value: Bool = false
-                
+            
                 func f1() {
                     // type: Bool
                     self.value
@@ -445,7 +445,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A: NSObject {
                 var prop: Int = 0
-                
+            
                 func f1(_ value: A!) {
                     // type: Int
                     value.prop
@@ -473,7 +473,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A: NSObject {
                 private var callback: (() -> Void)?
-                
+            
                 func f1() {
                     let _callback = self.callback
                     // type: Void?
@@ -503,7 +503,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A: NSObject {
                 private var callback: (() -> Void)?
-                
+            
                 func f1() {
                     let _callback = self.callback
                     // type: Void?
@@ -530,7 +530,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A: NSObject {
                 var b: NSObject?
-                
+            
                 func method() {
                     // type: Bool?
                     b?.responds(to: Selector("abc:"))
@@ -564,7 +564,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             }
             class A: NSObject {
                 var b: B?
-                
+            
                 func method() {
                     // type: B?
                     self.b?.method().method()
@@ -598,7 +598,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             }
             class A: NSObject {
                 var b: B?
-                
+            
                 func method() {
                     // type: B?
                     self.b?.method()?.method()
@@ -633,7 +633,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
             class A: NSObject {
                 weak var b: B?
-                
+            
                 func method() {
                     // type: Bool?
                     self.b?.responds(to: Selector("abc:"))
@@ -677,7 +677,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
             class C: NSObject {
                 var composed: (A & B)!
-                
+            
                 func method() {
                     // type: (A & B)!
                     self.composed
@@ -819,7 +819,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
             class MyClass {
                 var callback: Callback
-                
+            
                 func method() {
                     // type: Callback
                     self.callback = { (arg: Int) -> Void in
@@ -860,7 +860,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
             class MyClass {
                 var callback: Callback
-                
+            
                 func method() {
                     // type: Callback
                     self.callback = { () -> Void in
@@ -912,7 +912,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
             class MyClass {
                 var callback: Callback
-                
+            
                 func method() {
                     let local: Int
                     // type: Callback
@@ -1149,7 +1149,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A: UIView {
                 var a: UIView?
-                
+            
                 func method() {
                     // type: CGRect
                     self.convert(CGRect.zero, to: nil)
@@ -1267,14 +1267,15 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 let prot: Protocol!
                 // type: Bool?
                 prot.method?()
-
+            
                 if prot.method?() == true {
                 }
             }
             
             @objc
             protocol Protocol: NSObjectProtocol {
-                @objc optional func method() -> Bool
+                @objc
+                optional func method() -> Bool
             }
             """,
             options: ASTWriterOptions(outputExpressionTypes: true))

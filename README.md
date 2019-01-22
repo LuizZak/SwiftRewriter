@@ -50,12 +50,13 @@ will produce the following Swift file in the standard output:
 class MyClass: NSObject {
     var name: String
     var surname: String
-    
+
     init(name: String, surname: String) {
         self.name = name
         self.surname = surname
         super.init()
     }
+
     func printMyName() {
         NSLog("%@ %@", self.name, self.surname)
     }

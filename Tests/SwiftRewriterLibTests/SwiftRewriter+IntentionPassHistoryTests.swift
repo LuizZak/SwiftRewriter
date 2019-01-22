@@ -38,7 +38,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                     set(value) {
                     }
                 }
-                
+            
                 // [Creation] TestSingleInputProvider.m line 8 column 3
                 // [TypeMerge:FileTypeMergingIntentionPass] Updated nullability signature from () -> String! to: () -> String
                 func aMethod() -> String {
@@ -125,7 +125,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 var root: UnsafeMutablePointer<node234>!
                 // [Creation] A.c line 26 column 5
                 var cmp: cmpfn234!
-                
+            
                 // [Creation] Synthesizing parameterless constructor for struct
                 init() {
                     root = nil
@@ -148,7 +148,7 @@ class SwiftRewriter_IntentionPassHistoryTests: XCTestCase {
                 var counts: CInt
                 // [Creation] A.c line 32 column 5
                 var elems: UnsafeMutableRawPointer!
-                
+            
                 // [Creation] Synthesizing parameterless constructor for struct
                 init() {
                     parent = nil

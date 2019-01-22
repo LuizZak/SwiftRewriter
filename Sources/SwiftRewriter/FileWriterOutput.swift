@@ -62,6 +62,10 @@ class FileOutputTarget: RewriterOutputTarget {
         self.buffer += buffer
     }
     
+    public func outputRaw(_ text: String) {
+        writeBufferFile(text)
+    }
+    
     public func output(line: String, style: TextStyle) {
         outputIdentation()
         writeBufferFile(line)

@@ -13,6 +13,26 @@ class DefaultTypeMapperTests: XCTestCase {
         typeSystem = TypeSystem()
     }
     
+    func testSugarizeArraySwiftType() {
+        let sut = makeDefaultTypeMapper()
+        
+        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Array", parameters: ["Inner"])),
+                       SwiftType.array("Inner"))
+        
+        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Array", parameters: ["Inner", "Inner2"])),
+                       SwiftType.generic("Array", parameters: ["Inner", "Inner2"]))
+    }
+    
+    func testSugarizeArrayDictionarySwiftType() {
+        let sut = makeDefaultTypeMapper()
+        
+        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Dictionary", parameters: ["Key", "Value"])),
+                       SwiftType.dictionary(key: "Key", value: "Value"))
+        
+        XCTAssertEqual(sut.sugarizeSwiftType(SwiftType.generic("Dictionary", parameters: ["Element"])),
+                       SwiftType.generic("Dictionary", parameters: ["Element"]))
+    }
+    
     func testTypeNameString() {
         expectSwift(.typeName("MyType"), toConvertTo: "MyType")
         expectSwift(.optional(.typeName("MyType")), toConvertTo: "MyType?")
@@ -230,6 +250,27 @@ class DefaultTypeMapperTests: XCTestCase {
                toConvertTo: "NSArray")
     }
     
+    func testNestedNSArray() {
+        expect(
+            .pointer(
+                .generic(
+                    "NSArray",
+                    parameters: [
+                        .pointer(
+                            .generic(
+                                "NSArray",
+                                parameters: [
+                                    .pointer(
+                                        .struct("NSObject"))
+                                ]
+                            )
+                        )
+                    ]
+                )
+            ),
+               toConvertTo: "[[NSObject]]")
+    }
+    
     func testNSDictionary() {
         expect(.pointer(.generic("NSDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSObject"))])),
                toConvertTo: "[String: NSObject]")
@@ -431,7 +472,7 @@ extension DefaultTypeMapperTests {
                                    nullability: TypeNullability?,
                                    typeSystem: TypeSystem) -> String {
         
-        let mapper = DefaultTypeMapper(typeSystem: typeSystem)
+        let mapper = makeDefaultTypeMapper()
         
         var ctx: TypeMappingContext = .empty
         if let nul = nullability {
@@ -440,5 +481,9 @@ extension DefaultTypeMapperTests {
         ctx.inNonnullContext = inNonnullContext
         
         return mapper.typeNameString(for: type, context: ctx)
+    }
+    
+    private func makeDefaultTypeMapper() -> DefaultTypeMapper {
+        return DefaultTypeMapper(typeSystem: typeSystem)
     }
 }

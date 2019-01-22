@@ -70,6 +70,16 @@ public class FileIntentionBuilder {
     var inNonnullContext = false
     var intention: FileGenerationIntention
     
+    public static func makeFileIntention(fileName: String,
+                                         _ builderBlock: (FileIntentionBuilder) -> Void) -> FileGenerationIntention {
+        
+        let builder = FileIntentionBuilder(fileNamed: fileName)
+        
+        builderBlock(builder)
+        
+        return builder.build()
+    }
+    
     public init(fileNamed name: String) {
         intention = FileGenerationIntention(sourcePath: name, targetPath: name)
     }
@@ -122,7 +132,7 @@ public class FileIntentionBuilder {
             FunctionSignature(name: name,
                               parameters: parameters,
                               returnType: returnType,
-                              isStatic: true)
+                              isStatic: false)
         
         return createGlobalFunction(withSignature: signature, body: body)
     }
@@ -137,6 +147,23 @@ public class FileIntentionBuilder {
         if let body = body {
             funcIntent.functionBody = FunctionBodyIntention(body: body)
         }
+        
+        intention.addGlobalFunction(funcIntent)
+        
+        return self
+    }
+    
+    @discardableResult
+    public func createGlobalFunction(withName name: String,
+                                     _ initialization: (FunctionBuilder<GlobalFunctionGenerationIntention>) -> Void) -> FileIntentionBuilder {
+        
+        var funcIntent = GlobalFunctionGenerationIntention(signature: FunctionSignature(name: name))
+        funcIntent.inNonnullContext = inNonnullContext
+        
+        let builder = FunctionBuilder<GlobalFunctionGenerationIntention>(target: funcIntent)
+        initialization(builder)
+        
+        funcIntent = builder.build()
         
         intention.addGlobalFunction(funcIntent)
         
@@ -268,6 +295,93 @@ public class FileIntentionBuilder {
     }
 }
 
+public protocol _FunctionBuilder {
+    associatedtype FunctionType = FunctionIntention
+    var target: FunctionType { get nonmutating set }
+}
+
+public extension _FunctionBuilder where FunctionType: MutableSignatureFunctionIntention {
+    var signature: FunctionSignature { get { return target.signature } nonmutating set { target.signature = newValue } }
+    
+    // TODO: It is less than ideal to repeat the name argument here, since most
+    // likely the user got here from function builders that already require a
+    // name during their creation.
+    @discardableResult
+    func createSignature(name: String, _ builder: (FunctionSignatureBuilder) -> Void) -> Self {
+        let b = FunctionSignatureBuilder(signature: FunctionSignature(name: name))
+        
+        builder(b)
+        
+        target.signature = b.build()
+        
+        return self
+    }
+}
+
+extension _FunctionBuilder where FunctionType: MutableFunctionIntention {
+    @discardableResult
+    public func setBody(_ body: CompoundStatement) -> Self {
+        target.functionBody = FunctionBodyIntention(body: body)
+        
+        return self
+    }
+}
+
+public class FunctionSignatureBuilder {
+    var signature: FunctionSignature
+    
+    init(signature: FunctionSignature) {
+        self.signature = signature
+    }
+    
+    
+    @discardableResult
+    public func addParameter(name: String, type: SwiftType) -> FunctionSignatureBuilder {
+        signature.parameters.append(
+            ParameterSignature(label: name, name: name, type: type)
+        )
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setIsStatic(_ isStatic: Bool) -> FunctionSignatureBuilder {
+        signature.isStatic = isStatic
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setIsMutating(_ isMutating: Bool) -> FunctionSignatureBuilder {
+        signature.isMutating = isMutating
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setReturnType(_ type: SwiftType) -> FunctionSignatureBuilder {
+        signature.returnType = type
+        
+        return self
+    }
+    
+    func build() -> FunctionSignature {
+        return signature
+    }
+}
+
+public class FunctionBuilder<T: FunctionIntention>: _FunctionBuilder {
+    public var target: T
+    
+    init(target: T) {
+        self.target = target
+    }
+    
+    public func build() -> T {
+        return target
+    }
+}
+
 public class MemberBuilder<T: MemberGenerationIntention> {
     var targetMember: T
     
@@ -319,44 +433,40 @@ public extension MemberBuilder where T: OverridableMemberGenerationIntention {
     }
 }
 
-public extension MemberBuilder where T: MethodGenerationIntention {
-    @discardableResult
-    public func addParameter(name: String, type: SwiftType) -> MemberBuilder {
-        targetMember.signature.parameters.append(
-            ParameterSignature(label: name, name: name, type: type)
-        )
-        
-        return self
-    }
+extension MemberBuilder: _FunctionBuilder where T: FunctionIntention {
+    public typealias FunctionType = T
     
-    @discardableResult
-    public func setBody(_ body: CompoundStatement) -> MemberBuilder {
-        targetMember.functionBody = FunctionBodyIntention(body: body)
-        
-        return self
-    }
-    
-    @discardableResult
-    public func setIsStatic(_ isStatic: Bool) -> MemberBuilder {
-        targetMember.signature.isStatic = isStatic
-        
-        return self
-    }
-}
-
-public extension MemberBuilder where T: InitGenerationIntention {
-    @discardableResult
-    public func setBody(_ body: CompoundStatement) -> MemberBuilder {
-        targetMember.functionBody = FunctionBodyIntention(body: body)
-        
-        return self
-    }
+    public var target: FunctionType { get { return targetMember } set { targetMember = newValue }}
 }
 
 public extension MemberBuilder where T: PropertyGenerationIntention {
     @discardableResult
+    public func setAsField() -> MemberBuilder {
+        targetMember.mode = .asField
+        
+        return self
+    }
+    
+    @discardableResult
     public func setAsComputedProperty(body: CompoundStatement) -> MemberBuilder {
         targetMember.mode = .computed(FunctionBodyIntention(body: body))
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setAsGetterSetter(getter: CompoundStatement,
+                                  setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
+        
+        targetMember.mode = .property(get: FunctionBodyIntention(body: getter),
+                                      set: setter)
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setInitialValue(expression: Expression?) -> MemberBuilder {
+        targetMember.mode = .computed(FunctionBodyIntention(body: []))
         
         return self
     }

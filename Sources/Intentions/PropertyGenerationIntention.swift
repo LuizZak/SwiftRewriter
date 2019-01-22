@@ -90,6 +90,8 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
     }
     public var attributes: [PropertyAttribute]
     
+    public var initialValue: Expression?
+    
     public convenience init(name: String,
                             type: SwiftType,
                             attributes: [PropertyAttribute],
@@ -135,6 +137,8 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         mode = try container.decode(Mode.self, forKey: .mode)
         attributes = try container.decode([PropertyAttribute].self,
                                           forKey: .attributes)
+        initialValue = try container.decodeIfPresent(Expression.self,
+                                                     forKey: .initialValue)
         
         try super.init(from: container.superDecoder())
     }
@@ -149,6 +153,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         try container.encode(storage, forKey: .storage)
         try container.encode(mode, forKey: .mode)
         try container.encode(attributes, forKey: .attributes)
+        try container.encode(initialValue, forKey: .initialValue)
         
         try super.encode(to: container.superEncoder())
     }
@@ -239,6 +244,11 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         /// The body for the setter
         public var body: FunctionBodyIntention
         
+        public init(valueIdentifier: String, body: CompoundStatement) {
+            self.init(valueIdentifier: valueIdentifier,
+                      body: FunctionBodyIntention(body: body))
+        }
+        
         public init(valueIdentifier: String, body: FunctionBodyIntention) {
             self.valueIdentifier = valueIdentifier
             self.body = body
@@ -272,6 +282,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorag
         case setterAccessLevel
         case attributes
         case mode
+        case initialValue
     }
 }
 

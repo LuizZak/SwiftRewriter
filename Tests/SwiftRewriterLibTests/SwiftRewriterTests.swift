@@ -361,6 +361,7 @@ class SwiftRewriterTests: XCTestCase {
                 init(thing: AnyObject!) {
                     self.thing()
                 }
+
                 func myMethod() {
                     self.thing()
                 }
@@ -397,10 +398,11 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class MyClass {
                 private var anIVar: Int = 0
-                
+
                 init(thing: AnyObject!) {
                     self.thing()
                 }
+
                 func myMethod() {
                     self.thing()
                 }
@@ -436,6 +438,7 @@ class SwiftRewriterTests: XCTestCase {
                 init(thing: AnyObject) {
                     self.thing()
                 }
+
                 func myMethod() {
                     self.thing()
                 }
@@ -822,8 +825,10 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
-                @objc optional func myMethod()
-                @objc optional func myMethod2()
+                @objc
+                optional func myMethod()
+                @objc
+                optional func myMethod2()
             }
 
             class A: NSObject, MyProtocol {
@@ -848,8 +853,10 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             protocol MyProtocol: NSObjectProtocol {
                 func f1()
-                @objc optional func f2()
-                @objc optional func f3()
+                @objc
+                optional func f2()
+                @objc
+                optional func f3()
                 func f4()
             }
             """)
@@ -908,12 +915,14 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             import File
+
             // Preprocessor directives found in file:
             // #import "File.h"
             // #import <File.h>
             // #if 0
             // #endif
             // #define MACRO 123
+
             """)
     }
     
@@ -929,6 +938,7 @@ class SwiftRewriterTests: XCTestCase {
             // Preprocessor directives found in file:
             // #if 0
             // #endif
+
             """)
     }
     
@@ -1023,7 +1033,7 @@ class SwiftRewriterTests: XCTestCase {
                 var x: CFloat
                 var y: CFloat
                 var z: CFloat
-                
+            
                 init() {
                     x = 0.0
                     y = 0.0
@@ -1040,7 +1050,7 @@ class SwiftRewriterTests: XCTestCase {
                 var y: CFloat
                 var z: CFloat
                 var w: CFloat
-                
+            
                 init() {
                     x = 0.0
                     y = 0.0
@@ -1059,7 +1069,7 @@ class SwiftRewriterTests: XCTestCase {
                 var color: packed_float4
                 var offset: CInt
                 var booly: Bool
-                
+            
                 init() {
                     position = vector_float3()
                     color = packed_float4()
@@ -1103,7 +1113,7 @@ class SwiftRewriterTests: XCTestCase {
                 var x: CFloat
                 var y: CFloat
                 var z: CFloat
-                
+
                 init() {
                     x = 0.0
                     y = 0.0
@@ -1120,7 +1130,7 @@ class SwiftRewriterTests: XCTestCase {
                 var y: CFloat
                 var z: CFloat
                 var w: CFloat
-                
+
                 init() {
                     x = 0.0
                     y = 0.0
@@ -1137,7 +1147,7 @@ class SwiftRewriterTests: XCTestCase {
             struct VertexObject {
                 var position: vector_float3
                 var color: packed_float4
-                
+
                 init() {
                     position = vector_float3()
                     color = packed_float4()
@@ -1164,7 +1174,7 @@ class SwiftRewriterTests: XCTestCase {
             
             struct a {
                 var b: CInt
-                
+
                 init() {
                     b = 0
                 }
@@ -1187,7 +1197,7 @@ class SwiftRewriterTests: XCTestCase {
             
             struct a {
                 var b: CInt
-                
+
                 init() {
                     b = 0
                 }
@@ -1527,14 +1537,15 @@ class SwiftRewriterTests: XCTestCase {
             @end
             """,
             swift: """
-            @objc enum Enum: Int {
+            @objc
+            enum Enum: Int {
                 case Enum_A
             }
             
             @objc
             protocol A: NSObjectProtocol {
                 @objc var b: Bool { get set }
-                
+            
                 @objc
                 func method()
             }
@@ -1542,7 +1553,7 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class B: A {
                 @objc var b: Bool = false
-                
+            
                 @objc
                 func method() {
                 }
@@ -1582,6 +1593,7 @@ class SwiftRewriterTests: XCTestCase {
                 init(otherThing thing: A!) {
                     super.init(thing: thing)
                 }
+
                 override func a() {
                     super.a()
                 }
@@ -1664,7 +1676,7 @@ class SwiftRewriterTests: XCTestCase {
             class A {
                 var a: A?
                 var b: Int = 0
-                
+            
                 func method() {
                     self.takesInt(a?.b ?? 0)
                     self.takesInt(a?.returnsInt() ?? 0)
@@ -1701,7 +1713,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             struct A {
                 var a: CInt
-                
+            
                 init() {
                     a = 0
                 }
@@ -1750,7 +1762,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             class A {
                 weak var b: B?
-                
+            
                 func method() {
                     let a: A!
                     self.b?.c = 0
@@ -1785,7 +1797,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             class A {
                 var b: B?
-                
+            
                 func method() {
                     if let b = self.b {
                         self.takesB(b)
@@ -1860,7 +1872,7 @@ class SwiftRewriterTests: XCTestCase {
             class A {
                 var bounds: CGRect = CGRect()
                 weak var parent: A?
-                
+            
                 func method() {
                     self.bounds.insetBy(dx: 1, dy: 2)
                     self.bounds = (self.parent?.bounds ?? CGRect()).insetBy(dx: 1, dy: 2)
@@ -1892,7 +1904,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             class A {
                 var b: B?
-                
+            
                 func method() {
                     let local = Int((self.b?.value ?? 0.0) / (self.b?.value ?? 0.0))
                 }
@@ -1926,7 +1938,7 @@ class SwiftRewriterTests: XCTestCase {
             }
             class A {
                 var b: B?
-                
+            
                 func method(_ b: B) {
                     self.takesF(b.value)
                 }
@@ -1956,7 +1968,7 @@ class SwiftRewriterTests: XCTestCase {
             
             class A: NSObject {
                 var b: CGFloat = 0.0
-                
+            
                 func method() {
                     let changedY = fabs(self.b - self.b) > FLT_EPSILON
                 }
@@ -1983,7 +1995,7 @@ class SwiftRewriterTests: XCTestCase {
                 var a: Int {
                     return self._a
                 }
-                
+            
                 func method() {
                     self._a = 0
                 }
@@ -2197,7 +2209,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class A: NSObject {
                 private(set) var a: Int = 0
-                
+            
                 func method() {
                     self.a = 0
                 }
@@ -2225,7 +2237,7 @@ class SwiftRewriterTests: XCTestCase {
             
             class A {
                 var prop: CGFloat = 0.0
-                
+
                 func method() {
                     let local = GLenum(prop)
                 }
@@ -2255,7 +2267,7 @@ class SwiftRewriterTests: XCTestCase {
 
             class A {
                 var prop: CGFloat = 0.0
-                
+
                 func method() {
                     let local = GLenum(prop)
                 }
@@ -2322,7 +2334,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class A {
                 var a: Int = 0
-                
+
                 override init() {
                     self.a = 0
                     super.init()
@@ -2568,7 +2580,7 @@ class SwiftRewriterTests: XCTestCase {
             struct tree234_Tag {
                 var root: UnsafeMutablePointer<node234>!
                 var cmp: cmpfn234!
-                
+            
                 init() {
                     root = nil
                     cmp = nil

@@ -18,6 +18,34 @@ public protocol ExpressionPostfixBuildable {
     func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression
 }
 
+extension ExpressionPostfixBuildable {
+    public func call() -> PostfixExpression {
+        return call([] as [FunctionArgument], type: nil, callableSignature: nil)
+    }
+    
+    public func call(_ arguments: [FunctionArgument]) -> PostfixExpression {
+        return call(arguments, type: nil, callableSignature: nil)
+    }
+    
+    public func call(_ unlabeledArguments: [Expression]) -> PostfixExpression {
+        return call(unlabeledArguments, type: nil, callableSignature: nil)
+    }
+    
+    public func call(_ unlabeledArguments: [Expression],
+                     callableSignature: SwiftType?) -> PostfixExpression {
+        
+        return call(unlabeledArguments, type: nil, callableSignature: callableSignature)
+    }
+    
+    public func dot(_ member: String) -> PostfixExpression {
+        return dot(member, type: nil)
+    }
+    
+    public func sub(_ exp: Expression) -> PostfixExpression {
+        return sub(exp, type: nil)
+    }
+}
+
 public extension ExpressionPostfixBuildable {
     public func call(_ arguments: [FunctionArgument],
                      type: SwiftType?,
@@ -59,31 +87,38 @@ public extension ExpressionPostfixBuildable {
     }
 }
 
-public extension ExpressionPostfixBuildable {
-    public func call() -> PostfixExpression {
-        return call([] as [FunctionArgument], type: nil, callableSignature: nil)
+extension Expression: ExpressionPostfixBuildable {
+    public var expressionToBuild: Expression { return self }
+}
+
+extension Expression {
+    /// Creates a BinaryExpression between this expression and a right-hand-side
+    /// expression.
+    public func binary(op: SwiftOperator, rhs: Expression) -> BinaryExpression {
+        return .binary(lhs: self, op: op, rhs: rhs)
     }
     
-    public func call(_ arguments: [FunctionArgument]) -> PostfixExpression {
-        return call(arguments, type: nil, callableSignature: nil)
+    /// Creates a BinaryExpression between this expression and a right-hand-side
+    /// expression.
+    public func assignment(op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
+        return .assignment(lhs: self, op: op, rhs: rhs)
     }
     
-    public func call(_ unlabeledArguments: [Expression]) -> PostfixExpression {
-        return call(unlabeledArguments, type: nil, callableSignature: nil)
-    }
-    
-    public func call(_ unlabeledArguments: [Expression],
-                     callableSignature: SwiftType?) -> PostfixExpression {
+    /// Creates a type-cast expression with this expression
+    public func casted(to type: SwiftType, optional: Bool = true) -> CastExpression {
+        let exp = Expression.cast(expressionToBuild, type: type, isOptionalCast: optional)
         
-        return call(unlabeledArguments, type: nil, callableSignature: callableSignature)
+        return exp
     }
     
-    public func dot(_ member: String) -> PostfixExpression {
-        return dot(member, type: nil)
+    /// Begins an optional postfix creation from this expression.
+    public func optional() -> OptionalAccessPostfixBuilder {
+        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: false)
     }
     
-    public func sub(_ exp: Expression) -> PostfixExpression {
-        return sub(exp, type: nil)
+    /// Begins a force-unwrap optional postfix creation from this expression.
+    public func forceUnwrap() -> OptionalAccessPostfixBuilder {
+        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: true)
     }
 }
 
@@ -98,37 +133,6 @@ extension Expression {
         expectedType = expected
         
         return self
-    }
-}
-
-extension Expression: ExpressionPostfixBuildable {
-    public var expressionToBuild: Expression { return self }
-    
-    /// Creates a BinaryExpression between this expression and a right-hand-side
-    /// expression.
-    public func binary(op: SwiftOperator, rhs: Expression) -> BinaryExpression {
-        return .binary(lhs: self, op: op, rhs: rhs)
-    }
-    
-    /// Creates a BinaryExpression between this expression and a right-hand-side
-    /// expression.
-    public func assignment(op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
-        return .assignment(lhs: self, op: op, rhs: rhs)
-    }
-    
-    /// Creates a type-cast expression with this expression
-    public func casted(to type: SwiftType) -> CastExpression {
-        return .cast(expressionToBuild, type: type)
-    }
-    
-    /// Begins an optional postfix creation from this expression.
-    public func optional() -> OptionalAccessPostfixBuilder {
-        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: false)
-    }
-    
-    /// Begins a force-unwrap optional postfix creation from this expression.
-    public func forceUnwrap() -> OptionalAccessPostfixBuilder {
-        return OptionalAccessPostfixBuilder(exp: self, isForceUnwrap: true)
     }
 }
 

@@ -11,12 +11,17 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
     public var name: String
     public var storage: ValueStorage
     
+    public var initialValue: Expression?
+    
     public override var memberType: SwiftType {
         return type
     }
     
-    public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal,
+    public init(name: String,
+                storage: ValueStorage,
+                accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
+        
         self.name = name
         self.storage = storage
         super.init(accessLevel: accessLevel, source: source)
@@ -27,6 +32,7 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
         
         name = try container.decode(String.self, forKey: .name)
         storage = try container.decode(ValueStorage.self, forKey: .storage)
+        initialValue = try container.decodeIfPresent(Expression.self, forKey: .initialValue)
         
         try super.init(from: container.superDecoder())
     }
@@ -36,6 +42,7 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
         
         try container.encode(name, forKey: .name)
         try container.encode(storage, forKey: .storage)
+        try container.encodeIfPresent(initialValue, forKey: .initialValue)
         
         try super.encode(to: container.superEncoder())
     }
@@ -43,6 +50,7 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
     private enum CodingKeys: String, CodingKey {
         case name
         case storage
+        case initialValue
     }
 }
 

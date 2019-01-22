@@ -37,12 +37,13 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             class MyClass: NSObject {
                 var name: String
                 var surname: String
-                
+            
                 init(name: String, surname: String) {
                     self.name = name
                     self.surname = surname
                     super.init()
                 }
+            
                 func printMyName() {
                     NSLog("%@ %@", self.name, self.surname)
                 }
@@ -116,7 +117,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """
             class MyClass {
                 var property: String
-                
+            
                 func myMethod(_ parameter: String) -> AnyObject {
                 }
             }
@@ -255,6 +256,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             class MyClass {
                 init(thing: AnyObject!) {
                 }
+
                 func doThing() {
                 }
                 func doOtherThing() {
@@ -297,9 +299,10 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             class A {
                 private var ivarB: B!
                 var b: B
-                
+            
                 init(b: B!) {
                 }
+
                 func takesB(_ b: B!) -> B! {
                 }
             }
@@ -350,7 +353,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
 
             class Class: UIView {
                 weak var delegate: Delegate?
-                
+            
                 func method() {
                     // type: Delegate?
                     self.delegate
@@ -460,7 +463,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             // End of file A.swift
             class B {
                 var a: A?
-                
+            
                 func method() {
                     self.takesCGFloat(a?.width ?? 0.0)
                 }
@@ -494,7 +497,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             """
             class A: UIView {
                 var b: B?
-                
+            
                 func test() {
                     // type: CGRect?
                     self.window?.bounds
@@ -586,7 +589,7 @@ class SwiftRewriter_MultiFilesTests: XCTestCase {
             
             struct Aimpl {
                 var a: CInt
-                
+            
                 init() {
                     a = 0
                 }

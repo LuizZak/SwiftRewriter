@@ -3,7 +3,7 @@ import SwiftAST
 import KnownType
 
 /// Intention to generate a type initializer for a class or protocol initializer
-public final class InitGenerationIntention: MemberGenerationIntention, FunctionIntention {
+public final class InitGenerationIntention: MemberGenerationIntention, MutableFunctionIntention {
     public var parameters: [ParameterSignature]
     
     public var functionBody: FunctionBodyIntention?

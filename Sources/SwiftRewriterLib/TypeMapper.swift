@@ -259,7 +259,7 @@ public class DefaultTypeMapper: TypeMapper {
             
         case .optional(let type):
             var typeName = typeNameString(for: type)
-            if type.requiresTrailingParens {
+            if type.requiresSurroundingParens {
                 typeName = "(" + typeName + ")"
             }
             
@@ -267,7 +267,7 @@ public class DefaultTypeMapper: TypeMapper {
             
         case .implicitUnwrappedOptional(let type):
             var typeName = typeNameString(for: type)
-            if type.requiresTrailingParens {
+            if type.requiresSurroundingParens {
                 typeName = "(" + typeName + ")"
             }
             
@@ -275,7 +275,7 @@ public class DefaultTypeMapper: TypeMapper {
             
         case .nullabilityUnspecified(let type):
             var typeName = typeNameString(for: type)
-            if type.requiresTrailingParens {
+            if type.requiresSurroundingParens {
                 typeName = "(" + typeName + ")"
             }
             
@@ -286,7 +286,7 @@ public class DefaultTypeMapper: TypeMapper {
             
         case let .metatype(type):
             let inner = typeNameString(for: type)
-            if type.requiresTrailingParens {
+            if type.requiresSurroundingParens {
                 return "(" + inner + ").self"
             }
             
@@ -300,6 +300,12 @@ public class DefaultTypeMapper: TypeMapper {
             
         case let .nested(types):
             return types.map { typeNameString(for: $0) }.joined(separator: ".")
+            
+        case .array(let type):
+            return "[\(typeNameString(for: type))]"
+            
+        case let .dictionary(key, value):
+            return "[\(typeNameString(for: key)): \(typeNameString(for: value))]"
         }
     }
     
@@ -318,14 +324,6 @@ public class DefaultTypeMapper: TypeMapper {
         case .typeName(let name):
             return name
             
-        // Simplify known generic types
-        case .generic("Array", let parameters) where Array(parameters).count == 1:
-            return "[" + typeNameString(for: Array(parameters)[0]) + "]"
-            
-        case .generic("Dictionary", let parameters) where Array(parameters).count == 2:
-            let parameters = Array(parameters)
-            return "[" + typeNameString(for: parameters[0]) + ": " + typeNameString(for: parameters[1]) + "]"
-            
         case let .generic(type, parameters):
             return type + "<" + parameters.map(typeNameString(for:)).joined(separator: ", ") + ">"
         }
@@ -337,6 +335,10 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext) -> SwiftType {
+        return sugarizeSwiftType(_internalSwiftType(forObjcType: type, context: context))
+    }
+    
+    private func _internalSwiftType(forObjcType type: ObjcType, context: TypeMappingContext) -> SwiftType {
         switch type {
         case .void:
             return .void
@@ -387,6 +389,23 @@ public class DefaultTypeMapper: TypeMapper {
             }
             
             return swiftTuple(type: inner, count: length, context: context)
+        }
+    }
+    
+    /// Transforms a given SwiftType into a sugarized version of the type, converting
+    /// array and dictionary into the sugar equivalents
+    public func sugarizeSwiftType(_ type: SwiftType) -> SwiftType {
+        switch type {
+            
+        // Simplify known generic types
+        case .nominal(.generic("Array", let parameters)) where parameters.count == 1:
+            return .array(parameters[0])
+            
+        case .nominal(.generic("Dictionary", let parameters)) where parameters.count == 2:
+            return .dictionary(key: parameters[0], value: parameters[1])
+            
+        default:
+            return type
         }
     }
     

@@ -523,9 +523,7 @@ public class StatementWriter: StatementVisitor {
             target.outputLineFeed()
             
             target.idented {
-                for stmt in cs.statements {
-                    visitStatement(stmt)
-                }
+                emitStatements(cs.statements)
             }
         }
         
@@ -536,9 +534,7 @@ public class StatementWriter: StatementVisitor {
             target.outputLineFeed()
             
             target.idented {
-                for stmt in def {
-                    visitStatement(stmt)
-                }
+                emitStatements(def)
             }
         }
         

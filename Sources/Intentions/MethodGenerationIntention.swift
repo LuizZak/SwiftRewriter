@@ -4,7 +4,7 @@ import SwiftAST
 import KnownType
 
 /// An intention to generate a static/instance function for a type.
-public class MethodGenerationIntention: MemberGenerationIntention, FunctionIntention {
+public class MethodGenerationIntention: MemberGenerationIntention, MutableFunctionIntention, MutableSignatureFunctionIntention {
     public var typedSource: MethodDefinition? {
         return source as? MethodDefinition
     }

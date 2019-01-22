@@ -24,7 +24,8 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.7.0"),
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.24"),
-        .package(url: "https://github.com/LuizZak/console.git", from: "0.1.0")
+        .package(url: "https://github.com/LuizZak/console.git", from: "0.1.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.40200.0"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define
@@ -54,13 +55,16 @@ let package = Package(
             name: "KnownType",
             dependencies: ["SwiftAST", "WriterTargetOutput"]),
         .target(
+            name: "SwiftSyntaxSupport",
+            dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
+        .target(
             name: "Intentions",
             dependencies: ["SwiftAST", "GrammarModels", "KnownType"]),
         .target(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser",
                            "TypeDefinitions", "Utils", "Intentions",
-                           "KnownType", "WriterTargetOutput"]),
+                           "KnownType", "WriterTargetOutput", "SwiftSyntaxSupport"]),
         .target(
             name: "Commons",
             dependencies: ["SwiftAST", "SwiftRewriterLib", "Utils"]),
@@ -120,11 +124,16 @@ let package = Package(
             name: "KnownTypeTests",
             dependencies: ["TestCommons", "SwiftAST", "KnownType", "WriterTargetOutput"]),
         .testTarget(
+            name: "SwiftSyntaxSupportTests",
+            dependencies: ["SwiftSyntaxSupport", "SwiftSyntax", "KnownType",
+                           "Intentions", "SwiftAST", "TestCommons",
+                           "SwiftRewriterLib"]),
+        .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",
                            "ObjcParser", "ExpressionPasses", "IntentionPasses",
                            "TestCommons", "GlobalsProviders", "Intentions",
-                           "WriterTargetOutput"]),
+                           "WriterTargetOutput", "SwiftSyntaxSupport"]),
         .testTarget(
             name: "CommonsTests",
             dependencies: ["Commons", "SwiftAST", "KnownType", "SwiftRewriterLib"]),

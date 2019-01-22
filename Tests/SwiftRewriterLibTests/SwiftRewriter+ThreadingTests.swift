@@ -42,7 +42,6 @@ private extension SwiftRewriter_ThreadingTests {
             @property CGFloat c;
             - (void)myMethod;
             @end
-            
             """
             
             implementation += """
@@ -58,7 +57,6 @@ private extension SwiftRewriter_ThreadingTests {
                 return (10 + next.c) / 2;
             }
             @end
-            
             """
             
             expectedSwift += """
@@ -67,7 +65,6 @@ private extension SwiftRewriter_ThreadingTests {
                 var a: Bool = false
                 var b: Bool = false
                 var c: CGFloat = 0.0
-                \
             
                 func myMethod() {
                     var i: CInt = 0

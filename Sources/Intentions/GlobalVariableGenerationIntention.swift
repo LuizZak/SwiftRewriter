@@ -11,6 +11,10 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
     public var storage: ValueStorage
     public var initialValueExpr: GlobalVariableInitialValueIntention?
     
+    public var initialValue: Expression? {
+        return initialValueExpr?.expression
+    }
+    
     public init(name: String, storage: ValueStorage, accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         self.name = name

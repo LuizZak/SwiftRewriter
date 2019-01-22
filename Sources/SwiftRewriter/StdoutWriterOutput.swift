@@ -58,6 +58,12 @@ public final class TerminalStringRewriterOutput: RewriterOutputTarget {
         self.settings = settings
     }
     
+    public func outputRaw(_ text: String) {
+        buffer += text
+        
+        callChangeCallback()
+    }
+    
     public func output(line: String, style: TextStyle) {
         ignoreCallChange = true
         

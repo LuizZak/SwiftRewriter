@@ -145,8 +145,11 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
         let iteratorType: SwiftType
         
         switch stmt.exp.resolvedType {
-        case .nominal(.generic("Array", .tail(let iterator)))?:
-            iteratorType = iterator
+        case .nominal(.generic("Array", .tail(let element)))?:
+            iteratorType = element
+            
+        case .array(let element)?:
+            iteratorType = element
             
         // Sub-types of `NSArray` iterate as .any
         case .nominal(.typeName(let typeName))?
@@ -756,6 +759,20 @@ private class MemberInvocationResolver {
                 
             case .nominal(.generic("Dictionary", let params)) where Array(params).count == 2:
                 exp.resolvedType = .optional(Array(params)[1])
+                
+            case .array(let element):
+                if subType != .int {
+                    return exp.makeErrorTyped()
+                }
+                
+                exp.resolvedType = element
+                
+            case let .dictionary(key, value):
+                if subType != key {
+                    return exp.makeErrorTyped()
+                }
+                
+                exp.resolvedType = .optional(value)
                 
             // Sub-types of NSArray index as .any
             case .nominal(.typeName(let typeName))

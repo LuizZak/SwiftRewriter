@@ -19,6 +19,10 @@ public struct RewriterOutputSettings {
 
 /// Protocol for output targets of `SwiftRewriter` instances.
 public protocol RewriterOutputTarget: class {
+    /// Outputs a raw series of characters, with no indentation or extra line
+    /// feed
+    func outputRaw(_ text: String)
+    
     /// Outputs the given string with a `.plain` text style and outputs a line
     /// feed at the end, with padding for identation at the begginning.
     func output(line: String)
@@ -108,6 +112,12 @@ public final class StringRewriterOutput: RewriterOutputTarget {
     
     public init(settings: RewriterOutputSettings = .defaults) {
         self.settings = settings
+    }
+    
+    public func outputRaw(_ text: String) {
+        buffer += text
+        
+        callChangeCallback()
     }
     
     public func output(line: String, style: TextStyle) {
