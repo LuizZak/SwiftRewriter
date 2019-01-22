@@ -44,6 +44,9 @@ extension SwiftSyntaxProducer {
         case let exp as TernaryExpression:
             return generateTernary(exp)
             
+        case let exp as BlockLiteralExpression:
+            return generateClosure(exp)
+            
         case is UnknownExpression:
             return SyntaxFactory.makeBlankUnknownExpr()
             
@@ -53,16 +56,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateSizeOf(_ exp: SizeOfExpression) -> ExprSyntax {
-        switch exp.value {
-        case .expression(let exp):
-            return generateExpression(
-                Expression
-                    .identifier("MemoryLayout")
-                    .dot("size")
-                    .call([.labeled("ofValue", exp.copy())])
-            )
-        
-        case .type(let type):
+        func _forType(_ type: SwiftType) -> ExprSyntax {
             return MemberAccessExprSyntax { builder in
                 let base = SpecializeExprSyntax { builder in
                     let token = prepareStartToken(SyntaxFactory.makeIdentifier("MemoryLayout"))
@@ -86,6 +80,23 @@ extension SwiftSyntaxProducer {
                 builder.useDot(SyntaxFactory.makePeriodToken())
                 builder.useName(makeIdentifier("size"))
             }
+        }
+        
+        switch exp.value {
+        case .expression(let exp):
+            if case let .metatype(innerType)? = exp.resolvedType {
+                return _forType(innerType)
+            }
+            
+            return generateExpression(
+                Expression
+                    .identifier("MemoryLayout")
+                    .dot("size")
+                    .call([.labeled("ofValue", exp.copy())])
+            )
+        
+        case .type(let type):
+            return _forType(type)
         }
     }
     
@@ -119,6 +130,68 @@ extension SwiftSyntaxProducer {
                 
                 builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(exp.type))
             })
+        }
+    }
+    
+    func generateClosure(_ exp: BlockLiteralExpression) -> ClosureExprSyntax {
+        return ClosureExprSyntax { builder in
+            builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
+            
+            if exp.resolvedType == nil || exp.resolvedType != exp.expectedType {
+                let signature = ClosureSignatureSyntax { builder in
+                    builder.useInTok(SyntaxFactory.makeInKeyword().addingLeadingSpace())
+                    
+                    addExtraLeading(.newlines(1))
+                    
+                    builder.useOutput(generateReturn(exp.returnType))
+                    
+                    let parameters = ParameterClauseSyntax { builder in
+                        builder.useLeftParen(SyntaxFactory
+                            .makeLeftParenToken()
+                            .addingLeadingSpace()
+                        )
+                        builder.useRightParen(SyntaxFactory.makeRightParenToken())
+                        
+                        iterateWithComma(exp.parameters) { (arg, hasComma) in
+                            builder.addFunctionParameter(FunctionParameterSyntax { builder in
+                                builder.useFirstName(makeIdentifier(arg.name))
+                                builder.useColon(SyntaxFactory
+                                    .makeColonToken()
+                                    .withTrailingSpace()
+                                )
+                                
+                                builder.useType(SwiftTypeConverter.makeTypeSyntax(arg.type))
+                                
+                                if hasComma {
+                                    builder.useTrailingComma(SyntaxFactory
+                                        .makeCommaToken()
+                                        .withTrailingSpace()
+                                    )
+                                }
+                            })
+                        }
+                    }
+                    
+                    builder.useInput(parameters)
+                }
+                
+                builder.useSignature(signature)
+            }
+            
+            indent()
+            
+            extraLeading = nil
+            
+            let statements = _generateStatements(exp.body.statements)
+            for stmt in statements {
+                builder.addCodeBlockItem(stmt)
+            }
+            
+            deindent()
+            
+            extraLeading = .newlines(1) + indentation()
+            
+            builder.useRightBrace(makeStartToken(SyntaxFactory.makeRightBraceToken))
         }
     }
     
@@ -183,30 +256,34 @@ extension SwiftSyntaxProducer {
     }
     
     func generateUnary(_ exp: UnaryExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix({ self.generateExpression(exp.exp) }))
+        return generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
     func generatePrefix(_ exp: PrefixExpression) -> ExprSyntax {
-        return generateOperator(exp.op, mode: .prefix({ self.generateExpression(exp.exp) }))
+        return generateOperator(exp.op, mode: .prefix({ self.generateWithinParensIfNeccessary(exp.exp) }))
     }
     
     func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
         return SequenceExprSyntax { builder in
-            builder.addExpression(generateExpression(exp.lhs))
+            builder.addExpression(generateWithinParensIfNeccessary(exp.lhs))
             
-            addExtraLeading(.spaces(1))
+            if exp.op.category != .range {
+                addExtraLeading(.spaces(1))
+            }
             
             builder.addExpression(generateOperator(exp.op, mode: .infix))
             
-            addExtraLeading(.spaces(1))
+            if exp.op.category != .range {
+                addExtraLeading(.spaces(1))
+            }
             
-            builder.addExpression(generateExpression(exp.rhs))
+            builder.addExpression(generateWithinParensIfNeccessary(exp.rhs))
         }
     }
     
     func generatePostfix(_ exp: PostfixExpression) -> ExprSyntax {
         func makeExprSyntax(_ exp: Expression, optionalAccessKind: Postfix.OptionalAccessKind) -> ExprSyntax {
-            let base = generateExpression(exp)
+            let base = generateWithinParensIfNeccessary(exp)
             
             switch optionalAccessKind {
             case .none:
@@ -247,10 +324,21 @@ extension SwiftSyntaxProducer {
             }
             
         case let call as FunctionCallPostfix:
+            var arguments = call.arguments
+            
+            var trailingClosure: BlockLiteralExpression?
+            // If the last argument is a block type, close the
+            // parameters list earlier and use the block as a
+            // trailing closure.
+            if let block = arguments.last?.expression as? BlockLiteralExpression {
+                trailingClosure = block
+                arguments.removeLast()
+            }
+            
             return FunctionCallExprSyntax { builder in
                 builder.useCalledExpression(subExp)
                 
-                iterateWithComma(call.arguments) { (arg, hasComma) in
+                iterateWithComma(arguments) { (arg, hasComma) in
                     builder.addFunctionCallArgument(FunctionCallArgumentSyntax { builder in
                         if let label = arg.label {
                             builder.useLabel(makeIdentifier(label))
@@ -267,8 +355,19 @@ extension SwiftSyntaxProducer {
                     })
                 }
                 
-                builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
-                builder.useRightParen(SyntaxFactory.makeRightParenToken())
+                if let trailingClosure = trailingClosure {
+                    addExtraLeading(.spaces(1))
+                    builder.useTrailingClosure(
+                        generateClosure(trailingClosure)
+                    )
+                }
+                
+                // No need to emit parenthesis if a trailing closure
+                // is present as the only argument of the function
+                if !arguments.isEmpty || trailingClosure == nil {
+                    builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
+                    builder.useRightParen(SyntaxFactory.makeRightParenToken())
+                }
             }
             
         default:
@@ -365,6 +464,20 @@ extension SwiftSyntaxProducer {
         }
         
         return producer(op)
+    }
+    
+    func generateWithinParensIfNeccessary(_ exp: Expression) -> ExprSyntax {
+        if exp.requiresParens {
+            return TupleExprSyntax { builder in
+                builder.useLeftParen(makeStartToken(SyntaxFactory.makeLeftParenToken))
+                builder.useRightParen(SyntaxFactory.makeRightParenToken())
+                builder.addTupleElement(TupleElementSyntax { builder in
+                    builder.useExpression(generateExpression(exp))
+                })
+            }
+        }
+        
+        return generateExpression(exp)
     }
     
     enum OperatorMode {

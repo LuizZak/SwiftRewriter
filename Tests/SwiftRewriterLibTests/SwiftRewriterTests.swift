@@ -361,6 +361,7 @@ class SwiftRewriterTests: XCTestCase {
                 init(thing: AnyObject!) {
                     self.thing()
                 }
+
                 func myMethod() {
                     self.thing()
                 }
@@ -397,10 +398,11 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class MyClass {
                 private var anIVar: Int = 0
-                
+
                 init(thing: AnyObject!) {
                     self.thing()
                 }
+
                 func myMethod() {
                     self.thing()
                 }
@@ -436,6 +438,7 @@ class SwiftRewriterTests: XCTestCase {
                 init(thing: AnyObject) {
                     self.thing()
                 }
+
                 func myMethod() {
                     self.thing()
                 }
@@ -822,8 +825,10 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             @objc
             protocol MyProtocol: NSObjectProtocol {
-                @objc optional func myMethod()
-                @objc optional func myMethod2()
+                @objc
+                optional func myMethod()
+                @objc
+                optional func myMethod2()
             }
 
             class A: NSObject, MyProtocol {
@@ -848,8 +853,10 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             protocol MyProtocol: NSObjectProtocol {
                 func f1()
-                @objc optional func f2()
-                @objc optional func f3()
+                @objc
+                optional func f2()
+                @objc
+                optional func f3()
                 func f4()
             }
             """)
@@ -908,12 +915,14 @@ class SwiftRewriterTests: XCTestCase {
             """,
             swift: """
             import File
+
             // Preprocessor directives found in file:
             // #import "File.h"
             // #import <File.h>
             // #if 0
             // #endif
             // #define MACRO 123
+
             """)
     }
     
@@ -929,6 +938,7 @@ class SwiftRewriterTests: XCTestCase {
             // Preprocessor directives found in file:
             // #if 0
             // #endif
+
             """)
     }
     
@@ -1103,7 +1113,7 @@ class SwiftRewriterTests: XCTestCase {
                 var x: CFloat
                 var y: CFloat
                 var z: CFloat
-                
+
                 init() {
                     x = 0.0
                     y = 0.0
@@ -1120,7 +1130,7 @@ class SwiftRewriterTests: XCTestCase {
                 var y: CFloat
                 var z: CFloat
                 var w: CFloat
-                
+
                 init() {
                     x = 0.0
                     y = 0.0
@@ -1164,7 +1174,7 @@ class SwiftRewriterTests: XCTestCase {
             
             struct a {
                 var b: CInt
-                
+
                 init() {
                     b = 0
                 }
@@ -1187,7 +1197,7 @@ class SwiftRewriterTests: XCTestCase {
             
             struct a {
                 var b: CInt
-                
+
                 init() {
                     b = 0
                 }
@@ -2225,7 +2235,7 @@ class SwiftRewriterTests: XCTestCase {
             
             class A {
                 var prop: CGFloat = 0.0
-                
+
                 func method() {
                     let local = GLenum(prop)
                 }
@@ -2255,7 +2265,7 @@ class SwiftRewriterTests: XCTestCase {
 
             class A {
                 var prop: CGFloat = 0.0
-                
+
                 func method() {
                     let local = GLenum(prop)
                 }
@@ -2322,7 +2332,7 @@ class SwiftRewriterTests: XCTestCase {
             swift: """
             class A {
                 var a: Int = 0
-                
+
                 override init() {
                     self.a = 0
                     super.init()

@@ -261,4 +261,22 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateTernary,
             matches: "true ? foo : bar")
     }
+    
+    func testClosure() {
+        assert(
+            Expression.block(body: []),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ () -> Void in\n}")
+    }
+    
+    func testClosureWithParameters() {
+        assert(
+            Expression.block(
+                parameters: [BlockParameter(name: "p1", type: .int)],
+                return: .void,
+                body: []
+            ),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ (p1: Int) -> Void in\n}")
+    }
 }

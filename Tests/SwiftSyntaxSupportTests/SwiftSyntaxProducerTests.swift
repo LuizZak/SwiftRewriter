@@ -384,6 +384,48 @@ extension SwiftSyntaxProducerTests {
     }
 }
 
+// MARK: - Enum Generation
+extension SwiftSyntaxProducerTests {
+    func testGenerateFileWithEmptyEnum() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createEnum(withName: "A", rawValue: .int)
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            enum A: Int {
+            }
+            """)
+    }
+    
+    func testGenerateFileWithEnumWithOneCase() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.createEnum(withName: "A", rawValue: .int) { builder in
+                    builder.createCase(name: "case1", expression: .constant(1))
+                    builder.createCase(name: "case2")
+                }
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(
+            result,
+            matches: """
+            enum A: Int {
+                case case1 = 1
+                case case2
+            }
+            """)
+    }
+}
+
 // MARK: - Class Generation
 extension SwiftSyntaxProducerTests {
     func testGenerateFileWithEmptyClass() {
@@ -540,7 +582,8 @@ extension SwiftSyntaxProducerTests {
             result,
             matches: """
             class A {
-                init()
+                init() {
+                }
             }
             """)
     }

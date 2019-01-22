@@ -7,7 +7,10 @@ class ModifiersSyntaxDecoratorApplier {
     static func makeDefaultDecoratorApplier() -> ModifiersSyntaxDecoratorApplier {
         let decorator = ModifiersSyntaxDecoratorApplier()
         decorator.addDecorator(AccessLevelModifiersDecorator())
+        decorator.addDecorator(ProtocolOptionalModifierDecorator())
         decorator.addDecorator(StaticModifiersDecorator())
+        decorator.addDecorator(OverrideModifierDecorator())
+        decorator.addDecorator(ConvenienceInitModifierDecorator())
         decorator.addDecorator(MutatingModifiersDecorator())
         decorator.addDecorator(OwnershipModifierDecorator())
         return decorator
@@ -130,8 +133,8 @@ class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
     }
 }
 
-/// A modifier to apply `weak`, `unowned(safe)`, and `unowned(unsafe)` modifiers
-/// to variable declarations
+/// Decorator that applies `weak`, `unowned(safe)`, and `unowned(unsafe)`
+/// modifiers to variable declarations
 class OwnershipModifierDecorator: ModifiersSyntaxDecorator {
     func appendModifiers(for intention: IntentionProtocol,
                          _ list: inout [DeclModifierSyntax],
@@ -180,5 +183,103 @@ class OwnershipModifierDecorator: ModifiersSyntaxDecorator {
                 )
         
         list.append(modifier)
+    }
+}
+
+/// Decorator that applies `override` modifiers to members of types
+class OverrideModifierDecorator: ModifiersSyntaxDecorator {
+    func appendModifiers(for intention: IntentionProtocol,
+                         _ list: inout [DeclModifierSyntax],
+                         extraLeading: inout Trivia?) {
+        
+        guard let intention = intention as? MemberGenerationIntention else {
+            return
+        }
+        
+        if isOverridenMember(intention) {
+            let modifier = DeclModifierSyntax { builder in
+                builder.useName(SyntaxFactory
+                    .makeIdentifier("override")
+                    .withExtraLeading(consuming: &extraLeading)
+                    .withTrailingSpace()
+                )
+            }
+            
+            list.append(modifier)
+        }
+    }
+    
+    func isOverridenMember(_ member: MemberGenerationIntention) -> Bool {
+        if let _init = member as? InitGenerationIntention {
+            return _init.isOverride
+        }
+        if let method = member as? MethodGenerationIntention {
+            return method.isOverride
+        }
+        
+        return false
+    }
+}
+
+/// Decorator that applies `convenience` modifiers to initializers
+class ConvenienceInitModifierDecorator: ModifiersSyntaxDecorator {
+    func appendModifiers(for intention: IntentionProtocol,
+                         _ list: inout [DeclModifierSyntax],
+                         extraLeading: inout Trivia?) {
+        
+        guard let intention = intention as? InitGenerationIntention else {
+            return
+        }
+        
+        if intention.isConvenience {
+            let modifier = DeclModifierSyntax { builder in
+                builder.useName(SyntaxFactory
+                    .makeIdentifier("convenience")
+                    .withExtraLeading(consuming: &extraLeading)
+                    .withTrailingSpace()
+                )
+            }
+            
+            list.append(modifier)
+        }
+    }
+}
+
+/// Decorator that applies 'optional' modifiers to protocol members
+class ProtocolOptionalModifierDecorator: ModifiersSyntaxDecorator {
+    func appendModifiers(for intention: IntentionProtocol,
+                         _ list: inout [DeclModifierSyntax],
+                         extraLeading: inout Trivia?) {
+        
+        guard let member = intention as? MemberGenerationIntention else {
+            return
+        }
+        
+        if isOptionalMember(member) {
+            let modifier = DeclModifierSyntax { builder in
+                builder.useName(SyntaxFactory
+                    .makeIdentifier("optional")
+                    .withExtraLeading(consuming: &extraLeading)
+                    .withTrailingSpace()
+                )
+            }
+            
+            list.append(modifier)
+        }
+    }
+    
+    func isOptionalMember(_ member: MemberGenerationIntention) -> Bool {
+        guard member.type is ProtocolGenerationIntention else {
+            return false
+        }
+        
+        if let method = member as? MethodGenerationIntention {
+            return method.optional
+        }
+        if let property = member as? PropertyGenerationIntention {
+            return property.optional
+        }
+        
+        return false
     }
 }

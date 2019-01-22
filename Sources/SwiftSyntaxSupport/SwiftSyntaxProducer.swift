@@ -53,20 +53,21 @@ public class SwiftSyntaxProducer {
         /// Default settings instance
         public static let `default` = Settings()
         
-        /// If `true`, when outputting expression statements, print the resulting type
-        /// of the expression before the expression statement as a comment for inspection.
+        /// If `true`, when outputting expression statements, print the resulting
+        /// type of the expression before the expression statement as a comment
+        /// for inspection.
         public var outputExpressionTypes: Bool
         
-        /// If `true`, when outputting final intentions, print any history information
-        /// tracked on its `IntentionHistory` property before the intention's declaration
-        /// as a comment for inspection.
+        /// If `true`, when outputting final intentions, print any history
+        /// information tracked on its `IntentionHistory` property before the
+        /// intention's declaration as a comment for inspection.
         public var printIntentionHistory: Bool
         
-        /// If `true`, `@objc` attributes and `: NSObject` are emitted for declarations
-        /// during output.
+        /// If `true`, `@objc` attributes and `: NSObject` are emitted for
+        /// declarations during output.
         ///
-        /// This may increase compatibility with previous Objective-C code when compiled
-        /// and executed.
+        /// This may increase compatibility with previous Objective-C code when
+        /// compiled and executed.
         public var emitObjcCompatibility: Bool
         
         public init(outputExpressionTypes: Bool = false,
@@ -77,6 +78,78 @@ public class SwiftSyntaxProducer {
             self.printIntentionHistory = printIntentionHistory
             self.emitObjcCompatibility = emitObjcCompatibility
         }
+    }
+    
+    private func modifiers(for intention: IntentionProtocol) -> [DeclModifierSyntax] {
+        return modifiersDecorations.modifiers(for: intention, extraLeading: &extraLeading)
+    }
+    
+    private func attributes(for intention: IntentionProtocol,
+                            inline: Bool) -> [AttributeSyntax] {
+        
+        guard let attributable = intention as? AttributeTaggeableObject else {
+            return []
+        }
+        
+        var attributes = attributable.knownAttributes
+        
+        // TODO: This should not be done here, but in an IntentionPass
+        if shouldEmitObjcAttribute(intention) {
+            attributes.append(KnownAttribute(name: "objc"))
+        }
+        
+        var attributeSyntaxes: [AttributeSyntax] = []
+        
+        for attr in attributes {
+            let attrSyntax = generateAttributeSyntax(attr)
+            
+            if inline {
+                addExtraLeading(.spaces(1))
+            } else {
+                addExtraLeading(.newlines(1) + indentation())
+            }
+            
+            attributeSyntaxes.append(attrSyntax)
+        }
+        
+        return attributeSyntaxes
+    }
+    
+    private func shouldEmitObjcAttribute(_ intention: IntentionProtocol) -> Bool {
+        if !settings.emitObjcCompatibility {
+            // Protocols which feature optional members must be emitted with @objc
+            // to maintain compatibility; same for method/properties
+            if let _protocol = intention as? ProtocolGenerationIntention {
+                if _protocol.methods.any({ $0.optional })
+                    || _protocol.properties.any({ $0.optional }) {
+                    return true
+                }
+            }
+            if let property = intention as? ProtocolPropertyGenerationIntention {
+                return property.isOptional
+            }
+            if let method = intention as? ProtocolMethodGenerationIntention {
+                return method.isOptional
+            }
+            
+            return false
+        }
+        
+        if let method = intention as? MethodGenerationIntention {
+            if !isDeallocMethod(method) {
+                return true
+            }
+        }
+        if let type = intention as? TypeGenerationIntention,
+            type.kind != .struct {
+            return true
+        }
+        
+        return false
+    }
+    
+    private func isDeallocMethod(_ intention: MethodGenerationIntention) -> Bool {
+        return intention.name == "dealloc" && intention.parameters.count == 0
     }
 }
 
@@ -96,6 +169,15 @@ extension SwiftSyntaxProducer {
     public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
             
+            // Imports come before any header #directive comments
+            iterating(file.importDirectives) { module in
+                let syntax = generateImport(module)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+            }
+            
             if let headerTrivia = generatePreprocessorDirectivesTrivia(file) {
                 addExtraLeading(headerTrivia)
                 addExtraLeading(.newlines(1))
@@ -103,43 +185,23 @@ extension SwiftSyntaxProducer {
             
             didModifyExtraLeading = false
             
-            iterateWithBlankLineAfter(file.typealiasIntentions) { intention in
+            iterating(file.typealiasIntentions) { intention in
                 let syntax = generateTypealias(intention)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
                 builder.addCodeBlockItem(codeBlock)
-                
-                addExtraLeading(.newlines(1))
             }
             
-            iterateWithBlankLineAfter(file.globalVariableIntentions) { variable in
-                let syntax = generateGlobalVariable(variable)
-                
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
-                
-                builder.addCodeBlockItem(codeBlock)
-                
-                addExtraLeading(.newlines(1))
-            }
-            
-            iterateWithBlankLineAfter(file.globalFunctionIntentions) { function in
-                let syntax = generateFunction(function)
+            iterating(file.enumIntentions) { intention in
+                let syntax = generateEnum(intention)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
                 builder.addCodeBlockItem(codeBlock)
             }
             
-            iterateWithBlankLineAfter(file.protocolIntentions) { _protocol in
-                let syntax = generateProtocol(_protocol)
-                
-                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
-                
-                builder.addCodeBlockItem(codeBlock)
-            }
-            
-            iterateWithBlankLineAfter(file.structIntentions) { _struct in
+            iterating(file.structIntentions) { _struct in
                 let syntax = generateStruct(_struct)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
@@ -147,7 +209,31 @@ extension SwiftSyntaxProducer {
                 builder.addCodeBlockItem(codeBlock)
             }
             
-            iterateWithBlankLineAfter(file.classIntentions) { _class in
+            iterating(file.globalVariableIntentions) { variable in
+                let syntax = generateGlobalVariable(variable)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+            }
+            
+            iterating(file.globalFunctionIntentions) { function in
+                let syntax = generateFunction(function, alwaysEmitBody: true)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+            }
+            
+            iterating(file.protocolIntentions) { _protocol in
+                let syntax = generateProtocol(_protocol)
+                
+                let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
+                
+                builder.addCodeBlockItem(codeBlock)
+            }
+            
+            iterating(file.classIntentions) { _class in
                 let syntax = generateClass(_class)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
@@ -155,7 +241,7 @@ extension SwiftSyntaxProducer {
                 builder.addCodeBlockItem(codeBlock)
             }
             
-            iterateWithBlankLineAfter(file.extensionIntentions) { _class in
+            iterating(file.extensionIntentions) { _class in
                 let syntax = generateExtension(_class)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
@@ -194,6 +280,18 @@ extension SwiftSyntaxProducer {
     }
 }
 
+// MARK: - Import declarations
+extension SwiftSyntaxProducer {
+    func generateImport(_ module: String) -> ImportDeclSyntax {
+        return ImportDeclSyntax { builder in
+            builder.useImportTok(SyntaxFactory.makeImportKeyword().withTrailingSpace())
+            builder.addAccessPathComponent(AccessPathComponentSyntax { builder in
+                builder.useName(makeIdentifier(module))
+            })
+        }
+    }
+}
+
 // MARK: - Typealias Intention
 extension SwiftSyntaxProducer {
     func generateTypealias(_ intention: TypealiasIntention) -> TypealiasDeclSyntax {
@@ -205,6 +303,54 @@ extension SwiftSyntaxProducer {
             builder.useInitializer(TypeInitializerClauseSyntax { builder in
                 builder.useEqual(SyntaxFactory.makeEqualToken().addingSurroundingSpaces())
                 builder.useValue(SwiftTypeConverter.makeTypeSyntax(intention.fromType))
+            })
+        }
+    }
+}
+
+// MARK: - Enum Generation
+extension SwiftSyntaxProducer {
+    func generateEnum(_ intention: EnumGenerationIntention) -> EnumDeclSyntax {
+        addHistoryTrackingLeadingIfEnabled(intention)
+        
+        return EnumDeclSyntax { builder in
+            addExtraLeading(indentation())
+            
+            builder.useEnumKeyword(makeStartToken(SyntaxFactory.makeEnumKeyword).withTrailingSpace())
+            builder.useIdentifier(makeIdentifier(intention.typeName))
+            
+            addExtraLeading(.spaces(1))
+            
+            builder.useInheritanceClause(TypeInheritanceClauseSyntax { builder in
+                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+                builder.addInheritedType(InheritedTypeSyntax { builder in
+                    builder.useTypeName(SwiftTypeConverter.makeTypeSyntax(intention.rawValueType))
+                })
+            })
+            
+            indent()
+            
+            let members = generateMembers(intention)
+            
+            deindent()
+            
+            builder.useMembers(members)
+        }
+    }
+    
+    func generateEnumCase(_ _case: EnumCaseGenerationIntention) -> EnumCaseDeclSyntax {
+        return EnumCaseDeclSyntax { builder in
+            builder.useCaseKeyword(makeStartToken(SyntaxFactory.makeCaseKeyword).withTrailingSpace())
+            
+            builder.addEnumCaseElement(EnumCaseElementSyntax { builder in
+                builder.useIdentifier(makeIdentifier(_case.name))
+                
+                if let rawValue = _case.expression {
+                    builder.useRawValue(InitializerClauseSyntax { builder in
+                        builder.useEqual(SyntaxFactory.makeEqualToken().addingSurroundingSpaces())
+                        builder.useValue(generateExpression(rawValue))
+                    })
+                }
             })
         }
     }
@@ -234,10 +380,10 @@ extension SwiftSyntaxProducer {
                 SwiftTypeConverter.makeTypeSyntax(.typeName(intention.typeName))
             )
             
-            addExtraLeading(.spaces(1))
-            
             if let inheritanceClause = generateInheritanceClause(intention) {
                 builder.useInheritanceClause(inheritanceClause)
+            } else {
+                addExtraLeading(.spaces(1))
             }
             
             indent()
@@ -260,7 +406,9 @@ extension SwiftSyntaxProducer {
             addExtraLeading(indentation())
             
             builder.useClassKeyword(
-                makeStartToken(SyntaxFactory.makeClassKeyword).addingTrailingSpace())
+                makeStartToken(SyntaxFactory.makeClassKeyword)
+                    .addingTrailingSpace()
+            )
             
             let identifier = makeIdentifier(intention.typeName)
             
@@ -290,6 +438,28 @@ extension SwiftSyntaxProducer {
         inheritances.append(contentsOf:
             type.knownProtocolConformances.map { $0.protocolName }
         )
+        
+        // TODO: This should be done in an intention pass before handing over the
+        // types to this swift syntax producer
+        var emitObjcAttribute = false
+        if let prot = type as? ProtocolGenerationIntention {
+            if prot.methods.contains(where: { $0.optional })
+                || prot.properties.contains(where: { $0.optional }) {
+            
+                emitObjcAttribute = true
+            }
+            
+            if emitObjcAttribute || settings.emitObjcCompatibility {
+                // Always inherit form NSObjectProtocol in Objective-C compatibility mode
+                if !inheritances.contains("NSObjectProtocol") {
+                    inheritances.insert("NSObjectProtocol", at: 0)
+                }
+                
+                emitObjcAttribute = true
+            } else {
+                inheritances.removeAll(where: { $0 == "NSObjectProtocol" })
+            }
+        }
         
         if inheritances.isEmpty {
             return nil
@@ -330,6 +500,10 @@ extension SwiftSyntaxProducer {
         return StructDeclSyntax { builder in
             addExtraLeading(indentation())
             
+            let attributes = self.attributes(for: intention, inline: false)
+            for attribute in attributes {
+                builder.addAttribute(attribute)
+            }
             builder.useStructKeyword(
                 makeStartToken(SyntaxFactory.makeStructKeyword)
                     .addingTrailingSpace())
@@ -362,6 +536,11 @@ extension SwiftSyntaxProducer {
         
         return ProtocolDeclSyntax.init { builder in
             addExtraLeading(indentation())
+            
+            let attributes = self.attributes(for: intention, inline: false)
+            for attribute in attributes {
+                builder.addAttribute(attribute)
+            }
             
             builder.useProtocolKeyword(
                 makeStartToken(SyntaxFactory.makeProtocolKeyword).addingTrailingSpace())
@@ -397,47 +576,66 @@ extension SwiftSyntaxProducer {
             
             // TODO: Probably shouldn't detect ivar containers like this.
             if let ivarHolder = intention as? InstanceVariableContainerIntention {
-                iterateWithBlankLineAfter(ivarHolder.instanceVariables) { ivar in
+                iterating(ivarHolder.instanceVariables) { ivar in
                     addExtraLeading(indentation())
                     
                     builder.addDecl(generateInstanceVariable(ivar))
-                    
-                    addExtraLeading(.newlines(1))
                 }
                 
                 if !intention.properties.isEmpty {
                     extraLeading = .newlines(1)
                 }
             }
-            
-            iterateWithBlankLineAfter(intention.properties) { prop in
+            // TODO: ...and neither enums
+            iterating(intention.properties.compactMap { $0 as? EnumCaseGenerationIntention }) { prop in
+                addExtraLeading(indentation())
+                
+                builder.addDecl(generateEnumCase(prop))
+            }
+            // TODO: ...and again...
+            iterating(intention.properties.filter { !($0 is EnumCaseGenerationIntention) }) { prop in
+                if prop is EnumCaseGenerationIntention {
+                    return
+                }
+                
                 addExtraLeading(indentation())
                 
                 builder.addDecl(generateProperty(prop))
-                
-                addExtraLeading(.newlines(1))
             }
             
-            iterateWithBlankLineAfter(intention.constructors) { _init in
+            iterating(intention.constructors) { _init in
                 addExtraLeading(indentation())
                 
                 builder.addDecl(generateInitializer(_init))
-                
-                addExtraLeading(.newlines(1))
             }
             
-            iterateWithBlankLineAfter(intention.methods) { method in
+            // Dealloc methods are treated differently
+            // TODO: Create a separate GenerationIntention entirely for dealloc
+            // methods and detect them during SwiftRewriter's parsing with
+            // IntentionPass's instead of postponing to here.
+            var methods = intention.methods
+            let _deinit = methods.first(where: isDeallocMethod)
+            methods.removeAll(where: { $0 === _deinit })
+            if let _deinit = _deinit {
                 addExtraLeading(indentation())
                 
-                builder.addDecl(generateFunction(method))
+                builder.addDecl(
+                    generateDeinitializer(_deinit)
+                )
+                addExtraLeading(.newlines(2))
+            }
+            
+            iterating(methods) { method in
+                addExtraLeading(indentation())
                 
-                addExtraLeading(.newlines(1))
+                builder.addDecl(
+                    generateFunction(
+                        method,
+                        alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                    )
+                )
             }
         }
-    }
-    
-    private func modifiers(for intention: IntentionProtocol) -> [DeclModifierSyntax] {
-        return modifiersDecorations.modifiers(for: intention, extraLeading: &extraLeading)
     }
 }
 
@@ -447,6 +645,14 @@ extension SwiftSyntaxProducer {
     private func _initialValue(for intention: ValueStorageIntention) -> Expression? {
         if let intention = intention.initialValue {
             return intention
+        }
+        if intention is GlobalVariableGenerationIntention {
+            return nil
+        }
+        if let intention = intention as? MemberGenerationIntention {
+            if intention.type?.kind != .class {
+                return nil
+            }
         }
         
         return delegate?.swiftSyntaxProducer(self, initialValueFor: intention)
@@ -461,7 +667,7 @@ extension SwiftSyntaxProducer {
         
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
-                                    attributes: intention.knownAttributes,
+                                    attributes: attributes(for: intention, inline: true),
                                     intention: intention,
                                     modifiers: modifiers(for: intention),
                                     accessor: makeAccessorBlockCreator(intention),
@@ -473,7 +679,7 @@ extension SwiftSyntaxProducer {
         
         return generateVariableDecl(name: intention.name,
                                     storage: intention.storage,
-                                    attributes: intention.knownAttributes,
+                                    attributes: attributes(for: intention, inline: true),
                                     intention: intention,
                                     modifiers: modifiers(for: intention),
                                     initialization: _initialValue(for: intention))
@@ -492,7 +698,7 @@ extension SwiftSyntaxProducer {
     
     func generateVariableDecl(name: String,
                               storage: ValueStorage,
-                              attributes: [KnownAttribute],
+                              attributes: [AttributeSyntax],
                               intention: Intention?,
                               modifiers: [DeclModifierSyntax],
                               accessor: (() -> AccessorBlockSyntax)? = nil,
@@ -500,7 +706,7 @@ extension SwiftSyntaxProducer {
         
         return VariableDeclSyntax { builder in
             for attribute in attributes {
-                builder.addAttribute(generateAttributeSyntax(attribute))
+                builder.addAttribute(attribute)
             }
             
             for modifier in modifiers {
@@ -545,6 +751,45 @@ extension SwiftSyntaxProducer {
     }
     
     private func makeAccessorBlockCreator(_ property: PropertyGenerationIntention) -> (() -> AccessorBlockSyntax)? {
+        // Emit { get } and { get set } accessor blocks for protocols
+        if let property = property as? ProtocolPropertyGenerationIntention {
+            return {
+                return AccessorBlockSyntax { builder in
+                    builder.useLeftBrace(
+                        self.makeStartToken(SyntaxFactory.makeLeftBraceToken)
+                            .addingSurroundingSpaces()
+                    )
+                    
+                    builder.useRightBrace(SyntaxFactory.makeRightBraceToken())
+                    var accessors: [AccessorDeclSyntax] = []
+                    
+                    accessors.append(AccessorDeclSyntax { builder in
+                        builder.useAccessorKind(
+                            SyntaxFactory
+                                .makeToken(.contextualKeyword("get"),
+                                           presence: .present)
+                                .withTrailingSpace()
+                        )
+                    })
+                    
+                    if !property.isReadOnly {
+                        accessors.append(AccessorDeclSyntax { builder in
+                            builder.useAccessorKind(
+                                SyntaxFactory
+                                    .makeToken(.contextualKeyword("set"),
+                                               presence: .present)
+                                    .withTrailingSpace()
+                            )
+                        })
+                    }
+                    
+                    builder.useAccessorListOrStmtList(
+                        SyntaxFactory.makeAccessorList(accessors)
+                    )
+                }
+            }
+        }
+        
         switch property.mode {
         case .asField:
             return nil
@@ -631,8 +876,12 @@ extension SwiftSyntaxProducer {
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return InitializerDeclSyntax { builder in
+            let attributes = self.attributes(for: intention, inline: false)
             let modifiers = self.modifiers(for: intention)
             
+            for attribute in attributes {
+                builder.addAttribute(attribute)
+            }
             for modifier in modifiers {
                 builder.addModifier(modifier)
             }
@@ -647,16 +896,34 @@ extension SwiftSyntaxProducer {
             
             if let body = intention.functionBody {
                 builder.useBody(generateFunctionBody(body))
+            } else {
+                builder.useBody(generateEmptyFunctionBody())
             }
         }
     }
     
-    func generateFunction(_ intention: SignatureFunctionIntention) -> FunctionDeclSyntax {
+    func generateDeinitializer(_ intention: FunctionIntention) -> DeinitializerDeclSyntax {
+        addHistoryTrackingLeadingIfEnabled(intention)
+        
+        return DeinitializerDeclSyntax { builder in
+            builder.useDeinitKeyword(makeStartToken(SyntaxFactory.makeDeinitKeyword))
+            if let body = intention.functionBody {
+                builder.useBody(generateFunctionBody(body))
+            }
+        }
+    }
+    
+    func generateFunction(_ intention: SignatureFunctionIntention,
+                          alwaysEmitBody: Bool) -> FunctionDeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return FunctionDeclSyntax { builder in
+            let attributes = self.attributes(for: intention, inline: false)
             let modifiers = self.modifiers(for: intention)
             
+            for attribute in attributes {
+                builder.addAttribute(attribute)
+            }
             for modifier in modifiers {
                 builder.addModifier(modifier)
             }
@@ -667,7 +934,7 @@ extension SwiftSyntaxProducer {
             
             if let body = intention.functionBody {
                 builder.useBody(generateFunctionBody(body))
-            } else {
+            } else if alwaysEmitBody {
                 builder.useBody(generateEmptyFunctionBody())
             }
         }
@@ -709,7 +976,10 @@ extension SwiftSyntaxProducer {
         return FunctionParameterSyntax { builder in
             if parameter.label == parameter.name {
                 builder.useFirstName(prepareStartToken(makeIdentifier(parameter.name)))
-            } else if parameter.label == nil {
+            } else if let label = parameter.label {
+                builder.useFirstName(prepareStartToken(makeIdentifier(label)).withTrailingSpace())
+                builder.useSecondName(makeIdentifier(parameter.name))
+            } else {
                 builder.useFirstName(prepareStartToken(SyntaxFactory.makeWildcardKeyword()).withTrailingSpace())
                 builder.useSecondName(makeIdentifier(parameter.name))
             }
@@ -740,12 +1010,17 @@ extension SwiftSyntaxProducer {
     }
     
     func generateAttributeSyntax(_ attribute: KnownAttribute) -> AttributeSyntax {
-        return SyntaxFactory
-            .makeAttribute(
-                atSignToken: prepareStartToken(SyntaxFactory.makeAtSignToken()),
-                attributeName: makeIdentifier(attribute.name),
-                balancedTokens: SyntaxFactory.makeTokenList(attribute.parameters.map { [SyntaxFactory.makeIdentifier($0)] } ?? [])
-        )
+        return AttributeSyntax { builder in
+            builder.useAtSignToken(makeStartToken(SyntaxFactory.makeAtSignToken))
+            builder.useAttributeName(makeIdentifier(attribute.name))
+            
+            // TODO: Actually use balanced tokens to do attribute parameters
+            if let parameters = attribute.parameters {
+                builder.addToken(SyntaxFactory.makeLeftParenToken())
+                builder.addToken(makeIdentifier(parameters))
+                builder.addToken(SyntaxFactory.makeRightParenToken())
+            }
+        }
     }
 }
 
@@ -760,11 +1035,16 @@ extension SwiftSyntaxProducer {
         return token.withExtraLeading(consuming: &extraLeading)
     }
     
-    func iterateWithBlankLineAfter<T>(_ elements: [T],
-                                      postSeparator: Trivia = .newlines(2),
-                                      do block: (T) -> Void) {
+    func iterating<T>(_ elements: [T],
+                      inBetweenSpacing: Trivia = .newlines(1),
+                      postSeparator: Trivia = .newlines(2),
+                      do block: (T) -> Void) {
         
-        for item in elements {
+        for (i, item) in elements.enumerated() {
+            if i > 0 {
+                extraLeading = inBetweenSpacing
+            }
+            
             block(item)
         }
         
@@ -780,7 +1060,6 @@ func makeIdentifier(_ identifier: String) -> TokenSyntax {
 }
 
 func iterateWithComma<T>(_ elements: T,
-                         postSeparator: Trivia = .newlines(1),
                          do block: (T.Element, Bool) -> Void) where T: Collection {
     
     for (i, item) in elements.enumerated() {

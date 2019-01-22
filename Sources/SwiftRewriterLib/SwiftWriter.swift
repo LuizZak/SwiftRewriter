@@ -60,7 +60,7 @@ public final class SwiftWriter {
             unique.insert(file.targetPath)
             
             let writer
-                = InternalSwiftWriter(
+                = _SwiftSyntaxWriter(
                     intentions: intentions,
                     options: options,
                     diagnostics: Diagnostics(),
@@ -137,13 +137,234 @@ class _SwiftSyntaxWriter {
                       printIntentionHistory: options.printIntentionHistory,
                       emitObjcCompatibility: options.emitObjcCompatibility)
         
-        let producer = SwiftSyntaxProducer(settings: settings)
+        let producer = SwiftSyntaxProducer(settings: settings, delegate: self)
         
         let fileSyntax = producer.generateFile(fileIntent)
         
         out.outputRaw(fileSyntax.description)
         
         targetFile.close()
+    }
+}
+
+extension _SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
+    func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,
+                             shouldEmitTypeFor storage: ValueStorage,
+                             intention: Intention?,
+                             initialValue: Expression?) -> Bool {
+        
+        // Intentions (global variables, instance variables and properties) should
+        // preferably always be emitted with type annotations.
+        if intention != nil {
+            return true
+        }
+        
+        guard let initialValue = initialValue else {
+            return true
+        }
+        
+        return shouldEmitTypeSignature(forInitVal: initialValue,
+                                       varType: storage.type,
+                                       isConstant: storage.isConstant)
+    }
+    
+    func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,
+                             initialValueFor intention: ValueStorageIntention) -> Expression? {
+        
+        if let intention = intention as? PropertyGenerationIntention {
+            switch intention.mode {
+            case .asField:
+                break
+            case .computed, .property:
+                return nil
+            }
+        }
+        
+        // Don't emit `nil` values for non-constant fields, since Swift assumes
+        // the initial value of these values to be nil already.
+        // We need to emit `nil` in case of constants since 'let's don't do that
+        // implicit initialization
+        if intention.type.isOptional && !intention.storage.isConstant {
+            return nil
+        }
+        
+        return typeSystem.defaultValue(for: intention.type)
+        
+    }
+    
+    private func shouldEmitTypeSignature(forInitVal exp: Expression,
+                                         varType: SwiftType,
+                                         isConstant: Bool) -> Bool {
+        
+        if exp.isErrorTyped {
+            return true
+        }
+        
+        if case .block? = exp.resolvedType {
+            return true
+        }
+        
+        if exp.isLiteralExpression {
+            if let type = exp.resolvedType {
+                switch type {
+                case .int:
+                    return varType != .int
+                    
+                case .float:
+                    return varType != .double
+                    
+                case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
+                    return true
+                    
+                default:
+                    break
+                }
+            }
+            
+            switch deduceType(from: exp) {
+            case .int, .float, .nil:
+                return true
+                
+            default:
+                return false
+            }
+        } else if let type = exp.resolvedType {
+            guard typeSystem.isClassInstanceType(type) else {
+                return false
+            }
+            
+            if isConstant {
+                return false
+            }
+            
+            if type.isOptional != varType.isOptional {
+                return true
+            }
+            
+            return !typeSystem.typesMatch(type, varType, ignoreNullability: true)
+        }
+        
+        return false
+    }
+    
+    /// Attempts to make basic deductions about an expression's resulting type.
+    /// Used only for deciding whether to infer types for variable definitions
+    /// with initial values.
+    private func deduceType(from exp: Expression) -> DeducedType {
+        if let constant = exp.asConstant?.constant {
+            if constant.isInteger {
+                return .int
+            }
+            
+            switch constant {
+            case .float:
+                return .float
+            case .boolean:
+                return .bool
+            case .string:
+                return .string
+            case .nil:
+                return .nil
+            default:
+                break
+            }
+            
+            return .other
+        } else if let binary = exp.asBinary {
+            return deduceType(binary)
+            
+        } else if let assignment = exp.asAssignment {
+            return deduceType(from: assignment.rhs)
+            
+        } else if let parens = exp.asParens {
+            return deduceType(from: parens.exp)
+            
+        } else if exp is PrefixExpression || exp is UnaryExpression {
+            let op = exp.asPrefix?.op ?? exp.asUnary?.op
+            
+            switch op {
+            case .some(.negate):
+                return .bool
+            case .some(.bitwiseNot):
+                return .int
+                
+            // Pointer types
+            case .some(.multiply), .some(.bitwiseAnd):
+                return .other
+                
+            default:
+                return .other
+            }
+        } else if let ternary = exp.asTernary {
+            let lhsType = deduceType(from: ternary.ifTrue)
+            if lhsType == deduceType(from: ternary.ifFalse) {
+                return lhsType
+            }
+            
+            return .other
+        }
+        
+        return .other
+    }
+    
+    private func deduceType(_ binary: BinaryExpression) -> DeducedType {
+        let lhs = binary.lhs
+        let op = binary.op
+        let rhs = binary.rhs
+        
+        switch op.category {
+        case .arithmetic, .bitwise:
+            let lhsType = deduceType(from: lhs)
+            let rhsType = deduceType(from: rhs)
+            
+            // Arithmetic and bitwise operators keep operand types, if they
+            // are the same.
+            if lhsType == rhsType {
+                return lhsType
+            }
+            
+            // Float takes precedence over ints on arithmetic operators
+            if op.category == .arithmetic {
+                switch (lhsType, rhsType) {
+                case (.float, .int), (.int, .float):
+                    return .float
+                default:
+                    break
+                }
+            } else if op.category == .bitwise {
+                // Bitwise operators always cast the result to integers, if
+                // one of the operands is an integer
+                switch (lhsType, rhsType) {
+                case (_, .int), (.int, _):
+                    return .int
+                default:
+                    break
+                }
+            }
+            
+            return .other
+            
+        case .assignment:
+            return deduceType(from: rhs)
+            
+        case .comparison:
+            return .bool
+            
+        case .logical:
+            return .bool
+            
+        case .nullCoalesce, .range:
+            return .other
+        }
+    }
+    
+    private enum DeducedType {
+        case int
+        case float
+        case bool
+        case string
+        case `nil`
+        case other
     }
 }
 

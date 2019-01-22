@@ -200,7 +200,12 @@ extension SwiftSyntaxProducer {
             
             if let _else = stmt.elseBody {
                 builder.useElseKeyword(makeStartToken(SyntaxFactory.makeElseKeyword).addingLeadingSpace())
-                builder.useElseBody(generateCompound(_else))
+                if _else.statements.count == 1, let elseIfStmt = _else.statements[0] as? IfStatement {
+                    addExtraLeading(.spaces(1))
+                    builder.useElseBody(generateIfStmt(elseIfStmt))
+                } else {
+                    builder.useElseBody(generateCompound(_else))
+                }
             }
         }
     }
@@ -328,7 +333,7 @@ extension SwiftSyntaxProducer {
                 builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
                 builder.useRightParen(SyntaxFactory.makeRightParenToken())
                 
-                iterateWithComma(items, postSeparator: []) { (item, hasComma) in
+                iterateWithComma(items) { (item, hasComma) in
                     builder.addTuplePatternElement(
                         TuplePatternElementSyntax { builder in
                             builder.usePattern(generatePattern(item))

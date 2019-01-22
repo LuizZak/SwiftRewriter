@@ -341,7 +341,7 @@ class SwiftRewriter_StmtTests: XCTestCase {
             swift: """
             struct VertexObject {
                 var field: CInt
-                
+
                 init() {
                     field = 0
                 }

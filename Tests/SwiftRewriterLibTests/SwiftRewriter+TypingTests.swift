@@ -79,7 +79,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                     // type: NSObject
                     super
                 }
-                
+            
                 static func classMethod() {
                     // type: MyClass.Type
                     self
@@ -181,7 +181,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class MyClass: NSObject {
                 var aValue: Int = 0
-                
+            
                 func method() {
                     // type: Int
                     self.aValue
@@ -912,7 +912,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
 
             class MyClass {
                 var callback: Callback
-                
+            
                 func method() {
                     let local: Int
                     // type: Callback
@@ -1149,7 +1149,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             swift: """
             class A: UIView {
                 var a: UIView?
-                
+            
                 func method() {
                     // type: CGRect
                     self.convert(CGRect.zero, to: nil)
