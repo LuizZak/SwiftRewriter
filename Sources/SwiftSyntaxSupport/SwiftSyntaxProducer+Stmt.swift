@@ -55,6 +55,11 @@ extension SwiftSyntaxProducer {
     
     // TODO: Support for labeling in statements
     func generateStatement(_ stmt: Statement) -> [() -> CodeBlockItemSyntax] {
+        if let label = stmt.label {
+            addExtraLeading(.newlines(1) + indentation())
+            addExtraLeading(.lineComment("// \(label):"))
+        }
+        
         switch stmt {
         case let stmt as ReturnStatement:
             return [{ self.generateReturn(stmt).inCodeBlock() }]
