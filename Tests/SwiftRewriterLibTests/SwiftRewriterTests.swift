@@ -806,7 +806,7 @@ class SwiftRewriterTests: XCTestCase {
                 func myMethod()
             }
             """,
-            options: ASTWriterOptions(emitObjcCompatibility: true))
+            options: SwiftSyntaxOptions(emitObjcCompatibility: true))
     }
     
     func testRewriteProtocolConformance() {
@@ -1559,7 +1559,7 @@ class SwiftRewriterTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(emitObjcCompatibility: true))
+            options: SwiftSyntaxOptions(emitObjcCompatibility: true))
     }
     
     /// Tests calls that override a super call by detection of a `super` call on

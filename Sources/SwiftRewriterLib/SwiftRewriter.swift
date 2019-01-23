@@ -64,7 +64,7 @@ public final class SwiftRewriter {
     public var settings: Settings
     
     /// Describes settings to pass to the AST writers when outputting code
-    public var writerOptions: ASTWriterOptions = .default
+    public var writerOptions: SwiftSyntaxOptions = .default
     
     public init(input: InputSourcesProvider,
                 output: WriterOutput,
@@ -424,6 +424,7 @@ public final class SwiftRewriter {
         
         let writer = SwiftWriter(intentions: intentionCollection,
                                  options: writerOptions,
+                                 numThreads: settings.numThreads,
                                  diagnostics: diagnostics,
                                  output: outputTarget,
                                  typeMapper: typeMapper,
@@ -547,7 +548,7 @@ public final class SwiftRewriter {
             return
         }
         
-        let writer = SwiftSyntaxProducer(settings: writerOptions.toSwiftSyntaxProducerSettings())
+        let writer = SwiftSyntaxProducer(settings: writerOptions)
         
         let output = writer.generateFile(match)
         

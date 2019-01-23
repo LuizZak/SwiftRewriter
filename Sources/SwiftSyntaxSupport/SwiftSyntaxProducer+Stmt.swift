@@ -130,7 +130,7 @@ extension SwiftSyntaxProducer {
         case let stmt as DeferStatement:
             return [{ self.generateDefer(stmt).inCodeBlock() }]
             
-        case let stmt as CompoundStatement:
+        case is CompoundStatement:
             fatalError("Use generateCompound(_:) to generate syntaxes for compound statements")
             
         case is UnknownStatement:

@@ -8,7 +8,7 @@ public class SwiftRewriterJobBuilder {
     public var globalsProvidersSource: GlobalsProvidersSource?
     public var preprocessors: [SourcePreprocessor] = []
     public var settings: SwiftRewriter.Settings = .default
-    public var astWriterOptions: ASTWriterOptions = .default
+    public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
     
     public init() {
         
@@ -25,7 +25,7 @@ public class SwiftRewriterJobBuilder {
                                 globalsProvidersSource: globalsProvidersSource,
                                 preprocessors: preprocessors,
                                 settings: settings,
-                                astWriterOptions: astWriterOptions)
+                                swiftSyntaxOptions: swiftSyntaxOptions)
     }
 }
 

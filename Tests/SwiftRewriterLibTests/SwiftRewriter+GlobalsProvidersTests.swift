@@ -28,6 +28,6 @@ class SwiftRewriter_GlobalsProvidersTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
 }

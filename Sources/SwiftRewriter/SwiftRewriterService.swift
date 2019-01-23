@@ -7,7 +7,7 @@ import GlobalsProviders
 
 public enum Settings {
     /// Settings for the AST writer
-    public static var astWriter = ASTWriterOptions()
+    public static var astWriter = SwiftSyntaxOptions()
     
     /// General settings for `SwiftRewriter` instances
     public static var rewriter: SwiftRewriter.Settings = .default
@@ -44,7 +44,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
         jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
         jobBuilder.settings = Settings.rewriter
-        jobBuilder.astWriterOptions = Settings.astWriter
+        jobBuilder.swiftSyntaxOptions = Settings.astWriter
         jobBuilder.preprocessors = [QuickSpecPreprocessor()]
         
         let job = jobBuilder.createJob()

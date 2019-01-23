@@ -40,11 +40,11 @@ class MultiFileTestBuilder {
     }
     
     func transpile(expectsErrors: Bool = false,
-                   options: ASTWriterOptions = .default,
+                   options: SwiftSyntaxOptions = .default,
                    file: String = #file,
                    line: Int = #line) -> CompiledMultiFileTestResults {
         
-        builder.astWriterOptions = options
+        builder.swiftSyntaxOptions = options
         
         let job = builder.createJob()
         let output = TestWriterOutput()
@@ -73,11 +73,11 @@ class MultiFileTestBuilder {
     @discardableResult
     func translatesToSwift(_ expectedSwift: String,
                            expectsErrors: Bool = false,
-                           options: ASTWriterOptions = .default,
+                           options: SwiftSyntaxOptions = .default,
                            file: String = #file,
                            line: Int = #line) -> MultiFileTestBuilder {
         
-        builder.astWriterOptions = options
+        builder.swiftSyntaxOptions = options
         
         let job = builder.createJob()
         let output = TestWriterOutput()

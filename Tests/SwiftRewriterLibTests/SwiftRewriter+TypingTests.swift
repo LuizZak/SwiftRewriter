@@ -30,7 +30,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     /// Tests that the `self` identifier used in a method class context is properly
@@ -94,7 +94,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testSelfSuperTypeInPropertySynthesizedGetterAndSetterBody() {
@@ -136,7 +136,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testSelfSuperInitInClassMethod() {
@@ -162,7 +162,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testSelfPropertyFetch() {
@@ -188,7 +188,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testMessageSelf() {
@@ -219,7 +219,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testMessageClassSelf() {
@@ -250,7 +250,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testCustomInitClass() {
@@ -289,7 +289,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testIntrinsicsFromMethodParameter() {
@@ -309,7 +309,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     func testIntrinsicsForSetterCustomNewValueName() {
         assertObjcParse(
@@ -340,7 +340,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testIntrinsicsForSetterWithDefaultNewValueName() {
@@ -372,7 +372,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testIntrinsicsExposeClassInstanceProperties() {
@@ -405,7 +405,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testIntrinsicsExposeMethodParameters() {
@@ -425,7 +425,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testPropertyResolutionLooksThroughNullability() {
@@ -452,7 +452,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testVariableDeclarationCascadesTypeOfInitialExpression() {
@@ -481,7 +481,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testExpressionWithinBracelessIfStatement() {
@@ -511,7 +511,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testLookThroughProtocolConformances() {
@@ -537,7 +537,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testChainedOptionalAccessMethodCall() {
@@ -571,7 +571,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testChainedOptionalAccessMethodCall2() {
@@ -605,7 +605,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testChainCallRespondsToSelector() {
@@ -643,7 +643,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testTypeLookupIntoComposedProtocols() {
@@ -688,7 +688,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSide() {
@@ -737,7 +737,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testLocalVariableDeclarationInitializedTransmitsNullabilityFromRightHandSideWithSubclassing() {
@@ -790,7 +790,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     /// Tests that when resolving types of block expressions we expose the parameters
@@ -831,7 +831,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     /// Test that local variables declared within blocks are scoped within
@@ -873,7 +873,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testCapturingLocalsInBlocksFromOuterScopes() {
@@ -937,7 +937,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testAssignImplicitlyUnwrappedOptionalToLocalVariableEscalatesToOptional() {
@@ -964,7 +964,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testCreateNonOptionalLocalsWhenRHSInitializerIsNonOptional() {
@@ -991,7 +991,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testVisibilityOfGlobalElements() {
@@ -1022,7 +1022,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testOutOfOrderTypeResolving() {
@@ -1049,7 +1049,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testTypingInGlobalFunction() {
@@ -1071,7 +1071,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             class A: UIView {
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testExtensionOfGlobalClass() {
@@ -1101,7 +1101,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
             extension UIView {
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testForStatementIterator() {
@@ -1125,7 +1125,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testOverloadResolution() {
@@ -1166,7 +1166,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 }
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testTypeLookupInFoundationType() {
@@ -1186,7 +1186,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 array.add(object)
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testCastTyping() {
@@ -1202,7 +1202,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 (UIView() as NSObject).description
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testCLibOverloadResolution() {
@@ -1220,7 +1220,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 floor(f)
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     /// Verifies that deeply-nested transformations are properly executed and
@@ -1244,7 +1244,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 UIColor.lightGray.withAlphaComponent(0.2)
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testOptionalProtocolInvocationOptionalAccess() {
@@ -1278,7 +1278,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 optional func method() -> Bool
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
     
     func testBasicOverloadResolution() {
@@ -1312,6 +1312,6 @@ class SwiftRewriter_TypingTests: XCTestCase {
                 max(0.0, 0)
             }
             """,
-            options: ASTWriterOptions(outputExpressionTypes: true))
+            options: SwiftSyntaxOptions(outputExpressionTypes: true))
     }
 }

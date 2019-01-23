@@ -27,7 +27,7 @@ class SwiftRewriterJobTests: XCTestCase {
                              globalsProvidersSource: MockGlobalsProvidersSource(),
                              preprocessors: [MockSourcePreprocessor()],
                              settings: .default,
-                             astWriterOptions: .default)
+                             swiftSyntaxOptions: .default)
         let output = MockWriterOutput()
         
         let result = job.execute(output: output)

@@ -9,7 +9,7 @@ public class SwiftRewriterJob {
     public var globalsProvidersSource: GlobalsProvidersSource?
     public var preprocessors: [SourcePreprocessor]
     public var settings: SwiftRewriter.Settings = .default
-    public var astWriterOptions: ASTWriterOptions = .default
+    public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
     
     public init(input: InputSourcesProvider,
                 intentionPassesSource: IntentionPassSource?,
@@ -17,7 +17,7 @@ public class SwiftRewriterJob {
                 globalsProvidersSource: GlobalsProvidersSource?,
                 preprocessors: [SourcePreprocessor],
                 settings: SwiftRewriter.Settings,
-                astWriterOptions: ASTWriterOptions) {
+                swiftSyntaxOptions: SwiftSyntaxOptions) {
         
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources
@@ -25,7 +25,7 @@ public class SwiftRewriterJob {
         self.preprocessors = preprocessors
         self.settings = settings
         self.input = input
-        self.astWriterOptions = astWriterOptions
+        self.swiftSyntaxOptions = swiftSyntaxOptions
     }
     
     /// Executes a transpilation job, returning the result of the operation.
@@ -59,7 +59,7 @@ public class SwiftRewriterJob {
                                      globalsProvidersSource: globalsProvidersSource,
                                      settings: settings)
         
-        rewriter.writerOptions = astWriterOptions
+        rewriter.writerOptions = swiftSyntaxOptions
         rewriter.preprocessors = preprocessors
         
         return rewriter

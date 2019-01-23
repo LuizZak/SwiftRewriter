@@ -190,7 +190,6 @@ do {
     Settings.rewriter.verbose = result.get(verboseArg) ?? false
     Settings.rewriter.diagnoseFiles = result.get(diagnoseFileArg).map({ [$0] }) ?? []
     Settings.rewriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
-    Settings.astWriter.numThreads = result.get(numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
     Settings.astWriter.outputExpressionTypes = result.get(outputExpressionTypesArg) ?? false
     Settings.astWriter.printIntentionHistory = result.get(outputIntentionHistoryArg) ?? false
     Settings.astWriter.emitObjcCompatibility = result.get(emitObjcCompatibilityArg) ?? false

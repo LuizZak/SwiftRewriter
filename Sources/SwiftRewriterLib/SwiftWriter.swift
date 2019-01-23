@@ -16,11 +16,13 @@ public final class SwiftWriter {
     var output: WriterOutput
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
-    var options: ASTWriterOptions
+    var options: SwiftSyntaxOptions
+    let numThreads: Int
     let typeSystem: TypeSystem
     
     public init(intentions: IntentionCollection,
-                options: ASTWriterOptions,
+                options: SwiftSyntaxOptions,
+                numThreads: Int,
                 diagnostics: Diagnostics,
                 output: WriterOutput,
                 typeMapper: TypeMapper,
@@ -28,6 +30,7 @@ public final class SwiftWriter {
         
         self.intentions = intentions
         self.options = options
+        self.numThreads = numThreads
         self.diagnostics = diagnostics
         self.output = output
         self.typeMapper = typeMapper
@@ -46,7 +49,7 @@ public final class SwiftWriter {
         var errors: [(String, Error)] = []
         
         let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = options.numThreads
+        queue.maxConcurrentOperationCount = numThreads
         
         for file in fileIntents {
             if unique.contains(file.targetPath) {
@@ -100,11 +103,11 @@ class SwiftSyntaxWriter {
     var output: WriterOutput
     let typeMapper: TypeMapper
     var diagnostics: Diagnostics
-    var options: ASTWriterOptions
+    var options: SwiftSyntaxOptions
     let typeSystem: TypeSystem
     
     init(intentions: IntentionCollection,
-         options: ASTWriterOptions,
+         options: SwiftSyntaxOptions,
          diagnostics: Diagnostics,
          output: WriterOutput,
          typeMapper: TypeMapper,

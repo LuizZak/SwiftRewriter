@@ -9,13 +9,13 @@ import WriterTargetOutput
 class SingleFileTestBuilder {
     var test: XCTestCase
     var objc: String
-    var options: ASTWriterOptions
+    var options: SwiftSyntaxOptions
     var settings: SwiftRewriter.Settings
     var diagnosticsStream: String = ""
     
     init(test: XCTestCase,
          objc: String,
-         options: ASTWriterOptions,
+         options: SwiftSyntaxOptions,
          settings: SwiftRewriter.Settings) {
         
         self.test = test
@@ -135,7 +135,7 @@ extension XCTestCase {
     
     @discardableResult
     func assertObjcParse(objc: String, swift expectedSwift: String,
-                         options: ASTWriterOptions = .default,
+                         options: SwiftSyntaxOptions = .default,
                          rewriterSettings: SwiftRewriter.Settings = .default,
                          expectsErrors: Bool = false,
                          file: String = #file,
