@@ -60,7 +60,7 @@ public final class SwiftWriter {
             unique.insert(file.targetPath)
             
             let writer
-                = _SwiftSyntaxWriter(
+                = SwiftSyntaxWriter(
                     intentions: intentions,
                     options: options,
                     diagnostics: Diagnostics(),
@@ -95,7 +95,7 @@ public final class SwiftWriter {
     }
 }
 
-class _SwiftSyntaxWriter {
+class SwiftSyntaxWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
     let typeMapper: TypeMapper
@@ -147,7 +147,7 @@ class _SwiftSyntaxWriter {
     }
 }
 
-extension _SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
+extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
     func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,
                              shouldEmitTypeFor storage: ValueStorage,
                              intention: Intention?,
