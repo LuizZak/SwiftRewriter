@@ -3,11 +3,11 @@
 The tool splits the conversion process into six discrete steps, which are, whenever possible, divided into separate project targets.
 
 ```
-┌─────────────┐ ┌──────────────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌──────────┐
-│      1.     │ │          2.          │ │      3.     │ │      4.     │ │      5.     │ │    6.    │
-│ Objective-C ├─┤ Statements parsing/  ├─┤    Type     ├─┤  Intention  ├─┤     AST     ├─┤   Code   │
-│   parsing   │ │ Intention generation │ │  resolving  │ │  rewriting  │ │  rewriting  │ │  output  │
-└─────────────┘ └──────────────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └──────────┘
+┌─────────────┐ ┌──────────────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────────────┐ ┌──────────┐
+│      1.     │ │          2.          │ │      3.     │ │      4.     │ │      5.     │ │       6.       │ │    7.    │
+│ Objective-C ├─┤ Statements parsing/  ├─┤    Type     ├─┤  Intention  ├─┤     AST     ├─┤ Post-rewriting ├─┤   Code   │
+│   parsing   │ │ Intention generation │ │  resolving  │ │  rewriting  │ │  rewriting  │ │   formatting   │ │  output  │
+└─────────────┘ └──────────────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └────────────────┘ └──────────┘
 ```
 
 All of these steps are encapsulated and run by `SwiftRewriter` within the `SwiftRewriterLib` target.
@@ -92,6 +92,12 @@ Expression passes are provided via an `ASTRewriterPassSource` protocol provided 
     - Rewriter passes must notify when changes are made via `ASTRewriterPassContext.notifyChangedTree` to allow type resolution to kick in in between rewriter passes.
 
 #### 6. Code output
+
+At this point, a syntax tree produced by [`swift-syntax`](https://github.com/apple/swift-syntax) is produced and passed to intermediary syntax rewriters that implement `SwiftSyntaxRewriterPass`, which refine the final AST before output.
+
+All syntax rewriters are contained in the target named `SwiftSyntaxRewriterPasses`.
+
+#### 7. Code output
 
 At the final step, the code is output to an implementer of `WriterOutput` fed to `SwiftRewriter.init`.
 

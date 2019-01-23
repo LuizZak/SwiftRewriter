@@ -11,13 +11,16 @@ public protocol DiffTestCaseFailureReporter {
 public extension DiffTestCaseFailureReporter {
     
     public func diffTest(expected input: String,
+                         highlightLineInEditor: Bool = true,
                          file: String = #file,
                          line: Int = #line) -> DiffingTest {
         
         let location = DiffLocation(file: file, line: line)
         let diffable = DiffableString(string: input, location: location)
         
-        return DiffingTest(expected: diffable, testCase: self)
+        return DiffingTest(expected: diffable,
+                           testCase: self,
+                           highlightLineInEditor: highlightLineInEditor)
     }
 }
 
@@ -46,10 +49,15 @@ public struct DiffableString {
 public class DiffingTest {
     var expectedDiff: DiffableString
     let testCase: DiffTestCaseFailureReporter
+    let highlightLineInEditor: Bool
     
-    public init(expected: DiffableString, testCase: DiffTestCaseFailureReporter) {
+    public init(expected: DiffableString,
+                testCase: DiffTestCaseFailureReporter,
+                highlightLineInEditor: Bool) {
+        
         self.expectedDiff = expected
         self.testCase = testCase
+        self.highlightLineInEditor = highlightLineInEditor
     }
     
     public func diff(_ res: String,
@@ -86,6 +94,10 @@ public class DiffingTest {
             atLine: line,
             expected: true
         )
+        
+        if !highlightLineInEditor {
+            return
+        }
         
         // Report inline in Xcode now
         guard let (diffStartLine, _) = res.firstDifferingLineColumn(against: expectedDiff.string) else {

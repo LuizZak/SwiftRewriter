@@ -17,10 +17,13 @@ public enum Pattern: Codable, Equatable {
         switch discriminator {
         case "identifier":
             try self = .identifier(container.decode(String.self, forKey: .payload))
+            
         case "expression":
             try self = .expression(container.decodeExpression(forKey: .payload))
+            
         case "tuple":
             try self = .tuple(container.decode([Pattern].self, forKey: .payload))
+            
         default:
             throw DecodingError.dataCorruptedError(
                 forKey: CodingKeys.discriminator,
@@ -36,17 +39,19 @@ public enum Pattern: Codable, Equatable {
         case .identifier(let ident):
             try container.encode("identifier", forKey: .discriminator)
             try container.encode(ident, forKey: .payload)
+            
         case .expression(let exp):
             try container.encode("expression", forKey: .discriminator)
             try container.encodeExpression(exp, forKey: .payload)
+            
         case .tuple(let pattern):
             try container.encode("tuple", forKey: .discriminator)
             try container.encode(pattern, forKey: .payload)
         }
     }
     
-    /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by unwrapping
-    /// the inner patterns.
+    /// Simplifies patterns that feature 1-item tuples (i.e. `(<item>)`) by
+    /// unwrapping the inner patterns.
     public var simplified: Pattern {
         switch self {
         case .tuple(let pt) where pt.count == 1:
