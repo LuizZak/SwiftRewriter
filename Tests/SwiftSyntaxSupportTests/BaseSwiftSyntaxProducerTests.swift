@@ -13,28 +13,8 @@ class BaseSwiftSyntaxProducerTests: XCTestCase {
         
         let syntax = producer(SwiftSyntaxProducer())(node)
         
-        if syntax.description != expected {
-            let diff = syntax.description.makeDifferenceMarkString(against: expected)
-            
-            recordFailure(
-                withDescription: """
-                Expected to produce file matching:
-                
-                \(expected)
-                
-                But found:
-                
-                \(syntax.description)
-                
-                Diff:
-                
-                \(diff)
-                """,
-                inFile: file,
-                atLine: line,
-                expected: true
-            )
-        }
+        diffTest(expected: expected, file: file, line: line)
+            .diff(syntax.description, file: file, line: line + 2)
     }
     
     func assert(_ node: Syntax,
@@ -42,27 +22,7 @@ class BaseSwiftSyntaxProducerTests: XCTestCase {
                 file: String = #file,
                 line: Int = #line) {
         
-        if node.description != expected {
-            let diff = node.description.makeDifferenceMarkString(against: expected)
-            
-            recordFailure(
-                withDescription: """
-                Expected to produce file matching:
-                
-                \(expected)
-                
-                But found:
-                
-                \(node.description)
-                
-                Diff:
-                
-                \(diff)
-                """,
-                inFile: file,
-                atLine: line,
-                expected: true
-            )
-        }
+        diffTest(expected: expected, file: file, line: line)
+            .diff(node.description, file: file, line: line)
     }
 }

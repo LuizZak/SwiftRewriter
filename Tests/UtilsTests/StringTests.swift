@@ -227,6 +227,20 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges[1], input.range(of: "1\n")!.upperBound..<input.endIndex)
     }
     
+    func testLineRangesWithTwoEmptyFinalLines() {
+        let input = """
+            1
+            
+            
+            """
+        
+        let ranges = input.lineRanges()
+        XCTAssertEqual(ranges.count, 3)
+        XCTAssertEqual(ranges[0], input.intRange(0..<1))
+        XCTAssertEqual(ranges[1], input.intRange(2..<2))
+        XCTAssertEqual(ranges[2], input.intRange(3..<3))
+    }
+    
     func testLineRangesWithSingleLine() {
         let input = "123"
         
@@ -250,5 +264,16 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges.count, 2)
         XCTAssertEqual(ranges[0], input.startIndex..<input.startIndex)
         XCTAssertEqual(ranges[1], input.endIndex..<input.endIndex)
+    }
+}
+
+extension String {
+    func intRange<R>(_ range: R) -> Range<Index> where R: RangeExpression, R.Bound == Int {
+        let range = range.relative(to: Array(0..<count))
+        
+        let start = index(startIndex, offsetBy: range.lowerBound)
+        let end = index(startIndex, offsetBy: range.upperBound)
+        
+        return start..<end
     }
 }

@@ -80,7 +80,7 @@ let package = Package(
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
-                           "TestCommons", "Intentions"]),
+                           "Intentions"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["SwiftRewriterLib", "Utils", "MiniLexer"]),
@@ -95,7 +95,8 @@ let package = Package(
         .target(
             name: "TestCommons",
             dependencies: [
-                "SwiftAST", "SwiftRewriterLib"
+                "SwiftAST", "SwiftRewriterLib", "Intentions", "KnownType",
+                "GrammarModels", "Utils"
             ])
         
     ] + /* Tests */ [
@@ -153,7 +154,10 @@ let package = Package(
         .testTarget(
             name: "GlobalsProvidersTests",
             dependencies: ["SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
-                           "TestCommons"])
+                           "TestCommons"]),
+        .testTarget(
+            name: "TestCommonsTests",
+            dependencies: ["TestCommons", "Utils"])
     ],
     swiftLanguageVersions: [.v4_2]
 )

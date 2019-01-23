@@ -275,6 +275,13 @@ public class FileIntentionBuilder {
     }
     
     @discardableResult
+    public func addImportDirective(moduleName: String) -> FileIntentionBuilder {
+        intention.importDirectives.append(moduleName)
+        
+        return self
+    }
+    
+    @discardableResult
     public func addPreprocessorDirective(_ directive: String) -> FileIntentionBuilder {
         intention.preprocessorDirectives.append(directive)
         

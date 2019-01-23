@@ -184,7 +184,9 @@ extension SwiftSyntaxProducer {
                 builder.addCodeBlockItem(codeBlock)
             }
             
+            var hasHeaderTrivia: Bool = false
             if let headerTrivia = generatePreprocessorDirectivesTrivia(file) {
+                hasHeaderTrivia = true
                 addExtraLeading(headerTrivia)
                 addExtraLeading(.newlines(1))
             }
@@ -257,7 +259,7 @@ extension SwiftSyntaxProducer {
             
             // Noone consumed the leading trivia - emit a dummy token just so we
             // can have a file with preprocessor directives in place
-            if !didModifyExtraLeading {
+            if !didModifyExtraLeading && hasHeaderTrivia {
                 let item = CodeBlockItemSyntax { builder in
                     builder.useItem(SyntaxFactory
                         .makeToken(TokenKind.identifier(""),
@@ -290,7 +292,7 @@ extension SwiftSyntaxProducer {
 extension SwiftSyntaxProducer {
     func generateImport(_ module: String) -> ImportDeclSyntax {
         return ImportDeclSyntax { builder in
-            builder.useImportTok(SyntaxFactory.makeImportKeyword().withTrailingSpace())
+            builder.useImportTok(makeStartToken(SyntaxFactory.makeImportKeyword).withTrailingSpace())
             builder.addAccessPathComponent(AccessPathComponentSyntax { builder in
                 builder.useName(makeIdentifier(module))
             })

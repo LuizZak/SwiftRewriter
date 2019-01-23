@@ -34,12 +34,30 @@ public extension String {
     /// Produces a diff-like string with a marking on the first character
     /// that differs between `self` and a target string.
     public func makeDifferenceMarkString(against string: String) -> String {
+        guard let (line, column) = firstDifferingLineColumn(against: string) else {
+            return self + "\n ~ Strings are equal."
+        }
+        
         if self == string {
             return self + "\n ~ Strings are equal."
         }
         
-        if first != string.first {
+        if line == 0 && column == 0 {
             return self + "\n ~ Difference at start of string."
+        }
+        
+        let marker = String(repeating: "~", count: column - 1) + "^ Difference starts here"
+        
+        return insertingStringLine(marker, after: line)
+    }
+    
+    public func firstDifferingLineColumn(against string: String) -> (line: Int, column: Int)? {
+        if self == string {
+            return nil
+        }
+        
+        if first != string.first {
+            return (0, 0)
         }
         
         // Find first character differing across both strings
@@ -54,9 +72,7 @@ public extension String {
         let column = columnOffset(at: offset)
         let line = lineNumber(at: offset)
         
-        let marker = String(repeating: "~", count: column - 1) + "^ Difference starts here"
-        
-        return insertingStringLine(marker, after: line)
+        return (line, column)
     }
     
     private func insertingStringLine(_ string: String, after line: Int) -> String {

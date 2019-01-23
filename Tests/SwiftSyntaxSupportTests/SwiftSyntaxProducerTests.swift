@@ -298,6 +298,36 @@ extension SwiftSyntaxProducerTests {
 
 // MARK: - File generation
 extension SwiftSyntaxProducerTests {
+    func testGenerateImportDirective() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.addImportDirective(moduleName: "moduleA")
+            }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            import moduleA
+            """)
+    }
+    
+    func testGenerateMultipleImportDirectives() {
+        let file = FileIntentionBuilder
+            .makeFileIntention(fileName: "Test.swift") { builder in
+                builder.addImportDirective(moduleName: "moduleA")
+                builder.addImportDirective(moduleName: "moduleB")
+        }
+        let sut = SwiftSyntaxProducer()
+        
+        let result = sut.generateFile(file)
+        
+        assert(result, matches: """
+            import moduleA
+            import moduleB
+            """)
+    }
+    
     func testGeneratePreprocessorDirectivesInEmptyFile() {
         let file = FileIntentionBuilder
             .makeFileIntention(fileName: "Test.swift") { builder in
@@ -310,9 +340,7 @@ extension SwiftSyntaxProducerTests {
         
         // TODO: Consider removing the extra line feed in case an empty file is
         // generated.
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             // Preprocessor directives found in file:
             // #import <Abc.h>
             // #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -331,9 +359,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             // Preprocessor directives found in file:
             // #import <Abc.h>
             // #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -368,9 +394,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             func a() {
                 if abc == true {
                     print("Hello,", "World!")
@@ -398,9 +422,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             func a(test: Int) {
             }
             """)
@@ -420,9 +442,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             func a() -> Int {
             }
             """)
@@ -448,9 +468,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             weak var foo: AnyObject?
             unowned(safe) var bar: AnyObject?
             unowned(unsafe) var baz: AnyObject?
@@ -472,9 +490,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
                 var foo: Int {
                     return 1
@@ -526,9 +542,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
                 var foo: Int {
                     get {
@@ -564,9 +578,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             typealias Alias = Int
             """)
     }
@@ -584,9 +596,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             // MARK: -
             extension A {
             }
@@ -608,9 +618,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             enum A: Int {
             }
             """)
@@ -628,9 +636,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             enum A: Int {
                 case case1 = 1
                 case case2
@@ -650,9 +656,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
             }
             """)
@@ -668,9 +672,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
             }
             class B {
@@ -689,9 +691,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A: Supertype {
             }
             """)
@@ -709,9 +709,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A: ProtocolA, ProtocolB {
             }
             """)
@@ -728,9 +726,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
                 var property: Int
             }
@@ -748,9 +744,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
                 var ivarA: Int
             }
@@ -770,9 +764,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
                 var ivarA: Int
                 var propertyA: Int
@@ -791,9 +783,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
                 init() {
                 }
@@ -812,9 +802,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             class A {
                 func foo(_ a: Bar) {
                 }
@@ -835,9 +823,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             struct A {
             }
             """)
@@ -855,9 +841,7 @@ extension SwiftSyntaxProducerTests {
         
         let result = sut.generateFile(file)
         
-        assert(
-            result,
-            matches: """
+        assert(result, matches: """
             protocol A {
             }
             """)
