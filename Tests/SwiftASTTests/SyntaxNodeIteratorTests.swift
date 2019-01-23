@@ -297,23 +297,6 @@ class SyntaxNodeIteratorTests: XCTestCase {
         )
     }
     
-    func testSemicolon() {
-        assertStatement(
-            .compound([
-                .semicolon,
-                .semicolon
-                ]),
-            iteratesAs: [
-                Statement.compound([
-                    .semicolon,
-                    .semicolon
-                    ]),
-                Statement.semicolon,
-                Statement.semicolon
-            ]
-        )
-    }
-    
     /*
      Switch statement traversal:
      

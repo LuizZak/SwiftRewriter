@@ -8,12 +8,6 @@ public protocol StatementVisitor {
     /// - Returns: Result of visiting the statement node
     func visitStatement(_ statement: Statement) -> StmtResult
     
-    /// Visits a semicolon node
-    ///
-    /// - Parameter stmt: A semicolon statement to visit
-    /// - Returns: Result of visiting a semicolon with this visitor
-    func visitSemicolon(_ stmt: SemicolonStatement) -> StmtResult
-    
     /// Visits a compound statement with this visitor
     ///
     /// - Parameter stmt: A compound statement to visit

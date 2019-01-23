@@ -43,9 +43,6 @@ public final class SwiftASTSerializer {
             case is ReturnStatement:
                 kind = .return
                 
-            case is SemicolonStatement:
-                kind = .semicolon
-                
             case is SwitchStatement:
                 kind = .switch
                 
@@ -100,8 +97,6 @@ public final class SwiftASTSerializer {
                 statement = try container.decode(FallthroughStatement.self, forKey: .statement)
             case .continue:
                 statement = try container.decode(ContinueStatement.self, forKey: .statement)
-            case .semicolon:
-                statement = try container.decode(SemicolonStatement.self, forKey: .statement)
             case .unknown:
                 statement = try container.decode(UnknownStatement.self, forKey: .statement)
             }
@@ -278,7 +273,6 @@ public final class SwiftASTSerializer {
         case `for`
         case `if`
         case `return`
-        case semicolon
         case `switch`
         case unknown
         case varDecl

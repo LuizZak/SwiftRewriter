@@ -34,7 +34,6 @@ class SwiftASTSerializerTests: XCTestCase {
                         ])
                 )
             ]),
-            Statement.semicolon,
             Statement.if(
                 Expression.constant(true),
                 body: [

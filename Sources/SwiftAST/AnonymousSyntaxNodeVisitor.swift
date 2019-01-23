@@ -192,13 +192,6 @@ public final class AnonymousSyntaxNodeVisitor: ExpressionVisitor, StatementVisit
         stmt.accept(self)
     }
     
-    /// Visits a semicolon node
-    ///
-    /// - Parameter stmt: A SemicolonStatement to visit
-    public func visitSemicolon(_ stmt: SemicolonStatement) {
-        listener(stmt)
-    }
-    
     /// Visits a compound statement with this visitor
     ///
     /// - Parameter stmt: A CompoundStatement to visit

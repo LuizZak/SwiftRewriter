@@ -210,14 +210,6 @@ open class SyntaxNodeRewriter: ExpressionVisitor, StatementVisitor {
         return stmt.accept(self)
     }
     
-    /// Visits a semicolon node
-    ///
-    /// - Parameter stmt: A SemicolonStatement to visit
-    /// - Returns: Result of visiting a semicolon with this visitor
-    open func visitSemicolon(_ stmt: SemicolonStatement) -> Statement {
-        return stmt
-    }
-    
     /// Visits a compound statement with this visitor
     ///
     /// - Parameter stmt: A CompoundStatement to visit

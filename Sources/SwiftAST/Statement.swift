@@ -76,9 +76,6 @@ public class Statement: SyntaxNode, Codable, Equatable {
 }
 
 public extension Statement {
-    public static var semicolon: SemicolonStatement {
-        return SemicolonStatement()
-    }
     public static func compound(_ cpd: [Statement]) -> CompoundStatement {
         return CompoundStatement(statements: cpd)
     }
