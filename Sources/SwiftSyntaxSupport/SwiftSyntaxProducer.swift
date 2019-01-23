@@ -138,6 +138,9 @@ public class SwiftSyntaxProducer {
         if intention is PropertyGenerationIntention {
             return true
         }
+        if intention is InitGenerationIntention {
+            return true
+        }
         if let method = intention as? MethodGenerationIntention {
             if !isDeallocMethod(method) {
                 return true

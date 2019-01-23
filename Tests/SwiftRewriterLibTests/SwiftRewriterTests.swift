@@ -1532,6 +1532,8 @@ class SwiftRewriterTests: XCTestCase {
             @end
             
             @implementation B
+            - (instancetype)initWithValue:(NSInteger)value {
+            }
             - (void)method {
             }
             @end
@@ -1553,7 +1555,11 @@ class SwiftRewriterTests: XCTestCase {
             @objc
             class B: A {
                 @objc var b: Bool = false
-            
+
+                @objc
+                init(value: Int) {
+                }
+
                 @objc
                 func method() {
                 }
