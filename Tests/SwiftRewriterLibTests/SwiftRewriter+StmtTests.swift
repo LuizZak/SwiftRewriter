@@ -22,6 +22,13 @@ class SwiftRewriter_StmtTests: XCTestCase {
         )
     }
     
+    func testTranslateChainedBinaryExpression() {
+        assertSingleStatement(
+            objc: "10 + 26 + 42;",
+            swift: "10 + 26 + 42"
+        )
+    }
+    
     func testTranslateParenthesizedExpression() {
         assertSingleStatement(
             objc: "((10 + 26) * (15 + 15));",

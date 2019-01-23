@@ -382,6 +382,13 @@ extension SwiftSyntaxProducer {
             
             addExtraLeading(.newlines(1) + indentation())
             
+            for attribute in attributes(for: intention, inline: false) {
+                builder.addAttribute(attribute)
+            }
+            for modifier in modifiers(for: intention) {
+                builder.addModifier(modifier)
+            }
+            
             builder.useExtensionKeyword(
                 makeStartToken(SyntaxFactory.makeExtensionKeyword).addingTrailingSpace())
             
@@ -889,13 +896,10 @@ extension SwiftSyntaxProducer {
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return InitializerDeclSyntax { builder in
-            let attributes = self.attributes(for: intention, inline: false)
-            let modifiers = self.modifiers(for: intention)
-            
-            for attribute in attributes {
+            for attribute in attributes(for: intention, inline: false) {
                 builder.addAttribute(attribute)
             }
-            for modifier in modifiers {
+            for modifier in modifiers(for: intention) {
                 builder.addModifier(modifier)
             }
             
@@ -931,13 +935,10 @@ extension SwiftSyntaxProducer {
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return FunctionDeclSyntax { builder in
-            let attributes = self.attributes(for: intention, inline: false)
-            let modifiers = self.modifiers(for: intention)
-            
-            for attribute in attributes {
+            for attribute in attributes(for: intention, inline: false) {
                 builder.addAttribute(attribute)
             }
-            for modifier in modifiers {
+            for modifier in modifiers(for: intention) {
                 builder.addModifier(modifier)
             }
             

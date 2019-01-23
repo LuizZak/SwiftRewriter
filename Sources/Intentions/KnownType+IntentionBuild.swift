@@ -10,7 +10,12 @@ extension KnownTypeBuilder {
         
         switch type.kind {
         case .class:
-            typeIntention = ClassGenerationIntention(typeName: type.typeName)
+            if type.isExtension {
+                typeIntention = ClassExtensionGenerationIntention(typeName: type.typeName)
+            } else {
+                typeIntention = ClassGenerationIntention(typeName: type.typeName)
+            }
+            
             
         case .struct:
             typeIntention = StructGenerationIntention(typeName: type.typeName)

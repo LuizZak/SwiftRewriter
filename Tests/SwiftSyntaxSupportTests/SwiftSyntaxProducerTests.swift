@@ -143,6 +143,32 @@ extension SwiftSyntaxProducerTests {
                        expected)
     }
     
+    func testWriteExtensionAttributes() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .class)
+            .settingIsExtension(true)
+            .settingAttributes([
+                KnownAttribute(name: "attr"),
+                KnownAttribute(name: "otherAttr", parameters: ""),
+                KnownAttribute(name: "otherAttr", parameters: "type: Bool")
+            ])
+            .buildIntention()
+        let intent = type as! ClassExtensionGenerationIntention
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateExtension(intent).description
+        
+        let expected = """
+            // MARK: -
+            @attr
+            @otherAttr()
+            @otherAttr(type: Bool)
+            extension A {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
     func testWriteStructAttributes() {
         let type = KnownTypeBuilder(typeName: "A", kind: .struct)
             .settingAttributes([

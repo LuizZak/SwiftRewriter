@@ -265,7 +265,7 @@ extension SwiftSyntaxProducer {
     
     func generateBinary(_ exp: BinaryExpression) -> SequenceExprSyntax {
         return SequenceExprSyntax { builder in
-            builder.addExpression(generateWithinParensIfNeccessary(exp.lhs))
+            builder.addExpression(generateExpression(exp.lhs))
             
             if exp.op.category != .range {
                 addExtraLeading(.spaces(1))
@@ -277,7 +277,7 @@ extension SwiftSyntaxProducer {
                 addExtraLeading(.spaces(1))
             }
             
-            builder.addExpression(generateWithinParensIfNeccessary(exp.rhs))
+            builder.addExpression(generateExpression(exp.rhs))
         }
     }
     

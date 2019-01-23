@@ -279,4 +279,11 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             producer: SwiftSyntaxProducer.generateClosure,
             matches: "{ (p1: Int) -> Void in\n}")
     }
+    
+    func testSequentialBinaryExpression() {
+        assert(
+            Expression.constant(1).binary(op: .add, rhs: .constant(2)).binary(op: .add, rhs: .constant(3)),
+            producer: SwiftSyntaxProducer.generateBinary,
+            matches: "1 + 2 + 3")
+    }
 }
