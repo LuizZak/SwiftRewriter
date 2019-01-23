@@ -2,6 +2,7 @@ import XCTest
 import Antlr4
 import ObjcParser
 import ObjcParserAntlr
+import SwiftSyntaxSupport
 @testable import SwiftRewriterLib
 import SwiftAST
 import WriterTargetOutput
@@ -318,30 +319,16 @@ extension SwiftStatementASTReaderTests {
                     dump(result, to: &resStr)
                 }
                 dump(expected, to: &expStr)
-                
                 var expString = ""
                 var resString = ""
                 
-                let prettyPrintExpWriter =
-                    StatementWriter(options: .default,
-                                    target: StringRewriterOutput(settings: .defaults),
-                                    typeMapper: DefaultTypeMapper(),
-                                    typeSystem: TypeSystem())
+                let producer = SwiftSyntaxProducer()
                 
-                let prettyPrintResWriter =
-                    StatementWriter(options: .default,
-                                    target: StringRewriterOutput(settings: .defaults),
-                                    typeMapper: DefaultTypeMapper(),
-                                    typeSystem: TypeSystem())
-                
-                prettyPrintExpWriter.visitStatement(expected)
-                result.map(prettyPrintResWriter.visitStatement)
+                expString = producer.generateStatement(expected).description + "\n"
+                resString = (result.map(producer.generateStatement)?.description ?? "") + "\n"
                 
                 dump(expected, to: &expString)
                 dump(result, to: &resString)
-                
-                expString = (prettyPrintExpWriter.target as! StringRewriterOutput).buffer + "\n" + expString
-                resString = (prettyPrintResWriter.target as! StringRewriterOutput).buffer + "\n" + resString
                 
                 recordFailure(withDescription: """
                     Failed: Expected to read Objective-C expression

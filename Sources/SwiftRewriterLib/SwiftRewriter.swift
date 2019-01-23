@@ -4,6 +4,7 @@ import ObjcParser
 import SwiftAST
 import WriterTargetOutput
 import Intentions
+import SwiftSyntaxSupport
 import Utils
 
 private typealias NonnullTokenRange = (start: Int, end: Int)
@@ -546,18 +547,12 @@ public final class SwiftRewriter {
             return
         }
         
-        let writer =
-            InternalSwiftWriter(
-                intentions: intentionCollection, options: writerOptions,
-                diagnostics: Diagnostics(), output: outputTarget,
-                typeMapper: typeMapper, typeSystem: typeSystem)
+        let writer = SwiftSyntaxProducer(settings: writerOptions.toSwiftSyntaxProducerSettings())
         
-        let output = StringRewriterOutput()
-        
-        writer.outputFile(match, out: output)
+        let output = writer.generateFile(match)
         
         print("Diagnose file: \(match.targetPath)\ncontext: \(step)")
-        print(output.buffer)
+        print(output)
         print("")
     }
     

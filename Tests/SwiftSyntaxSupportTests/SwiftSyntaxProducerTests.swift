@@ -2,7 +2,8 @@ import XCTest
 import SwiftSyntax
 import SwiftAST
 @testable import SwiftSyntaxSupport
-import Intentions
+import KnownType
+@testable import Intentions
 import TestCommons
 import Utils
 
@@ -80,6 +81,192 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
                 }
             }
             """)
+    }
+}
+
+// MARK: - Attribute writing
+extension SwiftSyntaxProducerTests {
+    
+    func testWriteFailableInit() {
+        let initMethod = InitGenerationIntention(parameters: [])
+        initMethod.isFailable = true
+        initMethod.functionBody = FunctionBodyIntention(body: [])
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateInitializer(initMethod).description
+        
+        let expected = """
+            init?() {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
+    func testWriteConvenienceInit() {
+        let initMethod = InitGenerationIntention(parameters: [])
+        initMethod.isConvenience = true
+        initMethod.functionBody = FunctionBodyIntention(body: [])
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateInitializer(initMethod).description
+        
+        let expected = """
+            convenience init() {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
+    func testWriteClassAttributes() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .class)
+            .settingAttributes([
+                KnownAttribute(name: "attr"),
+                KnownAttribute(name: "otherAttr", parameters: ""),
+                KnownAttribute(name: "otherAttr", parameters: "type: Bool")
+            ])
+            .buildIntention()
+        let intent = type as! ClassGenerationIntention
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateClass(intent).description
+        
+        let expected = """
+            @attr
+            @otherAttr()
+            @otherAttr(type: Bool)
+            class A {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
+    func testWriteStructAttributes() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .struct)
+            .settingAttributes([
+                KnownAttribute(name: "attr"),
+                KnownAttribute(name: "otherAttr", parameters: ""),
+                KnownAttribute(name: "otherAttr", parameters: "type: Bool")
+                ])
+            .buildIntention()
+        let intent = type as! StructGenerationIntention
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateStruct(intent).description
+        
+        let expected = """
+            @attr
+            @otherAttr()
+            @otherAttr(type: Bool)
+            struct A {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
+    func testWriteEnumAttributes() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .enum)
+            .settingAttributes([
+                KnownAttribute(name: "attr"),
+                KnownAttribute(name: "otherAttr", parameters: ""),
+                KnownAttribute(name: "otherAttr", parameters: "type: Bool")
+            ])
+            .buildIntention()
+        let intent = type as! EnumGenerationIntention
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateEnum(intent).description
+        
+        let expected = """
+            @attr
+            @otherAttr()
+            @otherAttr(type: Bool)
+            enum A: Int {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
+    func testWriteProtocolAttributes() {
+        let type = KnownTypeBuilder(typeName: "A", kind: .protocol)
+            .settingAttributes([
+                KnownAttribute(name: "attr"),
+                KnownAttribute(name: "otherAttr", parameters: ""),
+                KnownAttribute(name: "otherAttr", parameters: "type: Bool")
+            ])
+            .buildIntention()
+        let intent = type as! ProtocolGenerationIntention
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateProtocol(intent).description
+        
+        let expected = """
+            @attr
+            @otherAttr()
+            @otherAttr(type: Bool)
+            protocol A {
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines), expected)
+    }
+    
+    func testWritePropertyAttributes() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .property(
+                named: "property",
+                type: .int,
+                attributes: [
+                    KnownAttribute(name: "attr"),
+                    KnownAttribute(name: "otherAttr", parameters: ""),
+                    KnownAttribute(name: "otherAttr", parameters: "type: Bool")
+                ]
+            )
+            .buildIntention()
+        let intent = type as! ClassGenerationIntention
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateClass(intent).description
+        
+        let expected = """
+            class A {
+                @attr @otherAttr() @otherAttr(type: Bool) var property: Int
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines),
+                       expected)
+    }
+    
+    func testWriteMethodAttributes() {
+        let type = KnownTypeBuilder(typeName: "A")
+            .method(
+                named: "method",
+                parsingSignature: "()",
+                attributes: [
+                    KnownAttribute(name: "attr"),
+                    KnownAttribute(name: "otherAttr", parameters: ""),
+                    KnownAttribute(name: "otherAttr", parameters: "type: Bool")
+                ]
+            )
+            .buildIntention()
+        let intent = type as! ClassGenerationIntention
+        let sut = SwiftSyntaxProducer()
+        
+        let output = sut.generateClass(intent).description
+        
+        let expected = """
+            class A {
+                @attr
+                @otherAttr()
+                @otherAttr(type: Bool)
+                func method() {
+                }
+            }
+            """
+        XCTAssertEqual(output.trimmingCharacters(in: .whitespacesAndNewlines), expected)
     }
 }
 

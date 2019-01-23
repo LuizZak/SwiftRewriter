@@ -395,6 +395,6 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         let stmt = Statement.unknown(UnknownASTContext(context: "abc"))
         let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
         
-        assert(syntaxes[0](), matches: "")
+        assert(syntaxes, matches: "")
     }
 }

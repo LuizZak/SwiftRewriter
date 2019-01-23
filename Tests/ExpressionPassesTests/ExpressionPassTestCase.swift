@@ -5,6 +5,7 @@ import ObjcParserAntlr
 import SwiftAST
 import Intentions
 import WriterTargetOutput
+import SwiftSyntaxSupport
 @testable import SwiftRewriterLib
 import SwiftAST
 
@@ -136,26 +137,13 @@ class ExpressionPassTestCase: XCTestCase {
             var expString = ""
             var resString = ""
             
-            let prettyPrintExpWriter =
-                StatementWriter(options: .default,
-                                target: StringRewriterOutput(settings: .defaults),
-                                typeMapper: DefaultTypeMapper(),
-                                typeSystem: TypeSystem())
+            let producer = SwiftSyntaxProducer()
             
-            let prettyPrintResWriter =
-                StatementWriter(options: .default,
-                                target: StringRewriterOutput(settings: .defaults),
-                                typeMapper: DefaultTypeMapper(),
-                                typeSystem: TypeSystem())
-            
-            prettyPrintExpWriter.visitStatement(expected)
-            prettyPrintResWriter.visitStatement(result)
+            expString = producer.generateStatement(expected).description + "\n"
+            resString = producer.generateStatement(statement).description + "\n"
             
             dump(expected, to: &expString)
             dump(result, to: &resString)
-            
-            expString = (prettyPrintExpWriter.target as! StringRewriterOutput).buffer + "\n" + expString
-            resString = (prettyPrintResWriter.target as! StringRewriterOutput).buffer + "\n" + resString
             
             recordFailure(withDescription: """
                             Failed to convert: Expected to convert statement into

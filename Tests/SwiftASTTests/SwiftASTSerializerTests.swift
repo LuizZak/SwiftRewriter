@@ -2,6 +2,7 @@ import XCTest
 
 import SwiftAST
 import WriterTargetOutput
+@testable import SwiftSyntaxSupport
 @testable import SwiftRewriterLib
 
 class SwiftASTSerializerTests: XCTestCase {
@@ -90,14 +91,10 @@ class SwiftASTSerializerTests: XCTestCase {
         
         let decoded = try SwiftASTSerializer.decodeStatement(decoder: decoder, data: data)
         
-        let writer = SwiftASTWriter(options: ASTWriterOptions.default,
-                                    typeMapper: DefaultTypeMapper(),
-                                    typeSystem: TypeSystem())
+        let writer = SwiftSyntaxProducer()
         
-        let expBuffer = StringRewriterOutput()
-        let resBuffer = StringRewriterOutput()
-        writer.write(compoundStatement: stmt, into: expBuffer)
-        writer.write(compoundStatement: (decoded as? CompoundStatement) ?? [decoded], into: resBuffer)
+        let expBuffer = writer.generateStatement(stmt).description
+        let resBuffer = writer.generateStatement((decoded as? CompoundStatement) ?? [decoded]).description
         
         XCTAssertEqual(
             stmt,
@@ -105,11 +102,11 @@ class SwiftASTSerializerTests: XCTestCase {
             """
             Expected:
             
-            \(expBuffer.buffer)
+            \(expBuffer)
             
             but received:
             
-            \(resBuffer.buffer)
+            \(resBuffer)
             """
             )
     }

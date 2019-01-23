@@ -1,6 +1,6 @@
 import SwiftAST
-import SwiftRewriterLib
 import WriterTargetOutput
+@testable import SwiftSyntaxSupport
 
 public enum StatementPrinter {
     public static func print(statement: Statement) {
@@ -10,16 +10,8 @@ public enum StatementPrinter {
     }
     
     public static func toString(statement: Statement) -> String {
-        let target = StringRewriterOutput(settings: .defaults)
+        let writer = SwiftSyntaxProducer(settings: .default)
         
-        let writer =
-            StatementWriter(options: .default,
-                            target: target,
-                            typeMapper: DefaultTypeMapper(),
-                            typeSystem: TypeSystem())
-        
-        writer.visitStatement(statement)
-        
-        return target.buffer
+        return writer.generateStatement(statement).description
     }
 }
