@@ -121,6 +121,9 @@ extension SwiftSyntaxProducer {
         case let stmt as WhileStatement:
             return [{ self.generateWhileStmt(stmt).inCodeBlock() }]
             
+        case let stmt as DoStatement:
+            return [{ self.generateDo(stmt).inCodeBlock() }]
+            
         case let stmt as DoWhileStatement:
             return [{ self.generateDoWhileStmt(stmt).inCodeBlock() }]
             

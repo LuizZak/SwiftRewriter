@@ -998,6 +998,39 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 @synchronized(self) {
                     stuff();
                 }
+                
+                otherStuff();
+            }
+            @end
+            """,
+            swift: """
+            class MyClass {
+                func myMethod() {
+                    do {
+                        let _lockTarget = self
+                        objc_sync_enter(_lockTarget)
+
+                        defer {
+                            objc_sync_exit(_lockTarget)
+                        }
+
+                        stuff()
+                    }
+
+                    otherStuff()
+                }
+            }
+            """)
+    }
+    
+    func testSingleSynchronizedStatement() {
+        assertObjcParse(
+            objc: """
+            @implementation MyClass
+            - (void)myMethod {
+                @synchronized(self) {
+                    stuff();
+                }
             }
             @end
             """,
