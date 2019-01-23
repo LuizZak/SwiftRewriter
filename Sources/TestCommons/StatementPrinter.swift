@@ -1,6 +1,6 @@
 import SwiftAST
 import WriterTargetOutput
-@testable import SwiftSyntaxSupport
+import SwiftSyntaxSupport
 
 public enum StatementPrinter {
     public static func print(statement: Statement) {
