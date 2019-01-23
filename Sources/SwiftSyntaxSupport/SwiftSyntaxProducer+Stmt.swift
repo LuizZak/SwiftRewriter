@@ -135,7 +135,6 @@ extension SwiftSyntaxProducer {
             
         case let stmt as CompoundStatement:
             return stmt.statements.flatMap(generateStatementBlockItems)
-            //fatalError("Use generateCompound(_:) to generate syntaxes for compound statements")
             
         case is UnknownStatement:
             return [{ SyntaxFactory.makeBlankUnknownStmt().inCodeBlock() }]
