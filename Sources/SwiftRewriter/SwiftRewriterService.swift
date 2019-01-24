@@ -4,6 +4,7 @@ import ExpressionPasses
 import SourcePreprocessors
 import IntentionPasses
 import GlobalsProviders
+import SwiftSyntaxRewriterPasses
 
 public enum Settings {
     /// Settings for the AST writer
@@ -43,6 +44,7 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         jobBuilder.intentionPassesSource = DefaultIntentionPasses()
         jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
         jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
+        jobBuilder.syntaxRewriterPassSource = DefaultSyntaxPassProvider()
         jobBuilder.settings = Settings.rewriter
         jobBuilder.swiftSyntaxOptions = Settings.astWriter
         jobBuilder.preprocessors = [QuickSpecPreprocessor()]

@@ -1,4 +1,5 @@
 import ObjcParser
+import SwiftSyntaxSupport
 
 /// Represents a transpilation job, with all required information to start a
 /// transpile job.
@@ -7,6 +8,7 @@ public class SwiftRewriterJob {
     public var intentionPassesSource: IntentionPassSource?
     public var astRewriterPassSources: ASTRewriterPassSource?
     public var globalsProvidersSource: GlobalsProvidersSource?
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?
     public var preprocessors: [SourcePreprocessor]
     public var settings: SwiftRewriter.Settings = .default
     public var swiftSyntaxOptions: SwiftSyntaxOptions = .default
@@ -15,6 +17,7 @@ public class SwiftRewriterJob {
                 intentionPassesSource: IntentionPassSource?,
                 astRewriterPassSources: ASTRewriterPassSource?,
                 globalsProvidersSource: GlobalsProvidersSource?,
+                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider?,
                 preprocessors: [SourcePreprocessor],
                 settings: SwiftRewriter.Settings,
                 swiftSyntaxOptions: SwiftSyntaxOptions) {
@@ -22,6 +25,7 @@ public class SwiftRewriterJob {
         self.intentionPassesSource = intentionPassesSource
         self.astRewriterPassSources = astRewriterPassSources
         self.globalsProvidersSource = globalsProvidersSource
+        self.syntaxRewriterPassSource = syntaxRewriterPassSource
         self.preprocessors = preprocessors
         self.settings = settings
         self.input = input
@@ -57,6 +61,7 @@ public class SwiftRewriterJob {
                                      intentionPassesSource: intentionPassesSource,
                                      astRewriterPassSources: astRewriterPassSources,
                                      globalsProvidersSource: globalsProvidersSource,
+                                     syntaxRewriterPassSource: syntaxRewriterPassSource,
                                      settings: settings)
         
         rewriter.writerOptions = swiftSyntaxOptions

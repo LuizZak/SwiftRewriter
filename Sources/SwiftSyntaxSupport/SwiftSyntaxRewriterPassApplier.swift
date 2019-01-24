@@ -19,3 +19,11 @@ public class SwiftSyntaxRewriterPassApplier {
         return provider.passes.reduce(file) { $1.rewrite($0) }
     }
 }
+
+public struct ArraySwiftSyntaxRewriterPassProvider: SwiftSyntaxRewriterPassProvider {
+    public var passes: [SwiftSyntaxRewriterPass]
+    
+    public init(passes: [SwiftSyntaxRewriterPass]) {
+        self.passes = passes
+    }
+}

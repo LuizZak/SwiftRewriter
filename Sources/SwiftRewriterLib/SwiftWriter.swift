@@ -14,27 +14,27 @@ import Utils
 public final class SwiftWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
-    let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     var options: SwiftSyntaxOptions
     let numThreads: Int
     let typeSystem: TypeSystem
+    let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
     
     public init(intentions: IntentionCollection,
                 options: SwiftSyntaxOptions,
                 numThreads: Int,
                 diagnostics: Diagnostics,
                 output: WriterOutput,
-                typeMapper: TypeMapper,
-                typeSystem: TypeSystem) {
+                typeSystem: TypeSystem,
+                syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier) {
         
         self.intentions = intentions
         self.options = options
         self.numThreads = numThreads
         self.diagnostics = diagnostics
         self.output = output
-        self.typeMapper = typeMapper
         self.typeSystem = typeSystem
+        self.syntaxRewriterApplier = syntaxRewriterApplier
     }
     
     public func execute() {
@@ -68,8 +68,8 @@ public final class SwiftWriter {
                     options: options,
                     diagnostics: Diagnostics(),
                     output: output,
-                    typeMapper: typeMapper,
-                    typeSystem: typeSystem)
+                    typeSystem: typeSystem,
+                    syntaxRewriterApplier: syntaxRewriterApplier)
             
             queue.addOperation {
                 autoreleasepool {
@@ -101,24 +101,24 @@ public final class SwiftWriter {
 class SwiftSyntaxWriter {
     var intentions: IntentionCollection
     var output: WriterOutput
-    let typeMapper: TypeMapper
     var diagnostics: Diagnostics
     var options: SwiftSyntaxOptions
     let typeSystem: TypeSystem
+    let syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier
     
     init(intentions: IntentionCollection,
          options: SwiftSyntaxOptions,
          diagnostics: Diagnostics,
          output: WriterOutput,
-         typeMapper: TypeMapper,
-         typeSystem: TypeSystem) {
+         typeSystem: TypeSystem,
+         syntaxRewriterApplier: SwiftSyntaxRewriterPassApplier) {
         
         self.intentions = intentions
         self.options = options
         self.diagnostics = diagnostics
         self.output = output
-        self.typeMapper = typeMapper
         self.typeSystem = typeSystem
+        self.syntaxRewriterApplier = syntaxRewriterApplier
     }
     
     func outputFile(_ fileIntent: FileGenerationIntention) throws {
@@ -137,7 +137,8 @@ class SwiftSyntaxWriter {
         
         let producer = SwiftSyntaxProducer(settings: settings, delegate: self)
         
-        let fileSyntax = producer.generateFile(fileIntent)
+        var fileSyntax = producer.generateFile(fileIntent)
+        fileSyntax = syntaxRewriterApplier.apply(to: fileSyntax)
         
         out.outputRaw(fileSyntax.description)
         

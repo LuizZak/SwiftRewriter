@@ -56,6 +56,9 @@ public final class SwiftRewriter {
     /// Provider for global variables
     public var globalsProvidersSource: GlobalsProvidersSource
     
+    /// Provider for swift-syntax rewriters
+    public var syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider
+    
     /// If true, `#include "file.h"` directives are resolved and the new unique
     /// files found during importing are included into the transpilation step.
     public var followIncludes: Bool = false
@@ -71,6 +74,7 @@ public final class SwiftRewriter {
                 intentionPassesSource: IntentionPassSource? = nil,
                 astRewriterPassSources: ASTRewriterPassSource? = nil,
                 globalsProvidersSource: GlobalsProvidersSource? = nil,
+                syntaxRewriterPassSource: SwiftSyntaxRewriterPassProvider? = nil,
                 settings: Settings = .default) {
         
         self.diagnostics = Diagnostics()
@@ -83,6 +87,8 @@ public final class SwiftRewriter {
             astRewriterPassSources ?? ArrayASTRewriterPassSource(syntaxNodePasses: [])
         self.globalsProvidersSource =
             globalsProvidersSource ?? ArrayGlobalProvidersSource(globalsProviders: [])
+        self.syntaxRewriterPassSource =
+            syntaxRewriterPassSource ?? ArraySwiftSyntaxRewriterPassProvider(passes: [])
         
         typeSystem = IntentionCollectionTypeSystem(intentions: intentionCollection)
         
@@ -419,16 +425,19 @@ public final class SwiftRewriter {
     
     private func outputDefinitions() {
         if settings.verbose {
-            print("Saving files...")
+            print("Applying Swift syntax passes and saving files...")
         }
+        
+        let syntaxApplier =
+            SwiftSyntaxRewriterPassApplier(provider: syntaxRewriterPassSource)
         
         let writer = SwiftWriter(intentions: intentionCollection,
                                  options: writerOptions,
                                  numThreads: settings.numThreads,
                                  diagnostics: diagnostics,
                                  output: outputTarget,
-                                 typeMapper: typeMapper,
-                                 typeSystem: typeSystem)
+                                 typeSystem: typeSystem,
+                                 syntaxRewriterApplier: syntaxApplier)
         
         writer.execute()
     }

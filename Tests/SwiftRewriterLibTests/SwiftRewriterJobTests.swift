@@ -1,8 +1,12 @@
 import XCTest
 import SwiftAST
 import Intentions
+import TestCommons
 import SwiftRewriterLib
 import WriterTargetOutput
+import SwiftSyntaxSupport
+import SwiftSyntaxRewriterPasses
+import SwiftSyntax
 import ObjcParser
 
 class SwiftRewriterJobTests: XCTestCase {
@@ -15,7 +19,7 @@ class SwiftRewriterJobTests: XCTestCase {
             // End of file Input.swift
             class Class {
                 func method() {
-                    hello.world()
+                    Hello.world()
                 }
             }
             // End of file Source.swift
@@ -25,6 +29,7 @@ class SwiftRewriterJobTests: XCTestCase {
                              intentionPassesSource: MockIntentionPassSource(),
                              astRewriterPassSources: MockExpressionPassesSource(),
                              globalsProvidersSource: MockGlobalsProvidersSource(),
+                             syntaxRewriterPassSource: MockSwiftSyntaxRewriterPassProvider(),
                              preprocessors: [MockSourcePreprocessor()],
                              settings: .default,
                              swiftSyntaxOptions: .default)
@@ -33,16 +38,10 @@ class SwiftRewriterJobTests: XCTestCase {
         let result = job.execute(output: output)
         
         let buffer = output.resultString()
+        
         XCTAssert(result.succeeded)
-        XCTAssertEqual(
-            buffer,
-            expectedSwift,
-            """
-            
-            Diff:
-            
-            \(expectedSwift.makeDifferenceMarkString(against: buffer))
-            """)
+        diffTest(expected: expectedSwift, highlightLineInEditor: false)
+            .diff(buffer)
     }
 }
 
@@ -192,4 +191,24 @@ private class MockGlobalsProviders: GlobalsProvider {
         return CollectionTypealiasProvider(aliases: [:])
     }
     
+}
+
+private class MockSwiftSyntaxRewriterPassProvider: SwiftSyntaxRewriterPassProvider {
+    var passes: [SwiftSyntaxRewriterPass] = [
+        RewriterPass()
+    ]
+    
+    private class RewriterPass: SyntaxRewriter, SwiftSyntaxRewriterPass {
+        func rewrite(_ file: SourceFileSyntax) -> SourceFileSyntax {
+            return self.visit(file) as! SourceFileSyntax
+        }
+        
+        override func visit(_ node: IdentifierExprSyntax) -> ExprSyntax {
+            if node.identifier.text == "hello" {
+                return node.withIdentifier(node.identifier.withKind(.identifier("Hello")))
+            }
+            
+            return node
+        }
+    }
 }
