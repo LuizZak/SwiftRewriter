@@ -148,7 +148,7 @@ class SwiftSyntaxWriter {
 extension SwiftSyntaxWriter: SwiftSyntaxProducerDelegate {
     func swiftSyntaxProducer(_ producer: SwiftSyntaxProducer,
                              shouldEmitTypeFor storage: ValueStorage,
-                             intention: Intention?,
+                             intention: IntentionProtocol?,
                              initialValue: Expression?) -> Bool {
         
         // Intentions (global variables, instance variables and properties) should

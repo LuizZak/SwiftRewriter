@@ -3,50 +3,36 @@ import Intentions
 import SwiftAST
 import KnownType
 
-public class SwiftSyntaxProducer {
-    var indentationMode: TriviaPiece = .spaces(4)
-    var indentationLevel: Int = 0
+public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
+    var settings: Settings
+    weak var delegate: SwiftSyntaxProducerDelegate?
     
+    // TODO: Come up with a better way to keep track of changes to leading
+    // indentation.
+    // This is currently used to emit an empty, dummy token with this trailing,
+    // in case a file with just import directive comments is encountered.
     var didModifyExtraLeading = false
-    var extraLeading: Trivia? {
+    override var extraLeading: Trivia? {
         didSet {
             didModifyExtraLeading = true
         }
     }
     
-    var settings: Settings
-    weak var delegate: SwiftSyntaxProducerDelegate?
+    var varDeclGenerator: VariableDeclSyntaxGenerator {
+        return VariableDeclSyntaxGenerator(producer: self)
+    }
     
-    let modifiersDecorations =
-        ModifiersSyntaxDecoratorApplier
-            .makeDefaultDecoratorApplier()
-    
-    public init() {
+    public override init() {
         settings = .default
+        
+        super.init()
     }
     
     public init(settings: Settings, delegate: SwiftSyntaxProducerDelegate? = nil) {
         self.settings = settings
         self.delegate = delegate
-    }
-    
-    func indentation() -> Trivia {
-        return Trivia(pieces: Array(repeating: indentationMode, count: indentationLevel))
-    }
-    
-    func indent() {
-        indentationLevel += 1
-    }
-    func deindent() {
-        indentationLevel -= 1
-    }
-    
-    func addExtraLeading(_ trivia: Trivia) {
-        if let lead = extraLeading {
-            extraLeading = lead + trivia
-        } else {
-            extraLeading = trivia
-        }
+        
+        super.init()
     }
     
     public struct Settings {
@@ -80,12 +66,12 @@ public class SwiftSyntaxProducer {
         }
     }
     
-    private func modifiers(for intention: IntentionProtocol) -> [DeclModifierSyntax] {
+    func modifiers(for intention: IntentionProtocol) -> [DeclModifierSyntax] {
         return modifiersDecorations.modifiers(for: intention, extraLeading: &extraLeading)
     }
     
-    private func attributes(for intention: IntentionProtocol,
-                            inline: Bool) -> [AttributeSyntax] {
+    func attributes(for intention: IntentionProtocol,
+                    inline: Bool) -> [AttributeSyntax] {
         
         guard let attributable = intention as? AttributeTaggeableObject else {
             return []
@@ -115,7 +101,7 @@ public class SwiftSyntaxProducer {
         return attributeSyntaxes
     }
     
-    private func shouldEmitObjcAttribute(_ intention: IntentionProtocol) -> Bool {
+    func shouldEmitObjcAttribute(_ intention: IntentionProtocol) -> Bool {
         if !settings.emitObjcCompatibility {
             // Protocols which feature optional members must be emitted with @objc
             // to maintain compatibility; same for method/properties
@@ -159,7 +145,7 @@ public class SwiftSyntaxProducer {
     }
 }
 
-// MARK: - Identation
+// MARK: - File generation
 extension SwiftSyntaxProducer {
     func addHistoryTrackingLeadingIfEnabled(_ intention: IntentionProtocol) {
         if !settings.printIntentionHistory {
@@ -218,7 +204,7 @@ extension SwiftSyntaxProducer {
             }
             
             iterating(file.globalVariableIntentions) { variable in
-                let syntax = generateGlobalVariable(variable)
+                let syntax = varDeclGenerator.generateGlobalVariable(variable)
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
@@ -604,7 +590,7 @@ extension SwiftSyntaxProducer {
                 iterating(ivarHolder.instanceVariables) { ivar in
                     addExtraLeading(indentation())
                     
-                    builder.addDecl(generateInstanceVariable(ivar))
+                    builder.addDecl(varDeclGenerator.generateInstanceVariable(ivar))
                 }
                 
                 if !intention.properties.isEmpty {
@@ -625,7 +611,7 @@ extension SwiftSyntaxProducer {
                 
                 addExtraLeading(indentation())
                 
-                builder.addDecl(generateProperty(prop))
+                builder.addDecl(varDeclGenerator.generateProperty(prop))
             }
             
             iterating(intention.constructors) { _init in
@@ -659,236 +645,6 @@ extension SwiftSyntaxProducer {
                         alwaysEmitBody: !(intention is ProtocolGenerationIntention)
                     )
                 )
-            }
-        }
-    }
-}
-
-// MARK: - Variable/property syntax
-extension SwiftSyntaxProducer {
-    
-    private func _initialValue(for intention: ValueStorageIntention) -> Expression? {
-        if let intention = intention.initialValue {
-            return intention
-        }
-        if intention is GlobalVariableGenerationIntention {
-            return nil
-        }
-        if let intention = intention as? MemberGenerationIntention {
-            if intention.type?.kind != .class {
-                return nil
-            }
-        }
-        
-        return delegate?.swiftSyntaxProducer(self, initialValueFor: intention)
-    }
-    
-    func generateInstanceVariable(_ intention: InstanceVariableGenerationIntention) -> DeclSyntax {
-        return generateVariableDecl(intention)
-    }
-    
-    func generateProperty(_ intention: PropertyGenerationIntention) -> DeclSyntax {
-        addHistoryTrackingLeadingIfEnabled(intention)
-        
-        return generateVariableDecl(name: intention.name,
-                                    storage: intention.storage,
-                                    attributes: attributes(for: intention, inline: true),
-                                    intention: intention,
-                                    modifiers: modifiers(for: intention),
-                                    accessor: makeAccessorBlockCreator(intention),
-                                    initialization: _initialValue(for: intention))
-    }
-    
-    func generateVariableDecl(_ intention: ValueStorageIntention & MemberGenerationIntention) -> DeclSyntax {
-        addHistoryTrackingLeadingIfEnabled(intention)
-        
-        return generateVariableDecl(name: intention.name,
-                                    storage: intention.storage,
-                                    attributes: attributes(for: intention, inline: true),
-                                    intention: intention,
-                                    modifiers: modifiers(for: intention),
-                                    initialization: _initialValue(for: intention))
-    }
-    
-    func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
-        addHistoryTrackingLeadingIfEnabled(intention)
-        
-        return generateVariableDecl(name: intention.name,
-                                    storage: intention.storage,
-                                    attributes: [],
-                                    intention: intention,
-                                    modifiers: modifiers(for: intention),
-                                    initialization: _initialValue(for: intention))
-    }
-    
-    func generateVariableDecl(name: String,
-                              storage: ValueStorage,
-                              attributes: [AttributeSyntax],
-                              intention: Intention?,
-                              modifiers: [DeclModifierSyntax],
-                              accessor: (() -> AccessorBlockSyntax)? = nil,
-                              initialization: Expression? = nil) -> VariableDeclSyntax {
-        
-        return VariableDeclSyntax { builder in
-            for attribute in attributes {
-                builder.addAttribute(attribute)
-            }
-            
-            for modifier in modifiers {
-                builder.addModifier(modifier)
-            }
-            
-            let letOrVar =
-                storage.isConstant
-                    ? SyntaxFactory.makeLetKeyword
-                    : SyntaxFactory.makeVarKeyword
-            
-            builder.useLetOrVarKeyword(makeStartToken(letOrVar).addingTrailingSpace())
-            
-            builder.addPatternBinding(PatternBindingSyntax { builder in
-                builder.usePattern(IdentifierPatternSyntax { builder in
-                    builder.useIdentifier(makeIdentifier(name))
-                })
-                
-                if delegate?.swiftSyntaxProducer(self,
-                                                 shouldEmitTypeFor: storage,
-                                                 intention: intention,
-                                                 initialValue: initialization) != false {
-                    
-                    builder.useTypeAnnotation(TypeAnnotationSyntax { builder in
-                        builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                        builder.useType(SwiftTypeConverter.makeTypeSyntax(storage.type))
-                    })
-                }
-                
-                if let accessor = accessor {
-                    builder.useAccessor(accessor())
-                }
-                
-                if let initialization = initialization {
-                    builder.useInitializer(InitializerClauseSyntax { builder in
-                        builder.useEqual(SyntaxFactory.makeEqualToken().withLeadingSpace().withTrailingSpace())
-                        builder.useValue(generateExpression(initialization))
-                    })
-                }
-            })
-        }
-    }
-    
-    private func makeAccessorBlockCreator(_ property: PropertyGenerationIntention) -> (() -> AccessorBlockSyntax)? {
-        // Emit { get } and { get set } accessor blocks for protocols
-        if let property = property as? ProtocolPropertyGenerationIntention {
-            return {
-                return AccessorBlockSyntax { builder in
-                    builder.useLeftBrace(
-                        self.makeStartToken(SyntaxFactory.makeLeftBraceToken)
-                            .addingSurroundingSpaces()
-                    )
-                    
-                    builder.useRightBrace(SyntaxFactory.makeRightBraceToken())
-                    var accessors: [AccessorDeclSyntax] = []
-                    
-                    accessors.append(AccessorDeclSyntax { builder in
-                        builder.useAccessorKind(
-                            SyntaxFactory
-                                .makeToken(.contextualKeyword("get"),
-                                           presence: .present)
-                                .withTrailingSpace()
-                        )
-                    })
-                    
-                    if !property.isReadOnly {
-                        accessors.append(AccessorDeclSyntax { builder in
-                            builder.useAccessorKind(
-                                SyntaxFactory
-                                    .makeToken(.contextualKeyword("set"),
-                                               presence: .present)
-                                    .withTrailingSpace()
-                            )
-                        })
-                    }
-                    
-                    builder.useAccessorListOrStmtList(
-                        SyntaxFactory.makeAccessorList(accessors)
-                    )
-                }
-            }
-        }
-        
-        switch property.mode {
-        case .asField:
-            return nil
-            
-        case .computed(let body):
-            return {
-                return AccessorBlockSyntax { builder in
-                    builder.useLeftBrace(self.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
-                    
-                    self.indent()
-                    let blocks = self._generateStatements(body.body.statements)
-                    self.deindent()
-                    
-                    let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
-                    
-                    builder.useAccessorListOrStmtList(stmtList)
-                    
-                    self.addExtraLeading(.newlines(1) + self.indentation())
-                    builder.useRightBrace(self.makeStartToken(SyntaxFactory.makeRightBraceToken))
-                }
-            }
-            
-        case let .property(get, set):
-            return {
-                return AccessorBlockSyntax { builder in
-                    builder.useLeftBrace(self.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
-                    
-                    self.indent()
-                    
-                    self.addExtraLeading(.newlines(1) + self.indentation())
-                    
-                    let getter = AccessorDeclSyntax { builder in
-                        builder.useAccessorKind(
-                            self.prepareStartToken(
-                                SyntaxFactory
-                                    .makeToken(.contextualKeyword("get"),
-                                               presence: .present)
-                            )
-                        )
-                        
-                        builder.useBody(self.generateFunctionBody(get))
-                    }
-                    
-                    self.addExtraLeading(.newlines(1) + self.indentation())
-                    
-                    let setter = AccessorDeclSyntax { builder in
-                        builder.useAccessorKind(
-                            self.prepareStartToken(
-                                SyntaxFactory
-                                    .makeToken(.contextualKeyword("set"),
-                                               presence: .present)
-                            )
-                        )
-                        
-                        if set.valueIdentifier != "newValue" {
-                            builder.useParameter(AccessorParameterSyntax { builder in
-                                builder.useLeftParen(self.makeStartToken(SyntaxFactory.makeLeftParenToken))
-                                builder.useName(makeIdentifier(set.valueIdentifier))
-                                builder.useRightParen(SyntaxFactory.makeRightParenToken())
-                            })
-                        }
-                        
-                        builder.useBody(self.generateFunctionBody(set.body))
-                    }
-                    
-                    self.deindent()
-                    
-                    let accessorList = SyntaxFactory.makeAccessorList([getter, setter])
-                    
-                    builder.useAccessorListOrStmtList(accessorList)
-                    
-                    self.addExtraLeading(.newlines(1) + self.indentation())
-                    builder.useRightBrace(self.makeStartToken(SyntaxFactory.makeRightBraceToken))
-                }
             }
         }
     }
@@ -1039,36 +795,6 @@ extension SwiftSyntaxProducer {
                 builder.addToken(makeIdentifier(parameters))
                 builder.addToken(SyntaxFactory.makeRightParenToken())
             }
-        }
-    }
-}
-
-// MARK: - Utilities
-extension SwiftSyntaxProducer {
-    
-    func makeStartToken(_ builder: (_ leading: Trivia, _ trailing: Trivia) -> TokenSyntax) -> TokenSyntax {
-        return prepareStartToken(builder([], []))
-    }
-    
-    func prepareStartToken(_ token: TokenSyntax) -> TokenSyntax {
-        return token.withExtraLeading(consuming: &extraLeading)
-    }
-    
-    func iterating<T>(_ elements: [T],
-                      inBetweenSpacing: Trivia = .newlines(1),
-                      postSeparator: Trivia = .newlines(2),
-                      do block: (T) -> Void) {
-        
-        for (i, item) in elements.enumerated() {
-            if i > 0 {
-                extraLeading = inBetweenSpacing
-            }
-            
-            block(item)
-        }
-        
-        if !elements.isEmpty {
-            extraLeading = postSeparator
         }
     }
 }

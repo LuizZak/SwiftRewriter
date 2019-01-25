@@ -160,19 +160,36 @@ extension SwiftSyntaxProducer {
     }
     
     func generateVariableDeclarations(_ stmt: VariableDeclarationsStatement) -> [() -> CodeBlockItemSyntax] {
-        return stmt.decl
-            .map { decl -> () -> CodeBlockItemSyntax in
-                return { SyntaxFactory.makeCodeBlockItem(item: self.generateVariableDecl(decl), semicolon: nil) }
+        if stmt.decl.isEmpty {
+            return []
+        }
+        
+        // Group runs of declarations such that individual runs have alternating
+        // 'let' or 'var' elements, which match the original sequence of declaration
+        // order
+        var lastDecl = stmt.decl[0]
+        
+        var decls: [[StatementVariableDeclaration]] = [[lastDecl]]
+        
+        for decl in stmt.decl.dropFirst() {
+            // Split the list of declarations into a new subsequence of elements,
+            // now
+            if lastDecl.isConstant != decl.isConstant {
+                decls.append([decl])
+            } else {
+                decls[decls.count - 1].append(decl)
             }
-    }
-    
-    func generateVariableDecl(_ decl: StatementVariableDeclaration) -> VariableDeclSyntax {
-        return generateVariableDecl(name: decl.identifier,
-                                    storage: decl.storage,
-                                    attributes: [],
-                                    intention: nil,
-                                    modifiers: [],
-                                    initialization: decl.initialization)
+            
+            lastDecl = decl
+        }
+        
+        return varDeclGenerator
+            .generateVariableDeclarations(stmt)
+            .map { decl in
+                return {
+                    SyntaxFactory.makeCodeBlockItem(item: decl(), semicolon: nil)
+                }
+            }
     }
     
     func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {

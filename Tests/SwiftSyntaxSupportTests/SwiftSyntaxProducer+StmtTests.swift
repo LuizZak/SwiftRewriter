@@ -39,21 +39,15 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     func testVariableDeclarationsStatement() {
         let stmt = Statement
             .variableDeclarations([
-                StatementVariableDeclaration(identifier: "foo", type: .int),
-                StatementVariableDeclaration(identifier: "bar",
-                                             type: .float,
-                                             initialization: .constant(0.0))
+                StatementVariableDeclaration(identifier: "foo",
+                                             type: .int,
+                                             initialization: .constant(0))
             ])
         let syntax = SwiftSyntaxProducer().generateVariableDeclarations(stmt)
         
         assert(syntax[0](),
                matches: """
-                var foo: Int
-                """)
-        
-        assert(syntax[1](),
-               matches: """
-                var bar: Float = 0.0
+                var foo: Int = 0
                 """)
     }
     
@@ -72,8 +66,7 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
         assert(syntax,
                matches: """
                  {
-                    var foo: Int
-                    var bar: Float = 0.0
+                    var foo: Int, bar: Float = 0.0
                 }
                 """)
     }
