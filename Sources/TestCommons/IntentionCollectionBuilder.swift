@@ -594,7 +594,9 @@ public class TypeBuilder<T: TypeGenerationIntention> {
             method = MethodGenerationIntention(signature: signature)
         }
         
-        method.functionBody = FunctionBodyIntention(body: [])
+        if !(targetType is ProtocolGenerationIntention) {
+            method.functionBody = FunctionBodyIntention(body: [])
+        }
         
         let mbuilder = MemberBuilder(targetMember: method)
         builder(mbuilder)

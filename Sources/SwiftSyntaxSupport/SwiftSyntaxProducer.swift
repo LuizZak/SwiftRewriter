@@ -617,7 +617,12 @@ extension SwiftSyntaxProducer {
             iterating(intention.constructors) { _init in
                 addExtraLeading(indentation())
                 
-                builder.addDecl(generateInitializer(_init))
+                builder.addDecl(
+                    generateInitializer(
+                        _init,
+                        alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                    )
+                )
             }
             
             // Dealloc methods are treated differently
@@ -653,7 +658,8 @@ extension SwiftSyntaxProducer {
 // MARK: - Function syntax
 extension SwiftSyntaxProducer {
     
-    func generateInitializer(_ intention: InitGenerationIntention) -> DeclSyntax {
+    func generateInitializer(_ intention: InitGenerationIntention,
+                             alwaysEmitBody: Bool) -> DeclSyntax {
         addHistoryTrackingLeadingIfEnabled(intention)
         
         return InitializerDeclSyntax { builder in
@@ -674,7 +680,7 @@ extension SwiftSyntaxProducer {
             
             if let body = intention.functionBody {
                 builder.useBody(generateFunctionBody(body))
-            } else {
+            } else if alwaysEmitBody {
                 builder.useBody(generateEmptyFunctionBody())
             }
         }
@@ -685,6 +691,7 @@ extension SwiftSyntaxProducer {
         
         return DeinitializerDeclSyntax { builder in
             builder.useDeinitKeyword(makeStartToken(SyntaxFactory.makeDeinitKeyword))
+            
             if let body = intention.functionBody {
                 builder.useBody(generateFunctionBody(body))
             }
