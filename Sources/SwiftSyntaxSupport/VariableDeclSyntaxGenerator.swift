@@ -45,10 +45,10 @@ class VariableDeclSyntaxGenerator {
     func generate(_ variableDecl: VariableDeclaration) -> VariableDeclSyntax {
         return VariableDeclSyntax { builder in
             for attribute in variableDecl.attributes {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             for modifier in variableDecl.modifiers {
-                builder.addModifier(modifier)
+                builder.addModifier(modifier(&producer.extraLeading))
             }
             
             let letOrVar =
@@ -253,7 +253,7 @@ private extension VariableDeclSyntaxGenerator {
                             storage: stmtDecl.storage,
                             attributes: [],
                             intention: nil,
-                            modifiers: [],
+                            modifiers: producer.modifiers(for: stmtDecl),
                             initialization: stmtDecl.initialization)
         
         return decl
@@ -276,9 +276,9 @@ private extension VariableDeclSyntaxGenerator {
     
     func makeDeclaration(name: String,
                          storage: ValueStorage,
-                         attributes: [AttributeSyntax],
+                         attributes: [() -> AttributeSyntax],
                          intention: IntentionProtocol?,
-                         modifiers: [DeclModifierSyntax],
+                         modifiers: ModifierDecoratorResult,
                          accessors: (() -> AccessorBlockSyntax)? = nil,
                          initialization: Expression? = nil) -> VariableDeclaration {
         

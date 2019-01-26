@@ -66,12 +66,16 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         }
     }
     
-    func modifiers(for intention: IntentionProtocol) -> [DeclModifierSyntax] {
-        return modifiersDecorations.modifiers(for: intention, extraLeading: &extraLeading)
+    func modifiers(for intention: IntentionProtocol) -> ModifierDecoratorResult {
+        return modifiersDecorations.modifiers(for: intention)
+    }
+    
+    func modifiers(for decl: StatementVariableDeclaration) -> ModifierDecoratorResult {
+        return modifiersDecorations.modifiers(for: decl)
     }
     
     func attributes(for intention: IntentionProtocol,
-                    inline: Bool) -> [AttributeSyntax] {
+                    inline: Bool) -> [() -> AttributeSyntax] {
         
         guard let attributable = intention as? AttributeTaggeableObject else {
             return []
@@ -84,15 +88,19 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
             attributes.append(KnownAttribute(name: "objc"))
         }
         
-        var attributeSyntaxes: [AttributeSyntax] = []
+        var attributeSyntaxes: [() -> AttributeSyntax] = []
         
         for attr in attributes {
-            let attrSyntax = generateAttributeSyntax(attr)
-            
-            if inline {
-                addExtraLeading(.spaces(1))
-            } else {
-                addExtraLeading(.newlines(1) + indentation())
+            let attrSyntax: () -> AttributeSyntax = {
+                defer {
+                    if inline {
+                        self.addExtraLeading(.spaces(1))
+                    } else {
+                        self.addExtraLeading(.newlines(1) + self.indentation())
+                    }
+                }
+                
+                return self.generateAttributeSyntax(attr)
             }
             
             attributeSyntaxes.append(attrSyntax)
@@ -313,7 +321,7 @@ extension SwiftSyntaxProducer {
             let attributes = self.attributes(for: intention, inline: false)
             
             for attribute in attributes {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             
             builder.useEnumKeyword(makeStartToken(SyntaxFactory.makeEnumKeyword).withTrailingSpace())
@@ -374,10 +382,10 @@ extension SwiftSyntaxProducer {
             addExtraLeading(.newlines(1) + indentation())
             
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             for modifier in modifiers(for: intention) {
-                builder.addModifier(modifier)
+                builder.addModifier(modifier(&extraLeading))
             }
             
             builder.useExtensionKeyword(
@@ -413,7 +421,7 @@ extension SwiftSyntaxProducer {
             addExtraLeading(indentation())
             
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             
             builder.useClassKeyword(
@@ -513,7 +521,7 @@ extension SwiftSyntaxProducer {
             
             let attributes = self.attributes(for: intention, inline: false)
             for attribute in attributes {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             builder.useStructKeyword(
                 makeStartToken(SyntaxFactory.makeStructKeyword)
@@ -550,7 +558,7 @@ extension SwiftSyntaxProducer {
             
             let attributes = self.attributes(for: intention, inline: false)
             for attribute in attributes {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             
             builder.useProtocolKeyword(
@@ -664,10 +672,10 @@ extension SwiftSyntaxProducer {
         
         return InitializerDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             for modifier in modifiers(for: intention) {
-                builder.addModifier(modifier)
+                builder.addModifier(modifier(&extraLeading))
             }
             
             builder.useInitKeyword(makeStartToken(SyntaxFactory.makeInitKeyword))
@@ -704,10 +712,10 @@ extension SwiftSyntaxProducer {
         
         return FunctionDeclSyntax { builder in
             for attribute in attributes(for: intention, inline: false) {
-                builder.addAttribute(attribute)
+                builder.addAttribute(attribute())
             }
             for modifier in modifiers(for: intention) {
-                builder.addModifier(modifier)
+                builder.addModifier(modifier(&extraLeading))
             }
             
             builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).addingTrailingSpace())

@@ -175,6 +175,16 @@ class SwiftRewriter_StmtTests: XCTestCase {
                 """)
     }
     
+    func testWeakModifier() {
+        assertSingleStatement(
+            objc: """
+            __weak id value;
+            """,
+            swift: """
+            weak var value: AnyObject?
+            """)
+    }
+    
     /// Tests __block specifier on local variable declaration
     func testParseBlockVarDeclaration() {
         assertSingleStatement(

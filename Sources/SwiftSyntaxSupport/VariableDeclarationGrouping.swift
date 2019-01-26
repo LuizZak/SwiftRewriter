@@ -4,8 +4,8 @@ import Intentions
 
 struct VariableDeclaration {
     var constant: Bool
-    var attributes: [AttributeSyntax]
-    var modifiers: [DeclModifierSyntax]
+    var attributes: [() -> AttributeSyntax]
+    var modifiers: ModifierDecoratorResult
     var kind: VariableDeclarationKind
 }
 

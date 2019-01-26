@@ -65,4 +65,30 @@ class LocalConstantPromotionExpressionPassTests: ExpressionPassTestCase {
             ])
         ); assertDidNotNotifyChange()
     }
+    
+    // Weak variables cannot be 'let' constants; make sure we detect that and skip
+    // promoting weak variables by mistake.
+    func testDoNotPromoteWeakValues() {
+        let body: CompoundStatement = [
+            Statement.variableDeclaration(identifier: "test",
+                                          type: .int,
+                                          ownership: .weak,
+                                          isConstant: false,
+                                          initialization: .constant(0))
+        ]
+        functionBodyContext = FunctionBodyIntention(body: body)
+        let resolver = ExpressionTypeResolver(typeSystem: TypeSystem.defaultTypeSystem)
+        _=resolver.resolveTypes(in: body)
+        
+        assertTransform(
+            statement: body,
+            into: CompoundStatement(statements: [
+                Statement.variableDeclaration(identifier: "test",
+                                              type: .int,
+                                              ownership: .weak,
+                                              isConstant: false,
+                                              initialization: .constant(0))
+            ])
+        ); assertDidNotNotifyChange()
+    }
 }

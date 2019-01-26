@@ -2,6 +2,8 @@ import Intentions
 import SwiftAST
 import SwiftSyntax
 
+typealias ModifierDecoratorResult = [(inout Trivia?) -> DeclModifierSyntax]
+
 class ModifiersSyntaxDecoratorApplier {
     /// Creates and returns a modifiers decorator with all default modifier decorators
     /// setup.
@@ -24,11 +26,21 @@ class ModifiersSyntaxDecoratorApplier {
         decorators.append(decorator)
     }
     
-    func modifiers(for intention: IntentionProtocol, extraLeading: inout Trivia?) -> [DeclModifierSyntax] {
-        var list: [DeclModifierSyntax] = []
+    func modifiers(for intention: IntentionProtocol) -> ModifierDecoratorResult {
+        var list: ModifierDecoratorResult = []
         
         for decorator in decorators {
-            decorator.appendModifiers(for: intention, &list, extraLeading: &extraLeading)
+            list.append(contentsOf: decorator.modifiers(for: .intention(intention)))
+        }
+        
+        return list
+    }
+    
+    func modifiers(for decl: StatementVariableDeclaration) -> ModifierDecoratorResult {
+        var list: ModifierDecoratorResult = []
+        
+        for decorator in decorators {
+            list.append(contentsOf: decorator.modifiers(for: .variableDecl(decl)))
         }
         
         return list
@@ -36,190 +48,201 @@ class ModifiersSyntaxDecoratorApplier {
 }
 
 protocol ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?)
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult
 }
 
 /// Decorator for adding `mutating` modifiers to methods
 class MutatingModifiersDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let method = intention as? MethodGenerationIntention else {
-            return
+        guard let method = element.intention as? MethodGenerationIntention else {
+            return []
         }
         if method.type is BaseClassIntention {
-            return
+            return []
         }
         
         if method.signature.isMutating {
-            list.append(SyntaxFactory
-                .makeDeclModifier(
-                    name: makeIdentifier("mutating")
-                        .addingTrailingSpace()
-                        .withExtraLeading(consuming: &extraLeading),
-                    detail: nil
-                )
-            )
+            return [{
+                SyntaxFactory
+                    .makeDeclModifier(
+                        name: makeIdentifier("mutating")
+                            .addingTrailingSpace()
+                            .withExtraLeading(consuming: &$0),
+                        detail: nil)
+            }]
         }
+        
+        return []
     }
 }
 
 /// Decorator that applies `static` to static members of types
 class StaticModifiersDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let intention = intention as? MemberGenerationIntention else {
-            return
+        guard let intention = element.intention as? MemberGenerationIntention else {
+            return []
         }
         
         if intention.isStatic {
-            list.append(SyntaxFactory
-                .makeDeclModifier(
-                    name: SyntaxFactory
-                        .makeStaticKeyword()
-                        .addingTrailingSpace()
-                        .withExtraLeading(consuming: &extraLeading),
-                    detail: nil)
-            )
+            return [{
+                SyntaxFactory
+                    .makeDeclModifier(
+                        name: SyntaxFactory
+                            .makeStaticKeyword()
+                            .addingTrailingSpace()
+                            .withExtraLeading(consuming: &$0),
+                        detail: nil)
+                }]
         }
+        
+        return []
     }
 }
 
 /// Decorator that appends access level to declarations
 class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let intention = intention as? FromSourceIntention else {
-            return
+        guard let intention = element.intention as? FromSourceIntention else {
+            return []
         }
         
         guard let token = _accessModifierFor(accessLevel: intention.accessLevel, omitInternal: true) else {
-            return
+            return []
         }
         
-        let modifier =
+        return [{
             SyntaxFactory
                 .makeDeclModifier(
                     name: token
                         .addingTrailingSpace()
-                        .withExtraLeading(consuming: &extraLeading),
+                        .withExtraLeading(consuming: &$0),
                     detail: nil
-                )
-        
-        list.append(modifier)
+            )
+        }]
     }
 }
 
 /// Decorator that adds `public(set)`, `internal(set)`, `fileprivate(set)`, `private(set)`
 /// setter modifiers to properties and instance variables
 class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let prop = intention as? PropertyGenerationIntention else {
-            return
+        guard let prop = element.intention as? PropertyGenerationIntention else {
+            return []
         }
         
         guard let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreVisible(than: setterLevel) else {
-            return
+            return []
         }
         guard let setterAccessLevel = _accessModifierFor(accessLevel: setterLevel, omitInternal: true) else {
-            return
+            return []
         }
                 
-        let decl = DeclModifierSyntax { builder in
-            builder.useName(setterAccessLevel.withExtraLeading(consuming: &extraLeading))
-            builder.addToken(SyntaxFactory.makeLeftParenToken())
-            builder.addToken(makeIdentifier("set"))
-            builder.addToken(SyntaxFactory.makeRightParenToken().withTrailingSpace())
-        }
-        
-        list.append(decl)
+        return [
+            { extraLeading in
+                DeclModifierSyntax { builder in
+                    builder.useName(setterAccessLevel.withExtraLeading(consuming: &extraLeading))
+                    builder.addToken(SyntaxFactory.makeLeftParenToken())
+                    builder.addToken(makeIdentifier("set"))
+                    builder.addToken(SyntaxFactory.makeRightParenToken().withTrailingSpace())
+                }
+            }
+        ]
     }
 }
 
 /// Decorator that applies `weak`, `unowned(safe)`, and `unowned(unsafe)`
 /// modifiers to variable declarations
 class OwnershipModifierDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let intention = intention as? ValueStorageIntention else {
-            return
+        guard let ownership = ownership(for: element) else {
+            return []
         }
         
-        let token: TokenSyntax
-        let detail: TokenListSyntax?
-        
-        switch intention.ownership {
-        case .strong:
-            return
-            
-        case .weak:
-            token = makeIdentifier("weak").addingTrailingSpace()
-            detail = nil
-            
-        case .unownedSafe:
-            token = makeIdentifier("unowned")
-            detail = SyntaxFactory
-                .makeTokenList([
-                    SyntaxFactory.makeLeftParenToken(),
-                    makeIdentifier("safe"),
-                    SyntaxFactory.makeRightParenToken().withTrailingSpace()
-                    ])
-            
-        case .unownedUnsafe:
-            token = makeIdentifier("unowned")
-            detail = SyntaxFactory
-                .makeTokenList([
-                    SyntaxFactory.makeLeftParenToken(),
-                    makeIdentifier("unsafe"),
-                    SyntaxFactory.makeRightParenToken().withTrailingSpace()
-                    ])
+        if ownership == .strong {
+            return []
         }
         
-        let modifier =
-            SyntaxFactory
-                .makeDeclModifier(
-                    name: token
-                        .withExtraLeading(consuming: &extraLeading),
-                    detail: detail
-                )
+        return [
+            {
+                let token: TokenSyntax
+                let detail: TokenListSyntax?
+                
+                switch ownership {
+                case .strong:
+                    token = SyntaxFactory.makeToken(.identifier(""), presence: .present)
+                    detail = nil
+                    
+                case .weak:
+                    token = makeIdentifier("weak").addingTrailingSpace()
+                    detail = nil
+                    
+                case .unownedSafe:
+                    token = makeIdentifier("unowned")
+                    detail = SyntaxFactory
+                        .makeTokenList([
+                            SyntaxFactory.makeLeftParenToken(),
+                            makeIdentifier("safe"),
+                            SyntaxFactory.makeRightParenToken().withTrailingSpace()
+                        ])
+                    
+                case .unownedUnsafe:
+                    token = makeIdentifier("unowned")
+                    detail = SyntaxFactory
+                        .makeTokenList([
+                            SyntaxFactory.makeLeftParenToken(),
+                            makeIdentifier("unsafe"),
+                            SyntaxFactory.makeRightParenToken().withTrailingSpace()
+                        ])
+                }
         
-        list.append(modifier)
+                return SyntaxFactory
+                    .makeDeclModifier(name: token.withExtraLeading(consuming: &$0),
+                                      detail: detail)
+            }
+        ]
+    }
+    
+    private func ownership(for element: DecoratableElement) -> Ownership? {
+        switch element {
+        case let .intention(intention as ValueStorageIntention):
+            return intention.ownership
+            
+        case let .variableDecl(decl):
+            return decl.ownership
+            
+        default:
+            return nil
+        }
     }
 }
 
 /// Decorator that applies `override` modifiers to members of types
 class OverrideModifierDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let intention = intention as? MemberGenerationIntention else {
-            return
+        guard let intention = element.intention as? MemberGenerationIntention else {
+            return []
         }
         
         if isOverridenMember(intention) {
-            let modifier = DeclModifierSyntax { builder in
-                builder.useName(SyntaxFactory
-                    .makeIdentifier("override")
-                    .withExtraLeading(consuming: &extraLeading)
-                    .withTrailingSpace()
-                )
-            }
-            
-            list.append(modifier)
+            return [
+                { extraLeading in
+                    DeclModifierSyntax { builder in
+                        builder.useName(SyntaxFactory
+                            .makeIdentifier("override")
+                            .withExtraLeading(consuming: &extraLeading)
+                            .withTrailingSpace())
+                    }
+                }
+            ]
         }
+        
+        return []
     }
     
     func isOverridenMember(_ member: MemberGenerationIntention) -> Bool {
@@ -236,49 +259,53 @@ class OverrideModifierDecorator: ModifiersSyntaxDecorator {
 
 /// Decorator that applies `convenience` modifiers to initializers
 class ConvenienceInitModifierDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let intention = intention as? InitGenerationIntention else {
-            return
+        guard let intention = element.intention as? InitGenerationIntention else {
+            return []
         }
         
         if intention.isConvenience {
-            let modifier = DeclModifierSyntax { builder in
-                builder.useName(SyntaxFactory
-                    .makeIdentifier("convenience")
-                    .withExtraLeading(consuming: &extraLeading)
-                    .withTrailingSpace()
-                )
-            }
-            
-            list.append(modifier)
+            return [
+                { extraLeading in
+                    DeclModifierSyntax { builder in
+                        builder.useName(SyntaxFactory
+                            .makeIdentifier("convenience")
+                            .withExtraLeading(consuming: &extraLeading)
+                            .withTrailingSpace()
+                        )
+                    }
+                }
+            ]
         }
+        
+        return []
     }
 }
 
 /// Decorator that applies 'optional' modifiers to protocol members
 class ProtocolOptionalModifierDecorator: ModifiersSyntaxDecorator {
-    func appendModifiers(for intention: IntentionProtocol,
-                         _ list: inout [DeclModifierSyntax],
-                         extraLeading: inout Trivia?) {
+    func modifiers(for element: DecoratableElement) -> ModifierDecoratorResult {
         
-        guard let member = intention as? MemberGenerationIntention else {
-            return
+        guard let member = element.intention as? MemberGenerationIntention else {
+            return []
         }
         
         if isOptionalMember(member) {
-            let modifier = DeclModifierSyntax { builder in
-                builder.useName(SyntaxFactory
-                    .makeIdentifier("optional")
-                    .withExtraLeading(consuming: &extraLeading)
-                    .withTrailingSpace()
-                )
-            }
-            
-            list.append(modifier)
+            return [
+                { extraLeading in
+                    DeclModifierSyntax { builder in
+                        builder.useName(SyntaxFactory
+                            .makeIdentifier("optional")
+                            .withExtraLeading(consuming: &extraLeading)
+                            .withTrailingSpace()
+                        )
+                    }
+                }
+            ]
         }
+        
+        return []
     }
     
     func isOptionalMember(_ member: MemberGenerationIntention) -> Bool {
@@ -321,4 +348,27 @@ func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool) -> TokenSy
     }
     
     return token
+}
+
+enum DecoratableElement {
+    case intention(IntentionProtocol)
+    case variableDecl(StatementVariableDeclaration)
+    
+    var intention: IntentionProtocol? {
+        switch self {
+        case .intention(let intention):
+            return intention
+        case .variableDecl:
+            return nil
+        }
+    }
+    
+    var variableDecl: StatementVariableDeclaration? {
+        switch self {
+        case .variableDecl(let decl):
+            return decl
+        case .intention:
+            return nil
+        }
+    }
 }

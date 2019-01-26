@@ -165,25 +165,6 @@ extension SwiftSyntaxProducer {
             return []
         }
         
-        // Group runs of declarations such that individual runs have alternating
-        // 'let' or 'var' elements, which match the original sequence of declaration
-        // order
-        var lastDecl = stmt.decl[0]
-        
-        var decls: [[StatementVariableDeclaration]] = [[lastDecl]]
-        
-        for decl in stmt.decl.dropFirst() {
-            // Split the list of declarations into a new subsequence of elements,
-            // now
-            if lastDecl.isConstant != decl.isConstant {
-                decls.append([decl])
-            } else {
-                decls[decls.count - 1].append(decl)
-            }
-            
-            lastDecl = decl
-        }
-        
         return varDeclGenerator
             .generateVariableDeclarations(stmt)
             .map { decl in
