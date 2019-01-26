@@ -14,6 +14,14 @@ public class BaseSwiftSyntaxProducer {
         return Trivia(pieces: Array(repeating: indentationMode, count: indentationLevel))
     }
     
+    func indentationString() -> String {
+        var trivia = ""
+        for piece in indentation() {
+            piece.write(to: &trivia)
+        }
+        return trivia
+    }
+    
     func indent() {
         indentationLevel += 1
     }

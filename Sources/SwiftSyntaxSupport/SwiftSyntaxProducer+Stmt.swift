@@ -40,11 +40,12 @@ extension SwiftSyntaxProducer {
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
         return CodeBlockSyntax { builder in
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
-            builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline().addingLeadingTrivia(indentation()))
             
             indent()
             defer {
                 deindent()
+                builder.useRightBrace(SyntaxFactory.makeRightBraceToken().onNewline().addingLeadingTrivia(indentation()))
+                extraLeading = nil
             }
             
             let stmts = _generateStatements(compoundStmt.statements)
@@ -136,8 +137,8 @@ extension SwiftSyntaxProducer {
         case let stmt as CompoundStatement:
             return stmt.statements.flatMap(generateStatementBlockItems)
             
-        case is UnknownStatement:
-            return [{ SyntaxFactory.makeBlankUnknownStmt().inCodeBlock() }]
+        case let stmt as UnknownStatement:
+            return [{ self.generateUnknown(stmt).inCodeBlock() }]
             
         default:
             return [{ SyntaxFactory.makeBlankExpressionStmt().inCodeBlock() }]
@@ -376,6 +377,21 @@ extension SwiftSyntaxProducer {
             builder.useDeferKeyword(makeStartToken(SyntaxFactory.makeDeferKeyword))
             builder.useBody(generateCompound(stmt.body))
         }
+    }
+    
+    func generateUnknown(_ unknown: UnknownStatement) -> ExprSyntax {
+        var trivia = extraLeading ?? []
+        let indent = indentationString()
+        
+        trivia = trivia + Trivia.blockComment("""
+            /*
+            \(indent)\(unknown.context.description)
+            \(indent)*/
+            """)
+        
+        return SyntaxFactory
+            .makeBlankIdentifierExpr()
+            .withIdentifier(makeIdentifier("").withLeadingTrivia(trivia))
     }
     
     func generatePattern(_ pattern: Pattern) -> PatternSyntax {

@@ -2654,4 +2654,28 @@ class SwiftRewriterTests: XCTestCase {
             }
             """)
     }
+    
+    func testRewriteIfElseIfElse() {
+        assertObjcParse(
+            objc: """
+            void f() {
+                if (true) {
+                } else if (true) {
+                    @throw error;
+                } else {
+                }
+            }
+            """,
+            swift: """
+            func f() {
+                if true {
+                } else if true {
+                    /*
+                    @throwerror;
+                    */
+                } else {
+                }
+            }
+            """)
+    }
 }

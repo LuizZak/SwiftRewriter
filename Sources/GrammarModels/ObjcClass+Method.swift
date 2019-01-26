@@ -6,6 +6,10 @@ public final class ExpressionNode: ASTNode {
 
 public final class MethodBody: ASTNode {
     public var statements: ObjectiveCParser.CompoundStatementContext?
+    
+    public override func shortDescription() -> String {
+        return statements?.getText() ?? ""
+    }
 }
 
 public class MethodDefinition: ASTNode, InitializableNode {

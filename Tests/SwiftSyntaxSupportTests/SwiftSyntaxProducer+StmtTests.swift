@@ -155,6 +155,26 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
                 """)
     }
     
+    func testIfElseIfElseStatement() {
+        assert(
+            Statement.if(
+                .constant(true),
+                body: [],
+                else: [
+                    .if(.constant(true),
+                        body: [],
+                        else: [])
+                ]
+            ),
+            producer: SwiftSyntaxProducer.generateIfStmt,
+            matches: """
+                if true {
+                } else if true {
+                } else {
+                }
+                """)
+    }
+    
     func testIfLetStatement() {
         assert(
             Statement.ifLet(.identifier("value"), .identifier("exp"), body: [], else: nil),
@@ -386,8 +406,12 @@ class SwiftSyntaxProducer_StmtTests: BaseSwiftSyntaxProducerTests {
     
     func testUnknownStatement() {
         let stmt = Statement.unknown(UnknownASTContext(context: "abc"))
-        let syntaxes = SwiftSyntaxProducer().generateStatement(stmt)
+        let syntaxes = SwiftSyntaxProducer().generateUnknown(stmt)
         
-        assert(syntaxes, matches: "")
+        assert(syntaxes, matches: """
+            /*
+            abc
+            */
+            """)
     }
 }
