@@ -5,6 +5,22 @@ import TestCommons
 import SwiftAST
 
 class ModifiersSyntaxDecoratorsTests: XCTestCase {
+    func testDefaultModifiersDecoratorApplier() {
+        let sut = ModifiersSyntaxDecoratorApplier.makeDefaultDecoratorApplier()
+        
+        var decorators = sut.decorators.makeIterator()
+        
+        XCTAssert(decorators.next() is AccessLevelModifiersDecorator)
+        XCTAssert(decorators.next() is PropertySetterAccessModifiersDecorator)
+        XCTAssert(decorators.next() is ProtocolOptionalModifiersDecorator)
+        XCTAssert(decorators.next() is StaticModifiersDecorator)
+        XCTAssert(decorators.next() is OverrideModifiersDecorator)
+        XCTAssert(decorators.next() is ConvenienceInitModifiersDecorator)
+        XCTAssert(decorators.next() is MutatingModifiersDecorator)
+        XCTAssert(decorators.next() is OwnershipModifiersDecorator)
+        XCTAssertNil(decorators.next())
+    }
+    
     func testMutatingModifiersDecorator() {
         let type = StructGenerationIntention(typeName: "Struct")
         withExtendedLifetime(type) {
@@ -156,7 +172,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             }
         }
         
-        let sut = OwnershipModifierDecorator()
+        let sut = OwnershipModifiersDecorator()
         
         assert(decorator: sut,
                element: .intention(makeIntention(.strong)),
@@ -180,7 +196,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             StatementVariableDeclaration(identifier: "v", type: .int, ownership: ownership)
         }
         
-        let sut = OwnershipModifierDecorator()
+        let sut = OwnershipModifiersDecorator()
         
         assert(decorator: sut,
                element: .variableDecl(makeVarDecl(.strong)),
@@ -207,7 +223,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             builder.setIsOverride(false)
         }
         
-        let sut = OverrideModifierDecorator()
+        let sut = OverrideModifiersDecorator()
         
         assert(decorator: sut,
                element: .intention(overriden),
@@ -224,7 +240,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             builder.setIsConvenience(false)
         }
         
-        let sut = ConvenienceInitModifierDecorator()
+        let sut = ConvenienceInitModifiersDecorator()
         
         assert(decorator: sut,
                element: .intention(_convenience),
@@ -250,7 +266,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             nonOptionalMethod.isOptional = false
             nonOptionalMethod.type = prot
             
-            let sut = ProtocolOptionalModifierDecorator()
+            let sut = ProtocolOptionalModifiersDecorator()
             
             assert(decorator: sut,
                    element: .intention(optionalProp),

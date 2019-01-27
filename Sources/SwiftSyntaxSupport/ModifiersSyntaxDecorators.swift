@@ -15,16 +15,16 @@ class ModifiersSyntaxDecoratorApplier {
         let decorator = ModifiersSyntaxDecoratorApplier()
         decorator.addDecorator(AccessLevelModifiersDecorator())
         decorator.addDecorator(PropertySetterAccessModifiersDecorator())
-        decorator.addDecorator(ProtocolOptionalModifierDecorator())
+        decorator.addDecorator(ProtocolOptionalModifiersDecorator())
         decorator.addDecorator(StaticModifiersDecorator())
-        decorator.addDecorator(OverrideModifierDecorator())
-        decorator.addDecorator(ConvenienceInitModifierDecorator())
+        decorator.addDecorator(OverrideModifiersDecorator())
+        decorator.addDecorator(ConvenienceInitModifiersDecorator())
         decorator.addDecorator(MutatingModifiersDecorator())
-        decorator.addDecorator(OwnershipModifierDecorator())
+        decorator.addDecorator(OwnershipModifiersDecorator())
         return decorator
     }
     
-    private var decorators: [ModifiersSyntaxDecorator] = []
+    private(set) var decorators: [ModifiersSyntaxDecorator] = []
     
     func addDecorator(_ decorator: ModifiersSyntaxDecorator) {
         decorators.append(decorator)
@@ -156,7 +156,7 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
 
 /// Decorator that applies `weak`, `unowned(safe)`, and `unowned(unsafe)`
 /// modifiers to variable declarations
-class OwnershipModifierDecorator: ModifiersSyntaxDecorator {
+class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
     func modifiers(for element: DecoratableElement) -> ModifiersDecoratorResult {
         
         guard let ownership = ownership(for: element) else {
@@ -222,7 +222,7 @@ class OwnershipModifierDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that applies `override` modifiers to members of types
-class OverrideModifierDecorator: ModifiersSyntaxDecorator {
+class OverrideModifiersDecorator: ModifiersSyntaxDecorator {
     func modifiers(for element: DecoratableElement) -> ModifiersDecoratorResult {
         
         guard let intention = element.intention as? MemberGenerationIntention else {
@@ -258,7 +258,7 @@ class OverrideModifierDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that applies `convenience` modifiers to initializers
-class ConvenienceInitModifierDecorator: ModifiersSyntaxDecorator {
+class ConvenienceInitModifiersDecorator: ModifiersSyntaxDecorator {
     func modifiers(for element: DecoratableElement) -> ModifiersDecoratorResult {
         
         guard let intention = element.intention as? InitGenerationIntention else {
@@ -284,7 +284,7 @@ class ConvenienceInitModifierDecorator: ModifiersSyntaxDecorator {
 }
 
 /// Decorator that applies 'optional' modifiers to protocol members
-class ProtocolOptionalModifierDecorator: ModifiersSyntaxDecorator {
+class ProtocolOptionalModifiersDecorator: ModifiersSyntaxDecorator {
     func modifiers(for element: DecoratableElement) -> ModifiersDecoratorResult {
         
         guard let member = element.intention as? MemberGenerationIntention else {
