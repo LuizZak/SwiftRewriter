@@ -48,7 +48,7 @@ class VariableDeclSyntaxGenerator {
                 builder.addAttribute(attribute())
             }
             for modifier in variableDecl.modifiers {
-                builder.addModifier(modifier(&producer.extraLeading))
+                builder.addModifier(modifier(producer))
             }
             
             let letOrVar =
@@ -278,7 +278,7 @@ private extension VariableDeclSyntaxGenerator {
                          storage: ValueStorage,
                          attributes: [() -> AttributeSyntax],
                          intention: IntentionProtocol?,
-                         modifiers: ModifierDecoratorResult,
+                         modifiers: ModifiersDecoratorResult,
                          accessors: (() -> AccessorBlockSyntax)? = nil,
                          initialization: Expression? = nil) -> VariableDeclaration {
         

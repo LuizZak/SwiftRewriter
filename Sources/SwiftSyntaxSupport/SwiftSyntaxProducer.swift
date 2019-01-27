@@ -66,11 +66,11 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         }
     }
     
-    func modifiers(for intention: IntentionProtocol) -> ModifierDecoratorResult {
+    func modifiers(for intention: IntentionProtocol) -> ModifiersDecoratorResult {
         return modifiersDecorations.modifiers(for: intention)
     }
     
-    func modifiers(for decl: StatementVariableDeclaration) -> ModifierDecoratorResult {
+    func modifiers(for decl: StatementVariableDeclaration) -> ModifiersDecoratorResult {
         return modifiersDecorations.modifiers(for: decl)
     }
     
@@ -385,7 +385,7 @@ extension SwiftSyntaxProducer {
                 builder.addAttribute(attribute())
             }
             for modifier in modifiers(for: intention) {
-                builder.addModifier(modifier(&extraLeading))
+                builder.addModifier(modifier(self))
             }
             
             builder.useExtensionKeyword(
@@ -675,7 +675,7 @@ extension SwiftSyntaxProducer {
                 builder.addAttribute(attribute())
             }
             for modifier in modifiers(for: intention) {
-                builder.addModifier(modifier(&extraLeading))
+                builder.addModifier(modifier(self))
             }
             
             builder.useInitKeyword(makeStartToken(SyntaxFactory.makeInitKeyword))
@@ -715,7 +715,7 @@ extension SwiftSyntaxProducer {
                 builder.addAttribute(attribute())
             }
             for modifier in modifiers(for: intention) {
-                builder.addModifier(modifier(&extraLeading))
+                builder.addModifier(modifier(self))
             }
             
             builder.useFuncKeyword(makeStartToken(SyntaxFactory.makeFuncKeyword).addingTrailingSpace())
@@ -866,5 +866,11 @@ extension TokenSyntax {
     
     func onNewline() -> TokenSyntax {
         return withLeadingTrivia(.newlines(1))
+    }
+}
+
+extension TokenSyntax {
+    func withExtraLeading(from producer: SwiftSyntaxProducer) -> TokenSyntax {
+        return withExtraLeading(consuming: &producer.extraLeading)
     }
 }
