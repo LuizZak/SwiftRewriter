@@ -216,16 +216,10 @@ class OverloadResolverState {
     private let cache = ConcurrentValue<[CacheEntry: Int?]>()
     
     public func makeCache() {
-        cache.usingCache = true
-        
-        cache.modifyingState {
-            $0.value = [:]
-        }
+        cache.setup(value: [:])
     }
     
     public func tearDownCache() {
-        cache.usingCache = false
-        
         cache.tearDown()
     }
     
