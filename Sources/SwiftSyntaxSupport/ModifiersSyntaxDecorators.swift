@@ -137,7 +137,7 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
         guard let setterLevel = prop.setterAccessLevel, prop.accessLevel.isMoreVisible(than: setterLevel) else {
             return []
         }
-        guard let setterAccessLevel = _accessModifierFor(accessLevel: setterLevel, omitInternal: true) else {
+        guard let setterAccessLevel = _accessModifierFor(accessLevel: setterLevel, omitInternal: false) else {
             return []
         }
                 
@@ -330,7 +330,7 @@ func _accessModifierFor(accessLevel: AccessLevel, omitInternal: Bool) -> TokenSy
     switch accessLevel {
     case .internal:
         // We don't emit `internal` explicitly by default here
-        return nil
+        return omitInternal ? nil : SyntaxFactory.makeInternalKeyword()
         
     case .open:
         // TODO: There's no `open` keyword currently in the SwiftSyntax version

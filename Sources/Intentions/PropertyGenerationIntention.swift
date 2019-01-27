@@ -4,7 +4,7 @@ import KnownType
 
 /// An intention to generate a property, either static/instance, computed/stored
 /// for a type definition.
-public class PropertyGenerationIntention: MemberGenerationIntention, ValueStorageIntention {
+public class PropertyGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
     public var propertySource: PropertyDefinition? {
         return source as? PropertyDefinition
     }

@@ -440,16 +440,68 @@ public extension MemberBuilder where T: OverridableMemberGenerationIntention {
     }
 }
 
+public extension MemberBuilder where T: InitGenerationIntention {
+    @discardableResult
+    public func setIsConvenience(_ isConvenience: Bool) -> MemberBuilder {
+        targetMember.isConvenience = isConvenience
+        return self
+    }
+}
+
 extension MemberBuilder: _FunctionBuilder where T: FunctionIntention {
     public typealias FunctionType = T
     
     public var target: FunctionType { get { return targetMember } set { targetMember = newValue }}
 }
 
+public extension MemberBuilder where T: MutableValueStorageIntention {
+    @discardableResult
+    public func setValueStorage(_ storage: ValueStorage) -> MemberBuilder {
+        targetMember.storage = storage
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setOwnership(_ ownership: Ownership) -> MemberBuilder {
+        targetMember.storage.ownership = ownership
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setStorageType(_ type: SwiftType) -> MemberBuilder {
+        targetMember.storage.type = type
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setIsConstant(_ isConstant: Bool) -> MemberBuilder {
+        targetMember.storage.isConstant = isConstant
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setInitialValue(_ expression: Expression?) -> MemberBuilder {
+        targetMember.initialValue = expression
+        
+        return self
+    }
+}
+
 public extension MemberBuilder where T: PropertyGenerationIntention {
     @discardableResult
     public func setAsField() -> MemberBuilder {
         targetMember.mode = .asField
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setSetterAccessLevel(_ accessLevel: AccessLevel?) -> MemberBuilder {
+        targetMember.setterAccessLevel = accessLevel
         
         return self
     }
@@ -474,6 +526,19 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
     @discardableResult
     public func setInitialValue(expression: Expression?) -> MemberBuilder {
         targetMember.mode = .computed(FunctionBodyIntention(body: []))
+        
+        return self
+    }
+    
+    @discardableResult
+    public func setIsStatic(_ isStatic: Bool) -> MemberBuilder {
+        if isStatic {
+            if !targetMember.attributes.contains(.attribute("class")) {
+                targetMember.attributes.append(.attribute("class"))
+            }
+        } else {
+            targetMember.attributes.removeAll(where: { $0 == .attribute("class") })
+        }
         
         return self
     }
@@ -706,5 +771,43 @@ public class EnumTypeBuilder {
     
     public func build() -> EnumGenerationIntention {
         return targetEnum
+    }
+}
+
+// MARK: - Typealiases
+public typealias PropertyBuilder = MemberBuilder<PropertyGenerationIntention>
+public typealias InstanceVarBuilder = MemberBuilder<InstanceVariableGenerationIntention>
+public typealias MethodBuilder = MemberBuilder<MethodGenerationIntention>
+public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
+
+public extension MemberBuilder where T == PropertyGenerationIntention {
+    public convenience init(name: String, type: SwiftType) {
+        let prop = PropertyGenerationIntention(name: name, type: type, attributes: [])
+        
+        self.init(targetMember: prop)
+    }
+}
+
+public extension PropertyGenerationIntention {
+    public convenience init(name: String, type: SwiftType, builder: (PropertyBuilder) -> Void) {
+        self.init(name: name, type: type, attributes: [])
+        
+        builder(PropertyBuilder(targetMember: self))
+    }
+}
+
+public extension MethodGenerationIntention {
+    public convenience init(name: String, builder: (MethodBuilder) -> Void) {
+        self.init(signature: FunctionSignature(name: name))
+        
+        builder(MethodBuilder(targetMember: self))
+    }
+}
+
+public extension InitGenerationIntention {
+    public convenience init(builder: (InitializerBuilder) -> Void) {
+        self.init(parameters: [])
+        
+        builder(InitializerBuilder(targetMember: self))
     }
 }
