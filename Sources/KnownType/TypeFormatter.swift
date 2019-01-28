@@ -266,6 +266,9 @@ public enum TypeFormatter {
         if signature.isStatic && includeStatic {
             result += "static "
         }
+        if signature.isMutating {
+            result += "mutating "
+        }
         
         if includeFuncKeyword {
             result += "func "

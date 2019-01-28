@@ -1,10 +1,9 @@
 import SwiftAST
-import Commons
 
-struct ValueTransformerWrapper: PostfixInvocationTransformer {
+public struct ValueTransformerWrapper: PostfixInvocationTransformer {
     let valueTransformer: ValueTransformer<PostfixExpression, Expression>
     
-    init(valueTransformer: ValueTransformer<PostfixExpression, Expression>) {
+    public init(valueTransformer: ValueTransformer<PostfixExpression, Expression>) {
         self.valueTransformer = valueTransformer
     }
     
@@ -18,7 +17,7 @@ struct ValueTransformerWrapper: PostfixInvocationTransformer {
 }
 
 extension ValueTransformerWrapper: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         return "\(valueTransformer)"
     }
 }

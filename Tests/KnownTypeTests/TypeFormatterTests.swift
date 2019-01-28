@@ -131,6 +131,17 @@ class TypeFormatterTests: XCTestCase {
         XCTAssertEqual("static (a b: Float, c: Int)", TypeFormatter.asString(signature: sig3))
     }
     
+    func testAsStringMutatingFunctionSignature() {
+        let sig = FunctionSignature(name: "abc",
+                                    parameters: [],
+                                    returnType: .int,
+                                    isStatic: false,
+                                    isMutating: true)
+        
+        XCTAssertEqual("mutating abc() -> Int", TypeFormatter.asString(signature: sig, includeName: true))
+        XCTAssertEqual("mutating func abc() -> Int", TypeFormatter.asString(signature: sig, includeName: true, includeFuncKeyword: true))
+    }
+    
     func testAsStringParameterDefaultValue() {
         let parameters = [
             ParameterSignature(label: "label", name: "name", type: .int, hasDefaultValue: true)

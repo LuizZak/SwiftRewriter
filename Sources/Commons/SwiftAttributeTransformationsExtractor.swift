@@ -7,19 +7,19 @@ import MiniLexer
 private typealias SwiftRewriterAttribute =
     SwiftClassInterfaceParser.SwiftRewriterAttribute
 
-class SwiftAttributeTransformationsExtractor {
+public class SwiftAttributeTransformationsExtractor {
     
     let type: KnownType
     
-    init(type: KnownType) {
+    public init(type: KnownType) {
         self.type = type
     }
     
-    func nonCanonicalNames() throws -> [String] {
+    public func nonCanonicalNames() throws -> [String] {
         return try aliases(in: type)
     }
     
-    func transformations() throws -> [PostfixTransformation] {
+    public func transformations() throws -> [PostfixTransformation] {
         var transformations: [PostfixTransformation] = []
         
         transformations.append(contentsOf:

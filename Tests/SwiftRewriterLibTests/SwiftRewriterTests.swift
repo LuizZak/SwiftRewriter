@@ -2628,6 +2628,7 @@ class SwiftRewriterTests: XCTestCase {
             @implementation A
             - (void)bar {
                 [self takesArray:self.foo];
+                [self.foo addObject:@""];
             }
             - (void)takesArray:(nonnull NSArray<NSString*>*)array {
                 
@@ -2640,6 +2641,7 @@ class SwiftRewriterTests: XCTestCase {
             
                 func bar() {
                     self.takesArray(self.foo)
+                    self.foo.append("")
                 }
                 func takesArray(_ array: [String]) {
                 }

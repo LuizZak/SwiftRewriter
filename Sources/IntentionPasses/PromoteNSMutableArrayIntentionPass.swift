@@ -136,10 +136,6 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
         return false
     }
     
-    private func convertPostfixInvocation(_ exp: Expression) -> Expression {
-        return exp
-    }
-    
     private func arrayTypeForNSMutableArray(_ type: SwiftType) -> SwiftType? {
         switch context.typeSystem.resolveAlias(in: type.deepUnwrapped).deepUnwrapped {
         case .nominal(.generic("NSMutableArray", let types)) where types.count == 1:
@@ -162,8 +158,7 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
     
     private func isArray(_ type: SwiftType) -> Bool {
         switch context.typeSystem.resolveAlias(in: type.deepUnwrapped).deepUnwrapped {
-        case .array,
-             .nominal(.generic("Array", _)):
+        case .nominal(.generic("Array", _)):
             
             return true
         default:

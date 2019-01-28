@@ -49,8 +49,13 @@ public class PostfixExpression: Expression {
     ///
     /// This can be useful to traverse from an inner postfix access until the
     /// outermost access, wherein a postfix access chain finishes.
+    ///
+    /// This method does not traverse to parent postfix expressions if this
+    /// expression is not the base expression of the parent postfix expression.
+    /// This check is needed to ensure method parameter or subscription value
+    /// expressions are not mistaken for base of postfix expressions.
     public var topPostfixExpression: PostfixExpression {
-        if let postfix = parent as? PostfixExpression {
+        if let postfix = parent as? PostfixExpression, postfix.exp === self {
             return postfix.topPostfixExpression
         }
         
@@ -264,6 +269,11 @@ public final class MemberPostfix: Postfix {
     
     public override func copy() -> MemberPostfix {
         return MemberPostfix(name: name).copyTypeAndMetadata(from: self)
+    }
+    
+    public func withIdentifier(_ identifier: String) -> MemberPostfix {
+        let c = MemberPostfix(name: identifier)
+        return c.copyTypeAndMetadata(from: self)
     }
     
     public override func isEqual(to other: Postfix) -> Bool {

@@ -1,5 +1,4 @@
 import SwiftAST
-import Commons
 
 /// An invocation transformer that allows renaming an instance or type property
 /// access
@@ -9,9 +8,9 @@ public class PropertyInvocationTransformer: PostfixInvocationTransformer {
     let oldName: String
     let newName: String
     
-    init(baseExpressionMatcher: ValueMatcher<Expression>,
-         oldName: String,
-         newName: String) {
+    public init(baseExpressionMatcher: ValueMatcher<Expression>,
+                oldName: String,
+                newName: String) {
         
         self.baseExpressionMatcher = baseExpressionMatcher
         self.oldName = oldName

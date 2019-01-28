@@ -22,6 +22,30 @@ public class SwiftTypeConverter {
     
     func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
         switch type {
+            
+            
+        case .nominal(.generic("Array", let inner)) where inner.count == 1:
+            return ArrayTypeSyntax { builder in
+                builder.useLeftSquareBracket(SyntaxFactory.makeLeftSquareBracketToken())
+                builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
+                
+                builder.useElementType(makeTypeSyntax(inner[0]))
+            }
+            
+        case let .nominal(.generic("Dictionary", elements)) where elements.count == 2:
+            let key = elements[0]
+            let value = elements[1]
+            
+            return DictionaryTypeSyntax { builder in
+                builder.useLeftSquareBracket(SyntaxFactory.makeLeftSquareBracketToken())
+                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
+                builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
+                
+                builder.useKeyType(makeTypeSyntax(key))
+                builder.useValueType(makeTypeSyntax(value))
+            }
+            
+            
         case .nominal(let nominal):
             return makeNominalTypeSyntax(nominal)
             
@@ -155,24 +179,6 @@ public class SwiftTypeConverter {
                         }
                     })
                 }
-            }
-            
-        case .array(let inner):
-            return ArrayTypeSyntax { builder in
-                builder.useLeftSquareBracket(SyntaxFactory.makeLeftSquareBracketToken())
-                builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
-                
-                builder.useElementType(makeTypeSyntax(inner))
-            }
-            
-        case let .dictionary(key, value):
-            return DictionaryTypeSyntax { builder in
-                builder.useLeftSquareBracket(SyntaxFactory.makeLeftSquareBracketToken())
-                builder.useColon(SyntaxFactory.makeColonToken().withTrailingSpace())
-                builder.useRightSquareBracket(SyntaxFactory.makeRightSquareBracketToken())
-                
-                builder.useKeyType(makeTypeSyntax(key))
-                builder.useValueType(makeTypeSyntax(value))
             }
         }
     }

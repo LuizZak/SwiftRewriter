@@ -918,7 +918,8 @@ public class TypeSystem {
         let result: KnownType?
         
         switch swiftType {
-        case .nominal(.typeName(let typeName)):
+        case .nominal(.typeName(let typeName)),
+             .nominal(.generic(let typeName, _)): // For generic types, ignore the generic parameters
             result = knownTypeWithName(typeName)
             
         // Meta-types recurse on themselves
@@ -1575,12 +1576,6 @@ private class TypealiasExpander {
             
         case .protocolComposition(let composition):
             return .protocolComposition(.fromCollection(composition.map(expand(inComposition:))))
-            
-        case .array(let inner):
-            return .array(expand(in: inner))
-            
-        case let .dictionary(key, value):
-            return .dictionary(key: expand(in: key), value: expand(in: value))
         }
     }
     

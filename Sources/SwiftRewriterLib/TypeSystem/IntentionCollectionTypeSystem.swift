@@ -241,7 +241,11 @@ public class IntentionCollectionTypeSystem: TypeSystem {
         
         if result == nil {
             guard let knownType = self.findType(for: type) else {
-                return nil
+                return super.method(withObjcSelector: selector,
+                                    invocationTypeHints: invocationTypeHints,
+                                    static: isStatic,
+                                    includeOptional: includeOptional,
+                                    in: type)
             }
             
             result = super.method(withObjcSelector: selector,

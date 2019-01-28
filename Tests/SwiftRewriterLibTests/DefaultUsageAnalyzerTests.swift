@@ -532,4 +532,55 @@ class DefaultUsageAnalyzerTests: XCTestCase {
         XCTAssertEqual(usages[0].isReadOnlyUsage, true)
         XCTAssertEqual(usages[1].isReadOnlyUsage, true)
     }
+    
+    func testUsingLocalAsParameterInMutatingMethodDoesNotAffectLocalReadOnlyStatus() {
+        // Regression test for a bug where using a local as a parameter for a
+        // mutating method marked the usage as mutating.
+        let typeSystem = TypeSystem()
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "A", kind: .struct)
+                .method(named: "b",
+                        shortParams: [("a", .typeName("A"))],
+                        isMutating: true)
+                .build()
+        )
+        typeSystem.addType(
+            KnownTypeBuilder(typeName: "B", kind: .class)
+                .constructor()
+                .build()
+        )
+        
+        let body: CompoundStatement = [
+            // var a: A
+            .variableDeclaration(
+                identifier: "a",
+                type: "A",
+                initialization: nil
+            ),
+            // var b: B
+            .variableDeclaration(
+                identifier: "b",
+                type: "B",
+                initialization: nil
+            ),
+            // a.b(b)
+            .expression(
+                Expression
+                    .identifier("a")
+                    .dot("b")
+                    .call([
+                        FunctionArgument(label: "b", expression: .identifier("b"))
+                        ])
+            )
+        ]
+        let typeResolver = ExpressionTypeResolver(typeSystem: typeSystem)
+        _=typeResolver.resolveTypes(in: body)
+        
+        let sut = LocalUsageAnalyzer(typeSystem: typeSystem)
+        
+        let usages = sut.findUsagesOf(localNamed: "b", in: FunctionBodyIntention(body: body))
+        
+        XCTAssertEqual(usages.count, 1)
+        XCTAssertEqual(usages[0].isReadOnlyUsage, true)
+    }
 }

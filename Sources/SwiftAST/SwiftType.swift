@@ -9,8 +9,6 @@ indirect public enum SwiftType: Hashable {
     case optional(SwiftType)
     case implicitUnwrappedOptional(SwiftType)
     case nullabilityUnspecified(SwiftType)
-    case array(SwiftType)
-    case dictionary(key: SwiftType, value: SwiftType)
 }
 
 extension SwiftType: ExpressibleByStringLiteral {
@@ -303,6 +301,13 @@ public extension SwiftType {
         return .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
+    public static func array(_ element: SwiftType) -> SwiftType {
+        return .generic("Array", parameters: [element])
+    }
+    public static func dictionary(key: SwiftType, value: SwiftType) -> SwiftType {
+        return .generic("Dictionary", parameters: [key, value])
+    }
+    
     /// Returns a type that is the same as the input, but with any .optional or
     /// .implicitUnwrappedOptional types unwrapped to non optional, inclusing
     /// block parameters.
@@ -352,6 +357,12 @@ extension NominalSwiftType: CustomStringConvertible {
         switch self {
         case .typeName(let name):
             return name
+            
+        case let .generic("Array", elements) where elements.count == 1:
+            return "[\(elements[0])]"
+            
+        case let .generic("Dictionary", elements) where elements.count == 2:
+            return "[\(elements[0]): \(elements[1])]"
             
         case let .generic(name, params):
             return name + "<" + params.map { $0.description }.joined(separator: ", ") + ">"
@@ -426,12 +437,6 @@ extension SwiftType: CustomStringConvertible {
             
         case .nested(let items):
             return items.map { $0.description }.joined(separator: ".")
-            
-        case .array(let type):
-            return "[\(type)]"
-            
-        case let .dictionary(key, value):
-            return "[\(key): \(value)]"
         }
     }
     

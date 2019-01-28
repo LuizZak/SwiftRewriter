@@ -10,8 +10,30 @@ class TypeSystemTests: XCTestCase {
         sut = TypeSystem()
     }
     
-    // MARK: - typesMatch
+    // MARK: - findType
+    func testFindType() {
+        let type1 = KnownTypeBuilder(typeName: "Type1").build()
+        let type2 = KnownTypeBuilder(typeName: "Type2").build()
+        sut.addType(type1)
+        sut.addType(type2)
+        
+        XCTAssertNotNil(sut.findType(for: "Type1"))
+        XCTAssertNotNil(sut.findType(for: "Type2"))
+        XCTAssertNil(sut.findType(for: "Type3"))
+    }
     
+    func testFindTypeGeneric() {
+        let type1 = KnownTypeBuilder(typeName: "Type1").build()
+        let type2 = KnownTypeBuilder(typeName: "Type2").build()
+        sut.addType(type1)
+        sut.addType(type2)
+        
+        XCTAssertNotNil(sut.findType(for: SwiftType.generic("Type1", parameters: ["T"])))
+        XCTAssertNotNil(sut.findType(for: SwiftType.generic("Type2", parameters: ["T"])))
+        XCTAssertNil(sut.findType(for: SwiftType.generic("Type3", parameters: ["T"])))
+    }
+    
+    // MARK: - typesMatch
     func testTypesMatchSameStructure() {
         XCTAssert(sut.typesMatch(.typeName("A"),
                                  .typeName("A"),
@@ -269,6 +291,14 @@ class TypeSystemTests: XCTestCase {
         XCTAssertTrue(sut.isType("C" as SwiftType, subtypeOf: "A"))
         XCTAssertFalse(sut.isType("A" as SwiftType, subtypeOf: "B"))
         XCTAssertFalse(sut.isType("A" as SwiftType, subtypeOf: "C"))
+    }
+    
+    func testIsTypeSubtypeOf_Array() {
+        XCTAssertTrue(sut.isType(.array(.int), subtypeOf: "Array"))
+    }
+    
+    func testIsTypeSubtypeOf_Dictionary() {
+        XCTAssertTrue(sut.isType(.dictionary(key: .int, value: .string), subtypeOf: "Dictionary"))
     }
     
     func testNSObjectDefinition() {
@@ -658,6 +688,20 @@ class TypeSystemTests: XCTestCase {
         XCTAssert(sut.isType("Q", assignableTo: "P"))
         XCTAssertFalse(sut.isType("P", assignableTo: "Q"))
         XCTAssertFalse(sut.isType("Q", assignableTo: "Z"))
+    }
+    
+    // TODO: Make this pass
+    func testIsTypeAssignableTo_Array() {
+        XCTAssert(sut.isType(.array(.int), assignableTo: .generic("Array", parameters: [.int])))
+        XCTAssert(sut.isType(.generic("Array", parameters: [.int]), assignableTo: .array(.int)))
+    }
+    // TODO: Make this pass
+    func testIsTypeAssignableTo_Dictionary() {
+        XCTAssert(sut.isType(.dictionary(key: .int, value: .int),
+                             assignableTo: .generic("Dictionary", parameters: [.int, .int])))
+        
+        XCTAssert(sut.isType(.generic("Dictionary", parameters: [.int, .int]),
+                             assignableTo: .dictionary(key: .int, value: .int)))
     }
     
     func testTypeCategoryPrimitives() {

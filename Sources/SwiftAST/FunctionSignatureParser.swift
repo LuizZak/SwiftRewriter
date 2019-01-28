@@ -61,13 +61,21 @@ public final class FunctionSignatureParser {
     ///
     /// ```
     /// function-signature
-    ///     : 'mutating'? identifier parameter-signature return-type?
-    ///     | 'mutating'? identifier parameter-signature 'throws' return-type?
-    ///     | 'mutating'? identifier parameter-signature 'rethrows' return-type?
+    ///     : declaration-modifiers? identifier parameter-signature return-type?
+    ///     | declaration-modifiers? identifier parameter-signature 'throws' return-type?
+    ///     | declaration-modifiers? identifier parameter-signature 'rethrows' return-type?
     ///     ;
     ///
     /// return-type
     ///     : '->' swift-type
+    ///
+    /// declaration-modifiers
+    ///     : declaration-modifier+
+    ///     ;
+    ///
+    /// declaration-modifier
+    ///     : 'mutating'
+    ///     ;
     /// ```
     ///
     /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.
@@ -100,13 +108,21 @@ public final class FunctionSignatureParser {
     ///
     /// ```
     /// function-signature
-    ///     : 'mutating'? identifier parameter-signature return-type?
-    ///     | 'mutating'? identifier parameter-signature 'throws' return-type?
-    ///     | 'mutating'? identifier parameter-signature 'rethrows' return-type?
+    ///     : declaration-modifiers? identifier parameter-signature return-type?
+    ///     | declaration-modifiers? identifier parameter-signature 'throws' return-type?
+    ///     | declaration-modifiers? identifier parameter-signature 'rethrows' return-type?
     ///     ;
     ///
     /// return-type
     ///     : '->' swift-type
+    ///
+    /// declaration-modifiers
+    ///     : declaration-modifier+
+    ///     ;
+    ///
+    /// declaration-modifier
+    ///     : 'mutating'
+    ///     ;
     /// ```
     ///
     /// Support for parsing Swift types is borrowed from `SwiftTypeParser`.

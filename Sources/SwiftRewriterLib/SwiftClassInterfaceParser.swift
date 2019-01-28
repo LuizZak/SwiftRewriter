@@ -193,6 +193,13 @@ public final class SwiftClassInterfaceParser {
     private static func parseTypeMember(from tokenizer: Tokenizer,
                                         _ typeBuilder: inout KnownTypeBuilder) throws {
         
+        enum DeclType {
+            case letDecl
+            case varDecl
+            case function
+            case initializer
+        }
+        
         let attributes: [Attribute] =
             (try? parseAttributes(from: tokenizer)) ?? []
         
@@ -201,8 +208,33 @@ public final class SwiftClassInterfaceParser {
         let modifiers: [DeclarationModifier] =
             (try? parseDeclarationModifiers(from: tokenizer)) ?? []
         
-        switch tokenizer.tokenType() {
-        case .let:
+        var declType: DeclType
+        
+        if modifiers.contains(where: { $0.isFunctionModifier }) {
+            declType = .function
+        } else {
+            switch tokenizer.tokenType() {
+            case .let:
+                declType = .letDecl
+                
+            case .var:
+                declType = .varDecl
+                
+            case .func:
+                declType = .function
+                
+            case ._init:
+                declType = .initializer
+                
+            default:
+                throw tokenizer.lexer.syntaxError(
+                    "Expected variable, function or initializer declaration"
+                )
+            }
+        }
+        
+        switch declType {
+        case .letDecl:
             let letDecl = try parseLetDeclaration(from: tokenizer)
             
             typeBuilder =
@@ -213,7 +245,7 @@ public final class SwiftClassInterfaceParser {
                     isStatic: modifiers.contains(.static),
                     attributes: knownAttributes)
             
-        case .var:
+        case .varDecl:
             let varDecl = try parseVarDeclaration(from: tokenizer)
             
             var ownership: Ownership = .strong
@@ -236,26 +268,22 @@ public final class SwiftClassInterfaceParser {
                     accessor: varDecl.isConstant ? .getter : .getterAndSetter,
                     attributes: knownAttributes)
             
-        case .func:
+        case .function:
             var funcDecl = try parseFunctionDeclaration(from: tokenizer)
             funcDecl.signature.isStatic = modifiers.contains(.static)
+            funcDecl.signature.isMutating = modifiers.contains(.functionModifier(.mutating))
             
             typeBuilder =
                 typeBuilder.method(withSignature: funcDecl.signature,
                                    attributes: knownAttributes)
             
-        case ._init:
+        case .initializer:
             let initDecl = try parseInitializerDeclaration(from: tokenizer)
             
             typeBuilder =
                 typeBuilder.constructor(withParameters: initDecl.parameters,
                                         attributes: knownAttributes,
                                         isFailable: initDecl.isFailable)
-            
-        default:
-            throw tokenizer.lexer.syntaxError(
-                "Expected variable, function or initializer declaration"
-            )
         }
     }
     
@@ -642,6 +670,7 @@ public final class SwiftClassInterfaceParser {
     /// ```
     /// declaration-modifier
     ///     : access-level-modifier
+    ///     | function-modifier
     ///     | 'class'
     ///     | 'convenience'
     ///     | 'dynamic'
@@ -655,11 +684,6 @@ public final class SwiftClassInterfaceParser {
     ///     | 'unowned(safe)'
     ///     | 'unowned(unsafe)'
     ///     | 'weak'
-    ///     ;
-    ///
-    /// access-level-modifier
-    ///     : 'public'
-    ///     | 'open'
     ///     ;
     /// ```
     private static func parseDeclarationModifier(from tokenizer: Tokenizer) throws -> DeclarationModifier {
@@ -704,11 +728,18 @@ public final class SwiftClassInterfaceParser {
             tokenizer.skipToken()
             
             return DeclarationModifier.ownership(.unownedUnsafe)
+            
         default:
             break
         }
         
-        return DeclarationModifier.accessLevel(try parseAccessLevel(from: tokenizer))
+        do {
+            return DeclarationModifier.accessLevel(try parseAccessLevel(from: tokenizer))
+        } catch {
+            let modifier = try parseFunctionModifier(from: tokenizer)
+            
+            return DeclarationModifier.functionModifier(modifier)
+        }
     }
     
     /// ```
@@ -732,6 +763,26 @@ public final class SwiftClassInterfaceParser {
         throw tokenizer.lexer.syntaxError("Expected access level modifier")
     }
     
+    /// ```
+    /// function-modifier
+    ///     : 'mutating'
+    ///     ;
+    /// ```
+    private static func parseFunctionModifier(from tokenizer: Tokenizer) throws -> FunctionModifier {
+        let token = try tokenizer.advance(overTokenType: .identifier)
+        
+        switch token.value {
+        case "mutating":
+            return .mutating
+            
+        default:
+            throw tokenizer.lexer.syntaxError("Expected function modifier")
+        }
+    }
+}
+
+// MARK: - Commons
+extension SwiftClassInterfaceParser {
     private static func typeName(from tokenizer: Tokenizer) throws -> String {
         do {
             let token = try tokenizer.advance(overTokenType: .identifier)
@@ -829,6 +880,21 @@ public final class SwiftClassInterfaceParser {
         case ownership(Ownership)
         case `override`
         case ignored
+        case functionModifier(FunctionModifier)
+        
+        var isFunctionModifier: Bool {
+            switch self {
+            case .functionModifier:
+                return true
+                
+            default:
+                return false
+            }
+        }
+    }
+    
+    private enum FunctionModifier {
+        case mutating
     }
 }
 
@@ -916,7 +982,6 @@ extension SwiftClassInterfaceParser {
         case unowned_safe
         case unowned_unsafe
         case optional
-        case `mutating`
         case `rethrows`
         case `required`
         case `override`
@@ -951,7 +1016,7 @@ extension SwiftClassInterfaceParser {
                 return 6
             case .dynamic, .unowned:
                 return 7
-            case .mutating, .rethrows, .required, .override, .optional:
+            case .rethrows, .required, .override, .optional:
                 return 8
             case .extension:
                 return 9
@@ -1057,8 +1122,6 @@ extension SwiftClassInterfaceParser {
                 return "unowned_unsafe"
             case .optional:
                 return "optional"
-            case .mutating:
-                return "mutating"
             case .rethrows:
                 return "rethrows"
             case .required:
@@ -1263,8 +1326,6 @@ extension SwiftClassInterfaceParser {
                     }
                     
                     return .unowned
-                case "mutating":
-                    return .mutating
                 case "rethrows":
                     return .rethrows
                 case "required":

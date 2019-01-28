@@ -68,7 +68,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                 if expMethod.ownerType?.asTypeName == method.ownerType?.asTypeName {
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            functionBody: functionBody,
                             definition: .forKnownMember(method),
                             expression: exp,
                             isReadOnlyUsage: true
@@ -108,7 +108,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                     
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            functionBody: functionBody,
                             definition: .forKnownMember(property),
                             expression: exp,
                             isReadOnlyUsage: readOnly
@@ -224,7 +224,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                     
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            functionBody: functionBody,
                             definition: def,
                             expression: identifier,
                             isReadOnlyUsage: readOnly
@@ -273,7 +273,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                     
                     let usage =
                         DefinitionUsage(
-                            intention: functionBody,
+                            functionBody: functionBody,
                             definition: def,
                             expression: identifier,
                             isReadOnlyUsage: readOnly
@@ -306,7 +306,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                 
                 let usage =
                     DefinitionUsage(
-                        intention: functionBody,
+                        functionBody: functionBody,
                         definition: definition,
                         expression: identifier,
                         isReadOnlyUsage: readOnly
@@ -341,7 +341,7 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
 /// Reports the usage of a type member or global declaration
 public struct DefinitionUsage {
     /// Intention for function body which this member usage is contained wihin.
-    public var intention: FunctionBodyIntention
+    public var functionBody: FunctionBodyIntention
     
     /// The definition that was effectively used
     public var definition: CodeDefinition

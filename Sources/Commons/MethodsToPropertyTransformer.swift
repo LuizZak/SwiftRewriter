@@ -1,5 +1,4 @@
 import SwiftAST
-import Commons
 
 /// Allows transforming method invocations to property accessors.
 public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
@@ -10,11 +9,11 @@ public final class MethodsToPropertyTransformer: PostfixInvocationTransformer {
     let propertyName: String
     let resultType: SwiftType
     
-    init(baseExpressionMatcher: ValueMatcher<Expression>,
-         getterName: String,
-         setterName: String?,
-         propertyName: String,
-         resultType: SwiftType) {
+    public init(baseExpressionMatcher: ValueMatcher<Expression>,
+                getterName: String,
+                setterName: String?,
+                propertyName: String,
+                resultType: SwiftType) {
         
         self.baseExpressionMatcher = baseExpressionMatcher
         self.getterName = getterName

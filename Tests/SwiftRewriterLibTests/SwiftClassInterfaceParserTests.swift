@@ -163,6 +163,17 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertEqual(type.knownMethods[2].signature.returnType, "MyClass")
     }
     
+    func testParseMutatingFunction() throws {
+        let type = try parseType("""
+            struct MyClass {
+                mutating func a()
+            }
+            """)
+        
+        XCTAssertEqual(type.knownMethods.count, 1)
+        XCTAssert(type.knownMethods[0].signature.isMutating)
+    }
+    
     func testParseStaticMembers() throws {
         let type = try parseType("""
             class MyClass {
@@ -277,6 +288,7 @@ class SwiftClassInterfaceParserTests: XCTestCase {
                 @inlinable
                 @_swiftrewriter(mapFrom: c(x: Int))
                 @_swiftrewriter(mapFrom: d(x:))
+                @_swiftrewriter(mapFrom: e(_:))
                 func b(y: Int)
             }
             """)
@@ -289,6 +301,8 @@ class SwiftClassInterfaceParserTests: XCTestCase {
         XCTAssertNil(type.knownMethods[1].knownAttributes[0].parameters)
         XCTAssertEqual(type.knownMethods[1].knownAttributes[1].name, "_swiftrewriter")
         XCTAssertEqual(type.knownMethods[1].knownAttributes[1].parameters, "mapFrom: c(x: Int)")
+        XCTAssertEqual(type.knownMethods[1].knownAttributes[2].parameters, "mapFrom: d(x:)")
+        XCTAssertEqual(type.knownMethods[1].knownAttributes[3].parameters, "mapFrom: e(_:)")
     }
     
     func testParseSwiftAttribute() throws {
@@ -354,6 +368,16 @@ class SwiftClassInterfaceParserTests: XCTestCase {
             """
         )
     }
+    
+    func testParseErrorWhenParsingMutatingInVarDecl() {
+        parseError(
+            """
+            class A {
+                mutating var a: Int { get }
+            }
+            """,
+            error: "Error at line 2 column 13: Expected token 'func' but found 'var'")
+    }
 }
 
 extension SwiftClassInterfaceParserTests {
@@ -407,6 +431,31 @@ extension SwiftClassInterfaceParserTests {
                           expected: true)
             
             throw error
+        }
+    }
+    
+    func parseError(_ string: String, error: String, file: String = #file, line: Int = #line) {
+        do {
+            _=try SwiftClassInterfaceParser.parseDeclaration(from: string)
+            
+            recordFailure(withDescription: "Expected error while parsing type signature.",
+                inFile: file,
+                atLine: line,
+                expected: true)
+        } catch let _error {
+            let description: String
+            if let _error = _error as? LexerError {
+                description = _error.description(withOffsetsIn: string)
+            } else {
+                description = "\(_error)"
+            }
+            
+            if description != error {
+                recordFailure(withDescription: "Expected error to match '\(error)', but received '\(description)'",
+                    inFile: file,
+                    atLine: line,
+                    expected: true)
+            }
         }
     }
 }

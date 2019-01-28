@@ -18,6 +18,7 @@ public enum CompoundedMappingTypeList {
             UIGestureRecognizerCompoundType.create(),
             UILabelCompoundType.create(),
             UIViewControllerCompoundType.create(),
+            SwiftStdlibCompoundTypes.array.create(),
         ]
     }
 }

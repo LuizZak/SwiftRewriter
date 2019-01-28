@@ -1173,7 +1173,7 @@ class SwiftRewriter_TypingTests: XCTestCase {
         assertObjcParse(
             objc: """
             void test() {
-                NSMutableArray *array = [NSMutableArray array];
+                NSMutableArray<NSObject*> *array = [NSMutableArray array];
                 NSObject *object = array;
                 [array addObject:object];
             }
