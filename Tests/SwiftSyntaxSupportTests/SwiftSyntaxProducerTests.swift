@@ -413,7 +413,7 @@ extension SwiftSyntaxProducerTests {
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createGlobalFunction(withName: "a") { builder in
                     builder.setBody([])
-                    builder.createSignature(name: "a") { builder in
+                    builder.createSignature { builder in
                         builder.addParameter(name: "test", type: .int)
                     }
                 }
@@ -423,7 +423,7 @@ extension SwiftSyntaxProducerTests {
         let result = sut.generateFile(file)
         
         assert(result, matches: """
-            func a(test: Int) {
+            func a(_ test: Int) {
             }
             """)
     }
@@ -433,7 +433,7 @@ extension SwiftSyntaxProducerTests {
             .makeFileIntention(fileName: "Test.swift") { builder in
                 builder.createGlobalFunction(withName: "a") { builder in
                     builder.setBody([])
-                    builder.createSignature(name: "a") { builder in
+                    builder.createSignature { builder in
                         builder.setReturnType(.int)
                     }
                 }

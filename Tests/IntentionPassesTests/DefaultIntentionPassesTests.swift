@@ -2,6 +2,8 @@ import XCTest
 import IntentionPasses
 import Intentions
 import SwiftRewriterLib
+import Commons
+import GlobalsProviders
 
 class DefaultIntentionPassesTests: XCTestCase {
     func testDefaultIntentionPasses() {
@@ -28,14 +30,31 @@ class DefaultIntentionPassesTests: XCTestCase {
 }
 
 // Helper method for constructing intention pass contexts for tests
-func makeContext(intentions: IntentionCollection) -> IntentionPassContext {
-    let system = IntentionCollectionTypeSystem(intentions: intentions)
-    let invoker = DefaultTypeResolverInvoker(globals: ArrayDefinitionsSource(),
-                                             typeSystem: system,
-                                             numThreads: 8)
-    let typeMapper = DefaultTypeMapper(typeSystem: system)
+func makeContext(intentions: IntentionCollection,
+                 resolveTypes: Bool = false) -> IntentionPassContext {
     
-    return IntentionPassContext(typeSystem: system,
+    let commonsTypeProvider = CompoundedMappingTypesGlobalsProvider()
+    
+    let globals = CompoundDefinitionsSource()
+    
+    // Register globals first
+    globals.addSource(commonsTypeProvider.definitionsSource())
+    
+    let typeSystem = IntentionCollectionTypeSystem(intentions: intentions)
+    
+    typeSystem.addTypealiasProvider(commonsTypeProvider.typealiasProvider())
+    typeSystem.addKnownTypeProvider(commonsTypeProvider.knownTypeProvider())
+    
+    let invoker = DefaultTypeResolverInvoker(globals: globals,
+                                             typeSystem: typeSystem,
+                                             numThreads: 8)
+    let typeMapper = DefaultTypeMapper(typeSystem: typeSystem)
+    
+    if resolveTypes {
+        invoker.resolveAllExpressionTypes(in: intentions, force: true)
+    }
+    
+    return IntentionPassContext(typeSystem: typeSystem,
                                 typeMapper: typeMapper,
                                 typeResolverInvoker: invoker,
                                 numThreads: 8)

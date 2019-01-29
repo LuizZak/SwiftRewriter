@@ -310,12 +310,12 @@ public protocol _FunctionBuilder {
 public extension _FunctionBuilder where FunctionType: MutableSignatureFunctionIntention {
     var signature: FunctionSignature { get { return target.signature } nonmutating set { target.signature = newValue } }
     
-    // TODO: It is less than ideal to repeat the name argument here, since most
-    // likely the user got here from function builders that already require a
-    // name during their creation.
     @discardableResult
-    func createSignature(name: String, _ builder: (FunctionSignatureBuilder) -> Void) -> Self {
-        let b = FunctionSignatureBuilder(signature: FunctionSignature(name: name))
+    func createSignature(_ builder: (FunctionSignatureBuilder) -> Void) -> Self {
+        // Reset signature
+        signature = FunctionSignature(name: signature.name)
+        
+        let b = FunctionSignatureBuilder(signature: signature)
         
         builder(b)
         
@@ -341,11 +341,19 @@ public class FunctionSignatureBuilder {
         self.signature = signature
     }
     
-    
     @discardableResult
     public func addParameter(name: String, type: SwiftType) -> FunctionSignatureBuilder {
         signature.parameters.append(
-            ParameterSignature(label: name, name: name, type: type)
+            ParameterSignature(label: nil, name: name, type: type)
+        )
+        
+        return self
+    }
+    
+    @discardableResult
+    public func addParameter(label: String, name: String, type: SwiftType) -> FunctionSignatureBuilder {
+        signature.parameters.append(
+            ParameterSignature(label: label, name: name, type: type)
         )
         
         return self

@@ -80,7 +80,7 @@ let package = Package(
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
-                           "Intentions"]),
+                           "Intentions", "TestCommons"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["SwiftRewriterLib", "Utils", "MiniLexer"]),

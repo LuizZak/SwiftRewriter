@@ -82,7 +82,7 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
         
         let usages = usageAnalyzer.findUsagesOf(property: property)
 
-        if usages.contains(where: isStrictNSMutableArrayUsage) {
+        if !usages.allSatisfy(isArrayOfTReplaceableUsage) {
             return
         }
         
@@ -111,29 +111,60 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
         }
     }
     
-    /// Returns `true` if a given usage cannot be replaced by a `Array<T>`, due
-    /// to expectations of a type being an `NSMutableArray`.
+    /// Returns `true` if a given usage can be replaced by a `Array<T>`, returning
+    /// `false` otherwise due to expectations of a type being an `NSMutableArray`.
     ///
-    /// This is a conservative check that returns `true` in case the usage cannot
+    /// This is a conservative check that returns `false` in case the usage cannot
     /// be verified as being a pure `Array<T>`-like usage.
-    private func isStrictNSMutableArrayUsage(_ usage: DefinitionUsage) -> Bool {
+    private func isArrayOfTReplaceableUsage(_ usage: DefinitionUsage) -> Bool {
         if !usage.isReadOnlyUsage {
             if usage.expression.parentExpression?.asAssignment?.lhs === usage.expression {
-                return false
+                return true
             }
             
-            return true
+            return false
         }
         
         if let expectedType = usage.expression.expectedType {
             if isNSArray(expectedType) || isArray(expectedType) {
+                return true
+            }
+            
+            return false
+        } else if usage.expression.isErrorTyped {
+            return false
+        }
+        
+        // Check if we have a properly typed expression, and check if the usage
+        // references an extension that is exclusively for NSArray or NSMutableArray
+        guard let postfix = postfixExpression(usage.expression) else {
+            return false
+        }
+        
+        let inverted = PostfixChainInverter.invert(expression: postfix)
+        
+        for postfixChainItem in inverted {
+            guard let op = postfixChainItem.postfix else {
+                continue
+            }
+            guard let member = op.asMember else {
+                continue
+            }
+            guard let memberType = member.memberDefinition?.ownerType else {
                 return false
             }
             
-            return true
+            let memberTypeName = memberType.asTypeName
+            guard let type = context.typeSystem.knownTypeWithName(memberTypeName) else {
+                return false
+            }
+            
+            if type.isExtension && (type.typeName == "NSMutableArray" || type.typeName == "NSArray") {
+                return false
+            }
         }
         
-        return false
+        return true
     }
     
     private func arrayTypeForNSMutableArray(_ type: SwiftType) -> SwiftType? {
@@ -164,6 +195,14 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
         default:
             return false
         }
+    }
+    
+    private func postfixExpression(_ exp: Expression) -> PostfixExpression? {
+        guard let postfix = exp.parentExpression?.asPostfix else {
+            return nil
+        }
+        
+        return postfix.exp === exp ? postfix : nil
     }
 }
 
