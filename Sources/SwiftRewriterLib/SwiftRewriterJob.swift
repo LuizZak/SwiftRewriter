@@ -1,4 +1,5 @@
 import ObjcParser
+import IntentionPasses
 
 /// Represents a transpilation job, with all required information to start a
 /// transpile job.

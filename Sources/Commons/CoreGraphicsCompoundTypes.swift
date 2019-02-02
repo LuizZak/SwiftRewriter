@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 public enum CoreGraphicsCompoundTypes {
     public static let cgPoint = CGPointCompoundType.self

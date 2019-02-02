@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 /// A function invocation transformer allows changing the shape of a postfix
 /// function call into equivalent calls with function name and parameters moved

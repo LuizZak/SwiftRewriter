@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import SwiftAST
 
 /// Method-to-method call transformation should allow:

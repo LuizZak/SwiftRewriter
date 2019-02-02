@@ -5,6 +5,7 @@ import SwiftAST
 import TypeSystem
 import WriterTargetOutput
 import Intentions
+import IntentionPasses
 import SwiftSyntaxSupport
 import Utils
 

@@ -66,19 +66,20 @@ let package = Package(
         .target(
             name: "TypeSystem",
             dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
-                           "Intentions", "KnownType"]),
+                           "Intentions", "KnownType", "GrammarModels"]),
         .target(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser",
                            "TypeDefinitions", "Utils", "Intentions", "TypeSystem",
-                           "KnownType", "WriterTargetOutput", "SwiftSyntaxSupport"]),
+                           "IntentionPasses", "KnownType", "WriterTargetOutput",
+                           "SwiftSyntaxSupport"]),
         .target(
             name: "Commons",
-            dependencies: ["SwiftAST", "SwiftRewriterLib", "Utils"]),
+            dependencies: ["SwiftAST", "Utils", "TypeSystem", "KnownType"]),
         .target(
             name: "IntentionPasses",
-            dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
-                           "MiniLexer", "Intentions"]),
+            dependencies: ["SwiftAST", "Commons", "Utils", "MiniLexer",
+                           "Intentions"]),
         .target(
             name: "GlobalsProviders",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons"]),
@@ -138,7 +139,8 @@ let package = Package(
             name: "TypeSystemTests",
             dependencies: ["TypeSystem", "SwiftAST", "ObjcParser",
                            "TypeDefinitions", "Utils", "Intentions",
-                           "KnownType", "TestCommons", "GlobalsProviders"]),
+                           "GrammarModels", "KnownType", "TestCommons",
+                           "GlobalsProviders"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",

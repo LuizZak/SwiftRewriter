@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import SwiftAST
 
 /// Specifies rewriting strategies to apply to a function invocation argument.

@@ -1,5 +1,4 @@
 import XCTest
-import SwiftRewriterLib
 import TypeSystem
 import ObjcParser
 import GrammarModels

@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import SwiftRewriterLib
 
 public class PropertyMergeIntentionPass: IntentionPass {
     /// A number representing the unique index of an operation to aid in history

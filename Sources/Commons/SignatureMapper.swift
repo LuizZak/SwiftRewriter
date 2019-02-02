@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 /// Provides simple signature mapping support by alowing rewriting the signature
 /// keywords of a method signature or invocation

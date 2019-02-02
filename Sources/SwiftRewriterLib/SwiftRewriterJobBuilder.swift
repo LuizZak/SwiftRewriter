@@ -1,4 +1,5 @@
 import ObjcParser
+import IntentionPasses
 
 /// Facility for creating `SwiftRewriterJob`s.
 public class SwiftRewriterJobBuilder {

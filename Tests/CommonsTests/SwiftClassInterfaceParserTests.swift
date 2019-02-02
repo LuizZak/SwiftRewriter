@@ -1,7 +1,7 @@
 import XCTest
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
+import Commons
 import TypeSystem
 import MiniLexer
 

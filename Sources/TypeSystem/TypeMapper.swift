@@ -1,5 +1,4 @@
 import SwiftAST
-import TypeSystem
 import GrammarModels
 
 /// Provides type-transforming support for a Swift rewriter

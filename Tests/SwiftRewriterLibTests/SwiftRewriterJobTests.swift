@@ -1,6 +1,7 @@
 import XCTest
 import SwiftAST
 import Intentions
+import IntentionPasses
 import SwiftRewriterLib
 import TypeSystem
 import WriterTargetOutput

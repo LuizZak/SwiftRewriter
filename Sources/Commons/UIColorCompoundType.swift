@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 
 public enum UIColorCompoundType {
     private static var singleton = makeType(from: typeString(), typeName: "UIColor")
