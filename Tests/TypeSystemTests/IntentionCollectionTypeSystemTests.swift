@@ -1,5 +1,5 @@
 import XCTest
-import SwiftRewriterLib
+import TypeSystem
 import TestCommons
 import GlobalsProviders
 

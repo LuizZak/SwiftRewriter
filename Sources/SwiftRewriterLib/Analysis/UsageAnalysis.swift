@@ -1,6 +1,7 @@
 import SwiftAST
 import KnownType
 import Intentions
+import TypeSystem
 
 /// Simplified API interface to find usages of symbols across intentions
 public protocol UsageAnalyzer {

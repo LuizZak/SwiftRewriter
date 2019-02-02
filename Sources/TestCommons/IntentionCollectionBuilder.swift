@@ -3,6 +3,7 @@ import GrammarModels
 import SwiftAST
 import KnownType
 import Intentions
+import TypeSystem
 import SwiftRewriterLib
 
 /// An empty initializer used as default argument of initializer closure parameters

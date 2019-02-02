@@ -5,6 +5,7 @@ import ObjcParserAntlr
 import SwiftAST
 import KnownType
 import Intentions
+import TypeSystem
 import WriterTargetOutput
 import SwiftSyntaxSupport
 import Utils

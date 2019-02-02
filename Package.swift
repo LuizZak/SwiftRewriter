@@ -39,6 +39,9 @@ let package = Package(
             name: "Utils",
             dependencies: []),
         .target(
+            name: "WriterTargetOutput",
+            dependencies: []),
+        .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),
         .target(
@@ -61,15 +64,17 @@ let package = Package(
             name: "Intentions",
             dependencies: ["SwiftAST", "GrammarModels", "KnownType"]),
         .target(
+            name: "TypeSystem",
+            dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
+                           "Intentions", "KnownType"]),
+        .target(
             name: "SwiftRewriterLib",
             dependencies: ["GrammarModels", "SwiftAST", "ObjcParser",
-                           "TypeDefinitions", "Utils", "Intentions",
+                           "TypeDefinitions", "Utils", "Intentions", "TypeSystem",
                            "KnownType", "WriterTargetOutput", "SwiftSyntaxSupport"]),
         .target(
             name: "Commons",
             dependencies: ["SwiftAST", "SwiftRewriterLib", "Utils"]),
-        .target(
-            name: "WriterTargetOutput"),
         .target(
             name: "IntentionPasses",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "Commons", "Utils",
@@ -96,7 +101,7 @@ let package = Package(
             name: "TestCommons",
             dependencies: [
                 "SwiftAST", "SwiftRewriterLib", "Intentions", "KnownType",
-                "GrammarModels", "Utils"
+                "GrammarModels", "Utils", "TypeSystem"
             ])
         
     ] + /* Tests */ [
@@ -130,19 +135,26 @@ let package = Package(
                            "Intentions", "SwiftAST", "TestCommons",
                            "SwiftRewriterLib"]),
         .testTarget(
+            name: "TypeSystemTests",
+            dependencies: ["TypeSystem", "SwiftAST", "ObjcParser",
+                           "TypeDefinitions", "Utils", "Intentions",
+                           "KnownType", "TestCommons"]),
+        .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",
                            "ObjcParser", "ExpressionPasses", "IntentionPasses",
                            "TestCommons", "GlobalsProviders", "Intentions",
-                           "WriterTargetOutput", "SwiftSyntaxSupport"]),
+                           "TypeSystem", "WriterTargetOutput", "SwiftSyntaxSupport"]),
         .testTarget(
             name: "CommonsTests",
-            dependencies: ["Commons", "SwiftAST", "KnownType", "SwiftRewriterLib"]),
+            dependencies: ["Commons", "SwiftAST", "KnownType", "SwiftRewriterLib",
+                           "TypeSystem"]),
         .testTarget(
             name: "ExpressionPassesTests",
             dependencies: ["ExpressionPasses", "SwiftAST", "SwiftRewriterLib",
                            "Antlr4", "ObjcParser", "ObjcParserAntlr",
-                           "IntentionPasses", "GlobalsProviders"]),
+                           "IntentionPasses", "GlobalsProviders",
+                           "TypeSystem"]),
         .testTarget(
             name: "SourcePreprocessorsTests",
             dependencies: ["SourcePreprocessors", "Utils", "SwiftRewriterLib",
@@ -150,14 +162,15 @@ let package = Package(
         .testTarget(
             name: "IntentionPassesTests",
             dependencies: ["SwiftAST", "GrammarModels", "SwiftRewriterLib",
-                           "IntentionPasses", "TestCommons", "GlobalsProviders"]),
+                           "IntentionPasses", "TestCommons", "GlobalsProviders",
+                           "TypeSystem"]),
         .testTarget(
             name: "GlobalsProvidersTests",
             dependencies: ["SwiftAST", "SwiftRewriterLib", "GlobalsProviders",
-                           "TestCommons"]),
+                           "TestCommons", "TypeSystem"]),
         .testTarget(
             name: "TestCommonsTests",
-            dependencies: ["TestCommons", "Utils"])
+            dependencies: ["TestCommons", "Utils", "TypeSystem"])
     ],
     swiftLanguageVersions: [.v4_2]
 )

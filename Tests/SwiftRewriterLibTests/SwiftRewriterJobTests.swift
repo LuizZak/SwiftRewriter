@@ -2,6 +2,7 @@ import XCTest
 import SwiftAST
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 import WriterTargetOutput
 import ObjcParser
 

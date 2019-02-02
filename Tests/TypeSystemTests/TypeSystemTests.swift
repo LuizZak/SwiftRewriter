@@ -1,7 +1,7 @@
 import XCTest
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
+import TypeSystem
 
 class TypeSystemTests: XCTestCase {
     var sut: TypeSystem!

@@ -1,6 +1,7 @@
 import SwiftAST
 import KnownType
 import Intentions
+import TypeSystem
 
 /// Class responsible for building the intrinsics exposed to type resolvers during
 /// resolution of member lookups.

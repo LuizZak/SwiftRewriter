@@ -2,6 +2,7 @@ import Foundation
 import GrammarModels
 import ObjcParser
 import SwiftAST
+import TypeSystem
 import WriterTargetOutput
 import Intentions
 import SwiftSyntaxSupport

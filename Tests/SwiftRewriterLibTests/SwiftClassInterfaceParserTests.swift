@@ -2,6 +2,7 @@ import XCTest
 import SwiftAST
 import KnownType
 import SwiftRewriterLib
+import TypeSystem
 import MiniLexer
 
 class SwiftClassInterfaceParserTests: XCTestCase {

@@ -2,6 +2,7 @@ import XCTest
 import IntentionPasses
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 
 class DefaultIntentionPassesTests: XCTestCase {
     func testDefaultIntentionPasses() {

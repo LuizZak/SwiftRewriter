@@ -1,6 +1,7 @@
 import XCTest
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 import IntentionPasses
 
 class SwiftRewriter_IntentionPassTests: XCTestCase {

@@ -3,6 +3,7 @@ import SwiftAST
 import KnownType
 import Intentions
 import SwiftRewriterLib
+import TypeSystem
 import TestCommons
 import Commons
 

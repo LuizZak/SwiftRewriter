@@ -4,6 +4,7 @@ import ObjcParser
 import ObjcParserAntlr
 import SwiftSyntaxSupport
 @testable import SwiftRewriterLib
+import TypeSystem
 import SwiftAST
 import WriterTargetOutput
 

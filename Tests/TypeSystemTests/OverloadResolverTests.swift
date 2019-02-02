@@ -1,7 +1,7 @@
 import XCTest
 import SwiftAST
 import KnownType
-@testable import SwiftRewriterLib
+@testable import TypeSystem
 import SwiftAST
 
 class OverloadResolverTests: XCTestCase {

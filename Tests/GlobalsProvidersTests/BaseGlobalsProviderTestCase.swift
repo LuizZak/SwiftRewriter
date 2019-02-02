@@ -2,6 +2,7 @@ import XCTest
 import SwiftAST
 import KnownType
 import SwiftRewriterLib
+import TypeSystem
 
 let cInt = SwiftType.typeName("CInt")
 let cFloat = SwiftType.typeName("CFloat")

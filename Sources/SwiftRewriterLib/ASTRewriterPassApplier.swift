@@ -2,6 +2,7 @@ import Foundation
 import SwiftAST
 import Intentions
 import Utils
+import TypeSystem
 
 /// Handy class used to apply a series of `ASTRewriterPass` instances to
 /// all function bodies found in one go.

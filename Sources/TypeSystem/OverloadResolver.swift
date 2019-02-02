@@ -258,7 +258,7 @@ class OverloadResolverState {
     }
 }
 
-extension Sequence where Element == FunctionArgument {
+public extension Sequence where Element == FunctionArgument {
     var asOverloadResolverArguments: [OverloadResolver.Argument] {
         return map {
             OverloadResolver.Argument(type: $0.expression.resolvedType,
@@ -268,7 +268,7 @@ extension Sequence where Element == FunctionArgument {
     }
 }
 
-extension Sequence where Element == SwiftType? {
+public extension Sequence where Element == SwiftType? {
     var asOverloadResolverArguments: [OverloadResolver.Argument] {
         return map {
             OverloadResolver.Argument(type: $0, isLiteral: false, literalKind: nil)

@@ -2,6 +2,7 @@ import GrammarModels
 import Foundation
 import Utils
 import Intentions
+import TypeSystem
 
 /// A protocol for objects that perform passes through intentions collected and
 /// perform changes and optimizations on them.

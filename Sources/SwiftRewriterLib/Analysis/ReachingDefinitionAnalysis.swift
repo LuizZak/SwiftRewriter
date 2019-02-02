@@ -1,5 +1,6 @@
 import SwiftAST
 import Intentions
+import TypeSystem
 
 public class ReachingDefinitionAnalyzer {
     let controlFlowGraph: ControlFlowGraph
