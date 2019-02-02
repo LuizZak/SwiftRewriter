@@ -1,7 +1,7 @@
 import XCTest
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
+import TypeSystem
 @testable import Commons
 
 class ExpressionTypeResolverTests: XCTestCase {

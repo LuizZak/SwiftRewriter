@@ -1,7 +1,6 @@
 import Foundation
 import SwiftAST
 import Intentions
-import TypeSystem
 
 /// A basic protocol with two front-end methods for requesting resolving of types
 /// of expression and statements on intention collections.
@@ -89,16 +88,16 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     }
 }
 
-class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
+public class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
     var intentions: IntentionCollection
     var globals: DefinitionsSource
     var typeSystem: TypeSystem
     var intentionGlobals: IntentionCollectionGlobals
     
-    init(intentions: IntentionCollection,
-         globals: DefinitionsSource,
-         typeSystem: TypeSystem,
-         intentionGlobals: IntentionCollectionGlobals) {
+    public init(intentions: IntentionCollection,
+                globals: DefinitionsSource,
+                typeSystem: TypeSystem,
+                intentionGlobals: IntentionCollectionGlobals) {
         
         self.intentions = intentions
         self.globals = globals
@@ -106,7 +105,7 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         self.intentionGlobals = intentionGlobals
     }
     
-    func makeContext(forFunction function: GlobalFunctionGenerationIntention) -> TypeResolvingQueueDelegate.Context {
+    public func makeContext(forFunction function: GlobalFunctionGenerationIntention) -> TypeResolvingQueueDelegate.Context {
         let resolver = ExpressionTypeResolver(
             typeSystem: typeSystem, contextFunctionReturnType: function.signature.returnType)
         
@@ -116,7 +115,7 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    func makeContext(forInit ctor: InitGenerationIntention) -> TypeResolvingQueueDelegate.Context {
+    public func makeContext(forInit ctor: InitGenerationIntention) -> TypeResolvingQueueDelegate.Context {
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
         
         let intrinsics = makeIntrinsics(typeResolver: resolver)
@@ -125,7 +124,7 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    func makeContext(forMethod method: MethodGenerationIntention) -> Context {
+    public func makeContext(forMethod method: MethodGenerationIntention) -> Context {
         let resolver = ExpressionTypeResolver(
             typeSystem: typeSystem, contextFunctionReturnType: method.returnType)
         
@@ -135,8 +134,8 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    func makeContext(forPropertyGetter property: PropertyGenerationIntention,
-                     getter: FunctionBodyIntention) -> Context {
+    public func makeContext(forPropertyGetter property: PropertyGenerationIntention,
+                            getter: FunctionBodyIntention) -> Context {
         
         let resolver = ExpressionTypeResolver(
             typeSystem: typeSystem, contextFunctionReturnType: property.type)
@@ -147,8 +146,8 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return Context(typeResolver: resolver, intrinsicsBuilder: intrinsics)
     }
     
-    func makeContext(forPropertySetter property: PropertyGenerationIntention,
-                     setter: PropertyGenerationIntention.Setter) -> Context {
+    public func makeContext(forPropertySetter property: PropertyGenerationIntention,
+                            setter: PropertyGenerationIntention.Setter) -> Context {
         
         let resolver = ExpressionTypeResolver(typeSystem: typeSystem)
 
@@ -170,8 +169,8 @@ class TypeResolvingQueueDelegate: FunctionBodyQueueDelegate {
         return intrinsics
     }
     
-    struct Context {
-        var typeResolver: ExpressionTypeResolver
+    public struct Context {
+        public var typeResolver: ExpressionTypeResolver
         var intrinsicsBuilder: TypeResolverIntrinsicsBuilder
     }
 }

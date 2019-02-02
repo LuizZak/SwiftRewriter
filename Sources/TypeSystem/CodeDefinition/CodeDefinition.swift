@@ -269,7 +269,7 @@ public class GlobalIntentionCodeDefinition: GlobalCodeDefinition {
 }
 
 public class LocalCodeDefinition: CodeDefinition {
-    var location: DefinitionLocation
+    public var location: DefinitionLocation
     
     fileprivate convenience init(variableNamed name: String,
                                  type: SwiftType,

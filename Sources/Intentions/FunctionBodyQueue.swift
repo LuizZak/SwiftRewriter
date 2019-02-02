@@ -1,6 +1,5 @@
 import Foundation
 import Utils
-import Intentions
 
 public protocol FunctionBodyQueueDelegate: class {
     associatedtype Context
@@ -217,6 +216,10 @@ public enum FunctionBodyCarryingIntention {
 /// context object.
 public class EmptyFunctionBodyQueueDelegate: FunctionBodyQueueDelegate {
     public typealias Context = Void
+    
+    public init() {
+        
+    }
     
     public func makeContext(forFunction function: GlobalFunctionGenerationIntention) {
         

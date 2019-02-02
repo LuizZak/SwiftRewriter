@@ -138,7 +138,7 @@ let package = Package(
             name: "TypeSystemTests",
             dependencies: ["TypeSystem", "SwiftAST", "ObjcParser",
                            "TypeDefinitions", "Utils", "Intentions",
-                           "KnownType", "TestCommons"]),
+                           "KnownType", "TestCommons", "GlobalsProviders"]),
         .testTarget(
             name: "SwiftRewriterLibTests",
             dependencies: ["SwiftRewriterLib", "SwiftAST", "GrammarModels",

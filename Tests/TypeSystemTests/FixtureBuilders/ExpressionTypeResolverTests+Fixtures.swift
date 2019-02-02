@@ -6,6 +6,7 @@ import SwiftRewriterLib
 import TypeSystem
 import TestCommons
 import Commons
+import TypeSystem
 
 protocol ExpressionTestResolverTestFixture {
     var scope: CodeScopeNode { get }

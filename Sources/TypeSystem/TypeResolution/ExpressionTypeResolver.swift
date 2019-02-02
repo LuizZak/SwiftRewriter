@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import ObjcParser
-import TypeSystem
 
 public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     private var nearestScopeCache: [ObjectIdentifier: CodeScopeNode] = [:]

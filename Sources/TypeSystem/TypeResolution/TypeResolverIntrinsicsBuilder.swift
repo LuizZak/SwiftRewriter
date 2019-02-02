@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import Intentions
-import TypeSystem
 
 /// Class responsible for building the intrinsics exposed to type resolvers during
 /// resolution of member lookups.
@@ -323,12 +322,12 @@ class IntentionCollectionGlobalsDefinitionsSource: DefinitionsSource {
     }
 }
 
-struct IntentionCollectionGlobals {
-    let funcMap: [String: [GlobalFunctionGenerationIntention]]
-    let funcIdentMap: [FunctionIdentifier: [GlobalFunctionGenerationIntention]]
-    let varMap: [String: [GlobalVariableGenerationIntention]]
+public struct IntentionCollectionGlobals {
+    public let funcMap: [String: [GlobalFunctionGenerationIntention]]
+    public let funcIdentMap: [FunctionIdentifier: [GlobalFunctionGenerationIntention]]
+    public let varMap: [String: [GlobalVariableGenerationIntention]]
     
-    init(intentions: IntentionCollection) {
+    public init(intentions: IntentionCollection) {
         funcMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.name })
         funcIdentMap = Dictionary(grouping: intentions.globalFunctions(), by: { $0.signature.asIdentifier })
         varMap = Dictionary(grouping: intentions.globalVariables(), by: { $0.name })

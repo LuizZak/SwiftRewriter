@@ -4,6 +4,7 @@ import SwiftAST
 import KnownType
 import SwiftRewriterLib
 import ExpressionPasses
+import TypeSystem
 
 class EnumRewriterExpressionPassTests: ExpressionPassTestCase {
     override func setUp() {

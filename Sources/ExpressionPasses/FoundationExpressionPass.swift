@@ -2,6 +2,7 @@ import SwiftRewriterLib
 import Utils
 import SwiftAST
 import Commons
+import TypeSystem
 
 /// Applies passes to simplify known Foundation methods
 public class FoundationExpressionPass: BaseExpressionPass {
