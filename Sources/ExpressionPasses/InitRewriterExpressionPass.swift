@@ -44,14 +44,9 @@ public class InitRewriterExpressionPass: ASTRewriterPass {
                 compound.statements = analyzeStatementBody(compound)
             }
             
-            // Next step is recursive failable super.init analysis- if we lack the
-            // context needed to figure out the superclass, quit now
-            if initializer.ownerType != nil {
-                ownerType = initializer.ownerType
-                return super.apply(on: statement, context: context)
-            }
-            
-            return statement
+            // Next step is recursive failable super.init analysis
+            ownerType = initializer.ownerType
+            return super.apply(on: statement, context: context)
         default:
             return statement
         }

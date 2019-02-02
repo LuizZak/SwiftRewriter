@@ -588,11 +588,13 @@ public class TypeBuilder<T: TypeGenerationIntention> {
         if targetType is ProtocolGenerationIntention {
             prop = ProtocolPropertyGenerationIntention(name: name,
                                                        storage: storage,
-                                                       attributes: attributes)
+                                                       attributes: attributes,
+                                                       ownerTypeName: targetType.typeName)
         } else {
             prop = PropertyGenerationIntention(name: name,
                                                storage: storage,
-                                               attributes: attributes)
+                                               attributes: attributes,
+                                               ownerTypeName: targetType.typeName)
         }
         
         prop.mode = mode
@@ -610,7 +612,7 @@ public class TypeBuilder<T: TypeGenerationIntention> {
     public func createConstructor(withParameters parameters: [ParameterSignature] = [],
                                   builder: (MemberBuilder<InitGenerationIntention>) -> Void = emptyInit) -> TypeBuilder {
         
-        let ctor = InitGenerationIntention(parameters: parameters)
+        let ctor = InitGenerationIntention(parameters: parameters, ownerTypeName: targetType.typeName)
         let mbuilder = MemberBuilder(targetMember: ctor)
         
         builder(mbuilder)
@@ -662,9 +664,9 @@ public class TypeBuilder<T: TypeGenerationIntention> {
         let method: MethodGenerationIntention
         
         if targetType is ProtocolGenerationIntention {
-            method = ProtocolMethodGenerationIntention(signature: signature)
+            method = ProtocolMethodGenerationIntention(signature: signature, ownerTypeName: targetType.typeName)
         } else {
-            method = MethodGenerationIntention(signature: signature)
+            method = MethodGenerationIntention(signature: signature, ownerTypeName: targetType.typeName)
         }
         
         if !(targetType is ProtocolGenerationIntention) {
@@ -702,7 +704,7 @@ public extension TypeBuilder where T: InstanceVariableContainerIntention {
     public func createInstanceVariable(named name: String, type: SwiftType) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
-        let ivar = InstanceVariableGenerationIntention(name: name, storage: storage)
+        let ivar = InstanceVariableGenerationIntention(name: name, storage: storage, ownerTypeName: targetType.typeName)
         targetType.addInstanceVariable(ivar)
         
         return self
@@ -770,7 +772,7 @@ public class EnumTypeBuilder {
     
     @discardableResult
     public func createCase(name: String, expression: Expression? = nil) -> EnumTypeBuilder {
-        let caseIntention = EnumCaseGenerationIntention(name: name, expression: expression)
+        let caseIntention = EnumCaseGenerationIntention(name: name, expression: expression, ownerTypeName: targetEnum.typeName)
         
         targetEnum.addCase(caseIntention)
         
@@ -789,32 +791,33 @@ public typealias MethodBuilder = MemberBuilder<MethodGenerationIntention>
 public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
 
 public extension MemberBuilder where T == PropertyGenerationIntention {
-    public convenience init(name: String, type: SwiftType) {
-        let prop = PropertyGenerationIntention(name: name, type: type, attributes: [])
+    public convenience init(name: String, type: SwiftType, ownerTypeName: String) {
+        let prop = PropertyGenerationIntention(name: name, type: type, attributes: [],
+                                               ownerTypeName: ownerTypeName)
         
         self.init(targetMember: prop)
     }
 }
 
 public extension PropertyGenerationIntention {
-    public convenience init(name: String, type: SwiftType, builder: (PropertyBuilder) -> Void) {
-        self.init(name: name, type: type, attributes: [])
+    public convenience init(name: String, type: SwiftType, ownerTypeName: String, builder: (PropertyBuilder) -> Void) {
+        self.init(name: name, type: type, attributes: [], ownerTypeName: ownerTypeName)
         
         builder(PropertyBuilder(targetMember: self))
     }
 }
 
 public extension MethodGenerationIntention {
-    public convenience init(name: String, builder: (MethodBuilder) -> Void) {
-        self.init(signature: FunctionSignature(name: name))
+    public convenience init(name: String, ownerTypeName: String, builder: (MethodBuilder) -> Void) {
+        self.init(signature: FunctionSignature(name: name), ownerTypeName: ownerTypeName)
         
         builder(MethodBuilder(targetMember: self))
     }
 }
 
 public extension InitGenerationIntention {
-    public convenience init(builder: (InitializerBuilder) -> Void) {
-        self.init(parameters: [])
+    public convenience init(ownerTypeName: String, builder: (InitializerBuilder) -> Void) {
+        self.init(parameters: [], ownerTypeName: ownerTypeName)
         
         builder(InitializerBuilder(targetMember: self))
     }

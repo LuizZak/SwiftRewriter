@@ -42,6 +42,7 @@ public class MethodGenerationIntention: MemberGenerationIntention, MutableFuncti
                             name: String,
                             returnType: SwiftType,
                             parameters: [ParameterSignature],
+                            ownerTypeName: String,
                             accessLevel: AccessLevel = .internal,
                             source: ASTNode? = nil) {
         
@@ -53,16 +54,18 @@ public class MethodGenerationIntention: MemberGenerationIntention, MutableFuncti
                               isMutating: false)
         
         self.init(signature: signature,
+                  ownerTypeName: ownerTypeName,
                   accessLevel: accessLevel,
                   source: source)
     }
     
     public init(signature: FunctionSignature,
+                ownerTypeName: String,
                 accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         
         self.signature = signature
-        super.init(accessLevel: accessLevel, source: source)
+        super.init(ownerTypeName: ownerTypeName, accessLevel: accessLevel, source: source)
     }
     
     public required init(from decoder: Decoder) throws {

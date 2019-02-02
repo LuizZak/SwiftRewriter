@@ -95,6 +95,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
     public convenience init(name: String,
                             type: SwiftType,
                             attributes: [PropertyAttribute],
+                            ownerTypeName: String,
                             accessLevel: AccessLevel = .internal,
                             source: ASTNode? = nil) {
         
@@ -107,6 +108,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         self.init(name: name,
                   storage: storage,
                   attributes: attributes,
+                  ownerTypeName: ownerTypeName,
                   accessLevel: accessLevel,
                   source: source)
     }
@@ -114,6 +116,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
     public init(name: String,
                 storage: ValueStorage,
                 attributes: [PropertyAttribute],
+                ownerTypeName: String,
                 accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         
@@ -121,7 +124,7 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
         self.storage = storage
         self.attributes = attributes
         
-        super.init(accessLevel: accessLevel, source: source)
+        super.init(ownerTypeName: ownerTypeName, accessLevel: accessLevel, source: source)
     }
     
     public required init(from decoder: Decoder) throws {

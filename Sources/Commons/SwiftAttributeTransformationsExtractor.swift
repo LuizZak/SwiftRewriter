@@ -19,6 +19,21 @@ public class SwiftAttributeTransformationsExtractor {
         return try aliases(in: type)
     }
     
+    /// Returns an array of aliased `KnownMethod`s that correspond to all methods
+    /// that are not actually methods of `type`, but old spelling of current
+    /// methods that got annotated with `@_swiftrewrite` attributes.
+    public func methodAliases() throws -> [KnownMethod] {
+        return try type.knownMethods.flatMap {
+            try methodAliases($0)
+        }
+    }
+    
+    /// Extracts postfix transformation information from `@_swiftrewriter`
+    /// attributes that where used to decorate members of the initialized type.
+    ///
+    /// - Returns: An array of postfix transformations that can be used to apply
+    /// conversions to proper members of the type.
+    /// - Throws: Any errors found while parsing `@_swiftrewriter` attributes.
     public func transformations() throws -> [PostfixTransformation] {
         var transformations: [PostfixTransformation] = []
         
@@ -160,7 +175,66 @@ public class SwiftAttributeTransformationsExtractor {
         
         return transforms
     }
-
+    
+    private func methodAliases(_ method: KnownMethod) throws -> [KnownMethod] {
+        let type = self.type
+        
+        func makeTransformation(identifier: FunctionIdentifier) -> MethodInvocationRewriter? {
+            
+            // Free function to method conversions don't have a method alias
+            if identifier.parameterNames.first == "self" {
+                return nil
+            }
+            
+            let builder =
+                MethodInvocationRewriterBuilder(mappingTo: method.signature)
+            
+            return builder.build()
+        }
+        
+        var aliases: [KnownMethod] = []
+        let typeBuilder = KnownTypeBuilder(typeName: type.typeName)
+        
+        for attribute in method.knownAttributes {
+            guard attribute.name == SwiftRewriterAttribute.name else {
+                continue
+            }
+            
+            let attr = try parseAttribute(attribute)
+            
+            switch attr.content {
+            case .renameFrom(let originalName):
+                var signature = method.signature
+                signature.name = originalName
+                
+                aliases.append(typeBuilder.method(withSignature: signature).build().knownMethods[0])
+                
+            case .mapFrom(let signature):
+                aliases.append(typeBuilder.method(withSignature: signature).build().knownMethods[0])
+                
+            case .mapFromIdentifier(let ident):
+                // We don't support aliasing global functions that where mapped
+                // into methods
+                if ident.parameterNames.first != "self" {
+                    let signature =
+                        FunctionSignature(
+                            name: ident.name,
+                            parameters: ident.parameterNames.map { ParameterSignature(label: $0, name: "_", type: .errorType, hasDefaultValue: false) },
+                            returnType: method.signature.returnType,
+                            isStatic: method.signature.isStatic,
+                            isMutating: method.signature.isMutating)
+                    
+                    aliases.append(typeBuilder.method(withSignature: signature).build().knownMethods[0])
+                }
+                
+            case .mapToBinaryOperator, .initFromFunction:
+                break
+            }
+        }
+        
+        return aliases
+    }
+    
     private func methodTransformations(_ method: KnownMethod) throws -> [PostfixTransformation] {
         let type = self.type
         

@@ -7,23 +7,30 @@ import SwiftRewriterLib
 /// information for converting invocations and implementations of methods on
 /// implementers and expression call sites.
 public class CompoundedMappingType {
+    var knownType: KnownType
+    
     /// Set of alternative names this class can be referenced as, but which are
     /// not the primary, canonical name.
     public let nonCanonicalNames: [String]
     
     public let transformations: [PostfixTransformation]
     
-    var knownType: KnownType
+    /// Methods that are not actually part of the original known type definition,
+    /// but are aliases of other methods described via `@_swiftrewriter` attributes
+    /// in methods
+    public let aliasedMethods: [KnownMethod]
     
     public var semantics: Set<Semantic>
     
     public init(knownType: KnownType,
                 transformations: [PostfixTransformation],
+                aliasedMethods: [KnownMethod],
                 semantics: Set<Semantic> = [],
                 aliases: [String] = []) {
         
         self.knownType = knownType
         self.transformations = transformations
+        self.aliasedMethods = aliasedMethods
         self.semantics = semantics
         self.nonCanonicalNames = aliases
     }

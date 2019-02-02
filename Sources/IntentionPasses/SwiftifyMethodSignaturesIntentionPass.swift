@@ -53,6 +53,7 @@ public class SwiftifyMethodSignaturesIntentionPass: IntentionPass {
                 
                 let initIntention =
                     InitGenerationIntention(parameters: method.signature.parameters,
+                                            ownerTypeName: type.typeName,
                                             accessLevel: method.accessLevel)
                 
                 initIntention.isOverride = method.isOverride

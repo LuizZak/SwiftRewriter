@@ -19,12 +19,13 @@ public final class InstanceVariableGenerationIntention: MemberGenerationIntentio
     
     public init(name: String,
                 storage: ValueStorage,
+                ownerTypeName: String,
                 accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         
         self.name = name
         self.storage = storage
-        super.init(accessLevel: accessLevel, source: source)
+        super.init(ownerTypeName: ownerTypeName, accessLevel: accessLevel, source: source)
     }
     
     public required init(from decoder: Decoder) throws {

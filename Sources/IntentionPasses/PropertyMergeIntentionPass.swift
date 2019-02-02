@@ -506,6 +506,7 @@ public class PropertyMergeIntentionPass: IntentionPass {
         let field =
             InstanceVariableGenerationIntention(name: name,
                                                 storage: property.storage,
+                                                ownerTypeName: type.typeName,
                                                 accessLevel: .private)
         
         type.addInstanceVariable(field)

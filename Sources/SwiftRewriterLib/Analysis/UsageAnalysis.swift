@@ -65,7 +65,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                     return
                 }
                 
-                if expMethod.ownerType?.asTypeName == method.ownerType?.asTypeName {
+                if expMethod.ownerType.asTypeName == method.ownerType.asTypeName {
                     let usage =
                         DefinitionUsage(
                             functionBody: functionBody,
@@ -103,7 +103,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
                     return
                 }
                 
-                if expProperty.ownerType?.asTypeName == property.ownerType?.asTypeName {
+                if expProperty.ownerType.asTypeName == property.ownerType.asTypeName {
                     let readOnly = self.isReadOnlyContext(exp)
                     
                     let usage =

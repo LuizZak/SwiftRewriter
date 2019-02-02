@@ -13,11 +13,12 @@ public final class InitGenerationIntention: MemberGenerationIntention, MutableFu
     public var isConvenience: Bool = false
     
     public init(parameters: [ParameterSignature],
+                ownerTypeName: String,
                 accessLevel: AccessLevel = .internal,
                 source: ASTNode? = nil) {
         
         self.parameters = parameters
-        super.init(accessLevel: accessLevel, source: source)
+        super.init(ownerTypeName: ownerTypeName, accessLevel: accessLevel, source: source)
     }
     
     public required init(from decoder: Decoder) throws {

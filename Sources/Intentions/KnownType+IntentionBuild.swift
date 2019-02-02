@@ -16,14 +16,10 @@ extension KnownTypeBuilder {
                 typeIntention = ClassGenerationIntention(typeName: type.typeName)
             }
             
-            
         case .struct:
             typeIntention = StructGenerationIntention(typeName: type.typeName)
             
         case .enum:
-            // type.setKnownTrait(KnownTypeTraits.enumRawValue,
-            // value: .swiftType(rawValueType))
-            
             typeIntention = EnumGenerationIntention(typeName: type.typeName,
                                                     rawValueType: type.knownTrait(KnownTypeTraits.enumRawValue)?.asSwiftType ?? .int)
             
@@ -34,7 +30,8 @@ extension KnownTypeBuilder {
         if let cls = typeIntention as? BaseClassIntention {
             for ivar in type.knownFields {
                 let intent = InstanceVariableGenerationIntention(name: ivar.name,
-                                                                 storage: ivar.storage)
+                                                                 storage: ivar.storage,
+                                                                 ownerTypeName: typeName)
                 
                 cls.addInstanceVariable(intent)
             }
@@ -47,11 +44,13 @@ extension KnownTypeBuilder {
             if type.kind == .protocol {
                 intent = ProtocolPropertyGenerationIntention(name: prop.name,
                                                              type: prop.storage.type,
-                                                             attributes: prop.attributes)
+                                                             attributes: prop.attributes,
+                                                             ownerTypeName: typeName)
             } else {
                 intent = PropertyGenerationIntention(name: prop.name,
                                                      type: prop.storage.type,
-                                                     attributes: prop.attributes)
+                                                     attributes: prop.attributes,
+                                                     ownerTypeName: typeName)
             }
             
             switch prop.accessor {
@@ -68,7 +67,8 @@ extension KnownTypeBuilder {
             typeIntention.addProperty(intent)
         }
         for method in type.knownMethods {
-            let intent = MethodGenerationIntention(signature: method.signature)
+            let intent = MethodGenerationIntention(signature: method.signature,
+                                                   ownerTypeName: typeName)
             intent.knownAttributes = method.knownAttributes
             
             typeIntention.addMethod(intent)
@@ -79,7 +79,8 @@ extension KnownTypeBuilder {
             typeIntention.addProtocol(intent)
         }
         for ctor in type.knownConstructors {
-            let intent = InitGenerationIntention(parameters: ctor.parameters)
+            let intent = InitGenerationIntention(parameters: ctor.parameters,
+                                                 ownerTypeName: typeName)
             intent.isFailable = ctor.isFailable
             intent.isConvenience = ctor.isConvenience
         }

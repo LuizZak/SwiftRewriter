@@ -27,7 +27,8 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             let method = MethodGenerationIntention(isStatic: false,
                                                    name: "method",
                                                    returnType: .int,
-                                                   parameters: [])
+                                                   parameters: [],
+                                                   ownerTypeName: type.typeName)
             method.signature.isMutating = true
             type.addMethod(method)
             method.type = type
@@ -46,7 +47,8 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             let method = MethodGenerationIntention(isStatic: false,
                                                    name: "method",
                                                    returnType: .int,
-                                                   parameters: [])
+                                                   parameters: [],
+                                                   ownerTypeName: type.typeName)
             method.signature.isMutating = true
             type.addMethod(method)
             method.type = type
@@ -63,7 +65,8 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
             let method = MethodGenerationIntention(isStatic: false,
                                                    name: "method",
                                                    returnType: .int,
-                                                   parameters: [])
+                                                   parameters: [],
+                                                   ownerTypeName: type.typeName)
             method.signature.isMutating = false
             type.addMethod(method)
             method.type = type
@@ -78,7 +81,8 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         let method = MethodGenerationIntention(isStatic: false,
                                                name: "method",
                                                returnType: .int,
-                                               parameters: [])
+                                               parameters: [],
+                                               ownerTypeName: "Type")
         method.signature.isStatic = true
         
         let sut = StaticModifiersDecorator()
@@ -89,7 +93,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
     }
     
     func testStaticModifiersDecoratorWithProperty() {
-        let property = PropertyGenerationIntention(name: "prop", type: .int) { builder in
+        let property = PropertyGenerationIntention(name: "prop", type: .int, ownerTypeName: "Type") { builder in
             builder.setIsStatic(true)
         }
         
@@ -136,7 +140,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
     
     func testPropertySetterAccessModifiersDecorator() {
         let makeProperty: (AccessLevel?) -> IntentionProtocol = { accessLevel in
-            PropertyGenerationIntention(name: "name", type: .int) { builder in
+            PropertyGenerationIntention(name: "name", type: .int, ownerTypeName: "A") { builder in
                 builder.setSetterAccessLevel(accessLevel)
                 builder.setAccessLevel(.open)
             }
@@ -167,7 +171,7 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
     
     func testOwnershipModifierDecoratorWithIntention() {
         let makeIntention: (Ownership) -> IntentionProtocol = { ownership in
-            PropertyGenerationIntention(name: "name", type: .int) { builder in
+            PropertyGenerationIntention(name: "name", type: .int, ownerTypeName: "A") { builder in
                 builder.setOwnership(ownership)
             }
         }
@@ -216,10 +220,10 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
     }
     
     func testOverrideModifierDecorator() {
-        let overriden = MethodGenerationIntention(name: "name") { builder in
+        let overriden = MethodGenerationIntention(name: "name", ownerTypeName: "A") { builder in
             builder.setIsOverride(true)
         }
-        let nonOverriden = MethodGenerationIntention(name: "name") { builder in
+        let nonOverriden = MethodGenerationIntention(name: "name", ownerTypeName: "A") { builder in
             builder.setIsOverride(false)
         }
         
@@ -233,10 +237,10 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
     }
     
     func testConvenienceInitModifierDecorator() {
-        let _convenience = InitGenerationIntention { builder in
+        let _convenience = InitGenerationIntention(ownerTypeName: "A") { builder in
             builder.setIsConvenience(true)
         }
-        let nonConvenience = InitGenerationIntention { builder in
+        let nonConvenience = InitGenerationIntention(ownerTypeName: "A") { builder in
             builder.setIsConvenience(false)
         }
         
@@ -253,16 +257,16 @@ class ModifiersSyntaxDecoratorsTests: XCTestCase {
         let prot = ProtocolGenerationIntention(typeName: "Prot")
         
         withExtendedLifetime(prot) {
-            let optionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, attributes: [])
+            let optionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, attributes: [], ownerTypeName: "A")
             optionalProp.isOptional = true
             optionalProp.type = prot
-            let nonOptionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, attributes: [])
+            let nonOptionalProp = ProtocolPropertyGenerationIntention(name: "name", type: .int, attributes: [], ownerTypeName: "A")
             nonOptionalProp.isOptional = false
             nonOptionalProp.type = prot
-            let optionalMethod = ProtocolMethodGenerationIntention(name: "name", builder: { _ in })
+            let optionalMethod = ProtocolMethodGenerationIntention(name: "name", ownerTypeName: "A", builder: { _ in })
             optionalMethod.isOptional = true
             optionalMethod.type = prot
-            let nonOptionalMethod = ProtocolMethodGenerationIntention(name: "name", builder: { _ in })
+            let nonOptionalMethod = ProtocolMethodGenerationIntention(name: "name", ownerTypeName: "A", builder: { _ in })
             nonOptionalMethod.isOptional = false
             nonOptionalMethod.type = prot
             

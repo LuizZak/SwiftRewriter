@@ -102,5 +102,15 @@ public final class PostfixChainInverter {
                 return postfix?.returnType
             }
         }
+        
+        public func formFunctionIdentifier(withNext next: Postfix) -> FunctionIdentifier? {
+            switch (self, next) {
+            case let (.member(name, _, _), .call(_, functionCallPostfix, _)):
+                return functionCallPostfix.identifierWith(methodName: name)
+                
+            default:
+                return nil
+            }
+        }
     }
 }

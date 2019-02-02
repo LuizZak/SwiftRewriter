@@ -88,7 +88,7 @@ class SwiftSyntaxProducerTests: BaseSwiftSyntaxProducerTests {
 extension SwiftSyntaxProducerTests {
     
     func testWriteFailableInit() {
-        let initMethod = InitGenerationIntention(parameters: [])
+        let initMethod = InitGenerationIntention(parameters: [], ownerTypeName: "A")
         initMethod.isFailable = true
         initMethod.functionBody = FunctionBodyIntention(body: [])
         let sut = SwiftSyntaxProducer()
@@ -104,7 +104,7 @@ extension SwiftSyntaxProducerTests {
     }
     
     func testWriteConvenienceInit() {
-        let initMethod = InitGenerationIntention(parameters: [])
+        let initMethod = InitGenerationIntention(parameters: [], ownerTypeName: "A")
         initMethod.isConvenience = true
         initMethod.functionBody = FunctionBodyIntention(body: [])
         let sut = SwiftSyntaxProducer()

@@ -12,9 +12,11 @@ extension IncompleteKnownType {
         do {
             let nonCanonicalNames = try extractor.nonCanonicalNames()
             let transformations = try extractor.transformations()
+            let aliasedMethods = try extractor.methodAliases()
             
             return CompoundedMappingType(knownType: type,
                                          transformations: transformations,
+                                         aliasedMethods: aliasedMethods,
                                          semantics: [],
                                          aliases: nonCanonicalNames)
         } catch {

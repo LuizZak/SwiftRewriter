@@ -97,7 +97,7 @@ public extension KnownType {
 }
 
 /// Describes a known type constructor
-public protocol KnownConstructor: SemanticalObject, AttributeTaggeableObject {
+public protocol KnownConstructor: KnownMember {
     /// Gets the parameters for this constructor
     var parameters: [ParameterSignature] { get }
     
@@ -115,7 +115,7 @@ public protocol KnownConstructor: SemanticalObject, AttributeTaggeableObject {
 /// Describes a known member of a type
 public protocol KnownMember: SemanticalObject, AttributeTaggeableObject {
     /// The owner type for this known member
-    var ownerType: KnownTypeReference? { get }
+    var ownerType: KnownTypeReference { get }
     
     /// Whether this member is a static (class) member
     var isStatic: Bool { get }

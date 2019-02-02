@@ -4,7 +4,7 @@ import SwiftAST
 /// Given a set of canonical type providers, does lookups in expression trees to
 /// replace references of non-canonical names with the proper canonical ones.
 ///
-/// Should be run as one of the first few expression passes.
+/// Should be run as one of the first expression passes.
 public class CanonicalNameExpressionPass: ASTRewriterPass {
     
     public override func visitIdentifier(_ exp: IdentifierExpression) -> Expression {

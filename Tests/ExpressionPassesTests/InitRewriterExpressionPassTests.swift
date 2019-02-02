@@ -27,7 +27,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         //   super.init()
         //
         
-        intentionContext = .initializer(InitGenerationIntention(parameters: []))
+        intentionContext = .initializer(InitGenerationIntention(parameters: [], ownerTypeName: "Type"))
         
         assertTransform(
             statement: .compound([
@@ -64,7 +64,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         //   self.init()
         //
         
-        intentionContext = .initializer(InitGenerationIntention(parameters: []))
+        intentionContext = .initializer(InitGenerationIntention(parameters: [], ownerTypeName: "Type"))
         
         assertTransform(
             statement: .compound([
@@ -102,7 +102,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         //   super.init()
         //
         
-        intentionContext = .initializer(InitGenerationIntention(parameters: []))
+        intentionContext = .initializer(InitGenerationIntention(parameters: [], ownerTypeName: "Type"))
         
         assertTransform(
             statement: .compound([
@@ -149,7 +149,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         //   super.init()
         //
         
-        intentionContext = .initializer(InitGenerationIntention(parameters: []))
+        intentionContext = .initializer(InitGenerationIntention(parameters: [], ownerTypeName: "Type"))
         
         assertTransform(
             statement:
@@ -194,7 +194,7 @@ class InitRewriterExpressionPassTests: ExpressionPassTestCase {
         //   super.init()
         //
         
-        intentionContext = .initializer(InitGenerationIntention(parameters: []))
+        intentionContext = .initializer(InitGenerationIntention(parameters: [], ownerTypeName: "Type"))
         
         assertTransform(
             statement:

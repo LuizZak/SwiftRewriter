@@ -133,7 +133,7 @@ private class MockIntentionPass: IntentionPass {
         let file = FileGenerationIntention(sourcePath: "Source.m", targetPath: "Source.swift")
         let cls = ClassGenerationIntention(typeName: "Class")
         cls.isInterfaceSource = false
-        let method = MethodGenerationIntention(signature: FunctionSignature(name: "method"))
+        let method = MethodGenerationIntention(signature: FunctionSignature(name: "method"), ownerTypeName: "A")
         method.functionBody = FunctionBodyIntention(body: [])
         cls.addMethod(method)
         file.addType(cls)

@@ -420,6 +420,7 @@ public class IntentionCollector {
                 ProtocolPropertyGenerationIntention(name: node.identifier?.name ?? "",
                                                     storage: storage,
                                                     attributes: attributes,
+                                                    ownerTypeName: ctx.typeName,
                                                     source: node)
             prop.isOptional = node.isOptionalProperty
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
@@ -434,6 +435,7 @@ public class IntentionCollector {
                 PropertyGenerationIntention(name: node.identifier?.name ?? "",
                                             storage: storage,
                                             attributes: attributes,
+                                            ownerTypeName: ctx.typeName,
                                             source: node)
             prop.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
             prop.knownAttributes = knownAttributes
@@ -488,13 +490,19 @@ public class IntentionCollector {
         let method: MethodGenerationIntention
         
         if context.findContext(ofType: ProtocolGenerationIntention.self) != nil {
-            let protMethod = ProtocolMethodGenerationIntention(signature: sign, source: node)
+            let protMethod =
+                ProtocolMethodGenerationIntention(signature: sign,
+                                                  ownerTypeName: ctx.typeName,
+                                                  source: node)
+            
             protMethod.isOptional = node.isOptionalMethod
             recordSourceHistory(intention: protMethod, node: node)
             
             method = protMethod
         } else {
-            method = MethodGenerationIntention(signature: sign, source: node)
+            method = MethodGenerationIntention(signature: sign,
+                                               ownerTypeName: ctx.typeName,
+                                               source: node)
         }
         
         method.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
@@ -562,6 +570,7 @@ public class IntentionCollector {
         let ivar =
             InstanceVariableGenerationIntention(name: node.identifier?.name ?? "",
                                                 storage: storage,
+                                                ownerTypeName: classCtx.typeName,
                                                 accessLevel: access,
                                                 source: node)
         ivar.inNonnullContext = delegate?.isNodeInNonnullContext(node) ?? false
@@ -604,6 +613,7 @@ public class IntentionCollector {
         
         let enumCase =
             EnumCaseGenerationIntention(name: identifier, expression: nil,
+                                        ownerTypeName: ctx.typeName,
                                         accessLevel: .internal, source: node)
         recordSourceHistory(intention: enumCase, node: node)
         
@@ -776,6 +786,7 @@ public class IntentionCollector {
         let ivar = InstanceVariableGenerationIntention(
             name: identifier.name,
             storage: storage,
+            ownerTypeName: ctx.typeName,
             source: node)
         recordSourceHistory(intention: ivar, node: node)
         ctx.addInstanceVariable(ivar)

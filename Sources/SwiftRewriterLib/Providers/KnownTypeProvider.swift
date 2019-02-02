@@ -70,7 +70,15 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
             return nil
         }
         
-        let type = CompoundKnownType(typeName: name, types: types)
+        let type: KnownType
+        
+        // Don't wrap a single type in a compound structure to avoid unneccessary
+        // overheads
+        if types.count == 1 {
+            type = types[0]
+        } else {
+            type = CompoundKnownType(typeName: name, types: types)
+        }
         
         if typesCache.usingCache {
             typesCache.modifyingValue { value in

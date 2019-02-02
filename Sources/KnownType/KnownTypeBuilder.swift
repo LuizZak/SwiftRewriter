@@ -173,7 +173,8 @@ public struct KnownTypeBuilder {
                             annotations: [String] = []) -> KnownTypeBuilder {
         
         var new = clone()
-        let ctor = BuildingKnownConstructor(parameters: parameters,
+        let ctor = BuildingKnownConstructor(ownerType: KnownTypeReference.typeName(typeName),
+                                            parameters: parameters,
                                             knownAttributes: attributes,
                                             semantics: semantics,
                                             isFailable: isFailable,
@@ -640,6 +641,23 @@ extension BuildingKnownType: KnownType {
 }
 
 private struct BuildingKnownConstructor: KnownConstructor, Codable {
+    var ownerType: KnownTypeReference
+    
+    var isStatic: Bool {
+        return true
+    }
+    
+    var memberType: SwiftType {
+        return .swiftBlock(
+            returnType: .typeName(ownerType.asTypeName),
+            parameters: []
+        )
+    }
+    
+    func typeDefinitionOrigin() -> KnownType? {
+        return nil
+    }
+    
     var parameters: [ParameterSignature]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
@@ -649,7 +667,7 @@ private struct BuildingKnownConstructor: KnownConstructor, Codable {
 }
 
 private struct BuildingKnownMethod: KnownMethod, Codable {
-    var ownerType: KnownTypeReference?
+    var ownerType: KnownTypeReference
     var body: KnownMethodBody?
     var signature: FunctionSignature
     var optional: Bool
@@ -668,7 +686,7 @@ private struct BuildingKnownMethod: KnownMethod, Codable {
 }
 
 private struct BuildingKnownProperty: KnownProperty, Codable {
-    var ownerType: KnownTypeReference?
+    var ownerType: KnownTypeReference
     var name: String
     var storage: ValueStorage
     var attributes: [PropertyAttribute]

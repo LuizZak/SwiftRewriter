@@ -103,7 +103,7 @@ class MandatoryIntentionPass: IntentionPass {
                     }
                 ))
         
-        let plainInit = InitGenerationIntention(parameters: [])
+        let plainInit = InitGenerationIntention(parameters: [], ownerTypeName: type.typeName)
         plainInit.functionBody = plainInitBody
         plainInit
             .history
@@ -135,7 +135,7 @@ class MandatoryIntentionPass: IntentionPass {
                     }
                 ))
         
-        let parameteredInit = InitGenerationIntention(parameters: parameters)
+        let parameteredInit = InitGenerationIntention(parameters: parameters, ownerTypeName: type.typeName)
         parameteredInit.functionBody = parameteredInitBody
         parameteredInit
             .history
@@ -262,6 +262,7 @@ class MandatoryIntentionPass: IntentionPass {
                 let intent =
                     InstanceVariableGenerationIntention(name: synth.ivarName,
                                                         storage: storage,
+                                                        ownerTypeName: type.typeName,
                                                         accessLevel: .private)
                 intent.history.recordCreation(description: """
                     Synthesized backing field for \(prop.name) due to @synthesize

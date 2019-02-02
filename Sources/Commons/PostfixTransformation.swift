@@ -1,4 +1,4 @@
-import SwiftRewriterLib
+import KnownType
 import SwiftAST
 
 /// Represents a transformation of a postfix invocation for types or instances of
@@ -17,6 +17,57 @@ public enum PostfixTransformation {
                                    setterName: String?)
     case initializer(old: [String?], new: [String?])
     case valueTransformer(ValueTransformer<PostfixExpression, Expression>)
+    
+    /// In case this postfix transformer transforms a function call expression,
+    /// this property returns an array of one-or-more (in the case of getter/setter
+    /// transformers where a getValue()/setValue(_:) pair of functions exist)
+    /// function identifiers that represent the functions that this postfix
+    /// transformer targets.
+    public var functionIdentifierAliases: [FunctionIdentifier] {
+        switch self {
+        case .method(let matcher):
+            return [matcher.identifier]
+            
+        case .function(let transformer):
+            return [
+                FunctionIdentifier(
+                    name: transformer.objcFunctionName,
+                    parameterNames: Array(repeating: nil, count: transformer.requiredArgumentCount)
+                )
+            ]
+            
+        case let .propertyFromMethods(_, getterName, setterName, _, _):
+            
+            var identifiers = [
+                FunctionIdentifier(name: getterName, parameterNames: [])
+            ]
+            
+            if let setterName = setterName {
+                identifiers.append(
+                    FunctionIdentifier(name: setterName, parameterNames: [nil])
+                )
+            }
+            
+            return identifiers
+            
+        case let .propertyFromFreeFunctions(_, getterName, setterName):
+            
+            var identifiers = [
+                FunctionIdentifier(name: getterName, parameterNames: [nil])
+            ]
+            
+            if let setterName = setterName {
+                identifiers.append(
+                    FunctionIdentifier(name: setterName, parameterNames: [nil, nil])
+                )
+            }
+            
+            return identifiers
+            
+        default:
+            return []
+        }
+    }
 }
 
 public func convertToPostfixInvocationTransformations(

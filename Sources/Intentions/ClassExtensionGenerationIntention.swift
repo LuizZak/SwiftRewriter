@@ -1,6 +1,7 @@
 import Foundation
 import GrammarModels
 import SwiftAST
+import KnownType
 
 /// An intention to generate a class extension from an existing class
 public final class ClassExtensionGenerationIntention: BaseClassIntention {

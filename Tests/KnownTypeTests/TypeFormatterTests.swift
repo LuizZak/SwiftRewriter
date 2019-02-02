@@ -82,7 +82,8 @@ class TypeFormatterTests: XCTestCase {
                 name: "a",
                 storage: ValueStorage(type: .int,
                                       ownership: .strong,
-                                      isConstant: false)
+                                      isConstant: false),
+                ownerTypeName: "Type"
             )
         
         XCTAssertEqual(
@@ -279,7 +280,7 @@ class TypeFormatterTests: XCTestCase {
     }
     
     func testAsStringEmptyInitializer() {
-        let initializer = InitGenerationIntention(parameters: [])
+        let initializer = InitGenerationIntention(parameters: [], ownerTypeName: "Type")
         
         let result = TypeFormatter.asString(initializer: initializer)
         let expected = """
@@ -290,7 +291,7 @@ class TypeFormatterTests: XCTestCase {
     }
     
     func testAsStringFailableInitializer() {
-        let initializer = InitGenerationIntention(parameters: [])
+        let initializer = InitGenerationIntention(parameters: [], ownerTypeName: "Type")
         initializer.isFailable = true
         
         let result = TypeFormatter.asString(initializer: initializer)
@@ -302,7 +303,7 @@ class TypeFormatterTests: XCTestCase {
     }
     
     func testAsStringConvenienceInitializer() {
-        let initializer = InitGenerationIntention(parameters: [])
+        let initializer = InitGenerationIntention(parameters: [], ownerTypeName: "Type")
         initializer.isConvenience = true
         
         let result = TypeFormatter.asString(initializer: initializer)
@@ -318,7 +319,8 @@ class TypeFormatterTests: XCTestCase {
             InitGenerationIntention(
                 parameters: [
                     ParameterSignature(label: "label", name: "name", type: .int)
-                ])
+                ],
+                ownerTypeName: "Type")
         
         let result = TypeFormatter.asString(initializer: initializer)
         let expected = """

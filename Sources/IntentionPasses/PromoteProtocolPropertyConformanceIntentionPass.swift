@@ -81,7 +81,8 @@ public class PromoteProtocolPropertyConformanceIntentionPass: IntentionPass {
                 let property =
                     PropertyGenerationIntention(name: prop.name,
                                                 type: prop.memberType,
-                                                attributes: prop.attributes)
+                                                attributes: prop.attributes,
+                                                ownerTypeName: type.typeName)
                 property
                     .history
                     .recordCreation(description: """

@@ -148,7 +148,8 @@ public class TypeGenerationIntention: FromSourceIntention {
         let intention =
             PropertyGenerationIntention(name: knownProperty.name,
                                         storage: knownProperty.storage,
-                                        attributes: knownProperty.attributes)
+                                        attributes: knownProperty.attributes,
+                                        ownerTypeName: typeName)
         
         addProperty(intention)
         
@@ -179,6 +180,7 @@ public class TypeGenerationIntention: FromSourceIntention {
     public func generateMethod(from knownMethod: KnownMethod, source: ASTNode? = nil) -> MethodGenerationIntention {
         let method =
             MethodGenerationIntention(signature: knownMethod.signature,
+                                      ownerTypeName: typeName,
                                       accessLevel: .internal, source: source)
         
         if let body = knownMethod.body {

@@ -1,4 +1,5 @@
 import SwiftAST
+import Commons
 import Intentions
 import KnownType
 import SwiftRewriterLib
@@ -143,13 +144,35 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
         
         let inverted = PostfixChainInverter.invert(expression: postfix)
         
-        for postfixChainItem in inverted {
+        for (i, postfixChainItem) in inverted.enumerated() {
             guard let op = postfixChainItem.postfix else {
                 continue
             }
             guard let member = op.asMember else {
                 continue
             }
+            
+            // Check if we have an aliased NSArray/NSMutableArray method created
+            // by a method annotated with `@_swiftrewriter` here
+            if i < inverted.count - 1 && member.memberDefinition == nil {
+                guard let identifier = postfixChainItem.formFunctionIdentifier(withNext: inverted[i + 1]) else {
+                    continue
+                }
+                
+                // TODO: Maybe we shouldn't really be looking at types directly
+                // from compound types, but through a first-class support for
+                // alised members in `TypeSystem`?
+                let nsArray = FoundationCompoundTypes.nsArray.create()
+                let nsMutArray = FoundationCompoundTypes.nsMutableArray.create()
+                
+                if nsArray.aliasedMethods.containsMethod(withIdentifier: identifier) {
+                    return true
+                }
+                if nsMutArray.aliasedMethods.containsMethod(withIdentifier: identifier) {
+                    return true
+                }
+            }
+            
             guard let memberType = member.memberDefinition?.ownerType else {
                 return false
             }
@@ -162,6 +185,25 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
             if type.isExtension && (type.typeName == "NSMutableArray" || type.typeName == "NSArray") {
                 return false
             }
+        }
+        
+        return true
+    }
+    
+    /// Returns `true` iff `member` represents a member access of a method or property
+    /// of native NSMutableArray/NSArrays.
+    private func isMemberAccessOfNSMutableArrayOrArrayDefinition(_ member: MemberPostfix) -> Bool {
+        guard let memberType = member.memberDefinition?.ownerType else {
+            return false
+        }
+        
+        let memberTypeName = memberType.asTypeName
+        guard let type = context.typeSystem.knownTypeWithName(memberTypeName) else {
+            return false
+        }
+        
+        if type.isExtension && (type.typeName == "NSMutableArray" || type.typeName == "NSArray") {
+            return false
         }
         
         return true
@@ -199,10 +241,10 @@ public class PromoteNSMutableArrayIntentionPass: IntentionPass {
     
     private func postfixExpression(_ exp: Expression) -> PostfixExpression? {
         guard let postfix = exp.parentExpression?.asPostfix else {
-            return nil
+            return exp.asPostfix
         }
         
-        return postfix.exp === exp ? postfix : nil
+        return postfix.exp === exp ? postfixExpression(postfix) : nil
     }
 }
 
@@ -214,5 +256,11 @@ private struct AnalysisEntry {
     enum Source {
         case property(PropertyGenerationIntention)
         case field(InstanceVariableGenerationIntention)
+    }
+}
+
+private extension Sequence where Element == KnownMethod {
+    func containsMethod(withIdentifier identifier: FunctionIdentifier) -> Bool {
+        return contains(where: { $0.signature.asIdentifier == identifier })
     }
 }
