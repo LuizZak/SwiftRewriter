@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import Utils
 import SwiftAST
 import Commons

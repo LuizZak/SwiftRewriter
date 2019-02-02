@@ -1,4 +1,3 @@
-import SwiftRewriterLib
 import TypeSystem
 
 public class OpenGLESGlobalsProvider: GlobalsProvider {

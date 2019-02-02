@@ -1,7 +1,6 @@
 import Foundation
 import SwiftAST
 import KnownType
-import SwiftRewriterLib
 
 /// Attempts to convert some common init patterns from Objective-C to Swift
 ///

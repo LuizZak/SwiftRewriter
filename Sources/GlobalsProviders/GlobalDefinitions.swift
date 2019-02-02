@@ -22,4 +22,8 @@ public protocol GlobalsProvider {
 /// Sources globals providers through an input array
 public struct ArrayGlobalProvidersSource: GlobalsProvidersSource {
     public var globalsProviders: [GlobalsProvider]
+    
+    public init(globalsProviders: [GlobalsProvider]) {
+        self.globalsProviders = globalsProviders
+    }
 }

@@ -2,6 +2,9 @@ import XCTest
 import SwiftAST
 import Intentions
 import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 import SwiftRewriterLib
 import TypeSystem
 import WriterTargetOutput

@@ -9,7 +9,7 @@ import TypeSystem
 public final class ASTRewriterPassApplier {
     private var dirtyFunctions = DirtyFunctionBodyMap()
     
-    var afterFile: ((String, _ passName: String) -> Void)?
+    public var afterFile: ((String, _ passName: String) -> Void)?
     
     var intentionGlobals: IntentionCollectionGlobals!
     

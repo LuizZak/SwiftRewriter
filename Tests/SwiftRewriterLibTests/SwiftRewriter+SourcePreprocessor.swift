@@ -1,4 +1,5 @@
 import XCTest
+import SourcePreprocessors
 import SwiftRewriterLib
 
 class SwiftRewriter_SourcePreprocessor: XCTestCase {

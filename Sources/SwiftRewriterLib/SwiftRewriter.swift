@@ -6,6 +6,9 @@ import TypeSystem
 import WriterTargetOutput
 import Intentions
 import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 import SwiftSyntaxSupport
 import Utils
 
@@ -733,4 +736,8 @@ internal func _typeNullability(inType type: ObjcType) -> TypeNullability? {
     default:
         return nil
     }
+}
+
+internal struct _PreprocessingContext: PreprocessingContext {
+    var filePath: String
 }

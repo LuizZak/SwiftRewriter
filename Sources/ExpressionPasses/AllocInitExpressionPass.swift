@@ -1,5 +1,4 @@
 import Foundation
-import SwiftRewriterLib
 import SwiftAST
 import Utils
 

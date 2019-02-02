@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 import TypeSystem
 
 /// Fixes casting of numeric types to use associated intializers instead of performing

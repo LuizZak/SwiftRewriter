@@ -1,5 +1,4 @@
 import SwiftAST
-import SwiftRewriterLib
 import TypeSystem
 import Commons
 

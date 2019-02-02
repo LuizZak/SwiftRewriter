@@ -1,5 +1,5 @@
 import SwiftAST
-import SwiftRewriterLib
+import Analysis
 
 /// Allows detecting local variables that are never mutated and can be marked as
 /// constant `let` declarations.

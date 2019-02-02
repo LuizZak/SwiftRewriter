@@ -1,7 +1,6 @@
 import SwiftAST
 import KnownType
 import TypeSystem
-import SwiftRewriterLib
 import Commons
 
 public class UIKitGlobalsProvider: GlobalsProvider {

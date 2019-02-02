@@ -1,5 +1,8 @@
 import ObjcParser
 import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 
 /// Represents a transpilation job, with all required information to start a
 /// transpile job.

@@ -1,5 +1,8 @@
 import ObjcParser
 import IntentionPasses
+import ExpressionPasses
+import SourcePreprocessors
+import GlobalsProviders
 
 /// Facility for creating `SwiftRewriterJob`s.
 public class SwiftRewriterJobBuilder {

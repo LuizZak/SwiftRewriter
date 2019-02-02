@@ -1,7 +1,6 @@
 import Foundation
 import SwiftAST
 import TypeSystem
-import SwiftRewriterLib
 
 private let cInt = SwiftType.typeName("CInt")
 private let cFloat = SwiftType.typeName("CFloat")
