@@ -104,7 +104,7 @@ public class IfStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asIf: IfStatement? {
+    var asIf: IfStatement? {
         return cast()
     }
 }

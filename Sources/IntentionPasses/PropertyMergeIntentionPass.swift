@@ -112,12 +112,12 @@ public class PropertyMergeIntentionPass: IntentionPass {
                     .lazy
                     .filter { $0.returnType == .void }
                     .filter { $0.isStatic == property.isStatic }
-                    .filter { $0.parameters.count == 1 }
                     .filter {
-                        self.context.typeSystem
-                            .typesMatch($0.parameters[0].type,
-                                        property.type,
-                                        ignoreNullability: true)
+                        $0.parameters.count == 1 &&
+                            self.context.typeSystem
+                                .typesMatch($0.parameters[0].type,
+                                            property.type,
+                                            ignoreNullability: true)
                     }
                     .filter { $0.name == expectedName }
             

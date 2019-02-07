@@ -51,7 +51,7 @@ public class ContinueStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asContinue: ContinueStatement? {
+    var asContinue: ContinueStatement? {
         return cast()
     }
 }

@@ -1,12 +1,12 @@
 public extension KeyedEncodingContainerProtocol {
     
-    public mutating func encodeStatement(_ stmt: Statement, forKey key: Key) throws {
+    mutating func encodeStatement(_ stmt: Statement, forKey key: Key) throws {
         let container = try SwiftASTSerializer.StatementContainer(statement: stmt)
         
         try self.encode(container, forKey: key)
     }
     
-    public mutating func encodeStatements(_ stmts: [Statement], forKey key: Key) throws {
+    mutating func encodeStatements(_ stmts: [Statement], forKey key: Key) throws {
         var nested = self.nestedUnkeyedContainer(forKey: key)
         
         for stmt in stmts {
@@ -14,7 +14,7 @@ public extension KeyedEncodingContainerProtocol {
         }
     }
     
-    public mutating func encodeStatementIfPresent(_ stmt: Statement?, forKey key: Key) throws {
+    mutating func encodeStatementIfPresent(_ stmt: Statement?, forKey key: Key) throws {
         guard let stmt = stmt else {
             return
         }
@@ -27,13 +27,13 @@ public extension KeyedEncodingContainerProtocol {
 
 public extension KeyedEncodingContainerProtocol {
     
-    public mutating func encodeExpression(_ exp: Expression, forKey key: Key) throws {
+    mutating func encodeExpression(_ exp: Expression, forKey key: Key) throws {
         let container = try SwiftASTSerializer.ExpressionContainer(expression: exp)
         
         try self.encode(container, forKey: key)
     }
     
-    public mutating func encodeExpressions(_ exps: [Expression], forKey key: Key) throws {
+    mutating func encodeExpressions(_ exps: [Expression], forKey key: Key) throws {
         var nested = self.nestedUnkeyedContainer(forKey: key)
         
         for exp in exps {
@@ -41,7 +41,7 @@ public extension KeyedEncodingContainerProtocol {
         }
     }
     
-    public mutating func encodeExpressionIfPresent(_ exp: Expression?, forKey key: Key) throws {
+    mutating func encodeExpressionIfPresent(_ exp: Expression?, forKey key: Key) throws {
         guard let exp = exp else {
             return
         }

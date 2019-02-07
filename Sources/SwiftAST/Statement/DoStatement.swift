@@ -61,7 +61,7 @@ public class DoStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asDoStatement: DoStatement? {
+    var asDoStatement: DoStatement? {
         return cast()
     }
 }

@@ -10,7 +10,7 @@ public protocol CodeScopeNode: CodeScope {
 }
 
 public extension CodeScopeNode where Self: SyntaxNode {
-    public var definitions: CodeScope {
+    var definitions: CodeScope {
         if let scope = metadata[_codeScopeKey] as? CodeScope {
             return scope
         }
@@ -20,7 +20,7 @@ public extension CodeScopeNode where Self: SyntaxNode {
         return scope
     }
     
-    public func firstDefinition(named name: String) -> CodeDefinition? {
+    func firstDefinition(named name: String) -> CodeDefinition? {
         if let def = definitions.firstDefinition(named: name) {
             return def
         }
@@ -28,7 +28,7 @@ public extension CodeScopeNode where Self: SyntaxNode {
         return nearestScopeThatIsNotSelf?.firstDefinition(named: name)
     }
     
-    public func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
+    func functionDefinitions(matching identifier: FunctionIdentifier) -> [CodeDefinition] {
         let defs =
             nearestScopeThatIsNotSelf?
                 .functionDefinitions(matching: identifier)
@@ -37,19 +37,19 @@ public extension CodeScopeNode where Self: SyntaxNode {
         return definitions.functionDefinitions(matching: identifier) + defs
     }
     
-    public func allDefinitions() -> [CodeDefinition] {
+    func allDefinitions() -> [CodeDefinition] {
         return definitions.allDefinitions()
     }
     
-    public func recordDefinition(_ definition: CodeDefinition) {
+    func recordDefinition(_ definition: CodeDefinition) {
         definitions.recordDefinition(definition)
     }
     
-    public func recordDefinitions(_ definitions: [CodeDefinition]) {
+    func recordDefinitions(_ definitions: [CodeDefinition]) {
         self.definitions.recordDefinitions(definitions)
     }
     
-    public func removeAllDefinitions() {
+    func removeAllDefinitions() {
         definitions.removeAllDefinitions()
     }
 }
@@ -57,7 +57,7 @@ public extension CodeScopeNode where Self: SyntaxNode {
 public extension SyntaxNode {
     /// Finds the nearest definition scope in the hierarchy chain for this syntax
     /// node.
-    public var nearestScope: CodeScopeNode? {
+    var nearestScope: CodeScopeNode? {
         var parent: SyntaxNode? = self
         while let p = parent {
             if let scope = p as? CodeScopeNode {
@@ -272,7 +272,7 @@ public extension IdentifierExpression {
     /// Gets the definition this identifier references.
     /// To gather definitions to identifiers, use a `ExpressionTypeResolver` on
     /// the syntax tree this identifier is contained in.
-    public var definition: CodeDefinition? {
+    var definition: CodeDefinition? {
         get {
             return metadata[_identifierDefinitionKey] as? CodeDefinition
         }
@@ -281,7 +281,7 @@ public extension IdentifierExpression {
         }
     }
     
-    public func settingDefinition(_ definition: CodeDefinition) -> IdentifierExpression {
+    func settingDefinition(_ definition: CodeDefinition) -> IdentifierExpression {
         let new = copy()
         new.definition = definition
         return new
@@ -290,7 +290,7 @@ public extension IdentifierExpression {
 
 public extension MemberPostfix {
     /// Gets the member this member postfix operation references
-    public var memberDefinition: KnownMember? {
+    var memberDefinition: KnownMember? {
         get {
             return metadata[_identifierDefinitionKey] as? KnownMember
         }

@@ -51,7 +51,7 @@ public class BreakStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asBreak: BreakStatement? {
+    var asBreak: BreakStatement? {
         return cast()
     }
 }

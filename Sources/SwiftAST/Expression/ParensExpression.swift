@@ -78,7 +78,7 @@ public class ParensExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asParens: ParensExpression? {
+    var asParens: ParensExpression? {
         return cast()
     }
     
@@ -87,7 +87,7 @@ public extension Expression {
     ///
     /// If `self` is not an instance of `ParensExpression`, self is returned
     /// instead.
-    public var unwrappingParens: Expression {
+    var unwrappingParens: Expression {
         if let parens = self as? ParensExpression {
             return parens.exp.unwrappingParens
         }

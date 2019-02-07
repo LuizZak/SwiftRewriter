@@ -296,12 +296,12 @@ public final class MemberPostfix: Postfix {
     }
 }
 public extension Postfix {
-    public static func member(_ name: String) -> MemberPostfix {
+    static func member(_ name: String) -> MemberPostfix {
         return MemberPostfix(name: name)
     }
     
     @inlinable
-    public var asMember: MemberPostfix? {
+    var asMember: MemberPostfix? {
         return self as? MemberPostfix
     }
 }
@@ -380,12 +380,12 @@ public final class SubscriptPostfix: Postfix {
     }
 }
 public extension Postfix {
-    public static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
+    static func `subscript`(_ exp: Expression) -> SubscriptPostfix {
         return SubscriptPostfix(expression: exp)
     }
     
     @inlinable
-    public var asSubscription: SubscriptPostfix? {
+    var asSubscription: SubscriptPostfix? {
         return self as? SubscriptPostfix
     }
 }
@@ -495,12 +495,12 @@ public final class FunctionCallPostfix: Postfix {
     }
 }
 public extension Postfix {
-    public static func functionCall(arguments: [FunctionArgument] = []) -> FunctionCallPostfix {
+    static func functionCall(arguments: [FunctionArgument] = []) -> FunctionCallPostfix {
         return FunctionCallPostfix(arguments: arguments)
     }
     
     @inlinable
-    public var asFunctionCall: FunctionCallPostfix? {
+    var asFunctionCall: FunctionCallPostfix? {
         return self as? FunctionCallPostfix
     }
 }

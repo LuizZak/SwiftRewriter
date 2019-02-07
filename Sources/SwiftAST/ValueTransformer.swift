@@ -115,7 +115,7 @@ public struct ValueTransformer<T, U> {
             return .success(value: value)
             
         case .failure(let message):
-            return .failure(message: message)
+            return .failure(message: message())
         }
     }
     
@@ -216,7 +216,7 @@ public struct ValueTransformer<T, U> {
                     return .success(value: value)
                 case .failure(let message):
                     printer("Transformation from \(file):\(line) failed: \(message())")
-                    return .failure(message: message)
+                    return .failure(message: message())
                 }
             }
         }
@@ -237,7 +237,7 @@ public struct ValueTransformer<T, U> {
                     return closure(value)
                     
                 case .failure(let message):
-                    return .failure(message: message)
+                    return .failure(message: message())
                 }
             }
             self.debugClosure = { value, printer in
@@ -253,11 +253,11 @@ public struct ValueTransformer<T, U> {
                         
                     case .failure(let message):
                         printer("Transformation from \(file):\(line) failed: \(message())")
-                        return .failure(message: message)
+                        return .failure(message: message())
                     }
                     
                 case .failure(let message):
-                    return .failure(message: message)
+                    return .failure(message: message())
                 }
             }
         }
@@ -296,7 +296,7 @@ public enum Result<T> {
         case .success(let value):
             return .success(value: mapper(value))
         case .failure(let message):
-            return .failure(message: message)
+            return .failure(message: message())
         }
     }
     
@@ -306,14 +306,14 @@ public enum Result<T> {
         case .success(let value):
             return mapper(value)
         case .failure(let message):
-            return .failure(message: message)
+            return .failure(message: message())
         }
     }
 }
 
 public extension ValueTransformer where T == U {
     @inlinable
-    public init(file: String = #file, line: Int = #line) {
+    init(file: String = #file, line: Int = #line) {
         self.init(file: file, line: line) { (value: T) -> U? in
             value
         }
@@ -323,7 +323,7 @@ public extension ValueTransformer where T == U {
 public extension ValueTransformer where U: MutableCollection {
     
     @inlinable
-    public func transformIndex(file: String = #file,
+    func transformIndex(file: String = #file,
                                line: Int = #line,
                                index: U.Index,
                                transformer: ValueTransformer<U.Element, U.Element>) -> ValueTransformer {
@@ -342,7 +342,7 @@ public extension ValueTransformer where U: MutableCollection {
     }
     
     @inlinable
-    public func replacing(file: String = #file,
+    func replacing(file: String = #file,
                           line: Int = #line,
                           index: U.Index,
                           with newValue: U.Element) -> ValueTransformer {
@@ -362,9 +362,9 @@ public extension ValueTransformer where U: MutableCollection {
 public extension ValueTransformer where U: RangeReplaceableCollection {
     
     @inlinable
-    public func removing(file: String = #file,
-                         line: Int = #line,
-                         index: U.Index) -> ValueTransformer {
+    func removing(file: String = #file,
+                  line: Int = #line,
+                  index: U.Index) -> ValueTransformer {
         
         return transforming(file: file, line: line) { value in
             guard value.endIndex > index else {
@@ -381,8 +381,8 @@ public extension ValueTransformer where U: RangeReplaceableCollection {
 public extension ValueTransformer where U: Sequence {
     
     @inlinable
-    public func removingFirst(file: String = #file,
-                              line: Int = #line) -> ValueTransformer<T, U.SubSequence> {
+    func removingFirst(file: String = #file,
+                       line: Int = #line) -> ValueTransformer<T, DropFirstSequence<U>> {
         
         return transforming(file: file, line: line) { value in
             return value.dropFirst()

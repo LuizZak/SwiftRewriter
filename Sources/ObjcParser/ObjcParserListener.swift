@@ -719,7 +719,7 @@ private class GlobalVariableListener: ObjectiveCParserBaseListener {
                 varDecl.addChild(typeNameNode)
                 
                 if let initializer = initDeclarator.initializer() {
-                    let expression = ExpressionNode(isInNonnullContext: inNonnull)
+                    let expression = ExpressionNode(_isInNonnullContext: inNonnull)
                     expression.expression = initializer.expression()
                     if let exp = initializer.expression() {
                         nodeFactory.updateSourceLocation(for: expression, with: exp)

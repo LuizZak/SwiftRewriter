@@ -22,24 +22,18 @@ open class ASTNode {
     /// (for syntax error correction etc.)
     public var existsInSource: Bool
     
-    /// Trivia leading up to this node
-    //public var leadingTrivia: Trivia?
-    
-    /// Trivia leading after this node
-    //public var trailingTrivia: Trivia?
-    
     /// Indicates whether this node was completely contained within the range of
     /// a NS_ASSUME_NONNULL_BEGIN/NS_ASSUME_NONNULL_END region.
     public var isInNonnullContext: Bool = false
     
     /// Instantiates a bare ASTNode with a given range.
     /// Defaults to an invalid range
-    public init(isInNonnullContext: Bool,
+    public init(_isInNonnullContext: Bool,
                 location: SourceLocation = .invalid,
                 length: SourceLength = .zero,
                 existsInSource: Bool = true) {
         
-        self.isInNonnullContext = isInNonnullContext
+        self.isInNonnullContext = _isInNonnullContext
         self.location = location
         self.length = length
         self.existsInSource = existsInSource
@@ -90,7 +84,7 @@ open class ASTNode {
         }
         
         node.parent = nil
-        if let index = children.index(where: { $0 === node }) {
+        if let index = children.firstIndex(where: { $0 === node }) {
             children.remove(at: index)
         }
     }
@@ -165,11 +159,4 @@ public protocol InitializableNode {
 /// A bare node used to specify invalid contexts
 public class InvalidNode: ASTNode {
     
-}
-
-/// Trivia encompasses spacing characters and comments between nodes
-public enum Trivia {
-    indirect case singleLineComment(String, leadingSpace: String)
-    indirect case multiLineComments(String, leadingSpace: String)
-    case spacing(String)
 }

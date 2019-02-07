@@ -48,7 +48,7 @@ public class Intention: IntentionProtocol, Historic, Codable {
 }
 
 public extension Intention {
-    public func ancestor<T: Intention>(ofType type: T.Type) -> T? {
+    func ancestor<T: Intention>(ofType type: T.Type) -> T? {
         if let parent = parent as? T {
             return parent
         }

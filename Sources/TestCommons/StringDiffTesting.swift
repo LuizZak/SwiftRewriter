@@ -10,7 +10,7 @@ public protocol DiffTestCaseFailureReporter {
 
 public extension DiffTestCaseFailureReporter {
     
-    public func diffTest(expected input: String,
+    func diffTest(expected input: String,
                          file: String = #file,
                          line: Int = #line) -> DiffingTest {
         

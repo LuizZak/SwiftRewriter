@@ -83,7 +83,7 @@ public class DictionaryLiteralExpression: Expression {
 }
 public extension Expression {
     @inlinable
-    public var asDictionary: DictionaryLiteralExpression? {
+    var asDictionary: DictionaryLiteralExpression? {
         return cast()
     }
 }

@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.0
 // The swift-tools-version declares the minimum version of Swift required to
 // build this package.
 
@@ -21,10 +21,10 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.7.0"),
-        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0"),
-        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.24"),
-        .package(url: "https://github.com/LuizZak/console.git", from: "0.1.0"),
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", .branch("swift5.0")),
+        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", .branch("swift5.0")),
+        .package(url: "https://github.com/LuizZak/console.git", .branch("swift5.0")),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.40200.0"))
     ],
     targets: [
@@ -190,5 +190,5 @@ let package = Package(
             dependencies: ["TestCommons",
                            "Utils", "TypeSystem"])
     ],
-    swiftLanguageVersions: [.v4_2]
+    swiftLanguageVersions: [.v5]
 )

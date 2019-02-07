@@ -5,20 +5,20 @@ public class ProtocolDeclaration: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ProtocolDeclaration {
-    public var properties: [PropertyDefinition] {
+    var properties: [PropertyDefinition] {
         return childrenMatching()
     }
     
-    public var protocolList: ProtocolReferenceList? {
+    var protocolList: ProtocolReferenceList? {
         return firstChild()
     }
     
-    public var methods: [MethodDefinition] {
+    var methods: [MethodDefinition] {
         return childrenMatching()
     }
 }

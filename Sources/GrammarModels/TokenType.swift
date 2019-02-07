@@ -37,7 +37,7 @@ public enum TokenType: Equatable {
 }
 
 public extension TokenType {
-    public var isTypeQualifier: Bool {
+    var isTypeQualifier: Bool {
         switch self {
         case .typeQualifier:
             return true
@@ -46,7 +46,7 @@ public extension TokenType {
         }
     }
     
-    public var isIdentifier: Bool {
+    var isIdentifier: Bool {
         switch self {
         case .identifier:
             return true

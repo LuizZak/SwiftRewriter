@@ -87,7 +87,7 @@ extension CompoundStatement: Sequence {
 
 public extension Statement {
     @inlinable
-    public var asCompound: CompoundStatement? {
+    var asCompound: CompoundStatement? {
         return cast()
     }
 }

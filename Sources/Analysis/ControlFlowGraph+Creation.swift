@@ -63,7 +63,7 @@ public extension ControlFlowGraph {
     /// The entry and exit points for the resulting graph will be the compound
     /// statement itself, with its inner nodes being the statements contained
     /// within.
-    public static func forCompoundStatement(_ compoundStatement: CompoundStatement) -> ControlFlowGraph {
+    static func forCompoundStatement(_ compoundStatement: CompoundStatement) -> ControlFlowGraph {
         let graph = innerForCompoundStatement(compoundStatement)
         
         markBackEdges(in: graph)

@@ -5,27 +5,18 @@
         "package": "Antlr4",
         "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
         "state": {
-          "branch": null,
-          "revision": "c8737a781a83c16c1325072611f780c62092c9fb",
-          "version": "4.0.24"
-        }
-      },
-      {
-        "package": "Console",
-        "repositoryURL": "https://github.com/LuizZak/console.git",
-        "state": {
-          "branch": null,
-          "revision": "a3adc9d4fbcc3f2c6add286140e02cfa66100a8e",
-          "version": "0.4.3"
+          "branch": "swift5.0",
+          "revision": "3e98de775d62bd0aff003d35782fbe00807f2abf",
+          "version": null
         }
       },
       {
         "package": "MiniLexer",
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
-          "branch": null,
-          "revision": "068f7a65ee3c5bbc7664f45ff7c601f9082f9a71",
-          "version": "0.7.2"
+          "branch": "swift5.0",
+          "revision": "995f8e9a66db96c9a061c4a4806f36503f07df61",
+          "version": null
         }
       },
       {

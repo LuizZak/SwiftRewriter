@@ -1,3 +1,5 @@
+
+
 @inlinable
 public func not<T>(_ rule: ValueMatcher<T>) -> ValueMatcher<T> {
     return ValueMatcher().match(closure: { !rule.matches($0) })
@@ -40,7 +42,7 @@ public func hasCount<C: Collection>(_ count: MatchRule<Int>) -> ValueMatcher<C> 
 
 public extension ValueMatcher where T: Equatable {
     @inlinable
-    public static func equals(to value: T) -> ValueMatcher<T> {
+    static func equals(to value: T) -> ValueMatcher<T> {
         return ValueMatcher().match(if: SwiftAST.equals(value))
     }
     
@@ -48,7 +50,7 @@ public extension ValueMatcher where T: Equatable {
 
 public extension ValueMatcher where T: Collection {
     @inlinable
-    public func hasCount(_ count: MatchRule<Int>) -> ValueMatcher<T> {
+    func hasCount(_ count: MatchRule<Int>) -> ValueMatcher<T> {
         return keyPath(\.count, count)
     }
     
@@ -56,7 +58,7 @@ public extension ValueMatcher where T: Collection {
 
 public extension ValueMatcher where T: Collection {
     @inlinable
-    public func atIndex(_ index: T.Index, matcher: ValueMatcher<T.Element>) -> ValueMatcher<T> {
+    func atIndex(_ index: T.Index, matcher: ValueMatcher<T.Element>) -> ValueMatcher<T> {
         return match { value in
             guard index < value.endIndex else {
                 return false
@@ -70,12 +72,12 @@ public extension ValueMatcher where T: Collection {
 
 public extension ValueMatcher where T: Collection, T.Element: Equatable {
     @inlinable
-    public func atIndex(_ index: T.Index, equals value: T.Element) -> ValueMatcher<T> {
+    func atIndex(_ index: T.Index, equals value: T.Element) -> ValueMatcher<T> {
         return atIndex(index, rule: .equals(value))
     }
     
     @inlinable
-    public func atIndex(_ index: T.Index, rule: MatchRule<T.Element>) -> ValueMatcher<T> {
+    func atIndex(_ index: T.Index, rule: MatchRule<T.Element>) -> ValueMatcher<T> {
         return match { value in
             guard index < value.endIndex else {
                 return false
@@ -89,14 +91,14 @@ public extension ValueMatcher where T: Collection, T.Element: Equatable {
 
 public extension ValueMatcher {
     @inlinable
-    public static prefix func ! (lhs: ValueMatcher) -> ValueMatcher {
+    static prefix func ! (lhs: ValueMatcher) -> ValueMatcher {
         return not(lhs)
     }
 }
 
 public extension MatchRule {
     @inlinable
-    public static prefix func ! (lhs: MatchRule) -> MatchRule {
+    static prefix func ! (lhs: MatchRule) -> MatchRule {
         switch lhs {
         case .negated(let rule):
             return rule
@@ -108,12 +110,12 @@ public extension MatchRule {
 
 public extension ValueMatcher {
     @inlinable
-    public static func == (lhs: Bool, rhs: ValueMatcher) -> ValueMatcher {
+    static func == (lhs: Bool, rhs: ValueMatcher) -> ValueMatcher {
         return lhs ? rhs : !rhs
     }
     
     @inlinable
-    public static func == (lhs: ValueMatcher, rhs: Bool) -> ValueMatcher {
+    static func == (lhs: ValueMatcher, rhs: Bool) -> ValueMatcher {
         return rhs ? lhs : !lhs
     }
 }

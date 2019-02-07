@@ -435,7 +435,7 @@ public class MemberBuilder<T: MemberGenerationIntention> {
 
 public extension MemberBuilder where T: OverridableMemberGenerationIntention {
     @discardableResult
-    public func setIsOverride(_ isOverride: Bool) -> MemberBuilder {
+    func setIsOverride(_ isOverride: Bool) -> MemberBuilder {
         targetMember.isOverride = isOverride
         return self
     }
@@ -443,7 +443,7 @@ public extension MemberBuilder where T: OverridableMemberGenerationIntention {
 
 public extension MemberBuilder where T: InitGenerationIntention {
     @discardableResult
-    public func setIsConvenience(_ isConvenience: Bool) -> MemberBuilder {
+    func setIsConvenience(_ isConvenience: Bool) -> MemberBuilder {
         targetMember.isConvenience = isConvenience
         return self
     }
@@ -457,35 +457,35 @@ extension MemberBuilder: _FunctionBuilder where T: FunctionIntention {
 
 public extension MemberBuilder where T: MutableValueStorageIntention {
     @discardableResult
-    public func setValueStorage(_ storage: ValueStorage) -> MemberBuilder {
+    func setValueStorage(_ storage: ValueStorage) -> MemberBuilder {
         targetMember.storage = storage
         
         return self
     }
     
     @discardableResult
-    public func setOwnership(_ ownership: Ownership) -> MemberBuilder {
+    func setOwnership(_ ownership: Ownership) -> MemberBuilder {
         targetMember.storage.ownership = ownership
         
         return self
     }
     
     @discardableResult
-    public func setStorageType(_ type: SwiftType) -> MemberBuilder {
+    func setStorageType(_ type: SwiftType) -> MemberBuilder {
         targetMember.storage.type = type
         
         return self
     }
     
     @discardableResult
-    public func setIsConstant(_ isConstant: Bool) -> MemberBuilder {
+    func setIsConstant(_ isConstant: Bool) -> MemberBuilder {
         targetMember.storage.isConstant = isConstant
         
         return self
     }
     
     @discardableResult
-    public func setInitialValue(_ expression: Expression?) -> MemberBuilder {
+    func setInitialValue(_ expression: Expression?) -> MemberBuilder {
         targetMember.initialValue = expression
         
         return self
@@ -494,28 +494,28 @@ public extension MemberBuilder where T: MutableValueStorageIntention {
 
 public extension MemberBuilder where T: PropertyGenerationIntention {
     @discardableResult
-    public func setAsField() -> MemberBuilder {
+    func setAsField() -> MemberBuilder {
         targetMember.mode = .asField
         
         return self
     }
     
     @discardableResult
-    public func setSetterAccessLevel(_ accessLevel: AccessLevel?) -> MemberBuilder {
+    func setSetterAccessLevel(_ accessLevel: AccessLevel?) -> MemberBuilder {
         targetMember.setterAccessLevel = accessLevel
         
         return self
     }
     
     @discardableResult
-    public func setAsComputedProperty(body: CompoundStatement) -> MemberBuilder {
+    func setAsComputedProperty(body: CompoundStatement) -> MemberBuilder {
         targetMember.mode = .computed(FunctionBodyIntention(body: body))
         
         return self
     }
     
     @discardableResult
-    public func setAsGetterSetter(getter: CompoundStatement,
+    func setAsGetterSetter(getter: CompoundStatement,
                                   setter: PropertyGenerationIntention.Setter) -> MemberBuilder {
         
         targetMember.mode = .property(get: FunctionBodyIntention(body: getter),
@@ -525,14 +525,14 @@ public extension MemberBuilder where T: PropertyGenerationIntention {
     }
     
     @discardableResult
-    public func setInitialValue(expression: Expression?) -> MemberBuilder {
+    func setInitialValue(expression: Expression?) -> MemberBuilder {
         targetMember.mode = .computed(FunctionBodyIntention(body: []))
         
         return self
     }
     
     @discardableResult
-    public func setIsStatic(_ isStatic: Bool) -> MemberBuilder {
+    func setIsStatic(_ isStatic: Bool) -> MemberBuilder {
         if isStatic {
             if !targetMember.attributes.contains(.attribute("class")) {
                 targetMember.attributes.append(.attribute("class"))
@@ -682,7 +682,7 @@ public extension TypeBuilder where T: ClassExtensionGenerationIntention {
     /// Marks the target type for this type builder as an implementation for a
     /// category extension interface declaration.
     @discardableResult
-    public func setAsCategoryImplementation(categoryName: String) -> TypeBuilder {
+    func setAsCategoryImplementation(categoryName: String) -> TypeBuilder {
         targetType.categoryName = categoryName
         
         return self
@@ -692,7 +692,7 @@ public extension TypeBuilder where T: ClassExtensionGenerationIntention {
 
 public extension TypeBuilder where T: InstanceVariableContainerIntention {
     @discardableResult
-    public func createInstanceVariable(named name: String, type: SwiftType) -> TypeBuilder {
+    func createInstanceVariable(named name: String, type: SwiftType) -> TypeBuilder {
         let storage = ValueStorage(type: type, ownership: .strong, isConstant: false)
         
         let ivar = InstanceVariableGenerationIntention(name: name, storage: storage)
@@ -707,7 +707,7 @@ public extension TypeBuilder where T: BaseClassIntention {
     /// Marks the target type for this type builder as coming from an interface
     /// declaration.
     @discardableResult
-    public func setAsInterfaceSource() -> TypeBuilder {
+    func setAsInterfaceSource() -> TypeBuilder {
         targetType.isInterfaceSource = true
         
         return self
@@ -716,14 +716,14 @@ public extension TypeBuilder where T: BaseClassIntention {
     /// Marks the target type for this type builder as coming from a category
     /// extension interface declaration.
     @discardableResult
-    public func setAsCategoryInterfaceSource() -> TypeBuilder {
+    func setAsCategoryInterfaceSource() -> TypeBuilder {
         targetType.isInterfaceSource = true
         
         return self
     }
     
     @discardableResult
-    public func createConformance(protocolName: String) -> TypeBuilder {
+    func createConformance(protocolName: String) -> TypeBuilder {
         let prot = ProtocolInheritanceIntention(protocolName: protocolName)
         targetType.addProtocol(prot)
         
@@ -731,7 +731,7 @@ public extension TypeBuilder where T: BaseClassIntention {
     }
     
     @discardableResult
-    public func createSynthesize(propertyName: String, variableName: String? = nil) -> TypeBuilder {
+    func createSynthesize(propertyName: String, variableName: String? = nil) -> TypeBuilder {
         let intent =
             PropertySynthesizationIntention(
                 propertyName: propertyName,
@@ -747,7 +747,7 @@ public extension TypeBuilder where T: BaseClassIntention {
 
 public extension TypeBuilder where T: ClassGenerationIntention {
     @discardableResult
-    public func inherit(from className: String) -> TypeBuilder {
+    func inherit(from className: String) -> TypeBuilder {
         targetType.superclassName = className
         
         return self
@@ -782,7 +782,7 @@ public typealias MethodBuilder = MemberBuilder<MethodGenerationIntention>
 public typealias InitializerBuilder = MemberBuilder<InitGenerationIntention>
 
 public extension MemberBuilder where T == PropertyGenerationIntention {
-    public convenience init(name: String, type: SwiftType) {
+    convenience init(name: String, type: SwiftType) {
         let prop = PropertyGenerationIntention(name: name, type: type, attributes: [])
         
         self.init(targetMember: prop)
@@ -790,7 +790,7 @@ public extension MemberBuilder where T == PropertyGenerationIntention {
 }
 
 public extension PropertyGenerationIntention {
-    public convenience init(name: String, type: SwiftType, builder: (PropertyBuilder) -> Void) {
+    convenience init(name: String, type: SwiftType, builder: (PropertyBuilder) -> Void) {
         self.init(name: name, type: type, attributes: [])
         
         builder(PropertyBuilder(targetMember: self))
@@ -798,7 +798,7 @@ public extension PropertyGenerationIntention {
 }
 
 public extension MethodGenerationIntention {
-    public convenience init(name: String, builder: (MethodBuilder) -> Void) {
+    convenience init(name: String, builder: (MethodBuilder) -> Void) {
         self.init(signature: FunctionSignature(name: name))
         
         builder(MethodBuilder(targetMember: self))
@@ -806,7 +806,7 @@ public extension MethodGenerationIntention {
 }
 
 public extension InitGenerationIntention {
-    public convenience init(builder: (InitializerBuilder) -> Void) {
+    convenience init(builder: (InitializerBuilder) -> Void) {
         self.init(parameters: [])
         
         builder(InitializerBuilder(targetMember: self))

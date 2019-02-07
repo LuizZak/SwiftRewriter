@@ -76,7 +76,7 @@ public typealias GenericArgumentSwiftType = OneOrMore<SwiftType>
 public extension SwiftType {
     /// If this Swift type is a nominal typename, returns the inner type name as
     /// a string, otherwise returns nil.
-    public var typeName: String? {
+    var typeName: String? {
         switch self {
         case .nominal(.typeName(let name)):
             return name
@@ -87,7 +87,7 @@ public extension SwiftType {
     
     /// Whether this type requires surrounding parenthesis when this type is used
     /// within an optional or metatype.
-    public var requiresSurroundingParens: Bool {
+    var requiresSurroundingParens: Bool {
         switch self {
         case .protocolComposition, .block:
             return true
@@ -97,7 +97,7 @@ public extension SwiftType {
     }
     
     /// Returns `true` if this type is a block type
-    public var isBlock: Bool {
+    var isBlock: Bool {
         switch self {
         case .block:
             return true
@@ -108,7 +108,7 @@ public extension SwiftType {
     
     /// Returns `true` if this type is either an optional, an implicitly unwrapped
     /// optional, or a 'nullability-unspecified' optional.
-    public var isOptional: Bool {
+    var isOptional: Bool {
         switch self {
         case .optional, .implicitUnwrappedOptional, .nullabilityUnspecified:
             return true
@@ -117,7 +117,7 @@ public extension SwiftType {
         }
     }
     
-    public var isMetatype: Bool {
+    var isMetatype: Bool {
         switch self {
         case .metatype:
             return true
@@ -126,7 +126,7 @@ public extension SwiftType {
         }
     }
     
-    public var isImplicitlyUnwrapped: Bool {
+    var isImplicitlyUnwrapped: Bool {
         switch self {
         case .implicitUnwrappedOptional:
             return true
@@ -135,7 +135,7 @@ public extension SwiftType {
         }
     }
     
-    public var canBeImplicitlyUnwrapped: Bool {
+    var canBeImplicitlyUnwrapped: Bool {
         switch self {
         case .implicitUnwrappedOptional, .nullabilityUnspecified:
             return true
@@ -144,7 +144,7 @@ public extension SwiftType {
         }
     }
     
-    public var isNullabilityUnspecified: Bool {
+    var isNullabilityUnspecified: Bool {
         switch self {
         case .nullabilityUnspecified:
             return true
@@ -156,7 +156,7 @@ public extension SwiftType {
     /// Returns `true` if this type represents a nominal type.
     /// Except for blocks, metatypes and tuples, all types are considered nominal
     /// types.
-    public var isNominal: Bool {
+    var isNominal: Bool {
         switch self {
         case .block, .metatype, .tuple:
             return false
@@ -166,7 +166,7 @@ public extension SwiftType {
     }
     
     /// Returns `true` iff this SwiftType is a `.protocolComposition` case.
-    public var isProtocolComposition: Bool {
+    var isProtocolComposition: Bool {
         switch self {
         case .protocolComposition:
             return true
@@ -177,7 +177,7 @@ public extension SwiftType {
     
     /// Returns `true` if this type is a `.typeName`, a `.genericTypeName`, or a
     /// `.protocolComposition` type.
-    public var isProtocolComposable: Bool {
+    var isProtocolComposable: Bool {
         switch self {
         case .nominal(.typeName), .nominal(.generic), .protocolComposition:
             return true
@@ -189,7 +189,7 @@ public extension SwiftType {
     /// If this type is an `.optional` or `.implicitUnwrappedOptional` type, returns
     /// an unwrapped version of self.
     /// The return is unwrapped only once.
-    public var unwrapped: SwiftType {
+    var unwrapped: SwiftType {
         switch self {
         case .optional(let type),
              .implicitUnwrappedOptional(let type),
@@ -205,7 +205,7 @@ public extension SwiftType {
     /// returns an unwrapped version of self.
     /// The return is then recursively unwrapped again until a non-optional base
     /// type is reached.
-    public var deepUnwrapped: SwiftType {
+    var deepUnwrapped: SwiftType {
         switch self {
         case .optional(let type),
              .implicitUnwrappedOptional(let type),
@@ -218,17 +218,17 @@ public extension SwiftType {
     }
     
     /// Returns `self` wrapped over an `.optional` case.
-    public var asOptional: SwiftType {
+    var asOptional: SwiftType {
         return .optional(self)
     }
     
     /// Returns `self` wrapped over an `.implicitUnwrappedOptional` case.
-    public var asImplicitUnwrapped: SwiftType {
+    var asImplicitUnwrapped: SwiftType {
         return .implicitUnwrappedOptional(self)
     }
     
     /// Returns `self` wrapped over an `.nullabilityUnspecified` case.
-    public var asNullabilityUnspecified: SwiftType {
+    var asNullabilityUnspecified: SwiftType {
         return .nullabilityUnspecified(self)
     }
     
@@ -237,7 +237,7 @@ public extension SwiftType {
     ///
     /// In case the other type is not an optional type, returns this type with
     /// no optionality.
-    public func withSameOptionalityAs(_ type: SwiftType) -> SwiftType {
+    func withSameOptionalityAs(_ type: SwiftType) -> SwiftType {
         return type.wrappingOther(self.deepUnwrapped)
     }
     
@@ -248,7 +248,7 @@ public extension SwiftType {
     /// If this type is not optional, `type` is returned, instead.
     ///
     /// Lookup is deep, and returns the same optionality chain as this type's.
-    public func wrappingOther(_ type: SwiftType) -> SwiftType {
+    func wrappingOther(_ type: SwiftType) -> SwiftType {
         switch self {
         case .optional(let inner):
             return .optional(inner.wrappingOther(type))
@@ -261,45 +261,45 @@ public extension SwiftType {
         }
     }
     
-    public static let void = SwiftType.tuple(.empty)
-    public static let int = SwiftType.typeName("Int")
-    public static let uint = SwiftType.typeName("UInt")
-    public static let string = SwiftType.typeName("String")
-    public static let bool = SwiftType.typeName("Bool")
-    public static let float = SwiftType.typeName("Float")
-    public static let double = SwiftType.typeName("Double")
-    public static let cgFloat = SwiftType.typeName("CGFloat")
-    public static let any = SwiftType.typeName("Any")
-    public static let anyObject = SwiftType.typeName("AnyObject")
+    static let void = SwiftType.tuple(.empty)
+    static let int = SwiftType.typeName("Int")
+    static let uint = SwiftType.typeName("UInt")
+    static let string = SwiftType.typeName("String")
+    static let bool = SwiftType.typeName("Bool")
+    static let float = SwiftType.typeName("Float")
+    static let double = SwiftType.typeName("Double")
+    static let cgFloat = SwiftType.typeName("CGFloat")
+    static let any = SwiftType.typeName("Any")
+    static let anyObject = SwiftType.typeName("AnyObject")
     
-    public static let selector = SwiftType.typeName("Selector")
+    static let selector = SwiftType.typeName("Selector")
     
-    public static let nsArray = SwiftType.typeName("NSArray")
-    public static let nsDictionary = SwiftType.typeName("NSDictionary")
+    static let nsArray = SwiftType.typeName("NSArray")
+    static let nsDictionary = SwiftType.typeName("NSDictionary")
     
     /// A special type name to use to represent instancetype's from Objective-C.
-    public static let instancetype = SwiftType.typeName("__instancetype")
+    static let instancetype = SwiftType.typeName("__instancetype")
     
     /// A special type used in place of definitions with improper typing
-    public static let errorType = SwiftType.typeName("<<error type>>")
+    static let errorType = SwiftType.typeName("<<error type>>")
     
-    public static func openRange(_ operand: SwiftType) -> SwiftType {
+    static func openRange(_ operand: SwiftType) -> SwiftType {
         return .nominal(.generic("Range", parameters: .tail(operand)))
     }
     
-    public static func closedRange(_ operand: SwiftType) -> SwiftType {
+    static func closedRange(_ operand: SwiftType) -> SwiftType {
         return .nominal(.generic("ClosedRange", parameters: .tail(operand)))
     }
     
-    public static func typeName(_ name: String) -> SwiftType {
+    static func typeName(_ name: String) -> SwiftType {
         return .nominal(.typeName(name))
     }
     
-    public static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
+    static func generic(_ name: String, parameters: GenericArgumentSwiftType) -> SwiftType {
         return .nominal(.generic(name, parameters: parameters))
     }
     
-    public static func swiftBlock(returnType: SwiftType, parameters: [SwiftType]) -> SwiftType {
+    static func swiftBlock(returnType: SwiftType, parameters: [SwiftType]) -> SwiftType {
         return .block(returnType: returnType, parameters: parameters, attributes: [])
     }
     
@@ -312,7 +312,7 @@ public extension SwiftType {
     ///   - removeImplicitsOnly: Whether to only remove implicit unwrapped optionals,
     /// keeping optionals in place.
     /// - Returns: The deeply unwrapped version of the input type.
-    public static func asNonnullDeep(_ type: SwiftType,
+    static func asNonnullDeep(_ type: SwiftType,
                                      removeUnspecifiedsOnly: Bool = false) -> SwiftType {
         
         var result: SwiftType = type
