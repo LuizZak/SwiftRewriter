@@ -25,7 +25,7 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", .branch("swift5.0")),
         .package(url: "https://github.com/LuizZak/console.git", .branch("swift5.0")),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.40200.0"))
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50000.0"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define

@@ -598,7 +598,12 @@ extension SwiftSyntaxProducer {
                 iterating(ivarHolder.instanceVariables) { ivar in
                     addExtraLeading(indentation())
                     
-                    builder.addDecl(varDeclGenerator.generateInstanceVariable(ivar))
+                    builder.addMemberDeclListItem(
+                        SyntaxFactory.makeMemberDeclListItem(
+                            decl: varDeclGenerator.generateInstanceVariable(ivar),
+                            semicolon: nil
+                        )
+                    )
                 }
                 
                 if !intention.properties.isEmpty {
@@ -609,7 +614,12 @@ extension SwiftSyntaxProducer {
             iterating(intention.properties.compactMap { $0 as? EnumCaseGenerationIntention }) { prop in
                 addExtraLeading(indentation())
                 
-                builder.addDecl(generateEnumCase(prop))
+                builder.addMemberDeclListItem(
+                    SyntaxFactory.makeMemberDeclListItem(
+                        decl: generateEnumCase(prop),
+                        semicolon: nil
+                    )
+                )
             }
             // TODO: ...and again...
             iterating(intention.properties.filter { !($0 is EnumCaseGenerationIntention) }) { prop in
@@ -619,16 +629,24 @@ extension SwiftSyntaxProducer {
                 
                 addExtraLeading(indentation())
                 
-                builder.addDecl(varDeclGenerator.generateProperty(prop))
+                builder.addMemberDeclListItem(
+                    SyntaxFactory.makeMemberDeclListItem(
+                        decl: varDeclGenerator.generateProperty(prop),
+                        semicolon: nil
+                    )
+                )
             }
             
             iterating(intention.constructors) { _init in
                 addExtraLeading(indentation())
                 
-                builder.addDecl(
-                    generateInitializer(
-                        _init,
-                        alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                builder.addMemberDeclListItem(
+                    SyntaxFactory.makeMemberDeclListItem(
+                        decl: generateInitializer(
+                            _init,
+                            alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                        ),
+                        semicolon: nil
                     )
                 )
             }
@@ -643,8 +661,11 @@ extension SwiftSyntaxProducer {
             if let _deinit = _deinit {
                 addExtraLeading(indentation())
                 
-                builder.addDecl(
-                    generateDeinitializer(_deinit)
+                builder.addMemberDeclListItem(
+                    SyntaxFactory.makeMemberDeclListItem(
+                        decl: generateDeinitializer(_deinit),
+                        semicolon: nil
+                    )
                 )
                 addExtraLeading(.newlines(2))
             }
@@ -652,10 +673,13 @@ extension SwiftSyntaxProducer {
             iterating(methods) { method in
                 addExtraLeading(indentation())
                 
-                builder.addDecl(
-                    generateFunction(
-                        method,
-                        alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                builder.addMemberDeclListItem(
+                    SyntaxFactory.makeMemberDeclListItem(
+                        decl: generateFunction(
+                            method,
+                            alwaysEmitBody: !(intention is ProtocolGenerationIntention)
+                        ),
+                        semicolon: nil
                     )
                 )
             }

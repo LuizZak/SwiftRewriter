@@ -155,7 +155,7 @@ extension SwiftSyntaxProducer {
                         self.addExtraLeading(self.indentation())
                     }
                     
-                    return SyntaxFactory.makeCodeBlockItem(item: self.generateExpression(exp), semicolon: nil)
+                    return SyntaxFactory.makeCodeBlockItem(item: self.generateExpression(exp), semicolon: nil, errorTokens: nil)
                 }
             }
     }
@@ -169,7 +169,7 @@ extension SwiftSyntaxProducer {
             .generateVariableDeclarations(stmt)
             .map { decl in
                 return {
-                    SyntaxFactory.makeCodeBlockItem(item: decl(), semicolon: nil)
+                    SyntaxFactory.makeCodeBlockItem(item: decl(), semicolon: nil, errorTokens: nil)
                 }
             }
     }
