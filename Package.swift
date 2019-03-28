@@ -21,10 +21,10 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", .branch("swift5.0")),
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.9.0"),
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
-        .package(url: "https://github.com/LuizZak/antlr4-swift.git", .branch("swift5.0")),
-        .package(url: "https://github.com/LuizZak/console.git", .branch("swift5.0")),
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.26"),
+        .package(url: "https://github.com/LuizZak/console.git", from: "0.5.0"),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50000.0"))
     ],
     targets: [
