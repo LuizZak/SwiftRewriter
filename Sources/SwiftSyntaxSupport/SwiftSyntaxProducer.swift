@@ -148,13 +148,6 @@ public class SwiftSyntaxProducer: BaseSwiftSyntaxProducer {
         return false
     }
     
-    private func isDeallocMethod(_ intention: MethodGenerationIntention) -> Bool {
-        return intention.name == "dealloc" && intention.parameters.count == 0
-    }
-}
-
-// MARK: - File generation
-extension SwiftSyntaxProducer {
     func addHistoryTrackingLeadingIfEnabled(_ intention: IntentionProtocol) {
         if !settings.printIntentionHistory {
             return
@@ -166,6 +159,15 @@ extension SwiftSyntaxProducer {
         }
     }
     
+    private func isDeallocMethod(_ intention: MethodGenerationIntention) -> Bool {
+        return intention.name == "dealloc" && intention.parameters.count == 0
+    }
+}
+
+// MARK: - File generation
+extension SwiftSyntaxProducer {
+    
+    /// Generates a source file syntax from a given file generation intention.
     public func generateFile(_ file: FileGenerationIntention) -> SourceFileSyntax {
         return SourceFileSyntax { builder in
             

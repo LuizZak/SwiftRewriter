@@ -13,13 +13,4 @@ enum DecoratableElement {
             return nil
         }
     }
-    
-    var variableDecl: StatementVariableDeclaration? {
-        switch self {
-        case .variableDecl(let decl):
-            return decl
-        case .intention:
-            return nil
-        }
-    }
 }
