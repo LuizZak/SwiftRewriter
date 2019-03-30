@@ -216,7 +216,7 @@ private extension ControlFlowGraph {
             result = _NodeCreationResult(startNode: node)
                 .addingReturnNode(node)
             
-        // Handled separately in _connections(for:start:in) above
+        // Handled separately in _connections(for:start:) above
         case is DeferStatement:
             result = .invalid
             
@@ -534,7 +534,6 @@ private extension ControlFlowGraph {
             return result
         }
         
-        // TODO: What do we do if self.isValid == true?
         func addingJumpInto(from target: ControlFlowGraphJumpTarget) -> _NodeCreationResult {
             if !isValid {
                 return self
@@ -545,6 +544,28 @@ private extension ControlFlowGraph {
             return result
         }
         
+        /**
+         Connects this subgraph result into another subgraph result by means
+         of connecting the start node of each subgraph.
+         
+         Example:
+         
+         This subgraph:
+         
+             start --> n1 --> n2
+ 
+         Second subgraph:
+         
+             p1 --> p2
+                `-> p3
+         
+         Resulting subgraph:
+         
+                  ,-> n1 --> n2
+             start
+                  `-> p1 --> p2
+                         `-> p3
+         */
         func addingBranch(towards result: _NodeCreationResult) -> _NodeCreationResult {
             if !result.isValid {
                 return self
