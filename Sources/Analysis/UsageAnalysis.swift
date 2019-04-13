@@ -289,10 +289,10 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
         return usages
     }
     
-    public func findAllUsages(in syntaxNode: SyntaxNode, functionBody: FunctionBodyIntention) -> [DefinitionUsage] {
-        var usages: [DefinitionUsage] = []
+    public func findAllUsages(in syntaxNode: SyntaxNode,
+                              functionBody: FunctionBodyIntention) -> [DefinitionUsage] {
         
-        let body = functionBody.body
+        var usages: [DefinitionUsage] = []
         
         let visitor =
             AnonymousSyntaxNodeVisitor { node in
@@ -316,7 +316,16 @@ public class LocalUsageAnalyzer: BaseUsageAnalyzer {
                 usages.append(usage)
             }
         
-        visitor.visitStatement(body)
+        switch syntaxNode {
+        case let stmt as Statement:
+            visitor.visitStatement(stmt)
+            
+        case let exp as Expression:
+            visitor.visitExpression(exp)
+            
+        default:
+            fatalError("Cannot search for definitions in statement node of type \(type(of: syntaxNode))")
+        }
         
         return usages
     }

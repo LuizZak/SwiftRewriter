@@ -8,11 +8,11 @@ public protocol InstanceVariableContainerIntention: IntentionProtocol {
 }
 
 public extension InstanceVariableContainerIntention {
-    public func hasInstanceVariable(named name: String) -> Bool {
+    func hasInstanceVariable(named name: String) -> Bool {
         return instanceVariables.contains(where: { $0.name == name })
     }
     
-    public func instanceVariable(named name: String) -> InstanceVariableGenerationIntention? {
+    func instanceVariable(named name: String) -> InstanceVariableGenerationIntention? {
         return instanceVariables.first(where: { $0.name == name })
     }
 }

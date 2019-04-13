@@ -20,7 +20,7 @@ public class PropertyDefinition: ASTNode, InitializableNode {
     public var hasIbInspectableSpecifier: Bool = false
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -41,7 +41,7 @@ public class PropertyAttributesList: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -87,7 +87,7 @@ public class PropertyAttributeNode: ASTNode {
                 length: SourceLength = .zero) {
         
         self.attribute = modifier
-        super.init(isInNonnullContext: isInNonnullContext,
+        super.init(_isInNonnullContext: isInNonnullContext,
                    location: location,
                    length: length)
     }

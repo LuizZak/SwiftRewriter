@@ -6,7 +6,7 @@ public protocol SemanticalObject {
 public extension SemanticalObject where Self: KnownMember {
     /// Returns `true` iff this member type is known to mutate arrays if either
     /// called, if this is a method, or set, in case this is a property/field.
-    public var isArrayMutator: Bool {
+    var isArrayMutator: Bool {
         return semantics.isSuperset(of: Semantics.collectionMutator)
     }
 }

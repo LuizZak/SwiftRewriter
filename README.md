@@ -65,7 +65,7 @@ class MyClass: NSObject {
 
 #### Requirements
 
-Xcode 10.1 & Swift 4.2
+Xcode 10.2 & Swift 5.0
 
 #### Usage
 
@@ -138,6 +138,6 @@ Some other libraries and resources that are also concerned with automating the p
 
 - [Yahoo's Objc2Swift](https://github.com/yahoojapan/objc2swift) makes language transformations, but it has shortcomings as far as making large transpilations go: Its grammar implementation lacks modern Objective-C features (such as generic types), and it makes no semantic transformations, doing AST conversions only. Main inspiration for writing this tool, I just thought augmenting it with a more modern Objective-C syntax and some semantical awareness would be nifty.
 
-- [Objc2Swift.js](http://okaxaki.github.io/objc2swift/index.html) is a more fully-fledged, nifty converter that is semantically-aware and attempts to produce working code while respecting semantics, but it does not currently support emitting Swift 3 and 4-compatible code.
+- [Objc2Swift.js](http://okaxaki.github.io/objc2swift/index.html) is a more fully-fledged, nifty converter that is semantically-aware and attempts to produce working code while respecting semantics, but it does not currently support emitting Swift 3, 4 and 5-compatible code.
 
 - [Swiftify](https://objectivec2swift.com/) is a comercial product which does many high and low-level transformations, producing code that appears to be (I haven't tested it much, tbh) nearly fully-functioning Swift code.

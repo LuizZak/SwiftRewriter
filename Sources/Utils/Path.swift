@@ -33,36 +33,36 @@ public struct Path: CustomStringConvertible {
 }
 
 public extension Sequence where Element == Path {
-    public func firstFilename(containing: String, options: String.CompareOptions = .literal) -> Path? {
+    func firstFilename(containing: String, options: String.CompareOptions = .literal) -> Path? {
         return first { $0.filename(contains: containing, options: options) }
     }
 }
 
 public extension Collection where Element == Path {
-    public func indexOfFilename(containing: String, options: String.CompareOptions = .literal) -> Index? {
-        return index { $0.filename(contains: containing, options: options) }
+    func indexOfFilename(containing: String, options: String.CompareOptions = .literal) -> Index? {
+        return firstIndex { $0.filename(contains: containing, options: options) }
     }
     
-    public func indexOfFilename(matching string: String, options: String.CompareOptions = .literal) -> Index? {
-        return index { $0.filename(is: string, options: options) }
+    func indexOfFilename(matching string: String, options: String.CompareOptions = .literal) -> Index? {
+        return firstIndex { $0.filename(is: string, options: options) }
     }
 }
 
 public extension Sequence where Element == String {
     /// Returns a list of paths for each string in this sequence
-    public var asPaths: [Path] {
+    var asPaths: [Path] {
         return map { $0.path }
     }
 }
 
 public extension String {
     /// Returns a `Path` with this string
-    public var path: Path {
+    var path: Path {
         return Path(fullPath: self)
     }
     
     /// Returns a `Path` with this string's path with tildes expanded
-    public var tildePath: Path {
+    var tildePath: Path {
         return Path(fullPath: self)
     }
 }

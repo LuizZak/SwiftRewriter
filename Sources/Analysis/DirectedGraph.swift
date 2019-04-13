@@ -99,34 +99,34 @@ public enum DirectedGraphVisitElement<E: DirectedGraphEdge, N: DirectedGraphNode
 
 public extension DirectedGraph {
     @inlinable
-    public func areEdgesEqual(_ edge1: Edge, _ edge2: Edge) -> Bool {
+    func areEdgesEqual(_ edge1: Edge, _ edge2: Edge) -> Bool {
         return areNodesEqual(startNode(for: edge1), startNode(for: edge2))
             && areNodesEqual(endNode(for: edge1), endNode(for: edge2))
     }
     
     @inlinable
-    public func allEdges(for node: Node) -> [Edge] {
+    func allEdges(for node: Node) -> [Edge] {
         return edges(towards: node) + edges(from: node)
     }
     
     @inlinable
-    public func nodesConnected(from node: Node) -> [Node] {
+    func nodesConnected(from node: Node) -> [Node] {
         return edges(from: node).map(self.endNode(for:))
     }
     
     @inlinable
-    public func nodesConnected(towards node: Node) -> [Node] {
+    func nodesConnected(towards node: Node) -> [Node] {
         return edges(towards: node).map(self.startNode(for:))
     }
     
     @inlinable
-    public func allNodesConnected(to node: Node) -> [Node] {
+    func allNodesConnected(to node: Node) -> [Node] {
         return nodesConnected(towards: node) + nodesConnected(from: node)
     }
     
     /// Performs a depth-first visiting of this directed graph
     @inlinable
-    public func depthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
+    func depthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
         var queue: [DirectedGraphVisitElement<Edge, Node>] = []
         
@@ -150,7 +150,7 @@ public extension DirectedGraph {
     
     /// Performs a breadth-first visiting of this directed graph
     @inlinable
-    public func breadthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
+    func breadthFirstVisit(start: Node, _ visitor: (DirectedGraphVisitElement<Edge, Node>) -> Void) {
         var visited: Set<Node> = []
         var queue: [DirectedGraphVisitElement<Edge, Node>] = []
         
@@ -184,7 +184,7 @@ public extension DirectedGraph {
     /// - Returns: A list of the nodes from this graph, topologically sorted, or
     /// `nil`, in case it cannot be sorted.
     @inlinable
-    public func topologicalSorted() -> [Node]? {
+    func topologicalSorted() -> [Node]? {
         var permanentMark: Set<Node> = []
         var temporaryMark: Set<Node> = []
         
@@ -230,21 +230,21 @@ public protocol DirectedGraphNode: Hashable {
 }
 
 public extension DirectedGraphEdge where Self: AnyObject {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
+    static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs === rhs
     }
     
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
     }
 }
 
 public extension DirectedGraphNode where Self: AnyObject {
-    public static func == (lhs: Self, rhs: Self) -> Bool {
+    static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs === rhs
     }
     
-    public func hash(into hasher: inout Hasher) {
+    func hash(into hasher: inout Hasher) {
         hasher.combine(ObjectIdentifier(self))
     }
 }

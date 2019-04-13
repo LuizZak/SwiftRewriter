@@ -188,7 +188,7 @@ public enum ArgumentRewritingStrategy {
 
 public extension Sequence where Element == ArgumentRewritingStrategy {
     
-    public func requiredArgumentCount() -> Int {
+    func requiredArgumentCount() -> Int {
         var requiredArgs = reduce(0) { $0 + $1.argumentConsumeCount }
         
         // Verify max arg count inferred from indexes of arguments
@@ -199,11 +199,11 @@ public extension Sequence where Element == ArgumentRewritingStrategy {
         return requiredArgs
     }
     
-    public func argumentLabels() -> [String?] {
+    func argumentLabels() -> [String?] {
         return map { $0.label }
     }
     
-    public static func addingLabels(_ labels: String?...) -> [Element] {
+    static func addingLabels(_ labels: String?...) -> [Element] {
         return labels.map { $0.map { .labeled($0, .asIs) } ?? .asIs }
     }
 }
@@ -214,7 +214,7 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
     /// rewriting strategies.
     ///
     /// - precondition: `arguments.count >= self.requiredArgumentCount()`
-    public func rewrite(arguments: [FunctionArgument]) -> [FunctionArgument] {
+    func rewrite(arguments: [FunctionArgument]) -> [FunctionArgument] {
         precondition(arguments.count >= self.requiredArgumentCount())
         
         var result: [FunctionArgument] = []
@@ -240,7 +240,7 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
     /// rewriting strategies.
     ///
     /// - precondition: `parameters.count >= self.requiredArgumentCount()`
-    public func rewrite(parameters: [ParameterSignature]) -> [ParameterSignature] {
+    func rewrite(parameters: [ParameterSignature]) -> [ParameterSignature] {
         precondition(parameters.count >= self.requiredArgumentCount())
         
         var result: [ParameterSignature] = []
@@ -266,7 +266,7 @@ public extension Collection where Element == ArgumentRewritingStrategy, Index ==
 
 public extension ValueTransformer where U == [FunctionArgument] {
     
-    public func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
+    func rewritingArguments(_ transformers: [ArgumentRewritingStrategy],
                                    file: String = #file,
                                    line: Int = #line) -> ValueTransformer {
         

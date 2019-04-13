@@ -75,7 +75,7 @@ class VariableDeclSyntaxGenerator {
     
     private func generate(_ binding: PatternBindingElement,
                           hasComma: Bool,
-                          accessors: (() -> AccessorBlockSyntax)? = nil) -> PatternBindingSyntax {
+                          accessors: (() -> Syntax)? = nil) -> PatternBindingSyntax {
         
         return PatternBindingSyntax { builder in
             builder.usePattern(IdentifierPatternSyntax { builder in
@@ -109,7 +109,7 @@ class VariableDeclSyntaxGenerator {
         }
     }
     
-    private func makeAccessorBlockCreator(_ property: PropertyGenerationIntention) -> (() -> AccessorBlockSyntax)? {
+    private func makeAccessorBlockCreator(_ property: PropertyGenerationIntention) -> (() -> Syntax)? {
         // Emit { get } and { get set } accessor blocks for protocols
         if let property = property as? ProtocolPropertyGenerationIntention {
             return { [producer] in
@@ -120,9 +120,8 @@ class VariableDeclSyntaxGenerator {
                     )
                     
                     builder.useRightBrace(SyntaxFactory.makeRightBraceToken())
-                    var accessors: [AccessorDeclSyntax] = []
                     
-                    accessors.append(AccessorDeclSyntax { builder in
+                    builder.addAccessorDecl(AccessorDeclSyntax { builder in
                         builder.useAccessorKind(
                             SyntaxFactory
                                 .makeToken(.contextualKeyword("get"),
@@ -132,7 +131,7 @@ class VariableDeclSyntaxGenerator {
                     })
                     
                     if !property.isReadOnly {
-                        accessors.append(AccessorDeclSyntax { builder in
+                        builder.addAccessorDecl(AccessorDeclSyntax { builder in
                             builder.useAccessorKind(
                                 SyntaxFactory
                                     .makeToken(.contextualKeyword("set"),
@@ -141,10 +140,6 @@ class VariableDeclSyntaxGenerator {
                             )
                         })
                     }
-                    
-                    builder.useAccessorListOrStmtList(
-                        SyntaxFactory.makeAccessorList(accessors)
-                    )
                 }
             }
         }
@@ -155,7 +150,7 @@ class VariableDeclSyntaxGenerator {
             
         case .computed(let body):
             return { [producer] in
-                return AccessorBlockSyntax { builder in
+                return CodeBlockSyntax { builder in
                     builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
                     
                     producer.indent()
@@ -164,7 +159,7 @@ class VariableDeclSyntaxGenerator {
                     
                     let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
                     
-                    builder.useAccessorListOrStmtList(stmtList)
+                    builder.addCodeBlockItem(SyntaxFactory.makeCodeBlockItem(item: stmtList, semicolon: nil, errorTokens: nil))
                     
                     producer.addExtraLeading(.newlines(1) + producer.indentation())
                     builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
@@ -216,9 +211,8 @@ class VariableDeclSyntaxGenerator {
                     
                     producer.deindent()
                     
-                    let accessorList = SyntaxFactory.makeAccessorList([getter, setter])
-                    
-                    builder.useAccessorListOrStmtList(accessorList)
+                    builder.addAccessorDecl(getter)
+                    builder.addAccessorDecl(setter)
                     
                     producer.addExtraLeading(.newlines(1) + producer.indentation())
                     builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
@@ -260,7 +254,7 @@ private extension VariableDeclSyntaxGenerator {
     }
     
     func makeDeclaration(_ intention: ValueStorageIntention) -> VariableDeclaration {
-        var accessors: (() -> AccessorBlockSyntax)?
+        var accessors: (() -> Syntax)?
         if let intention = intention as? PropertyGenerationIntention {
             accessors = makeAccessorBlockCreator(intention)
         }
@@ -279,7 +273,7 @@ private extension VariableDeclSyntaxGenerator {
                          attributes: [() -> AttributeSyntax],
                          intention: IntentionProtocol?,
                          modifiers: ModifiersDecoratorResult,
-                         accessors: (() -> AccessorBlockSyntax)? = nil,
+                         accessors: (() -> Syntax)? = nil,
                          initialization: Expression? = nil) -> VariableDeclaration {
         
         var patternBinding = makePatternBinding(name: name, type: storage.type, initialization: initialization)

@@ -47,7 +47,7 @@ extension ExpressionPostfixBuildable {
 }
 
 public extension ExpressionPostfixBuildable {
-    public func call(_ arguments: [FunctionArgument],
+    func call(_ arguments: [FunctionArgument],
                      type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
         
@@ -59,7 +59,7 @@ public extension ExpressionPostfixBuildable {
     
     /// Returns a postfix call with this expression as a function, and a series
     /// of unlabeled arguments as input.
-    public func call(_ unlabeledArguments: [Expression],
+    func call(_ unlabeledArguments: [Expression],
                      type: SwiftType?,
                      callableSignature: SwiftType?) -> PostfixExpression {
         
@@ -71,7 +71,7 @@ public extension ExpressionPostfixBuildable {
     }
     
     /// Creates a member access postfix expression with this expression
-    public func dot(_ member: String, type: SwiftType?) -> PostfixExpression {
+    func dot(_ member: String, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.member(member)
         op.returnType = type
         
@@ -79,7 +79,7 @@ public extension ExpressionPostfixBuildable {
     }
     
     /// Creates a subscript access postfix expression with this expression
-    public func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
+    func sub(_ exp: Expression, type: SwiftType?) -> PostfixExpression {
         let op = Postfix.subscript(exp)
         op.returnType = type
         

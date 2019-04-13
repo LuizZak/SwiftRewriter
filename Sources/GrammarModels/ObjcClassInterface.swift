@@ -7,28 +7,28 @@ public class ObjcClassInterface: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
 public extension ObjcClassInterface {
-    public var properties: [PropertyDefinition] {
+    var properties: [PropertyDefinition] {
         return childrenMatching()
     }
     
-    public var superclass: SuperclassName? {
+    var superclass: SuperclassName? {
         return firstChild()
     }
     
-    public var protocolList: ProtocolReferenceList? {
+    var protocolList: ProtocolReferenceList? {
         return firstChild()
     }
     
-    public var ivarsList: IVarsList? {
+    var ivarsList: IVarsList? {
         return firstChild()
     }
     
-    public var methods: [MethodDefinition] {
+    var methods: [MethodDefinition] {
         return childrenMatching()
     }
 }
@@ -45,7 +45,7 @@ public class IVarsList: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -58,7 +58,7 @@ public class IVarDeclaration: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 
@@ -68,7 +68,7 @@ public class ProtocolReferenceList: ASTNode, InitializableNode {
     }
     
     public required init(isInNonnullContext: Bool) {
-        super.init(isInNonnullContext: isInNonnullContext)
+        super.init(_isInNonnullContext: isInNonnullContext)
     }
 }
 

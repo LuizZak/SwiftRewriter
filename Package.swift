@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.0
 // The swift-tools-version declares the minimum version of Swift required to
 // build this package.
 
@@ -21,11 +21,11 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.7.0"),
-        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0"),
-        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.25"),
-        .package(url: "https://github.com/LuizZak/console.git", from: "0.1.0"),
-        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.40200.0"))
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.9.0"),
+        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.26"),
+        .package(url: "https://github.com/LuizZak/console.git", from: "0.5.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50000.0"))
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define
@@ -122,13 +122,7 @@ let package = Package(
             dependencies: ["GrammarModels"]),
         .testTarget(
             name: "SwiftASTTests",
-            dependencies: ["SwiftAST",
-                           "TestCommons",
-                           // TODO: We use this SwiftRewriterLib dependency here
-                           // to print AST's in a test for debugging purposes.
-                           // Attempt to abstract a simple AST-to-string functionality
-                           // to TestCommons and use that one, instead.
-                           "SwiftRewriterLib"]),
+            dependencies: ["SwiftAST", "TestCommons"]),
         .testTarget(
             name: "IntentionsTests",
             dependencies: ["Intentions",
@@ -190,5 +184,5 @@ let package = Package(
             dependencies: ["TestCommons",
                            "Utils", "TypeSystem"])
     ],
-    swiftLanguageVersions: [.v4_2]
+    swiftLanguageVersions: [.v5]
 )

@@ -623,7 +623,7 @@ public final class SwiftRewriter {
 
 // MARK: - IntentionCollectorDelegate
 fileprivate extension SwiftRewriter {
-    fileprivate class CollectorDelegate: IntentionCollectorDelegate {
+    class CollectorDelegate: IntentionCollectorDelegate {
         var typeMapper: TypeMapper
         var typeParser: TypeParsing
         

@@ -69,7 +69,9 @@ class MutatingModifiersDecorator: ModifiersSyntaxDecorator {
                         name: makeIdentifier("mutating")
                             .addingTrailingSpace()
                             .withExtraLeading(from: $0),
-                        detail: nil)
+                        detailLeftParen: nil,
+                        detail: nil,
+                        detailRightParen: nil)
             }]
         }
         
@@ -93,7 +95,9 @@ class StaticModifiersDecorator: ModifiersSyntaxDecorator {
                             .makeStaticKeyword()
                             .addingTrailingSpace()
                             .withExtraLeading(from: $0),
-                        detail: nil)
+                        detailLeftParen: nil,
+                        detail: nil,
+                        detailRightParen: nil)
                 }]
         }
         
@@ -119,8 +123,9 @@ class AccessLevelModifiersDecorator: ModifiersSyntaxDecorator {
                     name: token
                         .addingTrailingSpace()
                         .withExtraLeading(from: $0),
-                    detail: nil
-            )
+                    detailLeftParen: nil,
+                    detail: nil,
+                    detailRightParen: nil)
         }]
     }
 }
@@ -145,9 +150,9 @@ class PropertySetterAccessModifiersDecorator: ModifiersSyntaxDecorator {
             { producer in
                 DeclModifierSyntax { builder in
                     builder.useName(setterAccessLevel.withExtraLeading(from: producer))
-                    builder.addToken(SyntaxFactory.makeLeftParenToken())
-                    builder.addToken(makeIdentifier("set"))
-                    builder.addToken(SyntaxFactory.makeRightParenToken().withTrailingSpace())
+                    builder.useDetailLeftParen(SyntaxFactory.makeLeftParenToken())
+                    builder.useDetail(makeIdentifier("set"))
+                    builder.useDetailRightParen(SyntaxFactory.makeRightParenToken().withTrailingSpace())
                 }
             }
         ]
@@ -170,7 +175,7 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
         return [
             {
                 let token: TokenSyntax
-                let detail: TokenListSyntax?
+                let detail: TokenSyntax?
                 
                 switch ownership {
                 case .strong:
@@ -183,26 +188,18 @@ class OwnershipModifiersDecorator: ModifiersSyntaxDecorator {
                     
                 case .unownedSafe:
                     token = makeIdentifier("unowned")
-                    detail = SyntaxFactory
-                        .makeTokenList([
-                            SyntaxFactory.makeLeftParenToken(),
-                            makeIdentifier("safe"),
-                            SyntaxFactory.makeRightParenToken().withTrailingSpace()
-                        ])
+                    detail = makeIdentifier("safe")
                     
                 case .unownedUnsafe:
                     token = makeIdentifier("unowned")
-                    detail = SyntaxFactory
-                        .makeTokenList([
-                            SyntaxFactory.makeLeftParenToken(),
-                            makeIdentifier("unsafe"),
-                            SyntaxFactory.makeRightParenToken().withTrailingSpace()
-                        ])
+                    detail = makeIdentifier("unsafe")
                 }
-        
+                
                 return SyntaxFactory
                     .makeDeclModifier(name: token.withExtraLeading(from: $0),
-                                      detail: detail)
+                                      detailLeftParen: detail == nil ? nil : SyntaxFactory.makeLeftParenToken(),
+                                      detail: detail,
+                                      detailRightParen: detail == nil ? nil : SyntaxFactory.makeRightParenToken().withTrailingSpace())
             }
         ]
     }

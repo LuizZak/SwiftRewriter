@@ -61,7 +61,7 @@ public class DeferStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asDefer: DeferStatement? {
+    var asDefer: DeferStatement? {
         return cast()
     }
 }

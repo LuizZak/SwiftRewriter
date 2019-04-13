@@ -143,7 +143,7 @@ public class SwitchStatement: Statement {
 }
 public extension Statement {
     @inlinable
-    public var asSwitch: SwitchStatement? {
+    var asSwitch: SwitchStatement? {
         return cast()
     }
 }

@@ -133,7 +133,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         intention.parent = self
     }
     public func removeProtocol(_ intention: ProtocolInheritanceIntention) {
-        if let index = protocols.index(where: { $0 === intention }) {
+        if let index = protocols.firstIndex(where: { $0 === intention }) {
             intention.parent = nil
             protocols.remove(at: index)
         }
@@ -165,7 +165,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         intention.parent = self
     }
     public func removeProperty(_ intention: PropertyGenerationIntention) {
-        if let index = properties.index(where: { $0 === intention }) {
+        if let index = properties.firstIndex(where: { $0 === intention }) {
             intention.parent = nil
             intention.type = nil
             properties.remove(at: index)
@@ -201,7 +201,7 @@ public class TypeGenerationIntention: FromSourceIntention {
         intention.parent = self
     }
     public func removeMethod(_ intention: MethodGenerationIntention) {
-        if let index = methods.index(where: { $0 === intention }) {
+        if let index = methods.firstIndex(where: { $0 === intention }) {
             intention.parent = nil
             intention.type = nil
             methods.remove(at: index)

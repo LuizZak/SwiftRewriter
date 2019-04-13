@@ -5,7 +5,7 @@ import Antlr4
 public protocol DeclarationParserRule { }
 
 public extension Contextable where Base: DeclarationParserRule {
-    public var scope: ContainmentScope {
+    var scope: ContainmentScope {
         var parent = base.getParent()
         while let p = parent {
             if p is ObjectiveCParser.CompoundStatementContext {
@@ -24,7 +24,7 @@ public extension Contextable where Base: DeclarationParserRule {
     }
     
     /// Describes the contained scope of a declaration
-    public enum ContainmentScope {
+    enum ContainmentScope {
         case global
         case `class`
         case local
@@ -33,7 +33,7 @@ public extension Contextable where Base: DeclarationParserRule {
 
 public extension Contextable where Base: ObjectiveCParser.VarDeclarationContext {
     /// Whether this declaration represents a static variable declaration
-    public var isStatic: Bool {
+    var isStatic: Bool {
         guard let specs = base.declarationSpecifiers()?.storageClassSpecifier() else {
             return false
         }

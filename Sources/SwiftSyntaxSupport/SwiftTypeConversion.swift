@@ -97,7 +97,10 @@ public class SwiftTypeConverter {
                             .makeAttribute(
                                 atSignToken: SyntaxFactory.makeAtSignToken(),
                                 attributeName: makeIdentifier("autoclosure"),
-                                balancedTokens: SyntaxFactory.makeBlankTokenList()
+                                leftParen: nil,
+                                argument: nil,
+                                rightParen: nil,
+                                tokenList: SyntaxFactory.makeBlankTokenList()
                             )
                         )
                         
@@ -106,7 +109,10 @@ public class SwiftTypeConverter {
                             .makeAttribute(
                                 atSignToken: SyntaxFactory.makeAtSignToken(),
                                 attributeName: makeIdentifier("escaping"),
-                                balancedTokens: SyntaxFactory.makeBlankTokenList()
+                                leftParen: nil,
+                                argument: nil,
+                                rightParen: nil,
+                                tokenList: SyntaxFactory.makeBlankTokenList()
                             )
                         )
                         
@@ -115,7 +121,10 @@ public class SwiftTypeConverter {
                             .makeAttribute(
                                 atSignToken: SyntaxFactory.makeAtSignToken(),
                                 attributeName: makeIdentifier("convention"),
-                                balancedTokens: SyntaxFactory.makeTokenList([
+                                leftParen: nil,
+                                argument: nil,
+                                rightParen: nil,
+                                tokenList: SyntaxFactory.makeTokenList([
                                     SyntaxFactory.makeLeftParenToken(),
                                     makeIdentifier(convention.rawValue),
                                     SyntaxFactory.makeRightParenToken().withTrailingSpace()

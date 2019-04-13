@@ -9,7 +9,7 @@ public class TypeNameNode: ASTNode {
         
         self.type = type
         
-        super.init(isInNonnullContext: isInNonnullContext,
+        super.init(_isInNonnullContext: isInNonnullContext,
                    location: location,
                    length: length)
     }

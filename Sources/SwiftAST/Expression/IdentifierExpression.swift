@@ -67,7 +67,7 @@ public class IdentifierExpression: Expression, ExpressibleByStringLiteral {
 }
 public extension Expression {
     @inlinable
-    public var asIdentifier: IdentifierExpression? {
+    var asIdentifier: IdentifierExpression? {
         return cast()
     }
 }

@@ -91,7 +91,7 @@ extension String: KnownTypeReferenceConvertible {
 
 /// Default implementations
 public extension KnownType {
-    public var asKnownTypeReference: KnownTypeReference {
+    var asKnownTypeReference: KnownTypeReference {
         return .knownType(self)
     }
 }
@@ -182,19 +182,19 @@ public protocol KnownProtocolConformance {
 }
 
 public extension KnownMethod {
-    public var isStatic: Bool {
+    var isStatic: Bool {
         return signature.isStatic
     }
 }
 
 public extension KnownProperty {
-    public var memberType: SwiftType {
+    var memberType: SwiftType {
         return storage.type
     }
 }
 
 public extension KnownMethod {
-    public var memberType: SwiftType {
+    var memberType: SwiftType {
         return signature.swiftClosureType
     }
 }
@@ -204,7 +204,7 @@ public enum KnownTypeTraits {
 }
 
 public extension KnownType {
-    public func knownTrait(_ traitName: String) -> TraitType? {
+    func knownTrait(_ traitName: String) -> TraitType? {
         return knownTraits[traitName]
     }
 }
