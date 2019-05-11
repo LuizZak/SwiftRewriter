@@ -73,16 +73,7 @@ public extension SyntaxNode {
     /// Finds the nearest definition scope in the hierarchy chain for this syntax
     /// node which is not `self`
     internal var nearestScopeThatIsNotSelf: CodeScopeNode? {
-        var parent: SyntaxNode? = self
-        while let p = parent {
-            parent = p.parent
-            
-            if p !== self, let scope = p as? CodeScopeNode {
-                return scope
-            }
-        }
-        
-        return nil
+        return parent?.nearestScope
     }
 }
 
