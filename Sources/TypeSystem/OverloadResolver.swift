@@ -11,7 +11,7 @@ public class OverloadResolver {
         self.state = state
     }
     
-    /// Returns a matching resolution by index on a given array of methods.
+    /// Returns a matching resolution on a given array of methods.
     func findBestOverload(in methods: [KnownMethod],
                           argumentTypes: [SwiftType?]) -> KnownMethod? {
         
@@ -24,7 +24,7 @@ public class OverloadResolver {
         return nil
     }
     
-    /// Returns a matching resolution by index on a given array of methods.
+    /// Returns a matching resolution on a given array of methods.
     func findBestOverload(in methods: [KnownMethod],
                           arguments: [Argument]) -> KnownMethod? {
         
@@ -213,14 +213,14 @@ public class OverloadResolver {
 }
 
 class OverloadResolverState {
-    private let cache = ConcurrentValue<[CacheEntry: Int?]>()
+    private let cache = ConcurrentValue<[CacheEntry: Int?]>(value: [:])
     
     public func makeCache() {
         cache.setup(value: [:])
     }
     
     public func tearDownCache() {
-        cache.tearDown()
+        cache.tearDown(value: [:])
     }
     
     func cachedEntry(forSignatures signatures: [FunctionSignature],
@@ -233,7 +233,7 @@ class OverloadResolverState {
         return cache.readingValue { cache in
             let entry = CacheEntry(signatures: signatures, arguments: arguments)
             
-            return cache?[entry]
+            return cache[entry]
         }
     }
     
@@ -245,10 +245,10 @@ class OverloadResolverState {
             return
         }
         
-        cache.modifyingValue { cache in
+        cache.modifyingValueAsync { cache in
             let entry = CacheEntry(signatures: signatures, arguments: arguments)
             
-            cache?[entry] = resolutionIndex
+            cache[entry] = resolutionIndex
         }
     }
     

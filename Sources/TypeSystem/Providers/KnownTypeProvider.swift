@@ -19,8 +19,8 @@ public protocol KnownTypeProvider {
 /// Gathers one or more type providers into a single `KnownTypeProvider` interface.
 public class CompoundKnownTypeProvider: KnownTypeProvider {
     
-    private var typesCache = ConcurrentValue<[String: KnownType?]>()
-    private var canonicalTypenameCache = ConcurrentValue<[String: String]>()
+    private var typesCache = ConcurrentValue<[String: KnownType?]>(value: [:])
+    private var canonicalTypenameCache = ConcurrentValue<[String: String]>(value: [:])
     
     public var providers: [KnownTypeProvider]
     
@@ -34,8 +34,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func tearDownCache() {
-        typesCache.tearDown()
-        canonicalTypenameCache.tearDown()
+        typesCache.tearDown(value: [:])
+        canonicalTypenameCache.tearDown(value: [:])
     }
     
     public func addKnownTypeProvider(_ typeProvider: KnownTypeProvider) {
@@ -49,7 +49,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        if typesCache.usingCache, let type = typesCache.readingValue({ $0?[name] }) {
+        if typesCache.usingCache, let type = typesCache.readingValue({ $0[name] }) {
             return type
         }
         
@@ -63,8 +63,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         if types.isEmpty {
             if typesCache.usingCache {
-                typesCache.modifyingValue { value in
-                    value?[name] = nil
+                typesCache.modifyingValueAsync { value in
+                    value[name] = nil
                 }
             }
             return nil
@@ -73,8 +73,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         let type = CompoundKnownType(typeName: name, types: types)
         
         if typesCache.usingCache {
-            typesCache.modifyingValue { value in
-                value?[name] = type
+            typesCache.modifyingValueAsync { value in
+                value[name] = type
             }
         }
         
@@ -93,7 +93,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     
     public func canonicalName(for typeName: String) -> String? {
         if canonicalTypenameCache.usingCache {
-            if let canonical = canonicalTypenameCache.readingValue({ $0?[typeName] }) {
+            if let canonical = canonicalTypenameCache.readingValue({ $0[typeName] }) {
                 return canonical
             }
         }
@@ -104,8 +104,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
             }
             
             if canonicalTypenameCache.usingCache {
-                canonicalTypenameCache.modifyingState { state in
-                    state.value?[typeName] = canonical
+                canonicalTypenameCache.modifyingValueAsync { state in
+                    state[typeName] = canonical
                 }
             }
             

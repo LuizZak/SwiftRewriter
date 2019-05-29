@@ -11,8 +11,8 @@ public protocol TypealiasProvider {
 /// Gathers one or more typealias providers into a single `TypealiasProvider`
 /// interface.
 public class CompoundTypealiasProvider: TypealiasProvider {
-    private var aliasesCache = ConcurrentValue<[Int: SwiftType]>()
-    private var negativeLookups = ConcurrentValue<Set<String>>()
+    private var aliasesCache = ConcurrentValue<[Int: SwiftType]>(value: [:])
+    private var negativeLookups = ConcurrentValue<Set<String>>(value: [])
     
     public var providers: [TypealiasProvider]
     
@@ -26,17 +26,17 @@ public class CompoundTypealiasProvider: TypealiasProvider {
     }
     
     func tearDownCache() {
-        aliasesCache.tearDown()
-        negativeLookups.tearDown()
+        aliasesCache.tearDown(value: [:])
+        negativeLookups.tearDown(value: [])
     }
     
     public func unalias(_ typeName: String) -> SwiftType? {
-        if aliasesCache.usingCache, let type = aliasesCache.readingValue({ $0?[typeName.hashValue] }) {
+        if aliasesCache.usingCache, let type = aliasesCache.readingValue({ $0[typeName.hashValue] }) {
             return type
         }
         
         // Negative lookups
-        if negativeLookups.usingCache, negativeLookups.readingValue({ $0?.contains(typeName) == true }) {
+        if negativeLookups.usingCache, negativeLookups.readingValue({ $0.contains(typeName) }) {
             return nil
         }
         
@@ -44,8 +44,8 @@ public class CompoundTypealiasProvider: TypealiasProvider {
             if let type = provider.unalias(typeName) {
                 
                 if aliasesCache.usingCache {
-                    aliasesCache.modifyingValue { value in
-                        value?[typeName.hashValue] = type
+                    aliasesCache.modifyingValueAsync { value in
+                        value[typeName.hashValue] = type
                     }
                 }
                 
@@ -55,8 +55,8 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         
         // Store negative lookups
         if negativeLookups.usingCache {
-            negativeLookups.modifyingValue { value -> Void in
-                value?.insert(typeName)
+            negativeLookups.modifyingValueAsync { value -> Void in
+                value.insert(typeName)
             }
         }
         

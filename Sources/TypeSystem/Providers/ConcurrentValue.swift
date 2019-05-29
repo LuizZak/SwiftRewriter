@@ -2,12 +2,12 @@ import Dispatch
 
 final class ConcurrentValue<T> {
     struct CacheState {
-        var value: T?
+        var value: T
     }
     
     private var cacheBarrier =
         DispatchQueue(
-            label: "com.swiftrewriter.compoundtypeprovider.barriervalue_$\(T.self)",
+            label: "com.swiftrewriter.concurrentvalue.valuebarrier_$\(T.self)",
             qos: .default,
             attributes: .concurrent,
             autoreleaseFrequency: .inherit,
@@ -15,10 +15,14 @@ final class ConcurrentValue<T> {
     
     var usingCache = false
     
-    private var state = CacheState()
+    private var state: CacheState
+    
+    init(value: T) {
+        state = CacheState(value: value)
+    }
     
     @inlinable
-    func readingValue<U>(_ block: (T?) -> U) -> U {
+    func readingValue<U>(_ block: (T) -> U) -> U {
         return readingState { block($0.value) }
     }
     
@@ -30,14 +34,26 @@ final class ConcurrentValue<T> {
     }
     
     @inlinable
-    func modifyingValue<U>(_ block: (inout T?) -> U) -> U {
+    func modifyingValue<U>(_ block: (inout T) -> U) -> U {
         return modifyingState { block(&$0.value) }
+    }
+    
+    @inlinable
+    func modifyingValueAsync(_ block: @escaping (inout T) -> Void) -> Void {
+        modifyingState { block(&$0.value) }
     }
     
     @inlinable
     func modifyingState<U>(_ block: (inout CacheState) -> U) -> U {
         return cacheBarrier.sync(flags: .barrier) {
             block(&state)
+        }
+    }
+    
+    @inlinable
+    func modifyingStateAsync(_ block: @escaping (inout CacheState) -> Void) -> Void {
+        cacheBarrier.async(flags: .barrier) {
+            block(&self.state)
         }
     }
     
@@ -50,9 +66,9 @@ final class ConcurrentValue<T> {
     }
     
     @inlinable
-    func tearDown() {
+    func tearDown(value: T) {
         modifyingState { state in
-            state.value = nil
+            state.value = value
             usingCache = false
         }
     }

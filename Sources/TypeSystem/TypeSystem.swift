@@ -16,10 +16,10 @@ public class TypeSystem {
     private var initializedCache = false
     private var overloadResolverState = OverloadResolverState()
     var memberSearchCache = MemberSearchCache()
-    var aliasCache = ConcurrentValue<[SwiftType: SwiftType]>()
-    var allConformancesCache = ConcurrentValue<[String: [KnownProtocolConformance]]>()
-    var typeExistsCache = ConcurrentValue<[String: Bool]>()
-    var knownTypeForSwiftType = ConcurrentValue<[SwiftType: KnownType?]>()
+    var aliasCache = ConcurrentValue<[SwiftType: SwiftType]>(value: [:])
+    var allConformancesCache = ConcurrentValue<[String: [KnownProtocolConformance]]>(value: [:])
+    var typeExistsCache = ConcurrentValue<[String: Bool]>(value: [:])
+    var knownTypeForSwiftType = ConcurrentValue<[SwiftType: KnownType?]>(value: [:])
     
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
@@ -57,10 +57,10 @@ public class TypeSystem {
         protocolConformanceCache = nil
         overloadResolverState.tearDownCache()
         memberSearchCache.tearDownCache()
-        aliasCache.tearDown()
-        allConformancesCache.tearDown()
-        typeExistsCache.tearDown()
-        knownTypeForSwiftType.tearDown()
+        aliasCache.tearDown(value: [:])
+        allConformancesCache.tearDown(value: [:])
+        typeExistsCache.tearDown(value: [:])
+        knownTypeForSwiftType.tearDown(value: [:])
     }
     
     /// Gets the overload resolver instance for this type system
@@ -117,7 +117,7 @@ public class TypeSystem {
     
     /// Returns `true` if a type is known to exists with a given name.
     public func typeExists(_ name: String) -> Bool {
-        if typeExistsCache.usingCache, let result = typeExistsCache.readingValue({ $0?[name] }) {
+        if typeExistsCache.usingCache, let result = typeExistsCache.readingValue({ $0[name] }) {
             return result
         }
         
@@ -133,7 +133,7 @@ public class TypeSystem {
         
         if typeExistsCache.usingCache {
             typeExistsCache.modifyingValue { cache in
-                cache?[name] = result
+                cache[name] = result
             }
         }
         
@@ -710,7 +710,7 @@ public class TypeSystem {
     /// typealiases where found.
     public func resolveAlias(in type: SwiftType) -> SwiftType {
         if aliasCache.usingCache {
-            if let result = aliasCache.readingValue({ $0?[type] }) {
+            if let result = aliasCache.readingValue({ $0[type] }) {
                 return result
             }
         }
@@ -720,7 +720,7 @@ public class TypeSystem {
         
         if aliasCache.usingCache {
             aliasCache.modifyingValue {
-                $0?[type] = result
+                $0[type] = result
             }
         }
         
@@ -826,7 +826,7 @@ public class TypeSystem {
         visitedTypes.insert(type.typeName)
         
         if allConformancesCache.usingCache {
-            if let result = allConformancesCache.readingValue({ $0?[type.typeName] }) {
+            if let result = allConformancesCache.readingValue({ $0[type.typeName] }) {
                 return result
             }
         }
@@ -855,7 +855,7 @@ public class TypeSystem {
         
         if allConformancesCache.usingCache {
             allConformancesCache.modifyingValue { value in
-                value?[type.typeName] = protocols
+                value[type.typeName] = protocols
             }
         }
         
@@ -909,7 +909,7 @@ public class TypeSystem {
     /// Returns a known type for a given SwiftType, if present.
     public func findType(for swiftType: SwiftType) -> KnownType? {
         if knownTypeForSwiftType.usingCache {
-            if let result = knownTypeForSwiftType.readingValue({ $0?[swiftType] }) {
+            if let result = knownTypeForSwiftType.readingValue({ $0[swiftType] }) {
                 return result
             }
         }
@@ -942,7 +942,7 @@ public class TypeSystem {
         
         if knownTypeForSwiftType.usingCache {
             knownTypeForSwiftType.modifyingValue { cache in
-                cache?[swiftType] = result
+                cache[swiftType] = result
             }
         }
         
@@ -1637,31 +1637,21 @@ private class TypealiasExpander {
 }
 
 private final class CompoundKnownTypesCache {
-    private var barrier = DispatchQueue(label: "com.swiftrewriter.compoundtypescache.barrier",
-                                        qos: .default,
-                                        attributes: .concurrent,
-                                        autoreleaseFrequency: .inherit,
-                                        target: nil)
-    
-    private var types: [[String]: KnownType]
-    
-    init() {
-        types = [:]
-    }
+    private var types: ConcurrentValue<[[String]: KnownType]> = ConcurrentValue(value: [:])
     
     func fetch(names: [String]) -> KnownType? {
-        return barrier.sync(execute: { types[names] })
+        return types.readingValue({ $0[names] })
     }
     
     func record(type: KnownType, names: [String]) {
-        barrier.sync(flags: .barrier) {
-            types[names] = type
+        types.modifyingValueAsync {
+            $0[names] = type
         }
     }
 }
 
 private final class ProtocolConformanceCache {
-    private let cache = ConcurrentValue<[String: Entry]>()
+    private let cache = ConcurrentValue<[String: Entry]>(value: [:])
     
     init() {
         cache.setup(value: [:])
@@ -1669,15 +1659,15 @@ private final class ProtocolConformanceCache {
     
     func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
         cache.modifyingValue { entries -> Void in
-            var entry = entries?[typeName, default: Entry(conformances: [:])]
-            entry?.conformances[protocolName] = value
-            entries?[typeName] = entry
+            var entry = entries[typeName, default: Entry(conformances: [:])]
+            entry.conformances[protocolName] = value
+            entries[typeName] = entry
         }
     }
     
     func typeName(_ type: String, conformsTo protocolName: String) -> Bool? {
         return cache.readingValue { entries -> Bool? in
-            return entries?[type]?.conformances[protocolName]
+            return entries[type]?.conformances[protocolName]
         }
     }
     
@@ -1688,32 +1678,25 @@ private final class ProtocolConformanceCache {
 
 private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider {
     
-    private var barrier =
-        DispatchQueue(label: "com.swiftrewriter.typedefinitionsprotocolknowntypeprovider.barrier",
-                      qos: .default,
-                      attributes: .concurrent,
-                      autoreleaseFrequency: .inherit,
-                      target: nil)
-    
-    private var cache: [String: KnownType] = [:]
+    private var cache: ConcurrentValue<[String: KnownType]> = ConcurrentValue(value: [:])
     
     // For remembering attempts to look for protocols that where not found on
     // the protocols list.
     // Avoids repetitive linear lookups on the protocols list over and over.
-    private var negativeLookupResults: Set<String> = []
+    private var negativeLookupResults: ConcurrentValue<Set<String>> = ConcurrentValue(value: [])
     
     func knownType(withName name: String) -> KnownType? {
-        if let cached = barrier.sync(execute: { cache[name] }) {
+        if let cached = cache.readingValue({ $0[name] }) {
             return cached
         }
-        if barrier.sync(execute: { negativeLookupResults.contains(name) }) {
+        if negativeLookupResults.readingValue({ $0.contains(name) }) {
             return nil
         }
         
         let protocols = TypeDefinitions.protocolsList.protocols
         guard let prot = protocols.first(where: { $0.protocolName == name }) else {
-            barrier.sync(flags: .barrier) {
-                _ = negativeLookupResults.insert(name)
+            negativeLookupResults.modifyingValueAsync { value in
+                value.insert(name)
             }
             
             return nil
@@ -1721,7 +1704,7 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         
         let type = makeType(from: prot)
         
-        barrier.sync(flags: .barrier) {
+        cache.modifyingValue { cache in
             cache[name] = type
         }
         
@@ -1781,31 +1764,24 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
 
 private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
     
-    private var barrier =
-        DispatchQueue(label: "com.swiftrewriter.typedefinitionsclassknowntypeprovider.barrier",
-                      qos: .default,
-                      attributes: .concurrent,
-                      autoreleaseFrequency: .inherit,
-                      target: nil)
-    
-    private var cache: [String: KnownType] = [:]
+    private var cache: ConcurrentValue<[String: KnownType]> = ConcurrentValue(value: [:])
     
     // For remembering attempts to look for classes that where not found on
     // the classes list.
     // Avoids repetitive linear lookups on the classes list over and over.
-    private var negativeLookupResults: Set<String> = []
+    private var negativeLookupResults: ConcurrentValue<Set<String>> = ConcurrentValue(value: [])
     
     func knownType(withName name: String) -> KnownType? {
-        if let cached = barrier.sync(execute: { cache[name] }) {
+        if let cached = cache.readingValue({ $0[name] }) {
             return cached
         }
-        if barrier.sync(execute: { negativeLookupResults.contains(name) }) {
+        if negativeLookupResults.readingValue({ $0.contains(name) }) {
             return nil
         }
         
         guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
-            barrier.sync(flags: .barrier) {
-                _ = negativeLookupResults.insert(name)
+            negativeLookupResults.modifyingValueAsync {
+                $0.insert(name)
             }
             
             return nil
@@ -1813,8 +1789,8 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         
         let type = makeType(from: prot)
         
-        barrier.sync(flags: .barrier) {
-            cache[name] = type
+        cache.modifyingValueAsync {
+            $0[name] = type
         }
         
         return type
@@ -1873,9 +1849,9 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
 }
 
 internal final class MemberSearchCache {
-    private let methodsCache = ConcurrentValue<[MethodSearchEntry: KnownMethod?]>()
-    private let propertiesCache = ConcurrentValue<[PropertySearchEntry: KnownProperty?]>()
-    private let fieldsCache = ConcurrentValue<[FieldSearchEntry: KnownProperty?]>()
+    private let methodsCache = ConcurrentValue<[MethodSearchEntry: KnownMethod?]>(value: [:])
+    private let propertiesCache = ConcurrentValue<[PropertySearchEntry: KnownProperty?]>(value: [:])
+    private let fieldsCache = ConcurrentValue<[FieldSearchEntry: KnownProperty?]>(value: [:])
 
     var usingCache: Bool = false
 
@@ -1888,9 +1864,9 @@ internal final class MemberSearchCache {
 
     func tearDownCache() {
         usingCache = false
-        methodsCache.tearDown()
-        propertiesCache.tearDown()
-        fieldsCache.tearDown()
+        methodsCache.tearDown(value: [:])
+        propertiesCache.tearDown(value: [:])
+        fieldsCache.tearDown(value: [:])
     }
 
     func storeMethod(withObjcSelector selector: SelectorSignature,
@@ -1900,14 +1876,14 @@ internal final class MemberSearchCache {
                      in typeName: String,
                      method: KnownMethod?) {
         
-        methodsCache.modifyingValue { cache in
+        methodsCache.modifyingValueAsync { cache in
             let entry = MethodSearchEntry(selector: selector,
                                           invocationTypeHints: invocationTypeHints,
                                           isStatic: isStatic,
                                           includeOptional: includeOptional,
                                           typeName: typeName)
             
-            cache?[entry] = method
+            cache[entry] = method
         }
     }
 
@@ -1917,13 +1893,13 @@ internal final class MemberSearchCache {
                        in typeName: String,
                        property: KnownProperty?) {
         
-        propertiesCache.modifyingValue { cache in
+        propertiesCache.modifyingValueAsync { cache in
             let entry = PropertySearchEntry(name: name,
                                             isStatic: isStatic,
                                             includeOptional: includeOptional,
                                             typeName: typeName)
             
-            cache?[entry] = property
+            cache[entry] = property
         }
     }
 
@@ -1932,12 +1908,12 @@ internal final class MemberSearchCache {
                     in typeName: String,
                     field: KnownProperty?) {
         
-        fieldsCache.modifyingValue { cache in
+        fieldsCache.modifyingValueAsync { cache in
             let entry = FieldSearchEntry(name: name,
                                          isStatic: isStatic,
                                          typeName: typeName)
             
-            cache?[entry] = field
+            cache[entry] = field
         }
     }
 
@@ -1954,7 +1930,7 @@ internal final class MemberSearchCache {
                                           includeOptional: includeOptional,
                                           typeName: typeName)
             
-            return cache?[entry]
+            return cache[entry]
         }
     }
 
@@ -1969,7 +1945,7 @@ internal final class MemberSearchCache {
                                             includeOptional: includeOptional,
                                             typeName: typeName)
             
-            return cache?[entry]
+            return cache[entry]
         }
     }
 
@@ -1982,7 +1958,7 @@ internal final class MemberSearchCache {
                                          isStatic: isStatic,
                                          typeName: typeName)
             
-            return cache?[entry]
+            return cache[entry]
         }
     }
 
