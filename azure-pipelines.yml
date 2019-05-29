@@ -6,9 +6,18 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'macOS-10.14'
+jobs:
+- job: macOS
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - bash: 'sudo xcode-select -s /Applications/Xcode_10.2.app/Contents/Developer'
+  - bash: 'swift test'
 
-steps:
-- bash: 'sudo xcode-select -s /Applications/Xcode_10.2.app/Contents/Developer'
-- bash: 'swift test'
+- job: Linux
+  container:
+    image: swift:5.0-bionic
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - bash: 'swift test'
