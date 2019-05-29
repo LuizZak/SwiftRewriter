@@ -216,11 +216,11 @@ class OverloadResolverState {
     private let cache = ConcurrentValue<[CacheEntry: Int?]>(value: [:])
     
     public func makeCache() {
-        cache.setup(value: [:])
+        cache.setAsCaching(value: [:])
     }
     
     public func tearDownCache() {
-        cache.tearDown(value: [:])
+        cache.tearDownCaching(resetToValue: [:])
     }
     
     func cachedEntry(forSignatures signatures: [FunctionSignature],
@@ -245,7 +245,7 @@ class OverloadResolverState {
             return
         }
         
-        cache.modifyingValueAsync { cache in
+        cache.modifyingValue { cache in
             let entry = CacheEntry(signatures: signatures, arguments: arguments)
             
             cache[entry] = resolutionIndex

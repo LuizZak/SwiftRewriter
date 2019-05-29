@@ -1,10 +1,6 @@
 import Dispatch
 
 final class ConcurrentValue<T> {
-    struct CacheState {
-        var value: T
-    }
-    
     private var cacheBarrier =
         DispatchQueue(
             label: "com.swiftrewriter.concurrentvalue.valuebarrier_$\(T.self)",
@@ -15,60 +11,36 @@ final class ConcurrentValue<T> {
     
     var usingCache = false
     
-    private var state: CacheState
+    private var value: T
     
     init(value: T) {
-        state = CacheState(value: value)
+        self.value = value
     }
     
     @inlinable
     func readingValue<U>(_ block: (T) -> U) -> U {
-        return readingState { block($0.value) }
-    }
-    
-    @inlinable
-    func readingState<U>(_ block: (CacheState) -> U) -> U {
-        return cacheBarrier.sync {
-            block(state)
-        }
+        return cacheBarrier.sync { block(value) }
     }
     
     @inlinable
     func modifyingValue<U>(_ block: (inout T) -> U) -> U {
-        return modifyingState { block(&$0.value) }
-    }
-    
-    @inlinable
-    func modifyingValueAsync(_ block: @escaping (inout T) -> Void) -> Void {
-        modifyingState { block(&$0.value) }
-    }
-    
-    @inlinable
-    func modifyingState<U>(_ block: (inout CacheState) -> U) -> U {
         return cacheBarrier.sync(flags: .barrier) {
-            block(&state)
+            block(&value)
         }
     }
     
     @inlinable
-    func modifyingStateAsync(_ block: @escaping (inout CacheState) -> Void) -> Void {
-        cacheBarrier.async(flags: .barrier) {
-            block(&self.state)
-        }
-    }
-    
-    @inlinable
-    func setup(value: T) {
-        modifyingState { state in
-            state.value = value
+    func setAsCaching(value: T) {
+        modifyingValue {
+            $0 = value
             usingCache = true
         }
     }
     
     @inlinable
-    func tearDown(value: T) {
-        modifyingState { state in
-            state.value = value
+    func tearDownCaching(resetToValue value: T) {
+        modifyingValue {
+            $0 = value
             usingCache = false
         }
     }

@@ -29,13 +29,13 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func makeCache() {
-        typesCache.setup(value: [:])
-        canonicalTypenameCache.setup(value: [:])
+        typesCache.setAsCaching(value: [:])
+        canonicalTypenameCache.setAsCaching(value: [:])
     }
     
     func tearDownCache() {
-        typesCache.tearDown(value: [:])
-        canonicalTypenameCache.tearDown(value: [:])
+        typesCache.tearDownCaching(resetToValue: [:])
+        canonicalTypenameCache.tearDownCaching(resetToValue: [:])
     }
     
     public func addKnownTypeProvider(_ typeProvider: KnownTypeProvider) {
@@ -63,7 +63,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         if types.isEmpty {
             if typesCache.usingCache {
-                typesCache.modifyingValueAsync { value in
+                typesCache.modifyingValue { value in
                     value[name] = nil
                 }
             }
@@ -73,7 +73,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         let type = CompoundKnownType(typeName: name, types: types)
         
         if typesCache.usingCache {
-            typesCache.modifyingValueAsync { value in
+            typesCache.modifyingValue { value in
                 value[name] = type
             }
         }
@@ -104,7 +104,7 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
             }
             
             if canonicalTypenameCache.usingCache {
-                canonicalTypenameCache.modifyingValueAsync { state in
+                canonicalTypenameCache.modifyingValue { state in
                     state[typeName] = canonical
                 }
             }

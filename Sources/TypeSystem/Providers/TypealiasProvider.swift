@@ -21,13 +21,13 @@ public class CompoundTypealiasProvider: TypealiasProvider {
     }
     
     func makeCache() {
-        aliasesCache.setup(value: [:])
-        negativeLookups.setup(value: [])
+        aliasesCache.setAsCaching(value: [:])
+        negativeLookups.setAsCaching(value: [])
     }
     
     func tearDownCache() {
-        aliasesCache.tearDown(value: [:])
-        negativeLookups.tearDown(value: [])
+        aliasesCache.tearDownCaching(resetToValue: [:])
+        negativeLookups.tearDownCaching(resetToValue: [])
     }
     
     public func unalias(_ typeName: String) -> SwiftType? {
@@ -44,7 +44,7 @@ public class CompoundTypealiasProvider: TypealiasProvider {
             if let type = provider.unalias(typeName) {
                 
                 if aliasesCache.usingCache {
-                    aliasesCache.modifyingValueAsync { value in
+                    aliasesCache.modifyingValue { value in
                         value[typeName.hashValue] = type
                     }
                 }
@@ -55,7 +55,7 @@ public class CompoundTypealiasProvider: TypealiasProvider {
         
         // Store negative lookups
         if negativeLookups.usingCache {
-            negativeLookups.modifyingValueAsync { value -> Void in
+            negativeLookups.modifyingValue { value -> Void in
                 value.insert(typeName)
             }
         }
