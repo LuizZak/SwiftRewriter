@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/LuizZak/console.git",
         "state": {
           "branch": null,
-          "revision": "bfc877ae6e8eca2916e83809997263ef9cddbe6f",
-          "version": "0.5.0"
+          "revision": "6ebe1d8f7509fe72d312c97e433bc996e58f29c5",
+          "version": "0.7.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/LuizZak/MiniLexer.git",
         "state": {
           "branch": null,
-          "revision": "df9dc2eb1df42c9d9f8e43848a101d8d9e15d7f7",
-          "version": "0.9.0"
+          "revision": "4811517a12d8ee7452037e3b430b8de700392cc4",
+          "version": "0.9.3"
         }
       },
       {
