@@ -1,4 +1,4 @@
-import Foundation
+import Dispatch
 import SwiftAST
 import KnownType
 import Intentions
@@ -37,14 +37,17 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         
         var classProtocols: [String: [KnownProtocolConformance]] = [:]
         
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = context.numThreads
+        let queue = DispatchQueue(label: "com.swiftrewriter.intentionpass.protnullabilityprop", attributes: .concurrent)
+        let semaphore = DispatchSemaphore(value: context.numThreads)
         
         let mutex = Mutex()
         
         // First roundtrip: Collect all known conformances
         for clsName in Set(classes.map { $0.typeName }) {
-            queue.addOperation {
+            queue.async {
+                semaphore.wait()
+                defer { semaphore.signal() }
+                
                 guard let type = context.typeSystem.knownTypeWithName(clsName) else {
                     return
                 }
@@ -57,11 +60,14 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.sync(flags: .barrier, execute: { })
         
         // Second round-trip: Merge conformers with protocols
         for cls in classes {
-            queue.addOperation {
+            queue.async {
+                semaphore.wait()
+                defer { semaphore.signal() }
+                
                 guard let type = context.typeSystem.knownTypeWithName(cls.typeName) else {
                     return
                 }
@@ -78,7 +84,7 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        queue.sync(flags: .barrier, execute: { })
         
         context.notifyChange()
     }
