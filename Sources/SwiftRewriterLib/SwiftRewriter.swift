@@ -120,9 +120,10 @@ public final class SwiftRewriter {
         
         var outError: Error?
         let outErrorBarrier
-            = DispatchQueue(label: "br.com.swiftrewriter", qos: .default,
-                            attributes: .concurrent, autoreleaseFrequency: .inherit,
-                            target: nil)
+            = DispatchQueue(label: "br.com.swiftrewriter",
+                            attributes: .concurrent)
+        
+        let mutex = Mutex()
         
         for (i, src) in sources.enumerated() {
             queue.addOperation {
@@ -132,7 +133,7 @@ public final class SwiftRewriter {
                 
                 do {
                     try autoreleasepool {
-                        try self.loadObjcSource(from: src, index: i)
+                        try self.loadObjcSource(from: src, index: i, mutex: mutex)
                     }
                 } catch {
                     outErrorBarrier.sync(flags: .barrier) {
@@ -408,8 +409,9 @@ public final class SwiftRewriter {
                                    numThreds: settings.numThreads)
         
         if !settings.diagnoseFiles.isEmpty {
+            let mutex = Mutex()
             applier.afterFile = { file, passName in
-                synchronized(self) {
+                mutex.locking {
                     self.printDiagnosedFile(targetPath: file, step: "After applying \(passName) pass")
                 }
             }
@@ -479,7 +481,7 @@ public final class SwiftRewriter {
         }
     }
     
-    private func loadObjcSource(from source: InputSource, index: Int) throws {
+    private func loadObjcSource(from source: InputSource, index: Int, mutex: Mutex) throws {
         let state = parserStatePool.pull()
         defer { parserStatePool.repool(state) }
         
@@ -524,7 +526,7 @@ public final class SwiftRewriter {
         
         ctx.popContext() // FileGenerationIntention
         
-        synchronized(self) {
+        mutex.locking {
             parsers.append(parser)
             lazyParse.append(contentsOf: collectorDelegate.lazyParse)
             lazyResolve.append(contentsOf: collectorDelegate.lazyResolve)

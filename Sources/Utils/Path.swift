@@ -1,7 +1,13 @@
+#if canImport(Foundation)
 import Foundation
+#endif
 
 /// Helper class for dealing with path operations
 public struct Path: CustomStringConvertible {
+    /// The recognized path separtors for the current platform this code was built
+    // on.s
+    public static let pathSeparators: [Character] = ["/"]
+    
     public private(set) var fullPath: String
     
     public var description: String {
@@ -10,16 +16,25 @@ public struct Path: CustomStringConvertible {
     
     /// Returns the filename component of the path represented by this Path instance
     public var fileName: String {
-        return (fullPath as NSString).lastPathComponent
+        return lastPathComponent
     }
     
-    init(fullPath: String) {
+    public var lastPathComponent: String {
+        return
+            fullPath.split(separator: Path.pathSeparators[0],
+                           maxSplits: Int.max,
+                           omittingEmptySubsequences: true).last.map(String.init) ?? fullPath
+    }
+    
+    public init(fullPath: String) {
         self.fullPath = fullPath
     }
     
-    init(tildePath: String) {
-        self.fullPath = (tildePath as NSString).expandingTildeInPath
+    public init(tildePath: String) {
+        self.fullPath = expandTildes(path: tildePath)
     }
+    
+    #if canImport(Foundation)
     
     /// Returns `true` if this path's filename fully matches a given string.
     public func filename(is name: String, options: String.CompareOptions = .literal) -> Bool {
@@ -30,7 +45,11 @@ public struct Path: CustomStringConvertible {
     public func filename(contains substring: String, options: String.CompareOptions = .literal) -> Bool {
         return fileName.range(of: substring, options: options) != nil
     }
+    
+    #endif
 }
+
+#if canImport(Foundation)
 
 public extension Sequence where Element == Path {
     func firstFilename(containing: String, options: String.CompareOptions = .literal) -> Path? {
@@ -47,6 +66,8 @@ public extension Collection where Element == Path {
         return firstIndex { $0.filename(is: string, options: options) }
     }
 }
+
+#endif
 
 public extension Sequence where Element == String {
     /// Returns a list of paths for each string in this sequence

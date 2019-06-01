@@ -1,19 +1,3 @@
-import Cocoa
-
-/// Swift version of Objective-C's @synchronized statement.
-/// Do note that differently from Obj-C's version, this closure-based version
-/// consumes any 'return/continue/break' statements without affecting the parent
-/// function it is enclosed in.
-@inlinable
-public func synchronized<T>(_ lock: AnyObject, closure: () throws -> T) rethrows -> T {
-    objc_sync_enter(lock)
-    defer {
-        objc_sync_exit(lock)
-    }
-    
-    return try closure()
-}
-
 extension Sequence {
     /// Returns a dictionary containing elements grouped by a specified key
     /// Note that the 'key' closure is required to always return the same T key

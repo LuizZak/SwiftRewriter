@@ -20,6 +20,8 @@ public protocol FunctionBodyQueueDelegate: class {
 /// Allows collecting function bodies across intention collections from functions,
 /// methods and properties.
 public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
+    let mutex = Mutex()
+    
     public typealias Context = Delegate.Context
     
     public static func fromFile(_ intentionCollection: IntentionCollection,
@@ -182,7 +184,7 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
                                      _ intention: FunctionBodyCarryingIntention,
                                      context: Context) {
         
-        synchronized(self) {
+        mutex.locking {
             items.append(
                 FunctionBodyQueueItem(body: functionBody,
                                       intention: intention,

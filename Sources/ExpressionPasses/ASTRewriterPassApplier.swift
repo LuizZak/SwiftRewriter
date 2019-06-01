@@ -115,9 +115,10 @@ public final class ASTRewriterPassApplier {
     
     private class DirtyFunctionBodyMap {
         var dirty: [FunctionBodyIntention] = []
+        let mutex = Mutex()
         
         func markDirty(_ body: FunctionBodyIntention) {
-            synchronized(self) {
+            mutex.locking {
                 if dirty.contains(where: { $0 === body }) {
                     return
                 }
@@ -127,8 +128,8 @@ public final class ASTRewriterPassApplier {
         }
         
         func isDirty(_ body: FunctionBodyIntention) -> Bool {
-            return synchronized(self) {
-                return dirty.contains(where: { $0 === body })
+            return mutex.locking {
+                dirty.contains(where: { $0 === body })
             }
         }
     }
