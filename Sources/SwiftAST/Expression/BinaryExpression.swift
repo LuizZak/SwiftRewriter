@@ -1,4 +1,3 @@
-
 public class BinaryExpression: Expression {
     public var lhs: Expression {
         didSet { oldValue.parent = nil; lhs.parent = self; }

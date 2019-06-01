@@ -1,5 +1,3 @@
-import Foundation
-
 /// An expression component is understood to be any component of an expression,
 /// or an expression itself, which can be contained within another expression,
 /// and can contain sub-expressions itself.
