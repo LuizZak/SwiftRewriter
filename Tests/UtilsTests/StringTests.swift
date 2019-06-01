@@ -265,6 +265,18 @@ class StringTests: XCTestCase {
         XCTAssertEqual(ranges[0], input.startIndex..<input.startIndex)
         XCTAssertEqual(ranges[1], input.endIndex..<input.endIndex)
     }
+    
+    func testTrimWhitespace() {
+        XCTAssertEqual(trimWhitespace(""), "")
+        XCTAssertEqual(trimWhitespace("  "), "")
+        XCTAssertEqual(trimWhitespace("abc"), "abc")
+        XCTAssertEqual(trimWhitespace("abc "), "abc")
+        XCTAssertEqual(trimWhitespace(" abc"), "abc")
+        XCTAssertEqual(trimWhitespace("  abc "), "abc")
+        XCTAssertEqual(trimWhitespace("\nabc\n"), "abc")
+        XCTAssertEqual(trimWhitespace("\n abc def \t "), "abc def")
+        XCTAssertEqual(trimWhitespace("  abc def "), "abc def")
+    }
 }
 
 extension String {
