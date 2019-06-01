@@ -40,7 +40,7 @@ let package = Package(
             dependencies: []),
         .target(
             name: "WriterTargetOutput",
-            dependencies: []),
+            dependencies: ["Utils"]),
         .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),
