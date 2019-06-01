@@ -1,7 +1,7 @@
-import Foundation
 import SwiftAST
 import Intentions
 import MiniLexer
+import Utils
 
 /// Verifies the #import directives on every file and convert them to the appropriate
 /// Swift lib import declaration.
@@ -35,7 +35,7 @@ public class ImportDirectiveIntentionPass: IntentionPass {
         // For "#import <Framework/Framework.h>" paths, import "Framework" directly
         for imp in objc {
             if imp.pathComponents.count == 1 {
-                modules.append((imp.pathComponents[0] as NSString).deletingPathExtension)
+                modules.append(Path(fullPath: imp.pathComponents[0]).deletingPathExtension)
             } else if imp.pathComponents.count == 2 {
                 // "Framework/Framework.h" => "Framework" (+ ".h")
                 if imp.pathComponents[0] + ".h" == imp.pathComponents[1] {
@@ -77,13 +77,13 @@ public class ImportDirectiveIntentionPass: IntentionPass {
     private struct ObjcImportDecl {
         var path: String
         var pathComponents: [String] {
-            return (path as NSString).pathComponents
+            return Path(fullPath: path).pathComponents
         }
         
         /// Returns `true` if any of the path components of this import decl's
         /// path match a given path component fully.
-        func matchesPathComponent(_ path: String) -> Bool {
-            return pathComponents.contains(path)
+        func matchesPathComponent<S: StringProtocol>(_ path: S) -> Bool {
+            return pathComponents.contains(where: { $0 == path })
         }
     }
 }

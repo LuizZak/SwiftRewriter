@@ -9,4 +9,13 @@ class PathTests: XCTestCase {
         XCTAssertEqual(Path(fullPath: "scratch///").lastPathComponent, "scratch")
         XCTAssertEqual(Path(fullPath: "/").lastPathComponent, "/")
     }
+    
+    func testDeletingPathExtension() {
+        XCTAssertEqual(Path(fullPath: "/tmp/scratch.tiff").deletingPathExtension, "/tmp/scratch")
+        XCTAssertEqual(Path(fullPath: "/tmp/").deletingPathExtension, "/tmp")
+        XCTAssertEqual(Path(fullPath: "scratch.bundle/").deletingPathExtension, "scratch")
+        XCTAssertEqual(Path(fullPath: "scratch..tiff").deletingPathExtension, "scratch.")
+        XCTAssertEqual(Path(fullPath: ".tiff").deletingPathExtension, ".tiff")
+        XCTAssertEqual(Path(fullPath: "/").deletingPathExtension, "/")
+    }
 }

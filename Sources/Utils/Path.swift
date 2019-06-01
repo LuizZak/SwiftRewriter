@@ -21,9 +21,35 @@ public struct Path: CustomStringConvertible {
     
     public var lastPathComponent: String {
         return
-            fullPath.split(separator: Path.pathSeparators[0],
-                           maxSplits: Int.max,
-                           omittingEmptySubsequences: true).last.map(String.init) ?? fullPath
+            fullPath
+                .split(separator: Path.pathSeparators[0])
+                .last
+                .map(String.init) ?? fullPath
+    }
+    
+    public var pathComponents: [String] {
+        return fullPath.split(separator: Path.pathSeparators[0]).map(String.init)
+    }
+    
+    public var deletingPathExtension: String {
+        if fullPath == "/" || fullPath.hasPrefix(".") {
+            return fullPath
+        }
+        
+        let properPath: Substring
+        if fullPath.hasSuffix("/") {
+            properPath = fullPath.dropLast(1)
+        } else {
+            properPath = fullPath[...]
+        }
+        
+        let splits = properPath.split(separator: ".", omittingEmptySubsequences: false)
+        
+        if splits.count <= 1 {
+            return String(properPath)
+        }
+        
+        return splits.dropLast().joined(separator: ".")
     }
     
     public init(fullPath: String) {
