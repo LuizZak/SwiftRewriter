@@ -1,4 +1,7 @@
-import Foundation
+#if canImport(ObjectiveC)
+import ObjectiveC
+#endif
+
 import GrammarModels
 import ObjcParser
 import ObjcParserAntlr
@@ -49,8 +52,7 @@ public final class SwiftWriter {
         
         var errors: [(String, Error)] = []
         
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = numThreads
+        let queue = SWOperationQueue(maxConcurrentOperationCount: numThreads)
         
         let mutex = Mutex()
         

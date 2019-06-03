@@ -18,4 +18,21 @@ class PathTests: XCTestCase {
         XCTAssertEqual(Path(fullPath: ".tiff").deletingPathExtension, ".tiff")
         XCTAssertEqual(Path(fullPath: "/").deletingPathExtension, "/")
     }
+    
+    func testAppendingPathComponent() {
+        XCTAssertEqual(Path(fullPath: "/tmp").appendingPathComponent("scratch.tiff"), "/tmp/scratch.tiff")
+        XCTAssertEqual(Path(fullPath: "/tmp/").appendingPathComponent("scratch.tiff"), "/tmp/scratch.tiff")
+        XCTAssertEqual(Path(fullPath: "/").appendingPathComponent("scratch.tiff"), "/scratch.tiff")
+        XCTAssertEqual(Path(fullPath: "").appendingPathComponent("scratch.tiff"), "scratch.tiff")
+    }
+    
+    func testDeletingLastPathComponent() {
+        XCTAssertEqual(Path(fullPath: "").deletingLastPathComponent, "")
+        XCTAssertEqual(Path(fullPath: "/").deletingLastPathComponent, "/")
+        XCTAssertEqual(Path(fullPath: "/tmp").deletingLastPathComponent, "/")
+        XCTAssertEqual(Path(fullPath: "/tmp/").deletingLastPathComponent, "/")
+        XCTAssertEqual(Path(fullPath: "//tmp/").deletingLastPathComponent, "/")
+        XCTAssertEqual(Path(fullPath: "/tmp/scratch.tiff").deletingLastPathComponent, "/tmp")
+        XCTAssertEqual(Path(fullPath: "/tmp/scratch.tiff//").deletingLastPathComponent, "/tmp")
+    }
 }

@@ -1,5 +1,5 @@
-import Foundation
 import SwiftAST
+import MiniLexer
 import Utils
 
 /// Converts Type.alloc().init[...]() expression chains into proper Type() calls.
@@ -115,10 +115,23 @@ public class AllocInitExpressionPass: ASTRewriterPass {
         // Do a little Swift-importer-like-magic here: If the method selector is
         // in the form `loremWithThing:thing...`, we collapse such selector in
         // Swift as `lorem(thing:)`.
-        let split = methodName.components(separatedBy: "With")
-        if split.count != 2 || split.contains(where: ~~\.isEmpty) {
+        let with = "With"
+        
+        let lexer = Lexer(input: methodName)
+        guard let index = lexer.findNext(string: with) else {
             return arguments.map { $0.copy() }
         }
+        guard let endIndex = methodName.index(index, offsetBy: with.count, limitedBy: methodName.endIndex) else {
+            return arguments.map { $0.copy() }
+        }
+        guard endIndex < methodName.endIndex else {
+            return arguments.map { $0.copy() }
+        }
+        
+        let split: [Substring] = [
+            methodName[..<index],
+            methodName[endIndex...]
+        ]
         
         // All good! Collapse the identifier into a more 'swifty' construct
         var arguments = arguments.map { $0.copy() }

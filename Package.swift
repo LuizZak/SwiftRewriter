@@ -21,7 +21,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.9.3"),
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.9.4"),
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
         .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.26"),
         .package(url: "https://github.com/LuizZak/console.git", from: "0.7.0"),
@@ -84,7 +84,7 @@ let package = Package(
         .target(
             name: "ExpressionPasses",
             dependencies: ["SwiftAST", "Commons", "Utils", "Analysis",
-                           "Intentions", "TypeSystem"]),
+                           "Intentions", "TypeSystem", "MiniLexer"]),
         .target(
             name: "SourcePreprocessors",
             dependencies: ["Utils", "MiniLexer"]),
