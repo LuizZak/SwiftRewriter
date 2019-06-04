@@ -63,11 +63,11 @@ class VariableDeclSyntaxGenerator {
                 let patternSyntax =
                     generate(pattern, hasComma: false, accessors: accessors)
                 
-                builder.addPatternBinding(patternSyntax)
+                builder.addBinding(patternSyntax)
                 
             case let .multiple(patterns):
                 iterateWithComma(patterns) { pattern, hasComma in
-                    builder.addPatternBinding(generate(pattern, hasComma: hasComma))
+                    builder.addBinding(generate(pattern, hasComma: hasComma))
                 }
             }
         }
@@ -121,7 +121,7 @@ class VariableDeclSyntaxGenerator {
                     
                     builder.useRightBrace(SyntaxFactory.makeRightBraceToken())
                     
-                    builder.addAccessorDecl(AccessorDeclSyntax { builder in
+                    builder.addAccessor(AccessorDeclSyntax { builder in
                         builder.useAccessorKind(
                             SyntaxFactory
                                 .makeToken(.contextualKeyword("get"),
@@ -131,7 +131,7 @@ class VariableDeclSyntaxGenerator {
                     })
                     
                     if !property.isReadOnly {
-                        builder.addAccessorDecl(AccessorDeclSyntax { builder in
+                        builder.addAccessor(AccessorDeclSyntax { builder in
                             builder.useAccessorKind(
                                 SyntaxFactory
                                     .makeToken(.contextualKeyword("set"),
@@ -159,7 +159,7 @@ class VariableDeclSyntaxGenerator {
                     
                     let stmtList = SyntaxFactory.makeCodeBlockItemList(blocks)
                     
-                    builder.addCodeBlockItem(SyntaxFactory.makeCodeBlockItem(item: stmtList, semicolon: nil, errorTokens: nil))
+                    builder.addStatement(SyntaxFactory.makeCodeBlockItem(item: stmtList, semicolon: nil, errorTokens: nil))
                     
                     producer.addExtraLeading(.newlines(1) + producer.indentation())
                     builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))
@@ -211,8 +211,8 @@ class VariableDeclSyntaxGenerator {
                     
                     producer.deindent()
                     
-                    builder.addAccessorDecl(getter)
-                    builder.addAccessorDecl(setter)
+                    builder.addAccessor(getter)
+                    builder.addAccessor(setter)
                     
                     producer.addExtraLeading(.newlines(1) + producer.indentation())
                     builder.useRightBrace(producer.makeStartToken(SyntaxFactory.makeRightBraceToken))

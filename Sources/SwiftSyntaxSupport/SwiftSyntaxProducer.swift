@@ -177,7 +177,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             var hasHeaderTrivia: Bool = false
@@ -194,7 +194,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             iterating(file.enumIntentions) { intention in
@@ -202,7 +202,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             iterating(file.structIntentions) { _struct in
@@ -210,7 +210,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             iterating(file.globalVariableIntentions) { variable in
@@ -218,7 +218,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             iterating(file.globalFunctionIntentions) { function in
@@ -226,7 +226,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             iterating(file.protocolIntentions) { _protocol in
@@ -234,7 +234,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             iterating(file.classIntentions) { _class in
@@ -242,7 +242,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             iterating(file.extensionIntentions) { _class in
@@ -250,7 +250,7 @@ extension SwiftSyntaxProducer {
                 
                 let codeBlock = CodeBlockItemSyntax { $0.useItem(syntax) }
                 
-                builder.addCodeBlockItem(codeBlock)
+                builder.addStatement(codeBlock)
             }
             
             // Noone consumed the leading trivia - emit a dummy token just so we
@@ -264,7 +264,7 @@ extension SwiftSyntaxProducer {
                     )
                 }
                 
-                builder.addCodeBlockItem(item)
+                builder.addStatement(item)
             }
         }
     }
@@ -289,7 +289,7 @@ extension SwiftSyntaxProducer {
     func generateImport(_ module: String) -> ImportDeclSyntax {
         return ImportDeclSyntax { builder in
             builder.useImportTok(makeStartToken(SyntaxFactory.makeImportKeyword).withTrailingSpace())
-            builder.addAccessPathComponent(AccessPathComponentSyntax { builder in
+            builder.addPathComponent(AccessPathComponentSyntax { builder in
                 builder.useName(makeIdentifier(module))
             })
         }
@@ -352,7 +352,7 @@ extension SwiftSyntaxProducer {
         return EnumCaseDeclSyntax { builder in
             builder.useCaseKeyword(makeStartToken(SyntaxFactory.makeCaseKeyword).withTrailingSpace())
             
-            builder.addEnumCaseElement(EnumCaseElementSyntax { builder in
+            builder.addElement(EnumCaseElementSyntax { builder in
                 builder.useIdentifier(makeIdentifier(_case.name))
                 
                 if let rawValue = _case.expression {
@@ -600,7 +600,7 @@ extension SwiftSyntaxProducer {
                 iterating(ivarHolder.instanceVariables) { ivar in
                     addExtraLeading(indentation())
                     
-                    builder.addMemberDeclListItem(
+                    builder.addMember(
                         SyntaxFactory.makeMemberDeclListItem(
                             decl: varDeclGenerator.generateInstanceVariable(ivar),
                             semicolon: nil
@@ -616,7 +616,7 @@ extension SwiftSyntaxProducer {
             iterating(intention.properties.compactMap { $0 as? EnumCaseGenerationIntention }) { prop in
                 addExtraLeading(indentation())
                 
-                builder.addMemberDeclListItem(
+                builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
                         decl: generateEnumCase(prop),
                         semicolon: nil
@@ -631,7 +631,7 @@ extension SwiftSyntaxProducer {
                 
                 addExtraLeading(indentation())
                 
-                builder.addMemberDeclListItem(
+                builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
                         decl: varDeclGenerator.generateProperty(prop),
                         semicolon: nil
@@ -642,7 +642,7 @@ extension SwiftSyntaxProducer {
             iterating(intention.constructors) { _init in
                 addExtraLeading(indentation())
                 
-                builder.addMemberDeclListItem(
+                builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
                         decl: generateInitializer(
                             _init,
@@ -663,7 +663,7 @@ extension SwiftSyntaxProducer {
             if let _deinit = _deinit {
                 addExtraLeading(indentation())
                 
-                builder.addMemberDeclListItem(
+                builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
                         decl: generateDeinitializer(_deinit),
                         semicolon: nil
@@ -675,7 +675,7 @@ extension SwiftSyntaxProducer {
             iterating(methods) { method in
                 addExtraLeading(indentation())
                 
-                builder.addMemberDeclListItem(
+                builder.addMember(
                     SyntaxFactory.makeMemberDeclListItem(
                         decl: generateFunction(
                             method,
@@ -779,7 +779,7 @@ extension SwiftSyntaxProducer {
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
             
             iterateWithComma(parameters) { (item, hasComma) in
-                builder.addFunctionParameter(
+                builder.addParameter(
                     generateParameter(item, withTrailingComma: hasComma)
                 )
             }

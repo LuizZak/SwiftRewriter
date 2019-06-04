@@ -32,7 +32,7 @@ extension SwiftSyntaxProducer {
                     addExtraLeading(.newlines(1))
                 }
                 
-                builder.addCodeBlockItem(stmt())
+                builder.addStatement(stmt())
             }
         }
     }
@@ -51,7 +51,7 @@ extension SwiftSyntaxProducer {
             let stmts = _generateStatements(compoundStmt.statements)
             
             for stmt in stmts {
-                builder.addCodeBlockItem(stmt)
+                builder.addStatement(stmt)
             }
         }
     }
@@ -218,7 +218,7 @@ extension SwiftSyntaxProducer {
             builder.useIfKeyword(makeStartToken(SyntaxFactory.makeIfKeyword).withTrailingSpace())
             
             if let pattern = stmt.pattern {
-                builder.addConditionElement(ConditionElementSyntax { builder in
+                builder.addCondition(ConditionElementSyntax { builder in
                     builder.useCondition(OptionalBindingConditionSyntax { builder in
                         builder.useLetOrVarKeyword(SyntaxFactory.makeLetKeyword().withTrailingSpace())
                         
@@ -231,7 +231,7 @@ extension SwiftSyntaxProducer {
                     })
                 })
             } else {
-                builder.addConditionElement(ConditionElementSyntax { builder in
+                builder.addCondition(ConditionElementSyntax { builder in
                     builder.useCondition(generateExpression(stmt.exp))
                 })
             }
@@ -276,7 +276,7 @@ extension SwiftSyntaxProducer {
                 syntaxes.append(generateSwitchCase(label, statements: _default))
             }
             
-            builder.addSyntax(SyntaxFactory.makeSwitchCaseList(syntaxes))
+            builder.addCase(SyntaxFactory.makeSwitchCaseList(syntaxes))
         }
     }
     
@@ -292,7 +292,7 @@ extension SwiftSyntaxProducer {
             let stmts = _generateStatements(statements)
             
             for stmt in stmts {
-                builder.addCodeBlockItem(stmt)
+                builder.addStatement(stmt)
             }
         }
     }
@@ -318,7 +318,7 @@ extension SwiftSyntaxProducer {
         return WhileStmtSyntax { builder in
             builder.useWhileKeyword(makeStartToken(SyntaxFactory.makeWhileKeyword).withTrailingSpace())
             
-            builder.addConditionElement(ConditionElementSyntax { builder in
+            builder.addCondition(ConditionElementSyntax { builder in
                 builder.useCondition(generateExpression(stmt.exp))
             })
             
@@ -389,7 +389,7 @@ extension SwiftSyntaxProducer {
                 builder.useRightParen(SyntaxFactory.makeRightParenToken())
                 
                 iterateWithComma(items) { (item, hasComma) in
-                    builder.addTuplePatternElement(
+                    builder.addElement(
                         TuplePatternElementSyntax { builder in
                             builder.usePattern(generatePattern(item))
                             

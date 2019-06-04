@@ -85,7 +85,7 @@ public class SwiftTypeConverter {
                     // Parameters
                     makeTupleTypeSyntax(parameters)
                         .elements
-                        .forEach { builder.addTupleTypeElement($0) }
+                        .forEach { builder.addArgument($0) }
                 }
                 
                 builder.useBaseType(functionType)
@@ -149,7 +149,7 @@ public class SwiftTypeConverter {
                 let count = composition.count
                 
                 for (i, type) in composition.enumerated() {
-                    builder.addCompositionTypeElement(CompositionTypeElementSyntax { builder in
+                    builder.addElement(CompositionTypeElementSyntax { builder in
                         
                         switch type {
                         case .nested(let nested):
@@ -192,7 +192,7 @@ public class SwiftTypeConverter {
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
             
             iterateWithComma(types) { (type, hasComma) in
-                builder.addTupleTypeElement(TupleTypeElementSyntax { builder in
+                builder.addElement(TupleTypeElementSyntax { builder in
                     builder.useType(makeTypeSyntax(type))
                     
                     if hasComma {

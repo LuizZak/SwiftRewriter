@@ -3,11 +3,11 @@
     "pins": [
       {
         "package": "Antlr4",
-        "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
+        "repositoryURL": "https://github.com/LuizZak/Antlr4-Swift.git",
         "state": {
           "branch": null,
-          "revision": "e7778066f8ca1e30e606b291d2b63965669e5cdc",
-          "version": "4.0.26"
+          "revision": "065310a79abea55f737b55786045e0b0272e6d85",
+          "version": "4.0.28"
         }
       },
       {
@@ -41,9 +41,9 @@
         "package": "SwiftSyntax",
         "repositoryURL": "https://github.com/apple/swift-syntax.git",
         "state": {
-          "branch": null,
-          "revision": "43aa4a19b8105a803d8149ad2a86aa53a77efef3",
-          "version": "0.50000.0"
+          "branch": "xcode11-beta1",
+          "revision": "fdcbd4bfea2e833467e16d7962c4110c14382b56",
+          "version": null
         }
       }
     ]
