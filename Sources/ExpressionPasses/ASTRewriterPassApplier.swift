@@ -2,6 +2,7 @@
 import ObjectiveC
 #endif
 
+import Foundation
 import SwiftAST
 import Intentions
 import Utils
@@ -70,7 +71,8 @@ public final class ASTRewriterPassApplier {
     }
     
     private func internalApply(on intentions: IntentionCollection) {
-        let queue = SWOperationQueue(maxConcurrentOperationCount: numThreads)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = numThreads
         
         for file in intentions.fileIntentions() {
             queue.addOperation {
@@ -88,7 +90,8 @@ public final class ASTRewriterPassApplier {
                                intentions: IntentionCollection,
                                passType: ASTRewriterPass.Type) {
         
-        let queue = SWOperationQueue(maxConcurrentOperationCount: numThreads)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = numThreads
         
         let delegate =
             TypeResolvingQueueDelegate(

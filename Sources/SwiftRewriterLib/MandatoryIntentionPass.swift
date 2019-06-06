@@ -1,3 +1,4 @@
+import Foundation
 import SwiftAST
 import Intentions
 import IntentionPasses
@@ -57,7 +58,8 @@ class MandatoryIntentionPass: IntentionPass {
             context.typeSystem.tearDownCache()
         }
         
-        let queue = SWOperationQueue(maxConcurrentOperationCount: context.numThreads)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = context.numThreads
         
         let visitor = AnonymousIntentionVisitor()
         visitor.onVisitType = { type in

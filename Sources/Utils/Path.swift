@@ -1,6 +1,4 @@
-#if canImport(Foundation)
 import Foundation
-#endif
 
 // TODO: The path composition properties and methods here should probably return
 // another `Path`, instead of a bare `String`.
@@ -91,8 +89,6 @@ public struct Path: CustomStringConvertible {
         return fullPath + String(Path.pathSeparator) + component
     }
     
-    #if canImport(Foundation)
-    
     /// Returns `true` if this path's filename fully matches a given string.
     public func filename(is name: String, options: String.CompareOptions = .literal) -> Bool {
         return fileName.compare(name, options: options) == .orderedSame
@@ -102,11 +98,7 @@ public struct Path: CustomStringConvertible {
     public func filename(contains substring: String, options: String.CompareOptions = .literal) -> Bool {
         return fileName.range(of: substring, options: options) != nil
     }
-    
-    #endif
 }
-
-#if canImport(Foundation)
 
 public extension Sequence where Element == Path {
     func firstFilename(containing: String, options: String.CompareOptions = .literal) -> Path? {
@@ -123,8 +115,6 @@ public extension Collection where Element == Path {
         return firstIndex { $0.filename(is: string, options: options) }
     }
 }
-
-#endif
 
 public extension Sequence where Element == String {
     /// Returns a list of paths for each string in this sequence

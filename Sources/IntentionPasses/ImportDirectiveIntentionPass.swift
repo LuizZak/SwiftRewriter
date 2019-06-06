@@ -1,3 +1,4 @@
+import Foundation
 import SwiftAST
 import Intentions
 import MiniLexer
@@ -35,7 +36,7 @@ public class ImportDirectiveIntentionPass: IntentionPass {
         // For "#import <Framework/Framework.h>" paths, import "Framework" directly
         for imp in objc {
             if imp.pathComponents.count == 1 {
-                modules.append(Path(fullPath: imp.pathComponents[0]).deletingPathExtension)
+                modules.append((imp.pathComponents[0] as NSString).deletingPathExtension)
             } else if imp.pathComponents.count == 2 {
                 // "Framework/Framework.h" => "Framework" (+ ".h")
                 if imp.pathComponents[0] + ".h" == imp.pathComponents[1] {
@@ -77,7 +78,7 @@ public class ImportDirectiveIntentionPass: IntentionPass {
     private struct ObjcImportDecl {
         var path: String
         var pathComponents: [String] {
-            return Path(fullPath: path).pathComponents
+            return (path as NSString).pathComponents
         }
         
         /// Returns `true` if any of the path components of this import decl's

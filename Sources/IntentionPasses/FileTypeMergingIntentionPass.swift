@@ -56,7 +56,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
             return path[path.startIndex..<(path.lastIndex(of: ".") ?? path.endIndex)]
         }
         
-        var implByName =
+        let implByName =
             implementations
                 .groupBy {
                     strippingPathExtension($0.sourcePath)

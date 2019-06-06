@@ -24,7 +24,7 @@ let package = Package(
         .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.9.4"),
         .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
         .package(url: "https://github.com/LuizZak/Antlr4-Swift.git", from: "4.0.28"),
-        .package(url: "https://github.com/LuizZak/console.git", from: "0.7.0"),
+        .package(url: "https://github.com/LuizZak/console.git", from: "0.8.0"),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50000.0"))
     ],
     targets: [

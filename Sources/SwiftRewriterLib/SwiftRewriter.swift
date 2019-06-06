@@ -2,6 +2,7 @@
 import ObjectiveC
 #endif
 
+import Foundation
 import Dispatch
 import GrammarModels
 import ObjcParser
@@ -119,7 +120,8 @@ public final class SwiftRewriter {
         // Load input sources
         let sources = sourcesProvider.sources()
         
-        let queue = SWOperationQueue(maxConcurrentOperationCount: settings.numThreads)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
         
         var outError: Error?
         let outErrorBarrier
@@ -171,7 +173,8 @@ public final class SwiftRewriter {
         
         let antlrSettings = makeAntlrSettings()
         
-        let queue = SWOperationQueue(maxConcurrentOperationCount: settings.numThreads)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
         
         for item in lazyParse {
             queue.addOperation {
@@ -229,7 +232,8 @@ public final class SwiftRewriter {
         
         let typeMapper = self.typeMapper
         
-        let queue = SWOperationQueue(maxConcurrentOperationCount: settings.numThreads)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = settings.numThreads
         
         // Resolve typealiases and extension declarations first
         for item in lazyResolve {
@@ -471,7 +475,7 @@ public final class SwiftRewriter {
         }
         
         for file in includeFiles {
-            let fullPath = Path(fullPath: basePath).appendingPathComponent(file)
+            let fullPath = (basePath as NSString).appendingPathComponent(file)
             
             guard !includesFollowed.contains(fullPath) else {
                 continue
@@ -490,10 +494,10 @@ public final class SwiftRewriter {
         var path = source.sourceName()
         
         if settings.verbose {
-            print("Parsing \(Path(fullPath: path).lastPathComponent)...")
+            print("Parsing \((path as NSString).lastPathComponent)...")
         }
         
-        path = Path(fullPath: path).deletingPathExtension + ".swift"
+        path = (path as NSString).deletingPathExtension + ".swift"
         
         let src = try source.loadSource()
         
@@ -535,7 +539,7 @@ public final class SwiftRewriter {
             intentionCollection.addIntention(fileIntent)
             
             resolveIncludes(in: fileIntent.preprocessorDirectives,
-                            basePath: Path(fullPath: src.filePath).deletingLastPathComponent)
+                            basePath: (src.filePath as NSString).deletingLastPathComponent)
         }
     }
     
