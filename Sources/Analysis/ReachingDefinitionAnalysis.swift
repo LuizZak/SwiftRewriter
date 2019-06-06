@@ -36,8 +36,8 @@ public class ReachingDefinitionAnalyzer {
     private func calculate() {
         var inreaching: [ControlFlowGraphNode: Set<Definition>] = [:]
         var outreaching: [ControlFlowGraphNode: Set<Definition>] = [:]
-        var gen = generated()
-        var kill = killed()
+        let gen = generated()
+        let kill = killed()
         var changed: Set<ControlFlowGraphNode> = Set(controlFlowGraph.nodes)
         
         while !changed.isEmpty {

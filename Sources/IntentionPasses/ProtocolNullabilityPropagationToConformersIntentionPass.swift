@@ -1,4 +1,4 @@
-import Dispatch
+import Foundation
 import SwiftAST
 import KnownType
 import Intentions
@@ -37,7 +37,8 @@ public class ProtocolNullabilityPropagationToConformersIntentionPass: IntentionP
         
         var classProtocols: [String: [KnownProtocolConformance]] = [:]
         
-        let queue = SWOperationQueue(maxConcurrentOperationCount: context.numThreads)
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = context.numThreads
         
         let mutex = Mutex()
         
