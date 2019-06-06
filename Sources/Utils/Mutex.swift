@@ -1,34 +1,24 @@
-#if os(macOS)
-import Darwin.C
-#elseif os(Linux)
-import Glibc
-#endif
+import Foundation
 
 /// A simple, non-recursive mutex lock.
 public final class Mutex {
     
-    private var mutex: pthread_mutex_t
+    private var _lock: NSLock
     
     public init() {
-        mutex = pthread_mutex_t()
-        
-        pthread_mutex_init(&mutex, nil)
-    }
-    
-    deinit {
-        pthread_mutex_destroy(&mutex)
+        _lock = NSLock()
     }
     
     public func lock() {
-        pthread_mutex_lock(&mutex)
+        _lock.lock()
     }
     
     public func unlock() {
-        pthread_mutex_unlock(&mutex)
+        _lock.unlock()
     }
     
     public func tryLock() -> Bool {
-        return pthread_mutex_trylock(&mutex) == 0
+        return _lock.try()
     }
     
     public func locking<T>(_ closure: () throws -> T) rethrows -> T {
