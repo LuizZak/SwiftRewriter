@@ -42,6 +42,9 @@ let package = Package(
             name: "WriterTargetOutput",
             dependencies: ["Utils"]),
         .target(
+            name: "SwiftAST",
+            dependencies: ["MiniLexer"]),
+        .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),
         .target(
@@ -52,9 +55,6 @@ let package = Package(
             dependencies: ["ObjcParserAntlr", "Antlr4", "GrammarModels", "MiniLexer",
                            "TypeLexing", "Utils"]),
         .target(
-            name: "SwiftAST",
-            dependencies: ["GrammarModels", "MiniLexer"]),
-        .target(
             name: "KnownType",
             dependencies: ["SwiftAST", "WriterTargetOutput"]),
         .target(
@@ -62,7 +62,7 @@ let package = Package(
             dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
         .target(
             name: "Intentions",
-            dependencies: ["SwiftAST", "GrammarModels", "KnownType"]),
+            dependencies: ["SwiftAST", "GrammarModels", "KnownType", "ObjcParser"]),
         .target(
             name: "TypeSystem",
             dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
