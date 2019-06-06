@@ -58,11 +58,11 @@ let package = Package(
             name: "KnownType",
             dependencies: ["SwiftAST", "WriterTargetOutput"]),
         .target(
-            name: "SwiftSyntaxSupport",
-            dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
-        .target(
             name: "Intentions",
             dependencies: ["SwiftAST", "GrammarModels", "KnownType", "ObjcParser"]),
+        .target(
+            name: "SwiftSyntaxSupport",
+            dependencies: ["SwiftSyntax", "KnownType", "Intentions", "SwiftAST"]),
         .target(
             name: "TypeSystem",
             dependencies: ["SwiftAST", "ObjcParser", "TypeDefinitions", "Utils",
