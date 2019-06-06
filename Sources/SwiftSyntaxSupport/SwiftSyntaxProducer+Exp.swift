@@ -137,46 +137,61 @@ extension SwiftSyntaxProducer {
         return ClosureExprSyntax { builder in
             builder.useLeftBrace(makeStartToken(SyntaxFactory.makeLeftBraceToken))
             
-            if exp.resolvedType == nil || exp.resolvedType != exp.expectedType {
-                let signature = ClosureSignatureSyntax { builder in
+            let hasParameters = !exp.parameters.isEmpty
+            let requiresTypeSignatuer =
+                exp.resolvedType == nil || exp.resolvedType != exp.expectedType
+            
+            let signature = ClosureSignatureSyntax { builder in
+                if hasParameters || requiresTypeSignatuer {
                     builder.useInTok(SyntaxFactory.makeInKeyword().addingLeadingSpace())
-                    
-                    addExtraLeading(.newlines(1))
-                    
+                }
+                
+                if requiresTypeSignatuer {
                     builder.useOutput(generateReturn(exp.returnType))
+                }
+                
+                let parameters = ParameterClauseSyntax { builder in
+                    addExtraLeading(.spaces(1))
                     
-                    let parameters = ParameterClauseSyntax { builder in
+                    if requiresTypeSignatuer {
                         builder.useLeftParen(SyntaxFactory
                             .makeLeftParenToken()
-                            .addingLeadingSpace()
+                            .withExtraLeading(from: self)
                         )
-                        builder.useRightParen(SyntaxFactory.makeRightParenToken())
                         
-                        iterateWithComma(exp.parameters) { (arg, hasComma) in
-                            builder.addParameter(FunctionParameterSyntax { builder in
-                                builder.useFirstName(makeIdentifier(arg.name))
+                        builder.useRightParen(SyntaxFactory.makeRightParenToken())
+                    }
+                    
+                    iterateWithComma(exp.parameters) { (arg, hasComma) in
+                        builder.addParameter(FunctionParameterSyntax { builder in
+                            builder.useFirstName(
+                                makeIdentifier(arg.name)
+                                    .withExtraLeading(from: self)
+                            )
+                            
+                            if requiresTypeSignatuer {
                                 builder.useColon(SyntaxFactory
                                     .makeColonToken()
                                     .withTrailingSpace()
                                 )
                                 
                                 builder.useType(SwiftTypeConverter.makeTypeSyntax(arg.type))
-                                
-                                if hasComma {
-                                    builder.useTrailingComma(SyntaxFactory
-                                        .makeCommaToken()
-                                        .withTrailingSpace()
-                                    )
-                                }
-                            })
-                        }
+                            }
+                            
+                            if hasComma {
+                                builder.useTrailingComma(SyntaxFactory
+                                    .makeCommaToken()
+                                    .withTrailingSpace()
+                                )
+                            }
+                        })
                     }
-                    
-                    builder.useInput(parameters)
                 }
                 
-                builder.useSignature(signature)
+                builder.useInput(parameters)
             }
+            
+            builder.useSignature(signature)
             
             indent()
             
@@ -330,7 +345,12 @@ extension SwiftSyntaxProducer {
             // If the last argument is a block type, close the
             // parameters list earlier and use the block as a
             // trailing closure.
-            if let block = arguments.last?.expression as? BlockLiteralExpression {
+            // Exception: If the second-to-last argument is also a closure argument,
+            // don't use trailing closure syntax, since it results in confusing-looking
+            // code.
+            if let block = arguments.last?.expression as? BlockLiteralExpression,
+                !(arguments.dropLast().last?.expression is BlockLiteralExpression) {
+                
                 trailingClosure = block
                 arguments.removeLast()
             }

@@ -444,7 +444,7 @@ extension SwiftType: CustomStringConvertible {
     }
 }
 
-// MARK: - Codable compliance
+// MARK: - Codable conformance
 extension SwiftType: Codable {
     public init(from decoder: Decoder) throws {
         let string: String
