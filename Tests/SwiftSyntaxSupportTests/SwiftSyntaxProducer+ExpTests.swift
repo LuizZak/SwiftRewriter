@@ -94,6 +94,36 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             matches: "foo(1, b: 2)")
     }
     
+    func testPostfixFunctionCallWithTrailingClosure() {
+        assert(
+            Expression.identifier("foo").call([.block(body: [])]),
+            producer: SwiftSyntaxProducer.generatePostfix,
+            matches: "foo { () -> Void in\n}")
+        
+        assert(
+            Expression.identifier("foo").call([.constant(1), .block(body: [])]),
+            producer: SwiftSyntaxProducer.generatePostfix,
+            matches: "foo(1) { () -> Void in\n}")
+        
+        assert(
+            Expression.identifier("foo").call([.block(body: []), .block(body: [])]),
+            producer: SwiftSyntaxProducer.generatePostfix,
+            matches: """
+                foo({ () -> Void in
+                }, { () -> Void in
+                })
+                """)
+        
+        assert(
+            Expression.identifier("foo").call([.block(body: []), .constant(1), .block(body: [])]),
+            producer: SwiftSyntaxProducer.generatePostfix,
+            matches: """
+                foo({ () -> Void in
+                }, 1) { () -> Void in
+                }
+                """)
+    }
+    
     func testPostfixOptionalFunctionCall() {
         assert(
             Expression.identifier("foo").optional().call(),
@@ -267,6 +297,11 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             Expression.block(body: []),
             producer: SwiftSyntaxProducer.generateClosure,
             matches: "{ () -> Void in\n}")
+        
+        assert(
+            Expression.block(body: [.expression(Expression.identifier("foo").call())]),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ () -> Void in\n    foo()\n}")
     }
     
     func testClosureWithParameters() {
@@ -274,10 +309,105 @@ class SwiftSyntaxProducer_ExpTests: BaseSwiftSyntaxProducerTests {
             Expression.block(
                 parameters: [BlockParameter(name: "p1", type: .int)],
                 return: .void,
-                body: []
+                body: [
+                    .expression(Expression.identifier("foo").call())
+                ]
             ),
             producer: SwiftSyntaxProducer.generateClosure,
-            matches: "{ (p1: Int) -> Void in\n}")
+            matches: "{ (p1: Int) -> Void in\n    foo()\n}")
+        
+        assert(
+            Expression.block(
+                parameters: [
+                    BlockParameter(name: "p1", type: .int),
+                    BlockParameter(name: "p2", type: .string)
+                ],
+                return: .void,
+                body: [
+                    .expression(Expression.identifier("foo").call())
+                ]
+            ),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ (p1: Int, p2: String) -> Void in\n    foo()\n}")
+    }
+    
+    func testClosureOmitsTypeSignatureWhenExpectedTypeAndActualTypesMatch() {
+        assert(
+            Expression.block(
+                parameters: [],
+                return: .void,
+                body: [
+                    .expression(Expression.identifier("foo").call())
+                ])
+                .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
+                .typed(SwiftType.swiftBlock(returnType: .void, parameters: [])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{\n    foo()\n}")
+        
+        assert(
+            Expression.block(
+                parameters: [
+                    BlockParameter(name: "p1", type: .int)
+                ],
+                return: .void,
+                body: [
+                    .expression(Expression.identifier("foo").call())
+                ])
+                .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: [.int]))
+                .typed(SwiftType.swiftBlock(returnType: .void, parameters: [.int])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: """
+                { p1 in
+                    foo()
+                }
+                """)
+        
+        assert(
+            Expression.block(
+                parameters: [
+                    BlockParameter(name: "p1", type: .int),
+                    BlockParameter(name: "p2", type: .string)
+                ],
+                return: .void,
+                body: [
+                    .expression(Expression.identifier("foo").call())
+                ])
+                .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: [.int, .string]))
+                .typed(SwiftType.swiftBlock(returnType: .void, parameters: [.int, .string])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: """
+                { p1, p2 in
+                    foo()
+                }
+                """)
+    }
+    
+    func testClosureEmitsTypeSignatureWhenExpectedTypeAndActualTypesMismatch() {
+        assert(
+            Expression.block(
+                parameters: [],
+                return: .void,
+                body: [
+                    .expression(Expression.identifier("foo").call())
+                ])
+                .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
+                .typed(SwiftType.swiftBlock(returnType: .int, parameters: [])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ () -> Void in\n    foo()\n}")
+        
+        assert(
+            Expression.block(
+                parameters: [
+                    BlockParameter(name: "p1", type: .int)
+                ],
+                return: .void,
+                body: [
+                    .expression(Expression.identifier("foo").call())
+                ])
+                .typed(expected: SwiftType.swiftBlock(returnType: .void, parameters: []))
+                .typed(SwiftType.swiftBlock(returnType: .int, parameters: [])),
+            producer: SwiftSyntaxProducer.generateClosure,
+            matches: "{ (p1: Int) -> Void in\n    foo()\n}")
     }
     
     func testSequentialBinaryExpression() {
