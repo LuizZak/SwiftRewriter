@@ -514,9 +514,7 @@ public final class SwiftRewriter {
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
-            // TODO: Would be interesting if we could simply print ASTNodes
-            // directly, or not rely on ObjcParser to do that for us, at least.
-            parser.printParsedNodes()
+            parser.rootNode.printNode({ print($0) })
         }
         
         let ctx = IntentionBuildingContext()
