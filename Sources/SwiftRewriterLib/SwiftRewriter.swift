@@ -455,7 +455,7 @@ public final class SwiftRewriter {
         }
     }
     
-    private func resolveIncludes(in directives: [String], basePath: String) {
+    private func resolveIncludes(in directives: [String], basePath: String, foundFileCallback: (_ path: String) -> Void) {
         if !followIncludes {
             return
         }
@@ -481,8 +481,7 @@ public final class SwiftRewriter {
                 continue
             }
             
-            // TODO: Do meaningful work here to open the files and parse their
-            // declarations
+            foundFileCallback(fullPath)
         }
     }
     
@@ -536,8 +535,14 @@ public final class SwiftRewriter {
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
             
-            resolveIncludes(in: fileIntent.preprocessorDirectives,
-                            basePath: (src.filePath as NSString).deletingLastPathComponent)
+            resolveIncludes(
+                in: fileIntent.preprocessorDirectives,
+                basePath: (src.filePath as NSString).deletingLastPathComponent,
+                foundFileCallback: { filePath in
+                    // TODO: Do meaningful work here to open the files and parse their
+                    // declarations
+                }
+            )
         }
     }
     
