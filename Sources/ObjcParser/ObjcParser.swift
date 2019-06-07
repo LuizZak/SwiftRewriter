@@ -380,7 +380,7 @@ public class ObjcParser {
             var typeName: String = String(try lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
             
             // 'long long' support
-            if typeName == "long" && lexer.tokenType(matches: { $0.isIdentifier }) && lexer.token().value == "long" {
+            if typeName == "long" && lexer.tokenType(is: .identifier("long")) {
                 typeName = String(try typeName + " " + lexer.advance(matching: { $0.tokenType.isIdentifier }).value)
             }
             

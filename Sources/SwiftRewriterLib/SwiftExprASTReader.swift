@@ -127,7 +127,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
             return unary.accept(self)
         }
         if let typeName = ctx.typeName(),
-            let type = typeParser.parseObjcType(fromTypeName: typeName),
+            let type = typeParser.parseObjcType(from: typeName),
             let exp = ctx.castExpression()?.accept(self) {
             
             let swiftType = typeMapper.swiftType(forObjcType: type, context: .alwaysNonnull)
@@ -154,7 +154,7 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
         // sizeof(<expr>) / sizeof(<type>)
         if ctx.SIZEOF() != nil {
             if let typeSpecifier = ctx.typeSpecifier(),
-                let type = typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier) {
+                let type = typeParser.parseObjcType(from: typeSpecifier) {
                 
                 let swiftType = typeMapper.swiftType(forObjcType: type)
                 
@@ -349,12 +349,12 @@ public final class SwiftExprASTReader: ObjectiveCParserBaseVisitor<Expression> {
     
     public override func visitBlockExpression(_ ctx: ObjectiveCParser.BlockExpressionContext) -> Expression? {
         let returnType = ctx.typeSpecifier().flatMap { typeSpecifier -> ObjcType? in
-            return typeParser.parseObjcType(fromTypeSpecifier: typeSpecifier)
+            return typeParser.parseObjcType(from: typeSpecifier)
         } ?? .void
         
         let parameters: [BlockParameter]
         if let blockParameters = ctx.blockParameters() {
-            let types = typeParser.parseObjcTypes(fromBlockParameters: blockParameters)
+            let types = typeParser.parseObjcTypes(from: blockParameters)
             let args = blockParameters.typeVariableDeclaratorOrName()
             
             parameters =

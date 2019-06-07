@@ -138,8 +138,8 @@ open class ASTNode {
         self.location = startNode.location
         self.length =
             SourceLength(newlines: endNode.location.line - startNode.location.line,
-                          columnsAtLastLine: endNode.location.column,
-                          utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
+                         columnsAtLastLine: endNode.location.column,
+                         utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
     }
     
     /// Overriden by subclasses to provide custom short descriptions to be used
