@@ -19,8 +19,8 @@ public protocol KnownTypeProvider {
 /// Gathers one or more type providers into a single `KnownTypeProvider` interface.
 public class CompoundKnownTypeProvider: KnownTypeProvider {
     
-    private var typesCache = ConcurrentValue<[String: KnownType?]>(value: [:])
-    private var canonicalTypenameCache = ConcurrentValue<[String: String]>(value: [:])
+    @ConcurrentValue private var typesCache: [String: KnownType?] = [:]
+    @ConcurrentValue private var canonicalTypenameCache: [String: String] = [:]
     
     public var providers: [KnownTypeProvider]
     
@@ -29,27 +29,27 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     func makeCache() {
-        typesCache.setAsCaching(value: [:])
-        canonicalTypenameCache.setAsCaching(value: [:])
+        $typesCache.setAsCaching(value: [:])
+        $canonicalTypenameCache.setAsCaching(value: [:])
     }
     
     func tearDownCache() {
-        typesCache.tearDownCaching(resetToValue: [:])
-        canonicalTypenameCache.tearDownCaching(resetToValue: [:])
+        $typesCache.tearDownCaching(resetToValue: [:])
+        $canonicalTypenameCache.tearDownCaching(resetToValue: [:])
     }
     
     public func addKnownTypeProvider(_ typeProvider: KnownTypeProvider) {
         providers.append(typeProvider)
         
         // Reset cache to allow types from this type provider to be considered.
-        if typesCache.usingCache {
+        if $typesCache.usingCache {
             tearDownCache()
             makeCache()
         }
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        if typesCache.usingCache, let type = typesCache.readingValue({ $0[name] }) {
+        if $typesCache.usingCache, let type = typesCache[name] {
             return type
         }
         
@@ -62,20 +62,16 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         }
         
         if types.isEmpty {
-            if typesCache.usingCache {
-                typesCache.modifyingValue { value in
-                    value[name] = nil
-                }
+            if $typesCache.usingCache {
+                typesCache[name] = nil
             }
             return nil
         }
         
         let type = CompoundKnownType(typeName: name, types: types)
         
-        if typesCache.usingCache {
-            typesCache.modifyingValue { value in
-                value[name] = type
-            }
+        if $typesCache.usingCache {
+            typesCache[name] = type
         }
         
         return type
@@ -92,8 +88,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
     }
     
     public func canonicalName(for typeName: String) -> String? {
-        if canonicalTypenameCache.usingCache {
-            if let canonical = canonicalTypenameCache.readingValue({ $0[typeName] }) {
+        if $canonicalTypenameCache.usingCache {
+            if let canonical = canonicalTypenameCache[typeName] {
                 return canonical
             }
         }
@@ -103,10 +99,8 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
                 continue
             }
             
-            if canonicalTypenameCache.usingCache {
-                canonicalTypenameCache.modifyingValue { state in
-                    state[typeName] = canonical
-                }
+            if $canonicalTypenameCache.usingCache {
+                canonicalTypenameCache[typeName] = canonical
             }
             
             return canonical

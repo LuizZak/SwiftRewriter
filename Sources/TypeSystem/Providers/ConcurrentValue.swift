@@ -1,5 +1,6 @@
 import Dispatch
 
+@propertyDelegate
 final class ConcurrentValue<T> {
     private var cacheBarrier =
         DispatchQueue(
@@ -9,24 +10,35 @@ final class ConcurrentValue<T> {
             autoreleaseFrequency: .inherit,
             target: nil)
     
+    private var _value: T
+    
     var usingCache = false
     
-    private var value: T
+    var value: T {
+        get {
+            return cacheBarrier.sync { _value }
+        }
+        set {
+            cacheBarrier.sync(flags: .barrier, execute: { _value = newValue })
+        }
+    }
     
     init(value: T) {
-        self.value = value
+        self._value = value
+    }
+    
+    init(initialValue: T) {
+        self._value = initialValue
     }
     
     @inlinable
     func readingValue<U>(_ block: (T) -> U) -> U {
-        return cacheBarrier.sync { block(value) }
+        return block(value)
     }
     
     @inlinable
     func modifyingValue<U>(_ block: (inout T) -> U) -> U {
-        return cacheBarrier.sync(flags: .barrier) {
-            block(&value)
-        }
+        return block(&value)
     }
     
     @inlinable

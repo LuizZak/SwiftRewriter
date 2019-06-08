@@ -12,13 +12,13 @@ public class TypeSystem {
     
     private var compoundKnownTypesCache: CompoundKnownTypesCache?
     private var protocolConformanceCache: ProtocolConformanceCache?
-    private var baseClassTypesByNameCache = ConcurrentValue<[String: ClassType]>(value: [:])
+    @ConcurrentValue private var baseClassTypesByNameCache: [String: ClassType] = [:]
     private var overloadResolverState = OverloadResolverState()
     var memberSearchCache = MemberSearchCache()
-    var aliasCache = ConcurrentValue<[SwiftType: SwiftType]>(value: [:])
-    var allConformancesCache = ConcurrentValue<[String: [KnownProtocolConformance]]>(value: [:])
-    var typeExistsCache = ConcurrentValue<[String: Bool]>(value: [:])
-    var knownTypeForSwiftType = ConcurrentValue<[SwiftType: KnownType?]>(value: [:])
+    @ConcurrentValue var aliasCache: [SwiftType: SwiftType] = [:]
+    @ConcurrentValue var allConformancesCache: [String: [KnownProtocolConformance]] = [:]
+    @ConcurrentValue var typeExistsCache: [String: Bool] = [:]
+    @ConcurrentValue var knownTypeForSwiftType: [SwiftType: KnownType?] = [:]
     
     /// Type-aliases
     var innerAliasesProvider = CollectionTypealiasProvider(aliases: [:])
@@ -43,10 +43,10 @@ public class TypeSystem {
         protocolConformanceCache = ProtocolConformanceCache()
         overloadResolverState.makeCache()
         memberSearchCache.makeCache()
-        aliasCache.setAsCaching(value: [:])
-        allConformancesCache.setAsCaching(value: [:])
-        typeExistsCache.setAsCaching(value: [:])
-        knownTypeForSwiftType.setAsCaching(value: [:])
+        $aliasCache.setAsCaching(value: [:])
+        $allConformancesCache.setAsCaching(value: [:])
+        $typeExistsCache.setAsCaching(value: [:])
+        $knownTypeForSwiftType.setAsCaching(value: [:])
     }
     
     public func tearDownCache() {
@@ -56,10 +56,10 @@ public class TypeSystem {
         protocolConformanceCache = nil
         overloadResolverState.tearDownCache()
         memberSearchCache.tearDownCache()
-        aliasCache.tearDownCaching(resetToValue: [:])
-        allConformancesCache.tearDownCaching(resetToValue: [:])
-        typeExistsCache.tearDownCaching(resetToValue: [:])
-        knownTypeForSwiftType.tearDownCaching(resetToValue: [:])
+        $aliasCache.tearDownCaching(resetToValue: [:])
+        $allConformancesCache.tearDownCaching(resetToValue: [:])
+        $typeExistsCache.tearDownCaching(resetToValue: [:])
+        $knownTypeForSwiftType.tearDownCaching(resetToValue: [:])
     }
     
     /// Gets the overload resolver instance for this type system
@@ -116,7 +116,7 @@ public class TypeSystem {
     
     /// Returns `true` if a type is known to exists with a given name.
     public func typeExists(_ name: String) -> Bool {
-        if typeExistsCache.usingCache, let result = typeExistsCache.readingValue({ $0[name] }) {
+        if $typeExistsCache.usingCache, let result = typeExistsCache[name] {
             return result
         }
         
@@ -130,10 +130,8 @@ public class TypeSystem {
             result = false
         }
         
-        if typeExistsCache.usingCache {
-            typeExistsCache.modifyingValue { cache in
-                cache[name] = result
-            }
+        if $typeExistsCache.usingCache {
+            typeExistsCache[name] = result
         }
         
         return result
@@ -708,8 +706,8 @@ public class TypeSystem {
     /// Returns a plain `.typeName` with the passed type name within, in case no
     /// typealiases where found.
     public func resolveAlias(in type: SwiftType) -> SwiftType {
-        if aliasCache.usingCache {
-            if let result = aliasCache.readingValue({ $0[type] }) {
+        if $aliasCache.usingCache {
+            if let result = aliasCache[type] {
                 return result
             }
         }
@@ -717,10 +715,8 @@ public class TypeSystem {
         let resolver = TypealiasExpander(aliasesSource: typealiasProviders)
         let result = resolver.expand(in: type)
         
-        if aliasCache.usingCache {
-            aliasCache.modifyingValue {
-                $0[type] = result
-            }
+        if $aliasCache.usingCache {
+            aliasCache[type] = result
         }
         
         return result
@@ -824,8 +820,8 @@ public class TypeSystem {
         
         visitedTypes.insert(type.typeName)
         
-        if allConformancesCache.usingCache {
-            if let result = allConformancesCache.readingValue({ $0[type.typeName] }) {
+        if $allConformancesCache.usingCache {
+            if let result = allConformancesCache[type.typeName] {
                 return result
             }
         }
@@ -852,10 +848,8 @@ public class TypeSystem {
             )
         }
         
-        if allConformancesCache.usingCache {
-            allConformancesCache.modifyingValue { value in
-                value[type.typeName] = protocols
-            }
+        if $allConformancesCache.usingCache {
+            allConformancesCache[type.typeName] = protocols
         }
         
         return protocols
@@ -907,8 +901,8 @@ public class TypeSystem {
     
     /// Returns a known type for a given SwiftType, if present.
     public func findType(for swiftType: SwiftType) -> KnownType? {
-        if knownTypeForSwiftType.usingCache {
-            if let result = knownTypeForSwiftType.readingValue({ $0[swiftType] }) {
+        if $knownTypeForSwiftType.usingCache {
+            if let result = knownTypeForSwiftType[swiftType] {
                 return result
             }
         }
@@ -939,10 +933,8 @@ public class TypeSystem {
             result = nil
         }
         
-        if knownTypeForSwiftType.usingCache {
-            knownTypeForSwiftType.modifyingValue { cache in
-                cache[swiftType] = result
-            }
+        if $knownTypeForSwiftType.usingCache {
+            knownTypeForSwiftType[swiftType] = result
         }
         
         return result
@@ -1020,8 +1012,8 @@ public class TypeSystem {
     }
     
     private func classTypeDefinition(name: String) -> ClassType? {
-        if !baseClassTypesByNameCache.usingCache {
-            baseClassTypesByNameCache
+        if !$baseClassTypesByNameCache.usingCache {
+            $baseClassTypesByNameCache
                 .setAsCaching(value:
                     TypeDefinitions
                         .classesList
@@ -1031,7 +1023,7 @@ public class TypeSystem {
                 )
         }
         
-        return baseClassTypesByNameCache.readingValue { $0[name] }
+        return baseClassTypesByNameCache[name]
     }
 }
 
@@ -1634,28 +1626,26 @@ private class TypealiasExpander {
 }
 
 private final class CompoundKnownTypesCache {
-    private var types: ConcurrentValue<[[String]: KnownType]> = ConcurrentValue(value: [:])
+    @ConcurrentValue private var types: [[String]: KnownType] = [:]
     
     func fetch(names: [String]) -> KnownType? {
-        return types.readingValue({ $0[names] })
+        return types[names]
     }
     
     func record(type: KnownType, names: [String]) {
-        types.modifyingValue {
-            $0[names] = type
-        }
+        types[names] = type
     }
 }
 
 private final class ProtocolConformanceCache {
-    private let cache = ConcurrentValue<[String: Entry]>(value: [:])
+    @ConcurrentValue private var cache: [String: Entry] = [:]
     
     init() {
-        cache.setAsCaching(value: [:])
+        $cache.setAsCaching(value: [:])
     }
     
     func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
-        cache.modifyingValue { entries -> Void in
+        $cache.modifyingValue { entries -> Void in
             var entry = entries[typeName, default: Entry(conformances: [:])]
             entry.conformances[protocolName] = value
             entries[typeName] = entry
@@ -1663,9 +1653,7 @@ private final class ProtocolConformanceCache {
     }
     
     func typeName(_ type: String, conformsTo protocolName: String) -> Bool? {
-        return cache.readingValue { entries -> Bool? in
-            return entries[type]?.conformances[protocolName]
-        }
+        return cache[type]?.conformances[protocolName]
     }
     
     private struct Entry {
@@ -1675,35 +1663,31 @@ private final class ProtocolConformanceCache {
 
 private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider {
     
-    private var cache: ConcurrentValue<[String: KnownType]> = ConcurrentValue(value: [:])
+    @ConcurrentValue private var cache: [String: KnownType] = [:]
     
     // For remembering attempts to look for protocols that where not found on
     // the protocols list.
     // Avoids repetitive linear lookups on the protocols list over and over.
-    private var negativeLookupResults: ConcurrentValue<Set<String>> = ConcurrentValue(value: [])
+    @ConcurrentValue private var negativeLookupResults: Set<String> = []
     
     func knownType(withName name: String) -> KnownType? {
-        if let cached = cache.readingValue({ $0[name] }) {
+        if let cached = cache[name] {
             return cached
         }
-        if negativeLookupResults.readingValue({ $0.contains(name) }) {
+        if negativeLookupResults.contains(name) {
             return nil
         }
         
         let protocols = TypeDefinitions.protocolsList.protocols
         guard let prot = protocols.first(where: { $0.protocolName == name }) else {
-            _ = negativeLookupResults.modifyingValue { value in
-                value.insert(name)
-            }
+            negativeLookupResults.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        cache.modifyingValue { cache in
-            cache[name] = type
-        }
+        cache[name] = type
         
         return type
     }
@@ -1761,34 +1745,30 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
 
 private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
     
-    private var cache: ConcurrentValue<[String: KnownType]> = ConcurrentValue(value: [:])
+    @ConcurrentValue private var cache: [String: KnownType] = [:]
     
     // For remembering attempts to look for classes that where not found on
     // the classes list.
     // Avoids repetitive linear lookups on the classes list over and over.
-    private var negativeLookupResults: ConcurrentValue<Set<String>> = ConcurrentValue(value: [])
+    @ConcurrentValue private var negativeLookupResults: Set<String> = []
     
     func knownType(withName name: String) -> KnownType? {
-        if let cached = cache.readingValue({ $0[name] }) {
+        if let cached = cache[name] {
             return cached
         }
-        if negativeLookupResults.readingValue({ $0.contains(name) }) {
+        if negativeLookupResults.contains(name) {
             return nil
         }
         
         guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
-            _ = negativeLookupResults.modifyingValue {
-                $0.insert(name)
-            }
+            negativeLookupResults.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        cache.modifyingValue {
-            $0[name] = type
-        }
+        cache[name] = type
         
         return type
     }
@@ -1846,24 +1826,24 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
 }
 
 internal final class MemberSearchCache {
-    private let methodsCache = ConcurrentValue<[MethodSearchEntry: KnownMethod?]>(value: [:])
-    private let propertiesCache = ConcurrentValue<[PropertySearchEntry: KnownProperty?]>(value: [:])
-    private let fieldsCache = ConcurrentValue<[FieldSearchEntry: KnownProperty?]>(value: [:])
+    @ConcurrentValue private var methodsCache: [MethodSearchEntry: KnownMethod?] = [:]
+    @ConcurrentValue private var propertiesCache: [PropertySearchEntry: KnownProperty?] = [:]
+    @ConcurrentValue private var fieldsCache: [FieldSearchEntry: KnownProperty?] = [:]
 
     var usingCache: Bool = false
 
     func makeCache() {
         usingCache = true
-        methodsCache.setAsCaching(value: [:])
-        propertiesCache.setAsCaching(value: [:])
-        fieldsCache.setAsCaching(value: [:])
+        $methodsCache.setAsCaching(value: [:])
+        $propertiesCache.setAsCaching(value: [:])
+        $fieldsCache.setAsCaching(value: [:])
     }
 
     func tearDownCache() {
         usingCache = false
-        methodsCache.tearDownCaching(resetToValue: [:])
-        propertiesCache.tearDownCaching(resetToValue: [:])
-        fieldsCache.tearDownCaching(resetToValue: [:])
+        $methodsCache.tearDownCaching(resetToValue: [:])
+        $propertiesCache.tearDownCaching(resetToValue: [:])
+        $fieldsCache.tearDownCaching(resetToValue: [:])
     }
 
     func storeMethod(withObjcSelector selector: SelectorSignature,
@@ -1873,15 +1853,13 @@ internal final class MemberSearchCache {
                      in typeName: String,
                      method: KnownMethod?) {
         
-        methodsCache.modifyingValue { cache in
-            let entry = MethodSearchEntry(selector: selector,
-                                          invocationTypeHints: invocationTypeHints,
-                                          isStatic: isStatic,
-                                          includeOptional: includeOptional,
-                                          typeName: typeName)
-            
-            cache[entry] = method
-        }
+        let entry = MethodSearchEntry(selector: selector,
+                                      invocationTypeHints: invocationTypeHints,
+                                      isStatic: isStatic,
+                                      includeOptional: includeOptional,
+                                      typeName: typeName)
+        
+        methodsCache[entry] = method
     }
 
     func storeProperty(named name: String,
@@ -1890,14 +1868,12 @@ internal final class MemberSearchCache {
                        in typeName: String,
                        property: KnownProperty?) {
         
-        propertiesCache.modifyingValue { cache in
-            let entry = PropertySearchEntry(name: name,
-                                            isStatic: isStatic,
-                                            includeOptional: includeOptional,
-                                            typeName: typeName)
-            
-            cache[entry] = property
-        }
+        let entry = PropertySearchEntry(name: name,
+                                        isStatic: isStatic,
+                                        includeOptional: includeOptional,
+                                        typeName: typeName)
+        
+        propertiesCache[entry] = property
     }
 
     func storeField(named name: String,
@@ -1905,13 +1881,11 @@ internal final class MemberSearchCache {
                     in typeName: String,
                     field: KnownProperty?) {
         
-        fieldsCache.modifyingValue { cache in
-            let entry = FieldSearchEntry(name: name,
-                                         isStatic: isStatic,
-                                         typeName: typeName)
-            
-            cache[entry] = field
-        }
+        let entry = FieldSearchEntry(name: name,
+                                     isStatic: isStatic,
+                                     typeName: typeName)
+        
+        fieldsCache[entry] = field
     }
 
     func lookupMethod(withObjcSelector selector: SelectorSignature,
@@ -1920,15 +1894,13 @@ internal final class MemberSearchCache {
                       includeOptional: Bool,
                       in typeName: String) -> KnownMethod?? {
         
-        return methodsCache.readingValue { cache in
-            let entry = MethodSearchEntry(selector: selector,
-                                          invocationTypeHints: invocationTypeHints,
-                                          isStatic: isStatic,
-                                          includeOptional: includeOptional,
-                                          typeName: typeName)
-            
-            return cache[entry]
-        }
+        let entry = MethodSearchEntry(selector: selector,
+                                      invocationTypeHints: invocationTypeHints,
+                                      isStatic: isStatic,
+                                      includeOptional: includeOptional,
+                                      typeName: typeName)
+        
+        return methodsCache[entry]
     }
 
     func lookupProperty(named name: String,
@@ -1936,27 +1908,23 @@ internal final class MemberSearchCache {
                         includeOptional: Bool,
                         in typeName: String) -> KnownProperty?? {
         
-        return propertiesCache.readingValue { cache in
-            let entry = PropertySearchEntry(name: name,
-                                            isStatic: isStatic,
-                                            includeOptional: includeOptional,
-                                            typeName: typeName)
-            
-            return cache[entry]
-        }
+        let entry = PropertySearchEntry(name: name,
+                                        isStatic: isStatic,
+                                        includeOptional: includeOptional,
+                                        typeName: typeName)
+        
+        return propertiesCache[entry]
     }
 
     func lookupField(named name: String,
                      static isStatic: Bool,
                      in typeName: String) -> KnownProperty?? {
         
-        return fieldsCache.readingValue { cache in
-            let entry = FieldSearchEntry(name: name,
-                                         isStatic: isStatic,
-                                         typeName: typeName)
-            
-            return cache[entry]
-        }
+        let entry = FieldSearchEntry(name: name,
+                                     isStatic: isStatic,
+                                     typeName: typeName)
+        
+        return fieldsCache[entry]
     }
 
     struct MethodSearchEntry: Hashable {

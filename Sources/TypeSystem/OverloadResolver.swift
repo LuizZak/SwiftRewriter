@@ -213,43 +213,37 @@ public class OverloadResolver {
 }
 
 class OverloadResolverState {
-    private let cache = ConcurrentValue<[CacheEntry: Int?]>(value: [:])
+    @ConcurrentValue private var cache: [CacheEntry: Int?] = [:]
     
     public func makeCache() {
-        cache.setAsCaching(value: [:])
+        $cache.setAsCaching(value: [:])
     }
     
     public func tearDownCache() {
-        cache.tearDownCaching(resetToValue: [:])
+        $cache.tearDownCaching(resetToValue: [:])
     }
     
     func cachedEntry(forSignatures signatures: [FunctionSignature],
                      arguments: [OverloadResolver.Argument]) -> Int?? {
         
-        if !cache.usingCache {
+        if !$cache.usingCache {
             return nil
         }
         
-        return cache.readingValue { cache in
-            let entry = CacheEntry(signatures: signatures, arguments: arguments)
-            
-            return cache[entry]
-        }
+        let entry = CacheEntry(signatures: signatures, arguments: arguments)
+        return cache[entry]
     }
     
     func addCache(forSignatures signatures: [FunctionSignature],
                   arguments: [OverloadResolver.Argument],
                   resolutionIndex: Int?) {
         
-        if !cache.usingCache {
+        if !$cache.usingCache {
             return
         }
         
-        cache.modifyingValue { cache in
-            let entry = CacheEntry(signatures: signatures, arguments: arguments)
-            
-            cache[entry] = resolutionIndex
-        }
+        let entry = CacheEntry(signatures: signatures, arguments: arguments)
+        cache[entry] = resolutionIndex
     }
     
     struct CacheEntry: Hashable {
