@@ -59,7 +59,9 @@ extension SwiftSyntaxProducer {
         func _forType(_ type: SwiftType) -> ExprSyntax {
             return MemberAccessExprSyntax { builder in
                 let base = SpecializeExprSyntax { builder in
-                    let token = prepareStartToken(SyntaxFactory.makeIdentifier("MemoryLayout"))
+                    let token = prepareStartToken(
+                        SyntaxFactory.makeIdentifier("MemoryLayout")
+                    )
                     
                     builder.useExpression(
                         SyntaxFactory

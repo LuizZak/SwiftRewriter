@@ -5,10 +5,17 @@ public protocol ValueMatcherProtocol {
 }
 
 /// A matcher that can be used to check if a value matches an expected structure.
+@dynamicMemberLookup
 public struct ValueMatcher<T>: ValueMatcherProtocol {
     
     @usableFromInline
     var matchers: [AnyASTMatcherRule]
+    
+    public subscript<U>(dynamicMember keyPath: KeyPath<T, U>) -> PartialValueMatcher<T, U> {
+        get {
+            return PartialValueMatcher(keyPath: keyPath, baseMatcher: self)
+        }
+    }
     
     public init() {
         self.matchers = []

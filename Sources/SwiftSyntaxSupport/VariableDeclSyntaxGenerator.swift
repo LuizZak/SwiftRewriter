@@ -109,10 +109,11 @@ class VariableDeclSyntaxGenerator {
         }
     }
     
-    private func makeAccessorBlockCreator(_ property: PropertyGenerationIntention) -> (() -> Syntax)? {
+    private static func makeAccessorBlockCreator(_ property: PropertyGenerationIntention,
+                                                 _ producer: SwiftSyntaxProducer) -> (() -> Syntax)? {
         // Emit { get } and { get set } accessor blocks for protocols
         if let property = property as? ProtocolPropertyGenerationIntention {
-            return { [producer] in
+            return {
                 return AccessorBlockSyntax { builder in
                     builder.useLeftBrace(
                         producer.makeStartToken(SyntaxFactory.makeLeftBraceToken)
@@ -149,7 +150,7 @@ class VariableDeclSyntaxGenerator {
             return nil
             
         case .computed(let body):
-            return { [producer] in
+            return {
                 return CodeBlockSyntax { builder in
                     builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
                     
@@ -167,7 +168,7 @@ class VariableDeclSyntaxGenerator {
             }
             
         case let .property(get, set):
-            return { [producer] in
+            return {
                 return AccessorBlockSyntax { builder in
                     builder.useLeftBrace(producer.makeStartToken(SyntaxFactory.makeLeftBraceToken).withLeadingSpace())
                     
@@ -256,7 +257,7 @@ private extension VariableDeclSyntaxGenerator {
     func makeDeclaration(_ intention: ValueStorageIntention) -> VariableDeclaration {
         var accessors: (() -> Syntax)?
         if let intention = intention as? PropertyGenerationIntention {
-            accessors = makeAccessorBlockCreator(intention)
+            accessors = VariableDeclSyntaxGenerator.makeAccessorBlockCreator(intention, producer)
         }
         
         return makeDeclaration(name: intention.name,

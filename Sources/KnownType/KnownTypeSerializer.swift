@@ -1,12 +1,8 @@
-#if canImport(Foundation)
 import Foundation
-#endif
 import SwiftAST
 
 /// A serializer for KnownType definitions
 public final class KnownTypeSerializer {
-    #if canImport(Foundation)
-
     /// Serializes the public interface of a given known type.
     ///
     /// Body of methods are not serialized along with the method signatures.
@@ -21,8 +17,6 @@ public final class KnownTypeSerializer {
         try builder.decode(from: data)
         return builder.build()
     }
-    
-    #endif
 }
 
 extension KnownTypeReference: Codable {

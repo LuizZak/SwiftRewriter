@@ -9,7 +9,7 @@ enum DecoratableElement {
         switch self {
         case .intention(let intention):
             return intention
-        case .variableDecl:
+        default:
             return nil
         }
     }

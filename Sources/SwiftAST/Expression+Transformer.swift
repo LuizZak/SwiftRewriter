@@ -1,13 +1,13 @@
 public extension ValueTransformer where U: Expression {
     
     func decompose(file: String = #file,
-                          line: Int = #line) -> ValueTransformer<T, [Expression]> {
+                   line: Int = #line) -> ValueTransformer<T, [Expression]> {
         
         return transforming(file: file, line: line) { $0.subExpressions }
     }
     
     func removingMemberAccess(file: String = #file,
-                                     line: Int = #line) -> ValueTransformer<T, Expression> {
+                              line: Int = #line) -> ValueTransformer<T, Expression> {
         
         return transforming(file: file, line: line) { value in
             guard let postfix = value.asPostfix, postfix.op is MemberPostfix else {
@@ -26,8 +26,8 @@ public extension ValueTransformer where U: Expression {
     }
     
     func typed(expectedType type: SwiftType,
-                      file: String = #file,
-                      line: Int = #line) -> ValueTransformer {
+               file: String = #file,
+               line: Int = #line) -> ValueTransformer {
         
         return transforming(file: file, line: line) { exp in
             exp.expectedType = type
@@ -43,8 +43,8 @@ public extension ValueTransformer where U: Expression {
 public extension ValueTransformer where U == [Expression] {
     
     func asBinaryExpression(operator op: SwiftOperator,
-                                   file: String = #file,
-                                   line: Int = #line) -> ValueTransformer<T, BinaryExpression> {
+                            file: String = #file,
+                            line: Int = #line) -> ValueTransformer<T, BinaryExpression> {
         
         return transforming(file: file, line: line) { exp -> BinaryExpression? in
             if exp.count != 2 {
@@ -58,8 +58,8 @@ public extension ValueTransformer where U == [Expression] {
     }
     
     func asFunctionCall(labels: [String?],
-                               file: String = #file,
-                               line: Int = #line) -> ValueTransformer<T, PostfixExpression> {
+                        file: String = #file,
+                        line: Int = #line) -> ValueTransformer<T, PostfixExpression> {
         
         return transforming(file: file, line: line) { exp -> PostfixExpression? in
             if exp.count != labels.count + 1 {
