@@ -455,7 +455,7 @@ public final class SwiftRewriter {
         }
     }
     
-    private func resolveIncludes(in directives: [String], basePath: String) {
+    private func resolveIncludes(in directives: [String], basePath: String, foundFileCallback: (_ path: String) -> Void) {
         if !followIncludes {
             return
         }
@@ -481,8 +481,7 @@ public final class SwiftRewriter {
                 continue
             }
             
-            // TODO: Do meaningful work here to open the files and parse their
-            // declarations
+            foundFileCallback(fullPath)
         }
     }
     
@@ -514,9 +513,7 @@ public final class SwiftRewriter {
             CollectorDelegate(typeMapper: typeMapper, typeParser: typeParser)
         
         if settings.stageDiagnostics.contains(.parsedAST) {
-            // TODO: Would be interesting if we could simply print ASTNodes
-            // directly, or not rely on ObjcParser to do that for us, at least.
-            parser.printParsedNodes()
+            parser.rootNode.printNode({ print($0) })
         }
         
         let ctx = IntentionBuildingContext()
@@ -538,8 +535,14 @@ public final class SwiftRewriter {
             diagnostics.merge(with: parser.diagnostics)
             intentionCollection.addIntention(fileIntent)
             
-            resolveIncludes(in: fileIntent.preprocessorDirectives,
-                            basePath: (src.filePath as NSString).deletingLastPathComponent)
+            resolveIncludes(
+                in: fileIntent.preprocessorDirectives,
+                basePath: (src.filePath as NSString).deletingLastPathComponent,
+                foundFileCallback: { filePath in
+                    // TODO: Do meaningful work here to open the files and parse their
+                    // declarations
+                }
+            )
         }
     }
     

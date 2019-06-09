@@ -1,4 +1,4 @@
-import Dispatch
+import Foundation
 import Utils
 
 public protocol FunctionBodyQueueDelegate: class {
@@ -75,17 +75,15 @@ public class FunctionBodyQueue<Delegate: FunctionBodyQueueDelegate> {
     }
     
     private func collect(from intentions: IntentionCollection) {
-        let queue = DispatchQueue(label: "com.swiftrewriter.functionBodyQueue",
-                                  qos: .default,
-                                  attributes: .concurrent)
+        let queue = OperationQueue()
         
         for file in intentions.fileIntentions() {
-            queue.async {
+            queue.addOperation {
                 self.collectFromFile(file)
             }
         }
         
-        queue.sync(flags: .barrier, execute: { })
+        queue.waitUntilAllOperationsAreFinished()
     }
     
     private func collectFromFile(_ file: FileGenerationIntention) {
