@@ -1,4 +1,4 @@
-import Dispatch
+import Foundation
 import SwiftAST
 import Intentions
 
@@ -61,24 +61,20 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     
     private func resolveFromQueue(_ queue: FunctionBodyQueue<TypeResolvingQueueDelegate>) {
         // Make a file invoker for each file and execute resolving in parallel
-        let opQueue = DispatchQueue(label: "com.swiftrewriter.typeresolverinvoker", attributes: .concurrent)
-        let semaphor = DispatchSemaphore(value: numThreads)
+        let opQueue = OperationQueue()
+        opQueue.maxConcurrentOperationCount = numThreads
         
         for item in queue.items {
-            opQueue.async {
+            opQueue.addOperation {
                 autoreleasepool {
-                    semaphor.wait()
-                    
                     item.context.intrinsicsBuilder.makeCache()
                     _=item.context.typeResolver.resolveTypes(in: item.body.body)
                     item.context.intrinsicsBuilder.tearDownCache()
-                    
-                    semaphor.signal()
                 }
             }
         }
         
-        opQueue.sync(flags: .barrier, execute: { })
+        opQueue.waitUntilAllOperationsAreFinished()
     }
     
     // MARK: - Private methods

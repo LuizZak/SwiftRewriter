@@ -324,9 +324,9 @@ public extension ValueTransformer where U: MutableCollection {
     
     @inlinable
     func transformIndex(file: String = #file,
-                               line: Int = #line,
-                               index: U.Index,
-                               transformer: ValueTransformer<U.Element, U.Element>) -> ValueTransformer {
+                        line: Int = #line,
+                        index: U.Index,
+                        transformer: ValueTransformer<U.Element, U.Element>) -> ValueTransformer {
         
         return transformingResult(file: file, line: line) { value in
             guard value.endIndex > index else {
@@ -343,9 +343,9 @@ public extension ValueTransformer where U: MutableCollection {
     
     @inlinable
     func replacing(file: String = #file,
-                          line: Int = #line,
-                          index: U.Index,
-                          with newValue: U.Element) -> ValueTransformer {
+                   line: Int = #line,
+                   index: U.Index,
+                   with newValue: U.Element) -> ValueTransformer {
         
         return transforming(file: file, line: line) { value in
             guard value.endIndex > index else {
