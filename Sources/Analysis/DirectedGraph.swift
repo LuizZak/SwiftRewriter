@@ -192,10 +192,10 @@ public extension DirectedGraph {
         var list: [Node] = []
         
         func visit(_ node: Node) -> Bool {
-            if temporaryMark.contains(node) {
+            if permanentMark.contains(node) {
                 return true
             }
-            if permanentMark.contains(node) {
+            if temporaryMark.contains(node) {
                 return false
             }
             temporaryMark.insert(node)
