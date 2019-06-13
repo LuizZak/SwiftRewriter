@@ -1859,7 +1859,9 @@ internal final class MemberSearchCache {
                                       includeOptional: includeOptional,
                                       typeName: typeName)
         
-        methodsCache[entry] = method
+        $methodsCache.modifyingValue {
+            $0[entry] = method
+        }
     }
 
     func storeProperty(named name: String,
@@ -1873,7 +1875,9 @@ internal final class MemberSearchCache {
                                         includeOptional: includeOptional,
                                         typeName: typeName)
         
-        propertiesCache[entry] = property
+        $propertiesCache.modifyingValue {
+            $0[entry] = property
+        }
     }
 
     func storeField(named name: String,
@@ -1885,7 +1889,9 @@ internal final class MemberSearchCache {
                                      isStatic: isStatic,
                                      typeName: typeName)
         
-        fieldsCache[entry] = field
+        $fieldsCache.modifyingValue {
+            $0[entry] = field
+        }
     }
 
     func lookupMethod(withObjcSelector selector: SelectorSignature,
