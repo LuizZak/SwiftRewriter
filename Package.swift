@@ -184,5 +184,5 @@ let package = Package(
             dependencies: ["TestCommons",
                            "Utils", "TypeSystem"])
     ],
-    swiftLanguageVersions: [.version("5.1")]
+    swiftLanguageVersions: [.v5]
 )
