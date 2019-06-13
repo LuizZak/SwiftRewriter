@@ -244,4 +244,9 @@ extension FileGenerationIntention: KnownObjectiveCFile {
     public var types: [KnownType] {
         return typeIntentions
     }
+    
+    public var globals: [KnownGlobal] {
+        return globalVariableIntentions
+            + globalFunctionIntentions
+    }
 }
