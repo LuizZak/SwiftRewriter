@@ -1,4 +1,5 @@
 import GrammarModels
+import KnownType
 import SwiftAST
 
 /// An intention to generate a global variable.
@@ -65,5 +66,11 @@ public final class GlobalVariableGenerationIntention: FromSourceIntention, FileL
         case name
         case storage
         case initialValueExpr
+    }
+}
+
+extension GlobalVariableGenerationIntention: KnownGlobalVariable {
+    public var semantics: Set<Semantic> {
+        return []
     }
 }
