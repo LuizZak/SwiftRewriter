@@ -243,7 +243,9 @@ class OverloadResolverState {
         }
         
         let entry = CacheEntry(signatures: signatures, arguments: arguments)
-        cache[entry] = resolutionIndex
+        $cache.modifyingValue {
+            $0[entry] = resolutionIndex
+        }
     }
     
     struct CacheEntry: Hashable {

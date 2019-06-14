@@ -131,7 +131,9 @@ public class TypeSystem {
         }
         
         if $typeExistsCache.usingCache {
-            typeExistsCache[name] = result
+            $typeExistsCache.modifyingValue {
+                $0[name] = result
+            }
         }
         
         return result
@@ -716,7 +718,9 @@ public class TypeSystem {
         let result = resolver.expand(in: type)
         
         if $aliasCache.usingCache {
-            aliasCache[type] = result
+            $aliasCache.modifyingValue {
+                $0[type] = result
+            }
         }
         
         return result
@@ -849,7 +853,9 @@ public class TypeSystem {
         }
         
         if $allConformancesCache.usingCache {
-            allConformancesCache[type.typeName] = protocols
+            $allConformancesCache.modifyingValue {
+                $0[type.typeName] = protocols
+            }
         }
         
         return protocols
@@ -934,7 +940,9 @@ public class TypeSystem {
         }
         
         if $knownTypeForSwiftType.usingCache {
-            knownTypeForSwiftType[swiftType] = result
+            $knownTypeForSwiftType.modifyingValue {
+                $0[swiftType] = result
+            }
         }
         
         return result
@@ -1633,7 +1641,9 @@ private final class CompoundKnownTypesCache {
     }
     
     func record(type: KnownType, names: [String]) {
-        types[names] = type
+        $types.modifyingValue {
+            $0[names] = type
+        }
     }
 }
 
@@ -1680,14 +1690,18 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         
         let protocols = TypeDefinitions.protocolsList.protocols
         guard let prot = protocols.first(where: { $0.protocolName == name }) else {
-            negativeLookupResults.insert(name)
+            _ = $negativeLookupResults.modifyingValue {
+                $0.insert(name)
+            }
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        cache[name] = type
+        $cache.modifyingValue {
+            $0[name] = type
+        }
         
         return type
     }
@@ -1761,14 +1775,18 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         }
         
         guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
-            negativeLookupResults.insert(name)
+            _ = $negativeLookupResults.modifyingValue {
+                $0.insert(name)
+            }
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        cache[name] = type
+        $cache.modifyingValue {
+            $0[name] = type
+        }
         
         return type
     }
@@ -1826,24 +1844,24 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
 }
 
 internal final class MemberSearchCache {
-    @ConcurrentValue private var methodsCache: [MethodSearchEntry: KnownMethod?] = [:]
-    @ConcurrentValue private var propertiesCache: [PropertySearchEntry: KnownProperty?] = [:]
-    @ConcurrentValue private var fieldsCache: [FieldSearchEntry: KnownProperty?] = [:]
+    private var methodsCache: ConcurrentValue<[MethodSearchEntry: KnownMethod?]> = ConcurrentValue(value: [:])
+    private var propertiesCache: ConcurrentValue<[PropertySearchEntry: KnownProperty?]> = ConcurrentValue(value: [:])
+    private var fieldsCache: ConcurrentValue<[FieldSearchEntry: KnownProperty?]> = ConcurrentValue(value: [:])
 
     var usingCache: Bool = false
 
     func makeCache() {
         usingCache = true
-        $methodsCache.setAsCaching(value: [:])
-        $propertiesCache.setAsCaching(value: [:])
-        $fieldsCache.setAsCaching(value: [:])
+        methodsCache.setAsCaching(value: [:])
+        propertiesCache.setAsCaching(value: [:])
+        fieldsCache.setAsCaching(value: [:])
     }
 
     func tearDownCache() {
         usingCache = false
-        $methodsCache.tearDownCaching(resetToValue: [:])
-        $propertiesCache.tearDownCaching(resetToValue: [:])
-        $fieldsCache.tearDownCaching(resetToValue: [:])
+        methodsCache.tearDownCaching(resetToValue: [:])
+        propertiesCache.tearDownCaching(resetToValue: [:])
+        fieldsCache.tearDownCaching(resetToValue: [:])
     }
 
     func storeMethod(withObjcSelector selector: SelectorSignature,
@@ -1859,7 +1877,7 @@ internal final class MemberSearchCache {
                                       includeOptional: includeOptional,
                                       typeName: typeName)
         
-        $methodsCache.modifyingValue {
+        methodsCache.modifyingValue {
             $0[entry] = method
         }
     }
@@ -1875,7 +1893,7 @@ internal final class MemberSearchCache {
                                         includeOptional: includeOptional,
                                         typeName: typeName)
         
-        $propertiesCache.modifyingValue {
+        propertiesCache.modifyingValue {
             $0[entry] = property
         }
     }
@@ -1889,7 +1907,7 @@ internal final class MemberSearchCache {
                                      isStatic: isStatic,
                                      typeName: typeName)
         
-        $fieldsCache.modifyingValue {
+        fieldsCache.modifyingValue {
             $0[entry] = field
         }
     }
@@ -1906,7 +1924,7 @@ internal final class MemberSearchCache {
                                       includeOptional: includeOptional,
                                       typeName: typeName)
         
-        return methodsCache[entry]
+        return methodsCache.readingValue { $0[entry] }
     }
 
     func lookupProperty(named name: String,
@@ -1919,7 +1937,7 @@ internal final class MemberSearchCache {
                                         includeOptional: includeOptional,
                                         typeName: typeName)
         
-        return propertiesCache[entry]
+        return propertiesCache.readingValue { $0[entry] }
     }
 
     func lookupField(named name: String,
@@ -1930,7 +1948,7 @@ internal final class MemberSearchCache {
                                      isStatic: isStatic,
                                      typeName: typeName)
         
-        return fieldsCache[entry]
+        return fieldsCache.readingValue { $0[entry] }
     }
 
     struct MethodSearchEntry: Hashable {

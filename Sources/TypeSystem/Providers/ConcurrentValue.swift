@@ -18,9 +18,6 @@ final class ConcurrentValue<T> {
         get {
             return cacheBarrier.sync { _value }
         }
-        set {
-            cacheBarrier.sync(flags: .barrier, execute: { _value = newValue })
-        }
     }
     
     init(value: T) {

@@ -63,7 +63,9 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         
         if types.isEmpty {
             if $typesCache.usingCache {
-                typesCache[name] = nil
+                $typesCache.modifyingValue {
+                    $0[name] = nil
+                }
             }
             return nil
         }
@@ -71,7 +73,9 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
         let type = CompoundKnownType(typeName: name, types: types)
         
         if $typesCache.usingCache {
-            typesCache[name] = type
+            $typesCache.modifyingValue {
+                $0[name] = type
+            }
         }
         
         return type
@@ -100,7 +104,9 @@ public class CompoundKnownTypeProvider: KnownTypeProvider {
             }
             
             if $canonicalTypenameCache.usingCache {
-                canonicalTypenameCache[typeName] = canonical
+                $canonicalTypenameCache.modifyingValue {
+                    $0[typeName] = canonical
+                }
             }
             
             return canonical
