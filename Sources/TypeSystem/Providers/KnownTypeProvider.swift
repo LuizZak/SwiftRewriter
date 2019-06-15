@@ -1,5 +1,6 @@
 import KnownType
 import Intentions
+import Utils
 
 /// Gives support for querying an object for types by name.
 public protocol KnownTypeProvider {

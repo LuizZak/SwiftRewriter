@@ -1,8 +1,9 @@
 import Dispatch
 
 @propertyDelegate
-final class ConcurrentValue<T> {
-    private var cacheBarrier =
+public final class ConcurrentValue<T> {
+    @usableFromInline
+    var cacheBarrier =
         DispatchQueue(
             label: "com.swiftrewriter.concurrentvalue.valuebarrier_$\(T.self)",
             qos: .default,
@@ -10,36 +11,40 @@ final class ConcurrentValue<T> {
             autoreleaseFrequency: .inherit,
             target: nil)
     
-    private var _value: T
+    @usableFromInline
+    var _value: T
     
-    var usingCache = false
+    public var usingCache = false
     
-    var value: T {
+    @inlinable
+    public var value: T {
         get {
             return cacheBarrier.sync { _value }
         }
     }
     
-    init(value: T) {
+    @inlinable
+    public init(value: T) {
         self._value = value
     }
     
-    init(initialValue: T) {
+    @inlinable
+    public init(initialValue: T) {
         self._value = initialValue
     }
     
     @inlinable
-    func readingValue<U>(_ block: (T) -> U) -> U {
+    public func readingValue<U>(_ block: (T) -> U) -> U {
         return cacheBarrier.sync { block(_value) }
     }
     
     @inlinable
-    func modifyingValue<U>(_ block: (inout T) -> U) -> U {
+    public func modifyingValue<U>(_ block: (inout T) -> U) -> U {
         return cacheBarrier.sync(flags: .barrier, execute: { block(&_value) })
     }
     
     @inlinable
-    func setAsCaching(value: T) {
+    public func setAsCaching(value: T) {
         modifyingValue {
             $0 = value
             usingCache = true
@@ -47,7 +52,7 @@ final class ConcurrentValue<T> {
     }
     
     @inlinable
-    func tearDownCaching(resetToValue value: T) {
+    public func tearDownCaching(resetToValue value: T) {
         modifyingValue {
             $0 = value
             usingCache = false

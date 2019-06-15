@@ -123,16 +123,12 @@ public final class SwiftRewriter {
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = settings.numThreads
         
-        var outError: Error?
-        let outErrorBarrier
-            = DispatchQueue(label: "br.com.swiftrewriter",
-                            attributes: .concurrent)
-        
+        let outError: ConcurrentValue<Error?> = ConcurrentValue(value: nil)
         let mutex = Mutex()
         
         for (i, src) in sources.enumerated() {
             queue.addOperation {
-                if outErrorBarrier.sync(execute: { outError }) != nil {
+                if outError.value != nil {
                     return
                 }
                 
@@ -141,10 +137,10 @@ public final class SwiftRewriter {
                         try self.loadObjcSource(from: src, index: i, mutex: mutex)
                     }
                 } catch {
-                    outErrorBarrier.sync(flags: .barrier) {
-                        if outError != nil { return }
+                    outError.modifyingValue {
+                        if $0 != nil { return }
                         
-                        outError = error
+                        $0 = error
                     }
                 }
             }
@@ -152,7 +148,7 @@ public final class SwiftRewriter {
         
         queue.waitUntilAllOperationsAreFinished()
         
-        if let error = outError {
+        if let error = outError.value {
             throw error
         }
         

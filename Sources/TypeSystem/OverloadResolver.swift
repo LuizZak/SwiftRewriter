@@ -1,5 +1,6 @@
 import SwiftAST
 import KnownType
+import Utils
 
 /// Implements basic function call overload selection.
 public class OverloadResolver {

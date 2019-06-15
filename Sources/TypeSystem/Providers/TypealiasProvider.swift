@@ -1,4 +1,5 @@
 import SwiftAST
+import Utils
 
 /// Provides typealias conversions from a string typename to a `SwiftType`
 /// structure.

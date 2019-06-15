@@ -34,7 +34,10 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     public func resolveAllExpressionTypes(in intentions: IntentionCollection, force: Bool) {
         typeSystem.makeCache()
         
-        let queue = FunctionBodyQueue.fromIntentionCollection(intentions, delegate: makeQueueDelegate())
+        let queue =
+            FunctionBodyQueue
+                .fromIntentionCollection(intentions, delegate: makeQueueDelegate(),
+                                         numThreads: numThreads)
         
         resolveFromQueue(queue)
         

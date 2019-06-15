@@ -13,6 +13,11 @@ import TypeSystem
 public final class ASTRewriterPassApplier {
     private var dirtyFunctions = DirtyFunctionBodyMap()
     
+    /// A closure that is invoked after all AST rewriter passes finish being
+    /// applied to methods in a file.
+    ///
+    /// May be called concurrently, so locking/unlocking should be performed
+    /// within this closure to access shared resources.
     public var afterFile: ((String, _ passName: String) -> Void)?
     
     var intentionGlobals: IntentionCollectionGlobals!
@@ -54,7 +59,7 @@ public final class ASTRewriterPassApplier {
         }
         
         let expContext =
-            ASTRewriterPassContext(typeSystem: self.typeSystem,
+            ASTRewriterPassContext(typeSystem: typeSystem,
                                    typeResolver: item.context.typeResolver,
                                    notifyChangedTree: notifyChangedTree,
                                    source: item.intention,
@@ -75,11 +80,11 @@ public final class ASTRewriterPassApplier {
         queue.maxConcurrentOperationCount = numThreads
         
         for file in intentions.fileIntentions() {
-            queue.addOperation {
-                for passType in self.passes {
-                    self.internalApply(on: file, intentions: intentions,
-                                       passType: passType)
-                }
+            for passType in self.passes {
+                self.internalApply(on: file,
+                                   intentions: intentions,
+                                   passType: passType,
+                                   operationQueue: queue)
             }
         }
         
@@ -88,10 +93,8 @@ public final class ASTRewriterPassApplier {
     
     private func internalApply(on file: FileGenerationIntention,
                                intentions: IntentionCollection,
-                               passType: ASTRewriterPass.Type) {
-        
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = numThreads
+                               passType: ASTRewriterPass.Type,
+                               operationQueue: OperationQueue) {
         
         let delegate =
             TypeResolvingQueueDelegate(
@@ -105,7 +108,7 @@ public final class ASTRewriterPassApplier {
                 .fromFile(intentions, file: file, delegate: delegate)
         
         for item in bodyQueue.items {
-            queue.addOperation {
+            operationQueue.addOperation {
                 #if canImport(ObjectiveC)
                 autoreleasepool {
                     self.applyPassOnBody(item, passType: passType)
@@ -116,29 +119,34 @@ public final class ASTRewriterPassApplier {
             }
         }
         
-        queue.waitUntilAllOperationsAreFinished()
+        operationQueue.waitUntilAllOperationsAreFinished()
         
         self.afterFile?(file.targetPath, "\(passType)")
     }
     
     private class DirtyFunctionBodyMap {
-        var dirty: [FunctionBodyIntention] = []
-        let mutex = Mutex()
+        let dirty: ConcurrentValue<Set<FunctionBodyIntention>> = ConcurrentValue(value: [])
         
         func markDirty(_ body: FunctionBodyIntention) {
-            mutex.locking {
-                if dirty.contains(where: { $0 === body }) {
-                    return
-                }
-                
-                dirty.append(body)
+            _ = dirty.modifyingValue {
+                $0.insert(body)
             }
         }
         
         func isDirty(_ body: FunctionBodyIntention) -> Bool {
-            return mutex.locking {
-                dirty.contains(where: { $0 === body })
+            return dirty.readingValue {
+                $0.contains(body)
             }
         }
+    }
+}
+
+extension FunctionBodyIntention: Hashable {
+    public static func == (lhs: FunctionBodyIntention, rhs: FunctionBodyIntention) -> Bool {
+        return lhs === rhs
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
     }
 }
