@@ -3,9 +3,9 @@ import WriterTargetOutput
 
 /// Helper functions for generating friendly textual representations of types,
 /// methods and other constructs.
-public enum TypeFormatter {
+public extension TypeFormatter {
     /// Generates a string representation of a given known type
-    public static func asString(knownType type: KnownType) -> String {
+    static func asString(knownType type: KnownType) -> String {
         
         let o = StringRewriterOutput(settings: .defaults)
         
@@ -171,7 +171,7 @@ public enum TypeFormatter {
     }
     
     /// Generates a string representation of a given method's signature
-    public static func asString(method: KnownMethod,
+    static func asString(method: KnownMethod,
                                 ofType type: KnownType,
                                 withTypeName typeName: Bool = true) -> String {
         
@@ -193,7 +193,7 @@ public enum TypeFormatter {
     
     /// Generates a string representation of a given property's signature, with
     /// type name, property name and property type.
-    public static func asString(property: KnownProperty,
+    static func asString(property: KnownProperty,
                                 ofType type: KnownType,
                                 withTypeName typeName: Bool = true,
                                 includeVarKeyword: Bool = false,
@@ -231,7 +231,7 @@ public enum TypeFormatter {
     
     /// Generates a string representation of a given field's signature, with
     /// type name, field name and field type.
-    public static func asString(field: KnownProperty,
+    static func asString(field: KnownProperty,
                                 ofType type: KnownType,
                                 withTypeName typeName: Bool = true,
                                 includeVarKeyword: Bool = false) -> String {
@@ -254,66 +254,8 @@ public enum TypeFormatter {
         return result
     }
     
-    /// Generates a string representation of a given function signature.
-    /// The signature's name can be optionally include during conversion.
-    public static func asString(signature: FunctionSignature,
-                                includeName: Bool = false,
-                                includeFuncKeyword: Bool = false,
-                                includeStatic: Bool = true) -> String {
-        
-        var result = ""
-        
-        if signature.isStatic && includeStatic {
-            result += "static "
-        }
-        
-        if includeFuncKeyword {
-            result += "func "
-        }
-        
-        if includeName {
-            result += signature.name
-        }
-        
-        result += asString(parameters: signature.parameters)
-        
-        if signature.returnType != .void {
-            result += " -> \(stringify(signature.returnType))"
-        }
-        
-        return result
-    }
-    
-    /// Generates a string representation of a given set of function parameters,
-    /// with parenthesis enclosing the types.
-    ///
-    /// Returns an empty set of parenthesis if the parameters are empty.
-    public static func asString(parameters: [ParameterSignature]) -> String {
-        var result = "("
-        
-        for (i, param) in parameters.enumerated() {
-            if i > 0 {
-                result += ", "
-            }
-            
-            if param.label != param.name {
-                result += "\(param.label ?? "_") "
-            }
-            
-            result += param.name
-            result += ": "
-            result += stringify(param.type)
-            
-            if param.hasDefaultValue {
-                result += " = default"
-            }
-        }
-        
-        return result + ")"
-    }
-    
     /// Generates a string representation of a given initializer.
-    public static func asString(initializer: KnownConstructor) -> String {
+    static func asString(initializer: KnownConstructor) -> String {
         var result: String = ""
         
         if initializer.isConvenience {
@@ -331,7 +273,7 @@ public enum TypeFormatter {
         return result
     }
     
-    public static func stringify(_ trait: TraitType) -> String {
+    static func stringify(_ trait: TraitType) -> String {
         switch trait {
         case .swiftType(let type):
             return stringify(type)
@@ -341,7 +283,7 @@ public enum TypeFormatter {
         }
     }
     
-    public static func stringify(_ attribute: KnownAttribute) -> String {
+    static func stringify(_ attribute: KnownAttribute) -> String {
         if let parameters = attribute.parameters {
             return "@\(attribute.name)(\(parameters))"
         }
@@ -349,11 +291,7 @@ public enum TypeFormatter {
         return "@\(attribute.name)"
     }
     
-    public static func stringify(_ semantics: [Semantic]) -> String {
+    static func stringify(_ semantics: [Semantic]) -> String {
         return semantics.map { $0.name }.joined(separator: ", ")
-    }
-
-    public static func stringify(_ type: SwiftType) -> String {
-        return type.description
     }
 }

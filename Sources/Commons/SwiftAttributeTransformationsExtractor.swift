@@ -3,9 +3,6 @@ import KnownType
 import Intentions
 import MiniLexer
 
-private typealias SwiftRewriterAttribute =
-    SwiftClassInterfaceParser.SwiftRewriterAttribute
-
 class SwiftAttributeTransformationsExtractor {
     
     let type: KnownType

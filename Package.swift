@@ -43,7 +43,7 @@ let package = Package(
             dependencies: ["Utils"]),
         .target(
             name: "SwiftAST",
-            dependencies: ["MiniLexer", "Utils"]),
+            dependencies: ["MiniLexer", "Utils", "WriterTargetOutput"]),
         .target(
             name: "ObjcParserAntlr",
             dependencies: ["Antlr4"]),

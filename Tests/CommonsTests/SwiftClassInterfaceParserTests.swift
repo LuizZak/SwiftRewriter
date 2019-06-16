@@ -385,7 +385,7 @@ extension SwiftClassInterfaceParserTests {
     
     func parseAttribute(_ string: String,
                         file: String = #file,
-                        line: Int = #line) throws -> SwiftClassInterfaceParser.SwiftRewriterAttribute {
+                        line: Int = #line) throws -> SwiftRewriterAttribute {
         
         do {
             let type =
