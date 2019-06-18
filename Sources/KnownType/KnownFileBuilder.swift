@@ -1,6 +1,7 @@
+import Foundation
 import SwiftAST
 
-public final class KnownFileBuilder {
+public struct KnownFileBuilder {
     public typealias TypeBuildCallback = (KnownTypeBuilder) -> KnownTypeBuilder
     
     private var file: BuildingKnownFile
@@ -55,11 +56,12 @@ public final class KnownFileBuilder {
         var typeBuilder = KnownTypeBuilder(typeName: name, kind: kind)
         typeBuilder = builder(typeBuilder)
         
-        let new = clone()
+        var new = clone()
         new.file.types.append(typeBuilder.type)
         return new
     }
     
+    /// Returns the constructed KnownFile instance from this builder.
     public func build() -> KnownFile {
         let newFile
             = DummyFile(fileName: file.fileName,
@@ -71,6 +73,26 @@ public final class KnownFileBuilder {
         newFile.knownGlobals = assigningKeyPath(file.globals, value: newFile, keyPath: \.knownFile)
         
         return newFile
+    }
+    
+    /// Encodes the file represented by this known file builder
+    ///
+    /// - Returns: A data representation of the file being built which can be later
+    /// deserialized back into a buildable file with `KnownFileBuilder.decode(from:)`.
+    /// - Throws: Any error thrown during the decoding process.
+    public func encode() throws -> Data {
+        let encoder = JSONEncoder()
+        return try encoder.encode(file)
+    }
+    
+    /// Decodes the file to be built by this file builder from a given serialized
+    /// data which resulted from a call to `KnownFileBuilder.encode()`.
+    ///
+    /// - Parameter data: A data object produced by a call to `KnownFileBuilder.encode()`.
+    /// - Throws: Any error thrown during the decoding process.
+    public mutating func decode(from data: Data) throws {
+        let decoder = JSONDecoder()
+        file = try decoder.decode(BuildingKnownFile.self, from: data)
     }
     
     private func assigningKeyPath<T>(_ array: [T],
