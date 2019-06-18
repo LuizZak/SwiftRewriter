@@ -23,7 +23,7 @@ public final class FileGenerationIntention: Intention {
     
     /// Gets the (Swift) import directives should be printed at this file's top
     /// header section.
-    public var importDirectives: [String] = []
+    public var knownImportDirectives: [String] = []
     
     /// Gets the intention collection that contains this file generation intention
     public internal(set) var intentionCollection: IntentionCollection?
@@ -102,7 +102,7 @@ public final class FileGenerationIntention: Intention {
         
         preprocessorDirectives =
             try container.decode([String].self, forKey: .preprocessorDirectives)
-        importDirectives =
+        knownImportDirectives =
             try container.decode([String].self, forKey: .importDirectives)
         
         typeIntentions = try container.decodeIntentions(forKey: .typeIntentions)
@@ -133,7 +133,7 @@ public final class FileGenerationIntention: Intention {
         try container.encode(sourcePath, forKey: .sourcePath)
         try container.encode(targetPath, forKey: .targetPath)
         try container.encode(preprocessorDirectives, forKey: .preprocessorDirectives)
-        try container.encode(importDirectives, forKey: .importDirectives)
+        try container.encode(knownImportDirectives, forKey: .importDirectives)
         try container.encodeIntentions(typeIntentions, forKey: .typeIntentions)
         try container.encodeIntentions(typealiasIntentions, forKey: .typealiasIntentions)
         try container.encodeIntentions(globalFunctionIntentions,
@@ -236,7 +236,7 @@ public final class FileGenerationIntention: Intention {
     }
 }
 
-extension FileGenerationIntention: KnownObjectiveCFile {
+extension FileGenerationIntention: KnownFile {
     public var fileName: String {
         return (sourcePath as NSString).lastPathComponent
     }
@@ -245,7 +245,7 @@ extension FileGenerationIntention: KnownObjectiveCFile {
         return typeIntentions
     }
     
-    public var globals: [KnownGlobal] {
+    public var knownGlobals: [KnownGlobal] {
         return globalVariableIntentions
             + globalFunctionIntentions
     }

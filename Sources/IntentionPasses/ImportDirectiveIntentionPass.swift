@@ -27,7 +27,7 @@ public class ImportDirectiveIntentionPass: IntentionPass {
         
         let imports: [String] = mapImports(objcImports)
         
-        file.importDirectives = imports
+        file.knownImportDirectives = imports
     }
     
     private func mapImports(_ objc: [ObjcImportDecl]) -> [String] {

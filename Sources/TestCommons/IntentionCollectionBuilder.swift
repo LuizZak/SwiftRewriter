@@ -276,7 +276,7 @@ public class FileIntentionBuilder {
     
     @discardableResult
     public func addImportDirective(moduleName: String) -> FileIntentionBuilder {
-        intention.importDirectives.append(moduleName)
+        intention.knownImportDirectives.append(moduleName)
         
         return self
     }
