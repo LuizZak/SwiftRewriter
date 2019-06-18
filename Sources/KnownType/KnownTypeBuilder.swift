@@ -83,6 +83,12 @@ public struct KnownTypeBuilder {
         self.useSwiftSignatureMatching = useSwiftSignatureMatching
     }
     
+    public func swiftRewriterAttribute(_ content: SwiftRewriterAttribute.Content) -> KnownTypeBuilder {
+        var new = clone()
+        new.type.attributes.append(SwiftRewriterAttribute(content: content).asKnownAttribute)
+        return new
+    }
+    
     /// Changes the type name defined in this known type builder.
     public func named(_ name: String) -> KnownTypeBuilder {
         var new = clone()

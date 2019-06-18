@@ -6,7 +6,7 @@ public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObje
     /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this
     /// type, such as a file name/line number, if the type originated from a file,
-    /// etc.
+    /// or was synthesized, etc.
     var origin: String { get }
     
     /// Returns `true` if this known type represents an extension for another
@@ -293,5 +293,12 @@ public struct KnownAttribute: Codable {
     public init(name: String, parameters: String? = nil) {
         self.name = name
         self.parameters = parameters
+    }
+}
+
+public extension SwiftRewriterAttribute {
+    var asKnownAttribute: KnownAttribute {
+        return KnownAttribute(name: SwiftRewriterAttribute.name,
+                              parameters: content.asString)
     }
 }
