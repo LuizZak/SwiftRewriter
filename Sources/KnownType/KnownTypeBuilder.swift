@@ -435,8 +435,10 @@ public struct KnownTypeBuilder {
     }
     
     public func enumRawValue(type rawValueType: SwiftType) -> KnownTypeBuilder {
+        precondition(type.kind == .enum,
+                     "cannot add enum raw value to non-enum type kind \(type.kind)")
+        
         var new = clone()
-        precondition(type.kind == .enum)
         
         new.type.setKnownTrait(KnownTypeTraits.enumRawValue,
                                value: .swiftType(rawValueType))
@@ -448,9 +450,10 @@ public struct KnownTypeBuilder {
                          rawValue: Expression? = nil,
                          semantics: Set<Semantic> = []) -> KnownTypeBuilder {
         
-        var new = clone()
+        precondition(type.kind == .enum,
+                     "cannot add enum case to non-enum type kind \(type.kind)")
         
-        precondition(type.kind == .enum)
+        var new = clone()
         
         let storage =
             ValueStorage(type: .typeName(type.typeName), ownership: .strong,

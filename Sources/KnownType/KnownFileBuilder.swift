@@ -1,6 +1,8 @@
 import SwiftAST
 
 public final class KnownFileBuilder {
+    public typealias TypeBuildCallback = (KnownTypeBuilder) -> KnownTypeBuilder
+    
     private var file: BuildingKnownFile
     public var useSwiftSignatureMatching: Bool = false
     
@@ -26,25 +28,25 @@ public final class KnownFileBuilder {
         return KnownFileBuilder(file: file)
     }
     
-    public func `class`(name: String, _ builder: (KnownTypeBuilder) -> Void = { _ in }) -> KnownFileBuilder {
+    public func `class`(name: String, _ builder: TypeBuildCallback = { $0 }) -> KnownFileBuilder {
         return type(name: name, kind: .class, builder)
     }
     
-    public func `struct`(name: String, _ builder: (KnownTypeBuilder) -> Void = { _ in }) -> KnownFileBuilder {
+    public func `struct`(name: String, _ builder: TypeBuildCallback = { $0 }) -> KnownFileBuilder {
         return type(name: name, kind: .struct, builder)
     }
     
-    public func `enum`(name: String, _ builder: (KnownTypeBuilder) -> Void = { _ in }) -> KnownFileBuilder {
+    public func `enum`(name: String, _ builder: TypeBuildCallback = { $0 }) -> KnownFileBuilder {
         return type(name: name, kind: .enum, builder)
     }
     
-    public func `protocol`(name: String, _ builder: (KnownTypeBuilder) -> Void = { _ in }) -> KnownFileBuilder {
+    public func `protocol`(name: String, _ builder: TypeBuildCallback = { $0 }) -> KnownFileBuilder {
         return type(name: name, kind: .protocol, builder)
     }
     
-    func type(name: String, kind: KnownTypeKind, _ builder: (KnownTypeBuilder) -> Void) -> KnownFileBuilder {
-        let typeBuilder = KnownTypeBuilder(typeName: name, kind: kind)
-        builder(typeBuilder)
+    func type(name: String, kind: KnownTypeKind, _ builder: TypeBuildCallback = { $0 }) -> KnownFileBuilder {
+        var typeBuilder = KnownTypeBuilder(typeName: name, kind: kind)
+        typeBuilder = builder(typeBuilder)
         
         let new = clone()
         new.file.types.append(typeBuilder.type)
