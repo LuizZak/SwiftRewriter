@@ -409,22 +409,6 @@ public class TypeSystem {
             return true
         }
         
-        // For nominal types, check for subtyping conformance
-        if case .nominal(let nominalType) = unaliasedType,
-            case .nominal(let nominalBaseType) = unaliasedBaseType {
-
-            let typeName = typeNameIn(nominalType: nominalType)
-            let baseTypeName = typeNameIn(nominalType: nominalBaseType)
-
-            return isType(typeName, subtypeOf: baseTypeName) ||
-                isType(typeName, conformingTo: baseTypeName)
-        }
-        
-        // TODO: Convert into this switch later; currently it crashes during
-        // runtime because Swift is failing to detect the switch as non-exhaustive.
-        // Care should be taken when switching over SwiftTypes elsewhere, too.
-        #if false
-        
         switch (unaliasedType, unaliasedBaseType) {
         case (.nominal(let nominalType), .nominal(let nominalBaseType)):
             let typeName = typeNameIn(nominalType: nominalType)
@@ -432,11 +416,9 @@ public class TypeSystem {
             
             return isType(typeName, subtypeOf: baseTypeName) ||
                 isType(typeName, conformingTo: baseTypeName)
+        default:
+            return false
         }
-        
-        #endif
-        
-        return false
     }
     
     /// Returns the category for a given type name.
