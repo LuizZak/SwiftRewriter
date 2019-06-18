@@ -6,7 +6,7 @@ public protocol KnownFile {
     var fileName: String { get }
     
     /// Gets a list of known types defined within this file.
-    var types: [KnownType] { get }
+    var knownTypes: [KnownType] { get }
 }
 
 /// Represents the structure of an Objective-C file.
@@ -19,7 +19,7 @@ public protocol KnownObjectiveCFile: KnownFile {
 }
 
 /// A protocol for denoting global-level declartions, such as functions and variables.
-public protocol KnownGlobal: SemanticalObject {
+public protocol KnownGlobal: KnownDeclaration, SemanticalObject {
     
 }
 

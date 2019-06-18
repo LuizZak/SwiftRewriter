@@ -1,7 +1,7 @@
 import SwiftAST
 
 /// Describes a known type with known properties and methods and their signatures.
-public protocol KnownType: KnownTypeReferenceConvertible, AttributeTaggeableObject, SemanticalObject {
+public protocol KnownType: KnownTypeReferenceConvertible, KnownDeclaration, AttributeTaggeableObject, SemanticalObject {
     /// A string that specifies the origin of this known type.
     /// This should be implemented by conformers by returning an as precise as
     /// possible set of informations that can help pinpoint the origin of this

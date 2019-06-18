@@ -28,6 +28,9 @@ public class CompoundedMappingType {
 }
 
 extension CompoundedMappingType: KnownType {
+    public var knownFile: KnownFile? {
+        return knownType.knownFile
+    }
     public var origin: String {
         return knownType.origin
     }

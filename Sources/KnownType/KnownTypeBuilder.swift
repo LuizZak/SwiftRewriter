@@ -6,7 +6,7 @@ import SwiftAST
 public struct KnownTypeBuilder {
     public typealias ParameterTuple = (label: String, type: SwiftType)
     
-    private var type: BuildingKnownType
+    var type: BuildingKnownType
     public var useSwiftSignatureMatching: Bool = false
     
     public var typeName: String {
@@ -551,6 +551,7 @@ extension KnownTypeBuilder {
 private class DummyType: KnownType {
     var origin: String
     var typeName: String
+    var knownFile: KnownFile? = nil
     var kind: KnownTypeKind = .class
     var isExtension: Bool = false
     var knownTraits: [String: TraitType] = [:]
@@ -590,9 +591,10 @@ private class DummyType: KnownType {
     }
 }
 
-private struct BuildingKnownType: Codable {
+struct BuildingKnownType: Codable {
     var origin: String
     var typeName: String
+    var knownFile: KnownFile?
     var kind: KnownTypeKind = .class
     var isExtension: Bool = false
     var traits: [String: TraitType] = [:]
@@ -609,6 +611,22 @@ private struct BuildingKnownType: Codable {
         self.origin = "Synthesized type"
         self.typeName = typeName
         self.supertype = supertype
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case origin
+        case typeName
+        case kind
+        case isExtension
+        case traits
+        case constructors
+        case methods
+        case properties
+        case fields
+        case protocols
+        case attributes
+        case supertype
+        case semantics
     }
 }
 
@@ -645,7 +663,7 @@ extension BuildingKnownType: KnownType {
     }
 }
 
-private struct BuildingKnownConstructor: KnownConstructor, Codable {
+struct BuildingKnownConstructor: KnownConstructor, Codable {
     var parameters: [ParameterSignature]
     var knownAttributes: [KnownAttribute]
     var semantics: Set<Semantic>
@@ -654,7 +672,7 @@ private struct BuildingKnownConstructor: KnownConstructor, Codable {
     var annotations: [String]
 }
 
-private struct BuildingKnownMethod: KnownMethod, Codable {
+struct BuildingKnownMethod: KnownMethod, Codable {
     var ownerType: KnownTypeReference?
     var body: KnownMethodBody?
     var signature: FunctionSignature
@@ -663,7 +681,7 @@ private struct BuildingKnownMethod: KnownMethod, Codable {
     var semantics: Set<Semantic>
     var annotations: [String]
     
-    public enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case ownerType
         case signature
         case optional
@@ -673,7 +691,7 @@ private struct BuildingKnownMethod: KnownMethod, Codable {
     }
 }
 
-private struct BuildingKnownProperty: KnownProperty, Codable {
+struct BuildingKnownProperty: KnownProperty, Codable {
     var ownerType: KnownTypeReference?
     var name: String
     var storage: ValueStorage
@@ -687,6 +705,6 @@ private struct BuildingKnownProperty: KnownProperty, Codable {
     var annotations: [String]
 }
 
-private struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {
+struct BuildingKnownProtocolConformance: KnownProtocolConformance, Codable {
     var protocolName: String
 }

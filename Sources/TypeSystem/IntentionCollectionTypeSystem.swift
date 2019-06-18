@@ -375,6 +375,7 @@ class CompoundKnownType: KnownType {
     var typeName: String
     
     var kind: KnownTypeKind
+    var knownFile: KnownFile? = nil
     var knownTraits: [String: TraitType]
     var origin: String
     var isExtension: Bool

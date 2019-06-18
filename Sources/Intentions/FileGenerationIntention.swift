@@ -241,7 +241,7 @@ extension FileGenerationIntention: KnownObjectiveCFile {
         return (sourcePath as NSString).lastPathComponent
     }
     
-    public var types: [KnownType] {
+    public var knownTypes: [KnownType] {
         return typeIntentions
     }
     
