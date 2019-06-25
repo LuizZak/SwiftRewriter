@@ -845,12 +845,14 @@ func makeIdentifier(_ identifier: String) -> TokenSyntax {
     return SyntaxFactory.makeIdentifier(identifier)
 }
 
-func iterateWithComma<T>(_ elements: T,
-                         do block: (T.Element, Bool) -> Void) where T: Collection {
-    
+func iterateWithComma<T>(_ elements: T, do block: (T.Element, Bool) -> Void) where T: Collection {
     for (i, item) in elements.enumerated() {
         block(item, i < elements.count - 1)
     }
+}
+
+func mapWithComma<T, U>(_ elements: T, do block: (T.Element, Bool) -> U) -> [U] where T: Collection {
+    return elements.enumerated().map { block($1, $0 < elements.count - 1) }
 }
 
 extension TokenSyntax {
