@@ -107,7 +107,7 @@ extension TokenType: TokenProtocol {
     }
     
     private static func readIdentifierToken(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             let ident = try lexer.lexIdentifier()
@@ -123,7 +123,7 @@ extension TokenType: TokenProtocol {
     }
     
     private static func attemptReadOperator(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         // Lex operators first
         var op: Operator?
@@ -143,7 +143,7 @@ extension TokenType: TokenProtocol {
     }
     
     private static func attemptReadQualifierToken(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             let qualifier = try lexer.lexTypeQualifier()
@@ -155,7 +155,7 @@ extension TokenType: TokenProtocol {
     }
     
     private static func attemptReadKeywordToken(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             var isAt = false
@@ -181,7 +181,7 @@ extension TokenType: TokenProtocol {
     }
     
     private static func attemptReadSpecialChar(lexer: Lexer) -> TokenType? {
-        let bt = lexer.backtracker(); defer { bt.backtrack() }
+        let bt = lexer.backtracker(); defer { bt.backtrack(lexer: lexer) }
         
         do {
             let type: TokenType
