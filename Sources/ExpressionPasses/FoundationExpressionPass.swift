@@ -326,7 +326,7 @@ extension FoundationExpressionPass {
         makeInit(typeName: "NSLocale",
                  method: "localeWithLocaleIdentifier",
                  convertInto: Expression.identifier("Locale"),
-                 andCallWithArguments: [.labeled("identifier", .asIs)],
+                 andCallWithArguments: [.labeled("identifier")],
                  andTypeAs: .typeName("Locale"))
         
         makeInit(typeName: "NSLocale",

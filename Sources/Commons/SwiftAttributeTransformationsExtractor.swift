@@ -170,7 +170,7 @@ class SwiftAttributeTransformationsExtractor {
                     toSwiftFunction: method.signature.name,
                     firstArgumentBecomesInstance: true,
                     arguments: method.signature.parameters.map { arg in
-                        arg.label.flatMap { .labeled($0, .asIs) } ?? .asIs
+                        arg.label.flatMap { .labeled($0) } ?? .asIs
                     }
                 )
                 

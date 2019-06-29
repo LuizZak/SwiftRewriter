@@ -12,8 +12,8 @@ import SwiftAST
 ///     toSwiftFunction: "CGPoint",
 ///     firstArgumentBecomesInstance: false,
 ///     arguments: [
-///         .labeled("x", .asIs),
-///         .labeled("y", .asIs)
+///         .labeled("x"),
+///         .labeled("y")
 ///     ])
 /// ```
 ///
@@ -127,7 +127,7 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     /// side of the assignment expression.
     public convenience init(objcFunctionName: String,
                             toSwiftPropertySetter swiftProperty: String,
-                            argumentTransformer: ArgumentRewritingStrategy) {
+                            argumentTransformer: ArgumentRewritingStrategy = .asIs) {
         
         let target =
             Target.propertySetter(swiftProperty,
@@ -265,7 +265,10 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
     public enum Target {
         case propertyGetter(String)
         
-        case propertySetter(String, argumentTransformer: ArgumentRewritingStrategy)
+        // TODO: argumentTransformer doesn't seem to be assigned anything other
+        // than .asIs in all usage sites (aside from unit tests). Consider removing
+        // it to simplify implementation later
+        case propertySetter(String, argumentTransformer: ArgumentRewritingStrategy = .asIs)
         
         ///   - firstArgumentBecomesInstance: Whether to convert the first argument
         /// of the call into a target instance, such that the free function call
