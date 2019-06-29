@@ -1,6 +1,6 @@
 import Foundation
 import Dispatch
-import Utility
+import SPMUtility
 import Console
 import SwiftRewriterLib
 
@@ -208,14 +208,14 @@ do {
     
     if result.subparser(parser) == "files" {
         guard let files = result.get(filesArg) else {
-            throw Utility.ArgumentParserError.expectedValue(option: "<files...>")
+            throw ArgumentParserError.expectedValue(option: "<files...>")
         }
         
         try rewriter.rewrite(files: files.map { URL(fileURLWithPath: $0) })
         
     } else if result.subparser(parser) == "path" {
         guard let path = result.get(pathArg) else {
-            throw Utility.ArgumentParserError.expectedValue(option: "<path>")
+            throw ArgumentParserError.expectedValue(option: "<path>")
         }
         
         let skipConfirm = result.get(skipConfirmArg) ?? false
