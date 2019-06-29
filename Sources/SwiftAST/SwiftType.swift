@@ -284,11 +284,11 @@ public extension SwiftType {
     static let errorType = SwiftType.typeName("<<error type>>")
     
     static func openRange(_ operand: SwiftType) -> SwiftType {
-        return .nominal(.generic("Range", parameters: .tail(operand)))
+        return .nominal(.generic("Range", parameters: .one(operand)))
     }
     
     static func closedRange(_ operand: SwiftType) -> SwiftType {
-        return .nominal(.generic("ClosedRange", parameters: .tail(operand)))
+        return .nominal(.generic("ClosedRange", parameters: .one(operand)))
     }
     
     static func typeName(_ name: String) -> SwiftType {
@@ -313,7 +313,7 @@ public extension SwiftType {
     /// keeping optionals in place.
     /// - Returns: The deeply unwrapped version of the input type.
     static func asNonnullDeep(_ type: SwiftType,
-                                     removeUnspecifiedsOnly: Bool = false) -> SwiftType {
+                              removeUnspecifiedsOnly: Bool = false) -> SwiftType {
         
         var result: SwiftType = type
         
@@ -393,15 +393,15 @@ extension SwiftType: CustomStringConvertible {
             let sortedAttributes =
                 attributes.sorted { $0.description < $1.description }
             
-            let attributeString = 
+            let attributeString =
                 sortedAttributes.map { $0.description }.joined(separator: " ")
             
             return
                 (attributeString.isEmpty ? "" : attributeString + " ")
-                + "("
-                + parameters.map { $0.description }.joined(separator: ", ")
-                + ") -> "
-                + returnType.description
+                    + "("
+                    + parameters.map { $0.description }.joined(separator: ", ")
+                    + ") -> "
+                    + returnType.description
             
         case .optional(let type):
             return type.descriptionWithParens + "?"
@@ -444,7 +444,7 @@ extension SwiftType: CustomStringConvertible {
     }
 }
 
-// MARK: - Codable compliance
+// MARK: - Codable conformance
 extension SwiftType: Codable {
     public init(from decoder: Decoder) throws {
         let string: String
@@ -478,96 +478,81 @@ extension SwiftType: Codable {
 // MARK: - Building structures
 public typealias ZeroOrMore<T> = [T]
 
-/// An enum representing a list of one or more chained items
-public enum OneOrMore<T> {
-    indirect case list(T, OneOrMore)
-    case tail(T)
-    
-    /// Returns the item contained on this `OneOrMore` list node.
-    public var item: T {
-        switch self {
-        case .list(let item, _), .tail(let item):
-            return item
-        }
-    }
+public struct OneOrMore<T> {
+    public var first: T
+    var remaining: [T]
     
     /// Returns the number of items on this `OneOrMore` list.
     ///
     /// Due to semantics of this list type, this value is always `>= 1`.
     public var count: Int {
-        switch self {
-        case .list(_, let next):
-            return 1 + next.count
-            
-        case .tail:
-            return 1
-        }
+        return remaining.count + 1
     }
     
-    /// Creates a OneOrMore enum list with a given collection.
-    /// The collection must have at least one element.
+    public var last: T {
+        return remaining.last ?? first
+    }
+    
+    public init(first: T, remaining: [T]) {
+        self.first = first
+        self.remaining = remaining
+    }
+    
+    /// Creates a `OneOrMore` enum list with a given collection.
+    /// The collection must have at least two elements.
     ///
-    /// - precondition: Collection is not empty
+    /// - precondition: `collection.count >= 1`
     public static func fromCollection<C>(_ collection: C) -> OneOrMore
-        where C: BidirectionalCollection, C.Element == T {
+        where C: BidirectionalCollection, C.Element == T, C.Index == Int {
+            
+        precondition(collection.count >= 1)
         
-        precondition(!collection.isEmpty)
-        
-        var current = OneOrMore.tail(collection.last!)
-        
-        for item in collection.dropLast().reversed() {
-            current = .list(item, current)
-        }
-        
-        return current
+        return OneOrMore(first: collection[0], remaining: Array(collection.dropFirst(1)))
     }
     
-    /// Shortcut for creating a `OneOrMore` list with a single item
+    /// Shortcut for creating a `OneOrMore` list with a given item
     public static func one(_ value: T) -> OneOrMore {
-        return .tail(value)
+        return OneOrMore(first: value, remaining: [])
     }
 }
 
-/// An enum representing a list of two or more chained items
-public enum TwoOrMore<T> {
-    indirect case list(T, TwoOrMore)
-    case tail(T, T)
+public struct TwoOrMore<T> {
+    public var first: T
+    public var second: T
+    var remaining: [T]
     
     /// Returns the number of items on this `TwoOrMore` list.
     ///
     /// Due to semantics of this list type, this value is always `>= 2`.
     public var count: Int {
-        switch self {
-        case .list(_, let next):
-            return 1 + next.count
-            
-        case .tail:
-            return 2
-        }
+        return remaining.count + 2
     }
     
-    /// Creates a TwoOrMore enum list with a given collection.
+    public var last: T {
+        return remaining.last ?? second
+    }
+    
+    public init(first: T, second: T, remaining: [T]) {
+        self.first = first
+        self.second = second
+        self.remaining = remaining
+    }
+    
+    /// Creates a `TwoOrMore` enum list with a given collection.
     /// The collection must have at least two elements.
     ///
     /// - precondition: `collection.count >= 2`
     public static func fromCollection<C>(_ collection: C) -> TwoOrMore
         where C: BidirectionalCollection, C.Element == T, C.Index == Int {
-        
+            
         precondition(collection.count >= 2)
         
-        var current = TwoOrMore.tail(collection[collection.count - 2],
-                                     collection[collection.count - 1])
-        
-        for item in collection.dropLast(2).reversed() {
-            current = .list(item, current)
-        }
-        
-        return current
+        return TwoOrMore(first: collection[0], second: collection[1], remaining: Array(collection.dropFirst(2)))
     }
     
     /// Shortcut for creating a `TwoOrMore` list with two given items
     public static func two(_ value1: T, _ value2: T) -> TwoOrMore {
-        return .tail(value1, value2)
+        return TwoOrMore(first: value1, second: value2, remaining: [])
     }
 }
 
@@ -578,24 +563,43 @@ extension OneOrMore: Sequence {
     }
     
     public struct Iterator: IteratorProtocol {
-        private var current: OneOrMore?
+        private var current: OneOrMore
+        private var index: Index = .first
         
-        init(current: OneOrMore?) {
+        init(current: OneOrMore) {
             self.current = current
         }
         
         public mutating func next() -> T? {
-            switch current {
-            case let .list(item, next)?:
-                current = next
-                return item
-                
-            case .tail(let item)?:
-                current = nil
-                return item
-                
-            case nil:
-                return nil
+            defer {
+                index = index.next
+            }
+            
+            return index < current.endIndex ? current[index] : nil
+        }
+    }
+    
+    public enum Index: Comparable {
+        case first
+        case tail(Int)
+        
+        public var next: Index {
+            switch self {
+            case .first:
+                return .tail(0)
+            case .tail(let index):
+                return .tail(index + 1)
+            }
+        }
+        
+        public static func < (lhs: Index, rhs: Index) -> Bool {
+            switch (lhs, rhs) {
+            case (.first, .tail):
+                return true
+            case let (.tail(l), .tail(r)):
+                return l < r
+            default:
+                return false
             }
         }
     }
@@ -607,31 +611,49 @@ extension TwoOrMore: Sequence {
     }
     
     public struct Iterator: IteratorProtocol {
-        private var current: TwoOrMore?
-        private var rem: T?
+        private var current: TwoOrMore
+        private var index: Index = .first
         
-        init(current: TwoOrMore?) {
+        init(current: TwoOrMore) {
             self.current = current
         }
         
         public mutating func next() -> T? {
-            switch current {
-            case let .list(item, next)?:
-                current = next
-                
-                return item
-            case let .tail(item, next)?:
-                current = nil
-                
-                rem = next
-                
-                return item
-            case nil:
-                defer {
-                    rem = nil
-                }
-                
-                return rem
+            defer {
+                index = index.next
+            }
+            
+            return index < current.endIndex ? current[index] : nil
+        }
+    }
+    
+    public enum Index: Comparable {
+        case first
+        case second
+        case tail(Int)
+        
+        public var next: Index {
+            switch self {
+            case .first:
+                return .second
+            case .second:
+                return .tail(0)
+            case .tail(let index):
+                return .tail(index + 1)
+            }
+        }
+        
+        public static func < (lhs: Index, rhs: Index) -> Bool {
+            switch (lhs, rhs) {
+            case (.first, .second),
+                 (.first, .tail):
+                return true
+            case (.second, .tail):
+                return true
+            case let (.tail(l), .tail(r)) where l < r:
+                return true
+            default:
+                return false
             }
         }
     }
@@ -639,107 +661,68 @@ extension TwoOrMore: Sequence {
 
 // MARK: Collection conformance
 extension OneOrMore: Collection {
-    public func index(after i: Int) -> Int {
-        precondition(i < endIndex)
-        return i + 1
+    public var startIndex: OneOrMore<T>.Index {
+        return .first
+    }
+    public var endIndex: OneOrMore<T>.Index {
+        return .tail(remaining.count)
     }
     
-    public var startIndex: Int {
-        return 0
-    }
-    
-    public var endIndex: Int {
-        switch self {
-        case .list(_, let next):
-            return next.endIndex + 1
-        case .tail:
-            return 1
+    public subscript(index: Index) -> T {
+        switch index {
+        case .first:
+            return first
+        case .tail(let index):
+            return remaining[index]
         }
     }
     
-    public subscript(position: Int) -> T {
-        precondition(position >= 0, "position >= 0")
-        
-        if position == 0 {
-            switch self {
-            case .list(let item, _),
-                 .tail(let item):
-                return item
-            }
-        }
-        
-        switch self {
-        case .list(_, let next):
-            return next[position - 1]
-        case .tail:
-            fatalError("Exceeded index")
+    public subscript(index: Int) -> T {
+        switch index {
+        case 0:
+            return first
+        case let rem:
+            return remaining[rem - 1]
         }
     }
-}
-
-extension OneOrMore {
-    public var first: T {
-        return self[0]
-    }
-    public var last: T {
-        return self[count - 1]
+    
+    public func index(after i: OneOrMore<T>.Index) -> OneOrMore<T>.Index {
+        return i.next
     }
 }
 
 extension TwoOrMore: Collection {
-    public func index(after i: Int) -> Int {
-        precondition(i < endIndex)
-        return i + 1
+    public var startIndex: TwoOrMore<T>.Index {
+        return .first
+    }
+    public var endIndex: TwoOrMore<T>.Index {
+        return .tail(remaining.count)
     }
     
-    public var startIndex: Int {
-        return 0
-    }
-    
-    public var endIndex: Int {
-        switch self {
-        case .list(_, let next):
-            return next.endIndex + 1
-        case .tail:
-            return 2
+    public subscript(index: Index) -> T {
+        switch index {
+        case .first:
+            return first
+        case .second:
+            return second
+        case .tail(let index):
+            return remaining[index]
         }
     }
     
-    public subscript(position: Int) -> T {
-        precondition(position >= 0, "position >= 0")
-        
-        if position == 0 {
-            switch self {
-            case .list(let item, _),
-                 .tail(let item, _):
-                return item
-            }
-        } else if position == 1 {
-            switch self {
-            case .list(_, let next):
-                return next[position - 1]
-            case .tail(_, let right):
-                return right
-            }
-        }
-        
-        switch self {
-        case .list(_, let next):
-            return next[position - 1]
-        case .tail:
-            fatalError("Exceeded index")
+    public subscript(index: Int) -> T {
+        switch index {
+        case 0:
+            return first
+        case 1:
+            return second
+        case let rem:
+            return remaining[rem - 2]
         }
     }
-}
-extension TwoOrMore {
-    public var first: T {
-        return self[0]
-    }
-    public var second: T {
-        return self[1]
-    }
-    public var last: T {
-        return self[count - 1]
+    
+    public func index(after i: TwoOrMore<T>.Index) -> TwoOrMore<T>.Index {
+        return i.next
     }
 }
 
