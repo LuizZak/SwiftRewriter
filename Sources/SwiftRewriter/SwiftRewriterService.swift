@@ -5,12 +5,12 @@ import SourcePreprocessors
 import IntentionPasses
 import GlobalsProviders
 
-public enum Settings {
+public struct Settings {
     /// Settings for the AST writer
-    public static var astWriter = SwiftSyntaxOptions()
+    public var astWriter = SwiftSyntaxOptions()
     
     /// General settings for `SwiftRewriter` instances
-    public static var rewriter: SwiftRewriter.Settings = .default
+    public var rewriter: SwiftRewriter.Settings = .default
 }
 
 /// Protocol for enabling Swift rewriting service from CLI
@@ -20,18 +20,22 @@ public protocol SwiftRewriterService {
 }
 
 public class SwiftRewriterServiceImpl: SwiftRewriterService {
-    public static func fileDisk() -> SwiftRewriterService {
-        return SwiftRewriterServiceImpl(output: FileDiskWriterOutput())
+    public static func fileDisk(settings: Settings) -> SwiftRewriterService {
+        return SwiftRewriterServiceImpl(output: FileDiskWriterOutput(),
+                                        settings: settings)
     }
     
-    public static func terminal(colorize: Bool) -> SwiftRewriterService {
-        return SwiftRewriterServiceImpl(output: StdoutWriterOutput(colorize: colorize))
+    public static func terminal(settings: Settings, colorize: Bool) -> SwiftRewriterService {
+        return SwiftRewriterServiceImpl(output: StdoutWriterOutput(colorize: colorize),
+                                        settings: settings)
     }
     
-    var output: WriterOutput
+    let output: WriterOutput
+    let settings: Settings
     
-    public init(output: WriterOutput) {
+    public init(output: WriterOutput, settings: Settings) {
         self.output = output
+        self.settings = settings
     }
     
     public func rewrite(files: [URL]) throws {
@@ -43,8 +47,8 @@ public class SwiftRewriterServiceImpl: SwiftRewriterService {
         jobBuilder.intentionPassesSource = DefaultIntentionPasses()
         jobBuilder.astRewriterPassSources = DefaultExpressionPasses()
         jobBuilder.globalsProvidersSource = DefaultGlobalsProvidersSource()
-        jobBuilder.settings = Settings.rewriter
-        jobBuilder.swiftSyntaxOptions = Settings.astWriter
+        jobBuilder.settings = settings.rewriter
+        jobBuilder.swiftSyntaxOptions = settings.astWriter
         jobBuilder.preprocessors = [QuickSpecPreprocessor()]
         
         let job = jobBuilder.createJob()

@@ -48,7 +48,7 @@ public class ReachingDefinitionAnalyzer {
                     .nodesConnected(towards: n)
                     .compactMap {
                         outreaching[$0]
-                    }.reduce([]) { $0.union($1) }
+                    }.reduce(into: []) { $0.formUnion($1) }
             
             let oldOut = outreaching[n]
             
