@@ -1607,10 +1607,6 @@ private class TypealiasExpander {
             return .typeName(expand(inString: name))
             
         case let .generic(name, parameters):
-            if case .tail = parameters { } // Here to avoid a weird crash due
-                                           // to a compiler bug when accessing
-                                           // `parameters` without destructuring
-                                           // it somehow first
             return .generic(expand(inString: name),
                             parameters: .fromCollection(parameters.map(expand)))
         }

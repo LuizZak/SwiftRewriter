@@ -21,10 +21,10 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        .package(url: "https://github.com/LuizZak/MiniLexer.git", from: "0.9.4"),
-        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
-        .package(url: "https://github.com/LuizZak/Antlr4-Swift.git", from: "4.0.28"),
-        .package(url: "https://github.com/LuizZak/console.git", from: "0.8.0"),
+        .package(url: "https://github.com/LuizZak/MiniLexer.git", .exact("0.9.5")),
+        .package(url: "https://github.com/apple/swift-package-manager.git", .exact("0.4.0")),
+        .package(url: "https://github.com/LuizZak/antlr4-swift.git", from: "4.0.28"),
+        .package(url: "https://github.com/LuizZak/console.git", .exact("0.8.0")),
         .package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50000.0"))
     ],
     targets: [
@@ -98,7 +98,7 @@ let package = Package(
         .target(
             name: "SwiftRewriter",
             dependencies: [
-                "SwiftRewriterLib", "ObjcParser", "GrammarModels", "Utility",
+                "SwiftRewriterLib", "ObjcParser", "GrammarModels", "SPMUtility",
                 "ExpressionPasses", "Utils", "Console", "SourcePreprocessors",
                 "SwiftAST", "IntentionPasses", "MiniLexer", "GlobalsProviders",
                 "Commons"
