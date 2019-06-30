@@ -145,8 +145,10 @@ class SuggestConversionInterface {
         searchAndShowConfirm(in: menu, path: path)
     }
     
-    func searchAndShowConfirm(in menu: MenuController, path directoryPath: String,
+    func searchAndShowConfirm(in menu: MenuController,
+                              path directoryPath: String,
                               options: Options = .default) {
+        
         let console = menu.console
         let fileManager = FileManager.default
         
@@ -224,35 +226,6 @@ class SuggestConversionInterface {
             console.printLine("Error converting files: \(error)")
             _=console.readLineWith(prompt: "Press [Enter] to continue.")
         }
-    }
-}
-
-private class Stopwatch {
-    var start: timespec = timespec()
-    
-    private init() {
-        if #available(OSX 10.12, *) {
-            clock_gettime(CLOCK_MONOTONIC_RAW, &start)
-        } else {
-            fatalError()
-        }
-    }
-    
-    static func start() -> Stopwatch {
-        return Stopwatch()
-    }
-    
-    func stop() -> TimeInterval {
-        var end: timespec = timespec()
-        if #available(OSX 10.12, *) {
-            clock_gettime(CLOCK_MONOTONIC_RAW, &end)
-        } else {
-            fatalError()
-        }
-        
-        let delta_us = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_nsec - start.tv_nsec) / 1000
-        
-        return TimeInterval(delta_us) / 1_000_000
     }
 }
 
@@ -391,7 +364,7 @@ private class FilesExplorer: PagesCommandHandler {
         if #available(OSX 10.11, *) {
             newPathAttempt = URL(fileURLWithPath: input, relativeTo: path)
         } else {
-            newPathAttempt = nil
+            newPathAttempt = URL(string: input, relativeTo: path)
         }
         
         if verifyFilesNamed(input, from: path) {
@@ -439,8 +412,8 @@ private class FilesExplorer: PagesCommandHandler {
         
         var isDirectory = ObjCBool(false)
         
-        // Check if we're not pointing at a directory the user might want to navigate
-        // to
+        // Check if we're not pointing at a directory the user might want to
+        // navigate to
         if FileManager.default.fileExists(atPath: newPath.relativePath,
                                           isDirectory: &isDirectory)
             && isDirectory.boolValue {
@@ -449,7 +422,8 @@ private class FilesExplorer: PagesCommandHandler {
         
         // Raw .h/.m file
         if file.hasSuffix(".h") || file.hasSuffix(".m") {
-            let exists = FileManager.default.fileExists(atPath: newPath.relativePath, isDirectory: &isDirectory)
+            let exists = FileManager.default.fileExists(atPath: newPath.relativePath,
+                                                        isDirectory: &isDirectory)
             guard exists && !isDirectory.boolValue else {
                 return false
             }
@@ -481,12 +455,11 @@ private class FilesExplorer: PagesCommandHandler {
             
             // Search for .h/.m pairs with a similar name
             let filesInDir =
-                try
-                    FileManager.default
-                        .contentsOfDirectory(at: newPath.deletingLastPathComponent(),
-                                             includingPropertiesForKeys: nil,
-                                             options: [.skipsHiddenFiles,
-                                                       .skipsSubdirectoryDescendants])
+                try FileManager.default
+                    .contentsOfDirectory(at: newPath.deletingLastPathComponent(),
+                                         includingPropertiesForKeys: nil,
+                                         options: [.skipsHiddenFiles,
+                                                   .skipsSubdirectoryDescendants])
             
             // Match all files in directory
             let matches =
@@ -541,7 +514,7 @@ public class FileListConsoleProvider: ConsoleDataProvider {
         let url = fileList[row]
         let fullPath = url.standardizedFileURL.relativePath
         
-        var isDirectory: ObjCBool = ObjCBool(false)
+        var isDirectory = ObjCBool(false)
         guard FileManager.default.fileExists(atPath: fullPath, isDirectory: &isDirectory) else {
             return [""]
         }
