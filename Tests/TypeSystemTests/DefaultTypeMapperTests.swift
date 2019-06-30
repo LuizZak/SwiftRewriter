@@ -174,7 +174,7 @@ class DefaultTypeMapperTests: XCTestCase {
     }
     
     func testMapSimpleTypes() {
-        expect(.id(protocols: []),
+        expect(.id(),
                toConvertTo: "AnyObject")
         
         expect(.instancetype,
@@ -192,7 +192,7 @@ class DefaultTypeMapperTests: XCTestCase {
                withExplicitNullability: .nullable,
                toConvertTo: "(UITableViewDelegate & UITableViewDataSource)?")
         
-        expect(.specified(specifiers: ["__weak"], .id(protocols: [])),
+        expect(.specified(specifiers: ["__weak"], .id()),
                withExplicitNullability: nil,
                toConvertTo: "AnyObject?")
     }

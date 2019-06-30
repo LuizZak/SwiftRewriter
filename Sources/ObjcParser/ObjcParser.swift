@@ -345,7 +345,7 @@ public class ObjcParser {
                 
                 type = .id(protocols: types.map { String($0.value) })
             } else {
-                type = .id(protocols: [])
+                type = .id()
             }
         } else if lexer.tokenType(matches: { $0.isIdentifier }) {
             var typeName: String = String(try lexer.advance(matching: { $0.tokenType.isIdentifier }).value)

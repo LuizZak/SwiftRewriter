@@ -100,7 +100,7 @@ public class SwiftTypeConverter {
                                 leftParen: nil,
                                 argument: nil,
                                 rightParen: nil,
-                                tokenList: SyntaxFactory.makeBlankTokenList()
+                                tokenList: nil
                             )
                         )
                         
@@ -112,7 +112,7 @@ public class SwiftTypeConverter {
                                 leftParen: nil,
                                 argument: nil,
                                 rightParen: nil,
-                                tokenList: SyntaxFactory.makeBlankTokenList()
+                                tokenList: nil
                             )
                         )
                         
@@ -244,15 +244,13 @@ public class SwiftTypeConverter {
             
             let genericArgumentList =
                 SyntaxFactory
-                    .makeGenericArgumentList(types.enumerated().map {
-                        let (index, type) = $0
-                        
-                        return SyntaxFactory
-                            .makeGenericArgument(
-                                argumentType: type,
-                                trailingComma: index == types.count - 1 ? nil : SyntaxFactory.makeCommaToken().withTrailingSpace()
-                            )
-                    })
+                    .makeGenericArgumentList(
+                        mapWithComma(types) { (type, hasComma) -> GenericArgumentSyntax in
+                            SyntaxFactory
+                                .makeGenericArgument(
+                                    argumentType: type,
+                                    trailingComma: hasComma ? SyntaxFactory.makeCommaToken().withTrailingSpace() : nil)
+                        })
             
             let genericArgumentClause = SyntaxFactory
                 .makeGenericArgumentClause(

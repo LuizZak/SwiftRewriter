@@ -142,7 +142,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
                 objcFunctionName: "objc", toSwiftFunction: "swift",
                 firstArgumentBecomesInstance: false,
                 arguments: [
-                    .omitIf(matches: .equals(to: .identifier("A")), .asIs)
+                    .omitIf(matches: .equals(to: .identifier("A")))
                 ]
             )
         
@@ -198,7 +198,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
             FunctionInvocationTransformer(
                 objcFunctionName: "CGPointMake", toSwiftFunction: "CGPoint",
                 firstArgumentBecomesInstance: false,
-                arguments: [.labeled("x", .asIs), .labeled("y", .asIs)]
+                arguments: [.labeled("x"), .labeled("y")]
             )
         
         let exp =
@@ -259,8 +259,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
         let sut =
             FunctionInvocationTransformer(
                 objcFunctionName: "objc",
-                toSwiftPropertySetter: "swift",
-                argumentTransformer: .asIs
+                toSwiftPropertySetter: "swift"
             )
         
         XCTAssertEqual(
@@ -313,7 +312,7 @@ class FunctionInvocationTransformerTests: XCTestCase {
             FunctionInvocationTransformer(
                 objcFunctionName: "function", toSwiftFunction: "function",
                 firstArgumentBecomesInstance: false,
-                arguments: [.asIs, .labeled("label", .asIs)]
+                arguments: [.asIs, .labeled("label")]
         )
         
         XCTAssertEqual(

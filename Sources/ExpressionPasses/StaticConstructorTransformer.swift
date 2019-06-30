@@ -31,7 +31,7 @@ import Commons
 /// ```
 /// StaticConstructorTransformer(
 ///     typeName: "NSLocale",
-///     kind: .method("localeWithLocaleIdentifier", .labeled("identifier", .asIs)),
+///     kind: .method("localeWithLocaleIdentifier", .labeled("identifier")),
 ///     conversion: Expression.identifier("Locale"))
 /// ```
 ///

@@ -196,8 +196,7 @@ private extension BaseExpressionPass {
             transformers.append(
                 FunctionInvocationTransformer(
                     objcFunctionName: setterName,
-                    toSwiftPropertySetter: property,
-                    argumentTransformer: .asIs
+                    toSwiftPropertySetter: property
                 )
             )
         }
@@ -210,7 +209,7 @@ private extension BaseExpressionPass {
         
         let args: [ArgumentRewritingStrategy] = new.map {
             if let label = $0 {
-                return .labeled(label, .asIs)
+                return .labeled(label)
             }
             
             return .asIs

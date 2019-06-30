@@ -3,9 +3,13 @@ import SwiftAST
 /// Method-to-method call transformation should allow:
 ///
 /// 1. Renaming method member name
+/// ```
 ///     \<exp>.method()
-///         to
+/// ```
+/// to
+/// ```
 ///     \<exp>.otherMethod()
+/// ```
 ///
 /// 2. Add or remove arguments in arbitrary position
 ///     2.1 Add a new argument to an arbitrary position

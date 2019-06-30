@@ -60,16 +60,10 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
                                 )
         
         try assertObjcTypeParse("__weak id",
-                                .specified(specifiers: ["__weak"],
-                                       .id(protocols: [])
-                                    )
-                                )
+                                .specified(specifiers: ["__weak"], .id()))
         
         try assertObjcTypeParse("__block id",
-                                .specified(specifiers: ["__block"],
-                                           .id(protocols: [])
-            )
-        )
+                                .specified(specifiers: ["__block"], .id()))
     }
     
     func testParseGenericObjcType() throws {
@@ -77,15 +71,15 @@ class ObjcParser_ObjcTypeTests: XCTestCase {
                                 .pointer(.generic("NSArray", parameters: [.pointer(.struct("NSString"))])))
         
         try assertObjcTypeParse("NSArray<id>*",
-                                .pointer(.generic("NSArray", parameters: [.id(protocols: [])])))
+                                .pointer(.generic("NSArray", parameters: [.id()])))
         
         try assertObjcTypeParse("NSDictionary < NSString * , NSNumber * > *",
                                 .pointer(.generic("NSDictionary", parameters: [.pointer(.struct("NSString")), .pointer(.struct("NSNumber"))])))
     }
     
     func testParseIdWithNoProtocols() throws {
-        try assertObjcTypeParse("id", .id(protocols: []))
-        try assertObjcTypeParse("id*", .pointer(.id(protocols: [])))
+        try assertObjcTypeParse("id", .id())
+        try assertObjcTypeParse("id*", .pointer(.id()))
     }
     
     func testParseIdWithProtocolListObjcType() throws {

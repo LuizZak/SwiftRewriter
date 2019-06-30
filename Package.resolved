@@ -3,7 +3,7 @@
     "pins": [
       {
         "package": "Antlr4",
-        "repositoryURL": "https://github.com/LuizZak/Antlr4-Swift.git",
+        "repositoryURL": "https://github.com/LuizZak/antlr4-swift.git",
         "state": {
           "branch": null,
           "revision": "065310a79abea55f737b55786045e0b0272e6d85",
@@ -29,12 +29,21 @@
         }
       },
       {
+        "package": "llbuild",
+        "repositoryURL": "https://github.com/apple/swift-llbuild.git",
+        "state": {
+          "branch": null,
+          "revision": "f1c9ad9a253cdf1aa89a7f5c99c30b4513b06ddb",
+          "version": "0.1.1"
+        }
+      },
+      {
         "package": "SwiftPM",
         "repositoryURL": "https://github.com/apple/swift-package-manager.git",
         "state": {
           "branch": null,
-          "revision": "235aacc514cb81a6881364b0fedcb3dd083228f3",
-          "version": "0.3.0"
+          "revision": "8656a25cb906c1896339f950ac960ee1b4fe8034",
+          "version": "0.4.0"
         }
       },
       {

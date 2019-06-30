@@ -179,7 +179,7 @@ public class UIKitCorrectorIntentionPass: ClassVisitingIntentionPass {
         
         for k2 in k2.dropFirst() {
             if let k2 = k2 {
-                transformerBuilder.addingArgument(strategy: .labeled(k2, .asIs))
+                transformerBuilder.addingArgument(strategy: .labeled(k2))
             } else {
                 transformerBuilder.addingArgument(strategy: .asIs)
             }

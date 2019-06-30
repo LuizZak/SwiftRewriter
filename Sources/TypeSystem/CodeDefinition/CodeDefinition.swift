@@ -314,30 +314,6 @@ public class LocalCodeDefinition: CodeDefinition {
         case forLoop(ForStatement, PatternLocation)
         case ifLet(IfStatement, PatternLocation)
         
-        public static func == (lhs: DefinitionLocation, rhs: DefinitionLocation) -> Bool {
-            switch (lhs, rhs) {
-            case (.instanceSelf, .instanceSelf),
-                 (.staticSelf, .staticSelf),
-                 (.setterValue, .setterValue):
-                return true
-                
-            case let (.parameter(l), .parameter(r)):
-                return l == r
-                
-            case let (.variableDeclaration(d1, i1), .variableDeclaration(d2, i2)):
-                return d1 === d2 && i1 == i2
-                
-            case let (.forLoop(f1, loc1), .forLoop(f2, loc2)):
-                return f1 === f2 && loc1 == loc2
-                
-            case let (.ifLet(if1, loc1), .ifLet(if2, loc2)):
-                return if1 === if2 && loc1 == loc2
-                
-            default:
-                return false
-            }
-        }
-        
         public func hash(into hasher: inout Hasher) {
             switch self {
             case .instanceSelf:
