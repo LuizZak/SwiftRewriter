@@ -4,46 +4,30 @@ class SwiftRewriterArgumentsParser {
     
     let parser: ArgumentParser
     
-    // --colorize
+    /// `--colorize`
     let colorArg: OptionArgument<Bool>
-    
-    // --print-expression-types
+    /// `--print-expression-types`
     let outputExpressionTypesArg: OptionArgument<Bool>
-    
-    // --print-tracing-history
+    /// `--print-tracing-history`
     let outputIntentionHistoryArg: OptionArgument<Bool>
-    
-    // --verbose
+    /// `--verbose`
     let verboseArg: OptionArgument<Bool>
-    
-    // --num-threads
+    /// `--num-threads`
     let numThreadsArg: OptionArgument<Int>
-    
-    // --force-ll
+    /// `--force-ll`
     let forceUseLLPredictionArg: OptionArgument<Bool>
-    
-    // --emit-objc-compatibility
+    /// `--emit-objc-compatibility`
     let emitObjcCompatibilityArg: OptionArgument<Bool>
-    
-    // --diagnose-file
+    /// `--diagnose-file`
     let diagnoseFileArg: OptionArgument<String>
-    
-    //// --target stdout | filedisk
+    /// `--target stdout | filedisk`
     let targetArg: OptionArgument<Target>
     
-    //// files <files...>
+    /// `files <files...>`
+    let filesParser: FilesParser
     
-    let filesParser: ArgumentParser
-    let filesArg: PositionalArgument<[String]>
-    
-    //// path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]
-    
-    let pathParser: ArgumentParser
-    let pathArg: PositionalArgument<String>
-    let excludePatternArg: OptionArgument<String>
-    let includePatternArg: OptionArgument<String>
-    let skipConfirmArg: OptionArgument<Bool>
-    let overwriteArg: OptionArgument<Bool>
+    /// `path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]`
+    let pathParser: PathParser
     
     init() {
         parser =
@@ -149,52 +133,83 @@ class SwiftRewriterArgumentsParser {
                         Saves output of conversion to the filedisk as .swift files on the same folder as the input files.
                 """)
         
-        //// files <files...>
+        // files <files...>
+        filesParser = FilesParser(parentParser: parser)
         
-        filesParser
-            = parser.add(subparser: "files",
-                         overview: "Converts one or more .h/.m file(s) to Swift.")
-        filesArg
-            = filesParser.add(positional: "files", kind: [String].self, usage: "Objective-C file(s) to convert.")
-        
-        //// path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]
-        
-        pathParser
-            = parser.add(
-                subparser: "path",
-                overview: """
-                Examines a path and collects all .h/.m files to convert, before presenting \
-                a prompt to confirm conversion of files.
-                """)
-        
-        pathArg
-            = pathParser.add(positional: "path", kind: String.self,
-                             usage: "Path to the project to inspect")
-        
-        excludePatternArg
-            = pathParser.add(
-                option: "--exclude-pattern", shortName: "-e", kind: String.self,
-                usage: """
-                Provides a file pattern for excluding matches from the initial Objective-C \
-                files search. Pattern is applied to the full path.
-                """)
-        
-        includePatternArg
-            = pathParser.add(
-                option: "--include-pattern", shortName: "-i", kind: String.self,
-                usage: """
-                Provides a pattern for including matches from the initial Objective-C files \
-                search. Pattern is applied to the full path. --exclude-pattern takes \
-                priority over --include-pattern matches.
-                """)
-        
-        skipConfirmArg
-            = pathParser.add(option: "--skip-confirm", shortName: "-s", kind: Bool.self,
-                             usage: "Skips asking for confirmation prior to parsing.")
-        
-        overwriteArg
-            = pathParser.add(option: "--overwrite", shortName: "-o", kind: Bool.self,
-                             usage: "Overwrites any .swift file with a matching output name on the target path.")
+        // path <path> [--exclude-pattern <pattern>] [--skip-confirm] [--overwrite]
+        pathParser = PathParser(parentParser: parser)
     }
-
+    
+    /// `files <files...>`
+    class FilesParser {
+        /// `files <files...>`
+        let filesParser: ArgumentParser
+        /// `<files...>`
+        let filesArg: PositionalArgument<[String]>
+        
+        init(parentParser: ArgumentParser) {
+            filesParser
+                = parentParser.add(subparser: "files",
+                                   overview: "Converts one or more .h/.m file(s) to Swift.")
+            filesArg
+                = filesParser.add(positional: "files", kind: [String].self, usage: "Objective-C file(s) to convert.")
+        }
+    }
+    
+    /// `path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]`
+    class PathParser {
+        
+        /// `path <path> [--exclude-pattern <pattern>] [--include-pattern <pattern>] [--skip-confirm] [--overwrite]`
+        let pathParser: ArgumentParser
+        /// `<path...>` (for path mode only)
+        let pathArg: PositionalArgument<String>
+        
+        /// `--exclude-pattern <pattern>` (for path mode only)
+        let excludePatternArg: OptionArgument<String>
+        /// `--include-pattern <pattern>` (for path mode only)
+        let includePatternArg: OptionArgument<String>
+        /// `--skip-confirm` (for path mode only)
+        let skipConfirmArg: OptionArgument<Bool>
+        /// `--overwrite` (for path mode only)
+        let overwriteArg: OptionArgument<Bool>
+        
+        init(parentParser: ArgumentParser) {
+            pathParser
+                = parentParser.add(
+                    subparser: "path",
+                    overview: """
+                    Examines a path and collects all .h/.m files to convert, before presenting \
+                    a prompt to confirm conversion of files.
+                    """)
+            
+            pathArg
+                = pathParser.add(positional: "path", kind: String.self,
+                                 usage: "Path to the project to inspect")
+            
+            excludePatternArg
+                = pathParser.add(
+                    option: "--exclude-pattern", shortName: "-e", kind: String.self,
+                    usage: """
+                    Provides a file pattern for excluding matches from the initial Objective-C \
+                    files search. Pattern is applied to the full path.
+                    """)
+            
+            includePatternArg
+                = pathParser.add(
+                    option: "--include-pattern", shortName: "-i", kind: String.self,
+                    usage: """
+                    Provides a pattern for including matches from the initial Objective-C files \
+                    search. Pattern is applied to the full path. --exclude-pattern takes \
+                    priority over --include-pattern matches.
+                    """)
+            
+            skipConfirmArg
+                = pathParser.add(option: "--skip-confirm", shortName: "-s", kind: Bool.self,
+                                 usage: "Skips asking for confirmation prior to parsing.")
+            
+            overwriteArg
+                = pathParser.add(option: "--overwrite", shortName: "-o", kind: Bool.self,
+                                 usage: "Overwrites any .swift file with a matching output name on the target path.")
+        }
+    }
 }

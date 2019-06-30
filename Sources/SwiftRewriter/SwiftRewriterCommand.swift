@@ -36,7 +36,7 @@ class SwiftRewriterCommand {
     func filesMode(_ result: ArgumentParser.Result) throws {
         let rewriter = makeRewriterService(result)
         
-        guard let files = result.get(args.filesArg) else {
+        guard let files = result.get(args.filesParser.filesArg) else {
             throw ArgumentParserError.expectedValue(option: "<files...>")
         }
         
@@ -47,14 +47,14 @@ class SwiftRewriterCommand {
     func pathMode(_ result: ArgumentParser.Result) throws {
         let rewriter = makeRewriterService(result)
         
-        guard let path = result.get(args.pathArg) else {
+        guard let path = result.get(args.pathParser.pathArg) else {
             throw ArgumentParserError.expectedValue(option: "<path>")
         }
         
-        let skipConfirm = result.get(args.skipConfirmArg) ?? false
-        let excludePattern = result.get(args.excludePatternArg)
-        let includePattern = result.get(args.includePatternArg)
-        let overwrite = result.get(args.overwriteArg) ?? false
+        let skipConfirm = result.get(args.pathParser.skipConfirmArg) ?? false
+        let excludePattern = result.get(args.pathParser.excludePatternArg)
+        let includePattern = result.get(args.pathParser.includePatternArg)
+        let overwrite = result.get(args.pathParser.overwriteArg) ?? false
         
         let console = Console()
         let menu = Menu(rewriterService: rewriter, console: console)
