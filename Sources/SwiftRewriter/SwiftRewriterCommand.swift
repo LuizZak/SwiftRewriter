@@ -60,8 +60,10 @@ class SwiftRewriterCommand {
         let menu = Menu(rewriterService: rewriter, console: console)
         
         let options: SuggestConversionInterface.Options
-            = .init(overwrite: overwrite, skipConfirm: skipConfirm,
-                    excludePattern: excludePattern, includePattern: includePattern)
+            = .init(overwrite: overwrite,
+                    skipConfirm: skipConfirm,
+                    excludePattern: excludePattern,
+                    includePattern: includePattern)
         
         let interface = SuggestConversionInterface(rewriterService: rewriter)
         interface.searchAndShowConfirm(in: menu,
@@ -104,13 +106,26 @@ class SwiftRewriterCommand {
     func makeSettings(_ result: ArgumentParser.Result) -> Settings {
         var settings = Settings()
         
-        settings.rewriter.verbose = result.get(args.verboseArg) ?? false
-        settings.rewriter.diagnoseFiles = result.get(args.diagnoseFileArg).map({ [$0] }) ?? []
-        settings.rewriter.numThreads = result.get(args.numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
-        settings.astWriter.outputExpressionTypes = result.get(args.outputExpressionTypesArg) ?? false
-        settings.astWriter.printIntentionHistory = result.get(args.outputIntentionHistoryArg) ?? false
-        settings.astWriter.emitObjcCompatibility = result.get(args.emitObjcCompatibilityArg) ?? false
-        settings.rewriter.forceUseLLPrediction = result.get(args.forceUseLLPredictionArg) ?? false
+        settings.rewriter.verbose =
+            result.get(args.verboseArg) ?? false
+        
+        settings.rewriter.diagnoseFiles =
+            result.get(args.diagnoseFileArg).map { [$0] } ?? []
+        
+        settings.rewriter.numThreads =
+            result.get(args.numThreadsArg) ?? OperationQueue.defaultMaxConcurrentOperationCount
+        
+        settings.astWriter.outputExpressionTypes =
+            result.get(args.outputExpressionTypesArg) ?? false
+        
+        settings.astWriter.printIntentionHistory =
+            result.get(args.outputIntentionHistoryArg) ?? false
+        
+        settings.astWriter.emitObjcCompatibility =
+            result.get(args.emitObjcCompatibilityArg) ?? false
+        
+        settings.rewriter.forceUseLLPrediction =
+            result.get(args.forceUseLLPredictionArg) ?? false
         
         return settings
     }
