@@ -54,7 +54,7 @@ public class FileTypeMergingIntentionPass: IntentionPass {
         }
         
         func strippingPathExtension(_ path: String) -> String {
-            return (path as NSString).deletingPathExtension
+            (path as NSString).deletingPathExtension
         }
         
         let implByName =

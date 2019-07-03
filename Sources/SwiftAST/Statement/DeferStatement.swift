@@ -7,7 +7,7 @@ public class DeferStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return [body]
+        [body]
     }
     
     public init(body: CompoundStatement) {
@@ -31,12 +31,12 @@ public class DeferStatement: Statement {
     
     @inlinable
     public override func copy() -> DeferStatement {
-        return DeferStatement(body: body.copy()).copyMetadata(from: self)
+        DeferStatement(body: body.copy()).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitDefer(self)
+        visitor.visitDefer(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -62,6 +62,6 @@ public class DeferStatement: Statement {
 public extension Statement {
     @inlinable
     var asDefer: DeferStatement? {
-        return cast()
+        cast()
     }
 }

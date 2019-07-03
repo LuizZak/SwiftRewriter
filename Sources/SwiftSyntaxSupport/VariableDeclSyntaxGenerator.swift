@@ -12,15 +12,15 @@ class VariableDeclSyntaxGenerator {
     }
     
     func generateInstanceVariable(_ intention: InstanceVariableGenerationIntention) -> DeclSyntax {
-        return generateVariableDecl(intention)
+        generateVariableDecl(intention)
     }
     
     func generateProperty(_ intention: PropertyGenerationIntention) -> DeclSyntax {
-        return generateVariableDecl(intention)
+        generateVariableDecl(intention)
     }
     
     func generateGlobalVariable(_ intention: GlobalVariableGenerationIntention) -> DeclSyntax {
-        return generateVariableDecl(intention)
+        generateVariableDecl(intention)
     }
     
     func generateVariableDecl(_ intention: ValueStorageIntention) -> DeclSyntax {
@@ -43,7 +43,7 @@ class VariableDeclSyntaxGenerator {
     }
     
     func generate(_ variableDecl: VariableDeclaration) -> VariableDeclSyntax {
-        return VariableDeclSyntax { builder in
+        VariableDeclSyntax { builder in
             for attribute in variableDecl.attributes {
                 builder.addAttribute(attribute())
             }
@@ -77,7 +77,7 @@ class VariableDeclSyntaxGenerator {
                           hasComma: Bool,
                           accessors: (() -> Syntax)? = nil) -> PatternBindingSyntax {
         
-        return PatternBindingSyntax { builder in
+        PatternBindingSyntax { builder in
             builder.usePattern(IdentifierPatternSyntax { builder in
                 builder.useIdentifier(makeIdentifier(binding.name))
             })
@@ -301,14 +301,14 @@ private extension VariableDeclSyntaxGenerator {
                                     type: SwiftType?,
                                     initialization: Expression?) -> PatternBindingElement {
         
-        return PatternBindingElement(name: name,
+        PatternBindingElement(name: name,
                                      type: type,
                                      intention: nil,
                                      initialization: initialization)
     }
     
     private func makePatternBinding(_ intention: ValueStorageIntention) -> PatternBindingElement {
-        return PatternBindingElement(
+        PatternBindingElement(
             name: intention.name,
             type: intention.type,
             intention: intention,

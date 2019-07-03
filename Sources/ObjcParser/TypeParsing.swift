@@ -380,10 +380,10 @@ public class TypeParsing {
 
 extension TypeParsing {
     static func qualifiers(from spec: Parser.SpecifierQualifierListContext) -> [Parser.TypeQualifierContext] {
-        return spec.typeQualifier()
+        spec.typeQualifier()
     }
     
     static func qualifiers(from spec: Parser.DeclarationSpecifiersContext) -> [Parser.TypeQualifierContext] {
-        return spec.typeQualifier()
+        spec.typeQualifier()
     }
 }

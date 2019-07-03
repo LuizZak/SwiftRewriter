@@ -28,7 +28,7 @@ public class Identifier: ASTNode {
     }
     
     override public func shortDescription() -> String {
-        return name
+        name
     }
 }
 
@@ -49,6 +49,6 @@ public class KeywordNode: ASTNode {
     }
     
     override public func shortDescription() -> String {
-        return keyword.rawValue
+        keyword.rawValue
     }
 }

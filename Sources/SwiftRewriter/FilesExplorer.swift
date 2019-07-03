@@ -319,7 +319,7 @@ private class FilesExplorer: PagesCommandHandler {
     var canHandleEmptyInput: Bool = false
     
     var commandPrompt: String? {
-        return "Select a file above or input '0' to quit"
+        "Select a file above or input '0' to quit"
     }
     
     private var fileList: FileListConsoleProvider?
@@ -335,7 +335,7 @@ private class FilesExplorer: PagesCommandHandler {
     }
     
     func executeCommand(_ input: String) throws -> Pages.PagesCommandResult {
-        return self.navigateOption(input)
+        self.navigateOption(input)
     }
 
     public func getFileListProvider() throws -> FileListConsoleProvider {
@@ -498,11 +498,11 @@ public class FileListConsoleProvider: ConsoleDataProvider {
     let fileList: [URL]
     
     public var header: String {
-        return path.relativePath
+        path.relativePath
     }
     
     public var count: Int {
-        return fileList.count
+        fileList.count
     }
     
     public init(path: URL, fileList: [URL]) {

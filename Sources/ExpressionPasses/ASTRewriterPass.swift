@@ -52,7 +52,7 @@ public struct ASTRewriterPassContext {
 open class ASTRewriterPass: SyntaxNodeRewriter {
     public var context: ASTRewriterPassContext
     public var typeSystem: TypeSystem {
-        return context.typeSystem
+        context.typeSystem
     }
     
     public required init(context: ASTRewriterPassContext) {
@@ -72,7 +72,7 @@ open class ASTRewriterPass: SyntaxNodeRewriter {
     }
     
     open func visitBaseExpression(_ exp: Expression) -> Expression {
-        return visitExpression(exp)
+        visitExpression(exp)
     }
     
     open override func visitSizeOf(_ exp: SizeOfExpression) -> Expression {

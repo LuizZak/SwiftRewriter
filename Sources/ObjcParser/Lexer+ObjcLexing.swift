@@ -12,7 +12,7 @@ extension Lexer {
     /// ```
     @inline(__always)
     public func lexTypeQualifier() throws -> Substring {
-        return try consumeString { lexer in
+        try consumeString { lexer in
             if !lexer.advanceIf(equals: "extern") &&
                 !lexer.advanceIf(equals: "static") &&
                 !lexer.advanceIf(equals: "const") &&
@@ -43,7 +43,7 @@ extension Lexer {
     /// ```
     @inline(__always)
     public func lexIdentifier() throws -> Substring {
-        return try consumeString { lexer in
+        try consumeString { lexer in
             try lexer.advance(validatingCurrent: Lexer.isIdentifierLetter)
             
             lexer.advance(while: { Lexer.isIdentifierLetter($0) || Lexer.isDigit($0) })
@@ -60,7 +60,7 @@ extension Lexer {
     ///         | '__unused';
     /// ```
     public static func isTypeQualifier(_ string: String) -> Bool {
-        return _typeQualifiers.contains(string)
+        _typeQualifiers.contains(string)
     }
     
     /// Returns true if the character is an identifier letter character.
@@ -71,7 +71,7 @@ extension Lexer {
     /// ```
     @inline(__always)
     public static func isIdentifierLetter(_ atom: Atom) -> Bool {
-        return Lexer.isLetter(atom) || atom == "_" || atom == "$"
+        Lexer.isLetter(atom) || atom == "_" || atom == "$"
     }
     
     private static let _typeQualifiers = [

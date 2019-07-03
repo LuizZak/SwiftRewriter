@@ -20,7 +20,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     /// For ternary expressions, the test predicate doesn't have to be be a
     /// literal as well for the result to be `true`.
     open var isLiteralExpression: Bool {
-        return false
+        false
     }
     
     /// In case this expression is a literal expression type, returns the
@@ -30,27 +30,27 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     /// Composed expression types such as binary and ternary expressions always
     /// return `nil`.
     open var literalExpressionKind: LiteralExpressionKind? {
-        return nil
+        nil
     }
     
     /// `true` if this expression node requires parenthesis for unary, prefix, and
     /// postfix operations.
     open var requiresParens: Bool {
-        return false
+        false
     }
     
     open var description: String {
-        return "\(type(of: self))"
+        "\(type(of: self))"
     }
     
     open var customMirror: Mirror {
-        return Mirror(reflecting: "")
+        Mirror(reflecting: "")
     }
     
     /// Returns an array of sub-expressions contained within this expression, in
     /// case it is an expression formed of other expressions.
     open var subExpressions: [Expression] {
-        return []
+        []
     }
     
     /// If this expression's parent type is an expression, returns that parent
@@ -59,7 +59,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     /// Returns `nil`, in case no parent is present, or if the parent is not an
     /// Expression type.
     open var parentExpression: Expression? {
-        return parent as? Expression
+        parent as? Expression
     }
     
     /// Resolved type of this expression.
@@ -77,12 +77,12 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     /// Returns `true` if this expression's type has been successfully resolved
     /// with a non-error type.
     public var isTypeResolved: Bool {
-        return resolvedType != nil && !isErrorTyped
+        resolvedType != nil && !isErrorTyped
     }
     
     /// Returns `true` if this expression's type is currently resolved as an error type.
     public var isErrorTyped: Bool {
-        return resolvedType == .errorType
+        resolvedType == .errorType
     }
     
     override public init() {
@@ -114,7 +114,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     /// expression
     @inlinable
     open func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitExpression(self)
+        visitor.visitExpression(self)
     }
     
     @inlinable
@@ -123,7 +123,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     }
     
     open func isEqual(to other: Expression) -> Bool {
-        return false
+        false
     }
     
     open func encode(to encoder: Encoder) throws {
@@ -144,7 +144,7 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
     
     @usableFromInline
     final func cast<T: Expression>() -> T? {
-        return self as? T
+        self as? T
     }
     
     private enum CodingKeys: String, CodingKey {
@@ -155,123 +155,122 @@ public class Expression: SyntaxNode, Codable, ExpressionComponent, Equatable, Cu
 /// Helper static creators
 public extension Expression {
     static func assignment(lhs: Expression, op: SwiftOperator, rhs: Expression) -> AssignmentExpression {
-        return AssignmentExpression(lhs: lhs, op: op, rhs: rhs)
+        AssignmentExpression(lhs: lhs, op: op, rhs: rhs)
     }
     
     static func binary(lhs: Expression, op: SwiftOperator, rhs: Expression) -> BinaryExpression {
-        return BinaryExpression(lhs: lhs, op: op, rhs: rhs)
+        BinaryExpression(lhs: lhs, op: op, rhs: rhs)
     }
     
     static func unary(op: SwiftOperator, _ exp: Expression) -> UnaryExpression {
-        return UnaryExpression(op: op, exp: exp)
+        UnaryExpression(op: op, exp: exp)
     }
     
     static func sizeof(_ exp: Expression) -> SizeOfExpression {
-        return SizeOfExpression(value: .expression(exp))
+        SizeOfExpression(value: .expression(exp))
     }
     
     static func sizeof(type: SwiftType) -> SizeOfExpression {
-        return SizeOfExpression(value: .type(type))
+        SizeOfExpression(value: .type(type))
     }
     
     static func prefix(op: SwiftOperator, _ exp: Expression) -> PrefixExpression {
-        return PrefixExpression(op: op, exp: exp)
+        PrefixExpression(op: op, exp: exp)
     }
     
     static func postfix(_ exp: Expression, _ op: Postfix) -> PostfixExpression {
-        return PostfixExpression(exp: exp, op: op)
+        PostfixExpression(exp: exp, op: op)
     }
     
     static func constant(_ constant: Constant) -> ConstantExpression {
-        return ConstantExpression(constant: constant)
+        ConstantExpression(constant: constant)
     }
     
     static func parens(_ exp: Expression) -> ParensExpression {
-        return ParensExpression(exp: exp)
+        ParensExpression(exp: exp)
     }
     
     static func identifier(_ ident: String) -> IdentifierExpression {
-        return IdentifierExpression(identifier: ident)
+        IdentifierExpression(identifier: ident)
     }
     
     static func cast(_ exp: Expression, type: SwiftType, isOptionalCast: Bool = true) -> CastExpression {
-        return CastExpression(exp: exp, type: type, isOptionalCast: isOptionalCast)
+        CastExpression(exp: exp, type: type, isOptionalCast: isOptionalCast)
     }
     
     static func arrayLiteral(_ array: [Expression]) -> ArrayLiteralExpression {
-        return ArrayLiteralExpression(items: array)
+        ArrayLiteralExpression(items: array)
     }
     
     static func dictionaryLiteral(_ pairs: [ExpressionDictionaryPair]) -> DictionaryLiteralExpression {
-        return DictionaryLiteralExpression(pairs: pairs)
+        DictionaryLiteralExpression(pairs: pairs)
     }
     
     static func dictionaryLiteral(
         _ pairs: KeyValuePairs<Expression, Expression>) -> DictionaryLiteralExpression {
         
-        return
-            DictionaryLiteralExpression(
-                pairs: pairs.map {
-                    ExpressionDictionaryPair(key: $0.key, value: $0.value)
-                }
-            )
+        DictionaryLiteralExpression(
+            pairs: pairs.map {
+                ExpressionDictionaryPair(key: $0.key, value: $0.value)
+            }
+        )
     }
     
     static func ternary(_ exp: Expression,
                                `true` ifTrue: Expression,
                                `false` ifFalse: Expression) -> TernaryExpression {
         
-        return TernaryExpression(exp: exp, ifTrue: ifTrue, ifFalse: ifFalse)
+        TernaryExpression(exp: exp, ifTrue: ifTrue, ifFalse: ifFalse)
     }
     
     static func block(parameters: [BlockParameter] = [],
                              `return` returnType: SwiftType = .void,
                              body: CompoundStatement) -> BlockLiteralExpression {
         
-        return BlockLiteralExpression(parameters: parameters, returnType: returnType, body: body)
+        BlockLiteralExpression(parameters: parameters, returnType: returnType, body: body)
     }
     
     static func unknown(_ exp: UnknownASTContext) -> UnknownExpression {
-        return UnknownExpression(context: exp)
+        UnknownExpression(context: exp)
     }
 }
 
 // MARK: - Operator definitions
 public extension Expression {
     static func + (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .add, rhs: rhs)
+        .binary(lhs: lhs, op: .add, rhs: rhs)
     }
     
     static func - (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .subtract, rhs: rhs)
+        .binary(lhs: lhs, op: .subtract, rhs: rhs)
     }
     
     static func * (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .multiply, rhs: rhs)
+        .binary(lhs: lhs, op: .multiply, rhs: rhs)
     }
     
     static func / (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .divide, rhs: rhs)
+        .binary(lhs: lhs, op: .divide, rhs: rhs)
     }
     
     static prefix func ! (lhs: Expression) -> Expression {
-        return .unary(op: .negate, lhs)
+        .unary(op: .negate, lhs)
     }
     
     static func && (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .and, rhs: rhs)
+        .binary(lhs: lhs, op: .and, rhs: rhs)
     }
     
     static func || (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .or, rhs: rhs)
+        .binary(lhs: lhs, op: .or, rhs: rhs)
     }
     
     static func | (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .bitwiseOr, rhs: rhs)
+        .binary(lhs: lhs, op: .bitwiseOr, rhs: rhs)
     }
     
     static func & (lhs: Expression, rhs: Expression) -> Expression {
-        return .binary(lhs: lhs, op: .bitwiseAnd, rhs: rhs)
+        .binary(lhs: lhs, op: .bitwiseAnd, rhs: rhs)
     }
 }
 

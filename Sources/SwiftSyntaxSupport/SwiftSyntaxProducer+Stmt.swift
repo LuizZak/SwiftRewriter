@@ -38,7 +38,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateCompound(_ compoundStmt: CompoundStatement) -> CodeBlockSyntax {
-        return CodeBlockSyntax { builder in
+        CodeBlockSyntax { builder in
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
             
             indent()
@@ -146,7 +146,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateExpressions(_ stmt: ExpressionsStatement) -> [() -> CodeBlockItemSyntax] {
-        return stmt.expressions
+        stmt.expressions
             .map { exp -> () -> CodeBlockItemSyntax in
                 return {
                     if self.settings.outputExpressionTypes {
@@ -175,7 +175,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateReturn(_ stmt: ReturnStatement) -> ReturnStmtSyntax {
-        return ReturnStmtSyntax { builder in
+        ReturnStmtSyntax { builder in
             var returnToken = makeStartToken(SyntaxFactory.makeReturnKeyword)
             
             if let exp = stmt.exp {
@@ -188,7 +188,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateContinue(_ stmt: ContinueStatement) -> ContinueStmtSyntax {
-        return ContinueStmtSyntax { builder in
+        ContinueStmtSyntax { builder in
             builder.useContinueKeyword(makeStartToken(SyntaxFactory.makeContinueKeyword))
             
             if let label = stmt.targetLabel {
@@ -198,7 +198,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateBreak(_ stmt: BreakStatement) -> BreakStmtSyntax {
-        return BreakStmtSyntax { builder in
+        BreakStmtSyntax { builder in
             builder.useBreakKeyword(makeStartToken(SyntaxFactory.makeBreakKeyword))
             
             if let label = stmt.targetLabel {
@@ -208,13 +208,13 @@ extension SwiftSyntaxProducer {
     }
     
     func generateFallthrough(_ stmt: FallthroughStatement) -> FallthroughStmtSyntax {
-        return FallthroughStmtSyntax { builder in
+        FallthroughStmtSyntax { builder in
             builder.useFallthroughKeyword(makeStartToken(SyntaxFactory.makeFallthroughKeyword))
         }
     }
     
     func generateIfStmt(_ stmt: IfStatement) -> IfStmtSyntax {
-        return IfStmtSyntax { builder in
+        IfStmtSyntax { builder in
             builder.useIfKeyword(makeStartToken(SyntaxFactory.makeIfKeyword).withTrailingSpace())
             
             if let pattern = stmt.pattern {
@@ -251,7 +251,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateSwitchStmt(_ stmt: SwitchStatement) -> SwitchStmtSyntax {
-        return SwitchStmtSyntax { builder in
+        SwitchStmtSyntax { builder in
             builder.useSwitchKeyword(makeStartToken(SyntaxFactory.makeSwitchKeyword).withTrailingSpace())
             builder.useLeftBrace(SyntaxFactory.makeLeftBraceToken().withLeadingSpace())
             builder.useRightBrace(SyntaxFactory.makeRightBraceToken().withLeadingTrivia(.newlines(1) + indentation()))
@@ -281,7 +281,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateSwitchCase(_ caseLabel: Syntax, statements: [Statement]) -> SwitchCaseSyntax {
-        return SwitchCaseSyntax { builder in
+        SwitchCaseSyntax { builder in
             builder.useLabel(caseLabel)
             
             indent()
@@ -298,7 +298,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateSwitchCaseLabel(_ _case: SwitchCase) -> SwitchCaseLabelSyntax {
-        return SwitchCaseLabelSyntax { builder in
+        SwitchCaseLabelSyntax { builder in
             builder.useCaseKeyword(makeStartToken(SyntaxFactory.makeCaseKeyword).withTrailingSpace())
             builder.useColon(SyntaxFactory.makeColonToken())
             
@@ -315,7 +315,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateWhileStmt(_ stmt: WhileStatement) -> WhileStmtSyntax {
-        return WhileStmtSyntax { builder in
+        WhileStmtSyntax { builder in
             builder.useWhileKeyword(makeStartToken(SyntaxFactory.makeWhileKeyword).withTrailingSpace())
             
             builder.addCondition(ConditionElementSyntax { builder in
@@ -327,7 +327,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateDoWhileStmt(_ stmt: DoWhileStatement) -> RepeatWhileStmtSyntax {
-        return RepeatWhileStmtSyntax { builder in
+        RepeatWhileStmtSyntax { builder in
             builder.useRepeatKeyword(makeStartToken(SyntaxFactory.makeRepeatKeyword))
             builder.useWhileKeyword(SyntaxFactory.makeWhileKeyword().addingSurroundingSpaces())
             
@@ -337,7 +337,7 @@ extension SwiftSyntaxProducer {
     }
     
     func generateForIn(_ stmt: ForStatement) -> ForInStmtSyntax {
-        return ForInStmtSyntax { builder in
+        ForInStmtSyntax { builder in
             builder.useForKeyword(makeStartToken(SyntaxFactory.makeForKeyword).withTrailingSpace())
             builder.useInKeyword(SyntaxFactory.makeInKeyword().addingSurroundingSpaces())
             builder.useBody(generateCompound(stmt.body))
@@ -347,14 +347,14 @@ extension SwiftSyntaxProducer {
     }
     
     func generateDo(_ stmt: DoStatement) -> DoStmtSyntax {
-        return DoStmtSyntax { builder in
+        DoStmtSyntax { builder in
             builder.useDoKeyword(makeStartToken(SyntaxFactory.makeDoKeyword))
             builder.useBody(generateCompound(stmt.body))
         }
     }
     
     func generateDefer(_ stmt: DeferStatement) -> DeferStmtSyntax {
-        return DeferStmtSyntax { builder in
+        DeferStmtSyntax { builder in
             builder.useDeferKeyword(makeStartToken(SyntaxFactory.makeDeferKeyword))
             builder.useBody(generateCompound(stmt.body))
         }
@@ -408,12 +408,12 @@ extension SwiftSyntaxProducer {
 
 private extension ExprSyntax {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        return CodeBlockItemSyntax { $0.useItem(self) }
+        CodeBlockItemSyntax { $0.useItem(self) }
     }
 }
 
 private extension StmtSyntax {
     func inCodeBlock() -> CodeBlockItemSyntax {
-        return CodeBlockItemSyntax { $0.useItem(self) }
+        CodeBlockItemSyntax { $0.useItem(self) }
     }
 }

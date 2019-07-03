@@ -147,14 +147,14 @@ public class CollectionKnownTypeProvider: KnownTypeProvider {
     }
     
     public func knownType(withName name: String) -> KnownType? {
-        return knownTypesByName[name]?.first
+        knownTypesByName[name]?.first
     }
     
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
-        return knownTypes.filter { $0.kind == kind }
+        knownTypes.filter { $0.kind == kind }
     }
     
     public func canonicalName(for typeName: String) -> String? {
-        return canonicalMappings[typeName]
+        canonicalMappings[typeName]
     }
 }

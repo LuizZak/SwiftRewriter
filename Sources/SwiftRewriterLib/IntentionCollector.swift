@@ -32,14 +32,14 @@ public class IntentionBuildingContext {
     /// Searches from top-to-bottom, so the last context `T` that was pushed is
     /// returned first.
     public func findContext<T: Intention>(ofType type: T.Type = T.self) -> T? {
-        return contexts.reversed().first { $0 is T } as? T
+        contexts.reversed().first { $0 is T } as? T
     }
     
     /// Returns the topmost context on the contexts stack casted to a specific type.
     ///
     /// If the topmost context is not T, nil is returned instead.
     public func currentContext<T: Intention>(as type: T.Type = T.self) -> T? {
-        return contexts.last as? T
+        contexts.last as? T
     }
     
     public func popContext() {

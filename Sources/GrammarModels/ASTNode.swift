@@ -101,7 +101,7 @@ open class ASTNode {
     
     /// Gets children of this node of a given type
     public func childrenMatching<T: ASTNode>(type: T.Type = T.self) -> [T] {
-        return children.compactMap { $0 as? T }
+        children.compactMap { $0 as? T }
     }
     
     /// Gets the first child of this `ASTNode` that passes a given predicate.
@@ -121,7 +121,7 @@ open class ASTNode {
     
     /// Gets the first child of this `ASTNode` that is derived from a given type.
     public func firstChild<T: ASTNode>(ofType type: T.Type = T.self) -> T? {
-        return firstChild { _ in true }
+        firstChild { _ in true }
     }
     
     /// Updates the source range by making it the union of all of this node's
@@ -145,7 +145,7 @@ open class ASTNode {
     /// Overriden by subclasses to provide custom short descriptions to be used
     /// when printing AST nodes for diagnostics
     public func shortDescription() -> String {
-        return ""
+        ""
     }
 }
 

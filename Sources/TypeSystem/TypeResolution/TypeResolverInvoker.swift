@@ -83,7 +83,7 @@ public class DefaultTypeResolverInvoker: TypeResolverInvoker {
     // MARK: - Private methods
     
     private func makeQueueDelegate() -> TypeResolvingQueueDelegate {
-        return TypeResolvingQueueDelegate(
+        TypeResolvingQueueDelegate(
             intentions: typeSystem.intentions,
             globals: globals,
             typeSystem: typeSystem,

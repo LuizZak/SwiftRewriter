@@ -31,13 +31,13 @@ public final class FileGenerationIntention: Intention {
     /// Returns `true` if there are no intentions and no preprocessor directives
     /// registered for this file.
     public var isEmpty: Bool {
-        return isEmptyExceptDirectives && preprocessorDirectives.isEmpty
+        isEmptyExceptDirectives && preprocessorDirectives.isEmpty
     }
     
     /// Returns `true` if there are no intentions registered for this file, not
     /// counting any recorded preprocessor directive.
     public var isEmptyExceptDirectives: Bool {
-        return typeIntentions.isEmpty
+        typeIntentions.isEmpty
             && typealiasIntentions.isEmpty
             && globalFunctionIntentions.isEmpty
             && globalVariableIntentions.isEmpty
@@ -46,32 +46,32 @@ public final class FileGenerationIntention: Intention {
     /// Gets the class extensions (but not main class declarations) to create
     /// on this file.
     public var extensionIntentions: [ClassExtensionGenerationIntention] {
-        return typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
+        typeIntentions.compactMap { $0 as? ClassExtensionGenerationIntention }
     }
     
     /// Gets the classes (but not class extensions) to create on this file.
     public var classIntentions: [ClassGenerationIntention] {
-        return typeIntentions.compactMap { $0 as? ClassGenerationIntention }
+        typeIntentions.compactMap { $0 as? ClassGenerationIntention }
     }
     
     /// Gets the classes and class extensions to create on this file.
     public var classTypeIntentions: [BaseClassIntention] {
-        return typeIntentions.compactMap { $0 as? BaseClassIntention }
+        typeIntentions.compactMap { $0 as? BaseClassIntention }
     }
     
     /// Gets the protocols to create on this file.
     public var protocolIntentions: [ProtocolGenerationIntention] {
-        return typeIntentions.compactMap { $0 as? ProtocolGenerationIntention }
+        typeIntentions.compactMap { $0 as? ProtocolGenerationIntention }
     }
     
     /// Gets the enums to create on this file.
     public var enumIntentions: [EnumGenerationIntention] {
-        return typeIntentions.compactMap { $0 as? EnumGenerationIntention }
+        typeIntentions.compactMap { $0 as? EnumGenerationIntention }
     }
     
     /// Gets the structs to create on this file.
     public var structIntentions: [StructGenerationIntention] {
-        return typeIntentions.compactMap { $0 as? StructGenerationIntention }
+        typeIntentions.compactMap { $0 as? StructGenerationIntention }
     }
     
     /// Gets the typealias intentions to create on this file.
@@ -238,15 +238,15 @@ public final class FileGenerationIntention: Intention {
 
 extension FileGenerationIntention: KnownObjectiveCFile {
     public var fileName: String {
-        return (sourcePath as NSString).lastPathComponent
+        (sourcePath as NSString).lastPathComponent
     }
     
     public var types: [KnownType] {
-        return typeIntentions
+        typeIntentions
     }
     
     public var globals: [KnownGlobal] {
-        return globalVariableIntentions
+        globalVariableIntentions
             + globalFunctionIntentions
     }
 }

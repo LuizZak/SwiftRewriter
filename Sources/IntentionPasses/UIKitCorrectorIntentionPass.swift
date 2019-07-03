@@ -275,7 +275,7 @@ private class SignatureConversion {
     }
     
     public func canApply(to signature: FunctionSignature) -> Bool {
-        return signature.asIdentifier == signatureMapper.transformer.identifier
+        signature.asIdentifier == signatureMapper.transformer.identifier
     }
     
     public func apply(to signature: inout FunctionSignature) -> Bool {

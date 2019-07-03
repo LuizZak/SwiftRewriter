@@ -11,7 +11,7 @@ public class BaseSwiftSyntaxProducer {
             .makeDefaultDecoratorApplier()
     
     func indentation() -> Trivia {
-        return Trivia(pieces: Array(repeating: indentationMode, count: indentationLevel))
+        Trivia(pieces: Array(repeating: indentationMode, count: indentationLevel))
     }
     
     func indentationString() -> String {
@@ -42,11 +42,11 @@ public class BaseSwiftSyntaxProducer {
 extension BaseSwiftSyntaxProducer {
     
     func makeStartToken(_ builder: (_ leading: Trivia, _ trailing: Trivia) -> TokenSyntax) -> TokenSyntax {
-        return prepareStartToken(builder([], []))
+        prepareStartToken(builder([], []))
     }
     
     func prepareStartToken(_ token: TokenSyntax) -> TokenSyntax {
-        return token.withExtraLeading(consuming: &extraLeading)
+        token.withExtraLeading(consuming: &extraLeading)
     }
     
     func iterating<T>(_ elements: [T],

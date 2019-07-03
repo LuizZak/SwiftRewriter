@@ -31,7 +31,7 @@ public final class SwiftRewriter {
     private var typeSystem: IntentionCollectionTypeSystem
     
     /// For pooling and reusing Antlr parser states to aid in performance
-    private var parserStatePool: ObjcParserStatePool { return SwiftRewriter._parserStatePool }
+    private var parserStatePool: ObjcParserStatePool { SwiftRewriter._parserStatePool }
     
     /// Items to type-parse after parsing is complete, and all types have been
     /// gathered.
@@ -569,7 +569,7 @@ public final class SwiftRewriter {
     }
     
     private func makeAntlrSettings() -> AntlrSettings {
-        return AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
+        AntlrSettings(forceUseLLPrediction: settings.forceUseLLPrediction)
     }
     
     /// Settings for a `SwiftRewriter` instance
@@ -642,7 +642,7 @@ fileprivate extension SwiftRewriter {
         }
         
         func isNodeInNonnullContext(_ node: ASTNode) -> Bool {
-            return node.isInNonnullContext
+            node.isInNonnullContext
         }
         
         func reportForLazyResolving(intention: Intention) {
@@ -696,11 +696,11 @@ fileprivate extension SwiftRewriter {
         }
         
         func typeMapper(for intentionCollector: IntentionCollector) -> TypeMapper {
-            return typeMapper
+            typeMapper
         }
         
         func typeParser(for intentionCollector: IntentionCollector) -> TypeParsing {
-            return typeParser
+            typeParser
         }
     }
 }

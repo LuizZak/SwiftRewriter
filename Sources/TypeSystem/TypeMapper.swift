@@ -10,10 +10,10 @@ public protocol TypeMapper {
 
 public extension TypeMapper {
     func typeNameString(for objcType: ObjcType) -> String {
-        return typeNameString(for: objcType, context: .empty)
+        typeNameString(for: objcType, context: .empty)
     }
     func swiftType(forObjcType type: ObjcType) -> SwiftType {
-        return swiftType(forObjcType: type, context: .empty)
+        swiftType(forObjcType: type, context: .empty)
     }
 }
 
@@ -147,25 +147,25 @@ public struct TypeMappingContext {
     /// Returns whether a type qualifier with a given name can be found within
     /// this type mapping context
     public func hasQualifierModifier(named name: String) -> Bool {
-        return qualifiers.contains(name)
+        qualifiers.contains(name)
     }
     
     /// Returns whether a type specifier with a given name can be found within
     /// this type mapping context
     public func hasSpecifierModifier(named name: String) -> Bool {
-        return specifiers.contains(name)
+        specifiers.contains(name)
     }
     
     /// Returns whether a type-signature nullability specifier with a given
     /// name can be found within this type mapping context
     public func hasMethodNullabilitySpecifier(named name: String) -> Bool {
-        return nullabilitySpecifiers.contains { $0.name == name }
+        nullabilitySpecifiers.contains { $0.name == name }
     }
     
     /// Returns whether any of the @property modifiers is a `nonnull` modifier,
     /// or it the type pointer within has a `_Nonnull` specifier.
     public func hasNonnullModifier() -> Bool {
-        return hasPropertyModifier(named: "nonnull")
+        hasPropertyModifier(named: "nonnull")
             || hasMethodNullabilitySpecifier(named: "nonnull")
             || hasQualifierModifier(named: "_Nonnull")
             || hasSpecifierModifier(named: "nonnull")
@@ -174,7 +174,7 @@ public struct TypeMappingContext {
     /// Returns whether any of the @property modifiers is a `nullable` modifier,
     /// or it the type pointer within has a `_Nullable` specifier.
     public func hasNullableModifier() -> Bool {
-        return hasPropertyModifier(named: "nullable")
+        hasPropertyModifier(named: "nullable")
             || hasMethodNullabilitySpecifier(named: "nullable")
             || hasQualifierModifier(named: "_Nullable")
             || hasSpecifierModifier(named: "nullable")
@@ -184,7 +184,7 @@ public struct TypeMappingContext {
     /// modifier
     /// or it the type pointer within has a `_Null_unspecified` specifier.
     public func hasUnspecifiedNullabilityModifier() -> Bool {
-        return hasPropertyModifier(named: "null_unspecified")
+        hasPropertyModifier(named: "null_unspecified")
             || hasMethodNullabilitySpecifier(named: "null_unspecified")
             || hasQualifierModifier(named: "_Null_unspecified")
             || hasSpecifierModifier(named: "null_unspecified")
@@ -228,7 +228,7 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     public func typeNameString(for swiftType: SwiftType) -> String {
-        return innerTypeNameString(for: swiftType, isBlockContext: false)
+        innerTypeNameString(for: swiftType, isBlockContext: false)
     }
     
     private func innerTypeNameString(for swiftType: SwiftType,
@@ -335,7 +335,7 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     public func swiftType(forObjcType type: ObjcType, context: TypeMappingContext) -> SwiftType {
-        return sugarizeSwiftType(_internalSwiftType(forObjcType: type, context: context))
+        sugarizeSwiftType(_internalSwiftType(forObjcType: type, context: context))
     }
     
     private func _internalSwiftType(forObjcType type: ObjcType, context: TypeMappingContext) -> SwiftType {
@@ -621,7 +621,7 @@ public class DefaultTypeMapper: TypeMapper {
     }
     
     private func swiftTuple(type: ObjcType, count: Int, context: TypeMappingContext) -> SwiftType {
-        return swiftTuple(types: .init(repeating: type, count: count), context: context)
+        swiftTuple(types: .init(repeating: type, count: count), context: context)
     }
     
     private func swiftTuple(types: [ObjcType], context: TypeMappingContext) -> SwiftType {

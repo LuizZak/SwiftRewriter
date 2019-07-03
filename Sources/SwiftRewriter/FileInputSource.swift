@@ -15,7 +15,7 @@ public class FileInputProvider: InputSourcesProvider {
     }
     
     public func sources() -> [InputSource] {
-        return files.map {
+        files.map {
             FileInputSource(file: $0)
         }
     }
@@ -29,7 +29,7 @@ public class FileInputSource: InputSource {
     }
     
     public func sourceName() -> String {
-        return file
+        file
     }
     
     public func loadSource() throws -> CodeSource {
@@ -44,7 +44,7 @@ public class FileCodeSource: CodeSource {
     
     public var filePath: String
     public var fileContents: String {
-        return _source.source
+        _source.source
     }
     
     public init(filePath: String, fileContents: String) {
@@ -54,19 +54,19 @@ public class FileCodeSource: CodeSource {
     }
     
     public func fetchSource() -> String {
-        return _source.source
+        _source.source
     }
     
     public func stringIndex(forCharOffset offset: Int) -> String.Index {
-        return _source.stringIndex(forCharOffset: offset)
+        _source.stringIndex(forCharOffset: offset)
     }
     
     public func charOffset(forStringIndex index: String.Index) -> Int {
-        return _source.charOffset(forStringIndex: index)
+        _source.charOffset(forStringIndex: index)
     }
     
     public func utf8Index(forCharOffset offset: Int) -> Int {
-        return _source.utf8Index(forCharOffset: offset)
+        _source.utf8Index(forCharOffset: offset)
     }
     
     public func isEqual(to other: Source) -> Bool {
@@ -78,10 +78,10 @@ public class FileCodeSource: CodeSource {
     }
     
     public func lineNumber(at index: String.Index) -> Int {
-        return _source.lineNumber(at: index)
+        _source.lineNumber(at: index)
     }
     
     public func columnNumber(at index: String.Index) -> Int {
-        return _source.columnNumber(at: index)
+        _source.columnNumber(at: index)
     }
 }

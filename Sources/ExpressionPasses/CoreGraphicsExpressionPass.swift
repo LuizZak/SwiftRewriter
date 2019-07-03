@@ -154,7 +154,7 @@ extension CoreGraphicsExpressionPass {
     
     func createBasicTransformers() {
         func typing(as type: SwiftType) -> ArgumentRewritingStrategy {
-            return .transformed({ $0.typed(expected: type) })
+            .transformed({ $0.typed(expected: type) })
         }
         
         // UIEdgeInsetsMake(<top>, <left>, <bottom>, <right>)

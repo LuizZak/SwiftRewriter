@@ -102,7 +102,7 @@ public final class ExpressionTypeResolver: SyntaxNodeRewriter {
     
     /// Invocates the resolution of a given expression's type.
     public func resolveType(_ exp: Expression) -> Expression {
-        return exp.accept(self)
+        exp.accept(self)
     }
     
     // MARK: - Definition Collection
@@ -656,7 +656,7 @@ extension ExpressionTypeResolver {
 
 extension ExpressionTypeResolver {
     func expandAliases(in type: SwiftType) -> SwiftType {
-        return typeSystem.resolveAlias(in: type)
+        typeSystem.resolveAlias(in: type)
     }
     
     func searchIdentifierDefinition(_ exp: IdentifierExpression) -> CodeDefinition? {
@@ -1007,7 +1007,7 @@ private class MemberInvocationResolver {
     }
     
     func labels(in arguments: [FunctionArgument]) -> [String?] {
-        return arguments.map { $0.label }
+        arguments.map { $0.label }
     }
     
     func findBestMatch(_ functions: [FunctionSignature],

@@ -3,7 +3,7 @@ import SwiftAST
 
 public class SwiftTypeConverter {
     public static func makeTypeSyntax(_ type: SwiftType) -> TypeSyntax {
-        return SwiftTypeConverter().makeTypeSyntax(type)
+        SwiftTypeConverter().makeTypeSyntax(type)
     }
     
     private var _blockStackLevel = 0
@@ -187,7 +187,7 @@ public class SwiftTypeConverter {
     }
     
     func makeTupleTypeSyntax<C: Collection>(_ types: C) -> TupleTypeSyntax where C.Element == SwiftType {
-        return TupleTypeSyntax { builder in
+        TupleTypeSyntax { builder in
             builder.useLeftParen(SyntaxFactory.makeLeftParenToken())
             builder.useRightParen(SyntaxFactory.makeRightParenToken())
             

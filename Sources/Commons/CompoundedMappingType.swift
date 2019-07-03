@@ -29,39 +29,39 @@ public class CompoundedMappingType {
 
 extension CompoundedMappingType: KnownType {
     public var origin: String {
-        return knownType.origin
+        knownType.origin
     }
     public var supertype: KnownTypeReference? {
-        return knownType.supertype
+        knownType.supertype
     }
     public var typeName: String {
-        return knownType.typeName
+        knownType.typeName
     }
     public var kind: KnownTypeKind {
-        return knownType.kind
+        knownType.kind
     }
     public var isExtension: Bool {
-        return knownType.isExtension
+        knownType.isExtension
     }
     public var knownTraits: [String : TraitType] {
-        return knownType.knownTraits
+        knownType.knownTraits
     }
     public var knownConstructors: [KnownConstructor] {
-        return knownType.knownConstructors
+        knownType.knownConstructors
     }
     public var knownMethods: [KnownMethod] {
-        return knownType.knownMethods
+        knownType.knownMethods
     }
     public var knownProperties: [KnownProperty] {
-        return knownType.knownProperties
+        knownType.knownProperties
     }
     public var knownFields: [KnownProperty] {
-        return knownType.knownFields
+        knownType.knownFields
     }
     public var knownProtocolConformances: [KnownProtocolConformance] {
-        return knownType.knownProtocolConformances
+        knownType.knownProtocolConformances
     }
     public var knownAttributes: [KnownAttribute] {
-        return knownType.knownAttributes
+        knownType.knownAttributes
     }
 }

@@ -93,6 +93,6 @@ public class CollectionTypealiasProvider: TypealiasProvider {
     }
     
     public func unalias(_ typeName: String) -> SwiftType? {
-        return aliases[typeName]
+        aliases[typeName]
     }
 }

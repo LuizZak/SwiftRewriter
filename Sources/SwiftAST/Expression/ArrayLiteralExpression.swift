@@ -7,11 +7,11 @@ public class ArrayLiteralExpression: Expression {
     }
     
     public override var subExpressions: [Expression] {
-        return items
+        items
     }
     
     public override var description: String {
-        return "[\(items.map { $0.description }.joined(separator: ", "))]"
+        "[\(items.map { $0.description }.joined(separator: ", "))]"
     }
     
     public init(items: [Expression]) {
@@ -34,12 +34,12 @@ public class ArrayLiteralExpression: Expression {
     
     @inlinable
     public override func copy() -> ArrayLiteralExpression {
-        return ArrayLiteralExpression(items: items.map { $0.copy() }).copyTypeAndMetadata(from: self)
+        ArrayLiteralExpression(items: items.map { $0.copy() }).copyTypeAndMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: ExpressionVisitor>(_ visitor: V) -> V.ExprResult {
-        return visitor.visitArray(self)
+        visitor.visitArray(self)
     }
     
     public override func isEqual(to other: Expression) -> Bool {
@@ -74,6 +74,6 @@ public class ArrayLiteralExpression: Expression {
 public extension Expression {
     @inlinable
     var asArray: ArrayLiteralExpression? {
-        return cast()
+        cast()
     }
 }

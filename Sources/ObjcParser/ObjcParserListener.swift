@@ -673,7 +673,7 @@ internal class ObjcParserListener: ObjectiveCParserBaseListener {
     }
     
     private func isInNonnullContext(_ rule: ParserRuleContext) -> Bool {
-        return nonnullContextQuerier.isInNonnullContext(rule)
+        nonnullContextQuerier.isInNonnullContext(rule)
     }
 }
 

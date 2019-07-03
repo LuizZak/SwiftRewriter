@@ -74,7 +74,7 @@ public enum KnownTypeReference: KnownTypeReferenceConvertible {
     }
     
     public var asKnownTypeReference: KnownTypeReference {
-        return self
+        self
     }
 }
 
@@ -84,14 +84,14 @@ public protocol KnownTypeReferenceConvertible {
 
 extension String: KnownTypeReferenceConvertible {
     public var asKnownTypeReference: KnownTypeReference {
-        return .typeName(self)
+        .typeName(self)
     }
 }
 
 /// Default implementations
 public extension KnownType {
     var asKnownTypeReference: KnownTypeReference {
-        return .knownType(self)
+        .knownType(self)
     }
 }
 
@@ -182,19 +182,19 @@ public protocol KnownProtocolConformance {
 
 public extension KnownMethod {
     var isStatic: Bool {
-        return signature.isStatic
+        signature.isStatic
     }
 }
 
 public extension KnownProperty {
     var memberType: SwiftType {
-        return storage.type
+        storage.type
     }
 }
 
 public extension KnownMethod {
     var memberType: SwiftType {
-        return signature.swiftClosureType
+        signature.swiftClosureType
     }
 }
 
@@ -204,7 +204,7 @@ public enum KnownTypeTraits {
 
 public extension KnownType {
     func knownTrait(_ traitName: String) -> TraitType? {
-        return knownTraits[traitName]
+        knownTraits[traitName]
     }
 }
 
@@ -298,7 +298,7 @@ public struct KnownAttribute: Codable {
 
 public extension SwiftRewriterAttribute {
     var asKnownAttribute: KnownAttribute {
-        return KnownAttribute(name: SwiftRewriterAttribute.name,
-                              parameters: content.asString)
+        KnownAttribute(name: SwiftRewriterAttribute.name,
+                       parameters: content.asString)
     }
 }

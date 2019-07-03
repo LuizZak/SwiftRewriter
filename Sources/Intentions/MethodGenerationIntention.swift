@@ -6,7 +6,7 @@ import KnownType
 /// An intention to generate a static/instance function for a type.
 public class MethodGenerationIntention: MemberGenerationIntention, MutableFunctionIntention, MutableSignatureFunctionIntention {
     public var typedSource: MethodDefinition? {
-        return source as? MethodDefinition
+        source as? MethodDefinition
     }
     
     public var isOverride: Bool = false
@@ -16,26 +16,26 @@ public class MethodGenerationIntention: MemberGenerationIntention, MutableFuncti
     public var functionBody: FunctionBodyIntention?
     
     public override var isStatic: Bool {
-        return signature.isStatic
+        signature.isStatic
     }
     public var optional: Bool {
-        return false
+        false
     }
     
     public var name: String {
-        return signature.name
+        signature.name
     }
     public var returnType: SwiftType {
-        return signature.returnType
+        signature.returnType
     }
     public var parameters: [ParameterSignature] {
-        return signature.parameters
+        signature.parameters
     }
     public var selector: SelectorSignature {
-        return signature.asSelector
+        signature.asSelector
     }
     public override var memberType: SwiftType {
-        return signature.swiftClosureType
+        signature.swiftClosureType
     }
     
     public convenience init(isStatic: Bool,
@@ -98,6 +98,6 @@ extension MethodGenerationIntention: OverridableMemberGenerationIntention {
 
 extension MethodGenerationIntention: KnownMethod {
     public var body: KnownMethodBody? {
-        return functionBody
+        functionBody
     }
 }

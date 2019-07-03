@@ -289,10 +289,10 @@ public final class FunctionInvocationTransformer: PostfixInvocationTransformer {
 
 extension Sequence where Element == FunctionArgument {
     public func hasLabeledArguments() -> Bool {
-        return any { $0.isLabeled }
+        any { $0.isLabeled }
     }
     
     public func argumentLabels() -> [String?] {
-        return map { $0.label }
+        map { $0.label }
     }
 }

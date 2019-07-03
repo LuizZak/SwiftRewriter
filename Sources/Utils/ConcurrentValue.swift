@@ -19,7 +19,7 @@ public final class ConcurrentValue<T> {
     @inlinable
     public var value: T {
         get {
-            return cacheBarrier.sync { _value }
+            cacheBarrier.sync { _value }
         }
     }
     
@@ -35,12 +35,12 @@ public final class ConcurrentValue<T> {
     
     @inlinable
     public func readingValue<U>(_ block: (T) -> U) -> U {
-        return cacheBarrier.sync { block(_value) }
+        cacheBarrier.sync { block(_value) }
     }
     
     @inlinable
     public func modifyingValue<U>(_ block: (inout T) -> U) -> U {
-        return cacheBarrier.sync(flags: .barrier, execute: { block(&_value) })
+        cacheBarrier.sync(flags: .barrier, execute: { block(&_value) })
     }
     
     @inlinable

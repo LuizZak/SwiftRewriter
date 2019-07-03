@@ -11,15 +11,15 @@ public class UIKitGlobalsProvider: GlobalsProvider {
     }
     
     public func knownTypeProvider() -> KnownTypeProvider {
-        return CollectionKnownTypeProvider(knownTypes: UIKitGlobalsProvider.provider.types)
+        CollectionKnownTypeProvider(knownTypes: UIKitGlobalsProvider.provider.types)
     }
     
     public func typealiasProvider() -> TypealiasProvider {
-        return CollectionTypealiasProvider(aliases: UIKitGlobalsProvider.provider.typealiases)
+        CollectionTypealiasProvider(aliases: UIKitGlobalsProvider.provider.typealiases)
     }
     
     public func definitionsSource() -> DefinitionsSource {
-        return UIKitGlobalsProvider.provider.definitions
+        UIKitGlobalsProvider.provider.definitions
     }
 }
 

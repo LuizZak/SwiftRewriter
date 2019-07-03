@@ -15,6 +15,6 @@ public class TypeNameNode: ASTNode {
     }
     
     override public func shortDescription() -> String {
-        return type.description
+        type.description
     }
 }

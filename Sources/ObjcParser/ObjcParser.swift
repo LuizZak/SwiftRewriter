@@ -124,18 +124,18 @@ public class ObjcParser {
     }
     
     func startRange() -> RangeMarker {
-        return lexer.startRange()
+        lexer.startRange()
     }
     
     /// Creates and returns a backtracking point which can be activated to rewind
     /// the lexer to the point at which this method was called.
     func backtracker() -> Backtrack {
-        return lexer.backtracker()
+        lexer.backtracker()
     }
     
     /// Current lexer's location as a `SourceLocation`.
     func location() -> SourceLocation {
-        return lexer.location()
+        lexer.location()
     }
     
     func withTemporaryContext<T: ASTNode & InitializableNode>(

@@ -64,7 +64,7 @@ public class TypeSystem {
     
     /// Gets the overload resolver instance for this type system
     public func overloadResolver() -> OverloadResolver {
-        return OverloadResolver(typeSystem: self,
+        OverloadResolver(typeSystem: self,
                                 state: overloadResolverState)
     }
     
@@ -141,7 +141,7 @@ public class TypeSystem {
     
     /// Returns all known types that match a specified type
     public func knownTypes(ofKind kind: KnownTypeKind) -> [KnownType] {
-        return knownTypeProviders.knownTypes(ofKind: kind)
+        knownTypeProviders.knownTypes(ofKind: kind)
     }
     
     /// Gets a known type with a given name from this type system.
@@ -158,7 +158,7 @@ public class TypeSystem {
     }
     
     private func _knownTypeWithNameUnaliased(_ name: String) -> KnownType? {
-        return knownTypeProviders.knownType(withName: name)
+        knownTypeProviders.knownType(withName: name)
     }
     
     /// Given a non-canonical type name, returns the matching canonical name.
@@ -423,7 +423,7 @@ public class TypeSystem {
     
     /// Returns the category for a given type name.
     public func category(forType type: String) -> TypeCategory {
-        return category(forType: .typeName(type))
+        category(forType: .typeName(type))
     }
     
     /// Returns the category for a given type.
@@ -745,7 +745,7 @@ public class TypeSystem {
     
     /// Gets a protocol conformance to a given protocol name on a given known type.
     public func conformance(toProtocolName name: String, in type: KnownType) -> KnownProtocolConformance? {
-        return _conformance(toProtocolName: name, in: type, visitedTypes: [])
+        _conformance(toProtocolName: name, in: type, visitedTypes: [])
     }
     
     private func _conformance(toProtocolName name: String,
@@ -796,7 +796,7 @@ public class TypeSystem {
     /// Looks through supertype and protocol hierarchies, if available, resulting
     /// in all known protocol conformances of a type.
     public func allConformances(of type: KnownType) -> [KnownProtocolConformance] {
-        return _allConformances(of: type, visitedTypes: [])
+        _allConformances(of: type, visitedTypes: [])
     }
     
     private func _allConformances(of type: KnownType,
@@ -998,7 +998,7 @@ public class TypeSystem {
     }
     
     private func makeTypeMemberLookup() -> TypeMemberLookup {
-        return TypeMemberLookup(typeSystem: self, memberSearchCache: memberSearchCache)
+        TypeMemberLookup(typeSystem: self, memberSearchCache: memberSearchCache)
     }
     
     private func classTypeDefinition(name: String) -> ClassType? {
@@ -1171,7 +1171,7 @@ func typeNameIn(swiftType: SwiftType) -> String? {
 }
 
 func typeNameIn(nominalType: NominalSwiftType) -> String {
-    return nominalType.typeNameValue
+    nominalType.typeNameValue
 }
 
 private class TypeMemberLookup {
@@ -1615,7 +1615,7 @@ private final class CompoundKnownTypesCache {
     @ConcurrentValue private var types: [[String]: KnownType] = [:]
     
     func fetch(names: [String]) -> KnownType? {
-        return types[names]
+        types[names]
     }
     
     func record(type: KnownType, names: [String]) {
@@ -1641,7 +1641,7 @@ private final class ProtocolConformanceCache {
     }
     
     func typeName(_ type: String, conformsTo protocolName: String) -> Bool? {
-        return cache[type]?.conformances[protocolName]
+        cache[type]?.conformances[protocolName]
     }
     
     private struct Entry {
@@ -1694,7 +1694,7 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
     }
     
     func canonicalName(for typeName: String) -> String? {
-        return nil
+        nil
     }
     
     func makeType(from prot: ProtocolType) -> KnownType {
@@ -1779,7 +1779,7 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
     }
     
     func canonicalName(for typeName: String) -> String? {
-        return nil
+        nil
     }
     
     func makeType(from prot: ClassType) -> KnownType {

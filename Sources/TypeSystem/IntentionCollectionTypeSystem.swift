@@ -341,7 +341,7 @@ public class IntentionCollectionTypeSystem: TypeSystem {
         }
         
         func canonicalName(for typeName: String) -> String? {
-            return nil
+            nil
         }
         
         func unalias(_ typeName: String) -> SwiftType? {

@@ -12,7 +12,7 @@ public protocol ASTVisitor {
 public extension ASTVisitor {
     // Default implementation of merge simply returns the right-hand side
     func merge(_ r1: Result, r2: Result) -> Result {
-        return r2
+        r2
     }
 }
 
@@ -85,7 +85,7 @@ public class AnyASTVisitor<T>: ASTVisitor {
     }
     
     public func visit(_ node: ASTNode) -> T {
-        return visitClosure(node)
+        visitClosure(node)
     }
     
     public func onExit(_ node: ASTNode) {

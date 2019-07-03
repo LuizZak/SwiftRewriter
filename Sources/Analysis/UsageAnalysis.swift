@@ -172,7 +172,7 @@ public class BaseUsageAnalyzer: UsageAnalyzer {
     }
     
     func functionBodies() -> [FunctionBodyIntention] {
-        return []
+        []
     }
 }
 

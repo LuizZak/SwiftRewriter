@@ -10,7 +10,7 @@ public struct KnownTypeBuilder {
     public var useSwiftSignatureMatching: Bool = false
     
     public var typeName: String {
-        return type.typeName
+        type.typeName
     }
     
     public init(from existingType: KnownType, file: String = #file, line: Int = #line) {
@@ -475,12 +475,12 @@ public struct KnownTypeBuilder {
     }
     
     func clone() -> KnownTypeBuilder {
-        return KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
+        KnownTypeBuilder(type: type, useSwiftSignatureMatching: useSwiftSignatureMatching)
     }
     
     /// Returns the constructed KnownType instance from this builder.
     public func build() -> KnownType {
-        return DummyType(type: type)
+        DummyType(type: type)
     }
     
     /// Encodes the type represented by this known type builder
@@ -521,30 +521,30 @@ extension KnownTypeBuilder {
 extension KnownTypeBuilder {
     /// Gets the supertype currently registered on this known type builder.
     public var supertype: KnownTypeReferenceConvertible? {
-        return type.supertype
+        type.supertype
     }
     
     /// Returns a reference to the latest constructor added to this `KnownTypeBuilder`
     /// via a `.constructor(...)` call
     public var lastConstructor: KnownConstructor? {
-        return type.constructors.last
+        type.constructors.last
     }
     
     /// Returns a reference to the latest method added to this `KnownTypeBuilder`
     /// via a `.method(...)` call
     public var latestMethod: KnownMethod? {
-        return type.methods.last
+        type.methods.last
     }
     
     /// Returns a reference to the latest property added to this `KnownTypeBuilder`
     /// via a `.property(...)` call
     public var lastProperty: KnownProperty? {
-        return type.properties.last
+        type.properties.last
     }
     
     /// Returns the currently recorded protocol conformances for the final type
     public var protocolConformances: [String] {
-        return type.protocols.map { $0.protocolName }
+        type.protocols.map { $0.protocolName }
     }
 }
 
@@ -615,29 +615,29 @@ private struct BuildingKnownType: Codable {
 extension BuildingKnownType: KnownType {
     var knownTraits: [String: TraitType] {
         get {
-            return traits
+            traits
         }
         set {
             traits = newValue
         }
     }
     var knownConstructors: [KnownConstructor] {
-        return constructors
+        constructors
     }
     var knownMethods: [KnownMethod] {
-        return methods
+        methods
     }
     var knownProperties: [KnownProperty] {
-        return properties
+        properties
     }
     var knownFields: [KnownProperty] {
-        return fields
+        fields
     }
     var knownProtocolConformances: [KnownProtocolConformance] {
-        return protocols
+        protocols
     }
     var knownAttributes: [KnownAttribute] {
-        return attributes
+        attributes
     }
     
     mutating func setKnownTrait(_ traitName: String, value: TraitType) {

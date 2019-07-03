@@ -6,7 +6,7 @@ import KnownType
 /// for a type definition.
 public class PropertyGenerationIntention: MemberGenerationIntention, MutableValueStorageIntention {
     public var propertySource: PropertyDefinition? {
-        return source as? PropertyDefinition
+        source as? PropertyDefinition
     }
     
     public var isOverride: Bool = false
@@ -29,13 +29,13 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
     /// This is not analogous to `storage.isConstant`, and references only the
     /// Objective-C property.
     public var isReadOnly: Bool {
-        return attributes.contains { $0.rawString == "readonly" }
+        attributes.contains { $0.rawString == "readonly" }
     }
     
     /// Returns `true` if the original Objective-C property is marked with a
     /// "class" attribute.
     public var isClassProperty: Bool {
-        return attributes.contains { $0.rawString == "class" }
+        attributes.contains { $0.rawString == "class" }
     }
     
     /// If this property features a synthesized getter, returns the body intention
@@ -65,19 +65,19 @@ public class PropertyGenerationIntention: MemberGenerationIntention, MutableValu
     public var setterAccessLevel: AccessLevel?
     
     public override var isStatic: Bool {
-        return isClassProperty
+        isClassProperty
     }
     
     public var optional: Bool {
-        return false
+        false
     }
     
     public var isEnumCase: Bool {
-        return false
+        false
     }
     
     public override var memberType: SwiftType {
-        return type
+        type
     }
     
     public var name: String

@@ -7,7 +7,7 @@ public final class ClassExtensionGenerationIntention: BaseClassIntention {
     public var categoryName: String?
     
     public override var isExtension: Bool {
-        return true
+        true
     }
     
     public override init(typeName: String,

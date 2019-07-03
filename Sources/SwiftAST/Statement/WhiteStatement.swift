@@ -13,7 +13,7 @@ public class WhileStatement: Statement {
     }
     
     public override var children: [SyntaxNode] {
-        return [exp, body]
+        [exp, body]
     }
     
     public init(exp: Expression, body: CompoundStatement) {
@@ -40,12 +40,12 @@ public class WhileStatement: Statement {
     
     @inlinable
     public override func copy() -> WhileStatement {
-        return WhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
+        WhileStatement(exp: exp.copy(), body: body.copy()).copyMetadata(from: self)
     }
     
     @inlinable
     public override func accept<V: StatementVisitor>(_ visitor: V) -> V.StmtResult {
-        return visitor.visitWhile(self)
+        visitor.visitWhile(self)
     }
     
     public override func isEqual(to other: Statement) -> Bool {
@@ -74,6 +74,6 @@ public class WhileStatement: Statement {
 public extension Statement {
     @inlinable
     var asWhile: WhileStatement? {
-        return cast()
+        cast()
     }
 }

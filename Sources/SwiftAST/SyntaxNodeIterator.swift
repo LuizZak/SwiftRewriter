@@ -131,6 +131,6 @@ public final class SyntaxNodeSequence: Sequence {
     }
     
     public func makeIterator() -> SyntaxNodeIterator {
-        return SyntaxNodeIterator(node: node, inspectBlocks: inspectBlocks)
+        SyntaxNodeIterator(node: node, inspectBlocks: inspectBlocks)
     }
 }

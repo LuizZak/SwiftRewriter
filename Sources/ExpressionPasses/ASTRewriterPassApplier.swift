@@ -134,7 +134,7 @@ public final class ASTRewriterPassApplier {
         }
         
         func isDirty(_ body: FunctionBodyIntention) -> Bool {
-            return dirty.readingValue {
+            dirty.readingValue {
                 $0.contains(body)
             }
         }
@@ -143,7 +143,7 @@ public final class ASTRewriterPassApplier {
 
 extension FunctionBodyIntention: Hashable {
     public static func == (lhs: FunctionBodyIntention, rhs: FunctionBodyIntention) -> Bool {
-        return lhs === rhs
+        lhs === rhs
     }
     
     public func hash(into hasher: inout Hasher) {

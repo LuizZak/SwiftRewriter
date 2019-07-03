@@ -5,17 +5,17 @@ import KnownType
 /// An intention to generate a Swift enumeration type
 public final class EnumGenerationIntention: TypeGenerationIntention {
     public var typedSource: ObjcEnumDeclaration? {
-        return source as? ObjcEnumDeclaration
+        source as? ObjcEnumDeclaration
     }
     
     public override var kind: KnownTypeKind {
-        return .enum
+        .enum
     }
     
     public var rawValueType: SwiftType
     
     public var cases: [EnumCaseGenerationIntention] {
-        return properties.compactMap { $0 as? EnumCaseGenerationIntention }
+        properties.compactMap { $0 as? EnumCaseGenerationIntention }
     }
     
     public init(typeName: String,
