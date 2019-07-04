@@ -1,6 +1,6 @@
 import Dispatch
 
-@propertyDelegate
+@propertyWrapper
 public final class ConcurrentValue<T> {
     @usableFromInline
     var cacheBarrier =
@@ -17,9 +17,14 @@ public final class ConcurrentValue<T> {
     public var usingCache = false
     
     @inlinable
-    public var value: T {
+    public var wrappedValue: T {
         get {
             cacheBarrier.sync { _value }
+        }
+        set {
+            cacheBarrier.sync(flags: .barrier) {
+                _value = newValue
+            }
         }
     }
     
