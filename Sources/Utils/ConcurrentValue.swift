@@ -39,11 +39,6 @@ public final class ConcurrentValue<T> {
     }
 
     @inlinable
-    public func readingValue<U>(_ block: (T) -> U) -> U {
-        block(wrappedValue)
-    }
-
-    @inlinable
     public func modifyingValue<U>(_ block: (inout T) -> U) -> U {
         pthread_rwlock_wrlock(&lock)
         defer {
@@ -55,17 +50,17 @@ public final class ConcurrentValue<T> {
 
     @inlinable
     public func setAsCaching(value: T) {
-        modifyingValue {
-            $0 = value
-            usingCache = true
-        }
+        pthread_rwlock_wrlock(&lock)
+        _value = value
+        usingCache = true
+        pthread_rwlock_unlock(&lock)
     }
 
     @inlinable
     public func tearDownCaching(resetToValue value: T) {
-        modifyingValue {
-            $0 = value
-            usingCache = false
-        }
+        pthread_rwlock_wrlock(&lock)
+        _value = value
+        usingCache = false
+        pthread_rwlock_unlock(&lock)
     }
 }

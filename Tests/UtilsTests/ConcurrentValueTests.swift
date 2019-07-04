@@ -18,7 +18,7 @@ class ConcurrentValueTests: XCTestCase {
         measure {
             for i in 0...10_000 {
                 queue.addOperation {
-                    _ = self.valueNonWrapper.readingValue { $0.contains(i) }
+                    _ = self.valueNonWrapper.wrappedValue.contains(i)
                 }
             }
 
@@ -55,7 +55,7 @@ class ConcurrentValueTests: XCTestCase {
                     }
                 } else {
                     queue.addOperation {
-                        _ = self.valueNonWrapper.readingValue { $0.contains(i) }
+                        _ = self.valueNonWrapper.wrappedValue.contains(i)
                     }
                 }
             }
