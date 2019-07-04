@@ -84,6 +84,20 @@ class ConcurrentValueTests: XCTestCase {
         measure {
             for i in 0...10_000 {
                 queue.addOperation {
+                    self.value.insert(i)
+                }
+            }
+
+            queue.waitUntilAllOperationsAreFinished()
+        }
+    }
+
+    func testPerformancePropertyWrapperConcurrentModification_WrappedValue() {
+        let queue = makeTestOperationQueue()
+
+        measure {
+            for i in 0...10_000 {
+                queue.addOperation {
                     self.$value.wrappedValue.insert(i)
                 }
             }

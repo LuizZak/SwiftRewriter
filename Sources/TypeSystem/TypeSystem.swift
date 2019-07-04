@@ -131,9 +131,7 @@ public class TypeSystem {
         }
         
         if $typeExistsCache.usingCache {
-            $typeExistsCache.modifyingValue {
-                $0[name] = result
-            }
+            $typeExistsCache.wrappedValue[name] = result
         }
         
         return result
@@ -700,9 +698,7 @@ public class TypeSystem {
         let result = resolver.expand(in: type)
         
         if $aliasCache.usingCache {
-            $aliasCache.modifyingValue {
-                $0[type] = result
-            }
+            $aliasCache.wrappedValue[type] = result
         }
         
         return result
@@ -835,9 +831,7 @@ public class TypeSystem {
         }
         
         if $allConformancesCache.usingCache {
-            $allConformancesCache.modifyingValue {
-                $0[type.typeName] = protocols
-            }
+            $allConformancesCache.wrappedValue[type.typeName] = protocols
         }
         
         return protocols
@@ -922,9 +916,7 @@ public class TypeSystem {
         }
         
         if $knownTypeForSwiftType.usingCache {
-            $knownTypeForSwiftType.modifyingValue {
-                $0[swiftType] = result
-            }
+            $knownTypeForSwiftType.wrappedValue[swiftType] = result
         }
         
         return result
@@ -1619,9 +1611,7 @@ private final class CompoundKnownTypesCache {
     }
     
     func record(type: KnownType, names: [String]) {
-        $types.modifyingValue {
-            $0[names] = type
-        }
+        $types.wrappedValue[names] = type
     }
 }
 
@@ -1633,11 +1623,9 @@ private final class ProtocolConformanceCache {
     }
     
     func record(typeName: String, conformsTo protocolName: String, _ value: Bool) {
-        $cache.modifyingValue { entries -> Void in
-            var entry = entries[typeName, default: Entry(conformances: [:])]
-            entry.conformances[protocolName] = value
-            entries[typeName] = entry
-        }
+        $cache
+            .wrappedValue[typeName, default: Entry()]
+            .conformances[protocolName] = value
     }
     
     func typeName(_ type: String, conformsTo protocolName: String) -> Bool? {
@@ -1645,7 +1633,7 @@ private final class ProtocolConformanceCache {
     }
     
     private struct Entry {
-        var conformances: [String: Bool]
+        var conformances: [String: Bool] = [:]
     }
 }
 
@@ -1668,18 +1656,14 @@ private final class TypeDefinitionsProtocolKnownTypeProvider: KnownTypeProvider 
         
         let protocols = TypeDefinitions.protocolsList.protocols
         guard let prot = protocols.first(where: { $0.protocolName == name }) else {
-            _ = $negativeLookupResults.modifyingValue {
-                $0.insert(name)
-            }
+            $negativeLookupResults.wrappedValue.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        $cache.modifyingValue {
-            $0[name] = type
-        }
+        $cache.wrappedValue[name] = type
         
         return type
     }
@@ -1753,18 +1737,14 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
         }
         
         guard let prot = TypeDefinitions.classesList.classes.first(where: { $0.typeName == name }) else {
-            _ = $negativeLookupResults.modifyingValue {
-                $0.insert(name)
-            }
+            $negativeLookupResults.wrappedValue.insert(name)
             
             return nil
         }
         
         let type = makeType(from: prot)
         
-        $cache.modifyingValue {
-            $0[name] = type
-        }
+        $cache.wrappedValue[name] = type
         
         return type
     }
@@ -1822,24 +1802,24 @@ private final class TypeDefinitionsClassKnownTypeProvider: KnownTypeProvider {
 }
 
 internal final class MemberSearchCache {
-    private var methodsCache: ConcurrentValue<[MethodSearchEntry: KnownMethod?]> = ConcurrentValue(value: [:])
-    private var propertiesCache: ConcurrentValue<[PropertySearchEntry: KnownProperty?]> = ConcurrentValue(value: [:])
-    private var fieldsCache: ConcurrentValue<[FieldSearchEntry: KnownProperty?]> = ConcurrentValue(value: [:])
+    @ConcurrentValue private var methodsCache: [MethodSearchEntry: KnownMethod?] = [:]
+    @ConcurrentValue private var propertiesCache: [PropertySearchEntry: KnownProperty?] = [:]
+    @ConcurrentValue private var fieldsCache: [FieldSearchEntry: KnownProperty?] = [:]
 
     var usingCache: Bool = false
 
     func makeCache() {
         usingCache = true
-        methodsCache.setAsCaching(value: [:])
-        propertiesCache.setAsCaching(value: [:])
-        fieldsCache.setAsCaching(value: [:])
+        $methodsCache.setAsCaching(value: [:])
+        $propertiesCache.setAsCaching(value: [:])
+        $fieldsCache.setAsCaching(value: [:])
     }
 
     func tearDownCache() {
         usingCache = false
-        methodsCache.tearDownCaching(resetToValue: [:])
-        propertiesCache.tearDownCaching(resetToValue: [:])
-        fieldsCache.tearDownCaching(resetToValue: [:])
+        $methodsCache.tearDownCaching(resetToValue: [:])
+        $propertiesCache.tearDownCaching(resetToValue: [:])
+        $fieldsCache.tearDownCaching(resetToValue: [:])
     }
 
     func storeMethod(withObjcSelector selector: SelectorSignature,
@@ -1855,9 +1835,7 @@ internal final class MemberSearchCache {
                                       includeOptional: includeOptional,
                                       typeName: typeName)
         
-        methodsCache.modifyingValue {
-            $0[entry] = method
-        }
+        $methodsCache.wrappedValue[entry] = method
     }
 
     func storeProperty(named name: String,
@@ -1871,9 +1849,7 @@ internal final class MemberSearchCache {
                                         includeOptional: includeOptional,
                                         typeName: typeName)
         
-        propertiesCache.modifyingValue {
-            $0[entry] = property
-        }
+        $propertiesCache.wrappedValue[entry] = property
     }
 
     func storeField(named name: String,
@@ -1885,9 +1861,7 @@ internal final class MemberSearchCache {
                                      isStatic: isStatic,
                                      typeName: typeName)
         
-        fieldsCache.modifyingValue {
-            $0[entry] = field
-        }
+        $fieldsCache.wrappedValue[entry] = field
     }
 
     func lookupMethod(withObjcSelector selector: SelectorSignature,
@@ -1902,7 +1876,7 @@ internal final class MemberSearchCache {
                                       includeOptional: includeOptional,
                                       typeName: typeName)
         
-        return methodsCache.readingValue { $0[entry] }
+        return methodsCache[entry]
     }
 
     func lookupProperty(named name: String,
@@ -1915,7 +1889,7 @@ internal final class MemberSearchCache {
                                         includeOptional: includeOptional,
                                         typeName: typeName)
         
-        return propertiesCache.readingValue { $0[entry] }
+        return propertiesCache[entry]
     }
 
     func lookupField(named name: String,
@@ -1926,7 +1900,7 @@ internal final class MemberSearchCache {
                                      isStatic: isStatic,
                                      typeName: typeName)
         
-        return fieldsCache.readingValue { $0[entry] }
+        return fieldsCache[entry]
     }
 
     struct MethodSearchEntry: Hashable {

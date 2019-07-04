@@ -3,51 +3,56 @@ import Dispatch
 @propertyWrapper
 public final class ConcurrentValue<T> {
     @usableFromInline
-    var cacheBarrier =
-        DispatchQueue(
-            label: "com.swiftrewriter.concurrentvalue.valuebarrier_$\(T.self)",
-            qos: .default,
-            attributes: .concurrent,
-            autoreleaseFrequency: .inherit,
-            target: nil)
-    
+    var lock: pthread_rwlock_t
+
     @usableFromInline
     var _value: T
-    
+
     public var usingCache = false
-    
+
     @inlinable
     public var wrappedValue: T {
         get {
-            cacheBarrier.sync { _value }
-        }
-        set {
-            cacheBarrier.sync(flags: .barrier) {
-                _value = newValue
+            pthread_rwlock_rdlock(&lock)
+            defer {
+                pthread_rwlock_unlock(&lock)
             }
+            return _value
+        }
+        _modify {
+            pthread_rwlock_wrlock(&lock)
+            yield &_value
+            pthread_rwlock_unlock(&lock)
         }
     }
-    
-    @inlinable
-    public init(value: T) {
-        self._value = value
-    }
-    
+
     @inlinable
     public init(initialValue: T) {
+        lock = pthread_rwlock_t()
+        pthread_rwlock_init(&lock, nil)
+
         self._value = initialValue
     }
-    
+
+    deinit {
+        pthread_rwlock_destroy(&lock)
+    }
+
     @inlinable
     public func readingValue<U>(_ block: (T) -> U) -> U {
-        cacheBarrier.sync { block(_value) }
+        block(wrappedValue)
     }
-    
+
     @inlinable
     public func modifyingValue<U>(_ block: (inout T) -> U) -> U {
-        cacheBarrier.sync(flags: .barrier, execute: { block(&_value) })
+        pthread_rwlock_wrlock(&lock)
+        defer {
+            pthread_rwlock_unlock(&lock)
+        }
+
+        return block(&_value)
     }
-    
+
     @inlinable
     public func setAsCaching(value: T) {
         modifyingValue {
@@ -55,7 +60,7 @@ public final class ConcurrentValue<T> {
             usingCache = true
         }
     }
-    
+
     @inlinable
     public func tearDownCaching(resetToValue value: T) {
         modifyingValue {
