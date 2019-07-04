@@ -247,6 +247,7 @@ private class FileFinderInterface {
     func exploreFilesUi(path: String, menu: MenuController) {
         let console = menu.console
         let fileManager = FileManager.default
+        let maxFilesShown = 300
 
         repeat {
             console.clearScreen()
@@ -273,7 +274,8 @@ private class FileFinderInterface {
                 (($0 as NSString).pathExtension == "m" || ($0 as NSString).pathExtension == "h") &&
                 ($0 as NSString).lastPathComponent.localizedCaseInsensitiveContains(fileName)
             }
-            var matches = Array(matchesSource.prefix(300))
+            
+            var matches = Array(matchesSource.prefix(maxFilesShown))
             matches.sort { s1, s2 in
                 s1.compare(s2, options: .numeric) == .orderedAscending
             }
@@ -286,7 +288,10 @@ private class FileFinderInterface {
 
             repeat {
                 // Present selection to user
-                let matchesString = matches.count == 50 ? "Showing the first 50 matches" : "Showing all files found"
+                let matchesString =
+                    matches.count == maxFilesShown
+                        ? "Showing first \(maxFilesShown) matches"
+                        : "Showing all files found"
                 
                 let indexes = presentFileSelection(
                     in: menu, list: matches.asPaths,
@@ -397,7 +402,7 @@ private class FilesExplorer: PagesCommandHandler {
         
         do {
             path = newPath
-            let newList = try self.getFileListProvider()
+            let newList = try getFileListProvider()
             
             return .modifyList(keepPageIndex: true) { _ in
                 newList
