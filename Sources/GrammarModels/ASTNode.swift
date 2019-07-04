@@ -11,6 +11,12 @@ open class ASTNode {
     /// Original source for this node.
     public var originalSource: Source?
     
+    /// Overriden by subclasses to provide custom short descriptions to be used
+    /// when printing AST nodes for diagnostics
+    public var shortDescription: String {
+        ""
+    }
+    
     /// Children nodes associated with this node
     private(set) public var children: [ASTNode] = []
     
@@ -141,12 +147,6 @@ open class ASTNode {
                          columnsAtLastLine: endNode.location.column,
                          utf8Length: endNode.location.utf8Offset - startNode.location.utf8Offset)
     }
-    
-    /// Overriden by subclasses to provide custom short descriptions to be used
-    /// when printing AST nodes for diagnostics
-    public func shortDescription() -> String {
-        ""
-    }
 }
 
 public extension ASTNode {
@@ -158,7 +158,7 @@ public extension ASTNode {
         
         func _print(_ node: ASTNode) {
             var nodeTitle = "\(type(of: node))"
-            let description = node.shortDescription()
+            let description = node.shortDescription
             if !description.isEmpty {
                 nodeTitle += " (\(description))"
             }
