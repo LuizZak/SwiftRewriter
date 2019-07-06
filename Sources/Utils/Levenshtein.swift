@@ -7,10 +7,10 @@
 
 public class Levenshtein {
     
+    @inlinable
     public static func distanceBetween(_ aStr: String, and bStr: String) -> Int {
-        let a = Array(aStr.utf16)
-        let b = Array(bStr.utf16)
-        
+        let a = Array(aStr)
+        let b = Array(bStr)
         var dist = Array2D(cols: a.count + 1, rows: b.count + 1)
         
         for i in 1...a.count {
@@ -38,20 +38,26 @@ public class Levenshtein {
         return dist[a.count, b.count]
     }
     
-    private class func minimum(_ numbers: Int...) -> Int {
+    @inlinable
+    static func minimum(_ numbers: Int...) -> Int {
         return numbers.reduce(numbers[0]) { $0 < $1 ? $0 : $1 }
     }
     
+    @usableFromInline
     struct Array2D {
+        @usableFromInline
         var cols: Int, rows: Int
+        @usableFromInline
         var matrix: [Int]
         
+        @inlinable
         init(cols: Int, rows: Int) {
             self.cols = cols
             self.rows = rows
             matrix = Array(repeating: 0, count: cols * rows)
         }
         
+        @inlinable
         subscript(col: Int, row: Int) -> Int {
             get {
                 return matrix[cols * row + col]
@@ -59,14 +65,6 @@ public class Levenshtein {
             set {
                 matrix[cols * row + col] = newValue
             }
-        }
-        
-        func colCount() -> Int {
-            return cols
-        }
-        
-        func rowCount() -> Int {
-            return rows
         }
     }
 }

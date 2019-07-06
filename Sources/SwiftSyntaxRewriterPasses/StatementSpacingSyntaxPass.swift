@@ -58,8 +58,10 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
             expressions
                 .enumerated()
                 .dropLast()
-                .map { (i, exp) in
-                    Levenshtein.distanceBetween(
+                .map { (arg) -> Int in
+                    let (i, exp) = arg
+                    
+                    return Levenshtein.distanceBetween(
                         exp.description,
                         and: expressions[expressions.startIndex + i + 1].description
                     )
@@ -85,6 +87,10 @@ private class InnerSyntaxRewriter: SyntaxRewriter {
         return stmts
     }
     
+    /// Returns a list of indexes which represent running sequences of expression
+    /// statements.
+    /// The return is such that the list of ranges overlaps exactly all top-level
+    /// expression statements found on the input code block item list.
     func rangeOfExpressionStatements(in statements: CodeBlockItemListSyntax) -> [Range<Int>] {
         // Start scanning the statements, and whenever we reach an expression,
         // start counting until we hit another non-expression statement; the final
